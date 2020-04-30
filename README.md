@@ -1,6 +1,6 @@
 This project intends to be an upgrade of the full CrysFML library existing in SVN repository. 
 Contrary to CrysFML that is mostly written in Fortran 95, the new project is totally based in 
-the latest standard of Fortran (currently Fortran 2008) and cannot be compiled with a pure 
+the latest standard of Fortran (currently Fortran 2018) and cannot be compiled with a pure 
 Fortran 95 compiler. 
 The CrysFML2008 use from the beginning the submodule and object-oriented capabilities
 of Fortran2008. In the Src directory there are the main modules in *.f90 files of the same
