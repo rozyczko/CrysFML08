@@ -1,0 +1,17 @@
+TITLE   BaFe 
+INPFIL  bafe.hkl
+OUTFIL  BaFe_Cam
+WAVE    1.2740
+CELL    23.728398  10.6838  18.351802 90.0  90.0  90.0
+gen x,-y+1/4,z,1
+gen x,y+1/2,z+1/2,1 
+gen x+1/2,y,z+1/2,1 
+gen x+1/2,y+1/2,z,1 
+gen x,y,z+1/2,-1 
+gen x,y+1/2,z,-1 
+gen x+1/2,y,z,-1 
+gen x+1/2,y+1/2,z+1/2,-1 
+STATISTICS
+HKL_T   1
+MAGNETIC
+PRINT_ALL

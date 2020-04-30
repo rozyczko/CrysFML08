@@ -1,0 +1,15 @@
+TITLE   BaFe 
+INPFIL  bafe.fsq
+OUTFIL  BaFeK
+WAVE    1.2740
+!!!  CELL    11.864199   5.341900   9.175901  90.0  90.0  90.0   
+CELL    23.728398  10.6838  18.351802 90.0  90.0  90.0
+P n m a 
+!STATISTICS
+HKL_T   2
+NKVEC  1 1 
+KVEC 0.5 0.5 0.5
+Q_COEFF 1
+!TRANS   2 0 0  0 2 0  0 0 2   ! To tranform the indices of the input data  
+PRINT_ALL
+FRIEDEL

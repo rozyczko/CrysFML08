@@ -1,0 +1,5 @@
+celda (nuclear y magnetica): 13.4 28.9 13.3 90 95 90
+
+En el caso de indices reales, el parametro de celada "c" se divide por dos y se tiene que usar un vector de propagación (0 0 0.5).
+
+El fichero .int estaría ya en el formato hklm tras usar el getdata pero en triclinico... 
