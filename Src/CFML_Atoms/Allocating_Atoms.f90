@@ -57,15 +57,19 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
             Atm%Moment_Std= 0.0_cp
 
             Atm%n_oc      = 0
+            Atm%n_bc      = 0
             Atm%n_mc      = 0
             Atm%n_dc      = 0
             Atm%n_uc      = 0
             Atm%poc_q     = 0
+            Atm%pbc_q     = 0
             Atm%pmc_q     = 0
             Atm%pdc_q     = 0
             Atm%puc_q     = 0
             Atm%Ocs       = 0.0_cp
             Atm%Ocs_std   = 0.0_cp
+            Atm%Bcs       = 0.0_cp
+            Atm%Bcs_std   = 0.0_cp
             Atm%Mcs       = 0.0_cp
             Atm%Mcs_std   = 0.0_cp
             Atm%Dcs       = 0.0_cp
@@ -104,15 +108,19 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
             Atm%Moment_Std= 0.0_cp
 
             Atm%n_oc      = 0
+            Atm%n_bc      = 0
             Atm%n_mc      = 0
             Atm%n_dc      = 0
             Atm%n_uc      = 0
             Atm%poc_q     = 0
+            Atm%pbc_q     = 0
             Atm%pmc_q     = 0
             Atm%pdc_q     = 0
             Atm%puc_q     = 0
             Atm%Ocs       = 0.0_cp
             Atm%Ocs_std   = 0.0_cp
+            Atm%Bcs       = 0.0_cp
+            Atm%Bcs_std   = 0.0_cp
             Atm%Mcs       = 0.0_cp
             Atm%Mcs_std   = 0.0_cp
             Atm%Dcs       = 0.0_cp
@@ -130,10 +138,12 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
             Atm%M_U       =0.0_cp
 
             Atm%L_Ocs       = 0.0_cp
+            Atm%L_Bcs       = 0.0_cp
             Atm%L_Mcs       = 0.0_cp
             Atm%L_Dcs       = 0.0_cp
             Atm%L_Ucs       = 0.0_cp
             Atm%M_Ocs       = 0.0_cp
+            Atm%M_Bcs       = 0.0_cp
             Atm%M_Mcs       = 0.0_cp
             Atm%M_Dcs       = 0.0_cp
             Atm%M_Ucs       = 0.0_cp
@@ -160,13 +170,14 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
       integer,             intent(in)       :: d    !Number of k-vectors
 
       !---- Local Variables ----!
-      integer :: i
+      integer :: i,ier
       ! Types :: Atm_Type, Atm_Std_Type, MAtm_Std_Type, Atm_Ref_Type, MAtm_Ref_Type
       type(Atm_Type)     , dimension(n)  :: Atm
       type(Atm_Std_Type) , dimension(n)  :: Atm_Std
       type(MAtm_Std_Type), dimension(n)  :: MAtm_Std
       type(Atm_Ref_Type) , dimension(n)  :: Atm_Ref
       type(MAtm_Ref_Type), dimension(n)  :: MAtm_Ref
+
       !> Init
       if (n <= 0) then
          A%natoms=0
@@ -179,19 +190,30 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
 
       !> Allocating variables
       Select Case(trim(l_case(Type_Atm)))
-        Case("atm")
-           allocate (A%atom(n),source=Atm)
-        Case("atm_std")
-           allocate (A%atom(n),source=Atm_Std)
-        Case("matm_std")
-           allocate (A%atom(n),source=MAtm_Std)
-        Case("atm_ref")
-            allocate (A%atom(n),source=Atm_Ref)
-       Case("matm_ref")
-           allocate (A%atom(n),source=MAtm_Ref)
-      End Select
+         case("atm")
+            allocate(A%atom(n),source=Atm,stat=ier)
 
-      allocate (A%active(n))
+         case("atm_std")
+            allocate(A%atom(n),source=Atm_Std,stat=ier)
+
+         case("matm_std")
+            allocate(A%atom(n),source=MAtm_Std,stat=ier)
+
+         case("atm_ref")
+            allocate(A%atom(n),source=Atm_Ref,stat=ier)
+
+         case("matm_ref")
+            allocate(A%atom(n),source=MAtm_Ref,stat=ier)
+      end select
+
+      allocate (A%active(n),stat=ier)
+
+      if (ier /= 0) then
+         Err_CFML%Ierr=1
+         write(unit=Err_CFML%Msg,fmt="(a,i6,a)") "Error allocating atom List for N =",N," atoms"
+         return
+      end if
+
       A%active=.true.
       A%mcomp="crystal"
 

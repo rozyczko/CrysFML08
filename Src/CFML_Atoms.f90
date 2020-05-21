@@ -39,11 +39,12 @@
 !!----    Update: 06/03/2011
 !!----
 !!
-Module CFML_Atoms
+ Module CFML_Atoms
 
     !---- Use Modules ----!
     Use CFML_GlobalDeps
     Use CFML_Maths,        only: modulo_lat, equal_vector
+    Use CFML_Metrics,      only: Cell_G_Type
     Use CFML_Strings,      only: u_case,l_case
     Use CFML_gSpaceGroups, only: spg_type, apply_op, SuperSpaceGroup_Type
 
@@ -53,13 +54,15 @@ Module CFML_Atoms
     private
 
     !---- List of public procedures ----!
-    public :: Allocate_Atom_List, Extend_List, Init_Atom_Type, Read_Bin_Atom_List, &
+    public :: Allocate_Atom_List, Extend_Atom_List, Init_Atom_Type, Read_Bin_Atom_List, &
               Write_Bin_atom_List, Write_Atom_List
+    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints
+
 
     !---- Parameters ----!
-    real(kind=cp), parameter :: R_ATOM=1.1_cp      ! Average atomic radius
+    integer, public, parameter :: MAX_MOD=8          ! ??????
+    real(kind=cp),   parameter :: R_ATOM=1.1_cp      ! Average atomic radius
 
-    integer,public, parameter :: max_mod=8
 
     !---- Types ----!
 
@@ -81,9 +84,9 @@ Module CFML_Atoms
        integer                       :: Mult    = 0      ! Multiplicity of the Wyckoff position
        integer                       :: Charge  = 0      ! Charge, ionic state
        real(kind=cp), dimension(3)   :: X       = 0.0_cp ! Fractional Coordinates
-       real(kind=cp)                 :: U_iso   = 0.0_cp ! Biso, Uiso or Ueq (if iso =Biso)
+       real(kind=cp)                 :: U_iso   = 0.0_cp ! Biso, Uiso or Ueq (if ThType ="iso" normally U_iso = Biso)
        real(kind=cp)                 :: Occ     = 1.0_cp ! Occupancy factor
-       character(len=4)              :: UType   ="beta"  ! Options: U, B, beta
+       character(len=4)              :: UType   ="B"     ! Options: U, B, beta (U & beta are for anisotropic thermal factors)
        character(len=3)              :: ThType  ="iso"   ! Options: iso, ani
        real(kind=cp), dimension(6)   :: U       = 0.0_cp ! Anisotropic thermal factors
        logical                       :: Magnetic=.false. ! Flag indication if the atom is magnetic or not.
@@ -113,27 +116,35 @@ Module CFML_Atoms
     !!---- This type Modulated Atom type extends Atm_Std_Type by adding modulation
     !!---- Cosine(c) and Sine amplitudes(s) to each model parameter characterizing
     !!---- normal atoms. Up to max_mod harmonic numbers (Q_coeffs) are allowed
+    !!---- Still to implement special modulation functions (crenel-type)
+    !!---- Probably extending MAtm_Std_Type or its descendents
+
     !!----
     Type, Public, Extends(Atm_Std_Type)    :: MAtm_Std_Type
        integer                             :: n_oc   = 0       ! Number of occupation amplitudes
+       integer                             :: n_bc   = 0       ! Number of B_iso amplitudes
        integer                             :: n_mc   = 0       ! Number of moment amplitudes
        integer                             :: n_dc   = 0       ! Number of static displacement amplitudes
        integer                             :: n_uc   = 0       ! Number of thermal displacement amplitudes
        integer,      dimension(max_mod)    :: poc_q  = 0       ! Pointer to Q_coeffs of occupatiom amplitudes
+       integer,      dimension(max_mod)    :: pbc_q  = 0       ! Pointer to Q_coeffs of B_iso amplitudes
        integer,      dimension(max_mod)    :: pmc_q  = 0       ! Pointer to Q_coeffs of moment amplitudes
        integer,      dimension(max_mod)    :: pdc_q  = 0       ! Pointer to Q_coeffs of displacement amplitudes
        integer,      dimension(max_mod)    :: puc_q  = 0       ! Pointer to Q_coeffs of thermal displacement amplitudes
        real(kind=cp),dimension(2, max_mod) :: Ocs    = 0.0_cp  ! Ocos,Osin up to 8  (Oc, Os)
        real(kind=cp),dimension(2, max_mod) :: Ocs_std= 0.0_cp  !
+       real(kind=cp),dimension(2, max_mod) :: Bcs    = 0.0_cp  ! Bcos,Bsin up to 8  (Bc, Bs) B_Iso modulation amplitudes
+       real(kind=cp),dimension(2, max_mod) :: Bcs_std= 0.0_cp  !
        real(kind=cp),dimension(6, max_mod) :: Mcs    = 0.0_cp  ! Mcos,Msin up to 8  (Mcx Mcy  Mcz , Msx  Msy  Msz)
        real(kind=cp),dimension(6, max_mod) :: Mcs_std= 0.0_cp  !
        real(kind=cp),dimension(6, max_mod) :: Dcs    = 0.0_cp  ! Dcos,Dsin up to 8  (Dcx Dcy  Dcz , Dsx  Dsy  Dsz)
        real(kind=cp),dimension(6, max_mod) :: Dcs_std= 0.0_cp  !
-       real(kind=cp),dimension(12,max_mod) :: Ucs    = 0.0_cp  ! Ucos,Usin up to 8  (Dcx Dcy  Dcz , Dsx  Dsy  Dsz)
+       real(kind=cp),dimension(12,max_mod) :: Ucs    = 0.0_cp  ! Ucos,Usin up to 8  (Uc11 Uc22  Uc33, Uc12, Uc13, Uc23 , Us11 Us22  Us33, Us12, Us13, Us23)
        real(kind=cp),dimension(12,max_mod) :: Ucs_std= 0.0_cp  !
-       real(kind=cp),dimension(:),   allocatable :: Xs      ! Position in superspace
-       real(kind=cp),dimension(:),   allocatable :: Moms    ! Moment in superspace
-       real(kind=cp),dimension(:,:), allocatable :: Us      ! Thermal factos in superspace
+                                                               ! The items below are not yet used and they are not in CIFs
+       real(kind=cp),dimension(:),   allocatable :: Xs         ! Position in superspace
+       real(kind=cp),dimension(:),   allocatable :: Moms       ! Moment in superspace
+       real(kind=cp),dimension(:,:), allocatable :: Us         ! Thermal factors in superspace
     End Type MAtm_Std_Type
 
     !!----
@@ -173,10 +184,12 @@ Module CFML_Atoms
        real(kind=cp)                            :: M_U_iso   =0.0_cp
        real(kind=cp),dimension(6)               :: M_U       =0.0_cp
        integer,      dimension(2, max_mod)      :: L_Ocs    = 0       ! Code Numbers of parameter
+       integer,      dimension(2, max_mod)      :: L_Bcs    = 0       !
        integer,      dimension(6, max_mod)      :: L_Mcs    = 0       !
        integer,      dimension(6, max_mod)      :: L_Dcs    = 0       !
        integer,      dimension(12,max_mod)      :: L_Ucs    = 0       !
        real(kind=cp),dimension(2, max_mod)      :: M_Ocs    = 0.0_cp  ! Multipliers
+       real(kind=cp),dimension(2, max_mod)      :: M_Bcs    = 0.0_cp  ! Multipliers
        real(kind=cp),dimension(6, max_mod)      :: M_Mcs    = 0.0_cp  !
        real(kind=cp),dimension(6, max_mod)      :: M_Dcs    = 0.0_cp  !
        real(kind=cp),dimension(12,max_mod)      :: M_Ucs    = 0.0_cp  !
@@ -208,20 +221,69 @@ Module CFML_Atoms
        character (len=20),      dimension(:), allocatable :: ddlab          ! Labels of atoms at ddist (nat*idp)
     End Type Atm_Cell_Type
 
+    !!---- Type, Public :: Atom_Equiv_Type
+    !!----    integer                                        :: mult
+    !!----    character(len=2)                               :: ChemSymb
+    !!----    character(len=10),allocatable, dimension(:)    :: Lab
+    !!----    real(kind=sp),    allocatable, dimension(:,:)  :: x
+    !!---- End Type Atom_Equiv_Type
+    !!----
+    !!----  Updated: January 2014
+    !!
+    Type, Public :: Atom_Equiv_Type
+       integer                                        :: mult
+       character(len=2)                               :: ChemSymb
+       character(len=20),allocatable, dimension(:)    :: Lab
+       real(kind=cp),    allocatable, dimension(:,:)  :: x
+    End Type Atom_Equiv_Type
+
+    !!---- Type, Public :: Atom_Equiv_List_Type
+    !!----    integer                                           :: nauas
+    !!----    type (Atom_Equiv_Type), allocatable, dimension(:) :: atm
+    !!---- End Type Atom_Equiv_List_Type
+    !!----
+    !!----  Updated: January 2014
+    !!
+    Type, Public :: Atom_Equiv_List_Type
+       integer                                           :: nauas
+       type (Atom_Equiv_Type), allocatable, dimension(:) :: atm
+    End Type Atom_Equiv_List_Type
+
     !!----
     !!---- TYPE :: ALIST_TYPE
     !!--..
     !!
     Type, Public :: AtList_Type
-       integer                                    :: natoms=0      ! Number of atoms in the list
+       integer                                    :: natoms=0        ! Number of atoms in the list
        character(len=9)                           :: mcomp="Crystal" ! For magnetic moments and modulation functions Mcs and Dcs It may be also "Cartesian" or "Spherical"
        logical                                    :: symm_checked=.false.
-       logical,         dimension(:), allocatable :: Active        ! Flag for active or not
-       class(Atm_Type), dimension(:), allocatable :: Atom          ! Atoms
+       logical,         dimension(:), allocatable :: Active          ! Flag for active or not
+       class(Atm_Type), dimension(:), allocatable :: Atom            ! Atoms
     End type AtList_Type
+
+    !Overload
+
+    Interface Extend_Atom_List
+      Module Procedure Extend_List              !Creating a new AtList_Type with all atoms in unit cell
+      Module Procedure Set_Atom_Equiv_List      !Creating a an Atom_Equiv_List_Type from AtList_Type in asymmetric unit
+    End Interface Extend_Atom_List
+
 
     !---- Interface Zone ----!
     Interface
+
+       Pure Module Function Equiv_Atm(Nam1,Nam2,NameAt) Result(Equiv_Atom)
+          !---- Arguments ----!
+          character (len=*), intent (in) :: nam1,nam2
+          character (len=*), intent (in) :: NameAt
+          logical                        :: equiv_atom
+       End Function Equiv_Atm
+
+       Pure Module Function Wrt_Lab(Nam1,Nam2) Result(Bilabel)
+          !---- Arguments ----!
+          character (len=*), intent (in) :: nam1,nam2
+          character (len=8)              :: bilabel
+       End Function Wrt_Lab
 
        Module Subroutine Init_Atom_Type(Atm,d)
           !---- Arguments ----!
@@ -236,6 +298,11 @@ Module CFML_Atoms
           character(len=*),    intent(in)       :: Type_Atm !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
           integer,             intent(in)       :: d    ! Number of k-vectors
        End Subroutine Allocate_Atom_List
+
+       Module Subroutine Check_Symmetry_Constraints(SpG,Atm)
+         class(SpG_Type),   intent(in)     :: SpG
+         type(AtList_Type), intent(in out) :: Atm
+       End Subroutine Check_Symmetry_Constraints
 
        Module Subroutine Read_Bin_Atom_List(filename, A, Type_Atm)
           !---- Arguments ----!
@@ -266,6 +333,14 @@ Module CFML_Atoms
           logical, optional,   intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
        End Subroutine Extend_List
 
+       Module Subroutine Set_Atom_Equiv_List(SpG,cell,A,Ate,lun)
+         type(SpG_Type),             intent(in) :: SpG
+         type(Cell_G_Type),          intent(in) :: Cell
+         type(Atlist_Type),          intent(in) :: A
+         type(Atom_Equiv_List_Type), intent(out):: Ate
+         integer, optional,          intent(in) :: lun
+       End Subroutine Set_Atom_Equiv_List
+
     End Interface
 
-End Module CFML_Atoms
+ End Module CFML_Atoms

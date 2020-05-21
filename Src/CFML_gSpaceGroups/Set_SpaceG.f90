@@ -641,6 +641,8 @@ SubModule (CFML_gSpaceGroups) Set_SpaceGroup_Procedures
               SpaceG%Op(m)=SpaceG%Op(i)
               SpaceG%Op(i)%time_inv=-SpaceG%Op(i)%time_inv
             end do
+          else if(SpaceG%mag_type == 4) then
+             SpaceG%Anticentred=1
           end if
 
           call set_Shubnikov_info()
@@ -884,26 +886,27 @@ SubModule (CFML_gSpaceGroups) Set_SpaceGroup_Procedures
       !> Spacegroup from Str argument
       if (n_gen == 0) then
 
-         !Check if we are providing a generator list as the first argument
-         if(index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 ) then !Call directly to the space group constructor
-           call Group_Constructor(Str,SpaceG)
-           if(SpaceG%D == 4) then
-             if(present(debug)) then
-                call Identify_Group(SpaceG)
-             else
-                call Identify_Group(SpaceG)
-             end if
-             if(Err_CFML%Ierr == 1) then
-                write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
-                call clear_error()
-             end if
-             call set_Shubnikov_info()
-             if(len_trim(SpaceG%BNS_num) /= 0 .and. SpaceG%numshu /= 0 .and. len_trim(SpaceG%BNS_symb) == 0) then
+         !> Check if we are providing a generator list as the first argument
+         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 ) then !Call directly to the space group constructor
+            call Group_Constructor(Str,SpaceG)
+            if (SpaceG%D == 4) then
+               if (present(debug)) then
+                  call Identify_Group(SpaceG)
+               else
+                  call Identify_Group(SpaceG)
+               end if
+               if (Err_CFML%Ierr == 1) then
+                  write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
+                  call clear_error()
+               end if
                call set_Shubnikov_info()
-               SpaceG%BNS_symb=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%BNS
-             end if
-           end if
-           return
+               if (len_trim(SpaceG%BNS_num) /= 0 .and. SpaceG%numshu /= 0 .and. len_trim(SpaceG%BNS_symb) == 0) then
+                  call set_Shubnikov_info()
+                  SpaceG%BNS_symb=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%BNS
+               end if
+               if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
+            end if
+            return
          end if
 
          !> Init Spgr_Info
@@ -1065,6 +1068,7 @@ SubModule (CFML_gSpaceGroups) Set_SpaceGroup_Procedures
            !if(n_it > 0 .and. len_trim(SpaceG%spg_symb) == 0) SpaceG%spg_symb=trim(spgr_info(n_it)%hm) !str_HM(1:1)//l_case(str_HM(2:))
         end if
       end if
+      if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
 
    End Subroutine Set_SpaceGroup_gen
 

@@ -261,7 +261,6 @@ rem   Submodules CFML_gSpaceGroups
       ifort /c Init_Procedures.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Is_InversionCentre.f90                 /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Is_LattCentring.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
-      ifort /c Rational_IsLattVec.f90                 /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Rational_RedTraslation.f90             /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Operator_Equal.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Operator_Mult.f90                      /nologo %OPT1% %OPT2%  /module:..\mod
@@ -432,16 +431,17 @@ rem   Submodules CFML_Reflections
       cd ..
 rem
       echo .... Propagation vectors procedures
-      ifort /c CFML_Propagk.f90                          /nologo %OPT1% %OPT2% /module:.\mod
+      ifort /c CFML_Propagk.f90                       /nologo %OPT1% %OPT2% /module:.\mod
 rem
       echo .... I/O Formats procedures
-      ifort /c CFML_IOForm.f90                           /nologo %OPT1% %OPT2% /module:.\mod
+      ifort /c CFML_IOForm.f90                        /nologo %OPT1% %OPT2% /module:.\mod
 rem
 rem    Submodules CFML_IOForm
       cd .\CFML_IOForm
+      ifort /c Format_GEN.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
+      ifort /c Format_SHX.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
+      ifort /c Format_CIF.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Format_CFL.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-rem       ifort /c Format_CIF.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-rem       ifort /c Format_SHX.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
       goto END
@@ -507,8 +507,8 @@ rem
      copy .\mod\*.smod ..\%DIRECTORY%\LibW08\. > nul
      move *.lib ..\%DIRECTORY%\LibW08\. > nul
    ) else (
-rem     if exist ..\%DIRECTORY%\LibC08\ rmdir ..\%DIRECTORY%\LibC08\ /S /Q
-rem     mkdir ..\%DIRECTORY%\LibC08\
+     if exist ..\%DIRECTORY%\LibC08\ rmdir ..\%DIRECTORY%\LibC08\ /S /Q
+     mkdir ..\%DIRECTORY%\LibC08\
      copy .\mod\*.mod ..\%DIRECTORY%\LibC08\. > nul
      copy .\mod\*.smod ..\%DIRECTORY%\LibC08\. > nul
      move *.lib ..\%DIRECTORY%\LibC08\. > nul
