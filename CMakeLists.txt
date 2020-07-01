@@ -71,6 +71,6 @@ endif()
 include(add_prefix)
 include(add_suffix)
 include(set_compiler_flags)
-set_compiler_flags()
+  set_compiler_flags()
 # The subdirectories of the project.
 add_subdirectory(Src)

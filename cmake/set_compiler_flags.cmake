@@ -1,4 +1,4 @@
-macro(set_compiler_flags_08)
+macro(set_compiler_flags)
 
     # Nullify all the Fortran flags.
     set(CMAKE_Fortran_FLAGS "")

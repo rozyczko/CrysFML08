@@ -1,7 +1,0 @@
-celda :   8.3992    8.1627   11.8119   90.0000   90.0000 90.0000    809.820
-
-SOURCE: Cu(RX)     1.54184
-
-QVEC      0.000 0.16604  0.000
-
-Centrosymmetric super-space group: Pnma(00g)0s0  Number : 62 
