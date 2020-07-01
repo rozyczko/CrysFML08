@@ -77,11 +77,11 @@ rem   Submodules CFML_Mess
         ifort /c Win_Write_ScrollMsg.f90             /nologo %OPT1% %OPT2% %OPT3% /module:..\mod
 
       ) else (
-        ifort /c Err_Message.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
-        ifort /c Info_Message.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
-        ifort /c Print_Message.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
-        ifort /c Wait_Message.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
-        ifort /c Write_ScrollMsg.f90                 /nologo %OPT1% %OPT2%  /module:..\mod
+        ifort /c Con_Err_Message.f90                 /nologo %OPT1% %OPT2%  /module:..\mod
+        ifort /c Con_Info_Message.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+        ifort /c Con_Print_Message.f90               /nologo %OPT1% %OPT2%  /module:..\mod
+        ifort /c Con_Wait_Message.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+        ifort /c Con_Write_ScrollMsg.f90             /nologo %OPT1% %OPT2%  /module:..\mod
       )
       move /y *.obj .. > nul
       cd ..
@@ -442,6 +442,17 @@ rem    Submodules CFML_IOForm
       ifort /c Format_SHX.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Format_CIF.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
       ifort /c Format_CFL.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
+      ifort /c Format_MCIF.f90                        /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+rem
+      echo .... Maps/Percolation procedures
+      ifort /c CFML_Maps.f90                          /nologo %OPT1% %OPT2% /module:.\mod
+rem
+rem    Submodules CFML_Maps
+      cd .\CFML_Maps
+      ifort /c MarchingCubes.f90                      /nologo %OPT1% %OPT2%  /module:..\mod
+      ifort /c Maps.f90                               /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
       goto END
@@ -471,7 +482,6 @@ rem rem
 rem    echo .... Maps, BVS, Energy Configurations
 rem rem
 rem    ifort /c CFML_Export_Vtk.f90                      /nologo %OPT1% %OPT2%
-rem    ifort /c CFML_maps.f90                            /nologo %OPT1% %OPT2%
 rem    ifort /c CFML_conf_calc.f90                       /nologo %OPT1% %OPT2%
 rem rem
 rem    echo .... Magnetic Symmetry, Simulated Annealing, Keywords Parser

@@ -59,9 +59,11 @@ Module CFML_IOForm
    Use CFML_gSpaceGroups,      only: SpG_Type, SuperSpaceGroup_Type, Kvect_Info_Type,   &
                                      Change_Setting_SpaceG, Set_SpaceGroup, Get_Multip_Pos,&
                                      Get_Orbit, Allocate_Kvector, Write_SpaceGroup_Info, &
-                                     Get_Mat_from_Symb, Get_Symb_From_Mat
+                                     Get_Mat_from_Symb, Get_Symb_From_Mat, Get_Dimension_SymmOp
 
    Use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type
+
+   Use CFML_Messages
 
    !---- Variables ----!
    implicit none
@@ -71,8 +73,8 @@ Module CFML_IOForm
 
    !---- Public subroutines ----!
 
-   public :: Read_Xtal_Structure, &
-             Write_Cif_Template, Write_SHX_Template
+   public :: Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
+             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template
 
    !--------------------!
    !---- PARAMETERS ----!
@@ -126,6 +128,19 @@ Module CFML_IOForm
 
    !---- Interface zone ----!
    Interface
+      Module Function Get_NElem_Loop(cif, keyword, i_ini,i_end) Result(N)
+         type(File_Type),   intent(in) :: cif
+         character(len=*),  intent(in) :: keyword
+         integer, optional, intent(in) :: i_ini, i_end
+         integer                       :: n
+      End Function Get_NElem_Loop
+
+      Module Function Is_SSG_Struct(cif, i_ini,i_end) Result(ok)
+         type(File_Type),   intent(in) :: cif
+         integer, optional, intent(in) :: i_ini, i_end
+         logical                       :: ok
+      End Function Is_SSG_Struct
+
       Module Subroutine Get_Job_Info(cfl,Job_info, i_ini,i_end)
          type(File_Type),      intent(in)  :: cfl
          type(job_info_type),  intent(out) :: Job_info
@@ -207,7 +222,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_CFL_SpG(cfl, SpG, xyz_type, i_ini, i_end)
          Type(File_Type),                 intent(in)     :: cfl
-         class(SpG_Type),                 intent(out)    :: SpG
+         class(SpG_Type), allocatable,    intent(out)    :: SpG
          character(len=*), optional,      intent(in)     :: xyz_type
          integer, optional,               intent(in)     :: i_ini, i_end
       End Subroutine Read_CFL_SpG
@@ -415,7 +430,7 @@ Module CFML_IOForm
       Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Nphase, CFrame, Job_Info)
          type(File_Type),               intent(in)  :: cfl
          class(Cell_Type),              intent(out) :: Cell
-         class(SpG_Type),               intent(out) :: SpG
+         class(SpG_Type), allocatable,  intent(out) :: SpG
          Type(AtList_Type),             intent(out) :: Atmlist
          Integer,             optional, intent(in)  :: Nphase
          character(len=*),    optional, intent(in)  :: CFrame
@@ -430,12 +445,13 @@ Module CFML_IOForm
          Integer,             optional, intent(in)  :: Nphase
       End Subroutine Read_XTal_CIF
 
-      Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Nphase)
-         type(File_Type),               intent(in)  :: cif
-         class(Cell_Type),              intent(out) :: Cell
-         class(SpG_Type),               intent(out) :: SpG
-         Type(AtList_Type),             intent(out) :: Atmlist
-         Integer,             optional, intent(in)  :: Nphase
+      Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
+         type(File_Type),                 intent(in)  :: cif
+         class(Cell_Type),                intent(out) :: Cell
+         class(SpG_Type), allocatable,    intent(out) :: SpG
+         Type(AtList_Type),               intent(out) :: Atmlist
+         Type(Kvect_Info_Type), optional, intent(out) :: Kvec
+         Integer,               optional, intent(in)  :: Nphase
       End Subroutine Read_XTal_MCIF
 
       Module Subroutine Read_XTal_SHX(shx, Cell, SpG, Atm)
@@ -465,6 +481,13 @@ Module CFML_IOForm
          integer, optional,     intent(in)  :: i_ini,i_end
       End Subroutine Read_MCIF_Parent_Propagation_Vector
 
+      Module Subroutine Read_MCIF_Cell_Wave_Vector(cif, SpG, Kvec, i_ini,i_end)
+         Type(File_Type),                 intent(in)    :: cif
+         class(SpG_Type),       optional, intent(inout) :: SpG
+         Type(Kvect_Info_Type), optional, intent(out)   :: Kvec
+         integer,               optional, intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_Cell_Wave_Vector
+
       Module Subroutine Read_MCIF_Parent_SpaceG(cif,Spg,i_ini,i_end)
          Type(File_Type),       intent(in)    :: cif
          class(SpG_Type),       intent(inout) :: SpG
@@ -476,6 +499,12 @@ Module CFML_IOForm
          Type(AtList_Type), intent(inout) :: AtmList
          integer, optional, intent(in)  :: i_ini,i_end
       End Subroutine Read_MCIF_AtomSite_Moment
+
+      Module Subroutine Read_MCIF_AtomSite_Moment_Fourier(cif, AtmList,i_ini,i_end)
+         Type(File_Type),   intent(in)    :: cif
+         Type(AtList_Type), intent(inout) :: AtmList
+         integer, optional, intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_AtomSite_Moment_Fourier
 
       Module Subroutine Read_MCIF_SpaceG_Magn(cif,Spg,i_ini,i_end)
          Type(File_Type),       intent(in)    :: cif
@@ -495,11 +524,33 @@ Module CFML_IOForm
          integer, optional,     intent(in)    :: i_ini,i_end
       End Subroutine Read_MCIF_SpaceG_Magn_Transf
 
-      Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Centering(cif, Spg,i_ini,i_end)
+      Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Centering(cif, nsym, symop,i_ini,i_end)
          Type(File_Type),       intent(in)    :: cif
-         class(SpG_Type),       intent(inout) :: SpG
-         integer, optional,     intent(in)    :: i_ini,i_end
+         integer,                        intent(out)   :: nsym
+         character(len=*), dimension(:), intent(out)   :: symop
+         integer, optional,              intent(in)    :: i_ini,i_end
       End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Centering
+
+      Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Centering(cif, nsym, symop,i_ini,i_end)
+         Type(File_Type),                intent(in)    :: cif
+         integer,                        intent(out)   :: nsym
+         character(len=*), dimension(:), intent(out)   :: symop
+         integer, optional,              intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Centering
+
+      Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Operation(cif, nsym, symop,i_ini,i_end)
+         Type(File_Type),       intent(in)    :: cif
+         integer,                        intent(out)   :: nsym
+         character(len=*), dimension(:), intent(out)   :: symop
+         integer, optional,              intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Operation
+
+      Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation(cif, nsym, symop,i_ini,i_end)
+         Type(File_Type),                intent(in)    :: cif
+         integer,                        intent(out)   :: nsym
+         character(len=*), dimension(:), intent(out)   :: symop
+         integer, optional,              intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation
 
       Module Subroutine Write_MCIF_Template(filename,Cell,SpG,AtmList)
          character(len=*),        intent(in) :: filename
@@ -508,25 +559,54 @@ Module CFML_IOForm
          Type(AtList_Type),       intent(in) :: AtmList
       End Subroutine Write_MCIF_Template
 
-      Module Subroutine Write_MCIF_SpaceG_SymOP_Magn(Ipr, Spg)
+      Module Subroutine Write_MCIF_SpaceG_SymOP_Magn_Operation(Ipr, Spg)
          integer,          intent(in) :: Ipr
          class (Spg_type), intent(in) :: Spg
-      End Subroutine Write_MCIF_SpaceG_SymOP_Magn
+      End Subroutine Write_MCIF_SpaceG_SymOP_Magn_Operation
 
       Module Subroutine Write_MCIF_SpaceG_SymOP_Magn_Centering(Ipr, Spg)
          integer,          intent(in) :: Ipr
          class (Spg_type), intent(in) :: Spg
       End Subroutine Write_MCIF_SpaceG_SymOP_Magn_Centering
 
+      Module Subroutine Read_MCIF_AtomSite_Fourier_Wave_Vector(cif, SpG, Kvec, i_ini,i_end)
+         Type(File_Type),                 intent(in)    :: cif
+         class(SpG_Type),       optional, intent(inout) :: SpG
+         Type(Kvect_Info_Type), optional, intent(inout) :: Kvec
+         integer,               optional, intent(in)    :: i_ini,i_end
+      End Subroutine Read_MCIF_AtomSite_Fourier_Wave_Vector
+
       Module Subroutine Write_MCIF_AtomSite_Moment(Ipr, AtmList)
          integer,           intent(in) :: Ipr
          Type(AtList_Type), intent(in) :: AtmList
       End Subroutine Write_MCIF_AtomSite_Moment
 
+      Module Subroutine Write_MCIF_AtomSite_Moment_Fourier(Ipr,Atmlist)
+         integer,            intent(in) :: Ipr
+         Type(AtList_Type),  intent(in) :: AtmList
+      End Subroutine Write_MCIF_AtomSite_Moment_Fourier
+
+      Module Subroutine Write_MCIF_AtomSite_Fourier_Wave_Vector(Ipr,SpG,KVec)
+         integer, intent(in)                         :: Ipr
+         class(SpG_Type),       optional, intent(in) :: Spg
+         Type(Kvect_Info_Type), optional, intent(in) :: Kvec
+      End Subroutine Write_MCIF_AtomSite_Fourier_Wave_Vector
+
       Module Subroutine Write_MCIF_Parent_Propagation_Vector(Ipr,KVec)
          integer, intent(in)               :: Ipr
          Type(Kvect_Info_Type), intent(in) :: Kvec
       End Subroutine Write_MCIF_Parent_Propagation_Vector
+
+      Module Subroutine Write_MCIF_Cell_Modulation_Dimension(Ipr,SpG)
+         integer,         intent(in) :: Ipr
+         class(SpG_Type), intent(in) :: Spg
+      End Subroutine Write_MCIF_Cell_Modulation_Dimension
+
+      Module Subroutine Write_MCIF_Cell_Wave_Vector(Ipr,SpG,KVec)
+         integer, intent(in)                         :: Ipr
+         class(SpG_Type),       optional, intent(in) :: Spg
+         Type(Kvect_Info_Type), optional, intent(in) :: Kvec
+      End Subroutine Write_MCIF_Cell_Wave_Vector
 
       Module Subroutine Write_MCIF_Parent_SpaceG(Ipr, Spg)
          integer,          intent(in) :: Ipr
@@ -567,12 +647,12 @@ Module CFML_IOForm
     !!
     Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, IPhase, FType)
        !---- Arguments ----!
-       character(len=*),          intent( in)     :: filenam    ! Name of the file
-       class (Cell_G_Type),       intent(out)     :: Cell       ! Cell object
-       class (SpG_Type),          intent(out)     :: SpG        ! Space Group object
-       type (Atlist_type),        intent(out)     :: Atm        ! Atom List object
-       integer,         optional, intent(in)      :: IPhase     ! Number of phase
-       type(File_Type), optional, intent(out)     :: FType      ! File type
+       character(len=*),              intent( in)     :: filenam    ! Name of the file
+       class (Cell_G_Type),           intent(out)     :: Cell       ! Cell object
+       class (SpG_Type), allocatable, intent(out)     :: SpG        ! Space Group object
+       type (Atlist_type),            intent(out)     :: Atm        ! Atom List object
+       integer,         optional,     intent(in)      :: IPhase     ! Number of phase
+       type(File_Type), optional,     intent(out)     :: FType      ! File type
 
        !---- Local Variables ----!
        character(len=6):: Ext
@@ -596,10 +676,12 @@ Module CFML_IOForm
 
        select case (trim(u_case(ext)))
           case ('CFL')
-             call Read_XTal_CFL(f, Cell, SpG, Atm)
+             call Read_XTal_CFL(f, Cell, SpG, Atm)  !SpG is allocated inside the subroutine
           case ('CIF')
+             allocate(SpG_Type :: SpG)
              call Read_XTal_CIF(f, Cell, SpG, Atm)
           case ('INS','RES')
+             allocate(SpG_Type :: SpG)
              call Read_XTal_SHX(f, Cell, SpG, Atm)
           case ('PCR')
           case ('MCIF')
