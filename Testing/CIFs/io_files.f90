@@ -5,7 +5,7 @@
  Program Test_SHX_CIF_CFL
     !---- Use Modules ----!
     use CFML_Globaldeps
-    use CFML_Strings,      only: File_type, u_case, Get_extension
+    use CFML_Strings,      only: File_type, u_case 
     use CFML_Metrics,      only: Cell_G_Type, Write_Crystal_Cell
     use CFML_gSpaceGroups, only: Spg_Type, SuperSpaceGroup_Type, Write_SpaceGroup_Info
     use CFML_Atoms,        only: AtList_Type, Write_Atom_List
@@ -14,7 +14,6 @@
     !---- Local Variables ----!
     implicit none
 
-    character(len=:), allocatable       :: ext
     character(len=512)                  :: fname,cmdline
     integer                             :: nlong,narg
     real(kind=cp)                       :: start, fin
@@ -23,20 +22,6 @@
     class(Spg_Type), allocatable        :: SpG
     type(AtList_Type)                   :: Atm
 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !character(len=256)                  :: setting,ctr_code
-    !character(len=256),dimension(26)    :: tctr_code
-    !type(Cell_G_Type)                   :: Cell,Celln
-    !!type(Spg_Type)                      :: Grp
-    !type(File_type)                     :: flist
-    !type(SuperSpaceGroup_Type)          :: Grp
-    !!type(rational),   dimension(:,:),allocatable :: Mat
-    !!character(len=40),dimension(:,:),allocatable :: matrix
-    !integer :: i, j, L,k, d,Dd,nsg, ind, indexg, num_group, ier,mult,codini,narg,len_cmdline
-    !real(kind=cp), dimension(:,:),allocatable :: orb,morb
-    !real(kind=cp), dimension(3)               :: codes=1.0
-    !real(kind=cp), dimension(:,:),allocatable :: codeT
-    !integer,       dimension(:),  allocatable :: ptr
 
     !> Init
     narg=COMMAND_ARGUMENT_COUNT()
@@ -56,7 +41,6 @@
     call CPU_TIME(start)
 
     !> Type of Files
-    ext=get_extension(cmdline)
     call Read_Xtal_Structure(trim(cmdline), Cell, Spg, Atm)
 
     !> Print Information
