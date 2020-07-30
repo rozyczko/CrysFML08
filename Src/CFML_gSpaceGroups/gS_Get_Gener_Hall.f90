@@ -9,9 +9,10 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
    !!---- GET_GENERATORS_FROM_HALL
    !!----
    !!----    Magnetic Hall symbols interpretation based on descriptions on
-   !!----    http://cci.lbl.gov/sginfo/hall_symbols.html
+   !!----    (1) http://cci.lbl.gov/sginfo/hall_symbols.html and
+   !!----    (2) International Tables for Crystallography (2010). Vol. B, Appendix 1.4.2, pp. 122–134
    !!----
-   !!---- 09/05/2019
+   !!---- 09/05/2019, updated 30/07/2020 (JRC)
    !!
    Module Subroutine Get_Generators_from_Hall(Hall, Gen, Ngen, R_Shift)
       !---- Arguments ----!
@@ -21,11 +22,11 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       logical, optional,                           intent(in)  :: R_Shift    ! .True. to give the shift vector in free format
 
       !---- Local Variables ----!
-      character(len=9),  parameter :: L ="PABCIRSTF"
+      character(len=11), parameter :: L ="PABCIRSTFHX"  !adding the symbol H used in ref. (2), putting X for unknown lattice
       character(len=13), parameter :: T ="ABCNUVWD12345"
       character(len=6),  parameter :: A ="XYZ^"//'"*'
       character(len=6),  parameter :: N ="123406"
-      character(len=8),  parameter :: AT='abcABCIS'
+      character(len=13), parameter :: AT='abcnuvwdABCIS'
 
       integer, dimension(3,3), parameter  :: X_1   = reshape([ 1, 0, 0,  0, 1, 0,  0, 0, 1],[3,3])
       integer, dimension(3,3), parameter  :: Y_1   = reshape([ 1, 0, 0,  0, 1, 0,  0, 0, 1],[3,3])
@@ -70,7 +71,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       logical, dimension(PMAX)       :: Tr       ! time reversal
 
       character(len=20)              :: str
-      character(len=1)               :: car
+      character(len=3)               :: car
       character(len=10),dimension(5) :: dire
       integer                        :: i,j,n1,n2,nt,iv,signo
       integer                        :: ilat, axis
@@ -141,7 +142,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       if (str(1:1)=='-') then
          centro=.true.
-         str=adjustl(str(2:))
+         str=adjustl(str(2:))  !Removing the initial sign from the Hall-symbol
       end if
 
       ilat=index(L,u_case(str(1:1)))
@@ -150,54 +151,79 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown lattice traslational symmetry!"
          return
       end if
-      str=adjustl(str(2:))
+      str=adjustl(str(2:))  !Removing the lattice symbol for the Hall-symbol
 
       !>
-      !> Anti-traslational
+      !> Anti-traslational operators
       !>
       a_latt=0
       car=" "
       n1=index(str,"1'")
       if (n1 > 1) then
-       if( str(n1-1:n1-1) == ' ') then
-         if (len_trim(str) > n1+1) then
-            car=str(n1+2:)
-            n2=index(AT,car)
-            if (n2 == 0) then
-               err_CFML%IErr=1
-               err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown anti-lattice traslational symmetry!"
-               return
-            end if
-            select case (car)
-               case ("a")
-                  a_latt=[6,0,0]
-               case ("b")
-                  a_latt=[0,6,0]
-               case ("c")
-                  a_latt=[0,0,6]
-               case ("A")
-                  a_latt=[0,6,6]
-               case ("B")
-                  a_latt=[6,0,6]
-               case ("C")
-                  a_latt=[6,6,0]
-               case ("I")
-                  if (ilat ==6) then  ! R Lattice
-                     a_latt=[0,0,6]
-                  else
-                     a_latt=[6,6,6]
-                  end if
-               case ("S")
-                  if (ilat ==9) then ! F Lattice
-                     a_latt=[6,6,6]
-                  else
-                     a_latt=[0,0,6]
-                  end if
-            end select
-            str=adjustl(str(:n1-1))
-         end if
-       end if
+        if( str(n1-1:n1-1) == ' ') then
+          if (len_trim(str) > n1+1) then
+             car=str(n1+2:)
+             do i=1,len_trim(car)
+                n2=index(AT,car(i:i))
+                if (n2 == 0) then
+                   err_CFML%IErr=1
+                   err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown anti-lattice traslational symmetry!"
+                   return
+                end if
+             end do
+             select case (trim(car))
+                case ("a")
+                   a_latt=[6,0,0]
+                case ("b")
+                   a_latt=[0,6,0]
+                case ("c")
+                   a_latt=[0,0,6]
+                case ("ab","ba")
+                   a_latt=[6,6,0]
+                case ("ac","ca")
+                   a_latt=[6,0,6]
+                case ("bc","cb")
+                   a_latt=[0,6,6]
+                case ("n","abc","acb","bca","bac","cab","cba")
+                   a_latt=[6,6,6]
+                case ("u")
+                   a_latt=[3,0,0]
+                case ("v")
+                   a_latt=[0,3,0]
+                case ("w")
+                   a_latt=[0,0,3]
+                case ("uv","vu")
+                   a_latt=[3,3,0]
+                case ("uw","wu")
+                   a_latt=[3,0,3]
+                case ("vw","wv")
+                   a_latt=[0,3,3]
+                case ("d","uvw","uwv","vuw","vwu","wuv","wvu")
+                   a_latt=[3,3,3]
+                case ("A")
+                   a_latt=[0,6,6]
+                case ("B")
+                   a_latt=[6,0,6]
+                case ("C")
+                   a_latt=[6,6,0]
+                case ("I")
+                   if (ilat ==6) then  ! R Lattice
+                      a_latt=[0,0,6]
+                   else
+                      a_latt=[6,6,6]
+                   end if
+                case ("S")
+                   if (ilat ==9) then ! F Lattice
+                      a_latt=[6,6,6]
+                   else
+                      a_latt=[0,0,6]
+                   end if
+             end select
+             str=adjustl(str(:n1-1))
+          end if
+        end if
       end if
+
       str=u_case(str)
 
       !>
@@ -207,7 +233,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       Ni=0; Ai=0; Ti=0
       call Allocate_Op(4, Op)  ! 4 is Dimension
 
-      call get_words(str, dire, iv)
+      call get_words(str, dire, iv) !dire constains the items separated by blanks in the stripped (without L-symbol) Hall symbol
       if (iv ==0 ) then
          err_CFML%IErr=1
          err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Hall symbol format is wrong, please check it!"
@@ -234,7 +260,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             return
          end if
          Ni(i)=j
-         dire(i)=adjustl(dire(i)(2:))
+         dire(i)=adjustl(dire(i)(2:))  !Direction axis + Translation symbol
 
          if (pout) print*,'  ---> Rotation order: ', signo*Ni(i)
 
@@ -242,14 +268,14 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          axis=0
          j=index(A,dire(i)(1:1))
          if (j == 0) then
-            !> When A symbol can be omitted
+            !> When the axis symbol can be omitted
             select case (i)
                case (1) !> First operator
                   axis=3 ! c axis
 
-               case (2) !> Second operator
+               case (2) !> Second operator (precedence rules)
                   if (Ni(i) == 2) then
-                     if (abs(Ni(i-1))==2 .or. abs(Ni(i-1))==4) then
+                     if (abs(Ni(i-1)) == 2 .or. abs(Ni(i-1)) == 4) then
                         axis=1 ! a axis
 
                      elseif (abs(Ni(i-1))==3 .or. abs(Ni(i-1))==6) then
@@ -264,11 +290,12 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             end select
 
          else
+            !Now the axis symbol is explicitly given
             select case (j)
                case (1:3)
                   axis=j  ! a or b or c
 
-               case (4) !'
+               case (4) !^ (^ replaces ' in the original Hall-symbols)
                   if (Ni(i) /= 2) then
                      err_CFML%IErr=1
                      err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: The rotation order of the operator should be 2!"
@@ -460,7 +487,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          Ni(i)=Ni(i)*signo
       end do
 
-      !> In the original paper was not commented but is possible to
+      !> In the original paper it was not commented but it is possible to
       !> define a shift using the last operator with rotation order -1
       !> and given additional traslation
       !if (Ni(iv)== -1 .and. (.not. tr(iv))) then
@@ -479,7 +506,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       select case (ilat)
          case (2:5)
             nt=nt+1
-         case (6:8)
+         case (6:8,10)
             nt=nt+2
          case (9)
             nt=nt+3
@@ -646,7 +673,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          gen(ngen)=Get_Symb_from_Op(op)
       end if
 
-      if (ilat > 1) then
+      if (ilat > 1 .and. ilat < 11) then
          do i=1,3 ! Loops
             select case (i)
                case (1) ! First loop
@@ -682,6 +709,11 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                      case (9)
                         sn=identidad
                         sn(1:3,4)=[0//1, 1//2, 1//2]
+
+                     case (10)
+                        sn=identidad
+                        sn(1:3,4)=[2//3, 1//3, 0//1]
+
                   end select
 
                case (2) ! Second loop
@@ -701,6 +733,10 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                      case (9)
                         sn=identidad
                         sn(1:3,4)=[1//2, 0//1, 1//2]
+
+                     case (10)
+                        sn=identidad
+                        sn(1:3,4)=[1//3, 2//3, 0//1]
                   end select
 
                case (3) ! Third loop
@@ -728,6 +764,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
             if (ilat < 6) exit              ! only one cycle
             if (ilat < 9 .and. i==2) exit   ! two cycles
+            if (ilat == 10 .and. i==2) exit ! two cycles, H-centring
 
          end do
       end if

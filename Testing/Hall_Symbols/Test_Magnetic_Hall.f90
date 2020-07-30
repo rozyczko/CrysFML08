@@ -1,7 +1,7 @@
 !!----
 !!---- Program: Test_Magnetic_Hall_Symbols
 !!----
-!!---- JGP May2019
+!!---- JGP/NAK/JRC August2020 (GPKRC)
 !!
 Program Test_Magnetic_Hall_Symbols
    !---- Use Modules ----!
@@ -26,6 +26,7 @@ Program Test_Magnetic_Hall_Symbols
 
    !> Main
    do
+      call clear_error()
       write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol: "
       read(*,"(a)") input_Hall
       if(len_trim(input_Hall) == 0) exit
@@ -39,10 +40,12 @@ Program Test_Magnetic_Hall_Symbols
         str_Hall=input_Hall
         setting=" "
       end if
-      !str_Hall=trim(Mag_symb(ik)%HallM)
       ngen=0
-      gen=" "
       call Get_Generators(str_Hall, Gen, ngen)
+      if (Err_CFML%Ierr /= 0) then
+         print*,'    --->'//trim(Err_CFML%Msg)
+         cycle
+      end if
 
       generators=" "
       do i=1,ngen
