@@ -55,6 +55,18 @@ Program Test_Magnetic_Hall_Symbols
       write(*,"(a)") " => Obtained generators: "//trim(generators)
       if(len_trim(setting) /= 0) then
         write(*,"(a)") " => Followed by a change of basis: "//trim(setting)
+        call Change_Setting_Generators(setting,ngen,gen)
+        if (Err_CFML%Ierr /= 0) then
+           print*,'    --->'//trim(Err_CFML%Msg)
+           cycle
+        end if
+        generators=" "
+        do i=1,ngen
+          generators=trim(generators)//trim(gen(i))//";"
+        end do
+        generators=generators(1:len_trim(generators)-1)
+        write(*,"(a)") " => Newly Obtained generators: "//trim(generators)
+
       end if
 
 
@@ -66,9 +78,13 @@ Program Test_Magnetic_Hall_Symbols
          cycle
       end if
       !Check if a change of basis is provided
-      if(len_trim(setting) /= 0) then
-        call Change_Setting_SpaceG(setting, SpG)
-      end if
+      !if(len_trim(setting) /= 0) then
+      !  call Change_Setting_SpaceG(setting, SpG)
+      !  if(Err_CFML%Ierr == 1) then
+      !     write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
+      !     cycle
+      !  end if
+      !end if
 
       !
       !!> Identify group

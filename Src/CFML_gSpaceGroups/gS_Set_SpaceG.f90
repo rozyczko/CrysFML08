@@ -60,6 +60,57 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
    End Function Get_Multip_Pos
 
+   !!----
+   !!---- Module Subroutine Change_Setting_Generators(setting,ngen,gen,xyz_type)
+   !!----   character(len=*),               intent(in )    :: setting   !String with change of basis
+   !!----   integer,                        intent(in )    :: ngen      !Number of generators
+   !!----   character(len=*), dimension(:), intent(in out) :: gen       !String array with generators in Jones faithful form
+   !!----   character(len=*), optional,     intent(in )    :: xyz_type
+   !!----
+   !!----   This subroutine applies the basis transformation encoded in setting to the
+   !!----   generators provided. No generation of group is performed
+   !!----
+   !!----
+   !!----
+   Module Subroutine Change_Setting_Generators(setting,ngen,gen,xyz_type)
+      !---- Arguments ----!
+      character(len=*),               intent(in )    :: setting
+      integer,                        intent(in )    :: ngen
+      character(len=*), dimension(:), intent(in out) :: gen
+      character(len=*), optional,     intent(in )    :: xyz_type
+
+      !---- Local variables ----!
+      Type(rational), dimension(:,:), allocatable    :: Pmat,invPmat !(Dd,Dd)
+      Type(rational)                                 :: det
+      integer                                        :: i,d,Dd
+      character(len=6)                               :: Strcode
+      type(Symm_Oper_Type), dimension(ngen)          :: Op
+
+      call clear_error()
+      Dd=Get_Dimension_SymmOp(gen(1))
+      d=Dd-1
+      allocate(Pmat(Dd,Dd),invPmat(Dd,Dd))
+      call Get_Mat_From_Symb(setting, Pmat)
+      if(err_CFML%Ierr /= 0) return
+      det=Rational_Determ(Pmat(1:d,1:d))
+      if(det < 0_LI ) then
+         err_CFML%Ierr=1
+         err_CFML%Msg ="The determinant of the transformation matrix should be positive"
+         return
+      end if
+      invPmat=Rational_Inverse_Matrix(Pmat)
+      Strcode="xyz"
+      if(present(xyz_type)) Strcode=trim(xyz_type)
+
+      do i=1,ngen          !Transform the generators
+        Op(i)=Get_Op_from_Symb(gen(i))
+        Op(i)%Mat=matmul(matmul(invPmat,Op(i)%Mat),Pmat)
+        Op(i)%Mat(1:d,Dd)=Rational_Modulo_Lat(Op(i)%Mat(1:d,Dd))
+        gen(i)=Get_Symb_from_Mat(Op(i)%Mat, Strcode,Op(i)%time_inv)
+      end do
+
+   End Subroutine Change_Setting_Generators
+
    Module Subroutine Change_Setting_SpaceG(setting, SpaceG,xyz_type)
       !---- Arguments ----!
       character(len=*),           intent(in )    :: setting
