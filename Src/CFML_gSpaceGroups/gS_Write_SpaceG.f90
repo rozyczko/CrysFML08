@@ -95,7 +95,6 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
             if(len_trim(Grp%bns_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-symbol: ",trim(Grp%bns_symb)
             if(len_trim(Grp%bns_num) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-label : ",trim(Grp%bns_num)
             if(len_trim(Grp%og_symb) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group  OG-symbol: ",trim(Grp%og_symb)
-            if(len_trim(Grp%pg) /= 0)          write(unit=iout,fmt="(a, a)")     "                   Point Group: ",trim(Grp%pg)
             if(len_trim(Grp%mag_pg) /= 0)      write(unit=iout,fmt="(a, a)")     "          Magnetic Point Group: ",trim(Grp%mag_pg)
             !if(len_trim(Grp%mat2std) /= 0)     write(unit=iout,fmt="(a, a)")     "       To Standard Space Group: ",trim(Grp%mat2std)
             if(len_trim(Grp%setting) /= 0)     write(unit=iout,fmt="(a, a)")     "     Setting w.r.t. or. gener.: ",trim(Grp%setting)

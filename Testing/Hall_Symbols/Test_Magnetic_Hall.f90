@@ -11,26 +11,39 @@ Program Test_Magnetic_Hall_Symbols
    !---- Variables ----!
    implicit none
 
-   character(len=80)                            :: input_Hall, str_Hall
+   character(len=180)                           :: input_Hall
+   character(len=80)                            :: str_Hall
    character(len=60), dimension(:), allocatable :: gen
    character(len=:), allocatable                :: generators, setting
-   integer                                      :: i,ngen
+   integer                                      :: i,j,k,ngen,d
    type(spg_type)                               :: SpG
    real(kind=cp) :: start, fin
 
 
    call system("cls")
-   print*,'----------------------'
-   print*,' Testing Hall symbols '
-   print*,'----------------------'
 
    !> Main
    do
       call clear_error()
-      write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol: "
+      write(*,"(a)")'  ----------------------------'
+      write(*,"(a)")'   MHall: Testing Hall symbols'
+      write(*,"(a)")'  ----------------------------'
+      write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol or a list of generators in Jones'faithful notation: "
       read(*,"(a)") input_Hall
       if(len_trim(input_Hall) == 0) exit
       call cpu_time(start)
+      i=index(input_Hall,"x")
+      j=index(input_Hall,"y")
+      k=index(input_Hall,"z")
+
+      if(i /= 0 .and. j /= 0 .and. k /= 0) then !List of generators, generate the Hall symbol
+        call Get_Generators(input_hall, d, gen, ngen)
+        write(*,"(a,a)") " => Input generators: ",trim(input_hall)
+        input_hall = Get_Hall_from_Generators(Ngen, Gen)
+        write(*,"(a,a)") " => Deduced Hall symbol from generators: ",trim(input_hall)
+      end if
+
+
       !> Magnetic Hall symbol
       i=index(input_Hall,":")
       if(i /= 0) then
@@ -43,7 +56,7 @@ Program Test_Magnetic_Hall_Symbols
       ngen=0
       call Get_Generators(str_Hall, Gen, ngen)
       if (Err_CFML%Ierr /= 0) then
-         print*,'    --->'//trim(Err_CFML%Msg)
+         write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
          cycle
       end if
 
@@ -53,11 +66,12 @@ Program Test_Magnetic_Hall_Symbols
       end do
       generators=generators(1:len_trim(generators)-1)
       write(*,"(a)") " => Obtained generators: "//trim(generators)
+
       if(len_trim(setting) /= 0) then
         write(*,"(a)") " => Followed by a change of basis: "//trim(setting)
         call Change_Setting_Generators(setting,ngen,gen)
         if (Err_CFML%Ierr /= 0) then
-           print*,'    --->'//trim(Err_CFML%Msg)
+           write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
            cycle
         end if
         generators=" "
@@ -65,8 +79,7 @@ Program Test_Magnetic_Hall_Symbols
           generators=trim(generators)//trim(gen(i))//";"
         end do
         generators=generators(1:len_trim(generators)-1)
-        write(*,"(a)") " => Newly Obtained generators: "//trim(generators)
-
+        write(*,"(a)") " => Newly obtained generators: "//trim(generators)
       end if
 
 
@@ -74,18 +87,9 @@ Program Test_Magnetic_Hall_Symbols
       call Init_SpaceGroup(SpG)
       call Group_Constructor(gen,SpG)
       if (Err_CFML%Ierr /= 0) then
-         print*,'    --->'//trim(Err_CFML%Msg)
+         write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
          cycle
       end if
-      !Check if a change of basis is provided
-      !if(len_trim(setting) /= 0) then
-      !  call Change_Setting_SpaceG(setting, SpG)
-      !  if(Err_CFML%Ierr == 1) then
-      !     write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
-      !     cycle
-      !  end if
-      !end if
-
       !
       !!> Identify group
       call Identify_Group(Spg)
@@ -93,9 +97,11 @@ Program Test_Magnetic_Hall_Symbols
          write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
          call clear_error()
       end if
+      if(len_trim(Spg%mag_pg) == 0) Spg%mag_pg= Get_MagPG_from_BNS(Spg%bns_symb,Spg%mag_type)
+
       call Write_SpaceGroup_Info(SpG)
       call cpu_time(fin)
-      write(*,"(a,f12.3,a)") "Total CPU_TIME for this calculation: ",fin-start," seconds"
+      write(*,"(/,a,f12.3,a)") " => Total CPU_TIME for this calculation: ",fin-start," seconds"
 
    end do
 End Program Test_Magnetic_Hall_Symbols

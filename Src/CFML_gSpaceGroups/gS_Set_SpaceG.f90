@@ -5,6 +5,42 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
    implicit none
    Contains
 
+   !!---- Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
+   !!----   character(len=*), intent(in) :: BNS_Symb
+   !!----   integer,          intent(in) :: mag_type
+   !!----   character(len=:), allocatable:: mag_pg
+   !!----
+   !!----   Construct the symbol of the magnetic point group from the BNS notation
+   !!----
+   !!----
+   Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
+      character(len=*), intent(in) :: BNS_Symb
+      integer,          intent(in) :: mag_type
+      character(len=:), allocatable:: mag_pg
+      !---- Local variables ----!
+      integer :: i,j, m
+
+      !Setting the magnetic point group symbol from the BNS label
+      m=0
+      mag_pg=bns_symb(2:)
+      j=2
+      if(mag_type == 4) then
+        mag_pg=bns_symb(4:)
+        j=4
+      end if
+      do i=j,len_trim(bns_symb)
+        m=m+1
+        if(  bns_symb(i:i) == "a" .or. bns_symb(i:i) == "b"  &
+        .or. bns_symb(i:i) == "c" .or. bns_symb(i:i) == "d"  &
+        .or. bns_symb(i:i) == "e" .or. bns_symb(i:i) == "g"  &
+        .or. bns_symb(i:i) == "n") mag_pg(m:m)="m"
+        if(bns_symb(i:i) == "_") mag_pg(m:m+1)=" "
+      end do
+      mag_pg=pack_string(mag_pg)
+      if(mag_type == 4) mag_pg=trim(mag_pg)//"1'"
+
+   End Function Get_MagPG_from_BNS
+
    Module Function Get_Multip_Pos(x,SpG) Result(mult)
       !---- Arguments ----!
       real(kind=cp), dimension(:), intent(in) :: x !Vector position in superspace
@@ -548,23 +584,8 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
           End Select
 
          !Setting the magnetic point group symbol from the BNS label
-          m=0
-          SpaceG%mag_pg=SpaceG%bns_symb(2:)
-          j=2
-          if(SpaceG%mag_type == 4) then
-            SpaceG%mag_pg=SpaceG%bns_symb(4:)
-            j=4
-          end if
-          do i=j,len_trim(SpaceG%bns_symb)
-            m=m+1
-            if(  SpaceG%bns_symb(i:i) == "a" .or. SpaceG%bns_symb(i:i) == "b"  &
-            .or. SpaceG%bns_symb(i:i) == "c" .or. SpaceG%bns_symb(i:i) == "d"  &
-            .or. SpaceG%bns_symb(i:i) == "e" .or. SpaceG%bns_symb(i:i) == "g"  &
-            .or. SpaceG%bns_symb(i:i) == "n") SpaceG%mag_pg(m:m)="m"
-            if(SpaceG%bns_symb(i:i) == "_") SpaceG%mag_pg(m:m+1)=" "
-          end do
-          SpaceG%mag_pg=pack_string(SpaceG%mag_pg)
-          if(SpaceG%mag_type == 4) SpaceG%mag_pg=trim(SpaceG%mag_pg)//"1'"
+
+          SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
 
           !Setting the parent group symbol and setting from argument "parent" if present
           if(present(parent)) then
@@ -1011,6 +1032,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
                   SpaceG%BNS_symb=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%BNS
                end if
                if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
+               SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
             end if
             return
          end if
@@ -1166,6 +1188,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
           call set_Shubnikov_info()
           SpaceG%BNS_symb=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%BNS
         end if
+        SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
         if(by_Hall) then
            SpaceG%spg_symb = str(1:1)//l_case(str(2:))
         else if (.not. by_Gen) then

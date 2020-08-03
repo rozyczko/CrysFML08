@@ -1366,7 +1366,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
    !!----
    !!---- GET_HALL_FROM_GENERATORS
-   !!----     procedure that obtain the hall symbol from a list of generators
+   !!----     Procedure that obtain the hall symbol from a list of generators
    !!----     that create a Space group.
    !!----
    !!---- 29/05/2019
@@ -1381,15 +1381,16 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       !---- Local Variables ----!
       type(spg_type)                 :: Grp
       type(rational), dimension(3,3) :: Identidad
+      type(rational), dimension(4,4) :: Mat
       type(rational), dimension(3)   :: tr
 
       character(len=2)               :: c_latt
       character(len=1)               :: c_alatt
       character(len=5)               :: car_prime
-      character(len=8), dimension(5) :: car_op
+      character(len=8), dimension(5) :: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
-      integer                        :: prime,n,iv
-      integer                        :: n1,n2
+      integer                        :: prime,n,iv,Invt
+      integer                        :: n1,n2,n_lat,n_alat
 
       logical                        :: pout=.false.
 
@@ -1412,9 +1413,121 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       call Init_SpaceGroup(Grp)
       call Rational_Identity_Matrix(identidad)
 
+      !Examine the input generators to determine non-conventional lattice of anti-lattice type
+      !and add the (anti)lattice generators to the Hall symbol
+      n_lat=0; n_alat=0
+      do n=1,ngen
+        call Get_Mat_From_Symb(gen(n), Mat, Invt)
+        if(rational_equal(Mat(1:3,1:3),identidad)) then
+          tr=Mat(1:3,4)
+          tr=rational_modulo_lat(tr)
+          if (rational_equal(tr,[1//2, 0//1, 0//1])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1a"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'a"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[0//1, 1//2,  0//1])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1b"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'b"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[0//1,  0//1, 1//2])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1c"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'c"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[1//4,  0//1, 0//1])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1u"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'u"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[0//1, 1//4,  0//1])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1v"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'v"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[0//1,  0//1, 1//4])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1w"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'w"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[1//4,  1//4, 1//4])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1d"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'd"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[0//1,  1//4, 1//4])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1vw"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'vw"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[1//4, 0//1,  1//4])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1uw"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'uw"
+             end if
+             cycle
+          end if
+          if (rational_equal(tr,[1//4,  1//4, 0//1])) then
+             if(invt == 1) then
+               n_lat=n_lat+1
+               nc_lat(n_lat)="1uv"
+             else
+               n_alat=n_alat+1
+               nc_alat(n_alat)="1'uv"
+             end if
+             cycle
+          end if
+        end if
+      end do
+
       !> Constructor
       call Group_Constructor(gen,Grp)
       if (Err_CFML%Ierr /= 0) return
+
 
       call Identify_PointGroup(Grp)
       if (Err_CFML%Ierr /= 0) return
@@ -1425,8 +1538,24 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       call Identify_Crystal_System(Grp)
       if (Err_CFML%Ierr /= 0) return
 
+      if (pout) then
+         write(*,"(a,2i3)") " => N_lat & N_alat: ",n_lat,n_alat
+         do n=1,n_lat
+           write(*,"(i3,tr4,a)") n,nc_lat(n)
+         end do
+         do n=1,n_alat
+           write(*,"(i3,tr4,a)") n,nc_alat(n)
+         end do
+         print*,'Raw Group'
+         print*,'-----------'
+         call Write_SpaceGroup_Info(Grp)
+      end if
+
       !> Lattice Type
       Grp%SPG_lat=Get_Lattice_Type(ngen,gen)
+      if(Grp%SPG_lat == "X") then !Construct the generators of the lattice
+      end if
+
       c_latt=" "
       select case (Grp%centred)
           case (0,1)
@@ -1725,14 +1854,28 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       end select
 
       !> ----
-      !> Creating Hall symbol
+      !> Constructing the Hall symbol
       !> ----
 
       !> Lattice + anti-lattice
       Hall=trim(c_latt)
       Hall=trim(Hall)//' '//trim(car_op(1))//' '//trim(car_op(2))//' '//trim(car_op(3))
+
+      if(n_lat /= 0) then
+         do n=1,n_lat
+           Hall=trim(Hall)//' '//trim(nc_lat(n))
+         end do
+      end if
+
       Hall=trim(Hall)//' '//trim(car_prime)
-      if (c_alatt /=" ") Hall=trim(Hall)//" 1'"//c_alatt
+
+      if (c_alatt /= " ") then
+         Hall=trim(Hall)//" 1'"//c_alatt
+      else if (n_alat /= 0) then
+         do n=1,n_alat
+           Hall=trim(Hall)//' '//trim(nc_alat(n))
+         end do
+      end if
 
       if (present(ishift)) then
          if (any(ishift /= 0)) then

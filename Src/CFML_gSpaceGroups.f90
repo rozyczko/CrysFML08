@@ -66,11 +66,11 @@ Module CFML_gSpaceGroups
     public :: operator (==)
 
     !---- List of public functions and subroutines ----!
-    public :: Apply_OP, Symmetry_Symbol, Change_Setting_Generators,               &
-              Get_Crystal_System, Get_Dimension_SymmOP, Get_Hall_from_Generators, &
-              Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,      &
-              Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,           &
-              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,            &
+    public :: Apply_OP, Symmetry_Symbol, Change_Setting_Generators, Get_MagPG_from_BNS,&
+              Get_Crystal_System, Get_Dimension_SymmOP, Get_Hall_from_Generators,      &
+              Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,           &
+              Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                &
+              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                 &
               Inverse_OP, Get_Orbit, Get_moment_ctr, Get_TFourier_Ctr
 
     public :: Allocate_OP, Allocate_SpaceGroup, Allocate_KVector, Change_Setting_SpaceG, &
@@ -564,6 +564,12 @@ Module CFML_gSpaceGroups
           integer , Intent(in)                 :: i1,i2
           integer                              :: Isl
        End Function SearchOp
+
+       Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
+          character(len=*), intent(in) :: BNS_Symb
+          integer,          intent(in) :: mag_type
+          character(len=:), allocatable:: mag_pg
+       End Function Get_MagPG_from_BNS
 
        Module Subroutine Get_Stabilizer(X, Spg,Order,Ptr,Atr)
           !---- Arguments ----!
