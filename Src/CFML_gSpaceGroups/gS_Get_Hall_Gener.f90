@@ -1553,8 +1553,6 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       !> Lattice Type
       Grp%SPG_lat=Get_Lattice_Type(ngen,gen)
-      if(Grp%SPG_lat == "X") then !Construct the generators of the lattice
-      end if
 
       c_latt=" "
       select case (Grp%centred)
@@ -1708,7 +1706,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
             do n=3,iv
                n1=index(car_op(n),'-1')
-               if (n1 ==0) car_op(n)=" "
+               if (n1 == 0) car_op(n)=" "
             end do
 
          case ("TETRAGONAL")
@@ -1849,7 +1847,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
             do n=4,iv
                n1=index(car_op(n),'-1')
-               if (n1 ==0) car_op(n)=" "
+               if (n1 == 0) car_op(n)=" "
             end do
       end select
 
@@ -1859,8 +1857,19 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       !> Lattice + anti-lattice
       Hall=trim(c_latt)
+
+      !> Redundat centre of symmetry?
+      if(Hall(1:1) == "-") then !Centre of symmetry at the origin
+        do n=1,3
+           n1=index(car_op(n),"-1")  !Redundant centre of symmetry
+           if(n1 /= 0) car_op(n)=" "
+        end do
+      end if
+
+      !> Raw Hall symbol
       Hall=trim(Hall)//' '//trim(car_op(1))//' '//trim(car_op(2))//' '//trim(car_op(3))
 
+      !> Completing Hall symbol with non-conventional lattice centrings
       if(n_lat /= 0) then
          do n=1,n_lat
            Hall=trim(Hall)//' '//trim(nc_lat(n))
@@ -1869,6 +1878,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       Hall=trim(Hall)//' '//trim(car_prime)
 
+      !> Completing Hall symbol with non-conventional anti-translations
       if (c_alatt /= " ") then
          Hall=trim(Hall)//" 1'"//c_alatt
       else if (n_alat /= 0) then
@@ -1877,6 +1887,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          end do
       end if
 
+      !> Completing Hall symbol with provided shift of origin
       if (present(ishift)) then
          if (any(ishift /= 0)) then
             str_hall=" "

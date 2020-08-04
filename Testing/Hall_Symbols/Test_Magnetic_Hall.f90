@@ -98,6 +98,7 @@ Program Test_Magnetic_Hall_Symbols
          call clear_error()
       end if
       if(len_trim(Spg%mag_pg) == 0) Spg%mag_pg= Get_MagPG_from_BNS(Spg%bns_symb,Spg%mag_type)
+      if(len_trim(Spg%Hall)   == 0) Spg%Hall= str_Hall
 
       call Write_SpaceGroup_Info(SpG)
       call cpu_time(fin)
