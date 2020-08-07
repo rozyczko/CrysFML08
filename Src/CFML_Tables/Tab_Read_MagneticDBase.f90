@@ -32,7 +32,9 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
       if (present(DB_Path)) then
          database = trim(DB_Path)
          n=len_trim(database)
-         if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+         if(n /= 0)  then
+           if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+         end if
       else
          Env="CRYSFML_DB"
          if (present(EnvDB)) Env=trim(EnvDB)
@@ -43,7 +45,7 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
             err_CFML%IErr=1
             write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
                                                "    This is needed for localizing the data base: magnetic_data.txt"//newline// &
-                                               "    that should be within the %"//trim(Env)//"% directory"
+                                               "    that may be within the %"//trim(Env)//"% directory"
             return
          end if
          if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
@@ -159,8 +161,9 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
       if (present(DB_Path)) then
          database = trim(DB_Path)
          n=len_trim(database)
-         if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
-
+         if( n /= 0) then
+           if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+         end if
       else
          Env="CRYSFML_DB"
          if (present(EnvDB)) Env=trim(EnvDB)
@@ -171,7 +174,7 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
             err_CFML%IErr=1
             write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
                                                "    This is needed for localizing the data base: magnetic_data.bin"//newline// &
-                                               "    that should be within the %"//trim(Env)//"% directory"
+                                               "    that may be within the %"//trim(Env)//"% directory"
             return
          end if
          if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP

@@ -169,7 +169,9 @@ SubModule (CFML_SuperSpace_Database) TAB_SuperSpace_Database_Read
       if (present(DB_Path)) then
          database=trim(db_path)
          n=len_trim(database)
-         if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+         if( n /= 0) then
+           if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+         end if
       else
          Env="CRYSFML_DB"
          if (present(EnvDB)) Env=trim(EnvDB)

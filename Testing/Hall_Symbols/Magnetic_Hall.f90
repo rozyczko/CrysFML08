@@ -51,14 +51,14 @@ Program Magnetic_Hall
    !> Magnetic database from FullProf
    call Read_Magnetic_Data()
    if (err_CFML%IErr /= 0) then
-      print*, trim(err_cfml%msg)
+      write(*,"(a)") trim(err_cfml%msg)
       stop
    end if
 
    call system("cls")
-   print*,'-----------------------------------------------------'
-   print*,' Testing Magnetic Symmetry Groups using Hall symbols'
-   print*,'-----------------------------------------------------'
+   write(*,"(a)")'-----------------------------------------------------'
+   write(*,"(a)")' Testing Magnetic Symmetry Groups using Hall symbols'
+   write(*,"(a)")'-----------------------------------------------------'
 
    !> Main
    call cpu_time(start)
@@ -87,7 +87,7 @@ Program Magnetic_Hall
       call Init_SpaceGroup(SpG)
       call Group_Constructor(gen,SpG) 
       if (Err_CFML%Ierr /= 0) then
-         print*,'    --->'//trim(Err_CFML%Msg)
+         write(*,"(a)") '    --->'//trim(Err_CFML%Msg)
          cycle
       end if
       !
