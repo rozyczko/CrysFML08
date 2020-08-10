@@ -89,6 +89,9 @@ cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_For
 # Console Only for Ifort in release mode
 cmake -G "NMake Makefiles"  -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
 
+# Console Only for Ifort in release mode HDF5
+cmake -G "NMake Makefiles"  -D USE_HDF=ON -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
+
 # Console Only for gfortran in debug mode
 cmake -G "MinGW Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran_debug -D CRYSFML_PREFIX=LibC  ..\..\.
 # Console Only for gfortran in release mode

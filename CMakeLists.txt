@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 option(MINGW_HDF_TRICK "Help building with MinGW" OFF)
 option(GUI "Build CrysFML and WCrysFML library" OFF)
 option(ARCH32 "32 or 64 bit architecture" ON)
+option(USE_HDF "Build crysfml with HDF5 library" OFF)
+option(HEAP_ARRAYS "Put arrays in heap instead of stack (only for Windows ifort)" OFF)
 
 if(DEFINED CMAKE_Fortran_COMPILER)
     set(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER} CACHE STRING "The Fortran compiler. One of 'ifort' or 'gfortran'.")
@@ -65,6 +67,20 @@ endif()
 if (NOT WCRYSFML_PREFIX)
     # Set the default name for wcrysfml library within the install prefix.
     set(WCRYSFML_PREFIX LibW CACHE STRING "The name of wcrysfml library within library directory")
+endif()
+
+# Include and library paths for HDF5.
+# They must be set by the user.
+if(DEFINED HDF5_INCLUDE_PATH)
+    set(HDF5_INCLUDE_PATH ${HDF5_INCLUDE_PATH} CACHE PATH "HDF5 include path")
+else()
+    set(HDF5_INCLUDE_PATH "" CACHE PATH "HDF5 include path")
+endif()
+
+if(DEFINED HDF5_LIBRARY_PATH)
+    set(HDF5_LIBRARY_PATH ${HDF5_LIBRARY_PATH} CACHE PATH "HDF5 library path")
+else()
+    set(HDF5_LIBRARY_PATH "" CACHE PATH "HDF5 library path")
 endif()
 
 # Includes some modules and build the project.
