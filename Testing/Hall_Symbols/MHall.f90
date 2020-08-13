@@ -15,12 +15,15 @@ Program Test_Magnetic_Hall_Symbols
    character(len=80)                            :: str_Hall
    character(len=60), dimension(:), allocatable :: gen
    character(len=:), allocatable                :: generators, setting
-   integer                                      :: i,j,k,ngen,d
+   integer                                      :: i,j,k,ngen,d, narg
    type(spg_type)                               :: SpG
    real(kind=cp) :: start, fin
 
-
-   call system("cls")
+    narg=COMMAND_ARGUMENT_COUNT()
+    if (narg /= 0) then
+       call GET_COMMAND_ARGUMENT(1, input_Hall)
+       !write(*,"(a)") trim(input_Hall)
+    end if
 
    !> Main
    do
@@ -28,9 +31,11 @@ Program Test_Magnetic_Hall_Symbols
       write(*,"(a)")'  ----------------------------'
       write(*,"(a)")'   MHall: Testing Hall symbols'
       write(*,"(a)")'  ----------------------------'
-      write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol or a list of generators in Jones'faithful notation: "
-      read(*,"(a)") input_Hall
-      if(len_trim(input_Hall) == 0) exit
+      if (narg == 0) then
+        write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol or a list of generators in Jones'faithful notation: "
+        read(*,"(a)") input_Hall
+        if(len_trim(input_Hall) == 0) exit
+      end if
       call cpu_time(start)
       i=index(input_Hall,"x")
       j=index(input_Hall,"y")
@@ -108,6 +113,6 @@ Program Test_Magnetic_Hall_Symbols
       call Write_SpaceGroup_Info(SpG)
       call cpu_time(fin)
       write(*,"(/,a,f12.3,a)") " => Total CPU_TIME for this calculation: ",fin-start," seconds"
-
+      if (narg /= 0) exit
    end do
 End Program Test_Magnetic_Hall_Symbols
