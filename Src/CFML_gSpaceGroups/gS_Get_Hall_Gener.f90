@@ -84,7 +84,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       type(rational), dimension(3)   :: sh
       type(symm_oper_type)           :: op
 
-      logical, parameter             :: pout=.false.
+      logical, parameter             :: pout=.true.
 
       !> Init
       ngen=0
@@ -171,35 +171,74 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                    return
                 end if
              end do
+
              select case (trim(car))
-                case ("a")
+                case ("a")                  !1
                    a_latt=[6,0,0]
-                case ("b")
+                case ("b")                  !2
                    a_latt=[0,6,0]
-                case ("c")
+                case ("c")                  !3
                    a_latt=[0,0,6]
-                case ("ab","ba")
-                   a_latt=[6,6,0]
-                case ("ac","ca")
-                   a_latt=[6,0,6]
-                case ("bc","cb")
-                   a_latt=[0,6,6]
-                case ("n","abc","acb","bca","bac","cab","cba")
+                case ("n","abc","acb","bca","bac","cab","cba")  !4
                    a_latt=[6,6,6]
-                case ("u")
+                case ("u")               !5
                    a_latt=[3,0,0]
-                case ("v")
+                case ("v")               !6
                    a_latt=[0,3,0]
-                case ("w")
+                case ("w")               !7
                    a_latt=[0,0,3]
-                case ("uv","vu")
-                   a_latt=[3,3,0]
-                case ("uw","wu")
-                   a_latt=[3,0,3]
-                case ("vw","wv")
-                   a_latt=[0,3,3]
-                case ("d","uvw","uwv","vuw","vwu","wuv","wvu")
+                case ("d","uvw","uwv","vuw","vwu","wuv","wvu") !8
                    a_latt=[3,3,3]
+                case ("ab","ba")         !9
+                   a_latt=[6,6,0]
+                case ("ac","ca")         !10
+                   a_latt=[6,0,6]
+                case ("bc","cb")         !11
+                   a_latt=[0,6,6]
+                case ("uv","vu")         !12
+                   a_latt=[3,3,0]
+                case ("uw","wu")         !13
+                   a_latt=[3,0,3]
+                case ("vw","wv")         !14
+                   a_latt=[0,3,3]
+                case ("ad","da")         !15
+                   a_latt=[9,3,3]
+                case ("bd","db")         !16
+                   a_latt=[3,9,3]
+                case ("cd","dc")         !17
+                   a_latt=[3,3,9]
+                case ("nd","dn")         !18
+                   a_latt=[9,9,9]
+                case ("au","ua")         !19
+                   a_latt=[9,0,0]
+                case ("bu","ub")         !20
+                   a_latt=[3,6,0]
+                case ("cu","uc")         !21
+                   a_latt=[3,0,6]
+                case ("av","va")         !22
+                   a_latt=[6,3,0]
+                case ("bv","vb")         !23
+                   a_latt=[0,9,0]
+                case ("cv","vc")         !24
+                   a_latt=[0,3,6]
+                case ("aw","wa")         !25
+                   a_latt=[6,0,3]
+                case ("bw","wb")         !26
+                   a_latt=[0,6,3]
+                case ("cw","wc")         !27
+                   a_latt=[0,0,9]
+                case ("avw","vaw","vwa","wav","wva","awv") !28
+                   a_latt=[6,3,3]
+                case ("ubw","uwb","buw","bwu","wub","wbu") !29
+                   a_latt=[3,6,3]
+                case ("uvc","ucv","cuv","cvu","vuc","vcu") !30
+                   a_latt=[3,3,6]
+                case ("nu","un")       !31
+                   a_latt=[9,6,6]
+                case ("nv","vn")       !32
+                   a_latt=[6,9,6]
+                case ("nw","wn")       !33
+                   a_latt=[6,6,9]
                 case ("A")
                    a_latt=[0,6,6]
                 case ("B")
@@ -242,8 +281,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       do i=1, iv
          if (pout) then
-            print*,' '
-            print*,'  ---> Operator description: ',i, trim(dire(i))
+            write(*,"(a)") ' '
+            write(*,"(a,i5,a)")'  ---> Operator description: ',i, " "//trim(dire(i))
          end if
 
          !> Ni (Rotation)
@@ -262,7 +301,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          Ni(i)=j
          dire(i)=adjustl(dire(i)(2:))  !Direction axis + Translation symbol
 
-         if (pout) print*,'  ---> Rotation order: ', signo*Ni(i)
+         if (pout) write(*,"(a,i5)")'  ---> Rotation order: ', signo*Ni(i)
 
          !> Ai (axis)
          axis=0
@@ -338,7 +377,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          end if
          Ai(i)=axis
 
-         if (pout) print*,'  ---> Axis: ',Ai(i)
+         if (pout) write(*,"(a)")'  ---> Axis: ',Ai(i)
 
          !> Symbol T
          v_trans=0
@@ -464,7 +503,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          end do
          Ti(:,i)=v_trans
 
-         if (pout) print*,'  --->Traslation: ',Ti(:,i)
+         if (pout) write(*,"(a)")'  --->Traslation: ',Ti(:,i)
 
          !> Time reversal
          Tr(i)=.false.
@@ -478,7 +517,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
             if (pout) then
                if (tr(i)) then
-                  print*,'  ---> Primed operator'
+                  write(*,"(a)") '  ---> Primed operator'
                end if
             end if
          end if
@@ -497,7 +536,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       !
       !   iv=iv-1
       !end if
-      !if (pout) print*,'  ---> Shift: ', rational_string(sh)
+      !if (pout) write(*,"(a)")'  ---> Shift: '//rational_string(sh)
 
       !> Allocate Gen
       nt=iv
@@ -770,13 +809,13 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       end if
 
       if (pout) then
-         print*,' '
-         print*,'  ---> List of Possible Generators <---'
-         print*,'---------------------------------------'
+         write(*,"(a)")' '
+         write(*,"(a)")'  ---> List of Possible Generators <---'
+         write(*,"(a)")'---------------------------------------'
          do i=1,ngen
-            print*,'  ---> Generator: '//trim(gen(i))
+            write(*,"(a)")'  ---> Generator: '//trim(gen(i))
          end do
-         print*,' '
+         write(*,"(a)")' '
       end if
 
    End Subroutine Get_Generators_from_Hall
@@ -1386,19 +1425,59 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       character(len=2)               :: c_latt
       character(len=1)               :: c_alatt
-      character(len=5)               :: car_prime
+      character(len=8)               :: car_prime,car_antic
       character(len=8), dimension(5) :: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
-      integer                        :: prime,n,iv,Invt
-      integer                        :: n1,n2,n_lat,n_alat
+      integer                        :: i,prime,n,iv,Invt
+      integer                        :: n1,n2,n_lat,n_alat,n_antic
 
       logical                        :: pout=.false.
+      integer,                         parameter :: ntr=33
+      character(len=*), dimension(0:ntr),parameter:: symb_tr= ["   ","a  ","b  ","c  ","n  ","u  ","v  ","w  ","d  ",&
+             "ab ","ac ","bc ","uv ","uw ","vw ","da ","db ","dc ","dn ","ua ","ub ","uc ","va ","vb ","vc ",&
+             "wa ","wb ","wc ","avw","ubw","uvc","nu ","nv ","nw "]
+      type(rational), dimension(3,0:ntr) :: st_trans
+      st_trans = reshape([ 0_LI//1_LI, 0_LI//1_LI, 0_LI//1_LI,  &  !        0 !no translation
+                           1_LI//2_LI, 0_LI//1_LI, 0_LI//1_LI,  &  !a       1
+                           0_LI//1_LI, 1_LI//2_LI, 0_LI//1_LI,  &  !b       2
+                           0_LI//1_LI, 0_LI//1_LI, 1_LI//2_LI,  &  !c       3
+                           1_LI//2_LI, 1_LI//2_LI, 1_LI//2_LI,  &  !n       4
+                           1_LI//4_LI, 0_LI//1_LI, 0_LI//1_LI,  &  !u       5
+                           0_LI//1_LI, 1_LI//4_LI, 0_LI//1_LI,  &  !v       6
+                           0_LI//1_LI, 0_LI//1_LI, 1_LI//4_LI,  &  !w       7
+                           1_LI//4_LI, 1_LI//4_LI, 1_LI//4_LI,  &  !d       8
+                           1_LI//2_LI, 1_LI//2_LI, 0_LI//1_LI,  &  !ab      9
+                           1_LI//2_LI, 0_LI//1_LI, 1_LI//2_LI,  &  !ac     10
+                           0_LI//1_LI, 1_LI//2_LI, 1_LI//2_LI,  &  !bc     11
+                           1_LI//4_LI, 1_LI//4_LI, 0_LI//1_LI,  &  !uv     12
+                           1_LI//4_LI, 0_LI//1_LI, 1_LI//4_LI,  &  !uw     13
+                           0_LI//1_LI, 1_LI//4_LI, 1_LI//4_LI,  &  !vw     14
+                           3_LI//4_LI, 1_LI//4_LI, 1_LI//4_LI,  &  !da     15
+                           1_LI//4_LI, 3_LI//4_LI, 1_LI//4_LI,  &  !db     16
+                           1_LI//4_LI, 1_LI//4_LI, 3_LI//4_LI,  &  !dc     17
+                           3_LI//4_LI, 3_LI//4_LI, 3_LI//4_LI,  &  !dn     18
+                           3_LI//4_LI, 0_LI//1_LI, 0_LI//1_LI,  &  !ua     19
+                           1_LI//4_LI, 1_LI//2_LI, 0_LI//1_LI,  &  !ub     20
+                           1_LI//4_LI, 0_LI//1_LI, 1_LI//2_LI,  &  !uc     21
+                           1_LI//2_LI, 1_LI//4_LI, 0_LI//1_LI,  &  !va     22
+                           0_LI//1_LI, 3_LI//4_LI, 0_LI//1_LI,  &  !vb     23
+                           0_LI//1_LI, 1_LI//4_LI, 1_LI//2_LI,  &  !vc     24
+                           1_LI//2_LI, 0_LI//1_LI, 1_LI//4_LI,  &  !wa     25
+                           0_LI//1_LI, 1_LI//2_LI, 1_LI//4_LI,  &  !wb     26
+                           0_LI//1_LI, 0_LI//1_LI, 3_LI//4_LI,  &  !wc     27
+                           1_LI//2_LI, 1_LI//4_LI, 1_LI//4_LI,  &  !avw    28
+                           1_LI//4_LI, 1_LI//2_LI, 1_LI//4_LI,  &  !ubw    29
+                           1_LI//4_LI, 1_LI//4_LI, 1_LI//2_LI,  &  !uvc    30
+                           3_LI//4_LI, 1_LI//2_LI, 1_LI//2_LI,  &  !nu     31
+                           1_LI//2_LI, 3_LI//4_LI, 1_LI//2_LI,  &  !nv     32
+                           1_LI//2_LI, 1_LI//2_LI, 3_LI//4_LI],[3,ntr+1])  !nv     33
+
 
       if (pout) then
-         print*,'Generators'
-         print*,'-----------'
+         write(*,"(a)")'Generators'
+         write(*,"(a)")'-----------'
          do n=1,ngen
-            print*,'Gen:',n,trim(gen(n))
+            write(*,"(a,i5,a)")'Gen:',n,"  "//trim(gen(n))
          end do
       end if
 
@@ -1414,113 +1493,35 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       call Rational_Identity_Matrix(identidad)
 
       !Examine the input generators to determine non-conventional lattice of anti-lattice type
-      !and add the (anti)lattice generators to the Hall symbol
-      n_lat=0; n_alat=0
+      !and add the (anti)lattice generators to the Hall symbol. Search also anti-centre
+      n_lat=0; n_alat=0; n_antic=0; car_antic= " "
       do n=1,ngen
         call Get_Mat_From_Symb(gen(n), Mat, Invt)
         if(rational_equal(Mat(1:3,1:3),identidad)) then
           tr=Mat(1:3,4)
           tr=rational_modulo_lat(tr)
-          if (rational_equal(tr,[1//2, 0//1, 0//1])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1a"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'a"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[0//1, 1//2,  0//1])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1b"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'b"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[0//1,  0//1, 1//2])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1c"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'c"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[1//4,  0//1, 0//1])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1u"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'u"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[0//1, 1//4,  0//1])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1v"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'v"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[0//1,  0//1, 1//4])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1w"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'w"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[1//4,  1//4, 1//4])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1d"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'd"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[0//1,  1//4, 1//4])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1vw"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'vw"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[1//4, 0//1,  1//4])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1uw"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'uw"
-             end if
-             cycle
-          end if
-          if (rational_equal(tr,[1//4,  1//4, 0//1])) then
-             if(invt == 1) then
-               n_lat=n_lat+1
-               nc_lat(n_lat)="1uv"
-             else
-               n_alat=n_alat+1
-               nc_alat(n_alat)="1'uv"
-             end if
-             cycle
-          end if
+          do i=1,ntr
+            if (rational_equal(tr,st_trans(:,i))) then
+              if(invt == 1) then
+                n_lat=n_lat+1
+                nc_lat(n_lat)="1"//trim(symb_tr(i))
+              else
+                n_alat=n_alat+1
+                nc_alat(n_alat)="1'"//trim(symb_tr(i))
+              end if
+              exit
+            end if
+          end do
+        else if(rational_equal(Mat(1:3,1:3),-identidad) .and. Invt == -1 .and. len_trim(car_antic) == 0) then
+          tr=Mat(1:3,4)
+          tr=rational_modulo_lat(tr)
+          do i=0,ntr
+            if (rational_equal(tr,st_trans(:,i))) then
+                n_antic=n_antic+1
+                car_antic="-1'"//trim(symb_tr(i))
+              exit
+            end if
+          end do
         end if
       end do
 
@@ -1546,8 +1547,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          do n=1,n_alat
            write(*,"(i3,tr4,a)") n,nc_alat(n)
          end do
-         print*,'Raw Group'
-         print*,'-----------'
+         write(*,"(a)")'Raw Group'
+         write(*,"(a)")'-----------'
          call Write_SpaceGroup_Info(Grp)
       end if
 
@@ -1624,7 +1625,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                   c_alatt="I"
 
                case ("F")
-                  c_alatt="S"
+                  c_alatt="n"
             end select
             exit
          end if
@@ -1861,6 +1862,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       !> Redundat centre of symmetry?
       if(Hall(1:1) == "-") then !Centre of symmetry at the origin
         do n=1,3
+           n1=index(car_op(n),"-1'") !Skip anti-centring
+           if(n1 /= 0) cycle
            n1=index(car_op(n),"-1")  !Redundant centre of symmetry
            if(n1 /= 0) car_op(n)=" "
         end do
@@ -1868,6 +1871,11 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       !> Raw Hall symbol
       Hall=trim(Hall)//' '//trim(car_op(1))//' '//trim(car_op(2))//' '//trim(car_op(3))
+
+      !> Completing Hall symbol with anti-centre
+      if(n_antic /= 0) then
+         Hall=trim(Hall)//' '//trim(car_antic)
+      end if
 
       !> Completing Hall symbol with non-conventional lattice centrings
       if(n_lat /= 0) then

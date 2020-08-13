@@ -22,7 +22,6 @@ Program Test_Magnetic_Hall_Symbols
     narg=COMMAND_ARGUMENT_COUNT()
     if (narg /= 0) then
        call GET_COMMAND_ARGUMENT(1, input_Hall)
-       !write(*,"(a)") trim(input_Hall)
     end if
 
    !> Main
