@@ -67,7 +67,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       integer, dimension(PMAX)       :: Ni       ! rotation symbol for each operator
       integer, dimension(PMAX)       :: Ai       ! axis symbol for each operator
-      integer, dimension(3,PMAX)     :: Ti       ! traslation for each symbol
+      integer, dimension(3,PMAX)     :: Ti       ! translation for each symbol
       logical, dimension(PMAX)       :: Tr       ! time reversal
 
       character(len=20)              :: str
@@ -84,7 +84,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       type(rational), dimension(3)   :: sh
       type(symm_oper_type)           :: op
 
-      logical, parameter             :: pout=.true.
+      logical, parameter             :: pout=.false.
 
       !> Init
       ngen=0
@@ -135,7 +135,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       end if
 
       !>
-      !> Lattice traslational (L)
+      !> Lattice Centring (L) and centro-symmetry at origin
       !>
       centro=.false.
       ilat=0
@@ -148,13 +148,13 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       ilat=index(L,u_case(str(1:1)))
       if (ilat == 0) then
          err_CFML%IErr=1
-         err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown lattice traslational symmetry!"
+         err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown lattice translational symmetry!"
          return
       end if
       str=adjustl(str(2:))  !Removing the lattice symbol for the Hall-symbol
 
       !>
-      !> Anti-traslational operators
+      !> Anti-translations operators
       !>
       a_latt=0
       car=" "
@@ -167,7 +167,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                 n2=index(AT,car(i:i))
                 if (n2 == 0) then
                    err_CFML%IErr=1
-                   err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown anti-lattice traslational symmetry!"
+                   err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown translation symbol for 1' or -1'!"
                    return
                 end if
              end do
@@ -303,6 +303,14 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
          if (pout) write(*,"(a,i5)")'  ---> Rotation order: ', signo*Ni(i)
 
+         !> Time reversal
+         Tr(i)=.false.
+         j=index(dire(i),"'")
+         if ( j > 0) then  !the time reversal operator commutes with all symbols
+          Tr(i)=.true.
+          dire(i) = dire(i)(1:j-1)//dire(i)(j+1:) !Remove the primed symbol
+         end if
+
          !> Ai (axis)
          axis=0
          j=index(A,dire(i)(1:1))
@@ -370,14 +378,14 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          end if
 
          !> Axis could be 0 only if order the last operator is 1
-         if (axis==0 .and. Ni(i) /= 1) then
+         if (axis == 0 .and. Ni(i) /= 1) then
             err_CFML%IErr=1
             err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: The axis symbol (A) in Hall is wrong!"
             return
          end if
          Ai(i)=axis
 
-         if (pout) write(*,"(a)")'  ---> Axis: ',Ai(i)
+         if (pout) write(*,"(a,i5)")'  ---> Axis: ',Ai(i)
 
          !> Symbol T
          v_trans=0
@@ -385,7 +393,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             if (len_trim(dire(i))==0) exit
 
             j=index(T,dire(i)(1:1))
-            if (j==0) exit
+            if (j == 0) exit
             select case (j)
                case (1) ! a
                   v_trans=v_trans+[6,0,0]
@@ -503,24 +511,24 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          end do
          Ti(:,i)=v_trans
 
-         if (pout) write(*,"(a)")'  --->Traslation: ',Ti(:,i)
+         if (pout) write(*,"(a,3i4)")'  ---> Translation: ',Ti(:,i)
 
          !> Time reversal
-         Tr(i)=.false.
-         if (len_trim(dire(i)) > 0) then
-            if (dire(i)(1:1) /="'") then
-               err_CFML%IErr=1
-               err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Check the MHall symbol!"
-               return
-            end if
-            Tr(i)=.true.
-
-            if (pout) then
-               if (tr(i)) then
-                  write(*,"(a)") '  ---> Primed operator'
-               end if
-            end if
-         end if
+         !Tr(i)=.false.
+         !if (len_trim(dire(i)) > 0) then
+         !   if (dire(i)(1:1) /="'") then
+         !      err_CFML%IErr=1
+         !      err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Check the MHall symbol!"
+         !      return
+         !   end if
+         !   Tr(i)=.true.
+         !
+         !   if (pout) then
+         !      if (tr(i)) then
+         !         write(*,"(a)") '  ---> Primed operator'
+         !      end if
+         !   end if
+         !end if
 
          !> Save the signo in rotation
          Ni(i)=Ni(i)*signo
@@ -528,7 +536,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       !> In the original paper it was not commented but it is possible to
       !> define a shift using the last operator with rotation order -1
-      !> and given additional traslation
+      !> and given additional translation
       !if (Ni(iv)== -1 .and. (.not. tr(iv))) then
       !   shift=.true.
       !   ishift=mod(-Ti(:,iv) + 24, 12)
@@ -699,7 +707,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          gen(ngen)=Get_Symb_from_Op(op)
       end if
 
-      !> Anti-traslation
+      !> Anti-translation
       if (any(a_latt > 0)) then
          sn=identidad
          sn(4,4)=1
@@ -845,7 +853,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
 
       integer,               parameter :: MAX_H_OPER=10  ! Max. number of operators to select
-      integer,               parameter :: MAX_NC    =3   ! Max number of iterations on Traslation part
+      integer,               parameter :: MAX_NC    =3   ! Max number of iterations on Translation part
 
       integer, dimension(3), parameter :: TR_A=[MAX_DIV/2, 0, 0]
       integer, dimension(3), parameter :: TR_B=[0, MAX_DIV/2, 0]
@@ -938,7 +946,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             c_axis="*"
          end if
 
-         !> traslation
+         !> Translation
          tr=Op%Mat(1:3,4)
          rtr=tr
          itr=nint(rtr*real(MAX_DIV))
@@ -1004,8 +1012,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                   end if
 
                case (4)
-                  !> 41 is equivalent to traslation u, v, w or d
-                  !> 43 is equivalent to traslation au, vw or cw
+                  !> 41 is equivalent to translation u, v, w or d
+                  !> 43 is equivalent to translation au, vw or cw
 
                case (6)
                   np=MAX_DIV/6
@@ -1425,7 +1433,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
       character(len=2)               :: c_latt
       character(len=1)               :: c_alatt
-      character(len=8)               :: car_prime,car_antic
+      character(len=8)               :: car_prime
       character(len=8), dimension(5) :: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
       integer                        :: i,prime,n,iv,Invt
@@ -1492,9 +1500,9 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       call Init_SpaceGroup(Grp)
       call Rational_Identity_Matrix(identidad)
 
-      !Examine the input generators to determine non-conventional lattice of anti-lattice type
-      !and add the (anti)lattice generators to the Hall symbol. Search also anti-centre
-      n_lat=0; n_alat=0; n_antic=0; car_antic= " "
+      !Examine the input generators to determine non-conventional lattice of anti-translations type
+      !and add the (anti)translation generators to the Hall symbol. Search also anti-centre
+      n_lat=0; n_alat=0; n_antic=0
       do n=1,ngen
         call Get_Mat_From_Symb(gen(n), Mat, Invt)
         if(rational_equal(Mat(1:3,1:3),identidad)) then
@@ -1509,16 +1517,6 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                 n_alat=n_alat+1
                 nc_alat(n_alat)="1'"//trim(symb_tr(i))
               end if
-              exit
-            end if
-          end do
-        else if(rational_equal(Mat(1:3,1:3),-identidad) .and. Invt == -1 .and. len_trim(car_antic) == 0) then
-          tr=Mat(1:3,4)
-          tr=rational_modulo_lat(tr)
-          do i=0,ntr
-            if (rational_equal(tr,st_trans(:,i))) then
-                n_antic=n_antic+1
-                car_antic="-1'"//trim(symb_tr(i))
               exit
             end if
           end do
@@ -1568,13 +1566,13 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          return
       end if
 
-      !> Anti_lattice
+      !> Anti-translations
       c_alatt=" "
       do n=1,Grp%multip
          !> Conditions
          if (.not. Is_OP_Anti_Lattice(Grp%op(n))) cycle
 
-         !> Traslation
+         !> Translation
          tr=Grp%op(n)%Mat(1:3,4)
          tr=rational_modulo_lat(tr)
 
@@ -1590,7 +1588,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
          if (rational_equal(tr,[0//1, 0//1, 1//2])) then
             if (Grp%Laue == "-1") then
-               c_alatt='S'
+               c_alatt='n'
             else
                if (Grp%SPG_lat=="R") then
                   c_alatt="I"
@@ -1856,7 +1854,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       !> Constructing the Hall symbol
       !> ----
 
-      !> Lattice + anti-lattice
+      !> Lattice + anti-translations
       Hall=trim(c_latt)
 
       !> Redundat centre of symmetry?
@@ -1872,13 +1870,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       !> Raw Hall symbol
       Hall=trim(Hall)//' '//trim(car_op(1))//' '//trim(car_op(2))//' '//trim(car_op(3))
 
-      !> Completing Hall symbol with anti-centre
-      if(n_antic /= 0) then
-         Hall=trim(Hall)//' '//trim(car_antic)
-      end if
-
       !> Completing Hall symbol with non-conventional lattice centrings
-      if(n_lat /= 0) then
+      if(n_lat /= 0 .and. index(c_latt,"X") /= 0 ) then
          do n=1,n_lat
            Hall=trim(Hall)//' '//trim(nc_lat(n))
          end do
