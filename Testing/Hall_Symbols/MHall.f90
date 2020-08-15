@@ -1,12 +1,14 @@
 !!----
 !!---- Program: Test_Magnetic_Hall_Symbols
 !!----
-!!---- JGP/NAK/JRC August2020 (GPKRC)
+!!---- JGP/NAK/JRC August2020 
 !!
 Program Test_Magnetic_Hall_Symbols
    !---- Use Modules ----!
-   Use CFML_Globaldeps, only: cp, err_CFML,clear_error
-   Use CFML_gSpaceGroups
+   Use CFML_Globaldeps,   only: cp, err_CFML, clear_error
+   Use CFML_gSpaceGroups, only: SpG_Type, Get_Generators, Get_Hall_from_Generators, Change_Setting_Generators,&
+                                Init_SpaceGroup, Group_Constructor, Identify_Group, Write_SpaceGroup_Info, &
+                                Get_MagPG_from_BNS
 
    !---- Variables ----!
    implicit none
@@ -16,8 +18,8 @@ Program Test_Magnetic_Hall_Symbols
    character(len=60), dimension(:), allocatable :: gen
    character(len=:), allocatable                :: generators, setting
    integer                                      :: i,j,k,ngen,d, narg
-   type(spg_type)                               :: SpG
-   real(kind=cp) :: start, fin
+   type(SpG_Type)                               :: SpG
+   real(kind=cp)                                :: start, fin
 
     narg=COMMAND_ARGUMENT_COUNT()
     if (narg /= 0) then
@@ -61,7 +63,11 @@ Program Test_Magnetic_Hall_Symbols
       call Get_Generators(str_Hall, Gen, ngen)
       if (Err_CFML%Ierr /= 0) then
          write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-         cycle
+         if(narg /= 0 ) then 
+           exit
+         else
+           cycle
+         end if
       end if
 
       generators=" "
@@ -76,7 +82,11 @@ Program Test_Magnetic_Hall_Symbols
         call Change_Setting_Generators(setting,ngen,gen)
         if (Err_CFML%Ierr /= 0) then
            write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-           cycle
+           if(narg /= 0 ) then 
+             exit
+           else
+             cycle
+           end if
         end if
         generators=" "
         do i=1,ngen
@@ -92,7 +102,11 @@ Program Test_Magnetic_Hall_Symbols
       call Group_Constructor(gen,SpG)
       if (Err_CFML%Ierr /= 0) then
          write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-         cycle
+         if(narg /= 0 ) then 
+           exit
+         else
+           cycle
+         end if
       end if
       !
       !!> Identify group
