@@ -26,7 +26,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       character(len=13), parameter :: T ="ABCNUVWD12345"
       character(len=6),  parameter :: A ="XYZ^"//'"*'
       character(len=6),  parameter :: N ="123406"
-      character(len=13), parameter :: AT='abcnuvwdABCIS'
+      character(len=13), parameter :: AT="abcnuvwdABCIS"
 
       integer, dimension(3,3), parameter  :: X_1   = reshape([ 1, 0, 0,  0, 1, 0,  0, 0, 1],[3,3])
       integer, dimension(3,3), parameter  :: Y_1   = reshape([ 1, 0, 0,  0, 1, 0,  0, 0, 1],[3,3])
@@ -389,6 +389,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
          !> Symbol T
          v_trans=0
+         !     1234567890123
+         ! T ="ABCNUVWD12345"
          do
             if (len_trim(dire(i))==0) exit
 
@@ -414,6 +416,28 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
 
                case (9) ! 1
                   select case (Ni(i))
+                     case (2) ! 1/2
+                        select case (Ai(i))
+                           case (1)
+                              v_trans=v_trans+[6,0,0]
+                           case (2)
+                              v_trans=v_trans+[0,6,0]
+                           case (3)
+                              v_trans=v_trans+[0,0,6]
+                           case (4)
+                              v_trans=v_trans+[6,6,0]
+                           case (5)
+                              v_trans=v_trans+[6,0,6]
+                           case (6)
+                              v_trans=v_trans+[0,6,6]
+                           case (7)
+                              v_trans=v_trans+[6,-6,0]
+                           case (8)
+                              v_trans=v_trans+[6,0,-6]
+                           case (9)
+                              v_trans=v_trans+[0,6,-6]
+                        end select
+
                      case (3) ! 1/3
                         select case (Ai(i))
                            case (1)
@@ -422,6 +446,20 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,4,0]
                            case (3)
                               v_trans=v_trans+[0,0,4]
+                           case (4)
+                              v_trans=v_trans+[4,4,0]
+                           case (5)
+                              v_trans=v_trans+[4,0,4]
+                           case (6)
+                              v_trans=v_trans+[0,4,4]
+                           case (7)
+                              v_trans=v_trans+[4,-4,0]
+                           case (8)
+                              v_trans=v_trans+[4,0,-4]
+                           case (9)
+                              v_trans=v_trans+[0,4,-4]
+                           case (10)
+                              v_trans=v_trans+[4,4,4]
                         end select
 
                      case (4) ! 1/4
@@ -432,6 +470,20 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,3,0]
                            case (3)
                               v_trans=v_trans+[0,0,3]
+                           case (4)
+                              v_trans=v_trans+[3,3,0]
+                           case (5)
+                              v_trans=v_trans+[3,0,3]
+                           case (6)
+                              v_trans=v_trans+[0,3,3]
+                           case (7)
+                              v_trans=v_trans+[3,-3,0]
+                           case (8)
+                              v_trans=v_trans+[3,0,-3]
+                           case (9)
+                              v_trans=v_trans+[0,3,-3]
+                           case (10)
+                              v_trans=v_trans+[3,3,3]
                         end select
 
                      case (6) ! 1/6
@@ -442,6 +494,18 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,2,0]
                            case (3)
                               v_trans=v_trans+[0,0,2]
+                           case (4)
+                              v_trans=v_trans+[2,2,0]
+                           case (5)
+                              v_trans=v_trans+[2,0,2]
+                           case (6)
+                              v_trans=v_trans+[0,2,2]
+                           case (7)
+                              v_trans=v_trans+[2,-2,0]
+                           case (8)
+                              v_trans=v_trans+[2,0,-2]
+                           case (9)
+                              v_trans=v_trans+[0,2,-2]
                         end select
                   end select
 
@@ -455,9 +519,45 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,8,0]
                            case (3)
                               v_trans=v_trans+[0,0,8]
+                           case (4)
+                              v_trans=v_trans+[8,8,0]
+                           case (5)
+                              v_trans=v_trans+[8,0,8]
+                           case (6)
+                              v_trans=v_trans+[0,8,8]
+                           case (7)
+                              v_trans=v_trans+[8,-8,0]
+                           case (8)
+                              v_trans=v_trans+[8,0,-8]
+                           case (9)
+                              v_trans=v_trans+[0,8,-8]
+                           case (10)
+                              v_trans=v_trans+[8,8,8]
                         end select
 
-                     case (6) ! 2/6
+                     case (4) ! 2/4 = 1/2
+                        select case (Ai(i))
+                           case (1)
+                              v_trans=v_trans+[6,0,0]
+                           case (2)
+                              v_trans=v_trans+[0,6,0]
+                           case (3)
+                              v_trans=v_trans+[0,0,6]
+                           case (4)
+                              v_trans=v_trans+[6,6,0]
+                           case (5)
+                              v_trans=v_trans+[6,0,6]
+                           case (6)
+                              v_trans=v_trans+[0,6,6]
+                           case (7)
+                              v_trans=v_trans+[6,-6,0]
+                           case (8)
+                              v_trans=v_trans+[6,0,-6]
+                           case (9)
+                              v_trans=v_trans+[0,6,-6]
+                        end select
+
+                     case (6) ! 2/6 =1/3
                         select case (Ai(i))
                            case (1)
                               v_trans=v_trans+[4,0,0]
@@ -465,6 +565,18 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,4,0]
                            case (3)
                               v_trans=v_trans+[0,0,4]
+                           case (4)
+                              v_trans=v_trans+[4,4,0]
+                           case (5)
+                              v_trans=v_trans+[4,0,4]
+                           case (6)
+                              v_trans=v_trans+[0,4,4]
+                           case (7)
+                              v_trans=v_trans+[4,-4,0]
+                           case (8)
+                              v_trans=v_trans+[4,0,-4]
+                           case (9)
+                              v_trans=v_trans+[0,4,-4]
                         end select
                   end select
 
@@ -478,12 +590,51 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,9,0]
                            case (3)
                               v_trans=v_trans+[0,0,9]
+                           case (4)
+                              v_trans=v_trans+[9,9,0]
+                           case (5)
+                              v_trans=v_trans+[9,0,9]
+                           case (6)
+                              v_trans=v_trans+[0,9,9]
+                           case (7)
+                              v_trans=v_trans+[9,-9,0]
+                           case (8)
+                              v_trans=v_trans+[9,0,-9]
+                           case (9)
+                              v_trans=v_trans+[0,9,-9]
+                           case (10)
+                              v_trans=v_trans+[9,9,9]
                         end select
+
+                     case (6) ! 3/6 =1/2
+                        select case (Ai(i))
+                           case (1)
+                              v_trans=v_trans+[6,0,0]
+                           case (2)
+                              v_trans=v_trans+[0,6,0]
+                           case (3)
+                              v_trans=v_trans+[0,0,6]
+                           case (4)
+                              v_trans=v_trans+[6,6,0]
+                           case (5)
+                              v_trans=v_trans+[6,0,6]
+                           case (6)
+                              v_trans=v_trans+[0,6,6]
+                           case (7)
+                              v_trans=v_trans+[6,-6,0]
+                           case (8)
+                              v_trans=v_trans+[6,0,-6]
+                           case (9)
+                              v_trans=v_trans+[0,6,-6]
+                           case (10)
+                              v_trans=v_trans+[6,6,6]
+                        end select
+
                   end select
 
                case (12)! 4
                   select case (Ni(i))
-                     case (6) ! 4/6
+                     case (6) ! 4/6 = 2/3
                         select case (Ai(i))
                            case (1)
                               v_trans=v_trans+[8,0,0]
@@ -491,6 +642,20 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,8,0]
                            case (3)
                               v_trans=v_trans+[0,0,8]
+                           case (4)
+                              v_trans=v_trans+[8,8,0]
+                           case (5)
+                              v_trans=v_trans+[8,0,8]
+                           case (6)
+                              v_trans=v_trans+[0,8,8]
+                           case (7)
+                              v_trans=v_trans+[8,-8,0]
+                           case (8)
+                              v_trans=v_trans+[8,0,-8]
+                           case (9)
+                              v_trans=v_trans+[0,8,-8]
+                           case (10)
+                              v_trans=v_trans+[8,8,8]
                         end select
                   end select
 
@@ -504,31 +669,27 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
                               v_trans=v_trans+[0,10,0]
                            case (3)
                               v_trans=v_trans+[0,0,10]
+                           case (4)
+                              v_trans=v_trans+[10,10,0]
+                           case (5)
+                              v_trans=v_trans+[10,0,10]
+                           case (6)
+                              v_trans=v_trans+[0,10,10]
+                           case (7)
+                              v_trans=v_trans+[10,-10,0]
+                           case (8)
+                              v_trans=v_trans+[10,0,-10]
+                           case (9)
+                              v_trans=v_trans+[0,10,-10]
                         end select
                   end select
+
             end select
             dire(i)=adjustl(dire(i)(2:))
          end do
          Ti(:,i)=v_trans
 
          if (pout) write(*,"(a,3i4)")'  ---> Translation: ',Ti(:,i)
-
-         !> Time reversal
-         !Tr(i)=.false.
-         !if (len_trim(dire(i)) > 0) then
-         !   if (dire(i)(1:1) /="'") then
-         !      err_CFML%IErr=1
-         !      err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Check the MHall symbol!"
-         !      return
-         !   end if
-         !   Tr(i)=.true.
-         !
-         !   if (pout) then
-         !      if (tr(i)) then
-         !         write(*,"(a)") '  ---> Primed operator'
-         !      end if
-         !   end if
-         !end if
 
          !> Save the signo in rotation
          Ni(i)=Ni(i)*signo
@@ -578,11 +739,6 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             case (1)
                select case (Ai(i))
                   case (0)
-                     !if (.not. tr(i)) then
-                     !   err_CFML%IErr=1
-                     !   err_CFML%Msg="Get_Generators_from_MHall@GSPACEGROUPS: Check symbol!"
-                     !   return
-                     !end if
                      sn=sign(1,Ni(i))*identidad
                   case (1)
                      sn(1:3,1:3)=signo*X_1
