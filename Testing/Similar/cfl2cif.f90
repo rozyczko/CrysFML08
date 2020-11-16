@@ -62,7 +62,7 @@
     "                   ---- Version 0.0 May-2020 ----",                             &
     "                      (ILL JRC, NAK - May 2020 )"
 
-    DO
+    Do
       if(len_cmdline /=0) then
         lenf=index(cmdline,".")-1
         if(lenf <= 0) then

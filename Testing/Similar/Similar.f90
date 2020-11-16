@@ -516,7 +516,7 @@
                    Asub%Atom(na)%x=xp
                    Asub%Atom(na)%occ=occ
                    Asub%active(na)=.true.
-                     write(unit=i_cfl,fmt="(a,5f10.5,f8.3,i4)")  "Atom "//nam//A%atom(n)%SfacSymb, xp,&
+                   write(unit=i_cfl,fmt="(a,5f10.5,f8.3,i4)") "Atom "//nam//A%atom(n)%SfacSymb, xp,&
                                                               A%atom(n)%U_iso,occ,A%atom(n)%Mom,A%atom(n)%Charge
                    k=k+1
                    if(k > norbi) exit
