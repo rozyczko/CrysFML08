@@ -1,14 +1,18 @@
  Module Get_gSpG
+   ! In this module there are some subroutines for testing
+   ! They will be incorporate to CrysFML08 as soon as they work properly
    use CFML_GlobalDeps
    use CFML_gSpaceGroups
    use CFML_Rational
    use CFML_Maths
    implicit none
    private
-   Public :: Set_gSpG
+   Public :: Set_gSpG, SubGroups
    integer,          dimension(0:2), parameter :: CENT=[2,1,2]
    character(len=1), dimension(10),  parameter :: XYZ=["x","y","z","t","u","v","w","p","q","r"]
+
    contains
+
      Subroutine Set_gSpG(str,SpG,Mode,Setting)
        character(len=*),          intent(in) :: str
        Class(SpG_Type),           intent(out):: SpG
@@ -26,8 +30,12 @@
          Case default
            call Set_SpaceGroup(Str,SpG)
            if(present(setting)) then
-             call Change_Setting_SpaceG(setting,SpG)
-             !call Change_Set_SpaceG(setting,SpG)
+             !call Change_Setting_SpaceG(setting,SpG)
+             call Change_Set_SpaceG(setting,SpG)
+             if(err_CFML%Ierr /= 0) then
+               write(*,"(a)") " => "//trim(err_CFML%Msg)
+               write(*,"(a)") " => Provided setting not applied!"
+             end if
            end if
        End Select
      End Subroutine Set_gSpG
@@ -184,7 +192,247 @@
 
    End Subroutine Change_Set_SpaceG
 
+   Subroutine SubGroups(SpG, SubG, nsg, indexg, point,printd)
+      !---- Arguments ----!
+      type(Spg_Type),                    intent( in) :: SpG
+      type(Spg_Type),dimension(:),       intent(out) :: SubG
+      integer,                           intent(out) :: nsg
+      integer,                  optional,intent(in)  :: indexg
+      logical, dimension(:,:),  optional,intent(out) :: point
+      logical,                  optional,intent(in)  :: printd
 
+      !--- Local variables ---!
+      integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng,i1,i2,nalloc,navoid
+      character (len=40), dimension(:),allocatable :: gen
+      character (len=40), dimension(Spg%Num_Lat)   :: gen_lat
+      character (len=256),dimension(:),allocatable :: list_gen
+      character (len=40)                           :: gen_cent
+      type(Symm_Oper_Type)                         :: Op_cent, Op_aux
+      type(Symm_Oper_Type), dimension(Spg%Num_Lat) :: Op_lat
+      type(Spg_Type),dimension(size(SubG))         :: Sub_tmp
+
+      !> Trivial P1: x,y,z
+      if (Spg%Multip == 1) then
+         SubG(1)=SpG
+         nsg=1
+         return
+      else if (Spg%Multip == 2) then !> Trivial P-1: x,y,z; -x,-y,-z
+         Op_aux=Get_Op_from_Symb(SpG%Symb_Op(2))
+         if (Is_OP_Inversion_Centre(Op_aux)) then
+           SubG(1)=SpG
+           nsg=1
+           return
+         end if
+      end if
+
+      d=SpG%d
+      nc=0
+      nop=SpG%numops !number of symmetry operators excluding lattice centrings & centre of symmetry
+      if (SpG%centred /= 1) then
+         nop=nop*2        ! number of symmetry operators excluding lattice centrings
+         nc=SpG%Numops+1  ! Position of the centre of symmetry if it exist
+         gen_cent=SpG%Symb_Op(nc)
+         call Allocate_Op(SpG%d,Op_cent)
+         Op_cent=SpG%Op(nc)  !Operator corresponding to the centre of symmetry
+      end if
+
+      ng=0; nla=0
+      if (SpG%num_lat > 0) then
+         do i=1,SpG%num_lat
+            ng=ng+1
+            gen_lat(ng)= SpG%Symb_Op(1+nop*i)
+            Op_lat(ng)= SpG%Op(1+nop*i)  !Operators corresponding to the lattice centring vectors
+         end do
+         nla=ng
+      end if
+
+      allocate(gen(SpG%Multip))
+      do i=2,SpG%Numops
+        gen(i-1) = SpG%Symb_Op(i)
+      end do
+      ngen=SpG%Numops-1
+      if (SpG%centred /= 1) then
+        do i=SpG%Numops+1,2*SpG%Numops
+           ngen=ngen+1
+           gen(ngen) = SpG%Symb_Op(i)
+        end do
+      end if
+      if (SpG%centred /= 1) then
+        ngen=ngen+1
+        gen(ngen)=gen_cent
+      end if
+
+
+      !Construct the lists of  possible generators to be tested
+      !mp=max(1,ngen-2)*max(1,ngen-1)*ngen*max(1,ngen-1)*ngen*ngen*max(1,SpG%num_lat)**2
+      nalloc=min((ngen**4)*max(1,SpG%num_lat)**2, 1800000)+2
+      if (allocated(list_gen)) deallocate(list_gen)
+      allocate(list_gen(nalloc))
+      write(*,"(a,i7)") " Number of allocated lists: ",nalloc
+      L=0
+      ! Start with the simplest lists: 1 generator
+      if (ngen >= 1) then
+         do i=1,ngen
+            L=L+1
+            list_gen(L)=trim(gen(i))
+         end do
+      end if
+      ! Continue with the lists : 2 generators
+      if (ngen >= 2) then
+         do i=1,ngen-1
+            do j=i+1,ngen
+               if(trim(gen(i)) == trim(gen(j))) cycle
+               L=L+1
+               list_gen(L)=trim(gen(i))//";"//trim(gen(j))
+            end do
+         end do
+      end if
+      ! Continue with the lists : 3 generators (it is enough for general crystallographic groups)
+      if(ngen >= 3) then
+         do_3g: do i=1,ngen-2
+            do j=i+1,ngen-1
+               do k=j+1,ngen
+                  if(trim(gen(i)) == trim(gen(j)) .or. trim(gen(i)) == trim(gen(k)) .or. trim(gen(k)) == trim(gen(j))) cycle
+                  L=L+1
+                  if(L > nalloc) then
+                    L=nalloc
+                    write(*,"(a)") "Warning: Maximum number of generator lists reached at 3-generators loop"
+                    exit do_3g
+                  end if
+                  list_gen(L)=trim(gen(i))//";"//trim(gen(j))//";"//trim(gen(k))
+               end do
+            end do
+         end do do_3g
+      end if
+
+      mp=L
+
+      if (SpG%num_lat > 0)  then
+         do_jl: do j=1,SpG%num_lat
+            do i=1,mp
+               if(index(list_gen(i),trim(gen_lat(j))) /= 0) cycle
+               L=L+1
+               if(L > nalloc) then
+                 L=nalloc
+                 write(*,"(a)") "Warning: Maximum number of generator lists reached at first Lattice-generators loop"
+                 exit do_jl
+               end if
+               list_gen(L)=trim(list_gen(i))//";"//trim(gen_lat(j))
+            end do
+         end do  do_jl
+      end if
+      !i1=mp+1
+      !i2=i1+mp
+      !if (SpG%num_lat > 1)  then
+      !   do_jla: do j=1,SpG%num_lat
+      !      do i=i1,i2   !1,mp
+      !         if(index(list_gen(i),trim(gen_lat(j))) /= 0) cycle
+      !         L=L+1
+      !         if(L > nalloc) then
+      !           L=nalloc
+      !           write(*,"(a)") "Warning: Maximum number of generator lists reached at second Lattice-generators loop"
+      !           exit do_jla
+      !         end if
+      !         list_gen(L)=trim(list_gen(i))//";"//trim(gen_lat(j))
+      !      end do
+      !   end do do_jla
+      !end if
+
+      nsg=L !Number of lists with generators
+
+      if(present(printd)) then
+        write(unit=*,fmt="(a,i6)") " Number of generator lists: ",nsg
+        open(unit=55,file="generator_list_subgroup_full.txt",status="replace",action="write")
+        do i=1,nsg
+          write(unit=55,fmt="(a,i6,a)") " Generator list #",i,"  "//trim(List_gen(i))
+        end do
+        close(unit=55)
+      end if
+      !> Generate the subgroups corresponding to the above lists
+      n=1
+      if(present(printd)) write(*,"(a,2(i4,a))") " => Generating subgroup #",n," with list of generators: ",1,"  "//trim(List_gen(1))
+      call Group_Constructor(List_gen(1),Sub_tmp(1))
+      navoid=0
+      do_L:do L=2,nsg
+         do i=n-1,1,-1
+           if(Is_in_Group(list_gen(L),Sub_tmp(i))) cycle do_L !Prevent generation of repeated groups
+         end do
+         n=n+1 !new group
+         if(present(printd)) write(*,"(a,2(i8,a))") " => Generating subgroup #",n," with list of generators: ",L,"  "//trim(List_gen(L))
+         call Group_Constructor(List_gen(L),Sub_tmp(n))
+         if (Err_CFML%Ierr /= 0) then
+           write(*,"(a)") " => Error in Group_Constructor "//trim(Err_CFML%Msg)
+           write(*,"(a)") "    Continuing with the next list "
+           n=max(1,n-1)
+           cycle do_L
+         end if
+         do i=n-1,1,-1  !Check for repetitions in any case
+            if (Sub_tmp(n) == Sub_tmp(i)) then
+               n=max(1,n-1)
+               if(present(printd))  write(*,"(a,i4)") " Repeated group, new 'n' ",n
+               cycle do_L
+            end if
+         end do
+      end do do_L
+
+      if(present(printd)) write(unit=*,fmt="(a,i8)") " Number of generator lists: ",nsg
+      L=0
+      if (present(indexg)) then
+        do i=1,n
+          idx=SpG%multip/Sub_tmp(i)%multip
+          if (idx == indexg) then
+            L=L+1
+            SubG(L)=Sub_tmp(i)
+          end if
+        end do
+        nsg=L
+      else
+        nsg=n
+        do i=1,n
+          SubG(i)=Sub_tmp(i)
+        end do
+      end if
+
+      if (present(point)) then
+         point=.false.
+         do j=1,nsg
+            L=1
+            do i=1,SpG%multip
+               do k=L,SubG(j)%multip
+                  if (SubG(j)%Symb_Op(k) == SpG%Symb_Op(i)) then
+                     point(i,j) = .true.
+                     L=k+1
+                     exit
+                  end if
+               end do
+            end do
+         end do
+      end if
+
+   End Subroutine SubGroups
+
+   Function Is_in_Group(list_gen,Spg) result(it_is)
+     character(len=*),intent(in) :: list_gen
+     type(Spg_Type),  intent(in) :: SpG
+     logical                     :: it_is
+     !
+     integer :: i,ngen,d
+     character(len=40), dimension(:),allocatable :: gen
+     character(len=:),allocatable :: all_ops
+
+     all_ops=trim(Spg%Symb_Op(2))//";"
+     do i=3,Spg%multip
+       all_ops=trim(all_ops)//trim(Spg%Symb_Op(i))//";"
+     end do
+     it_is=.true.
+     call Get_Generators(list_gen, d, gen, ngen)
+     do i=1,ngen
+       if(index(all_ops,trim(gen(i))) == 0) then
+         it_is=.false.
+         return
+       end if
+     end do
+   End Function Is_in_Group
  End Module Get_gSpG
 
 !!----
@@ -209,24 +457,25 @@
     !integer, dimension(:,:),allocatable :: G
     !integer, dimension(:),  allocatable :: ord
     integer, dimension(:), allocatable  :: cosets
-    integer :: i, j, L, nsg, indexg, num_group, ier,lun !, ind
-    real(kind=cp) :: start, fin
+    integer :: i, j, L, nsg, indexg, num_group, ier,minu !lun !, ind
+    real(kind=cp) :: start, fin,tini,tfin, secnd
     logical :: set_given, sup_given, datb_given, full, shub_given
 
     !> Init
+    call CPU_TIME(tini)
     call Set_Conditions_NumOp_EPS(4096) !Maximum admissible multiplicity
-    open(newunit=lun,file="groups.out",status="replace",action="write")
+    !open(newunit=lun,file="groups.out",status="replace",action="write")
     do
        set_given=.false.; sup_given=.false.; datb_given=.false.; shub_given=.false.
        write(*,'(/,a,/)') " => Examples of input to the next question:"
        write(*,'(a)') "1236   :: a,b,c;0,0,0      shub        <-- Shubnikov group type 1236 in standard setting"
-       write(*,'(a)') "123    :: a,-c,b;1/2,0,0   cryst       <-- Space group type 123 in non-standard setting"
+       write(*,'(a)') "123    :: a,-c,b;1/2,0,0               <-- Space group type 123 in non-standard setting"
        write(*,'(a)') "Pn'ma                                  <-- Shubnikov group type Pn'ma in standard setting"
        write(*,'(a)') "Pn'ma  :: -c,b,a;0,0,0     shub        <-- Shubnikov group type Pn'ma in the non-standard setting Pcmn'"
        write(*,'(a)') "B 2 C B                                <-- space #41 of standard symbol Aba2"
        write(*,'(a)') "13232  :: sup                          <-- SuperSpace group 13232 in standard setting"
        write(*,'(a)') "221    :: a2,-a1,a3,a4;0,0,1/2,0  sup  <-- SuperSpace group #221 in non-standard setting"
-       write(*,'(a)') "Pnma(0,0,g)ss0  :: sup                 <-- SuperSpace group of standard symbol"
+       write(*,'(a)') "Pnma(0,0,g)0s0  :: sup                 <-- SuperSpace group of standard symbol"
        write(*,'(a)') "x,-y,z,t,1;x,y,z,t+1/2,-1              <-- The generators of a Magnetic SuperSpace group"
        write(*,'(a)') "x1,-x2,x3,x4,1;x1,x2,x3,x4+1/2,-1      <-- The generators of a Magnetic SuperSpace group"
        write(*,'(/,a)',advance='no') " => Introduce generators, HM or Hall symbol, or the number of a standard group as indicated above: "
@@ -243,7 +492,7 @@
              j=index(generatorList,"sup")  !Superspace
              if(j /= 0) then
                sup_given=.true.
-               if(index(generatorList,"a1") /= 0) then
+               if(index(generatorList,"a1") /= 0 .or. index(generatorList,"d") /= 0) then
                  setting= adjustl(generatorlist(i+2:j-1))
                  set_given=.true.
                end if
@@ -266,7 +515,7 @@
              j=index(generatorList,"sup")  !Superspace
              if(j /= 0) then
                sup_given=.true.
-               if(index(generatorList,"a1") /= 0) then
+               if(index(generatorList,"a1") /= 0  .or. index(generatorList,"d") /= 0) then
                  setting= adjustl(generatorlist(i+2:j-1))
                  set_given=.true.
                end if
@@ -306,7 +555,11 @@
             if(set_given ) then
                call Set_gSpG(generatorList,Grp,"GEN",Setting)
             else
-               call Set_gSpG(generatorList,Grp,"GEN")
+              if(index(generatorList,"x") /= 0) then
+                call Set_gSpG(generatorList,Grp,"GEN")
+              else
+                call Set_gSpG(generatorList,Grp," ")
+              end if
             end if
          end if
        end if
@@ -315,7 +568,7 @@
           cycle
        else
           call Write_SpaceGroup_Info(Grp)
-          call Write_SpaceGroup_Info(Grp,lun)
+          !call Write_SpaceGroup_Info(Grp,lun)
        end if
 
        full=.false.
@@ -326,22 +579,20 @@
           read(mode,*,iostat=ier) indexg
           if(ier == 0) exit
        end do
-       !> Testing Get_subgroups_cosets
-       if (indexg == 0) then
-         if(full) then
-            call get_subgroups_full(Grp,sGrp,nsg)
-         else
-            call get_subgroups(Grp,sGrp,nsg)
-         end if
-       else if(indexg > 0) then
-         if(full) then
-            call get_subgroups_full(Grp,sGrp,nsg,indexg)
-         else
-          call get_subgroups(Grp,sGrp,nsg,indexg)
-         end if
-       else
-          cycle
-       end if
+       Select Case(indexg)
+         Case(:-1)
+           cycle
+         Case(0)
+           !if(full) then
+           !  call Get_SubGroups_full(Grp,sGrp,nsg,printd=.true.)
+           !else
+           !  call Get_SubGroups_gen(Grp,sGrp,nsg,printd=.true.)
+           !end if
+           call SubGroups(Grp,sGrp,nsg,printd=.true.)
+         Case Default
+           !call Get_SubGroups_full(Grp,sGrp,nsg,indexg,printd=.true.)
+           call SubGroups(Grp,sGrp,nsg,indexg,printd=.true.)
+       End Select
        if (Err_CFML%Ierr /= 0) then
           write(*,'(/,4x,a)') trim(Err_CFML%Msg)
           cycle
@@ -350,21 +601,21 @@
        if (nsg > 0) Then
           do L=1,nsg
              write(*,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
-             write(lun,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
+             !write(lun,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
              call Identify_Group(sGrp(L)) !.false.
              if (Err_CFML%Ierr /= 0) then
                 write(*,'(/,4x,"=> Error in the identification of the group: ",a)') trim(Err_CFML%Msg)
              end if
              call Write_SpaceGroup_Info(sGrp(L))
-             call Write_SpaceGroup_Info(sGrp(L),lun)
+             !call Write_SpaceGroup_Info(sGrp(L),lun)
              !> Write the coset decomposition of Grp with respect to the current subgroup
              call Get_Cosets(Grp,sGrp(L),cosets)
              nc=size(cosets)
              if (nc > 0) then
                 !     12345678901234
-                forma="(a,i3,a,    a)"
-                write(forma(9:12),"(i4)") nc
-                write(lun,forma) "  Coset decomposition of  G: "//trim(Grp%Spg_symb)//&
+                forma="(/,a,i3,a,    a,/)"
+                write(forma(11:14),"(i4)") nc
+                write(*,forma) "  Coset decomposition of  G: "//trim(Grp%Spg_symb)//&
                                  "(",nc+1,") =  H("//trim(sGrp(L)%BNS_symb)//")  + ",("{"//&
                                  trim(Grp%Symb_Op(cosets(j)))//"} H + ",j=1,nc-1), &
                                  "{"//trim(Grp%Symb_Op(cosets(nc)))//"} H"
@@ -374,7 +625,12 @@
 
        call CPU_TIME(fin)
        write(*,"(a,f12.3,a)") "CPU_TIME for this calculation: ",fin-start," seconds"
-       write(lun,"(a,f12.3,a)") "CPU_TIME for this calculation: ",fin-start," seconds"
+       !write(lun,"(a,f12.3,a)") "CPU_TIME for this calculation: ",fin-start," seconds"
     end do
+    call CPU_TIME(tfin)
+    secnd=tfin-tini
+    minu=int(secnd/60.0)
+    secnd=secnd-real(minu*60)
+    write(*,"(/,a,i6,a,f12.3,a)") "Total CPU_TIME for this calculation: ",minu," minutes and ",secnd," seconds"
 
 End Program Test_Groups

@@ -19,7 +19,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       character(len=*),                            intent(in)  :: Hall      ! Hall symbol
       character(len=*), dimension(:), allocatable, intent(out) :: Gen       ! String generators
       integer,                                     intent(out) :: Ngen      ! Number of genertaors
-      logical, optional,                           intent(in)  :: R_Shift    ! .True. to give the shift vector in free format
+      logical, optional,                           intent(in)  :: R_Shift   ! .True. to give the shift vector in free format
 
       !---- Local Variables ----!
       character(len=11), parameter :: L ="PABCIRSTFHX"  !adding the symbol H used in ref. (2), putting X for unknown lattice
@@ -1004,7 +1004,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          character(len=1):: Prime =" "
       End Type H_Oper
 
-      integer,               parameter :: MAX_DIV   =12  ! Multiplo of 3 and 4
+      integer,               parameter :: MAX_DIV   =12  ! Multiple of 3 and 4
 
 
 
@@ -1592,11 +1592,18 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       character(len=8)               :: car_prime
       character(len=8), dimension(5) :: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
-      integer                        :: i,prime,n,iv,Invt
+      integer                        :: i,prime,n,iv,Invt,ind_sh
       integer                        :: n1,n2,n_lat,n_alat,n_antic
+      integer,          dimension(3) :: ish
+      integer,        dimension(3,3) :: s
+      real(kind=cp),  dimension(3,3) :: sinv
+      real(kind=cp),    dimension(3) :: t
+      logical                        :: pout=.false., need_shift=.false.
+      character(len=40),    dimension(Ngen) :: symb_gen
+      Type(Symm_Oper_Type), dimension(Ngen) :: Op_gen
+      integer, dimension(3,3),parameter :: ident=reshape([1,0,0,0,1,0,0,0,1],[3,3])
 
-      logical                        :: pout=.false.
-      integer,                         parameter :: ntr=33
+      integer, parameter         :: ntr=33
       character(len=*), dimension(0:ntr),parameter:: symb_tr= ["   ","a  ","b  ","c  ","n  ","u  ","v  ","w  ","d  ",&
              "ab ","ac ","bc ","uv ","uw ","vw ","da ","db ","dc ","dn ","ua ","ub ","uc ","va ","vb ","vc ",&
              "wa ","wb ","wc ","avw","ubw","uvc","nu ","nv ","nw "]
@@ -1653,6 +1660,43 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
          Err_CFML%Msg="Get_Hall_from_SpG@GSPACEGROUPS: Number of generators is zero!"
       end if
 
+      !Calculate symmetry symbols of generators and determine if one of the operators
+      !cannot be represented if there is a translation like n/3 or n/6 in an operator
+      !that is not oriented along the c-axis
+      ind_sh=0
+      ish=0
+      if(present(Ishift)) then
+        ish=Ishift
+      else
+        do i=1,ngen
+          Op_gen(i)=Get_Op_from_Symb(gen(i))
+          s=Op_gen(i)%Mat(1:3,1:3)
+          t=Op_gen(i)%Mat(1:3,4)
+          Symb_gen(i)=Symmetry_Symbol(s,t)
+          !write(*,"(i5,a)") i,"  ->  "//trim(Symb_gen(i))
+          if(Equal_Matrix(s,ident,3)) cycle
+          if(ind_sh == 0) then
+            !if(index(Symb_gen(i),"z") == 0 .or. .not. (index(Symb_gen(i),"x") /= 0 .and. index(Symb_gen(i),"y") /= 0)) then
+            if(index(Symb_gen(i),"z") == 0 ) then
+              if(index(Symb_gen(i),"/3") /= 0 .or. index(Symb_gen(i),"/6") /= 0 ) then
+                need_shift=.true.
+                ind_sh=i
+              end if
+            end if
+          end if
+        end do
+        if(need_shift) then !Determine the shift (only along z!)
+          !s=Op_gen(ind_sh)%Mat(1:3,1:3)
+          !t=Op_gen(ind_sh)%Mat(1:3,4)
+          !s=s-ident
+          !t(3)=t(3)/s(3,3)
+          !!t=matmul(sinv,t) !New origin shift that multiplied by 12 should give an integer
+          !ish=-nint(12.0*t)
+          !write(*,"(a,3i8,a)") " Calculated Shift: [",ish," ]"
+          write(*,"(a,/,a)") " => Warning! operator: "//trim(gen(ind_sh))//"  cannot be written with a legal Hall symbol", &
+                             "    A different setting of the group will be generateded."
+        end if
+      end if
       call Init_SpaceGroup(Grp)
       call Rational_Identity_Matrix(identidad)
 
@@ -1897,8 +1941,11 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             end do
 
          case ("TRIGONAL")
+            !Look for possible shift because one generators cannot be represented with
+            !a Hall symbol
+            !if (present(ishift) .or. need_shift) then
             if (present(ishift)) then
-               str_Hall=Search_Hall_Operators(Grp,ishift)
+               str_Hall=Search_Hall_Operators(Grp,ish)
             else
                str_Hall=Search_Hall_Operators(Grp)
             end if
@@ -1940,8 +1987,9 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
             car_op(3:)=" "
 
          case ("HEXAGONAL")
+            !if (present(ishift) .or. need_shift) then
             if (present(ishift)) then
-               str_Hall=Search_Hall_Operators(Grp,ishift)
+               str_Hall=Search_Hall_Operators(Grp,ish)
             else
                str_Hall=Search_Hall_Operators(Grp)
             end if

@@ -42,8 +42,9 @@ Program test230_groups
       generatorList=adjustl(Get_IT_Generators(aux))
       if (len_trim(generatorList) == 0) exit
       !write(*,'(a)') " => Calling Group_Constructor "//"for group: "//trim(aux)
+      !write(*,"(a)")  " => Generator List: "//trim(generatorList)
       call Group_Constructor(generatorList,Grp)
-      !write(*,'(a)') " =>Out of Group_Constructor "//"for group: "//trim(aux)
+      !write(*,'(a)') " => Out of Group_Constructor "//"for group: "//trim(aux)
 
       Grp%numspg=i
       call Get_SpaceGroup_Symbols(aux,HM=hm)
@@ -63,6 +64,8 @@ Program test230_groups
           write(lun,"(a)")   "  ------------------------------------------------------------------------------"
       end if
 
+      !write(*,"(a)")  " => Grp%spg_symb: "//trim(Grp%spg_symb)
+      !call Write_SpaceGroup_Info(Grp)
       call Get_SubGroups_full(Grp, sGrp, nsg)
 
       if (Err_CFML%Ierr /= 0) then
@@ -108,7 +111,9 @@ Program test230_groups
    write(lun,"(/,a,i3,a,f9.5,a)") "  CPU_Time for all calculations: ",minuts," minutes, ",secs," seconds"
 
    contains
-
+   !
+   !This subroutine is not used in this program. It is written here for testing purposes
+   !   
    Subroutine Get_SubGroups_n(SpG, SubG, nsg, indexg, point)
       !---- Arguments ----!
       type(Spg_Type),                    intent( in) :: SpG
@@ -147,7 +152,7 @@ Program test230_groups
       nop=SpG%numops !number of symmetry operators excluding lattice centrings & centre of symmetry
       if (SpG%centred /= 1) then
          nop=nop*2        ! number of symmetry operators excluding lattice centrings
-         nc=SpG%Numops+1  ! Position of the centre of symmetry if it exist
+         nc=SpG%Numops+1  ! Position of the centre of symmetry if it exists
          gen_cent=SpG%Symb_Op(nc)
          call Allocate_Op(SpG%d,Op_cent)
          Op_cent=SpG%Op(nc)  !Operator corresponding to the centre of symmetry

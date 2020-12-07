@@ -47,7 +47,6 @@
        Use CFML_Messages,      only: Error_message
        use CFML_Strings,       only: File_Type,u_case
        Use CFML_Maths,         only: Zbelong, epss, inverse_matrix
-       Use CFML_Trigonometry,  only: rtan, asind, sind, cosd
        Use CFML_Metrics,       only: Cell_G_Type, Rot_Gibbs_Matrix
        Use CFML_gSpaceGroups,  only: SpG_type
        Use CFML_Reflections,   only: h_absent, mh_absent
@@ -444,7 +443,6 @@
              end do
            end if
 
-           return
          End Subroutine get_domain_contrib
 
          !> @brief
@@ -485,9 +483,9 @@
               End If
               teta=2.0*om
              !.....Bissecting geometry high-chi
-              Call rtan(x(2),x(1),phi,"d")  !getting phi
-              dst=Sqrt(x(1)*x(1)+x(2)*x(2))
-              Call rtan(x(3),dst,chi,"d")    !getting chi
+              phi = atan2d(x(2),x(1))  !getting phi
+              dst = Sqrt(x(1)*x(1)+x(2)*x(2))
+              chi = atan2d(x(3),dst)    !getting chi
               If (im == 2) Then
                 chi=180.0-chi
                 phi=phi+180.0
@@ -501,7 +499,7 @@
                 diff=chimax-180
                 If (chi < -180+diff .and. chi >= -180)  chi=chi+360.0
               End If
-           Return
+
          End Subroutine Get_Angles
 
         !> @brief

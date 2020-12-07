@@ -13,7 +13,8 @@ for %%x in (%*) do (
 )
 SET PROGRAM=%~3
 if [%PROGRAM%] == [] (
-  echo "The name of a Fortran file should be provided (e.g.  myprogram.f90)"
+  echo "The name of a Fortran file should be provided as the third argument"
+  echo "Example: compile_f90 gfortran64 debug myprogram.f90"
   goto END
   ) else (
 rem  set EXE=%PROGRAM%
