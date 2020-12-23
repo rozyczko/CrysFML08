@@ -1,6 +1,6 @@
 @echo off
 rem ****
-rem ****---- Compilation for XRFIT Program ----****
+rem ****---- Compilation for TOF-FIT Program ----****
 rem ****
 rem > INIT
    (set _DEBUG=N)
@@ -52,17 +52,16 @@ rem
 rem
 rem > Compilation
    if [%_COMP%]==[ifort] (
-      ifort /c Cw_Diffraction_Pv.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c XRFit.f90                  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /exe:XRFit *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000
+      ifort /c TOF_Module.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
+      ifort /c TOF_fitting.f90                  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
+      ifort /exe:TOF_fit *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000
    )
 rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c Cw_Diffraction_Pv.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c XRFit.f90                    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC08
-      gfortran -o XRFit.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c TOF_Module.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
+      gfortran -c TOF_fitting.f90                    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
+      gfortran -o TOF_fit.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
    )
 rem
 rem   if exist %FULLPROF% copy XRFit.exe %FULLPROF%
    del *.obj *.mod *.o *.map *.bak > nul
-

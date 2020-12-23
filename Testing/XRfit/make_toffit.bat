@@ -2,7 +2,7 @@
 rem ****
 rem ****---- Compilation for TOF-FIT Program ----****
 rem ****
-rem > INIT 
+rem > INIT
    (set _DEBUG=N)
    (set _COMP=ifort)
    if [%TARGET_ARCH%]==[] (set TARGET_ARCH=ia32)
@@ -18,7 +18,7 @@ rem > Arguments ----
     if [%1]==[gfortran64] (
        (set _COMP=gfortran)
        (set _VER=m64)
-    )   
+    )
     shift
     if not [%1]==[] goto LOOP
 rem
@@ -36,7 +36,7 @@ rem
       )
       (set OPT2=/fpp /Qopt-report:0)
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
       if [%_DEBUG%]==[Y] (
          if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran64_debug)
@@ -52,16 +52,16 @@ rem
 rem
 rem > Compilation
    if [%_COMP%]==[ifort] (
-      ifort /c TOF_Diffraction.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC08
-      ifort /c tof-fit.f90                  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC08
-      ifort /exe:TOFfit *.obj  %CRYSFML%\%DIRECTORY%\LibC08\crysfml.lib /link /stack:300000000 
+      ifort /c TOF_Diffraction.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
+      ifort /c tof-fit.f90                  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
+      ifort /exe:TOFfit *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c TOF_Diffraction.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC08
-      gfortran -c tof-fit.f90                    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC08
-      gfortran -o TOFfit.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC08 -lcrysfml
+      gfortran -c TOF_Diffraction.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
+      gfortran -c tof-fit.f90                    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
+      gfortran -o TOFfit.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
    )
-rem 
-rem   if exist %FULLPROF% copy XRFit.exe %FULLPROF%  
+rem
+rem   if exist %FULLPROF% copy XRFit.exe %FULLPROF%
    del *.obj *.mod *.o *.map *.bak > nul

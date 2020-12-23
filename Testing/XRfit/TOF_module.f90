@@ -77,7 +77,8 @@ Module  TOF_Diffraction
 
    ! Private Zone
 
-   integer, parameter     :: ngl_tof=6          ! Maximum number of global parameters for TOF
+   integer, parameter     :: nglob_tof=15       ! Maximum number of global parameters for TOF
+   integer, parameter     :: nshp_tof=6          ! Maximum number of peak-shape parameters per peak
    integer, parameter     :: nbac=120           ! Maximum number of background parameters
    integer                :: n_ba               ! Number of points to define the background
    integer                :: jobtyp             ! 0 Refinement, 1: Simulation
@@ -90,7 +91,13 @@ Module  TOF_Diffraction
    integer, parameter, private :: npeaks_max=300
    real, dimension(npeaks_max), private,save    :: Intens
    real, dimension(npeaks_max), private,save    :: sigma0
-   real, dimension(npeaks_max), private,save    :: der_sig2,der_sig1,der_sig0
+   real, dimension(npeaks_max), private,save    :: alpha0
+   real, dimension(npeaks_max), private,save    :: beta0
+   real, dimension(npeaks_max), private,save    :: eta0
+   real, dimension(npeaks_max), private,save    :: der_sig2,der_sig1,der_sig0,der_sigQ
+   real, dimension(npeaks_max), private,save    :: der_alf0,der_alf1,der_alf2,der_alf3
+   real, dimension(npeaks_max), private,save    :: der_bet0,der_bet1,der_bet2,der_bet3
+   real, dimension(npeaks_max), private,save    :: der_eta0,der_eta1,der_eta2
 
  Contains
 
@@ -339,7 +346,7 @@ Module  TOF_Diffraction
       write(unit=7,fmt="(a,i5  )") " => Number of cycles: ",c%icyc
 
       ! Number of parameters
-      vs%np = ngl_tof+ n_ba + 6 * npeaks
+      vs%np = nglob_tof+ n_ba + 6 * npeaks
 
       ! save input data
       j = 0
@@ -358,26 +365,36 @@ Module  TOF_Diffraction
 
 
       write(unit=7,fmt="(/a)")         " => Global parameters          Flag"
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Alpha",   vs%pv(1),vs%code(1)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Beta ",   vs%pv(2),vs%code(2)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Sig-2       ",   vs%pv(3),vs%code(3)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Sig-1       ",   vs%pv(4),vs%code(4)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Sig-0       ",   vs%pv(5),vs%code(5)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Eta  ",   vs%pv(6),vs%code(6)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha0",   vs%pv( 1),vs%code( 1)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha1",   vs%pv( 2),vs%code( 2)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha2",   vs%pv( 3),vs%code( 3)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha3",   vs%pv( 4),vs%code( 4)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta0 ",   vs%pv( 5),vs%code( 5)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta1 ",   vs%pv( 6),vs%code( 6)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta2 ",   vs%pv( 7),vs%code( 7)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta3 ",   vs%pv( 8),vs%code( 8)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-2 ",   vs%pv( 9),vs%code( 9)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-1 ",   vs%pv(10),vs%code(10)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-0 ",   vs%pv(11),vs%code(11)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-Q ",   vs%pv(12),vs%code(12)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta0  ",   vs%pv(13),vs%code(13)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta1  ",   vs%pv(14),vs%code(14)
+      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta2  ",   vs%pv(15),vs%code(15)
       write(unit=7,fmt="(/a)")           " => Background parameters"
       write(unit=7,fmt="(a)")            "      Scatt. Variable     Background  Flag"
+
       do j=1,n_ba
-        write(unit=7,fmt="(2f18.4,i4)")   BackGroundPoint(j)%x, vs%pv(j+ngl_tof),vs%code(j+ngl_tof)
+        write(unit=7,fmt="(2f18.4,i4)")   BackGroundPoint(j)%x, vs%pv(j+nglob_tof),vs%code(j+nglob_tof)
       end do
 
       write(unit=7,fmt="(/A/)")                                                    &
            "    Position       Intensity    Shift-Sigma   Shift-alpha    Shift-beta    Shift-Eta       Flags"
-      j=ngl_tof+n_ba+1
+      j=nglob_tof+n_ba+1
       do i=1,npeaks
          write(unit=7,fmt="(f14.6,f14.2,4F14.6,5x,6i2)")                          &
                vs%pv(j),vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5),   &
                vs%code(j),vs%code(j+1),vs%code(j+2),vs%code(j+3),vs%code(j+4),vs%code(j+5)
-         j=j+ngl_tof
+         j=j+nshp_tof
       end do
 
       write(unit=7,fmt= "(/a,i4/)") " => Total number of refined parameters: ", c%npvar
@@ -465,33 +482,42 @@ Module  TOF_Diffraction
       vs%code_comp=.false.
       vs%nampar(:)= "               "
 
-      vs%nampar(1)="Global-alpha"
-      vs%nampar(2)="Global-beta"
-      vs%nampar(3)="Global-Sig-2"
-      vs%nampar(4)="Global-Sig-1"
-      vs%nampar(5)="Global-Sig-0"
-      vs%nampar(6)="Global-eta"
+      vs%nampar( 1)="Global-alpha0"
+      vs%nampar( 2)="Global-alpha1"
+      vs%nampar( 3)="Global-alpha2"
+      vs%nampar( 4)="Global-alpha3"
+      vs%nampar( 5)="Global-beta0 "
+      vs%nampar( 6)="Global-beta1 "
+      vs%nampar( 7)="Global-beta2 "
+      vs%nampar( 8)="Global-beta3 "
+      vs%nampar( 9)="Global-Sig-2 "
+      vs%nampar(10)="Global-Sig-1 "
+      vs%nampar(11)="Global-Sig-0 "
+      vs%nampar(12)="Global-Sig-Q "
+      vs%nampar(13)="Global-eta0  "
+      vs%nampar(14)="Global-eta1  "
+      vs%nampar(15)="Global-eta2  "
 
       ! Background
       if (n_ba <= 9) then
          do j=1,n_ba
-            write(unit=vs%nampar(ngl_tof+j),fmt="(a,i1)")   "background_",j
+            write(unit=vs%nampar(nglob_tof+j),fmt="(a,i1)")   "background_",j
          end do
       else
          do j=1,9
-            write(unit=vs%nampar(ngl_tof+j),fmt="(a,i1)")   "background_",j
+            write(unit=vs%nampar(nglob_tof+j),fmt="(a,i1)")   "background_",j
          end do
          do j=10,min(n_ba,99)
-            write(unit=vs%nampar(ngl_tof+j),fmt="(a,i2)")   "background_",j
+            write(unit=vs%nampar(nglob_tof+j),fmt="(a,i2)")   "background_",j
          end do
          if(n_ba >= 100) then
             do j=100,n_ba
-               write(unit=vs%nampar(ngl_tof+j),fmt="(a,i3)")   "background_",j
+               write(unit=vs%nampar(nglob_tof+j),fmt="(a,i3)")   "background_",j
             end do
          end if
       end if
 
-      j=ngl_tof+n_ba+1
+      j=nglob_tof+n_ba+1
       if (npeak <= 9) then
          do i=1,npeak
             write(unit=vs%nampar(j),  fmt="(a,i1)")   "TOF___Pos_",i
@@ -500,7 +526,7 @@ Module  TOF_Diffraction
             write(unit=vs%nampar(j+3),fmt="(a,i1)")   "Shf_Alpha_",i
             write(unit=vs%nampar(j+4),fmt="(a,i1)")   "Shf__Beta_",i
             write(unit=vs%nampar(j+5),fmt="(a,i1)")   "Shf___Eta_",i
-            j=j+ngl_tof
+            j=j+nshp_tof
          end do
       else
          do i=1,9
@@ -510,7 +536,7 @@ Module  TOF_Diffraction
             write(unit=vs%nampar(j+3),fmt="(a,i1)")   "Shf_Alpha_",i
             write(unit=vs%nampar(j+4),fmt="(a,i1)")   "Shf__Beta_",i
             write(unit=vs%nampar(j+5),fmt="(a,i1)")   "Shf___Eta_",i
-            j=j+ngl_tof
+            j=j+nshp_tof
          end do
 
          do i=10,min(99,npeak)
@@ -520,7 +546,7 @@ Module  TOF_Diffraction
             write(unit=vs%nampar(j+3),fmt="(a,i2)")   "Shf_Alpha_",i
             write(unit=vs%nampar(j+4),fmt="(a,i2)")   "Shf__Beta_",i
             write(unit=vs%nampar(j+5),fmt="(a,i2)")   "Shf___Eta_",i
-            j=j+ngl_tof
+            j=j+nshp_tof
          end do
          if(npeak >= 100) then
            do i=100,npeak
@@ -530,7 +556,7 @@ Module  TOF_Diffraction
               write(unit=vs%nampar(j+3),fmt="(a,i3)")   "Shf_Alpha_",i
               write(unit=vs%nampar(j+4),fmt="(a,i3)")   "Shf__Beta_",i
               write(unit=vs%nampar(j+5),fmt="(a,i3)")   "Shf___Eta_",i
-              j=j+ngl_tof
+              j=j+nshp_tof
            end do
          end if
       end if
@@ -556,20 +582,20 @@ Module  TOF_Diffraction
       real, dimension(Max_Free_Par) :: p
       real, dimension(Max_Free_Par) :: dval
       integer                       :: ncount,j,npea,l,ib,ib1,ib2,i1,i2
-      real                          :: profil, tang, bac_ctr, alfa, beta, dsp2, dt, omega, gamma, eta,&
-                                       w,dsp
+      real                          :: profil, tang, bac_ctr, alfa, beta, dt, omega, gamma, eta,&
+                                       w,dsp, dsp2, dsp4
       type(deriv_TOF_type)          :: deriv
       real, parameter               :: sqrt_8ln2=2.3548200450309493820231386529194
 
       ! FITS TO Jorgensen functions: convolution of gaussian and back-to-back exponentials
       ! P are parameters. YCALC is the value returned to the main program
       ! IF DER is present the function calculates the analytical derivatives
-      ! P(1) to P(5) are global parameters: Global-alpha, Global-beta, Global-Sig-2,
-      ! Global-Sig-1 and Global-Sig-0   (ngl=5)
-      ! P(6=ngl_tof+1) to P(ngl_tof+n_ba) are background parameters
-      ! Jstart= ngl_tof+ n_ba +1
+      ! P(1) to P(14) are global parameters: Global-alpha0,1,2,3, Global-beta0,1,2,3 Global-Sig-2,
+      ! Global-Sig-1, Global-Sig-0, global-Sig-Q, global-Eta0,1,2   (nglob_tof=15)
+      ! P(15=nglob_tof+1) to P(nglob_tof+n_ba) are background parameters
+      ! Jstart= nglob_tof+ n_ba +1
       ! P(jstart),P(jstar+1),P(jstar+2),P(jstar+3),P(jstar+4)... : PeakPosition, Intensity,
-      !  Shft-sigma, Shft-alpha, Shft-beta, PeakPosition, ....
+      !  Shft-sigma, Shft-alpha, Shft-beta, Shft-eta, PeakPosition, ....
       ! Background is calculated by linear interpolation of low and high background
       ! To avoid repetitive calculations, the values that cannot vary are stored
       ! in intermediate arrays in the first call
@@ -577,7 +603,7 @@ Module  TOF_Diffraction
 
       IF (i == 1) then
          lorcomp=.false.
-         if (abs(vs%pv(6)) > 0.00001 .or. vs%code(6) == 1) lorcomp=.true.
+         if (any(abs(vs%pv(13:) ) > 0.00001)) lorcomp=.true.
          p(:)=0.0
          ncount=0
          DO j=1,vs%np
@@ -590,24 +616,58 @@ Module  TOF_Diffraction
          END DO
 
          npea=0
-         jstart=ngl_tof+n_ba+1
-         DO j=jstart,vs%np,ngl_tof
+         jstart=nglob_tof+n_ba+1
+         DO j=jstart,vs%np,nshp_tof
             npea=npea+1
             Intens(npea)=p(j+1)
             if (abs(p(j+5)) > 0.00001 .or. vs%code(j+5) == 1 ) lorcomp=.true.
             dsp=p(j)/d2tof
             dsp2=dsp*dsp
-            sigma0(npea) = (p(3)*dsp2 + p(4))*dsp2 + p(5)  !Sigma calculated for all peaks
+            dsp4=dsp2*dsp2
+            alpha0(npea) = p(1)+ p(2)/dsp2 + p(3)/dsp4 +  p(4)/sqrt(dsp)   !Alpha0 calculated for all peaks
+            beta0(npea)  = p(5)+ p(6)/dsp2 + p(7)/dsp4 +  p(8)/sqrt(dsp)   !Beta0 calculated for all peaks
+            sigma0(npea) = p(9)*dsp4 + p(10)*dsp2 + p(11) + p(12)/dsp2     !Sigma0 calculated for all peaks
+            eta0(npea)   = p(13) + p(14)*dsp  + p(15)*dsp2                 !Eta0 calculated for all peaks
 
             ! Derivatives
             if (present(der)) then
                der_sig2(npea)=0.0
                der_sig1(npea)=0.0
                der_sig0(npea)=0.0
+               der_sigQ(npea)=0.0
                if (sigma0(npea) > 0.0001) then
-                  der_sig2(npea)=dsp2*dsp2     !3
-                  der_sig1(npea)=dsp2          !4
-                  der_sig0(npea)=1.0           !5
+                  der_sig2(npea)=dsp2*dsp2     !9
+                  der_sig1(npea)=dsp2          !10
+                  der_sig0(npea)=1.0           !11
+                  der_sigQ(npea)=1.0/dsp2      !12
+               end if
+               der_alf0(npea)=0.0
+               der_alf1(npea)=0.0
+               der_alf2(npea)=0.0
+               der_alf3(npea)=0.0
+               if (alpha0(npea) > 0.0001) then
+                  der_alf0(npea)=1.0
+                  der_alf1(npea)=1.0/dsp2
+                  der_alf2(npea)=1.0/dsp4
+                  der_alf3(npea)=1.0/sqrt(dsp)
+               end if
+               der_bet0(npea)=0.0
+               der_bet1(npea)=0.0
+               der_bet2(npea)=0.0
+               der_bet3(npea)=0.0
+               if (beta0(npea) > 0.0001) then
+                  der_bet0(npea)=1.0
+                  der_bet1(npea)=1.0/dsp2
+                  der_bet2(npea)=1.0/dsp4
+                  der_bet3(npea)=1.0/sqrt(dsp)
+               end if
+               der_eta0(npea)=0.0
+               der_eta1(npea)=0.0
+               der_eta2(npea)=0.0
+               if (eta0(npea) > 0.0001) then
+                  der_eta0(npea)=1.0
+                  der_eta1(npea)=dsp2
+                  der_eta2(npea)=dsp2
                end if
             end if
          END DO
@@ -620,13 +680,13 @@ Module  TOF_Diffraction
       ! Calculation of the background
       i1=1
       i2=n_ba
-      ib1=ngl_tof+1
+      ib1=nglob_tof+1
       ib2=ib1+1
       do ib=1,n_ba-1
          if (tof >= BackGroundPoint(ib)%x .and. tof <= BackGroundPoint(ib+1)%x) then
             i1=ib
             i2=ib+1
-            ib1=ngl_tof+i1
+            ib1=nglob_tof+i1
             ib2=ib1+1
             exit
          end if
@@ -635,31 +695,44 @@ Module  TOF_Diffraction
       bac_ctr=p(ib1)+(p(ib2)-p(ib1))*tang     !background calculated
 
       l=0
-      DO j=jstart,vs%np,ngl_tof
+      DO j=jstart,vs%np,nshp_tof
          l=l+1
          dt=tof-p(j)
          gamma= sqrt_8ln2*sqrt(abs(sigma0(l)+p(j+2)))
-         alfa = p(1)+p(j+3)
-         beta = p(2)+p(j+4)
+         alfa = alpha0(l)+p(j+3)
+         beta = beta0(l)+p(j+4)
          if ( dt <= 0.0) then
              w=1.38629436112/alfa
          else
              w=1.38629436112/beta
          end if
          if (abs(dt)> 15.0*(gamma+w)) cycle
-         eta  = p(6)+p(j+5)
+         eta  = eta0(l)+p(j+5)
          ! Calculation of the derivatives
          IF (present(der)) then
             call tof_Jorgensen_VonDreele(dt,alfa,beta,gamma,eta,omega,deriv)
 
-            dval(1)  = dval(1)  + Intens(l)*deriv%alfa             !DOmega/Dalfa
-            dval(2)  = dval(2)  + Intens(l)*deriv%beta             !DOmega/Dbeta
-            dval(3)  = dval(3)  + Intens(l)*deriv%sigma*der_sig2(l)!DOmega/Dsigma * Dsigma/DSig-2
-            dval(4)  = dval(4)  + Intens(l)*deriv%sigma*der_sig1(l)!DOmega/Dsigma * Dsigma/DSig-1
-            dval(5)  = dval(5)  + Intens(l)*deriv%sigma*der_sig0(l)!DOmega/Dsigma * Dsigma/DSig-0
-            dval(6)  = dval(6)  + Intens(l)*deriv%eta              !DOmega/Deta
+            dval(1)  = dval(1)  + Intens(l)*deriv%alfa*der_alf0(l)      !DOmega/Dalfa  * Dalfa/Dalf0
+            dval(2)  = dval(2)  + Intens(l)*deriv%alfa*der_alf1(l)      !DOmega/Dalfa  * Dalfa/Dalf1
+            dval(3)  = dval(3)  + Intens(l)*deriv%alfa*der_alf2(l)      !DOmega/Dalfa  * Dalfa/Dalf2
+            dval(4)  = dval(4)  + Intens(l)*deriv%alfa*der_alf3(l)      !DOmega/Dalfa  * Dalfa/Dalf3
+
+            dval(5)  = dval(5)  + Intens(l)*deriv%beta*der_bet0(l)      !DOmega/Dbeta * Dbeta/Dbet0
+            dval(6)  = dval(6)  + Intens(l)*deriv%beta*der_bet1(l)      !DOmega/Dbeta * Dbeta/Dbet1
+            dval(7)  = dval(7)  + Intens(l)*deriv%beta*der_bet2(l)      !DOmega/Dbeta * Dbeta/Dbet2
+            dval(8)  = dval(8)  + Intens(l)*deriv%beta*der_bet3(l)      !DOmega/Dbeta * Dbeta/Dbet3
+
+            dval(9)   = dval(9)   + Intens(l)*deriv%sigma*der_sig2(l)   !DOmega/Dsigma * Dsigma/DSig-2
+            dval(10)  = dval(10)  + Intens(l)*deriv%sigma*der_sig1(l)   !DOmega/Dsigma * Dsigma/DSig-1
+            dval(11)  = dval(11)  + Intens(l)*deriv%sigma*der_sig0(l)   !DOmega/Dsigma * Dsigma/DSig-0
+            dval(12)  = dval(12)  + Intens(l)*deriv%sigma*der_sigQ(l)   !DOmega/Dsigma * Dsigma/DSig-Q
+
+            dval(13)  = dval(13)  + Intens(l)*deriv%eta*der_eta0(l)    !DOmega/Deta * Deta/Deta0
+            dval(14)  = dval(14)  + Intens(l)*deriv%eta*der_eta1(l)    !DOmega/Deta * Deta/Deta1
+            dval(15)  = dval(15)  + Intens(l)*deriv%eta*der_eta2(l)    !DOmega/Deta * Deta/Deta2
+
             dval(j)  = dval(j)  - Intens(l)*deriv%dt               !DOmega/Ddel * Ddel/Dp(j) <- Bragg Pos.
-            dval(j+1)= dval(j+1)+ omega                         !Dprofil/Dri  <- Integr. Intensity
+            dval(j+1)= dval(j+1)+ omega                            !Dprofil/Dri  <- Integr. Intensity
             dval(j+2)= dval(j+2)+ Intens(l)*deriv%sigma            !DOmega/DSh-sigma
             dval(j+3)= dval(j+3)+ Intens(l)*deriv%alfa             !DOmega/DSh-alfa
             dval(j+4)= dval(j+4)+ Intens(l)*deriv%beta             !DOmega/DSh-beta

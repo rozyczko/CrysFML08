@@ -14,7 +14,7 @@
    integer,public, parameter         :: npeaks=(Max_Free_par-(nbac+ngl))/4
    integer,public, parameter         :: npe_sub=15
    real,public,    parameter         :: rad=57.29577951
-   real,private,   dimension(npeaks) :: ri1,ri2,dt2,t2
+   real,private,   dimension(npeaks) :: Intens,ri2,dt2,t2
    real,public ,   dimension(npeaks) :: fwhm1,fwhm2,eta1,eta2
    real,public ,   dimension(npeaks) :: der_u,der_v,der_w,der_z,der_x
    real,public ,   dimension(npeaks) :: der_u2,der_v2,der_w2,der_z2,der_x2
@@ -212,7 +212,7 @@
 
          DO j=jstart,vsa%np,4
             npea=npea+1
-            ri1(npea)=Vsa%Pv(j+1)*ratio
+            Intens(npea)=Vsa%Pv(j+1)*ratio
             tet=Vsa%Pv(j)/2.0/rad
             tn=tan(tet)
             eta1(npea)=Vsa%Pv(8)+Vsa%Pv(9)*Vsa%Pv(j)+Vsa%Pv(j+3)
@@ -241,7 +241,7 @@
                tn2=tan(tet2)
                eta2(npea)=Vsa%Pv(8)+Vsa%Pv(9)*t2(npea)+Vsa%Pv(j+3)
                dt2(npea)=rla*COS(tet)/SQRT(1.0-(rla*SIN(tet))**2)
-               ri2(npea)=ri1(npea)*Vsa%Pv(1)
+               ri2(npea)=Intens(npea)*Vsa%Pv(1)
                Hg=sqrt((Vsa%Pv(4)*tn2+Vsa%Pv(5))*tn2+Vsa%Pv(6))
                fwhm2(npea)=Hg+Vsa%Pv(7)/cos(tet2)+Vsa%Pv(j+2)      !FWHM calculated for all peaks
 
@@ -305,14 +305,14 @@
         IF (abs(v1) < 80.0) then
            call prof_val( eta,gamma1,Vsa%pv(2),Vsa%pv(3),tth ,Vsa%pv(j), &
                           dprdt, dprdg,dprde,dprds,dprdd,profil,use_asymm,use_hps)
-           ss1=ri1(l)*profil
+           ss1=Intens(l)*profil
            if (present(CalDer)) then
-              Vsa%dpv(j)=ri1(l)*dprdt           !Derivative w.r.t. 2theta = p(j)
+              Vsa%dpv(j)=Intens(l)*dprdt           !Derivative w.r.t. 2theta = p(j)
               Vsa%dpv(j+1)=ss1/Vsa%pv(j+1)      !Derivative w.r.t. Integrated intensity
-              Vsa%dpv(j+2)=ri1(l)*dprdg         !Derivative w.r.t. FWHM
-              Vsa%dpv(j+3)=ri1(l)*dprde         !Derivative w.r.t. Eta
-              asder1=asder1+ri1(l)*dprds        !Derivative w.r.t. S_L
-              asder2=asder2+ri1(l)*dprdd        !Derivative w.r.t. S_D
+              Vsa%dpv(j+2)=Intens(l)*dprdg         !Derivative w.r.t. FWHM
+              Vsa%dpv(j+3)=Intens(l)*dprde         !Derivative w.r.t. Eta
+              asder1=asder1+Intens(l)*dprds        !Derivative w.r.t. S_L
+              asder2=asder2+Intens(l)*dprdd        !Derivative w.r.t. S_D
               etader=etader+Vsa%dpv(j+3)
               xder=xder+Vsa%dpv(j+3)*der_x(l)
               uder=uder+Vsa%dpv(j+2)*der_u(l)
@@ -421,7 +421,7 @@
          If(abs(v1) < 25.0) then
            call prof_val( eta,gamma1,Vsa%Pv(2),Vsa%Pv(3),tth ,Vsa%Pv(j),      &
                         dprdt, dprdg,dprde,dprds,dprdd,profil,use_asymm,use_hps)
-           ss1=ri1(l)*profil
+           ss1=Intens(l)*profil
          End If
 
         ! ligne suivante corrigee le 05 juin 2002

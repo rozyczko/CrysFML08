@@ -236,7 +236,7 @@
       real(kind=cp),    dimension(np_SAN) :: high    !High-limit value of parameters
       real(kind=cp),    dimension(np_SAN) :: config  !Vector State characterizing the current best configuration
       real(kind=cp)                       :: cost    !Cost of the best configuration
-      character(len=15),dimension(np_SAN) :: nampar !name of parameters of the model
+      character(len=15),dimension(np_SAN) :: nampar  !name of parameters of the model
     End Type State_Vector_Type
 
     Interface

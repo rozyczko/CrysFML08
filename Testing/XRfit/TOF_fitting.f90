@@ -23,14 +23,14 @@
        !  Calculation of the background
        i1=1
        i2=n_ba         ! nb de points de bruit de fond
-       ib1=ngl_tof+1   ! nb de parametres globaux
+       ib1=nglob_tof+1 ! nb de parametres globaux
        ib2=ib1+1       ! nb de parametres globaux + 1
 
         do ib=1,n_ba-1
           if(tth >= BackGroundPoint(ib)%x .and. tth <= BackGroundPoint(ib+1)%x) then
             i1=ib
             i2=ib+1
-            ib1=ngl_tof+i1
+            ib1=nglob_tof+i1
             ib2=ib1+1
             exit
           end if
@@ -81,24 +81,33 @@
 
       write(unit=8,fmt="(f14.6,a)") d2tof , "  <=  d to T.O.F. coefficient"
       write(unit=8,fmt="(a)") "!  Global Profile Parameters:"
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(1),vs%code(1), " <= Global-Alpha &  Flag "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2), " <= Global-Beta  &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3), " <= Sig-2        &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(4),vs%code(4), " <= Sig-1        &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5), " <= Sig-0        &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6), " <= Eta          &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(1),vs%code(1),   " <= Global-alpha0  &  Flag "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2),   " <= Global-alpha1  &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3),   " <= Global-alpha2  &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(4),vs%code(4),   " <= Global-alpha3  &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5),   " <= Global-beta0   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6),   " <= Global-beta1   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(7),vs%code(7),   " <= Global-beta2   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(8),vs%code(8),   " <= Global-beta3   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(9),vs%code(9),   " <= Global-Sig-2   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(10),vs%code(10), " <= Global-Sig-1   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(11),vs%code(11), " <= Global-Sig-0   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(12),vs%code(12), " <= Global-Sig-Q   &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(13),vs%code(13), " <= Global-eta0    &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(14),vs%code(14), " <= Global-eta1    &       "
+      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(15),vs%code(15), " <= Global-eta2    &       "
       write(unit=8,fmt="(a)") "!  Background Parameters:"
       write(unit=8,fmt="(a)") "!       TOF        Background   Flag "
       do j=1,n_ba   !write background paramers
-       write(unit=8,fmt="(2f14.4,i6)") BackGroundPoint(j)%x, vs%pv(j+ngl_tof), vs%code(j+ngl_tof)
+       write(unit=8,fmt="(2f14.4,i6)") BackGroundPoint(j)%x, vs%pv(j+nglob_tof), vs%code(j+nglob_tof)
       end do
-      l=ngl_tof+n_ba+1
+      l=nglob_tof+n_ba+1
       write(unit=8,fmt="(a)") "!  Reflection Parameters:"
       write(unit=8,fmt="(a)") "!    TOF-Bragg     Intensity   Shift-sigma   Shift-alpha    Shift-beta     Shift-eta     Flags"
       do i=1,npeakx    !write peak parameters
         write(unit=8,fmt="(3f14.4,3f14.6,2x,6i2)") &
              vs%pv(l),vs%pv(l+1),vs%pv(l+2),vs%pv(l+3),vs%pv(l+4),vs%pv(l+5),(vs%code(l+k),k=0,5)
-        l=l+6
+        l=l+nshp_tof
       end do
       write(unit=8,fmt="(a,g14.6)") "!  Chi2 = ",chi2
       close(unit=8)
@@ -129,7 +138,7 @@
         ELSE
           ifinal=npeakx
         END IF
-        j=ngl_tof+n_ba+1
+        j=nglob_tof+n_ba+1
         Do  i=1,ifinal
           tof=xx(i)
           dif=fobs(i)-fcalc(i)+shd
@@ -137,7 +146,7 @@
           write(unit=22,fmt="(f14.4,4f14.2,2f14.4,tr1,2f14.4,4f14.6)")  &
                tof,fobs(i),fcalc(i), dif, backa(tof)-shb,  &
                tofbragg,iposr, vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5)
-          j=j+6
+          j=j+nshp_tof
         End Do
 
         If(npeakx+1 < nob) THEN
@@ -356,7 +365,7 @@
        stop
      end if
 
-     do j=1,ngl_tof         !read global parameters
+     do j=1,nglob_tof         !read global parameters
        call get_texte(1,texte,ok)
        if(ok) then
            read(unit=texte,fmt=*,iostat=ier) vs%pv(j), vs%code(j)
@@ -373,12 +382,12 @@
      do j=1,n_ba        !read background parameters
         call get_texte(1,texte,ok)
         if(ok) then
-           read(unit=texte,fmt=*,iostat=ier) BackGroundPoint(j)%x, vs%pv(j+ngl_tof), vs%code(j+ngl_tof)
+           read(unit=texte,fmt=*,iostat=ier) BackGroundPoint(j)%x, vs%pv(j+nglob_tof), vs%code(j+nglob_tof)
            if(ier /= 0) then
              write(unit=*,fmt="(a,i3)") " => Error at reading text: background point #",j
              stop
            end if
-           BackGroundPoint(j)%y = vs%pv(j+ngl_tof)
+           BackGroundPoint(j)%y = vs%pv(j+nglob_tof)
         else
            write(unit=*,fmt="(a,i3)") " => Error in pik input file at reading background point #",j
            stop
@@ -388,7 +397,7 @@
      if(ain > BackGroundPoint(1)%x )     ain=BackGroundPoint(1)%x
      if(afin < BackGroundPoint(n_ba)%x ) afin=BackGroundPoint(n_ba)%x
 
-     j=ngl_tof+n_ba+1
+     j=nglob_tof+n_ba+1
      npeaks_rf=0
      DO i=1,npeaks       !read peak parameters
       call get_texte(1,texte,ok)
@@ -405,7 +414,7 @@
       write(*,"(a,i3)") " => Line: "//trim(texte)//"   Peak#",i
 
       if(sum(vs%code(j:j+5)) > 0) npeaks_rf=npeaks_rf+1
-      j=j+6
+      j=j+nshp_tof
      END DO
 
      call set_nampar_tof(n_ba,npeaks)
