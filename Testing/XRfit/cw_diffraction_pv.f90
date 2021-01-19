@@ -68,7 +68,7 @@
          chi=chi/real(m-n)
          if(chi <= chiold) then
            c%nfev=c%nfev+1
-           write(unit=*,fmt="(a,i6,a,g12.4)") " => Iteration number: ",c%nfev, "  Chi2=",chi
+           write(unit=*,fmt="(a,i6,a,F14.6)") " => Iteration number: ",c%nfev, "      Chi2=",chi
            chiold=chi
          end if
 
@@ -308,7 +308,7 @@
            ss1=Intens(l)*profil
            if (present(CalDer)) then
               Vsa%dpv(j)=Intens(l)*dprdt           !Derivative w.r.t. 2theta = p(j)
-              Vsa%dpv(j+1)=ss1/Vsa%pv(j+1)      !Derivative w.r.t. Integrated intensity
+              Vsa%dpv(j+1)=ss1/Vsa%pv(j+1)         !Derivative w.r.t. Integrated intensity
               Vsa%dpv(j+2)=Intens(l)*dprdg         !Derivative w.r.t. FWHM
               Vsa%dpv(j+3)=Intens(l)*dprde         !Derivative w.r.t. Eta
               asder1=asder1+Intens(l)*dprds        !Derivative w.r.t. S_L

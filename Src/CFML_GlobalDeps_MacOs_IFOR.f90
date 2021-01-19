@@ -59,6 +59,7 @@ Module CFML_GlobalDeps
    !---- Operating System ----!
    character(len=3), parameter :: OPS_NAME = "MAC"               ! O.S. Name
    character(len=1), parameter :: OPS_SEP = "/"                  ! O.S. directory separator character
+   character(len=2), parameter :: line_term = char(10)           ! O.S. line terminator character
    integer,          parameter :: OPS = 3                        ! O.S. Flag -> 1:Win 2:Lin 3:Mac
 
    !---- Compiler ----!

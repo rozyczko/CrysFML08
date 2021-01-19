@@ -181,7 +181,7 @@
 !!--..         First/second Interface(s) (no derivatives required)
 !!--..         ---------------------------------------------------
 !!--..
-!!--..         Subroutine Levenberg_Marquard_Fit(Model_Functn, m, c, Vs, chi2, infout,residuals)
+!!--..         Subroutine Levenberg_Marquardt_Fit(Model_Functn, m, c, Vs, chi2, infout,residuals)
 !!--..            Integer,                     Intent(In)      :: m        !Number of observations
 !!--..            type(LSQ_conditions_type),   Intent(In Out)  :: c        !Conditions of refinement
 !!--..            type(LSQ_State_Vector_type), Intent(In Out)  :: Vs       !State vector
@@ -194,7 +194,7 @@
 !!--..         The second interface corresponds to the original version in MINPACK
 !!--..         (called lmdif1)
 !!--..
-!!--..         Subroutine Levenberg_Marquard_Fit(Model_Functn, m, n, x, fvec, tol, info, iwa)
+!!--..         Subroutine Levenberg_Marquardt_Fit(Model_Functn, m, n, x, fvec, tol, info, iwa)
 !!--..            Integer,                     Intent(In)      :: m
 !!--..            Integer,                     Intent(In)      :: n
 !!--..            Real (Kind=cp),Dimension(:), Intent(In Out)  :: x
@@ -210,7 +210,7 @@
 !!--..         Third/fourth/fifth Interface(s) (analytical derivatives required)
 !!--..         -----------------------------------------------------------
 !!--..
-!!--..         Subroutine Levenberg_Marquard_Fit(Model_Functn, m, c, Vs, chi2, calder, infout,residuals)
+!!--..         Subroutine Levenberg_Marquardt_Fit(Model_Functn, m, c, Vs, chi2, calder, infout,residuals)
 !!--..            Integer,                     Intent(In)      :: m        !Number of observations
 !!--..            type(LSQ_conditions_type),   Intent(In Out)  :: c        !Conditions of refinement
 !!--..            type(LSQ_State_Vector_type), Intent(In Out)  :: Vs       !State vector
@@ -243,7 +243,7 @@
 !!--..         defined in CFML_Refcodes
 !!--..         This fifth interface is effectively called LM_DERV
 !!--..
-!!--..         Subroutine Levenberg_Marquard_Fit(Model_Functn, m, c, Vect, chi2, calder, infout,residuals)
+!!--..         Subroutine Levenberg_Marquardt_Fit(Model_Functn, m, c, Vect, chi2, calder, infout,residuals)
 !!--..            Integer,                     Intent(In)      :: m        !Number of observations
 !!--..            type(LSQ_conditions_type),   Intent(In Out)  :: c        !Conditions of refinement
 !!--..            real, dimension(:),          Intent(In Out)  :: Vect     !State vector like in CFML_Refcodes V_Vec
@@ -302,7 +302,7 @@
 !!
  Module CFML_Optimization_LSQ
     !---- Use Files ----!
-    Use CFML_GlobalDeps,   only: Cp, Dp, Err_CFML, Clear_Error
+    Use CFML_GlobalDeps,   only: Cp, Dp, Err_CFML, Clear_Error, line_term
     Use CFML_Maths,        only: Inverse_Matrix, Upper_Triangular,SVDcmp
 
 
@@ -364,6 +364,7 @@
     Type, public :: LSQ_Conditions_Type
        logical          :: constr=.false.  ! if true box constraint of percent% are applied to parameters
        logical          :: reached=.false. ! if true convergence was reached in the algorithm
+       logical          :: failed=.false.  ! the algorithm failed because singular matrix
        integer          :: corrmax=50      ! value of correlation in % to output
        integer          :: nfev=0          ! number of function evaluations (output component, useful for assessing LM algorithm)
        integer          :: njev=0          ! number of Jacobian evaluations                 "
@@ -550,7 +551,7 @@
        type(LSQ_State_Vector_type),intent(in)     :: vs
     End Subroutine Info_LSQ_LM_VS
 
-    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,out_obscal)
+    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
        !---- Arguments ----!
        real(kind=cp),              intent(in)     :: chi2
        real(kind=cp),              intent(in)     :: FL
@@ -562,6 +563,7 @@
        integer,                    intent(in)     :: lun
        type(LSQ_conditions_type),  intent(in)     :: c
        type(LSQ_State_Vector_type),intent(in)     :: vs
+       character(len=*),           intent(in)     :: algor
        character(len=*), optional, intent(in)     :: out_obscal
     End Subroutine Info_LSQ_Output
 

@@ -1,4 +1,4 @@
-     Module Input_output_data_mod
+   Module Input_output_data_mod
       use TOF_diffraction
       use CFML_Optimization_LSQ
       use CFML_DiffPatt
@@ -59,17 +59,18 @@
       End Subroutine Get_Texte
 
 !--------------------------------------------------------------------
-      Subroutine output_plot(nob,xx,fobs,sig,fcalc,chi2)
+     Subroutine output_plot(nob,xx,fobs,sig,fcalc,chi2)
       integer, intent(in)              :: nob
       real,    intent(in),dimension(:) :: xx,fobs,fcalc,sig
       real,    intent(in)              :: chi2
       ! Local variables
       integer                          :: i,j,k,l,ico,ifinal
-      real                             :: shb,shd,dif,yma,ymi,tof,tofbragg
+      real                             :: shb,shd,dif,yma,ymi,tof,tofbragg,alpha,beta,gamm,sigma,&
+                                          hg,hl,dsp,dsp2,dsp4,fwhm,eta
       real                             :: iposr
 
  !    Rewriting the input file
-      open(Unit=8,file=trim(filecode)//".new",status="replace")
+      open(Unit=8,file=trim(filecode)//".new",status="replace",action="write")
       ico=0
       if(c%constr) ico=1
       write(unit=8,fmt="(a)")   trim(title)
@@ -105,8 +106,8 @@
       write(unit=8,fmt="(a)") "!  Reflection Parameters:"
       write(unit=8,fmt="(a)") "!    TOF-Bragg     Intensity   Shift-sigma   Shift-alpha    Shift-beta     Shift-eta     Flags"
       do i=1,npeakx    !write peak parameters
-        write(unit=8,fmt="(3f14.4,3f14.6,2x,6i2)") &
-             vs%pv(l),vs%pv(l+1),vs%pv(l+2),vs%pv(l+3),vs%pv(l+4),vs%pv(l+5),(vs%code(l+k),k=0,5)
+        write(unit=8,fmt="(3f14.4,3f14.6,2x,6i2,i8)") &
+             vs%pv(l),vs%pv(l+1),vs%pv(l+2),vs%pv(l+3),vs%pv(l+4),vs%pv(l+5),(vs%code(l+k),k=0,5),i
         l=l+nshp_tof
       end do
       write(unit=8,fmt="(a,g14.6)") "!  Chi2 = ",chi2
@@ -123,7 +124,7 @@
         shb   = 0.0                         ! idem wpl_pfit.f90
         shd   = ymi - 0.2*(yma-ymi)
         iposr = ymi - 0.1*(yma-ymi)
-       open(unit=22,file=trim(filecode)//".xrf",status="replace")
+       open(unit=22,file=trim(filecode)//".xrf",status="replace",action="write")
         write(unit=22,fmt="(2A)") " ",TRIM(title)
         write(unit=22,fmt="(2a)")      " => Data file name: ",TRIM(filedat)
         write(unit=22,fmt="(a,I4)")    " => Instrm        : ", itype
@@ -157,20 +158,32 @@
                 backa(tof)-shb
           End Do
         End If
-        !write(unit=22,fmt='(a)') 'XYDATA'
-        !write(unit=22,fmt='(a)') 'TITLE: '//trim(Title)
-        !write(unit=22,fmt='(a)') '! File saved from TOT-FIT'
-        !write(unit=22,fmt='(a)') '! File name: '//trim(filecode)
-        !write(unit=22,fmt='(a)') '! Scattering variable: TOF'
-        !write(unit=22,fmt='(a)') '! '//" Time-of-flight"//'     '//'Intensity'
-        !do  i=1,nob
-        !  write(unit=22,fmt="(4f14.4)") xx(i),fobs(i),sig(i), fcalc(i)
-        !end do
+      close (unit=22)
+      open(unit=22,file=trim(filecode)//".irf",status="replace",action="write")
+
+      write(unit=22,fmt="(a)") "!  d-spacing       Sigma^2         Gamma         Alpha          Beta        Shift"
+      write(unit=22,fmt="(a,i6)") "LIST_SIG_GAM_ALF_BET_SHIFT",npeakx
+      l=nglob_tof+n_ba+1
+      do i=1,npeakx    !write peak parameters
+        dsp=vs%pv(l)/d2tof
+        dsp2=dsp*dsp
+        dsp4=dsp2*dsp2
+        alpha=vs%pv(1) + vs%pv(2)/dsp  + vs%pv(3)/dsp2  + vs%pv(4)/sqrt(dsp) + vs%pv(l+3)
+        beta= vs%pv(5) + vs%pv(6)/dsp  + vs%pv(7)/dsp2  + vs%pv(8)/dsp4      + vs%pv(l+4)
+        sigma=vs%pv(9)*dsp4 + vs%pv(10)*dsp2 + vs%pv(11) + vs%pv(12)/dsp2    + vs%pv(l+2)
+        eta=vs%pv(13) + vs%pv(14)*dsp + vs%pv(15)*dsp2 +  vs%pv(l+5)
+        !Calculate gamma from sigma and eta using TCH relations
+        FWHM= sqrt_8ln2*sqrt(abs(sigma))
+        call get_HG_HL(fwhm,eta,hg,gamm)
+        sigma=(hg/sqrt_8ln2)**2
+        write(unit=22,fmt="(6f16.7,i8)") dsp, sigma, gamm, alpha, beta, 0.0,i
+        l=l+nshp_tof
+      end do
       close (unit=22)
       return
-      End subroutine output_plot
+     End subroutine output_plot
 
-      Subroutine Input_Data(filename,iform,dif)
+     Subroutine Input_Data(filename,iform,dif)
         character(len=*),    intent(in) :: filename
         Type(DiffPat_E_Type),intent(out):: dif
         integer,             intent(in) :: iform
@@ -210,9 +223,9 @@
           end if
          stop
         end if
-      End Subroutine Input_Data
+     End Subroutine Input_Data
 
-     End Module Input_output_data_mod
+   End Module Input_output_data_mod
 !----------------------------------------------------------------------------------
 !------------------------------------------------------------------
 !     Program to fit TOF powder patterns
@@ -423,7 +436,7 @@
 
       Call Input_Data(filedat,itype,df)
       call cpu_time(timi)
-      Call Tof_Profile_Fitting(Filedat, ain,afin,df, Ifail)
+      Call Tof_Profile_Fitting(Filecode, ain,afin,df, Ifail)
       call cpu_time(timf)
       call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,d%sw,7,c,vs)
       close(unit=1)

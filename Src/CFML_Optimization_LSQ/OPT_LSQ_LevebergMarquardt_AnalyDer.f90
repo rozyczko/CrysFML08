@@ -1,4 +1,4 @@
- Submodule (CFML_Optimization_LSQ) OPT_LSQ_LevenbergMarquard_AnalyDer
+ Submodule (CFML_Optimization_LSQ) OPT_LSQ_LevenbergMarquardt_AnalyDer
   implicit none
    contains
 
@@ -66,12 +66,14 @@
                                                iflag,info
        Integer,        dimension(c%npvar)   :: ipvt
        Integer, dimension(c%npvar,c%npvar)  :: p,id
-       Real (Kind=cp), dimension(c%npvar)   :: x, sx,xo
+       Real (Kind=cp), dimension(c%npvar)   :: x, sx,xo,Sig
        Real (Kind=cp), dimension(vs%np)     :: vp
        Real (Kind=cp), dimension(m)         :: fvec  !Residuals
        Real (Kind=cp), dimension(m,c%npvar) :: fjac
-       Real (Kind=cp)                       :: ftol, gtol, xtol,iChi2,deni,denj
+       Real (Kind=cp)                       :: ftol, gtol, xtol,iChi2,deni,denj, Tikhonov
        Real (Kind=cp), Parameter            :: factor = 100.0_CP, zero = 0.0_CP
+       Real (Kind=cp), dimension(c%npvar,c%npvar) :: U,Vm,Sigm
+       character(len=len(infout))           :: text
 
        info = 0
        n=c%npvar
@@ -144,6 +146,13 @@
        if (chi2 < 1.0e15) then
           chi2=chi2*chi2/max(1.0_cp,real(m-n,kind=cp))
        end if
+       if(info < 0) then
+           c%failed=.true.
+           c%reached=.false.
+           write(unit=infout,fmt="(a,g12.4,a)") "Derivatives produce strong divergence! The parameters for the best Chi2 = ",chi2," are maintained"// &
+           line_term//" => Standard deviations cannot be calculated."
+           return
+       end if
        sx=zero
 
        !Extract the curvature matrix side of equation below from fjac
@@ -176,6 +185,7 @@
           correl(j,j)=1.00001
        end do
        correl(1:n,1:n)=Inverse_Matrix(correl(1:n,1:n))
+       text=" "
        If (Err_CFML%Ierr == 0) then
           Do i=1,n
              deni = curv_mat(i,i)
@@ -185,13 +195,77 @@
        Else
           Do i=1,n
              if (correl(i,i) <= zero) then
-                info=0
-                write(unit=infout,fmt="(a,i3)") "Final Singular Matrix!, problem with parameter #",i
+                write(unit=text,fmt="(a,i4,a)") "Final Singular Matrix!, problem with parameter #",i,line_term//" => Standard deviations cannot be calculated..."
                 exit
              end if
           End Do
-          Err_CFML%Ierr = 1
-          Err_CFML%Msg=" Singular Matrix at the end of LM_Der for calculating std deviations ..."
+          c%failed=.true.
+       End if
+       !If the final curvature matrix is singular perform a Tikhonov
+       !regularization (This increases the error bars!)
+       Tikhonov=0.0
+       if(Err_CFML%Ierr /= 0) then
+         j=0
+         do
+           !first do a SVD decomposition
+           U=curv_mat(1:n,1:n)
+           call SVDcmp(U,Sig,Vm)
+           Tikhonov=maxval(Sig)*1.0e-6
+           Sig=Sig+max(Tikhonov,0.0001)
+           Sigm=0.0
+           do i=1,n
+              Sigm(i,i)=Sig(i)
+           end do
+           curv_mat(1:n,1:n)=matmul(U,matmul(Sigm,transpose(Vm)))
+           correl(1:n,1:n) = Inverse_Matrix(curv_mat(1:n,1:n))
+           if(Err_CFML%Ierr == 0) then
+            c%failed=.false.
+            exit
+           end if
+           j=j+1
+           if(j > 3) exit
+         end do
+         if(j <= 3) then
+           Err_CFML%Ierr=0
+           c%failed=.false.
+           Err_CFML%Msg="Regularization (SVD,Tikhonov) of the final Curvature Matrix OK! ... bigger Standard Deviations"
+         else
+           Err_CFML%Ierr = 1
+           Tikhonov=99999.0
+           Err_CFML%Msg=trim(Err_CFML%Msg)//line_term//" => Regularization (SVD,Tikhonov) of the final Curvature Matrix unsuccessfull (no standard deviations) ..."
+           c%failed=.true.
+         end if
+       end if
+
+       If (Err_CFML%Ierr == 0) then
+          !Here correl is the inverse of the curvature matrix (Variance-co-variance matrix)
+          Do i=1,n
+             sx(i) = sqrt(abs(correl(i,i)))
+          End Do
+          !Now correl is the true correlation matrix
+          forall (i=1:n,j=1:n)
+              correl(i,j)=correl(i,j)/sqrt(correl(i,i)*correl(j,j))
+          end forall
+       Else
+          !Here correl is the "pseudo"-inverse of the curvature-matrix
+          Do i=1,n
+            deni = curv_mat(i,i)
+             if( deni <= zero) then
+               sx(i) = 99999.9
+             else
+               sx(i) = sqrt(abs(correl(i,i)/deni))         !sqrt(abs(correl(i,i)*Chi2))
+             end if
+          End Do
+          !Pseudo-correlation matrix
+          do j=1,n
+             denj=correl(j,j)
+             if( denj <= zero) denj=1.0
+             do i=1,n
+                deni=correl(i,i)
+                if( deni <= zero) deni=1.0
+                correl(j,i)=correl(j,i)/sqrt(denj*deni)
+             end do
+          end do
        End if
 
        !Update the State vector Vs
@@ -223,24 +297,24 @@
              c%reached=.false.
           Case(1)
              c%reached=.true.
-             write(unit=infout,fmt="(a,g12.5,a,e12.5)") "Initial Chi2:", ichi2, &
-               "     Convergence reached: The relative error in the sum of squares is at most ",c%tol
+             write(unit=infout,fmt="(a,g12.5,a,e12.5,a)") "Tikhonov regularization:", Tikhonov, &
+               line_term//" => Convergence reached: The relative error in the sum of squares is at most ",c%tol, line_term//trim(text)
 
           Case(2)
              c%reached=.true.
-             write(unit=infout,fmt="(a,g12.5,a,e12.5)") "Initial Chi2:", ichi2,&
-                "     Convergence reached: The relative error between x and the solution is at most ",c%tol
+             write(unit=infout,fmt="(a,g12.5,a,e12.5,a)") "Tikhonov regularization:", Tikhonov,&
+               line_term//" => Convergence reached: The relative error between x and the solution is at most ",c%tol,line_term//trim(text)
 
           Case(3)
             c%reached=.true.
-             write(unit=infout,fmt="(a,g12.5,a,e12.5)") "Initial Chi2:", ichi2,&
-             "     Convergence reached: The relative error "// &
-             "in the sum of squares and the difference between x and the solution are both at most ",c%tol
+             write(unit=infout,fmt="(a,g12.5,a,e12.5,a)") "Tikhonov regularization:", Tikhonov,&
+             line_term//" =>  Convergence reached: The relative error "// &
+             "in the sum of squares and the difference between x and the solution are both at most ",c%tol,line_term//trim(text)
 
           Case(4,8)
              c%reached=.true.
-             write(unit=infout,fmt="(a,g12.5,a)") "Initial Chi2:", ichi2, &
-              "     Convergence reached: Residuals vector is orthogonal to the columns of the Jacobian to machine precision"
+             write(unit=infout,fmt="(a,g12.5,a)") "Tikhonov regularization:", Tikhonov, &
+              line_term//" => Convergence reached: Residuals vector is orthogonal to the columns of the Jacobian to machine precision"
 
           Case(5)
              c%reached=.false.
@@ -401,6 +475,7 @@
         if(Err_CFML%Ierr /= 0) then
           Err_CFML%Ierr = 1
           Err_CFML%Msg=trim(Err_CFML%Msg)//" => Regularization (SVD,Tikhonov) of the final Curvature Matrix unsuccessfull (no standard deviations) ..."
+          c%failed=.true.
           j=0
           do
             !first do a SVD decomposition
@@ -419,6 +494,7 @@
             if(j > 3) exit
           end do
           if(j <= 3) then
+            c%failed=.false.
             Err_CFML%Msg="Regularization (SVD,Tikhonov) of the final Curvature Matrix OK! ... bigger Standard Deviations"
           end if
         end if
@@ -774,7 +850,6 @@
             Call fcn(m, n, x, fvec, fjac, iflag)
             njev = njev + 1
             If (iflag < 0) Exit Do_Out
-
             !        If Requested, call fcn to enable printing of iterates.
             If (nprint > 0) Then
                iflag = 0
@@ -783,6 +858,7 @@
             End If
 
             !        Compute the qr factorization of the jacobian.
+
             Call qrfac(m, n, fjac, .TRUE., ipvt, wa1, wa2)
 
             !        On the first iteration and if mode is 1, scale according
@@ -885,7 +961,8 @@
 
                !           Compute the ratio of the actual to the predicted reduction.
                ratio = zero
-               If (prered /= zero) ratio = actred/prered
+               !If (prered /= zero) ratio = actred/prered
+               If (abs(prered - zero) >= epsmch) ratio = actred/prered
 
                !           Update the step bound.
                If (ratio <= p25) Then
@@ -1113,4 +1190,4 @@
 
     End Subroutine lmder1
 
- End Submodule OPT_LSQ_LevenbergMarquard_AnalyDer
+ End Submodule OPT_LSQ_LevenbergMarquardt_AnalyDer

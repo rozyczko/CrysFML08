@@ -205,7 +205,7 @@
     Implicit None
 
     Integer               :: ll,ier,no
-    Character (Len=256)   :: texte
+    Character (Len=512)   :: texte
     Logical               :: esta, numeric
     Integer               :: i,j,k,npeak,npts,L,ico
 
@@ -413,6 +413,7 @@
       write(unit=*,fmt="(a,2f14.4)") " => Treating data in range: ",ain,afin
       write(unit=*,fmt="(a,2f14.4)") " => Background in range: ",bac_pos(1),bac_pos(n_ba)
       call Init_Prof_Val()
+
       if(jobtyp > 2) then
          do i=1,d%nobs
            call Sum_PV_Peaks(i,d%x(i),d%yc(i),Vs)
@@ -429,8 +430,9 @@
             call Levenberg_Marquardt_Fit(powder_patt_der, d%nobs, c, Vs, chi2, .true., texte)
          end if
          call cpu_time(timf)
-          write(unit=*,fmt="(a)") " => "//texte(1:26)
-          write(unit=*,fmt="(a)") " => "//trim(texte(31:))
+          write(unit=*,fmt="(a)") " => "//texte(1:41)
+          write(unit=*,fmt="(a)") " => "//texte(41:133)
+          write(unit=*,fmt="(a)") " => "//trim(texte(133:))
           write(unit=*,fmt="(a,f15.5)") " => Final   Chi2:", chi2
           !write(unit=*,fmt=*) " => Function and Jacobian evaluations: ",c%nfev,c%njev
           write(unit=*,fmt="(a,f10.3,a)") " => CPU-time:", timf-timi," seconds"

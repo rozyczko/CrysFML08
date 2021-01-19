@@ -35,7 +35,7 @@
        real(kind=cp),    dimension(:),      intent(in)      :: y     !Observed values
        real(kind=cp),    dimension(:),      intent(in out)  :: w     !weight of observations
        integer,                             intent(in)      :: nobs  !number of observations
-       Type(LSQ_Conditions_type),           intent(in)      :: c     !conditions for refinement
+       Type(LSQ_Conditions_type),           intent(in out)  :: c     !conditions for refinement
        real(kind=cp),dimension(:),          intent(in out)  :: a     !vector of parameter
        real(kind=cp),dimension(:),          intent(in out)  :: sa    !estimated standard deviations
        real(kind=cp),                       intent(in out)  :: fl    !Marquardt LAMBDA value
@@ -93,6 +93,7 @@
              Err_CFML%Ierr = 1
              write(unit=Err_CFML%Msg,fmt="(a,i5,a,a)")  &
                   " => Singular matrix!!, problem with parameter no.:",i," -> ",trim(namfree(i))
+             c%failed=.true.
              ifail=2
              return
           end if
@@ -127,6 +128,7 @@
              end do
              write(unit=Err_CFML%Msg,fmt="(a,i5,a,a)")  &
                   " => Singular matrix!!, problem with parameter no.:",j," -> ",trim(namfree(j))
+             c%failed=.true.
              ifail=2
              return
           end if
@@ -205,7 +207,7 @@
     Subroutine Curfit_v2(Model_Functn, d, c, vs, Fl, Chir, Ifail,nt)
        !---- Arguments ----!
        Type(LSQ_Data_Type),                 intent(in out)  :: d
-       Type(LSQ_Conditions_type),           intent(in)      :: c     !conditions for refinement
+       Type(LSQ_Conditions_type),           intent(in out)  :: c     !conditions for refinement
        Type(LSQ_State_Vector_type),         intent(in out)  :: vs
        real(kind=cp),                       intent(in out)  :: fl    !Marquardt LAMBDA value
        real(kind=cp),                       intent(out)     :: chir
@@ -273,6 +275,7 @@
              write(unit=Err_CFML%Msg,fmt="(a,i5,a,a)")  &
                   " => Singular matrix!!, problem with parameter no.:",i," -> ",trim(namfree(i))
              ifail=2
+             c%failed=.true.
              return
           end if
        end do
@@ -313,6 +316,7 @@
              end do
              write(unit=Err_CFML%Msg,fmt="(a,i5,a,a)")  &
                   " => Singular matrix!!, problem with parameter no.:",j," -> ",trim(namfree(j))
+             c%failed=.true.
              ifail=2
              return
           end if

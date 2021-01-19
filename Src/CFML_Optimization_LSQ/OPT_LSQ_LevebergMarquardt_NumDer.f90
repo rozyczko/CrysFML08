@@ -1,4 +1,4 @@
- Submodule (CFML_Optimization_LSQ) OPT_LSQ_LevenbergMarquard_NumDer
+ Submodule (CFML_Optimization_LSQ) OPT_LSQ_LevenbergMarquardt_NumDer
   implicit none
    contains
 
@@ -198,6 +198,7 @@
           End Do
           Err_CFML%Ierr = 1
           Err_CFML%Msg=" => Singular Matrix at the end of LM_Der for calculating std deviations ... provided sigmas are dubious!"
+          c%failed=.true.
        End if
 
        if(present(idebug)) then
@@ -403,6 +404,7 @@
         !regularization (This increases the error bars!)
         Tikhonov=0.0
         if(Err_CFML%Ierr /=  0) then
+          c%failed=.true.
           Err_CFML%Ierr = 1
           Err_CFML%Msg="Regularization (SVD,Tikhonov) of the final Curvature Matrix unsuccessfull (no standard deviations) ..."
           j=0
@@ -1221,4 +1223,4 @@
 
     End Subroutine Fdjac2
 
- End Submodule OPT_LSQ_LevenbergMarquard_NumDer
+ End Submodule OPT_LSQ_LevenbergMarquardt_NumDer

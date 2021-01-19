@@ -103,4 +103,15 @@ SubModule (CFML_Profiles) PRF_TCH_pVoigt
 
     End Subroutine TCH_pVoigt_Der
 
+    Pure Module Subroutine Get_HG_HL(fwhm,eta,HG,HL)
+      real(kind=cp), intent(in)  :: fwhm, eta
+      real(kind=cp), intent(out) :: HG,HL
+      real(kind=cp) :: eta2,eta3
+
+      eta2=eta*eta; eta3=eta2*eta
+      HL=fwhm*(0.72928_cp * eta + 0.19289_cp * eta2 + 0.07783_cp * eta3)
+      HG=fwhm*sqrt(1.0_cp - 0.74417_cp * eta - 0.24781_cp * eta2 - 0.00810_cp * eta3)
+
+    End Subroutine Get_HG_HL
+
 End SubModule PRF_TCH_pVoigt

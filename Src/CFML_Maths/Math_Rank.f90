@@ -170,7 +170,7 @@ Submodule (CFML_Maths) Maths_Sbm_Rank
                 end if
              end do
              z=w(k)
-             if (l ==k)then
+             if (l == k)then
                 if (z < 0.0_cp)then
                    w(k)=-z
                    v(1:n,k)=-v(1:n,k)
@@ -179,7 +179,7 @@ Submodule (CFML_Maths) Maths_Sbm_Rank
              end if
              if (its == num_its) then
                 ERR_CFML%ierr=1
-                ERR_CFML%Msg = "MATHS@SVDCMP: convergence not reached ! "
+                ERR_CFML%Msg = "MATHS@SVDCMP: convergence not reached in SVD! "
                 return
              end if
              x=w(l)

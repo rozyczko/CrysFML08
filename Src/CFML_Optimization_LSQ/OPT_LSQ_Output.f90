@@ -141,7 +141,7 @@
     End Subroutine Info_LSQ_LM_VS
 
     !!----
-    !!----  Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,out_obscal)
+    !!----  Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
     !!----   real(kind=cp),              intent(in)     :: chi2       !Final Chi2
     !!----   real(kind=cp),              intent(in)     :: FL         !Final Marquardt lambda
     !!----   integer,                    intent(in)     :: nobs       !Number of data points
@@ -154,12 +154,13 @@
     !!----   type(LSQ_State_Vector_type),intent(in)     :: vs         !State vector (parameters of the model)
     !!----   character(len=*), optional, intent(in)     :: out_obscal !If present the vectors X,Y,Yc,Sig(=sqrt(1/w))
     !!----                                                            !Are output in a file called LM_fit.xy
+    !!----   character(len=*),           intent(in)     :: algor      !Used algorithm CURFIT or LEVMAR
     !!----
-    !!----  Subroutine for output information at the end of refinement
+    !!----  Subroutine for output information of the least squares program at the end of refinement
     !!----
-    !!---- Update: August - 2009
+    !!---- Update: August - 2009, January 2021
     !!
-    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,out_obscal)
+    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
        !---- Arguments ----!
        real(kind=cp),              intent(in)     :: chi2
        real(kind=cp),              intent(in)     :: FL
@@ -171,6 +172,7 @@
        integer,                    intent(in)     :: lun
        type(LSQ_conditions_type),  intent(in)     :: c
        type(LSQ_State_Vector_type),intent(in)     :: vs
+       character(len=*),           intent(in)     ::algor
        character(len=*), optional, intent(in)     :: out_obscal
 
        !---- Local variables ----!
@@ -193,6 +195,7 @@
        rex=sqrt(real(nobs-c%npvar)/riobs)*100.0
        write(unit=lun,fmt="(/,(3(a,f8.3)))") "  Rfact= ",rfact,"   Rwfact= ",rwfact,"   Rex= ",rex
        write(unit=lun,fmt="(/,a,F16.3)") "  Final value of Marquardt F-Lambda = ",FL
+       write(unit=lun,fmt="(/,a)")       "  The used algorithms is "//algor
 
        !---- Correlation matrix ----!
        write(unit=lun,fmt="(/,a,/)")   " => Correlation Matrix: "

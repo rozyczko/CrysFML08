@@ -60,6 +60,7 @@ Module  TOF_Diffraction
       real, dimension(3,60)  :: hghl
    End Type IRF_Type
 
+   real, parameter                         :: sqrt_8ln2=2.3548200450309493820231386529194
    Type(IRF_Type)                          :: IRF_Info
 
 
@@ -75,7 +76,6 @@ Module  TOF_Diffraction
    character(len=256),public ::  filedat,title,filecode
 
 
-   ! Private Zone
 
    integer, parameter     :: nglob_tof=15       ! Maximum number of global parameters for TOF
    integer, parameter     :: nshp_tof=6          ! Maximum number of peak-shape parameters per peak
@@ -435,6 +435,7 @@ Module  TOF_Diffraction
       if(jobtyp == 0) then
          do
             call marquardt_fit(Sum_Jorgensen_VonDreele_peaks,d%x,d%y,wf,d%yc,d%nobs,c,vs,7,chi2)
+            if(c%failed) exit
             if (.not. c%reached) then
                write(unit=*,fmt="(a)",advance='no')' => Convergence not reached!. Do you want continue?'
                read(unit=*,fmt="(a)") ans
@@ -585,7 +586,6 @@ Module  TOF_Diffraction
       real                          :: profil, tang, bac_ctr, alfa, beta, dt, omega, gamma, eta,&
                                        w,dsp, dsp2, dsp4
       type(deriv_TOF_type)          :: deriv
-      real, parameter               :: sqrt_8ln2=2.3548200450309493820231386529194
 
       ! FITS TO Jorgensen functions: convolution of gaussian and back-to-back exponentials
       ! P are parameters. YCALC is the value returned to the main program
@@ -624,8 +624,8 @@ Module  TOF_Diffraction
             dsp=p(j)/d2tof
             dsp2=dsp*dsp
             dsp4=dsp2*dsp2
-            alpha0(npea) = p(1)+ p(2)/dsp2 + p(3)/dsp4 +  p(4)/sqrt(dsp)   !Alpha0 calculated for all peaks
-            beta0(npea)  = p(5)+ p(6)/dsp2 + p(7)/dsp4 +  p(8)/sqrt(dsp)   !Beta0 calculated for all peaks
+            alpha0(npea) = p(1)+ p(2)/dsp  + p(3)/dsp2 +  p(4)/sqrt(dsp)   !Alpha0 calculated for all peaks
+            beta0(npea)  = p(5)+ p(6)/dsp  + p(7)/dsp2 +  p(8)/dsp4        !Beta0 calculated for all peaks
             sigma0(npea) = p(9)*dsp4 + p(10)*dsp2 + p(11) + p(12)/dsp2     !Sigma0 calculated for all peaks
             eta0(npea)   = p(13) + p(14)*dsp  + p(15)*dsp2                 !Eta0 calculated for all peaks
 
@@ -647,8 +647,8 @@ Module  TOF_Diffraction
                der_alf3(npea)=0.0
                if (alpha0(npea) > 0.0001) then
                   der_alf0(npea)=1.0
-                  der_alf1(npea)=1.0/dsp2
-                  der_alf2(npea)=1.0/dsp4
+                  der_alf1(npea)=1.0/dsp
+                  der_alf2(npea)=1.0/dsp2
                   der_alf3(npea)=1.0/sqrt(dsp)
                end if
                der_bet0(npea)=0.0
@@ -657,9 +657,9 @@ Module  TOF_Diffraction
                der_bet3(npea)=0.0
                if (beta0(npea) > 0.0001) then
                   der_bet0(npea)=1.0
-                  der_bet1(npea)=1.0/dsp2
-                  der_bet2(npea)=1.0/dsp4
-                  der_bet3(npea)=1.0/sqrt(dsp)
+                  der_bet1(npea)=1.0/dsp
+                  der_bet2(npea)=1.0/dsp2
+                  der_bet3(npea)=1.0/dsp4
                end if
                der_eta0(npea)=0.0
                der_eta1(npea)=0.0

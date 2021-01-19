@@ -47,7 +47,7 @@ Module CFML_Profiles
 
     !---- List of public Subroutines ----!
     public :: init_prof_val, prof_val, Calc_Pseudo_Voigt, Prof_Lorentzian, Prof_Gaussian, &
-              psvoigtian
+              psvoigtian, Get_HG_HL
 
     !---- List of public functions ----!
     public :: Pseudovoigt,Lorentzian,Gaussian,Back_To_Back_Exp, Ikeda_Carpenter, Exponential, &
@@ -195,6 +195,11 @@ Module CFML_Profiles
           real(kind=cp),                       intent(out):: pv_val
           real(kind=cp), optional,dimension(:),intent(out):: dpar
        End Subroutine TCH_pVoigt_Der
+
+       Pure Module Subroutine Get_HG_HL(fwhm,eta,HG,HL)
+         real(kind=cp), intent(in)  :: fwhm, eta
+         real(kind=cp), intent(out) :: HG,HL
+       End Subroutine Get_HG_HL
 
        Pure Module Function Split_Pseudovoigt(X,Par) Result (Pv_Val)
           !---- Arguments ----!
