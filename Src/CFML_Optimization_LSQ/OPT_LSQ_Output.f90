@@ -195,7 +195,7 @@
        rex=sqrt(real(nobs-c%npvar)/riobs)*100.0
        write(unit=lun,fmt="(/,(3(a,f8.3)))") "  Rfact= ",rfact,"   Rwfact= ",rwfact,"   Rex= ",rex
        write(unit=lun,fmt="(/,a,F16.3)") "  Final value of Marquardt F-Lambda = ",FL
-       write(unit=lun,fmt="(/,a)")       "  The used algorithms is "//algor
+       write(unit=lun,fmt="(/,a)")       "  The used algorithm is "//algor
 
        !---- Correlation matrix ----!
        write(unit=lun,fmt="(/,a,/)")   " => Correlation Matrix: "

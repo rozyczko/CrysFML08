@@ -155,6 +155,13 @@
        end if
        sx=zero
 
+       !Make an additional direct final call to the model function in order to calculate the Jacobian J,
+       !curvature matrix A=Jt.J, invert it and take the diagonal elements for calculating the standard
+       !deviations at the final point.
+       !iflag=2
+       !Call Model_Functn(m, n, x, fvec, fjac, iflag)
+       !curv_mat(1:n,1:n) = matmul (transpose(fjac),fjac)
+
        !Extract the curvature matrix side of equation below from fjac
        !        t     t           t
        !       p *(jac *jac)*p = r *r
@@ -168,12 +175,6 @@
        end do
        curv_mat(1:n,1:n) = matmul(  p, matmul( curv_mat(1:n,1:n),transpose(p) )  )
 
-       !Make an additional direct final call to the model function in order to calculate the Jacobian J,
-       !curvature matrix A=Jt.J, invert it and take the diagonal elements for calculating the standard
-       !deviations at the final point.
-       !iflag=2
-       !Call Model_Functn(m, n, x, fvec, fjac, iflag)
-       !curv_mat(1:n,1:n) = matmul (transpose(fjac),fjac)
        do j=1,n
           denj=curv_mat(j,j)
           if( denj <= zero) denj=1.0
@@ -195,7 +196,7 @@
        Else
           Do i=1,n
              if (correl(i,i) <= zero) then
-                write(unit=text,fmt="(a,i4,a)") "Final Singular Matrix!, problem with parameter #",i,line_term//" => Standard deviations cannot be calculated..."
+                write(unit=text,fmt="(a,i4,a)") "Final Singular Matrix!, problem with refined parameter #",i,line_term//" => Standard deviations cannot be calculated..."
                 exit
              end if
           End Do

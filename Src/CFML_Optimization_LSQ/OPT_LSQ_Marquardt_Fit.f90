@@ -3,7 +3,7 @@
    contains
 
     !!--++
-    !!--++  Subroutine Curfit_v1(Model_Functn, X, Y, W, Nobs, c, A, Sa, Fl, Yc, Chir, Ifail)
+    !!--++  Subroutine Curfit_v1(Model_Functn, X, Y, W, Nobs, c, A, Sa, Fl, Yc, Chir, Ifail,nt)
     !!--++     real(kind=cp),    dimension(:),      intent(in)      :: x     !vector with abcisae
     !!--++     real(kind=cp),    dimension(:),      intent(in)      :: y     !Observed values
     !!--++     real(kind=cp),    dimension(:),      intent(in out)  :: w     !weight of observations
@@ -13,8 +13,9 @@
     !!--++     real(kind=cp),dimension(:),          intent(in out)  :: sa    !estimated standard deviations
     !!--++     real(kind=cp),                       intent(in out)  :: fl    !Marquardt LAMBDA value
     !!--++     real(kind=cp),dimension(:),          intent(out)     :: yc    !Calculated
-    !!--++     real(kind=cp),                       intent(out)     :: chir
-    !!--++     integer,                    intent(out)     :: ifail
+    !!--++     real(kind=cp),                       intent(out)     :: chir  !Chi-square
+    !!--++     integer,                             intent(out)     :: ifail !If /= 0 the algorithm failed
+    !!--++     integer,                             intent(out)     :: nt    ! Number of trials
     !!--++
     !!--++     Interface
     !!--++      Subroutine Model_Functn(iv,Xv,ycalc,aa,der)
@@ -41,7 +42,8 @@
        real(kind=cp),                       intent(in out)  :: fl    !Marquardt LAMBDA value
        real(kind=cp),dimension(:),          intent(out)     :: yc    !Calculated
        real(kind=cp),                       intent(out)     :: chir
-       integer,                             intent(out)     :: ifail,nt
+       integer,                             intent(out)     :: ifail
+       integer,                             intent(out)     :: nt
 
        Interface
         Subroutine Model_Functn(iv,Xv,ycalc,aa,der)
@@ -181,14 +183,15 @@
     End Subroutine Curfit_v1
 
     !!--++
-    !!--++  Subroutine Curfit_v2(Model_Functn, d, c, vs, Fl, Chir, Ifail)
+    !!--++  Subroutine Curfit_v2(Model_Functn, d, c, vs, Fl, Chir, Ifail,nt)
     !!--++     Type(LSQ_Data_type)                  intent(in out)  :: d     !Data
     !!--++     Type(LSQ_Conditions_type),           intent(in)      :: c     !conditions for refinement
     !!--++     Type(LSQ_State_Vector_type),         intent(in out)  :: vs    !State Vector with model parameters
     !!--++     real(kind=cp),                       intent(in out)  :: fl    !Marquardt LAMBDA value
     !!--++     real(kind=cp),dimension(:),          intent(out)     :: yc    !Calculated
     !!--++     real(kind=cp),                       intent(out)     :: chir
-    !!--++     integer,                    intent(out)     :: ifail
+    !!--++     integer,                             intent(out)     :: ifail
+    !!--++     integer,                             intent(out)     :: nt
     !!--++
     !!--++     Interface
     !!--++      Subroutine Model_Functn(iv,xv,ycalc,Vsa,der)
@@ -680,7 +683,7 @@
           end do
        end if
 
-       call Info_LSQ_Output(chi2,FL,nobs,x,y,yc,w,Ipr,c,vs)
+       call Info_LSQ_Output(chi2,FL,nobs,x,y,yc,w,Ipr,c,vs,"CURFIT")
 
     End Subroutine Marquardt_Fit_v1
 
@@ -923,7 +926,7 @@
        end if
 
 
-       call Info_LSQ_Output(chi2,FL,d%nobs,d%x,d%y,d%yc,d%sw,Ipr,c,vs)
+       call Info_LSQ_Output(chi2,FL,d%nobs,d%x,d%y,d%yc,d%sw,Ipr,c,vs,"CURFIT")
 
     End Subroutine Marquardt_Fit_v2
 
