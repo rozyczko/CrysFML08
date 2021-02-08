@@ -11,11 +11,12 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
    !!----
    !!---- 20/04/19
    !!
-   Module Subroutine SpaceG_Constructor_Str(ListGen, Spg, Strcode)
+   Module Subroutine SpaceG_Constructor_Str(ListGen, Spg, Strcode, set_inv)
       !---- Arguments ----!
       character(len=*),           intent(in)     :: ListGen
       class(Spg_Type),            intent(in out) :: Spg
       character(len=*), optional, intent(in)     :: Strcode
+      logical,          optional, intent(in)     :: set_inv
 
       !--- Local variables ---!
       character(len=40),    dimension(:),  allocatable :: gen1, gen
@@ -82,6 +83,10 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
       do i=1,multip
          Spg%Symb_Op(i)=trim(Get_Symb_from_Op(Op(i)))
       end do
+
+      if(present(set_inv)) then
+        if(set_inv) Spg%inv = Get_Inv_OP(Op) !Construct the pointer of each operator to its inverse
+      end if
 
       if (num_lat > 0) then
          if (allocated(Spg%Lat_tr)) Deallocate(Spg%Lat_tr)

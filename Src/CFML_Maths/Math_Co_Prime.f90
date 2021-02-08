@@ -9,9 +9,9 @@ Submodule (CFML_Maths) CFML_Math_002
     !!----
     !!---- CO_PRIME
     !!----
-    !!----    Provides the value .TRUE. if the array V contains co-prime
-    !!----
+    !!---- Provides the value .TRUE. if the array V contains co-prime
     !!---- integers: there is no common divisor for all the integers.
+    !!----
     !!---- Only the first 1000 prime numbers are stored in the module array "primes"
     !!----
     !!---- 27/03/2019

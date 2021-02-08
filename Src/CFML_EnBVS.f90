@@ -71,7 +71,7 @@
     use CFML_Strings,           only: Sort_Strings,Get_words, U_Case,pack_string
     Use CFML_Scattering_Tables, only: Get_Ionic_Radius, Get_Chem_Symb, Get_Z_Symb, Get_Covalent_Radius, Set_Chem_Info
     use CFML_Metrics,           only: Cell_G_Type
-    use CFML_gSpaceGroups,      only: SPG_Type, Get_Orbit
+    use CFML_gSpaceGroups,      only: SPG_Type, Get_Orbit, Point_Orbit
     use CFML_Atoms,             only: Atm_Type, Init_Atom_type, Write_Atom_List, AtList_Type, Allocate_Atom_List, &
                                       Extend_Atom_List, Atm_Cell_Type, Allocate_Atoms_Cell
     use CFML_Geom,              only: Coord_Info, Distance, calc_dist_angle_sigma, calc_dist_angle

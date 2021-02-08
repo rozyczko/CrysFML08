@@ -143,9 +143,9 @@
 
       ! - Compute energy
 
-      e_self        = 0.0_dp
-      e_s           = 0.0_dp
-      e_l           = 0.0_dp
+      e_self = 0.0_dp
+      e_s    = 0.0_dp
+      e_l    = 0.0_dp
 
       ! - E_SELF
 
@@ -204,10 +204,11 @@
       Integer,      Optional,Intent(in)    :: iwrt
       !---- Local variables ----!
       Type (Atm_Cell_Type)                       :: Ac,Bc
+      Type (Point_Orbit)                         :: orbit
 
       Character(len=2)                           :: label
 
-      Integer                                    :: i, j, k, l, n, m, icomb, p, diff, penalty_aux, orbit_mult,lun
+      Integer                                    :: i, j, k, l, n, m, icomb, p, diff, penalty_aux,lun
       Integer                                    :: nelements, nanions_candidate, ncombinations, nsolutions, nunusual_aux
       Integer                                    :: nsol_usual, nelemmix, nequiv_sol, npenalty_min, penalty_min
       Integer, Parameter                         :: massive_limit = 100
@@ -269,14 +270,13 @@
       Do i = 1 , A%Natoms
          Ac%Nat = Ac%Nat + A%Atom(i)%Mult
          Ac%Lab(j:Ac%Nat) = A%Atom(i)%Lab
-         !Call Get_Orbit(A%Atom(i)%X,SpGr,orbit_mult,Ac%XYZ(:,j:Ac%Nat))
-         Call Get_Orbit(A%Atom(i)%X,SpGr,orbit_mult,xyz)
-         Ac%XYZ(:,j:Ac%Nat)=xyz
-         If (orbit_mult /= A%Atom(i)%Mult) Then
+         Call Get_Orbit(A%Atom(i)%X,SpGr,orbit)
+         If (orbit%mult /= A%Atom(i)%Mult) Then
             Err_CFML%Ierr=1
             Err_CFML%Msg = "Error in multiplicities. Check space group (or increase epsg)"
             Return
          End If
+         Ac%XYZ(:,j:Ac%Nat)=orbit%pos(:,:)
          j = j + A%Atom(i)%Mult
       End Do
 

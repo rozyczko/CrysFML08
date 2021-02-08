@@ -32,6 +32,10 @@ SubModule (CFML_gSpaceGroups) SPG_Allocate_SpaceGroup
       if(allocated(Grp%Symb_Op)) deallocate(Grp%Symb_Op)
       allocate(Grp%Symb_Op(multip))
 
+      if(allocated(Grp%inv)) deallocate(Grp%inv)
+      allocate(Grp%inv(multip))
+      Grp%inv = 0
+
       if(allocated(Grp%centre_coord)) deallocate(Grp%centre_coord)
       allocate(Grp%centre_coord(d-1))
       Grp%centre_coord=0_LI

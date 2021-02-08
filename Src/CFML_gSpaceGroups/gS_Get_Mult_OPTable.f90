@@ -42,6 +42,39 @@ SubModule (CFML_gSpaceGroups) SPG_Multip_OP_Table
          end do
       end do
    End Subroutine Get_Multip_OP_Table
+   !!----
+   !!---- GET_INV_OP
+   !!----
+   !!----   This Fucntion construct a pointer to the inverse
+   !!----   of each operator Op. It is assumed that
+   !!----   the first element is the identity.
+   !!----
+   !!---- 29/01/21
+   !!
+   Pure Module Function Get_Inv_OP (Op)  result(inv)
+      !---- Arguments ----!
+      type(Symm_Oper_Type), dimension(:),   intent(in) :: Op
+      integer, dimension(:), allocatable               :: inv
+
+      !---- Local Variables ----!
+      integer:: i,j,m,Multip
+      type(Symm_Oper_Type) :: Opm, identity_OP
+
+      multip=size(Op)
+      Identity_OP%Mat = Op(1)%Mat
+      allocate(inv(Multip))
+      inv=0
+      inv(1)=1
+      do_i:do i=2,multip
+         do j=2,multip
+            Opm=Op(i)*Op(j)
+            if(Opm == identity_Op) then
+              inv(i)=j
+              cycle do_i
+             end if
+         end do
+      end do do_i
+   End Function Get_Inv_OP
 
 End SubModule SPG_Multip_OP_Table
 

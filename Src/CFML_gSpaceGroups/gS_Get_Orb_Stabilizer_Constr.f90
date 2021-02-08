@@ -1,6 +1,6 @@
 !!----
 SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
-   implicit none
+    implicit none
 
     character (len=*), dimension(26),parameter   :: &
     cdd=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r', &
@@ -9,10 +9,10 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
 
    !!----
    !!---- GET_STABILIZER
-   !!----    Subroutine to obtain the list of symmetry operator of a space group that leaves
+   !!----    Subroutine to obtain the list of symmetry operators of a space group that leaves
    !!----    invariant an atomic position. This subroutine provides a pointer to the symmetry
    !!----    operators of the site point group and the additional translation with respect to
-   !!----    the canonical representant.
+   !!----    the canonical representative.
    !!----
    !!---- 13/06/2019
    !!
@@ -51,42 +51,59 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
 
    End Subroutine Get_Stabilizer
 
-   Module Subroutine Get_Orbit(x,Spg,Mult,orb,mom,morb,ptr,convl)
+   !! Module Subroutine Get_Orbit(x,Spg,orbit,mom,orb3D,convl,Tbox)
+   !!
+   !!---- Subroutine to generate the orbit of a point x in space/superspace
+   !!---- If mom is not present then the orbit%mom components remain unallocated
+   !!---- If orb3D is present, the restriction to 3D space is also output.
+   !!---- If convl is present and convl=.false., only the orbit within a primitive
+   !!---- cell is output. If Tbox is present, the orbit is extended to a supercell
+   !!---- that is [ Tbox(1) x a, Tbox(2) x b, Tbox(3) x c ]  by adding all possible
+   !!---- translations to the Zero-cell orbit
+   !!----
+   !!---- The orb object is of type Point Orbit defined in the general module
+   !!---- and repeated here for the sake of proper documentation.
+   !!  Type, public :: Point_Orbit
+   !!     integer                                      :: Mult=0 ! Multiplicity of the orbit
+   !!     real(kind=cp),allocatable,dimension(:,:)     :: pos    ! (d,Mult) Positions of the points
+   !!     real(kind=cp),allocatable,dimension(:,:)     :: mom    ! (d,Mult) Associated moments
+   !!     integer,      allocatable,dimension(:)       :: pts    ! (  Mult) Pointer to symmetry operator
+   !!     integer,      allocatable,dimension(:,:)     :: Lat    ! (d,Mult) lattice translation used to
+   !!  End Type Point_Orbit                                      ! put the atom  g(i).pos(:,1) within the cell
+   !!                                                            ! pos(:,i)=  g(pts(i)).pos(:,1) + Lat(:,i)
+   !!
+   Module Subroutine Get_Orbit(x,Spg,orbit,mom,orb3D,convl,Tbox)
       !---- Arguments ----!
-      real(kind=cp), dimension(:),                         intent(in)  :: x         !Position vector
-      class(SpG_Type),                                     intent(in)  :: spg       !Space Group
-      integer,                                             intent(out) :: mult      !Multiplicity of the orbit
-      real(kind=cp),dimension(:,:), allocatable,           intent(out) :: orb       !Orbit of x
-      real(kind=cp), dimension(:),               optional, intent(in)  :: mom       !Magnetic moment
-      real(kind=cp),dimension(:,:), allocatable, optional, intent(out) :: morb      !Magnetic moment orbit
-      integer, dimension(:),allocatable,         optional, intent(out) :: ptr       !Pointer to symmetry operator
-      logical,                                   optional, intent(in)  :: convl     !If present and true the content of a primite cell is outpput in the orbits
+      real(kind=cp), dimension(:),          intent(in)  :: x
+      class(SpG_Type),                      intent(in)  :: spg
+      type(Point_Orbit),                    intent(out) :: orbit
+      real(kind=cp), dimension(:),optional, intent(in)  :: mom
+      type(Point_Orbit),          optional, intent(out) :: orb3D
+      logical,                    optional, intent(in)  :: convl
+      integer,       dimension(3),optional, intent(in)  :: Tbox
 
       !---- Local variables ----!
-      integer                                          :: i, j, nt,d
+      integer                                          :: i, j, n, nt,d,mult,n_tr,L,i1,i2,i3
       real(kind=cp), dimension(Spg%d)                  :: xs,xsp
       real(kind=cp), dimension(Spg%d)                  :: ms,msp
       real(kind=cp), dimension(Spg%d-1)                :: v
       real(kind=cp), dimension(Spg%d,Spg%d,Spg%multip) :: Om
+      real(kind=cp), dimension(Spg%d-1,Spg%multip)     :: Orb,morb
+      real(kind=cp), dimension(:,:), allocatable       :: OrbE
+      integer,       dimension(:,:), allocatable       :: LatE
+      integer,       dimension(Spg%d-1)                :: Latt
+      integer,       dimension(Spg%d-1,Spg%multip)     :: Lat
+      integer,       dimension(:),  allocatable        :: ptr
       logical                                          :: conv
+      integer,       dimension(:,:), allocatable       :: add_Lat
 
       conv=.true.
       if(present(convl)) conv=convl
       d=Spg%d-1
-      xs(Spg%d)=1.0
-      ms(Spg%d)=1.0
-      allocate(orb(d,Spg%multip))
-      orb=0.0
-
-      if(present(morb)) then
-        allocate(morb(d,Spg%multip))
-        morb=0.0
-      end if
-      if(present(ptr)) then
-        allocate(ptr(Spg%multip))
-        ptr=0
-      end if
-
+      xs(Spg%d)=1.0_cp
+      ms(Spg%d)=1.0_cp
+      orb=0.0_cp; morb=0.0_cp
+      ptr=0
 
       Select Type(SpG)
 
@@ -103,31 +120,106 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
              Om(:,:,i)=Spg%Op(i)%Mat
            end do
            xs(1:d)=x
-           if(present(morb)) ms(1:d)=mom
+           if(present(mom)) ms(1:d)=mom
       End Select
 
+      allocate(ptr(Spg%multip))
       mult=1
       orb(:,1)=xs(1:d)
-      if(present(morb)) morb(:,1)=ms(1:d)
-      if(present(ptr)) ptr(mult) = 1
+      Lat(:,1)=0
+      ptr(mult) = 1
+      if(present(mom)) morb(1:d,1)=ms(1:d)
 
       do_ext: do j=2,Spg%Multip
          xsp=matmul(Om(:,:,j),xs)
-         xsp=modulo_lat(xsp)
+         call Lat_Modulo(xsp(1:d),v(1:d),Latt)
+         xsp(1:d)=v(1:d)
          do nt=1,mult
-            v=orb(1:d,nt)-xsp(1:d)
+            v(1:d)=orb(1:d,nt)-xsp(1:d)
+            if(sum(abs(v(1:d))) < 2.0 * EPSS) cycle do_ext
             if(Spg%Num_lat > 0 .and. .not. conv) then
-              if (is_Lattice_vec(v,Spg%Lat_tr)) cycle do_ext
+              if (is_Lattice_vec(v(1:d),Spg%Lat_tr(1:d,:))) cycle do_ext
             else
-              if (Zbelong(v)) cycle do_ext
+              if (Zbelong(v(1:d))) cycle do_ext
             end if
          end do
          msp(1:d)=Spg%Op(j)%dt*Spg%Op(j)%time_inv*matmul(Om(1:d,1:d,j),ms(1:d))
          mult=mult+1
-         orb(:,mult)=xsp(1:d)
-         if(present(morb)) morb(:,mult)=msp(1:d)
-         if(present(ptr))  ptr(mult) = j   !Pointer to symmetry operator
+         orb(1:d,mult)=xsp(1:d)
+         Lat(1:d,mult)=Latt
+         if(present(mom)) morb(1:d,mult)=msp(1:d)
+         ptr(mult) = j   !Pointer to symmetry operator
       end do do_ext
+
+      if(present(Tbox)) then  !Add supplemental cells
+        n_tr=(tbox(1)+1)*(tbox(2)+1)*(tbox(3)+1); L=0
+        allocate(add_Lat(d,n_tr))
+        add_Lat=0
+        do i1=0,tbox(1)
+          do i2=0,tbox(2)
+             do i3=0,tbox(3)
+                if(i1 == 0 .and. i2 == 0 .and. i3 == 0 ) cycle
+                L=L+1
+                add_Lat(1:3,L)=[i1,i2,i3]
+             end do
+          end do
+        end do
+        n_tr=L
+        nt=mult*(n_tr+1)
+        orbit%Mult=nt
+        allocate(orbit%pos(d,nt), orbit%pts(nt), orbit%Lat(d,nt))
+        if(present(mom))  allocate(orbit%mom(d,nt))
+        orbit%pos(:,1:mult) = orb(:,1:mult)
+        orbit%pts(1:mult)   = ptr(1:mult)
+        orbit%Lat(:,1:mult) = Lat(:,1:mult)
+        nt=mult
+        do L=1,n_tr
+          do n=1,mult
+            orbit%pos(:,nt+n)=orb(:,n)+ add_Lat(:,L)
+            orbit%Lat(:,nt+n)=Lat(:,n)+ add_Lat(:,L)
+            orbit%pts(nt+n)= ptr(n)
+            if(present(mom)) orbit%mom(:,nt+n)=morb(:,n)
+          end do
+          nt=nt+mult
+        end do
+      else
+         orbit%Mult=mult
+         orbit%pos=orb(:,1:mult)   !Automatic allocation
+         orbit%pts=ptr(1:mult)
+         orbit%Lat=Lat(:,1:mult)
+         if(present(mom)) orbit%mom=morb(:,1:mult)
+      end if
+
+      if(present(orb3D)) then !Restriction to 3D
+        mult=orbit%Mult
+        allocate(orbe(3,Mult),LatE(3,Mult))
+        if(allocated(ptr)) deallocate(ptr)
+        allocate(ptr(Mult))
+        ptr=0;orbe=0.0;late=0
+        nt=1
+        orbE(:,1)=orb(1:3,1)
+        ptr(1)=1
+        LatE(:,1)=0
+        do_i:do i=2,mult
+          do j=1,nt
+            if(sum(abs(orbE(:,j)-orbit%pos(1:3,i))) < 2.0 * EPSS ) cycle do_i
+          end do
+          nt=nt+1
+          orbE(:,nt) = orbit%pos(1:3,i)
+          LatE(:,nt) = orbit%Lat(1:3,i)
+          ptr(nt)=i    !This points to the i-atom of the superspace orbit
+        end do do_i
+        orb3D%mult=nt
+
+        allocate(orb3D%pos(3,nt),orb3D%Lat(3,nt),orb3D%pts(nt))
+        if(present(mom)) allocate(orb3D%mom(3,nt))
+        do i=1,nt
+          orb3D%pos(:,i)= orbE(:,i)
+          orb3D%Lat(:,i)= LatE(:,i)
+          orb3D%pts(i)  = orbit%pts(ptr(i)) !This points to the symmetry operator
+          if(present(mom)) orb3D%mom(:,i) = orbit%mom(1:3,ptr(i))
+        end do
+      end if
 
    End Subroutine Get_Orbit
 
@@ -488,8 +580,8 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
         do ig=1,order
           ir=ss_ptr(ig)
               g(:,:) = SpG%Op(ir)%Mat(1:3,1:3)   !                          /  g    0   t  \
-               ts(:) = SpG%Op(ir)%Mat(1:d,d+1)   !   Superspace operator:  |  Mx   ep   tI |    !ts=(t,tI)
-             Mx(:,:) = SpG%Op(ir)%Mat(4:d,1:3)   !                         \   0    0   1 /
+               ts(:) = SpG%Op(ir)%Mat(1:d,d+1)   !   Superspace operator:  |  Mx   ep   tI  |    !ts=(t,tI)
+             Mx(:,:) = SpG%Op(ir)%Mat(4:d,1:3)   !                          \   0    0   1 /
              Ep(:,:) = SpG%Op(ir)%Mat(4:d,4:d)
              magm(:,:) = g(:,:)
              if(mode(1:1) == "M")  magm(:,:) = magm(:,:)*SpG%Op(ir)%time_inv*SpG%Op(ir)%dt

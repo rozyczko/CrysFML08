@@ -86,7 +86,8 @@
               Points_In_Line2D, Pikout_Lj_Cubic, &
               RowEchelonForm,                &
               Set_EPS_Math, SmithNormalForm, Svdcmp, Swap, Resolv_Sist_1x2,      &
-              Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3
+              Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3,&
+              Lat_Modulo
 
 
 
@@ -896,6 +897,13 @@
           real(kind=cp), dimension(n,n)             :: T
        End Function Lower_Triangular_R
 
+       Pure Module Subroutine Lat_Modulo(u,v,lat)
+          !---- Argument ----!
+          real(kind=cp), dimension(:),         intent( in) :: u
+          real(kind=cp), dimension(1:size(u)), intent(out) :: v
+          integer,       dimension(1:size(u)), intent(out) :: Lat
+       End Subroutine Lat_Modulo
+
        Module Subroutine LU_Backsub(a,indx,b)
           !---- Arguments ----!
           real(kind=cp), dimension(:,:), intent(in)     :: a
@@ -1028,13 +1036,13 @@
           real(kind=cp),dimension(:),intent(in)    :: a,b
           real(kind=cp),dimension(size(a),size(b)) :: c
        End Function Outerprod
-       
+
        Pure Module Function Polynomial_Fit(X, Y, NPoints, Order) Result(Coeff)
           !---- Arguments ----!
-          real(kind=cp), dimension(:), intent(in) :: X,Y        
-          integer,                     intent(in) :: NPoints    
-          integer,                     intent(in) :: Order      
-          real(kind=cp), dimension(Order+1)       :: Coeff      
+          real(kind=cp), dimension(:), intent(in) :: X,Y
+          integer,                     intent(in) :: NPoints
+          integer,                     intent(in) :: Order
+          real(kind=cp), dimension(Order+1)       :: Coeff
        End Function Polynomial_Fit
 
        Pure Module Subroutine Points_In_Line2D(X1, XN, N, XP)

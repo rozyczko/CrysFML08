@@ -52,7 +52,7 @@ Module CFML_gSpaceGroups
     Use CFML_Magnetic_Database
     Use CFML_SuperSpace_Database
     Use CFML_Maths,             only: Set_eps_math, modulo_lat, determ3D, Get_eps_math, Zbelong,EPSS,Diagonalize_RGEN, &
-                                      equal_vector,resolv_sist_3x3,trace,Equal_Matrix, Inverse_Matrix
+                                      equal_vector,resolv_sist_3x3,trace,Equal_Matrix, Inverse_Matrix,Lat_modulo
     Use CFML_Strings,           only: u_case, l_case, pack_string, get_separator_pos, get_num, &
                                       get_words, String_Fraction_2Dig,Set_Symb_From_Mat
 
@@ -76,7 +76,7 @@ Module CFML_gSpaceGroups
     public :: Allocate_OP, Allocate_SpaceGroup, Allocate_KVector, Change_Setting_SpaceG, &
               Get_Cosets, Get_Generators, Get_Laue_PG, Get_Magnetic_Lattice,             &
               Get_Mat_from_Symb, Get_Stabilizer, Get_SubGroups_gen, Group_Constructor,   &
-              Identify_Group, Init_SpaceGroup,  Is_OP_Inversion_Centre,                  &
+              Identify_Group, Init_SpaceGroup,  Is_OP_Inversion_Centre, Get_Inv_OP,      &
               Set_Conditions_NumOP_EPS, Set_SpaceGroup,Is_OP_Lattice_Centring,           &
               Write_SpaceGroup_Info, Get_Multip_Pos, Is_Lattice_Vec,Is_OP_Anti_Lattice,  &
               Get_SubGroups_full, SearchOp, Write_SymTrans_Code, Read_SymTrans_Code
@@ -92,6 +92,7 @@ Module CFML_gSpaceGroups
     Type, public :: Group_Type
        integer                                         :: Multip =0       ! Multiplicity of the Group
        integer                                         :: D=0             ! Dimension of operator matrices (2:2D, 3:D3,...)
+       integer,              dimension(:), allocatable :: inv             ! Pointer to the inverse of the symmetry operator
        type(Symm_Oper_Type), dimension(:), allocatable :: Op              ! Symmetry operator
        character(len=80),    dimension(:), allocatable :: Symb_Op         ! Symbol operator
     End Type Group_Type
@@ -165,6 +166,18 @@ Module CFML_gSpaceGroups
        integer,allocatable,dimension(:,:)           :: q_coeff     ! number of q_coeff(nk,nq)
     End Type kvect_info_type
 
+    !!----
+    !!---- TYPE :: Point_Orbit
+    !!--..
+    !!
+    Type, public :: Point_Orbit
+       integer                                      :: Mult=0      ! Multiplicity of the orbit
+       real(kind=cp),allocatable,dimension(:,:)     :: pos         ! (d,Mult) Positions of the points
+       real(kind=cp),allocatable,dimension(:,:)     :: mom         ! (d,Mult) Associated moments
+       integer,      allocatable,dimension(:)       :: pts         ! (  Mult) Pointer to symmetry operator
+       integer,      allocatable,dimension(:,:)     :: Lat         ! (d,Mult) lattice translation used to
+    End Type Point_Orbit                                           ! put the atom  g(i).pos(:,1) within the cell
+                                                                   ! pos(:,i)=  g(pts(i)).pos(:,1) + Lat(:,i)
     !---- Private Variables ----!
     integer,          dimension(0:2), parameter :: CENT=[2,1,2]       ! Multiplier for calculating the total multiplicity
     character(len=1), dimension(10),  parameter :: XYZ=["x","y","z","t","u","v","w","p","q","r"]
@@ -290,7 +303,7 @@ Module CFML_gSpaceGroups
           logical                    :: info
        End Function Equal_Group
 
-       Module Function Equal_Symm_Oper(Op1, Op2) Result(info)
+       Pure Module Function Equal_Symm_Oper(Op1, Op2) Result(info)
           !---- Arguments ----!
           type(Symm_Oper_Type), intent(in) :: Op1,Op2
           logical                          :: info
@@ -461,6 +474,12 @@ Module CFML_gSpaceGroups
           integer, dimension(:,:),allocatable,intent(out):: Table
        End Subroutine Get_Multip_OP_Table
 
+       Pure Module Function Get_Inv_OP(Op) Result(inv)
+          !---- Arguments ----!
+          type(Symm_Oper_Type), dimension(:),   intent(in) :: Op
+          integer, dimension(:), allocatable               :: inv
+       End Function Get_Inv_OP
+
        Module Function Get_Multip_Pos(x,SpG) Result(mult)
           !---- Arguments ----!
           real(kind=cp), dimension(:), intent(in) :: x
@@ -482,16 +501,15 @@ Module CFML_gSpaceGroups
           integer, dimension(:,:), allocatable, optional, intent(out)    :: table
        End Subroutine Get_OPS_from_Generators
 
-       Module Subroutine Get_Orbit(x,Spg,Mult,orb,mom,morb,ptr,convl)
+       Module Subroutine Get_Orbit(x,Spg,orbit,mom,orb3D,convl,Tbox)
           !---- Arguments ----!
-          real(kind=cp), dimension(:),                         intent(in)  :: x
-          class(SpG_Type),                                     intent(in)  :: spg
-          integer,                                             intent(out) :: mult
-          real(kind=cp),dimension(:,:), allocatable,           intent(out) :: orb
-          real(kind=cp), dimension(:),               optional, intent(in)  :: mom
-          real(kind=cp),dimension(:,:), allocatable, optional, intent(out) :: morb
-          integer, dimension(:),allocatable,         optional, intent(out) :: ptr
-          logical,                                   optional, intent(in)  :: convl
+          real(kind=cp), dimension(:),          intent(in)  :: x
+          class(SpG_Type),                      intent(in)  :: spg
+          type(Point_Orbit),                    intent(out) :: orbit
+          real(kind=cp), dimension(:),optional, intent(in)  :: mom
+          type(Point_Orbit),          optional, intent(out) :: orb3D
+          logical,                    optional, intent(in)  :: convl
+          integer,  dimension(3),     optional, intent(in)  :: Tbox
        End Subroutine Get_Orbit
 
        Module Subroutine Get_Origin_Shift(ng, G, G_,  P_, origShift, shift)
@@ -718,18 +736,20 @@ Module CFML_gSpaceGroups
           type(rational), dimension(3,3),   intent(in)    :: M
        End Subroutine Match_Shubnikov_Group
 
-       Module Subroutine SpaceG_Constructor_GenV(GenV, Spg, StrCode)
+       Module Subroutine SpaceG_Constructor_GenV(GenV, Spg, StrCode, set_inv)
           !---- Arguments ----!
           character(len=*),dimension(:),intent(in)     :: GenV
           class(Spg_Type),              intent(in out) :: Spg
           character(len=*),optional,    intent(in)     :: StrCode
+          logical,         optional,    intent(in)     :: set_inv
        End Subroutine SpaceG_Constructor_GenV
 
-       Module Subroutine SpaceG_Constructor_Str(ListGen, Spg, Strcode)
+       Module Subroutine SpaceG_Constructor_Str(ListGen, Spg, Strcode, set_inv)
           !---- Arguments ----!
           character(len=*),           intent(in)     :: ListGen
           class(Spg_Type),            intent(in out) :: Spg
           character(len=*), optional, intent(in)     :: Strcode
+          logical,          optional, intent(in)     :: set_inv
        End Subroutine SpaceG_Constructor_Str
 
        Module Subroutine Init_SpaceGroup(Grp)
@@ -888,13 +908,14 @@ Module CFML_gSpaceGroups
           character(len=*), optional, intent(in ) :: database_path
        End Subroutine Set_SpaceGroup_DBase
 
-       Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, debug)
+       Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, debug,set_inv)
           !---- Arguments ----!
           character(len=*),                          intent(in ) :: Str
           class(spg_type),                           intent(out) :: SpaceG
           integer,                         optional, intent(in ) :: NGen
           character(len=*),  dimension(:), optional, intent(in ) :: Gen
           logical,                         optional, intent(in ) :: debug
+          logical,                         optional, intent(in ) :: set_inv
        End Subroutine Set_SpaceGroup_gen
 
        !Module Subroutine Set_SpaceGroup_symb(Str, SpaceG, NGen, Gen)

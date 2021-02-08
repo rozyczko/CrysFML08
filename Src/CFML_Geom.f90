@@ -52,7 +52,7 @@
     use CFML_Atoms,         only: AtList_Type,Atm_Cell_Type,Equiv_Atm, Wrt_Lab, Atom_Equiv_List_Type, &
                                   Allocate_Atom_List, Atm_Std_Type
     use CFML_gSpaceGroups,  only: SpG_Type, Apply_OP, Get_Multip_Pos, Is_Lattice_Vec, &
-                                  searchop, Write_SymTrans_Code, Get_Orbit
+                                  searchop, Write_SymTrans_Code, Get_Orbit, Point_Orbit
 
     implicit none
 

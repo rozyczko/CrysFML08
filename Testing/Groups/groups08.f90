@@ -459,7 +459,7 @@
     integer, dimension(:), allocatable  :: cosets
     integer :: i, j, L, nsg, indexg, num_group, ier,minu !lun !, ind
     real(kind=cp) :: start, fin,tini,tfin, secnd
-    logical :: set_given, sup_given, datb_given, full, shub_given
+    logical :: set_given, sup_given, datb_given, full, shub_given, set_inv=.true.
 
     !> Init
     call CPU_TIME(tini)
@@ -567,6 +567,7 @@
           write(*,'(/,4x,a)') trim(Err_CFML%Msg)
           cycle
        else
+          if(set_inv) Grp%inv=get_Inv_OP(Grp%Op)
           call Write_SpaceGroup_Info(Grp)
           !call Write_SpaceGroup_Info(Grp,lun)
        end if

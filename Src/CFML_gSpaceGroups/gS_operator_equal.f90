@@ -7,7 +7,7 @@ SubModule (CFML_gSpaceGroups) SPG_Oper_Equal
    !!----
    !!---- 19/04/2019
    !!
-   Module Function Equal_Symm_Oper(Op1, Op2) Result(info)
+   Pure Module Function Equal_Symm_Oper(Op1, Op2) Result(info)
       !---- Arguments ----!
       type(Symm_Oper_Type), intent(in) :: Op1,Op2
       logical                          :: info

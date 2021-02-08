@@ -121,6 +121,7 @@
        real(kind=cp), dimension (:,:),allocatable :: orb
        type(point_list_type)                      :: pl
        type (AtList_Type)                         :: A
+       type (Point_Orbit)                         :: orbit
        character(len=*),parameter,dimension(26) :: let=(/"a","b","c","d","e","f","g","h", &
           "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"/)
        real(kind=cp), allocatable, dimension (:,:) :: vec
@@ -273,8 +274,9 @@
        do i=1,A_n%natoms
          A_n%atom(i)%x= A%atom(i)%x
          A_n%atom(i)%Lab= A%atom(i)%Lab
-         call Get_Orbit(A_n%atom(i)%x,Spgn,Mult,orb)
-         A_n%atom(i)%Mult=mult
+         !call Get_Orbit(A_n%atom(i)%x,Spgn,Mult,orb)
+         call Get_Orbit(A_n%atom(i)%x,Spgn,orbit)
+         A_n%atom(i)%Mult=orbit%mult
          A_n%atom(i)%occ=real(mult)/real(Spgn%Multip)
        end do
        if(allocated(A%atom)) deallocate(A%atom)

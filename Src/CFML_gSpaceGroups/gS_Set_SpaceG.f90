@@ -963,13 +963,13 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen,debug)
+   Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen,debug, set_inv)
       !---- Arguments ----!
       character(len=*),                          intent(in ) :: Str
       class(spg_type),                           intent(out) :: SpaceG
       integer,                         optional, intent(in ) :: NGen
       character(len=*),  dimension(:), optional, intent(in ) :: Gen
-      logical,                         optional, intent(in ) :: debug
+      logical,                         optional, intent(in ) :: debug, set_inv
 
       !---- Local Variables ----!
       integer                                      :: i,n_gen, n_it, d, ier
@@ -1016,7 +1016,11 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
          !> Check if we are providing a generator list as the first argument
          if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 ) then !Call directly to the space group constructor
-            call Group_Constructor(Str,SpaceG)
+            if(present(set_inv)) then
+              call Group_Constructor(Str,SpaceG,set_inv=set_inv)
+            else
+              call Group_Constructor(Str,SpaceG)
+            end if
             if (SpaceG%D == 4) then
                if (present(debug)) then
                   call Identify_Group(SpaceG)
@@ -1152,7 +1156,11 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       end if
 
       !> Generate the spacegroup
-      call Group_Constructor(l_gen,SpaceG)
+      if(present(set_inv)) then
+        call Group_Constructor(l_gen,SpaceG,set_inv=set_inv)
+      else
+        call Group_Constructor(l_gen,SpaceG)
+      end if
       SpaceG%init_label=Str
       if (Err_CFML%Ierr /= 0) return
       if(n_it /= 0) SpaceG%spg_symb= str_HM_std(1:1)//l_case(str_HM_std(2:))

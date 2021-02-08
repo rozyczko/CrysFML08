@@ -23,10 +23,15 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
       character(len=40) :: Symb
       integer,       dimension(3,3)  :: s
       real(kind=cp), dimension(3)    :: t
+      logical :: inverse
+
 
       !> Init
       iout=6 !To be replaced by Fortran environment value
       if(present(lun)) iout=lun
+
+      inverse=.false.
+      if(allocated(Grp%inv)) inverse=.true.
 
       if(Grp%d-1 > 3) then !Superspace group
 
@@ -132,8 +137,13 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
       end if
 
       if(Grp%d-1 == 3) then !Calculate the symmetry symbol
-         write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators and symmetry symbols"
-         write(unit=iout,fmt="(a)")       "  ========================================================"
+         if(inverse) then
+           write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators, symmetry symbols & pointer to the inverse"
+           write(unit=iout,fmt="(a)")       "  =============================================================================="
+         else
+           write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators and symmetry symbols"
+           write(unit=iout,fmt="(a)")       "  ========================================================"
+         end if
          do i=1,Grp%Multip
             s=Grp%Op(i)%Mat(1:3,1:3)
             t=Grp%Op(i)%Mat(1:3,4)
@@ -142,14 +152,26 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
               npos=index(Symb," ")
               Symb=Symb(1:npos-1)//"' "//Symb(npos+1:)
             end if
-            write(unit=iout,fmt="(a,i4,a,t50,a)") "  SymmOp",i,": "//trim(Grp%Symb_Op(i))," Symbol: "//trim(Symb)
+            if(inverse) then
+              write(unit=iout,fmt="(a,i4,a,t50,a,t95,i5)") "  SymmOp",i,": "//trim(Grp%Symb_Op(i))," Symbol: "//trim(Symb), Grp%inv(i)
+            else
+              write(unit=iout,fmt="(a,i4,a,t50,a)")        "  SymmOp",i,": "//trim(Grp%Symb_Op(i))," Symbol: "//trim(Symb)
+            end if
          end do
       else
-         write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators"
-         write(unit=iout,fmt="(a)")       "  ==================================="
-         do i=1,Grp%Multip
-            write(unit=iout,fmt="(a,i4,a)") "  SymmOp",i,": "//trim(Grp%Symb_Op(i))
-         end do
+         if(inverse) then
+            write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators and pointer to its inverse"
+            write(unit=iout,fmt="(a)")       "  =============================================================="
+            do i=1,Grp%Multip
+               write(unit=iout,fmt="(a,i4,a,t80,i5)") "  SymmOp",i,": "//trim(Grp%Symb_Op(i)), Grp%inv(i)
+            end do
+         else
+            write(unit=iout,fmt="(/a)")      "  Complete list of symmetry operators"
+            write(unit=iout,fmt="(a)")       "  ==================================="
+            do i=1,Grp%Multip
+               write(unit=iout,fmt="(a,i4,a)") "  SymmOp",i,": "//trim(Grp%Symb_Op(i))
+            end do
+         end if
       end if
    End Subroutine Write_SpaceGroup_Info
 
