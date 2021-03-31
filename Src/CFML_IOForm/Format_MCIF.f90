@@ -1809,7 +1809,7 @@ SubModule (CFML_IOForm) IO_MCIF
 
       !> Number of Q Coeff
       Nq=get_NElem_Loop(cif,str,j_ini-1,j_end)
-      if (Nq ==0) then
+      if (Nq == 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_MCIF_Atom_Site_Fourier_Wave_Vector: Error in loop"
          return

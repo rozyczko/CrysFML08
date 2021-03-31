@@ -80,7 +80,6 @@ _cell_wave_vector_y
 _cell_wave_vector_z
 1 0.5768(3) 0.000000 0.000000
 
-
 _parent_space_group.child_transform_Pp_abc  'a,b,c;0,0,0'
 
 _space_group.magn_ssg_name  "Fddd1'(\a00)0s0s"

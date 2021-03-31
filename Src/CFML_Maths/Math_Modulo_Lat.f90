@@ -36,21 +36,8 @@ Submodule (CFML_Maths) Maths_Modulo_Lat
        real(kind=cp), dimension(1:size(u)), intent(out) :: v
        integer,       dimension(1:size(u)), intent(out) :: Lat
        integer :: i,j
-       Lat=0
-       v=u
-       do i=1,size(v)
-         do
-           if(v(i) >= 1.0_cp) then
-             v(i)=v(i)-1.0_cp
-             Lat(i)=Lat(i)-1
-           else if(v(i) < 0.0_cp) then
-             v(i)=v(i)+1.0_cp
-             Lat(i)=Lat(i)+1
-           else
-             exit
-           end if
-         end do
-       end do
+       v=mod(u+10.0_cp,1.0_cp)
+       Lat=nint(u-v)
     End Subroutine Lat_Modulo
 
 End Submodule Maths_Modulo_Lat

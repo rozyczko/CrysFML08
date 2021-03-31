@@ -34,20 +34,20 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
       ptr   = 0; ptr(1)= 1
       atr   = 0.0_cp
 
-      do n1=-1,1
-         do n2=-1,1
-            do n3=-1,1
+       do n1=-1,1
+          do n2=-1,1
+             do n3=-1,1
                tr=real([n1, n2, n3])
-               do j=2,Spg%multip
-                  xx=Apply_OP(Spg%Op(j),x) + tr - x
+               do j=2,Spg%NumOps
+                  xx=Apply_OP(Spg%Op(j),x)  - x   + tr
                   if (sum(abs(xx)) > 2.0 * EPSS) cycle
                   order=order+1
                   ptr(order)=j
                   atr(:,order)=tr
                end do
-            end do
-         end do
-      end do
+             end do
+          end do
+       end do
 
    End Subroutine Get_Stabilizer
 
@@ -96,39 +96,44 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
       integer,       dimension(:),  allocatable        :: ptr
       logical                                          :: conv
       integer,       dimension(:,:), allocatable       :: add_Lat
+      real(kind=cp), dimension(Spg%d)                  :: momd
 
       conv=.true.
       if(present(convl)) conv=convl
       d=Spg%d-1
       xs(Spg%d)=1.0_cp
+      ms=0.0
       ms(Spg%d)=1.0_cp
       orb=0.0_cp; morb=0.0_cp
       ptr=0
+      momd=0.0; momd(Spg%d)=1.0_cp
+      if(present(mom)) momd(1:3)=mom(1:3)
 
       Select Type(SpG)
 
         type is (SuperSpaceGroup_Type)
            Om=SpG%Om
            xs(1:3)=x   !Extend the position and moment to superspace
-           if(present(mom)) ms(1:3)=mom
+           ms(1:3) = momd(1:3)
            do i=1,SpG%nk
              xs(3+i)=dot_product(x,SpG%kv(:,i))
-             if(present(mom)) ms(3+i)=dot_product(mom,SpG%kv(:,i))
+             ms(3+i)=dot_product(momd(1:3),SpG%kv(:,i))
            end do
         class default
            do i=1,Spg%Multip
              Om(:,:,i)=Spg%Op(i)%Mat
            end do
            xs(1:d)=x
-           if(present(mom)) ms(1:d)=mom
+           ms(1:d) = momd
       End Select
 
       allocate(ptr(Spg%multip))
       mult=1
-      orb(:,1)=xs(1:d)
-      Lat(:,1)=0
+      call Lat_Modulo(xs(1:d),v(1:d),Latt)
+      orb(:,1)=v(1:d)
+      Lat(:,1)=Latt
       ptr(mult) = 1
-      if(present(mom)) morb(1:d,1)=ms(1:d)
+      morb(1:d,1)=ms(1:d)
 
       do_ext: do j=2,Spg%Multip
          xsp=matmul(Om(:,:,j),xs)
@@ -147,17 +152,17 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
          mult=mult+1
          orb(1:d,mult)=xsp(1:d)
          Lat(1:d,mult)=Latt
-         if(present(mom)) morb(1:d,mult)=msp(1:d)
+         morb(1:d,mult)=msp(1:d)
          ptr(mult) = j   !Pointer to symmetry operator
       end do do_ext
 
       if(present(Tbox)) then  !Add supplemental cells
-        n_tr=(tbox(1)+1)*(tbox(2)+1)*(tbox(3)+1); L=0
+        n_tr=tbox(1)*tbox(2)*tbox(3); L=0
         allocate(add_Lat(d,n_tr))
         add_Lat=0
-        do i1=0,tbox(1)
-          do i2=0,tbox(2)
-             do i3=0,tbox(3)
+        do i1=0,tbox(1)-1
+          do i2=0,tbox(2)-1
+             do i3=0,tbox(3)-1
                 if(i1 == 0 .and. i2 == 0 .and. i3 == 0 ) cycle
                 L=L+1
                 add_Lat(1:3,L)=[i1,i2,i3]
@@ -168,17 +173,18 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
         nt=mult*(n_tr+1)
         orbit%Mult=nt
         allocate(orbit%pos(d,nt), orbit%pts(nt), orbit%Lat(d,nt))
-        if(present(mom))  allocate(orbit%mom(d,nt))
+        allocate(orbit%mom(d,nt))
         orbit%pos(:,1:mult) = orb(:,1:mult)
         orbit%pts(1:mult)   = ptr(1:mult)
         orbit%Lat(:,1:mult) = Lat(:,1:mult)
+        orbit%mom(:,1:mult) = morb(:,1:mult)
         nt=mult
         do L=1,n_tr
           do n=1,mult
             orbit%pos(:,nt+n)=orb(:,n)+ add_Lat(:,L)
             orbit%Lat(:,nt+n)=Lat(:,n)+ add_Lat(:,L)
             orbit%pts(nt+n)= ptr(n)
-            if(present(mom)) orbit%mom(:,nt+n)=morb(:,n)
+            orbit%mom(:,nt+n)=morb(:,n)
           end do
           nt=nt+mult
         end do
@@ -187,7 +193,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
          orbit%pos=orb(:,1:mult)   !Automatic allocation
          orbit%pts=ptr(1:mult)
          orbit%Lat=Lat(:,1:mult)
-         if(present(mom)) orbit%mom=morb(:,1:mult)
+         orbit%mom=morb(:,1:mult)
       end if
 
       if(present(orb3D)) then !Restriction to 3D
@@ -212,12 +218,12 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
         orb3D%mult=nt
 
         allocate(orb3D%pos(3,nt),orb3D%Lat(3,nt),orb3D%pts(nt))
-        if(present(mom)) allocate(orb3D%mom(3,nt))
+        allocate(orb3D%mom(3,nt))
         do i=1,nt
           orb3D%pos(:,i)= orbE(:,i)
           orb3D%Lat(:,i)= LatE(:,i)
           orb3D%pts(i)  = orbit%pts(ptr(i)) !This points to the symmetry operator
-          if(present(mom)) orb3D%mom(:,i) = orbit%mom(1:3,ptr(i))
+          orb3D%mom(:,i) = orbit%mom(1:3,ptr(i))
         end do
       end if
 
@@ -598,7 +604,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
                  exit
                end if
                if(equal_vector(mE,-SpG%q_coeff(:,iqt))) then
-                 iss=-1
+                 iss=-1  ! iss=-1
                  exit
                end if
              end do !iq
@@ -617,7 +623,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
            if(present(ipr)) then
              do ip=1,nq
                 i=(ip-1)*6
-                write(unit=ipr,fmt='(a,i2,a,t20,a,t55,6f14.4,4i3)') '     Operator ',ir,": ",trim(Spg%Symb_Op(ir)),Tfourl(i+1:i+6),brack_m(:)
+                write(unit=ipr,fmt='(a,i2,a,t20,a,t55,a,6f14.4,4i3)') '     Operator ',ir,": ",trim(Spg%Symb_Op(ir))," Matrix SubM x TFourier & [m] : ",Tfourl(i+1:i+6),brack_m(:)
              end do
            end if
         end do  !ig operators
@@ -629,7 +635,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
              write(unit=ipr,fmt='(a,6f14.4)')     '     Sum of TFour: ',sTf(i+1:i+6)
           end do
         end if
-        call Get_Refinement_Codes(n,sTF,sCtr,iss,multi,codd,TFourL)
+        call Get_Refinement_Codes(n,sTF,sCtr,iss,multi,codd,TFourL)  !Get_Refinement_Codes(n,vect_val,Ctr,iss,multi,codd,vect_out)
         cod=0.0
         do j=1,n
           if(codd(j) /= "0") then
@@ -656,7 +662,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
         codini=codini+iss
         if(present(Ipr)) then
           Write(Ipr,"(a,i4)")      " Number of free parameters: ",iss
-          Write(Ipr,"(a,24F14.6)") " Basic Values: ",val(1:iss)
+          Write(Ipr,"(a,24F14.6)") " Basic Values: ",TFourL(1:iss)
           write(Ipr,"(a,24f14.6)") " Multipliers: ",(multi(j), j=1,n)
           write(Ipr,"(28a)")       " String with free parameters: ( ",(codd(j)//", ",j=1,n-1),codd(n)//" )"
           write(Ipr,"(a,24i6)")    " Resulting integer codes: ", nint(cod(1:n))
