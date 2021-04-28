@@ -172,7 +172,7 @@
        integer,                    intent(in)     :: lun
        type(LSQ_conditions_type),  intent(in)     :: c
        type(LSQ_State_Vector_type),intent(in)     :: vs
-       character(len=*),           intent(in)     ::algor
+       character(len=*),           intent(in)     :: algor
        character(len=*), optional, intent(in)     :: out_obscal
 
        !---- Local variables ----!
