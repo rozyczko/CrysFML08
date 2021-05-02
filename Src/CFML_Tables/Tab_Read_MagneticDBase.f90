@@ -55,16 +55,24 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
       end if
 
       if(len_trim(Env) /= 0) then
-           call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
-           n=len_trim(database)
-           if (n == 0) then
-             err_CFML%IErr=1
-             write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
+          call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
+          n=len_trim(database)
+          if (n == 0) then
+            !Try FullProf
+            Env="FULLPROF"
+            call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
+            n=len_trim(database)
+            if (n == 0) then
+              err_CFML%IErr=1
+              write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
                                                "    This is needed for localizing the data base: magnetic_data.txt"//newline// &
-                                               "    that may be within the %"//trim(Env)//"% directory"
-             return
-           end if
-           if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+                                               "    that should be within the %"//trim(Env)//"% directory"
+              return
+            else
+              database=trim(database)//OPS_SEP//"Databases"
+            end if
+          end if
+          if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
       end if
 
       !> Open
@@ -200,16 +208,24 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
       end if
 
       if(len_trim(Env) /= 0) then
-           call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
-           n=len_trim(database)
-           if (n == 0) then
-             err_CFML%IErr=1
-             write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
+          call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
+          n=len_trim(database)
+          if (n == 0) then
+            !Try FullProf
+            Env="FULLPROF"
+            call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
+            n=len_trim(database)
+            if (n == 0) then
+              err_CFML%IErr=1
+              write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
                                                "    This is needed for localizing the data base: magnetic_data.txt"//newline// &
-                                               "    that may be within the %"//trim(Env)//"% directory"
-             return
-           end if
-           if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
+                                               "    that should be within the %"//trim(Env)//"% directory"
+              return
+            else
+              database=trim(database)//OPS_SEP//"Databases"
+            end if
+          end if
+          if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
       end if
 
       !> open data file

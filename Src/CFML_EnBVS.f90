@@ -54,6 +54,7 @@
 !!----       CALC_BVS
 !!----       CALC_MAP_BVEL
 !!----       CALC_MAP_BVS
+!!----       CALC_SITE_ENE
 !!--++       COMPLETE_TABLE                [Private]
 !!----       COST_BVS
 !!----       COST_BVS_COULOMBREP
@@ -87,7 +88,7 @@
     public :: Allocate_Atoms_Conf_List, Calc_BVS, Deallocate_Atoms_Conf_List,           &
               Set_Table_d0_b, Species_on_List, Set_Table_BVEL_Params,    &
               Calc_Map_BVS, Cost_BVS, Cost_BVS_CoulombRep, Calc_Map_BVEL, Ewald,        &
-              Set_Formal_Charges
+              Set_Formal_Charges, Calc_Site_Ene
 
     !---- List of public private ----!
     private :: Bond_Valence, Complete_Table, Complete_Table_BVEL, get_soft_covalent_radius
@@ -106,7 +107,7 @@
     !!----    real(kind=cp)                               :: totatoms  ! Total number of atoms in the unit cell
     !!----    character(len=4), dimension(:), allocatable :: Species   ! Symbol + valence
     !!----    real(kind=cp),    dimension(:), allocatable :: Radius    !ionic/atomic radius of species
-    !!----    type(Atm_Type),  dimension(:), allocatable :: atom
+    !!----    type(Atm_Type),  dimension(:),  allocatable :: atom
     !!---- End Type Atoms_Conf_List_Type
     !!----
     !!---- Update: March - 2005
@@ -156,7 +157,7 @@
       Module Subroutine Calc_Map_BVEL(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol,emin,npix,outp,bvel_map)
          !---- Arguments ----!
          type (Atoms_Conf_List_type), intent(in) :: A
-         type (SPG_Type),        intent(in) :: SpG
+         type (SPG_Type),             intent(in) :: SpG
          Type (Cell_G_Type),          intent(in) :: Cell
          character(len=*),            intent(in) :: Filecod
          integer,                     intent(in) :: ndimx
@@ -175,7 +176,7 @@
       Module Subroutine Calc_Map_BVS(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol)
          !---- Arguments ----!
          type (Atoms_Conf_List_type), intent(in) :: A
-         type (SPG_Type),        intent(in) :: SpG
+         type (SPG_Type),             intent(in) :: SpG
          Type (Cell_G_Type),          intent(in) :: Cell
          character(len=*),            intent(in) :: Filecod
          integer,                     intent(in) :: ndimx
@@ -218,6 +219,19 @@
          !---- Arguments ----!
          type (Atoms_Conf_List_Type), intent(in out)   :: A  !Objet to be deallocated
       End Subroutine Deallocate_Atoms_Conf_List
+
+      Module Subroutine Calc_Site_Ene(A,Spg,Cell,x,y,z,atname,drmax,emin)
+        !---- Arguments ----!
+        Type (Atoms_Conf_List_Type), Intent(in out):: A
+        Type (SPG_Type),             Intent(in)    :: SpG
+        Type (Cell_G_Type),          Intent(in)    :: Cell
+        real(kind=cp),               intent(in)    :: x
+        real(kind=cp),               intent(in)    :: y
+        real(kind=cp),               intent(in)    :: z
+        character(len=*),            intent(in)    :: atname  !Species of the probe atom e.g. LI+1
+        real(kind=cp),               intent(in)    :: drmax
+        real(kind=cp),               intent(out)   :: emin
+      End Subroutine Calc_Site_Ene
 
       Module Subroutine Ewald(Lattvec,Vol,Ac,e)
         Real(kind=cp), Dimension(3,3),  Intent(in)   :: Lattvec

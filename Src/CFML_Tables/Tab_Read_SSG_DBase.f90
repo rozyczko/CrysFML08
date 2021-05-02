@@ -39,15 +39,22 @@ SubModule (CFML_SuperSpace_Database) TAB_SuperSpace_Database_Read
       else
          Env="CRYSFML_DB"
          if (present(EnvDB)) Env=trim(EnvDB)
-
          call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
          n=len_trim(database)
          if (n == 0) then
-            err_CFML%IErr=1
-            write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
+            !Try FullProf
+            Env="FULLPROF"
+            call GET_ENVIRONMENT_VARIABLE(trim(Env),database)
+            n=len_trim(database)
+            if (n == 0) then
+              err_CFML%IErr=1
+              write(unit=err_cfml%msg,fmt="(a)") " => The "//trim(Env)//" environment variable is not defined! "//newline// &
                                                "    This is needed for localizing the data base: magnetic_data.txt"//newline// &
                                                "    that should be within the %"//trim(Env)//"% directory"
-            return
+              return
+            else
+              database=trim(database)//OPS_SEP//"Databases"
+            end if
          end if
          if (database(n:n) /= OPS_SEP) database=trim(database)//OPS_SEP
       end if
