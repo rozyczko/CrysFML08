@@ -62,16 +62,16 @@
       End Subroutine Get_Texte
 
 !--------------------------------------------------------------------
-     Subroutine output_plot(nob,xx,fobs,sig,fcalc,chi2,algor,icont)
+     Subroutine output_plot(nob,xx,fobs,fcalc,chi2,algor,icont)
       integer,          intent(in)              :: nob
-      real(Kind=cp),    intent(in),dimension(:) :: xx,fobs,fcalc,sig
+      real(Kind=cp),    intent(in),dimension(:) :: xx,fobs,fcalc
       real(Kind=cp),    intent(in)              :: chi2
       character(len=*), intent(in)              :: algor
       integer,          intent(in)              :: icont
       ! Local variables
       integer                          :: i,j,k,l,ico,ifinal
       real(kind=cp)                    :: shb,shd,dif,yma,ymi,tof,tofbragg,alpha,beta,gamm,sigma,&
-                                          hg,hl,dsp,dsp2,dsp4,fwhm,eta
+                                          hg,dsp,dsp2,dsp4,fwhm,eta
       real(kind=cp)                    :: iposr
       logical       :: opn
       integer, save :: icount=0
@@ -155,7 +155,7 @@
         write(unit=23,fmt="(2A)") " ",TRIM(title)
         write(unit=23,fmt="(2a)")      " => Data file name: ",TRIM(filedat)
         write(unit=23,fmt="(a,I4)")    " => Instrm        : ", itype
-        write(unit=23,fmt="(a,2f14.5)") " => Dtt1(usec)    : ", d2tof, 0.0
+        write(unit=23,fmt="(a,2f14.5)")" => Dtt1(usec)    : ", d2tof, 0.0
         write(unit=23,fmt="(a,I9)")    " => Numb.of.points: ", nob
         write(unit=23,fmt="(a,i9)")    " => Numb.of.peaks : ", npeakx
         write(unit=23,fmt="(a)")   &
@@ -273,16 +273,16 @@
 
       Implicit None
 
-      Integer              :: ll,ier,no,ifail
+      Integer              :: ier,ifail
       Character(Len=256)   :: texte
       Character(Len=4)     :: ext
       Character(Len=6)     :: algor
-      Logical              :: esta, numeric,ok
-      Integer              :: i,j,k,npts,L,ico
+      Logical              :: numeric,ok
+      Integer              :: i,j,k,ico
 
       Real(kind=cp)                           :: timi,timf
-      real(kind=cp),dimension(:), allocatable :: ww
-      Character(Len=15),dimension(20)         :: words
+      !real(kind=cp),dimension(:), allocatable :: ww
+      !Character(Len=15),dimension(20)         :: words
       Integer                                 :: narg,lr,ln
       Type(DiffPat_E_Type)                    :: df  !Diffraction pattern
 
@@ -479,7 +479,7 @@
       call cpu_time(timf)
 
       call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,d%sw,7,c,vs,algor)
-      call Output_Plot(d%nobs,d%x,d%y,d%sw,d%yc,chi2,algor,icont)
+      call Output_Plot(d%nobs,d%x,d%y,d%yc,chi2,algor,icont)
       if(icont == 0) exit
     End Do  !icont
 

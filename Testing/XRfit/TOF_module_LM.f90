@@ -110,7 +110,7 @@ Module  TOF_Diffraction
 
     !Local variables
     integer                     :: i,j,no
-    real(Kind=cp)               :: xval,yval,chi
+    real(Kind=cp)               :: chi
     real(Kind=cp),save          :: chiold=1.0e30
     type(LSQ_State_Vector_type) :: lvs
     Real(Kind=cp), Dimension(n) :: der
@@ -372,11 +372,10 @@ Module  TOF_Diffraction
       character(len=*),      intent(in)     :: algor
 
       !---- Local Variables ----!
-      integer                                  :: i,j, no, ierror,ncount
-      real(Kind=cp), allocatable, dimension(:) :: wf,A
+      integer                                  :: i,j, no, ierror
+      real(Kind=cp), allocatable, dimension(:) :: wf
       character(len=1)                         :: ans
       Character (Len=512)                      :: texte
-      real(Kind=cp)                            :: ymax_gr, ymin_gr, yrange, intervalo
       logical :: opn
       ! Init
       chi2 = 0.

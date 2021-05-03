@@ -13,4 +13,4 @@ make_hall.sh $COMP
 ##
 # "#### TOF_fit_LM Program ####"
 chmod +x make_tof_LM.sh
-tof_LM.sh $COMP
+make_tof_LM.sh $COMP
