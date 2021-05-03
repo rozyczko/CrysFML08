@@ -51,6 +51,8 @@ rem
    )
 rem
 rem > Compilation
+rem > Go to the proper directory
+cd ..\..\Hall_Symbols
    if [%_COMP%]==[ifort] (
       ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
       ifort /exe:MHall *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
@@ -64,3 +66,4 @@ rem
    if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe  
    if exist %PROGCFML% copy MHall.exe %PROGCFML%\DistFPS_64b\MHall.exe    
    del *.obj *.mod *.o *.map *.bak > nul
+cd ..\Programs_FP\Windows

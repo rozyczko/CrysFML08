@@ -51,6 +51,8 @@ rem
    )
 rem
 rem > Compilation
+rem > Go to the proper directory
+cd ..\..\XRfit
    if [%_COMP%]==[ifort] (
       ifort /c TOF_module_LM.f90   /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
       ifort /c TOF_fitting_LM.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
@@ -66,3 +68,4 @@ rem
    if exist %FULLPROF% copy TOF_fit_LM.exe %FULLPROF%\TOF_fit_LM.exe
    if exist %PROGCFML% copy TOF_fit_LM.exe %PROGCFML%\DistFPS_64b\TOF_fit_LM.exe    
    del *.obj *.mod *.o *.map *.bak > nul
+cd ..\Programs_FP\Windows
