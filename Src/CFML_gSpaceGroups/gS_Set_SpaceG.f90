@@ -1007,7 +1007,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       !> Check
       if (len_trim(Str) <= 0 .and. n_gen <= 0) then
          err_CFML%Ierr=1
-         Err_CFML%Msg="Set_SpaceGroup@GSPACEGROUPS: Argument not valid to set Space Group!"
+         Err_CFML%Msg="Set_SpaceGroup@GSPACEGROUPS: Argument not valid to set Space Group!: len_trim(Str) <= 0 .and. n_gen <= 0"
          return
       end if
 

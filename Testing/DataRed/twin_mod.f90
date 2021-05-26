@@ -99,7 +99,7 @@
            !--- Local variables ---!
            integer                      :: ier,i,j,nmat
            character(len=:),allocatable :: line,kw
-           logical :: twin_rot_given
+           !logical :: twin_rot_given
 
            nmat=0
 

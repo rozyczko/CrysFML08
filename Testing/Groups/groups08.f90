@@ -52,7 +52,7 @@
       Type(rational), dimension(SpaceG%D-1)            :: v
       Type(rational), dimension(:,:),allocatable       :: newLat
       Type(rational) :: det
-      integer :: i,j,k,l,n,m,Npos,d,Dd,im
+      integer :: i,j,k,l,n,m,Npos,d,Dd !,im
       character(len=6) :: Strcode
       character(len=80), dimension(:),allocatable :: gen_lat
       type(spg_type)   :: SpG, P1_t !Auxiliary space groups
@@ -202,11 +202,11 @@
       logical,                  optional,intent(in)  :: printd
 
       !--- Local variables ---!
-      integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng,i1,i2,nalloc,navoid
-      character (len=40), dimension(:),allocatable :: gen
-      character (len=40), dimension(Spg%Num_Lat)   :: gen_lat
+      integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng,nalloc,navoid !,i1,i2
+      character (len=80), dimension(:),allocatable :: gen
+      character (len=80), dimension(Spg%Num_Lat)   :: gen_lat
       character (len=256),dimension(:),allocatable :: list_gen
-      character (len=40)                           :: gen_cent
+      character (len=80)                           :: gen_cent
       type(Symm_Oper_Type)                         :: Op_cent, Op_aux
       type(Symm_Oper_Type), dimension(Spg%Num_Lat) :: Op_lat
       type(Spg_Type),dimension(size(SubG))         :: Sub_tmp

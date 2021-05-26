@@ -35,7 +35,6 @@ Submodule (CFML_Maths) Maths_Modulo_Lat
        real(kind=cp), dimension(:),         intent( in) :: u
        real(kind=cp), dimension(1:size(u)), intent(out) :: v
        integer,       dimension(1:size(u)), intent(out) :: Lat
-       integer :: i,j
        v=mod(u+10.0_cp,1.0_cp)
        Lat=nint(u-v)
     End Subroutine Lat_Modulo

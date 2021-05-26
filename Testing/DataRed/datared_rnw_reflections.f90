@@ -26,14 +26,14 @@
       type(Reflection_List),                   intent(out)    :: Ref
       type(Group_k_Type),optional,dimension(:),intent(in out) :: Gk
       !local variables
-      integer                                :: i,j,nr,inp,ier,nkv,ivk,numor,a,b
+      integer                                :: i,j,nr,inp,ier,nkv,ivk,a,b !,numor
       real(kind=cp)                          :: wavel
       character(len=132)                     :: line
       character(len=6)                       :: keyw
       integer,             dimension(3)      :: hkl
       real(kind=cp),       dimension(3)      :: h1,h2,h3
       type(ObsRef), dimension(:),allocatable :: Ob
-      integer,      dimension(:),allocatable :: ind,pnf !pnf points to not found integer indices
+      integer,      dimension(:),allocatable :: ind !,pnf points to not found integer indices
       logical :: found
 
       nr=Number_lines(trim(filhkl))+1
@@ -144,7 +144,7 @@
                end if
                if(Ob(nr)%idomain == 0) Ob(nr)%idomain =1
                if(cond%transf_ind) then
-                 Ob(nr)%h=matmul(cond%transhkl,Ob(nr)%h)
+                 Ob(nr)%h=nint(matmul(cond%transhkl,Ob(nr)%h))
                end if
                Ob(nr)%hr=Ob(nr)%h(1:3)
                do j=1,kinfo%nk
@@ -670,8 +670,11 @@
       if(present(lun)) iou=lun
       Select Case(kinfo%nk)
         case(0)
-          line="List of read reflections"
-          if(present(gen)) line="List of generated reflections"
+          if(present(gen)) then
+             line="List of generated reflections"
+          else
+             line="List of read reflections"
+          end if
         case default
           if(cond%hkl_type == 11 .or. cond%hkl_type == 12) then
              line="List of read reflections with real reciprocal space indices"

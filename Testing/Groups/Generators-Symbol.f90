@@ -238,7 +238,7 @@
                  if(done(i)) cycle
                  if(op_symb(i)(1:1) == "2" ) then
                    if(msgen(2) == "21") then
-                     if(index(op_symb(i),"(") .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
+                     if(index(op_symb(i),"(") /=0 .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
                        point_op(2)=i
                        done(i)=.true.
                        List_Symb(2) = trim(List_Symb(2))//dire(1)
@@ -391,7 +391,7 @@
                  if(done(i)) cycle
                  if(op_symb(i)(1:1) == "2" ) then
                    if(msgen(2) == "21") then
-                     if(index(op_symb(i),"(") .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
+                     if(index(op_symb(i),"(") /= 0 .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
                        point_op(2)=i
                        done(i)=.true.
                        List_Symb(2) = trim(List_Symb(2))//dire(1)
@@ -1186,7 +1186,7 @@
       integer,                        intent(out) :: ngen
       character(len=*), dimension(:), intent(out) :: List_symb
       !--- Local variables ---!
-      integer                                   :: i,j,n,m,e_numops
+      integer                                   :: i,j,n,m !,e_numops
       integer,          dimension(3,3)          :: s
       real(kind=cp),    dimension(3)            :: t
       character(len=6), dimension(8)            :: sgen,msgen

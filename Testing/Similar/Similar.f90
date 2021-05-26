@@ -5,7 +5,7 @@
   !!---          Change of Space Group Settings
   !!---          Obtention of subgroups and transformation to standard setting
   !!--- (C) Created by JRC at Laboratorire Leon Brillouin, January 2002. Based in an old
-  !!---     Fortran 77 program written in 1990 at ILL. Is was re-written based in CrysFML
+  !!---     Fortran 77 program written in 1990 at ILL. It was re-written based in CrysFML
   !!---     Updated in January 2014 (JRC). Update October 2018 (JRC)
   !!--- Authors: Juan Rodriguez-Carvajal (Institut Laue-Langevin)
   !!---          Nebil A. Katcho (Institut Laue-Langevin) (Module: CFML_SpG_Standard_Representation)
@@ -17,7 +17,7 @@
     Use CFML_gSpaceGroups, only: Set_SpaceGroup, Write_SpaceGroup_Info, SpG_Type, &
                                  get_stabilizer, Get_multip_pos, Get_Mat_From_Symb, &
                                  get_orbit, Get_SubGroups_full, Identify_Group, &
-                                 Change_Setting_SpaceG, Get_SubGroups
+                                 Change_Setting_SpaceG, Get_SubGroups_gen, Point_Orbit
     Use CFML_Strings,      only: l_case, number_lines, pack_string, u_case, File_Type
     Use CFML_Atoms,        only: AtList_Type, Allocate_Atom_list, Write_Atom_List, &
                                  Extend_Atom_List,Atom_Equiv_List_Type, Atm_Cell_Type
@@ -29,9 +29,11 @@
 
     type(File_Type)                  :: file_dat
     type(Cell_G_Type)                :: Cell, Cell_n, Cell_std
-    type(SpG_Type)                   :: SpaceGroup,SpaceGroup_n
+    class(SpG_Type),allocatable      :: SpaceGroup,SpaceGroup_n
+    !type(SpG_Type)                   :: SpaceGroup,SpaceGroup_n
     type(SpG_Type), dimension (1024) :: SubGroup
-    type(AtList_Type)                :: A, A_n, Asub     !List of atoms in the asymmetric unit
+    type(AtList_Type)                :: A, A_n      !List of atoms in the asymmetric unit
+    type(AtList_Type)                :: Asub
     type(Atom_Equiv_List_Type)       :: Ate,Ate_n  !List of all atoms in the cell
     type(Point_list_type)            :: pl, pl_n
 
@@ -57,7 +59,7 @@
     real, dimension(3)       :: xp         !auxiliary 3D-vector
     real, dimension(6)       :: cel        !cell parameters
     logical                  :: iprin, trans_given, trn_std, index_given, fix_given, full_given, esta, none_given
-    real,   dimension(:,:), allocatable   :: xo !orbits matrix
+    type(Point_Orbit)        :: orb
     character(len=1)         :: fix_lat
     integer                  :: narg
     real, parameter,dimension(3,3) :: identity=reshape ([1,0,0,0,1,0,0,0,1],[3,3])
@@ -286,7 +288,7 @@
       CALL CPU_TIME(seconds)
       write(unit=*,fmt="(a)")  " => Start calculation of subgroups: "
           !call Get_SubGroups_full(SpaceGroup_n, SubGroup, nsg,printd=.true.)
-          call Get_SubGroups(SpaceGroup_n, SubGroup, nsg, printd=.true.)
+          call Get_SubGroups_gen(SpaceGroup_n, SubGroup, nsg, printd=.true.)
           if (Err_CFML%Ierr /= 0) then
              write(*,'(/,4x,"=> Error in the generation of the subgroups: ",a)') trim(Err_CFML%Msg)
           end if
@@ -335,7 +337,9 @@
 
        do n=1,A%natoms  !loop over atoms in the asymmetric unit of the original group
 
-         Call get_orbit(A%atom(n)%x,SpaceGroup,pl%np,pl%x)
+         Call get_orbit(A%atom(n)%x,SpaceGroup,orb)
+         pl%np= orb%mult
+         pl%x = orb%pos
          do j=1,pl%np
            write(unit=pl%nam(j),fmt="(a,i3,a)") trim(A%atom(n)%lab)//"(",j,")"
            pl%nam(j)=pack_string(pl%nam(j))
@@ -435,7 +439,9 @@
         call Allocate_Atom_List(nauas,Asub,"Atm",0)
         call clear_Error()
         do n=1,A%natoms  !loop over atoms in the asymmetric unit of the original group
-          Call get_orbit(A%atom(n)%x,SpaceGroup,pl%np,pl%x)
+          Call get_orbit(A%atom(n)%x,SpaceGroup,orb)
+          pl%np= orb%mult
+          pl%x = orb%pos
           do j=1,pl%np
             write(unit=pl%nam(j),fmt="(a,i5,a)") trim(A%atom(n)%lab)//"(",j,")"
             pl%nam(j)=pack_string(pl%nam(j))
@@ -477,7 +483,8 @@
                         nam(i1:i2) =" "
                      end if
                      nam=pack_string(nam)
-                     Call get_orbit(pl_n%x(:,j),SubGroup(i),mult,xo)
+                     Call get_orbit(pl_n%x(:,j),SubGroup(i),orb)
+                     mult=orb%mult
                      occ=real(mult)/real(SubGroup(i)%Multip)
                      na=na+1
                      Asub%Atom(na)=A%atom(n)
@@ -508,7 +515,8 @@
                       nam(i1:i2) =" "
                    end if
                    nam=pack_string(nam)
-                   Call get_orbit(pl_n%x(:,j),SubGroup(i),mult,xo)
+                   Call get_orbit(pl_n%x(:,j),SubGroup(i),orb)
+                   mult=orb%mult
                    occ=real(mult)/real(SubGroup(i)%Multip)
                    na=na+1
                    Asub%Atom(na)=A%atom(n)

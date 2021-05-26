@@ -467,7 +467,7 @@ SubModule (CFML_IOForm) IO_CIF
 
       type (atm_type)                 :: atm1
       type (atm_std_type)             :: atm2
-      type (matm_std_type)            :: atm3
+      !type (matm_std_type)            :: atm3
       type (atm_ref_type)             :: atm4
 
       !class(atm_type), allocatable    :: atm5

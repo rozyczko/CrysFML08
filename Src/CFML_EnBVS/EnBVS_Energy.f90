@@ -222,7 +222,7 @@
       Real(kind=cp)                              :: Dmax=4.0, Dangle=0.0
       Real(kind=dp),  Dimension(:), Allocatable  :: energy
       Real(kind=cp), Dimension(:), Allocatable   :: sumocc, solution_aux
-      Real(kind=cp), Dimension(:,:), Allocatable :: solution, combination, solution_new, xyz
+      Real(kind=cp), Dimension(:,:), Allocatable :: solution, combination, solution_new !, xyz
 
       Logical                                    :: error_pairs=.False.,error_element=.False.
       Logical                                    :: warning_valence
@@ -966,7 +966,7 @@
 
       !---- Local variables ----!
       character(len=4)                             :: car,atm
-      integer                                      :: i,j,k,n,n1,n2
+      integer                                      :: i,j,n,n1,n2 !,k
       integer                                      :: nx1,nx2,ny1,ny2,nz1,nz2
       integer                                      :: i1,j1,k1,sig1,sig2,ncont
       real(kind=cp)                                :: rx1,ry1,rz1,qval,q1,q2,rep

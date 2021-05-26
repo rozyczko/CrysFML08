@@ -31,17 +31,17 @@
       type(Cell_G_type),    intent(in)     :: Cell
       class(SpG_type),      intent(in)     :: SpG
       type(kvect_Info_Type),intent(in)     :: kinfo
-      type(Twin_Type),      intent(in)     :: tw
+      type(Twin_Type),      intent(in)     :: tw   !not yet implemented
       integer,optional,     intent(in)     :: lun
       logical,optional,     intent(in)     :: debug
 
       !Local variables
       real(kind=cp) :: total, sig, suma, sumai,suman, sumaw, sumanw, Rint, Rwint, aver_sig, &
-                       sigg, int_rej, q2, aver_int, Sintlmax,delt,Rint_sat,Rwint_sat,Rint_fun,&
-                       Rwint_fun
-      integer       :: i,j,k, iou, ier, iv, ns, rej, ival,  nkv, nn, ihkl, irej,ideb,&
-                       indp, nequiv, L, drej, Lmin,i_refout, D, n_mag, n_sat, n_fun, Num_Ref
-      logical :: absent,twin_acc
+                       sigg, int_rej, aver_int, Sintlmax,delt
+                       !Rwint_fun , q2,Rint_fun,Rwint_sat,Rint_sat
+      integer       :: i,j,k, iou, ns, rej, ihkl, irej,ideb,& !, ier, iv, ival,  nkv, nn
+                       indp, nequiv, drej, i_refout, D, n_mag, n_sat, n_fun, Num_Ref
+      !logical :: absent,twin_acc ! Not yet implemented
       integer :: n,ipos,mult,i_mag,i_mog        !123456789012345678901234567890
       character(len=29) :: fm1="(i8, i4,a,2f12.3,i12,f10.4,a)"
       character(len=24) :: fm2="(a, i4,i4,2i7,2f12.3,a/)"
@@ -56,7 +56,8 @@
       !integer, dimension(:,:), allocatable            :: h_list
       integer, dimension(R%nref)                      :: inf_mag
       real(kind=cp),    dimension(3)                  :: hr
-      real(kind=cp),    dimension(R%nref)             :: intav, sigmav, sigstat, warn
+      real(kind=cp),    dimension(R%nref)             :: intav, sigmav, sigstat
+      integer,          dimension(R%nref)             :: warn
       real(kind=cp),    dimension(R%nref)             :: intav_mag
       real(kind=cp),    dimension(R%nref)             :: intav_sat
       real(kind=cp),    dimension(R%nref)             :: intav_fun
@@ -492,23 +493,22 @@
 
     End Subroutine Treat_Reflections_nonConv
 
-    Subroutine Treat_Reflections_Conv(R,cond,cell,SpG,kinfo,Gk,tw,lun)
+    Subroutine Treat_Reflections_Conv(R,cond,cell,SpG,Gk,tw,lun)
       type(Reflection_List),intent(in out) :: R
       type(Conditions_Type),intent(in out) :: cond
       type(Cell_G_type),    intent(in)     :: Cell
       class(SpG_type),      intent(in)     :: SpG
-      type(kvect_Info_Type),intent(in)     :: kinfo
       type(Group_k_Type),   intent(in)     :: Gk
       type(Twin_Type),      intent(in)     :: tw
       integer,optional,     intent(in)     :: lun
 
       ! Local Variables
 
-      character(len=20)                    :: line1,wmess
-      integer, dimension(R%nref)           :: itreat, iord, nequv, ini, fin, numor, ivk, icod, warn
+      character(len=30)                    :: wmess !line1,
+      integer, dimension(R%nref)           :: itreat, nequv, ini, fin, ivk, icod, warn !, iord, numor
       integer, dimension(nmax)             :: contr
       integer, dimension(3)                :: hkl
-      real(kind=cp),    dimension(R%nref)  :: intav, sigmav, sigstat,lambda_laue, tbar,twotet,absorpt
+      real(kind=cp),    dimension(R%nref)  :: intav, sigmav, sigstat !,absorpt,lambda_laue, tbar,twotet
       integer,          dimension(3,R%nref):: hkls
       real(kind=cp),    dimension(4)       :: angles
       real(kind=cp),    dimension(3)       :: h1,h2,h3
@@ -517,9 +517,9 @@
       character(len=*),parameter,dimension(0:1) :: warn_mess=["                      ",  &
                                                                " <- Dubious reflection"]
       real    :: total, sig, suma, suman, sumaw, sumanw, Rint, Rwint, aver_sig, &
-                 wavel,sigg, int_rej, epsg, delt, q2, aver_int
-      integer :: i,j,k, iou, ier, iv, ns, rej, ival,  nkv, nn, ihkl, irej,&
-                 lenf, nin, ivp, nk, nequiv, L, drej, Lmin,i_refout
+                 sigg, int_rej, delt, q2, aver_int !,wavel, epsg
+      integer :: i,j,k, iou, iv, ns, rej, ival, nn, ihkl, irej,&  !lenf, ier,  nkv
+                 nin, ivp, nk, nequiv, L, drej, Lmin,i_refout
       logical :: absent,twin_acc
 
       warn=0
@@ -822,7 +822,7 @@
       !
 
       i=len_trim(cond%forma)
-      cond%forma=cond%forma(1:i-1)//",a)"
+      if(i > 1) cond%forma=cond%forma(1:i-1)//",a)"
       drej=0
       int_rej=0.0
 

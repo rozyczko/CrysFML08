@@ -2,7 +2,7 @@
 rem ****
 rem ****---- Compilation for Groups Program ----****
 rem ****
-rem > INIT 
+rem > INIT
    (set _DEBUG=N)
    (set _COMP=ifort)
    if [%TARGET_ARCH%]==[] (set TARGET_ARCH=ia32)
@@ -18,7 +18,7 @@ rem > Arguments ----
     if [%1]==[gfortran64] (
        (set _COMP=gfortran)
        (set _VER=m64)
-    )   
+    )
     shift
     if not [%1]==[] goto LOOP
 rem
@@ -36,14 +36,14 @@ rem
       )
       (set OPT2=/fpp /Qopt-report:0)
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
       if [%_DEBUG%]==[Y] (
-         if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran_debug)
+         if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran64_debug)
          (set OPT0=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics)
          (set OPT1=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics)
       ) else (
-         if [%_VER%]==[m32] (set DIRECTORY=gfortran) else (set DIRECTORY=gfortran)
+         if [%_VER%]==[m32] (set DIRECTORY=gfortran) else (set DIRECTORY=gfortran64)
          (set OPT0=-O0 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics)
          (set OPT1=-O3 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics)
       )
@@ -53,12 +53,12 @@ rem
 rem > Compilation
    if [%_COMP%]==[ifort] (
       ifort /c groups08.f90   /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /exe:groups08 *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
+      ifort /exe:groups08 *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
       gfortran -c groups08.f90           %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
       gfortran -o groups08.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
    )
-rem   
+rem
    del *.obj *.mod *.o *.map *.bak > nul

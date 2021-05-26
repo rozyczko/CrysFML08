@@ -114,14 +114,14 @@
        ! Local variables
        integer                                    :: i,j,k,m,ifail,L,n,Ls,ip,L1
        integer                                    :: i1,i2,i3,maxa,maxp,maxm,mult
-       real(kind=cp), dimension (3,3)             :: S,Sinv
+       real(kind=cp), dimension(3,3)              :: S,Sinv
        real(kind=cp)                              :: determ
        logical                                    :: newp,fail
-       real(kind=cp), dimension (  3)             :: pos
-       real(kind=cp), dimension (:,:),allocatable :: orb
+       real(kind=cp), dimension(  3)              :: pos
        type(point_list_type)                      :: pl
        type (AtList_Type)                         :: A
        type (Point_Orbit)                         :: orbit
+       !real(kind=cp), dimension(:,:),allocatable :: orb
        character(len=*),parameter,dimension(26) :: let=(/"a","b","c","d","e","f","g","h", &
           "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"/)
        real(kind=cp), allocatable, dimension (:,:) :: vec

@@ -113,7 +113,7 @@ Program test230_groups
    contains
    !
    !This subroutine is not used in this program. It is written here for testing purposes
-   !   
+   !
    Subroutine Get_SubGroups_n(SpG, SubG, nsg, indexg, point)
       !---- Arguments ----!
       type(Spg_Type),                    intent( in) :: SpG
@@ -124,10 +124,10 @@ Program test230_groups
 
       !--- Local variables ---!
       integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng
-      character (len=40), dimension(:),allocatable :: gen,gen_min
-      character (len=40), dimension(30)            :: gen_lat
+      character (len=80), dimension(:),allocatable :: gen,gen_min
+      character (len=80), dimension(30)            :: gen_lat
       character (len=256),dimension(:),allocatable :: list_gen
-      character (len=40)                           :: gen_cent, gen_aux
+      character (len=80)                           :: gen_cent, gen_aux
 
       type(Symm_Oper_Type)                         :: Op_cent, Op_aux
       type(Symm_Oper_Type), dimension(30)          :: Op_lat
