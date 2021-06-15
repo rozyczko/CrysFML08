@@ -298,11 +298,13 @@
             else ! autodetection of the new format
                a = index(line, ".")
                b = index(line(a+1:), ".")
+               line=" "
                if (b < 10) then
-                 write(cond%forma,"(a,i1,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
+                 write(line,"(a,i1,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
                else
-                 write(cond%forma,"(a,i2,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
+                 write(line,"(a,i2,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
                end if
+               cond%forma=trim(line)
                write(unit=*,fmt=*)"=> Will use format ",cond%forma
             end if
             rewind(unit=inp)
