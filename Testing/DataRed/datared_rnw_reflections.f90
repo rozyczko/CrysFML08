@@ -26,7 +26,7 @@
       type(Reflection_List),                   intent(out)    :: Ref
       type(Group_k_Type),optional,dimension(:),intent(in out) :: Gk
       !local variables
-      integer                                :: i,j,nr,inp,ier,nkv,ivk,a,b !,numor
+      integer                                :: i,j,nr,inp,ier,nkv,ivk,a,b,i_rem,irm !,numor
       real(kind=cp)                          :: wavel
       character(len=132)                     :: line
       character(len=6)                       :: keyw
@@ -309,6 +309,7 @@
             end if
             rewind(unit=inp)
 
+            irm=0
             do
                nr=nr+1
                read(unit=inp,fmt=cond%forma ,iostat=ier) &
@@ -318,24 +319,24 @@
                  exit
                end if
                h1=Ob(nr)%hr
+               if(cond%transf_ind) then
+                  h1=matmul(cond%transhkl,h1)
+                  if(.not. zbelong(h1)) then
+                    irm=irm+1
+                    if(irm == 1) Open(newunit=i_rem,file="removed_reflections.rmv",status="unknown",action="write")
+                    write(unit=i_rem,fmt=cond%forma) Ob(nr)%numor,  h1, Ob(nr)%intens, Ob(nr)%sigma,Ob(nr)%twtheta, Ob(nr)%omega, Ob(nr)%chi, Ob(nr)%phi
+                    write(unit=*,fmt="(a,3f8.3)")" => Removed reflection (non-integer): ",h1
+                    nr= nr-1
+                    cycle
+                  end if
+               end if
+
                if(.not. zbelong(h1)) then
                  if(cond%prop .or. cond%to_og) then
                    cond%hkl_real=.true.
-                 else
-                   if(cond%transf_ind) then
-                      h1=matmul(cond%transhkl,h1)
-                   else
-                      write(unit=*,fmt="(a,3f8.3)")" => Removed reflection (non-integer): ",h1
-                      nr= nr-1
-                      cycle
-                   end if
                  end if
                else
-                 if(cond%transf_ind) then
-                    h1=matmul(cond%transhkl,h1)
-                 else
                     h1=real(nint(h1))
-                 end if
                end if
                Ob(nr)%hr=h1
             end do

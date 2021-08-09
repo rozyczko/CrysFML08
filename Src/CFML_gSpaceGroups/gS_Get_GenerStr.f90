@@ -59,12 +59,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
       j=1
       do i=1, np
          k=pos(i)
-         !gen(i)=adjustl(ListGen(j:k-1))
          gen(i)=ListGen(j:k-1)
-         !lg=len_trim(gen(i))
-         !if(gen(i)(lg:lg) /= "1") then
-         !  gen(i)=trim(gen(i))//",1"
-         !end if
          j = k + 1
       end do
       if (ngen > np) then
@@ -73,7 +68,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
          if (i /= 0) gen(ngen)(i:i) = " "
       end if
 
-      !> Time reverse
+      !> Time reversal
       timerev_provided=.false.
       do i=1,ngen
          call Get_Separator_Pos(gen(i),",",pos,np)

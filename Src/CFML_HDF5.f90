@@ -39,26 +39,99 @@
 !!
 Module CFML_HDF5
     !---- Use Modules ----!
-    use HDF5
-    use CFML_ILL_Instrm_Data, ONLY: SXtal_Numor_type,Initialize_Numor,&
-                                    err_ILLData,err_ILLData_mess
-    use CFML_Strings,         ONLY: l_case
+    use hdf5
+    use CFML_GlobalDeps
+    use CFML_Strings,         only: l_case, Get_Filename
+    use CFML_ILL_Instrm_Data, only: SXTAL_Numor_type,Read_Numor
 
     implicit none
 
     private
 
-    public: Read_Nexus_D19
+    Type, public :: Nexus_Type
+        integer                                         :: nanodes
+        integer                                         :: ncathodes
+        integer                                         :: nframes
+        integer                                         :: scan_angle
+        integer, dimension(:,:,:), allocatable          :: counts
+        real(kind=cp)                                   :: gamma_step
+        real(kind=cp)                                   :: temperature
+        real(kind=cp), dimension(3)                     :: scan_info
+        real(kind=cp), dimension(:), allocatable        :: monitor
+        real(kind=cp), dimension(:,:), allocatable      :: angles ! phi,chi,omega,gamma,psi,nu
+        logical                                         :: is_name
+        logical                                         :: is_scantype
+        logical                                         :: is_gamma
+        logical                                         :: is_omega
+        logical                                         :: is_chi
+        logical                                         :: is_phi
+        logical                                         :: is_mode
+        logical                                         :: is_monitor
+        logical                                         :: gamma_coupling
+        character(len=2)                                :: geometry
+        character(len=10)                               :: instrument_name
+        character(len=20)                               :: scan_type
+        character(len=512)                              :: filename
+        character(len=512)                              :: filcod
+    End Type Nexus_Type
 
-    contains
+    type, public :: Cfl_Type
+        integer, dimension(:,:), allocatable :: numor_list
+        character(len=10)  :: instrument_name
+        character(len=512) :: numor_path
+    end type Cfl_Type
+
+    ! List of public variables
+    logical,            public :: err_nexus
+    character(len=256), public :: err_nexus_mess
+
+    ! List of public subroutines
+    public :: Initialize_Nexus,Read_Nexus, Ascii_to_Nexus
 
     Interface
-        Module Subroutine Read_Nexus_D19(filename,numor,counts)
-            !---- Arguments ----!
-            character(len=*),                       intent(in)  :: filename
-            type(SXTAL_NUMOR_type),                 intent(out) :: numor
-            integer, dimension(:,:,:), allocatable, intent(out) :: counts
-        End Subroutine Read_Nexus_D19
+
+        Module Subroutine Read_Nexus(nexus)
+          type(nexus_type), intent(in out)  :: nexus
+        End Subroutine Read_Nexus
+
+        Module Subroutine Ascii_to_Nexus(cfl,n,ierr)
+          type(cfl_type), intent(in)  :: cfl
+          integer,        intent(in)  :: n
+          integer,        intent(out) :: ierr
+        End Subroutine Ascii_to_Nexus
+
     End Interface
+
+    Contains
+
+    subroutine Initialize_Nexus(nexus)
+        !---- Arguments ----!
+        type(Nexus_Type), intent(inout)  :: nexus
+
+        nexus%instrument_name = ''
+        nexus%scan_type       = ''
+        nexus%geometry        = ''
+        nexus%filename        = ''
+        nexus%filcod          = ''
+        nexus%nanodes         = 0
+        nexus%ncathodes       = 0
+        nexus%nframes         = 0
+        nexus%scan_angle      = 0
+        nexus%scan_info(:)    = 0.0
+        nexus%temperature     = 0.0
+        nexus%gamma_step      = 0.0
+        nexus%is_name         = .false.
+        nexus%is_scantype     = .true.
+        nexus%is_gamma        = .true.
+        nexus%is_omega        = .true.
+        nexus%is_chi          = .true.
+        nexus%is_phi          = .true.
+        nexus%is_mode         = .true.
+        nexus%is_monitor      = .false.
+        nexus%gamma_coupling  = .false.
+        if (allocated(nexus%counts)) deallocate(nexus%counts)
+        if (allocated(nexus%angles)) deallocate(nexus%angles)
+
+    end subroutine Initialize_Nexus
 
 End Module CFML_HDF5

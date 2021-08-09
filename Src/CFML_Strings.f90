@@ -232,11 +232,12 @@
           real(kind=cp),dimension(3)                   :: vec   ! Vector
        End Function Get_Vec_From_String
 
-       Module Subroutine Get_Words(Str,dire,ic)
+       Module Subroutine Get_Words(Str,dire,ic,sep)
           !---- Argument ----!
           character(len=*),                 intent ( in) :: Str   ! Input string
           character(len=*), dimension(:),   intent (out) :: dire  ! Vector of Words
           integer,                          intent (out) :: ic    ! Number of words
+          character(len=*), optional,       intent ( in) :: sep   ! separator other than blank
        End Subroutine Get_Words
 
        Module Subroutine Inc_LineNum(line_n)

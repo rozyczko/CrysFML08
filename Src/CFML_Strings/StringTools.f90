@@ -333,7 +333,7 @@ Submodule (CFML_Strings) STR_StrTools
    End Subroutine Get_Separator_Pos
 
    !!----
-   !!---- GET_WORD
+   !!---- GET_WORDS
    !!----    Determines the number of words (Ic) in the string "Line" and generates a
    !!----    character vector "Dire" with separated words.
    !!----    Control of errors is possible by inquiring the global variables Err_CFML
@@ -342,11 +342,12 @@ Submodule (CFML_Strings) STR_StrTools
    !!----
    !!---- 05/04/2019
    !!
-   Module Subroutine Get_Words(Str,dire,ic)
+   Module Subroutine Get_Words(Str,dire,ic,sep)
       !---- Argument ----!
       character(len=*),                 intent ( in) :: Str   ! Input string
       character(len=*), dimension(:),   intent (out) :: dire  ! Vector of Words
       integer,                          intent (out) :: ic    ! Number of words
+      character(len=*), optional,       intent ( in) :: sep   ! separator other than blank
 
       !---- Local variables ----!
       character (len=len(Str))  :: line1,line2
@@ -357,6 +358,13 @@ Submodule (CFML_Strings) STR_StrTools
       ic=0
       ndim=size(dire)
       line1=Str
+      !Remove tabs, or a provided separator, replacing them by blanks
+      do j=1,len_trim(line1)
+        if(line1(j:j) == char(9)) line1(j:j)=" "
+        if(present(sep)) then
+           if(line1(j:j) == sep) line1(j:j)="  "
+        end if
+      end do
 
       do
          line1=adjustl(line1)
@@ -381,7 +389,7 @@ Submodule (CFML_Strings) STR_StrTools
             err_cfml%msg="Dimension of DIRE exceeded"
             exit
          end if
-         dire(ic)=line2(:nlong2)
+         dire(ic)=adjustl(line2(:nlong2))
       end do
 
    End Subroutine Get_Words

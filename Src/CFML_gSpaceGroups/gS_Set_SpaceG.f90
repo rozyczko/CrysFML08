@@ -972,9 +972,11 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       logical,                         optional, intent(in ) :: debug, set_inv
 
       !---- Local Variables ----!
-      integer                                      :: i,n_gen, n_it, d, ier
+      integer                                      :: i,j,n_gen, n_it, d, ier
       integer                                      :: n_laue, n_pg !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
+      character(len=35), dimension(15)             :: items
+      character(len=len(Str))                      :: loc_str
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
       character(len=5)                             :: car
       character(len=256)                           :: gList
@@ -999,6 +1001,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       ti=[1.0/2.0,1.0/2.0,1.0/2.0]
       tr2=[1.0/3.0,2.0/3.0,2.0/3.0]
       tr1=[2.0/3.0,1.0/3.0,1.0/3.0]
+      loc_str=Str
       call clear_error()
 
       call Init_SpaceGroup(SpaceG)
@@ -1015,11 +1018,30 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       if (n_gen == 0) then
 
          !> Check if we are providing a generator list as the first argument
-         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 ) then !Call directly to the space group constructor
+         i=index(Str,")")
+         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0) then !Call directly to the space group constructor
+
+            if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
+              !Transform the list of generators to the standard form in CrysFML
+              call Get_Words(Str,items,n_it,";")
+              loc_str=" "
+              do i=1,n_it
+                j=index(items(i),")")
+                if(index(items(i),"'") /= 0) then
+                  items(i) = trim(adjustl(items(i)(2:j-1)))//",-1;"
+                else
+                  items(i) = trim(adjustl(items(i)(2:j-1)))//",1;"
+                end if
+                loc_str=trim(loc_str)//items(i)
+              end do
+              j=len_trim(loc_str)
+              if(loc_str(j:j) == ";") loc_str(j:j)=" "
+            end if
+            !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
             if(present(set_inv)) then
-              call Group_Constructor(Str,SpaceG,set_inv=set_inv)
+              call Group_Constructor(loc_Str,SpaceG,set_inv=set_inv)
             else
-              call Group_Constructor(Str,SpaceG)
+              call Group_Constructor(loc_Str,SpaceG)
             end if
             if (SpaceG%D == 4) then
                if (present(debug)) then

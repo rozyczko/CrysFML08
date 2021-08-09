@@ -24,19 +24,26 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
       type(rational),       dimension(:),  allocatable :: centre_coord,anticentre_coord
       type(rational),       dimension(:,:),allocatable :: Lat_tr, aLat_tr
       type(rational),       dimension(:,:),allocatable :: Mat
-      integer :: d,i,ngen,invt,multip,centred,anticentred,Numops,num_lat,num_alat,mag_type
+      integer :: d,i,j,ngen,invt,multip,centred,anticentred,Numops,num_lat,num_alat,mag_type
 
       !> Init
       call Clear_Error()
       call Init_SpaceGroup(Spg)
       allocate(gen1(maxnum_op))
-      !call Get_Generators(ListGen, d, gen1, ngen1)
-      !call Check_Gener(gen1, gen)
       call Get_Generators(ListGen, d, gen, ngen)
-
       if (Err_CFML%Ierr /= 0) return
-
-      ngen=size(gen)
+      call Set_Identity_Matrix(d)
+      allocate(Mat(d,d))
+      !Remove the identity from the list of generators
+      j=0
+      do i=1,ngen
+         call Get_Mat_From_Symb(gen(i), Mat, invt)
+         if(Err_CFML%Ierr /= 0) return
+         if(rational_equal(Mat, Identity_Matrix) .and. invt == 1) cycle
+         j=j+1
+         gen(j) =gen(i)
+      end do
+      ngen=j
       do i=1,ngen
          Spg%generators_list=trim(Spg%generators_list)//trim(gen(i))//";"
       end do
@@ -47,13 +54,10 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
          call Allocate_Op(d,Op(i))
       end do
 
-      allocate(Mat(d,d))
       !> Construct the list of the generators on top of Op.
       !> The identity is always the first operator
       do i=1,ngen
          call Get_Mat_From_Symb(gen(i), Mat, invt)
-         if(Err_CFML%Ierr /= 0) return
-
          Op(i+1)%Mat=Mat
          Op(i+1)%time_inv=invt
       end do
