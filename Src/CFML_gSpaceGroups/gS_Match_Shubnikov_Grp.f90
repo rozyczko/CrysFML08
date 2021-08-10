@@ -266,6 +266,10 @@ SubModule (CFML_gSpaceGroups) SPG_Match_Shubnikov_Group
                                 G%OG_num      = nlabel_og(i)
                                 G%numshu      = i
                                 G%mat2std_shu = trim(symb)
+                                call set_shubnikov_info()
+                                j=Litvin2IT(i)
+                                G%UNI         = shubnikov_info(j)%STD
+                                write(G%UNI_num,"(i4)")  j
                                 return
                             else
                                 if (pout) write(*,'(8x,a)') "Failed"

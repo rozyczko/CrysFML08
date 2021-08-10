@@ -121,6 +121,8 @@ Module CFML_gSpaceGroups
        character(len=:),              allocatable :: BNS_symb          ! Belonov-Neronova-Smirnova Shubnikov group symbol
        character(len=:),              allocatable :: OG_symb           ! Opechowski-Guccione Shubnikov group symbol
        character(len=:),              allocatable :: Hall              ! Hall symbol
+       character(len=:),              allocatable :: UNI               ! Unified Symbol
+       character(len=:),              allocatable :: UNI_num           ! Unified number
        character(len=:),              allocatable :: crystalsys        ! Crystal system
        character(len=:),              allocatable :: pg                ! Point group
        character(len=:),              allocatable :: mag_pg            ! Magnetic PG

@@ -59,6 +59,8 @@ SubModule (CFML_gSpaceGroups) SPG_Init_Proc
             mGrp%BNS_num     = "       "
             mGrp%OG_symb     = "       "
             mGrp%OG_num      = "       "
+            mGrp%UNI         = "       "
+            mGrp%UNI_num     = "       "
             mGrp%Centre      = "       " ! Alphanumeric information about the center of symmetry
             mGrp%crystalsys  = "       "
             mGrp%pg          = "       " !Point Group

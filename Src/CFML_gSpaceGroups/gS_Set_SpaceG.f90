@@ -774,6 +774,8 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
           call set_Shubnikov_info()
           SpaceG%Hall=adjustl(shubnikov_info(Litvin2IT(num))%MHall)
+          SpaceG%UNI=adjustl(shubnikov_info(Litvin2IT(num))%STD)
+          write(SpaceG%UNI_num,"(i4)") Litvin2IT(num)
 
           if(change_setting) then
               call Change_Setting_SpaceG(setting, SpaceG)
@@ -1244,6 +1246,8 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
         if(len_trim(SpaceG%BNS_num) /= 0 .and. SpaceG%numshu /= 0 .and. len_trim(SpaceG%BNS_symb) == 0) then
           call set_Shubnikov_info()
           SpaceG%BNS_symb=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%BNS
+          SpaceG%UNI=Shubnikov_Info(Litvin2IT(SpaceG%numshu))%STD
+          write(SpaceG%UNI_num,"(i4)") Litvin2IT(SpaceG%numshu)
         end if
         SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
         if(by_Hall) then
