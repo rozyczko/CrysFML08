@@ -976,10 +976,9 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       integer                                      :: n_laue, n_pg !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
       character(len=35), dimension(15)             :: items
-      character(len=len(Str))                      :: loc_str
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
       character(len=5)                             :: car
-      character(len=256)                           :: gList
+      character(len=256)                           :: gList,loc_str
       type(rational), dimension(3)                 :: ta,tb,tc,ti,tr1,tr2
 
       logical :: by_Gen=.false., by_Hall=.false., ok1=.false., ok2=.false., ok3=.false.
@@ -1019,7 +1018,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
          !> Check if we are providing a generator list as the first argument
          i=index(Str,")")
-         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0) then !Call directly to the space group constructor
+         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
 
             if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
               !Transform the list of generators to the standard form in CrysFML
@@ -1038,6 +1037,22 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
               if(loc_str(j:j) == ";") loc_str(j:j)=" "
             end if
             !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
+
+            i=index(loc_str,"UNI")
+            if(i /= 0) then
+               if(i == 1) then
+                  loc_str=adjustl(loc_str(i+3:))
+               else
+                  loc_str=loc_str(1:i-1)
+               end if
+               call Set_Shubnikov_Info()
+               do i=1,NUM_SHUBNIKOV
+                  if (trim(loc_str) /= trim(Shubnikov_info(i)%STD)) cycle
+                  loc_str=Shubnikov_info(i)%Generators
+                  exit
+               end do
+            end if
+
             if(present(set_inv)) then
               call Group_Constructor(loc_Str,SpaceG,set_inv=set_inv)
             else

@@ -471,6 +471,8 @@
        write(*,'(a)') "1236   :: a,b,c;0,0,0      shub        <-- Shubnikov group type 1236 in standard setting"
        write(*,'(a)') "123    :: a,-c,b;1/2,0,0               <-- Space group type 123 in non-standard setting"
        write(*,'(a)') "Pn'ma                                  <-- Shubnikov group type Pn'ma in standard setting"
+       write(*,'(a)') "UNI Pnna.1'_a[Pncm]                    <-- Shubnikov group given in unified notation"
+       write(*,'(a)') "UNI Pnna.1'_a[Pncm] :: -c,b,a;0,0,0    <-- Shubnikov group given in unified notation in non-stardard setting"
        write(*,'(a)') "Pn'ma  :: -c,b,a;0,0,0     shub        <-- Shubnikov group type Pn'ma in the non-standard setting Pcmn'"
        write(*,'(a)') "B 2 C B                                <-- space #41 of standard symbol Aba2"
        write(*,'(a)') "13232  :: sup                          <-- SuperSpace group 13232 in standard setting"
