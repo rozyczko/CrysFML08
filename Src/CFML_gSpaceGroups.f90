@@ -71,7 +71,8 @@ Module CFML_gSpaceGroups
               Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,           &
               Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                &
               Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                 &
-              Inverse_OP, Get_Orbit, Get_moment_ctr, Get_TFourier_Ctr
+              Inverse_OP, Get_Orbit, Get_moment_ctr, Get_TFourier_Ctr,                 &
+              ISO_to_jones_notation
 
     public :: Allocate_OP, Allocate_SpaceGroup, Allocate_KVector, Change_Setting_SpaceG, &
               Get_Cosets, Get_Generators, Get_Laue_PG, Get_Magnetic_Lattice,             &
@@ -389,6 +390,11 @@ Module CFML_gSpaceGroups
           integer, intent(in) :: numSpg
           character(len=:), allocatable :: symbolHM
        End Function Get_HM_Standard
+
+       Module Subroutine ISO_to_jones_notation(gen_string)
+          !---- Arguments ----!
+          character(len=*), intent(in out) :: gen_string
+       End Subroutine ISO_to_jones_notation
 
        Module Function Get_Lattice_Type_from_Gener(Ngen,Gen) Result(Latt)
           !---- Arguments ----!

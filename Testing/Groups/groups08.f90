@@ -192,7 +192,7 @@
 
    End Subroutine Change_Set_SpaceG
 
-   Subroutine SubGroups(SpG, SubG, nsg, indexg, point,printd)
+   Subroutine SubGroups(SpG, SubG, nsg, indexg, point, printd)
       !---- Arguments ----!
       type(Spg_Type),                    intent( in) :: SpG
       type(Spg_Type),dimension(:),       intent(out) :: SubG
@@ -268,7 +268,7 @@
       nalloc=min((ngen**4)*max(1,SpG%num_lat)**2, 1800000)+2
       if (allocated(list_gen)) deallocate(list_gen)
       allocate(list_gen(nalloc))
-      write(*,"(a,i7)") " Number of allocated lists: ",nalloc
+      !write(*,"(a,i7)") " Number of allocated lists: ",nalloc
       L=0
       ! Start with the simplest lists: 1 generator
       if (ngen >= 1) then
@@ -586,15 +586,15 @@
          Case(:-1)
            cycle
          Case(0)
-           !if(full) then
-           !  call Get_SubGroups_full(Grp,sGrp,nsg,printd=.true.)
-           !else
-           !  call Get_SubGroups_gen(Grp,sGrp,nsg,printd=.true.)
-           !end if
-           call SubGroups(Grp,sGrp,nsg,printd=.true.)
+           if(full) then
+             call Get_SubGroups_full(Grp,sGrp,nsg,printd=.true.)
+           else
+             call Get_SubGroups_gen(Grp,sGrp,nsg,printd=.true.)
+           end if
+           !call SubGroups(Grp,sGrp,nsg,printd=.true.)
          Case Default
-           !call Get_SubGroups_full(Grp,sGrp,nsg,indexg,printd=.true.)
-           call SubGroups(Grp,sGrp,nsg,indexg,printd=.true.)
+           call Get_SubGroups_full(Grp,sGrp,nsg,indexg,printd=.true.)
+           !call SubGroups(Grp,sGrp,nsg,indexg,printd=.true.)
        End Select
        if (Err_CFML%Ierr /= 0) then
           write(*,'(/,4x,a)') trim(Err_CFML%Msg)
@@ -603,7 +603,7 @@
 
        if (nsg > 0) Then
           do L=1,nsg
-             write(*,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
+             !write(*,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
              !write(lun,"(/2(a,i3))") "  SUB-GROUP NUMBER #",L, " of index: ",Grp%multip/sGrp(L)%multip
              call Identify_Group(sGrp(L)) !.false.
              if (Err_CFML%Ierr /= 0) then
@@ -618,7 +618,7 @@
                 !     12345678901234
                 forma="(/,a,i3,a,    a,/)"
                 write(forma(11:14),"(i4)") nc
-                write(*,forma) "  Coset decomposition of  G: "//trim(Grp%Spg_symb)//&
+                write(*,forma) "  Coset decomposition of  G: "//trim(Grp%BNS_symb)//&
                                  "(",nc+1,") =  H("//trim(sGrp(L)%BNS_symb)//")  + ",("{"//&
                                  trim(Grp%Symb_Op(cosets(j)))//"} H + ",j=1,nc-1), &
                                  "{"//trim(Grp%Symb_Op(cosets(nc)))//"} H"

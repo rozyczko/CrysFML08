@@ -1024,21 +1024,10 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
             if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
               !Transform the list of generators to the standard form in CrysFML
-              call Get_Words(Str,items,n_it,";")
-              loc_str=" "
-              do i=1,n_it
-                j=index(items(i),")")
-                if(index(items(i),"'") /= 0) then
-                  items(i) = trim(adjustl(items(i)(2:j-1)))//",-1;"
-                else
-                  items(i) = trim(adjustl(items(i)(2:j-1)))//",1;"
-                end if
-                loc_str=trim(loc_str)//items(i)
-              end do
-              j=len_trim(loc_str)
-              if(loc_str(j:j) == ";") loc_str(j:j)=" "
+              loc_str=Str
+              call ISO_to_jones_notation(loc_str)
+              !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
             end if
-            !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
 
             i=index(loc_str,"UNI")
             if(i /= 0) then

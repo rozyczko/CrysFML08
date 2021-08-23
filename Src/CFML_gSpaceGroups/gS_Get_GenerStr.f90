@@ -20,15 +20,18 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
 
       !--- Local variables ---!
       character(len=:), allocatable :: symbol, ListGen
-      integer, dimension(20) :: Pos
-      integer                :: i,j,k,np
-      logical                :: timerev_provided
+      integer, dimension(20)        :: Pos
+      integer                       :: i,j,k,np
+      logical                       :: timerev_provided
 
       !> Init
       ngen=0
 
       !> Determine the dimension from the generatorList (first operator)
       ListGen=trim(StrGen)//"  "
+
+      !Check if the generator string is given in ISOTROPY format
+      if(index(ListGen,"(") /= 0 .and. index(ListGen,")") /= 0) call ISO_to_jones_notation(ListGen)
 
       i=index(ListGen,";")
       if (i == 0) then
@@ -84,6 +87,31 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
          end do
       end if
    End Subroutine Get_Generators_from_Str
+
+   Module Subroutine ISO_to_jones_notation(gen_string)
+      !---- Arguments ----!
+      character(len=*), intent(in out) :: gen_string
+      !--- Local variables ---!
+      character(len=len(gen_string)+2) :: loc_str
+      integer                          :: i,j,n_it
+      character(len=35), dimension(25) :: items
+
+      !Transform the list of generators to the standard form in CrysFML
+      call Get_Words(gen_string,items,n_it,";")
+      loc_str=" "
+      do i=1,n_it
+        j=index(items(i),")")
+        if(index(items(i),"'") /= 0) then
+          items(i) = trim(adjustl(items(i)(2:j-1)))//",-1;"
+        else
+          items(i) = trim(adjustl(items(i)(2:j-1)))//",1;"
+        end if
+        loc_str=trim(loc_str)//items(i)
+      end do
+      j=len_trim(loc_str)
+      if(loc_str(j:j) == ";") loc_str(j:j)=" "
+      gen_string=loc_str
+   End Subroutine ISO_to_jones_notation
 
 End SubModule SPG_Generators_from_Str
 

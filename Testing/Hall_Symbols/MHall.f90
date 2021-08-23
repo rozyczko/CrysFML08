@@ -1,14 +1,15 @@
 !!----
 !!---- Program: Test_Magnetic_Hall_Symbols
 !!----
-!!---- JGP/NAK/JRC August2020 
+!!---- JGP/NAK/JRC August2020
 !!
 Program Test_Magnetic_Hall_Symbols
    !---- Use Modules ----!
    Use CFML_Globaldeps,   only: cp, err_CFML, clear_error
    Use CFML_gSpaceGroups, only: SpG_Type, Get_Generators, Get_Hall_from_Generators, Change_Setting_Generators,&
                                 Init_SpaceGroup, Group_Constructor, Identify_Group, Write_SpaceGroup_Info, &
-                                Get_MagPG_from_BNS
+                                Get_MagPG_from_BNS, ISO_to_Jones_Notation
+   !Use CFML_Strings,      only: Get_Words
 
    !---- Variables ----!
    implicit none
@@ -42,7 +43,10 @@ Program Test_Magnetic_Hall_Symbols
       j=index(input_Hall,"y")
       k=index(input_Hall,"z")
 
+
       if(i /= 0 .and. j /= 0 .and. k /= 0) then !List of generators, generate the Hall symbol
+        !Check the aspect of generators, does it contains (x,-y,z)' forms?, and convert them to Jones Faithful notation
+        if(index(input_Hall,")") /= 0 .and. index(input_Hall,"(") /= 0) call ISO_to_jones_notation(input_Hall)
         call Get_Generators(input_hall, d, gen, ngen)
         write(*,"(a,a)") " => Input generators: ",trim(input_hall)
         input_hall = Get_Hall_from_Generators(Ngen, Gen)
@@ -63,7 +67,7 @@ Program Test_Magnetic_Hall_Symbols
       call Get_Generators(str_Hall, Gen, ngen)
       if (Err_CFML%Ierr /= 0) then
          write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-         if(narg /= 0 ) then 
+         if(narg /= 0 ) then
            exit
          else
            cycle
@@ -82,7 +86,7 @@ Program Test_Magnetic_Hall_Symbols
         call Change_Setting_Generators(setting,ngen,gen)
         if (Err_CFML%Ierr /= 0) then
            write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-           if(narg /= 0 ) then 
+           if(narg /= 0 ) then
              exit
            else
              cycle
@@ -102,7 +106,7 @@ Program Test_Magnetic_Hall_Symbols
       call Group_Constructor(gen,SpG)
       if (Err_CFML%Ierr /= 0) then
          write(*,"(a)")'    --->'//trim(Err_CFML%Msg)
-         if(narg /= 0 ) then 
+         if(narg /= 0 ) then
            exit
          else
            cycle
@@ -128,4 +132,5 @@ Program Test_Magnetic_Hall_Symbols
       write(*,"(/,a,f12.3,a)") " => Total CPU_TIME for this calculation: ",fin-start," seconds"
       if (narg /= 0) exit
    end do
+
 End Program Test_Magnetic_Hall_Symbols

@@ -227,6 +227,13 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
       end do do_L
       if(present(printd)) write(unit=*,fmt="(a,i8)") " Number of generator lists: ",nsg
       nsg=n
+      !Generate the Hall symbol if d=4
+      if(d == 4) then
+        do L=1,nsg
+          call Get_Generators(SubG(L)%generators_list, d, gen, ngen)
+          SubG(L)%Hall=Get_Hall_from_Generators(ngen,Gen(1:ngen))
+        end do
+      end if
 
    End Subroutine Get_SubGroups_gen
 
@@ -241,10 +248,10 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
 
       !--- Local variables ---!
       integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng,i1,i2,nalloc,navoid
-      character (len=40), dimension(:),allocatable :: gen
-      character (len=40), dimension(Spg%Num_Lat)   :: gen_lat
+      character (len=80), dimension(:),allocatable :: gen
+      character (len=80), dimension(Spg%Num_Lat)   :: gen_lat
       character (len=256),dimension(:),allocatable :: list_gen
-      character (len=40)                           :: gen_cent
+      character (len=80)                           :: gen_cent
       type(Symm_Oper_Type)                         :: Op_cent, Op_aux
       type(Symm_Oper_Type), dimension(Spg%Num_Lat) :: Op_lat
       type(Spg_Type),dimension(size(SubG))         :: Sub_tmp
@@ -407,7 +414,7 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
          do i=n-1,1,-1  !Check for repetitions in any case
             if (Sub_tmp(n) == Sub_tmp(i)) then
                n=max(1,n-1)
-               if(present(printd))  write(*,"(a,i4)") " Repeated group, new 'n' ",n
+               if(present(printd))  write(*,"(a,i4)") "     Repeated group, new 'n' ",n
                cycle do_L
             end if
          end do
@@ -428,6 +435,14 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
         nsg=n
         do i=1,n
           SubG(i)=Sub_tmp(i)
+        end do
+      end if
+
+      !Generate the Hall symbol if d=4
+      if(d == 4) then
+        do L=1,nsg
+          call Get_Generators(SubG(L)%generators_list, d, gen, ngen)
+          SubG(L)%Hall=Get_Hall_from_Generators(ngen,Gen(1:ngen))
         end do
       end if
 
