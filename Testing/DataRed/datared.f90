@@ -75,7 +75,7 @@
             if(cond%eps_given) then
               call Set_Eps_Math(cond%epsg)
             else
-              call Set_Eps_Math(0.001_cp)
+              call Set_Eps_Math(0.0005_cp)
             end if
           end if
 

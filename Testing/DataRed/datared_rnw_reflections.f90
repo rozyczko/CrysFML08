@@ -4,7 +4,7 @@
     Use CFML_Rational
     Use CFML_Maths,   only: zbelong,epss,sort,set_eps_math
     Use CFML_Metrics, only: Cell_Type, Cell_G_Type
-    Use CFML_Strings, only: number_lines
+    Use CFML_Strings, only: number_lines, FindFmt
     Use CFML_gSpaceGroups
     Use CFML_Reflections
     Use CFML_Propagation_Vectors
@@ -30,6 +30,7 @@
       real(kind=cp)                          :: wavel
       character(len=132)                     :: line
       character(len=6)                       :: keyw
+      character(len=80)                      :: kfmt
       integer,             dimension(3)      :: hkl
       real(kind=cp),       dimension(3)      :: h1,h2,h3
       type(ObsRef), dimension(:),allocatable :: Ob
@@ -296,15 +297,17 @@
                  cond%forma="(i6,3f7.3,2f10.2,4f8.2)"
                end if
             else ! autodetection of the new format
-               a = index(line, ".")
-               b = index(line(a+1:), ".")
-               line=" "
-               if (b < 10) then
-                 write(line,"(a,i1,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
-               else
-                 write(line,"(a,i2,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
-               end if
-               cond%forma=trim(line)
+               !a = index(line, ".")
+               !b = index(line(a+1:), ".")
+               !line=" "
+               !if (b < 10) then
+               !  write(line,"(a,i1,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
+               !else
+               !  write(line,"(a,i2,a,i1,a)") '(i6,3f', b, '.', b+6-a, ',2f10.2,4f8.2)'
+               !end if
+               !cond%forma=trim(line)
+               call FindFmt(0,line,"iffffffffff",kfmt)
+               cond%forma=trim(kfmt)
                write(unit=*,fmt=*)"=> Will use format ",cond%forma
             end if
             rewind(unit=inp)
