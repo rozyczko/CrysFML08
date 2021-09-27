@@ -11,16 +11,17 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
    !!----
    !!---- 20/04/19
    !!
-   Module Subroutine Get_Generators_from_Str(StrGen, d, gen, ngen)
+   Module Subroutine Get_Generators_from_Str(StrGen, d, gen, ngen,time_given)
       !---- Arguments ----!
       character(len=*),                            intent(in)  :: StrGen
       integer,                                     intent(out) :: d
       character(len=*), dimension(:), allocatable, intent(out) :: gen
       integer,                                     intent(out) :: ngen
+      logical, optional,                           intent(out) :: time_given
 
       !--- Local variables ---!
       character(len=:), allocatable :: symbol, ListGen
-      integer, dimension(20)        :: Pos
+      integer, dimension(40)        :: Pos
       integer                       :: i,j,k,np
       logical                       :: timerev_provided
 
@@ -86,6 +87,8 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
             if (np < d-1) gen(i)=trim(gen(i))//",1"
          end do
       end if
+      if(present(time_given)) time_given=timerev_provided
+
    End Subroutine Get_Generators_from_Str
 
    Module Subroutine ISO_to_jones_notation(gen_string)

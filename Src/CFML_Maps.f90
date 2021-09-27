@@ -58,7 +58,8 @@
 
     !---- List of public subroutines ----!
     public :: Load_ExtendedMap, Search_Peaks, Statistic_Map, &
-              Calculate_Contour2D, Calculate_Mesh, Set_Cube_Info
+              Calculate_Contour2D, Calculate_Mesh, Set_Cube_Info, &
+              Percol_Analysis, Read_BVEL, Peak_List
 
     !---- Definitions ----!
 

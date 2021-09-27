@@ -83,31 +83,37 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
                                                write(unit=iout,fmt="(a,i4)")     "                  Op-Dimension: ",Grp%d
                                                write(unit=iout,fmt="(a,i4)")     "               Space-Dimension: ",Grp%d-1
                                                write(unit=iout,fmt="(a,i4)")     "                  Multiplicity: ",Grp%multip
-                                               write(unit=iout,fmt="(a,i4,a)")   "                       MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
+            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4,a)")   "                       MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
                                                write(unit=iout,fmt="(a,i4)")     "                        NumOps: ",Grp%numops
                                                write(unit=iout,fmt="(a,i4)")     "                       Centred: ",Grp%centred
                                                write(unit=iout,fmt="(a,i4)")     "     Num. Centring translation: ",Grp%num_lat
-                                               write(unit=iout,fmt="(a,i4)")     "        Num. Anti-translations: ",Grp%num_alat
+            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4)")     "        Num. Anti-translations: ",Grp%num_alat
             if(len_trim(Grp%centre) /= 0)      write(unit=iout,fmt="(a, a)")     "            Centre of symmetry: ",trim(Grp%centre)
             if(len_trim(Grp%Crystalsys) /= 0)  write(unit=iout,fmt="(a, a)")     "                Crystal system: ",trim(Grp%Crystalsys)
             if(len_trim(Grp%pg) /= 0)          write(unit=iout,fmt="(a, a)")     "  Crystallographic Point group: ",trim(Grp%pg)
             if(len_trim(Grp%laue) /= 0)        write(unit=iout,fmt="(a, a)")     "                    Laue class: ",trim(Grp%laue)
             if(Grp%numspg /= 0)                write(unit=iout,fmt="(a,i4)")     "            Space Group number: ",Grp%numspg
-            if(Grp%numshu /= 0)                write(unit=iout,fmt="(a,i4)")     "        Shubnikov Group number: ",Grp%numshu
             if(len_trim(Grp%init_label) /= 0)  write(unit=iout,fmt="(a, a)")     "        Space Group Init Label: ",trim(Grp%init_label)
             if(len_trim(Grp%spg_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "            Space Group symbol: ",trim(Grp%spg_symb)
             if(len_trim(Grp%Hall) /= 0)        write(unit=iout,fmt="(a, a)")     "                   Hall symbol: ",trim(Grp%Hall)
+
+         if(Grp%magnetic) then
+            if(Grp%numshu /= 0 )               write(unit=iout,fmt="(a,i4)")     "        Shubnikov Group number: ",Grp%numshu
             if(len_trim(Grp%bns_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-symbol: ",trim(Grp%bns_symb)
             if(len_trim(Grp%bns_num) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-label : ",trim(Grp%bns_num)
             if(len_trim(Grp%og_symb) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group  OG-symbol: ",trim(Grp%og_symb)
             if(len_trim(Grp%UNI) /= 0)         write(unit=iout,fmt="(a, a)")     "   MSG unified notation symbol: ",trim(Grp%UNI)
             if(len_trim(Grp%UNI_num) /= 0)     write(unit=iout,fmt="(a, a)")     "   MSG unified notation number: ",trim(Grp%UNI_num)
             if(len_trim(Grp%mag_pg) /= 0)      write(unit=iout,fmt="(a, a)")     "          Magnetic Point Group: ",trim(Grp%mag_pg)
+            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "   To Standard Shubnikov Group: ",trim(Grp%Mat2Std_Shu)
+         else
             !if(len_trim(Grp%mat2std) /= 0)     write(unit=iout,fmt="(a, a)")     "       To Standard Space Group: ",trim(Grp%mat2std)
             if(len_trim(Grp%setting) /= 0)     write(unit=iout,fmt="(a, a)")     "     Setting w.r.t. or. gener.: ",trim(Grp%setting)
-            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "   To Standard Shubnikov Group: ",trim(Grp%Mat2Std_Shu)
+            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "             To Standard Group: ",trim(Grp%Mat2Std_Shu)
             if(len_trim(Grp%Parent_spg) /= 0)  write(unit=iout,fmt="(a, a)")     "            Parent Space Group: ",trim(Grp%Parent_spg)
             if(len_trim(Grp%tfrom_parent) /= 0)write(unit=iout,fmt="(a, a)")     "         Transform from Parent: ",trim(Grp%tfrom_parent)
+         end if
+
       end if
 
       if (Len_Trim(Grp%Generators_List) /= 0) Then
@@ -131,7 +137,7 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
          end do
       end if
 
-      if (Grp%num_alat > 0) then
+      if (Grp%num_alat > 0 ) then
          write(unit=iout,fmt="(/a)")      "             Anti-translations:"
          do i=1,Grp%num_alat
             write(unit=iout,fmt="(a,10a)") "                               [ ",(trim(Rational_String(Grp%aLat_tr(j,i)))//" ",j=1,Grp%d-1),"]"

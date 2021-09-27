@@ -277,7 +277,7 @@
          !call Get_Orbit(A_n%atom(i)%x,Spgn,Mult,orb)
          call Get_Orbit(A_n%atom(i)%x,Spgn,orbit)
          A_n%atom(i)%Mult=orbit%mult
-         A_n%atom(i)%occ=real(mult)/real(Spgn%Multip)
+         A_n%atom(i)%occ=real(orbit%mult)/real(Spgn%Multip)
        end do
        if(allocated(A%atom)) deallocate(A%atom)
        if(present(debug)) close(unit=lu)

@@ -74,7 +74,7 @@ Module CFML_IOForm
    !---- Public subroutines ----!
 
    public :: Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
-             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template
+             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File
 
    !--------------------!
    !---- PARAMETERS ----!
@@ -140,6 +140,12 @@ Module CFML_IOForm
          integer, optional, intent(in) :: i_ini, i_end
          logical                       :: ok
       End Function Is_SSG_Struct
+
+      Module Function Charge(label) result(q)
+         !---- Arguments ----!
+         character(len=*), intent(in):: label   ! Input string containing oxidation state
+         integer                     :: q
+      End Function Charge
 
       Module Subroutine Get_Job_Info(cfl,Job_info, i_ini,i_end)
          type(File_Type),      intent(in)  :: cfl

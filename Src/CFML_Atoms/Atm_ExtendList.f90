@@ -46,12 +46,13 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
       npeq=SpG%numops
       if (SpG%centred == 2) npeq=npeq*2
       if (ccell) npeq=SpG%multip
-      call allocate_atom_list(npeq*A%natoms,c_atm,Type_Atm,3)
+      call allocate_atom_list(npeq*A%natoms,c_atm,Type_Atm,0)
       n=0
       do k=1,A%natoms
-         l=1       ! Number of symetric atom
+         if (.not. A%atom(k)%active) cycle
+         l=1       ! Number of representant atom i asymmetric unit
          n=n+1     ! Number of atom in the list
-
+         c_atm%Atom(n)=A%atom(k)        !First atom of the orbit
          xo= modulo_lat(A%atom(k)%x)
          u(:,l)= xo
          c_atm%atom(n)%x=xo
@@ -69,7 +70,6 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
             l=l+1
             u(:,l)=xx(:)
             n=n+1
-
             select case (l)
                case(:9)
                   write(unit=fmm,fmt="(i1)") l
@@ -80,24 +80,25 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
             end select
             !c_atm%Atom(n)     = A%atom(k)     ! Valid for Intel and not for GFortran
             c_atm%Atom(n)%lab     = trim(A%atom(k)%lab)//"_"//adjustl(fmm)
-            c_atm%Atom(n)%Chemsymb=A%atom(k)%Chemsymb
-            c_atm%Atom(n)%Z       =A%atom(k)%Z
             c_atm%Atom(n)%Mult    = real(l)/SpG%multip
-            c_atm%Atom(n)%Charge  =A%atom(k)%Charge
             c_atm%Atom(n)%x       = xx
-            c_atm%Atom(n)%UType   =A%atom(k)%UType
-            c_atm%Atom(n)%ThType  =A%atom(k)%ThType
-            c_atm%Atom(n)%U_iso   =A%atom(k)%U_iso
-            c_atm%Atom(n)%Magnetic=A%atom(k)%Magnetic
-            c_atm%Atom(n)%Moment  =A%atom(k)%Moment
-            c_atm%Atom(n)%SfacSymb=A%atom(k)%SfacSymb
-            c_atm%Atom(n)%Ind_ff  =A%atom(k)%Ind_ff
+            c_atm%Atom(n)%Chemsymb= A%atom(k)%Chemsymb
+            c_atm%Atom(n)%Z       = A%atom(k)%Z
+            c_atm%Atom(n)%Charge  = A%atom(k)%Charge
+            c_atm%Atom(n)%UType   = A%atom(k)%UType
+            c_atm%Atom(n)%ThType  = A%atom(k)%ThType
+            c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
+            c_atm%Atom(n)%Magnetic= A%atom(k)%Magnetic
+            c_atm%Atom(n)%Moment  = A%atom(k)%Moment
+            c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
+            c_atm%Atom(n)%Ind_ff  = A%atom(k)%Ind_ff
+            c_atm%Atom(n)%VarF    = A%atom(k)%VarF
 
             !select type(atm => A%atom(k))
             !   class is (Atm_Std_Type)
             !      c_atm%Atom(n)%u_iso_std=atm%u_iso_std
-            !      !c_atm%Atom(n)%x_std=A%atom(k)%x_std
-            !      !c_atm%Atom(n)%occ_std=A%atom(k)%occ_std
+            !      c_atm%Atom(n)%x_std=Atm%x_std
+            !      c_atm%Atom(n)%occ_std=Atm%occ_std
             !end select
 
             !select type(atm => A%atom(k))
@@ -119,16 +120,16 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
       if (n == 0) then
          err_CFML%IErr=1
          err_CFML%Msg="Extend_List@CFML_Atoms: Number of extended atoms is zero!"
-         call allocate_atom_list(0,c_atm,Type_Atm,3)
+         call allocate_atom_list(0,c_atm,Type_Atm,0)
          return
       end if
 
-      call allocate_atom_list(n,B,Type_Atm,3)
+      call allocate_atom_list(n,B,Type_Atm,0)
       B%Active=c_atm%active(1:n)
       B%Atom=c_atm%atom(1:n)
 
       !> DEallocate
-      call allocate_atom_list(0,c_atm,Type_Atm,3)
+      call allocate_atom_list(0,c_atm,Type_Atm,0)
 
    End Subroutine Extend_List
 

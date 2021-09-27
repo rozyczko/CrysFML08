@@ -123,8 +123,8 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
            do i=1,Spg%Multip
              Om(:,:,i)=Spg%Op(i)%Mat
            end do
-           xs(1:d)=x
-           ms(1:d) = momd
+           xs(1:d)=x(1:d)
+           ms(1:d) = momd(1:d)
       End Select
 
       allocate(ptr(Spg%multip))

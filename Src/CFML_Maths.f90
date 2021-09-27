@@ -66,7 +66,7 @@
               Lcm, Linear_Dependent, Linear_Interpol, Locate, Lower_Triangular,  &
               Mat_Cross, Modulo_Lat,         &
               Negligible, Norm,              &
-              Outerprod,                     &
+              Outerprod, Polyhedron_Volume,  &
               Poly_Legendre, Polynomial_Fit, &
               mRank, Rotation_OX, Rotation_OY, Rotation_OZ, Real_Spher_Harm_Ang,  &
               Real_Spher_Harm_Ucvec, Real_Spher_HarmCharge_Ucvec, &
@@ -87,7 +87,7 @@
               RowEchelonForm,                &
               Set_EPS_Math, SmithNormalForm, Svdcmp, Swap, Resolv_Sist_1x2,      &
               Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3,&
-              Lat_Modulo
+              Lat_Modulo, Get_Plane_from_3Points, Get_Centroid_Coord
 
 
 
@@ -798,6 +798,25 @@
           logical                                             :: ok
        End Function In_Limits_R
 
+       Module Subroutine Get_Centroid_Coord(Cn,Atm_Cart,Centroid,Baricenter)
+          !---- Arguments ----!
+          integer,                       intent(in) :: Cn          ! Coordination Number
+          real(kind=cp), dimension(:,:), intent(in) :: Atm_Cart    ! Cartesian coordinates of atoms, gathered as: (1:3,1:Cn)
+          real(kind=cp), dimension(3),   intent(out):: Centroid    ! Centroid
+          real(kind=cp), dimension(3),   intent(out):: Baricenter  ! Baricenter
+       End Subroutine Get_Centroid_Coord
+
+       Module Subroutine Get_Plane_from_3Points(P1, P2, P3, A, B, C, D)
+          !---- Arguments ----!
+          real(kind=cp), dimension(3), intent(in) :: P1
+          real(kind=cp), dimension(3), intent(in) :: P2
+          real(kind=cp), dimension(3), intent(in) :: P3
+          real(kind=cp),               intent(out):: A
+          real(kind=cp),               intent(out):: B
+          real(kind=cp),               intent(out):: C
+          real(kind=cp),               intent(out):: D
+       End Subroutine Get_Plane_from_3Points
+
        Module Subroutine Invert_Matrix_R(a,b,perm)
           !---- Arguments ----!
           real(kind=cp), dimension(:,:),  intent(in ) :: a         ! Input Array
@@ -1060,6 +1079,14 @@
           real(kind=cp),intent (in) :: X
           real(kind=cp)             :: Plmx
        End Function Poly_Legendre
+
+       Module Function Polyhedron_Volume(NV,Vert,Cent) Result(vol)
+          !---- Arguments ----!
+          integer,                       intent(in) :: Nv       ! Number of Vertices
+          real(kind=cp), dimension(:,:), intent(in) :: Vert     ! Cartesian coordinates of atoms
+          real(kind=cp), dimension(3),   intent(in) :: Cent     ! Cartesian coordinates of Central atom
+          real(kind=cp)                             :: vol
+       End Function Polyhedron_Volume
 
        Module Function PseudoDeterm_C(A,n) result(det)
           !---- Arguments ----!

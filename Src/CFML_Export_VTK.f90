@@ -290,7 +290,7 @@ Module CFML_Export_VTK
     integer(kind=4)              :: gType, fType=0, nVal=1, ndim=3, nASYM != ngrid(1)*ngrid(2)*ngrid(3)
     integer(kind=4), dimension(4):: version=[3,0,0,0]
     integer(kind=4), dimension(3):: ngrid
-
+    character(len=79)            :: tit
 
     if(code == "P" .or. code == "p") then
       filegrid=trim(filename)//".pgrid"
@@ -299,6 +299,7 @@ Module CFML_Export_VTK
       filegrid=trim(filename)//".ggrid"
       gtype=0
     end if
+    tit=trim(title)
     ! Open the file and check that the file is valid
 
     open(newunit=vesta_id,file=trim(filegrid), &
@@ -319,7 +320,7 @@ Module CFML_Export_VTK
 
     ! ----------- Here starts the header
     write(vesta_id) version
-    write(vesta_id) title(1:79)//end_line
+    write(vesta_id) tit(1:79)//end_line
     write(vesta_id) gType
     write(vesta_id) fType !=0
     write(vesta_id) nval  !=1

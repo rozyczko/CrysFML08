@@ -586,6 +586,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
          !Setting the magnetic point group symbol from the BNS label
 
           SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
+          SpaceG%magnetic=.true.
 
           !Setting the parent group symbol and setting from argument "parent" if present
           if(present(parent)) then
@@ -816,7 +817,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
             Case(6)
                SpaceG%mat2std="a,b,c,d,e,f;0,0,0,0,0,0"
           End Select
-
+          SpaceG%magnetic=.false.
           SpaceG%Centre="Acentric"                    ! Alphanumeric information about the center of symmetry
           SpaceG%Parent_num=igroup_spacegroup(num)    ! Number of the parent Group
           SpaceG%Num_Lat=iclass_ncentering(iclass)-1  ! Number of centring points in a cell (notice that in the data base what is stored is the number of lattice points per cell: Num_lat+1)
@@ -975,7 +976,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
 
       !---- Local Variables ----!
       integer                                      :: i,j,n_gen, n_it, d, ier
-      integer                                      :: n_laue, n_pg !, nfin
+      integer                                      :: n_laue, n_pg, lo !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
       character(len=35), dimension(15)             :: items
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
@@ -983,7 +984,8 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       character(len=256)                           :: gList,loc_str
       type(rational), dimension(3)                 :: ta,tb,tc,ti,tr1,tr2
 
-      logical :: by_Gen=.false., by_Hall=.false., ok1=.false., ok2=.false., ok3=.false.
+      logical :: by_Gen=.false., by_Hall=.false., ok1=.false., ok2=.false., ok3=.false., &
+                 magnetic=.true.
 
       !> Init
 
@@ -1082,6 +1084,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
                if (trim(str_HM) /= trim(spgr_info(i)%hm)) cycle
                n_laue=spgr_info(i)%laue
                n_pg=  spgr_info(i)%pg
+               magnetic=.false.
                exit
             end do
             str_HM_std=trim(str_HM)
@@ -1110,6 +1113,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
                if (trim(str_HM_std)==trim(str_HM)) then
                   gList=get_IT_Generators(car)
                end if
+               magnetic=.false.
                exit
             end do
          end if
@@ -1135,6 +1139,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
                if (trim(str_HM_std)==trim(str_HM)) then
                   gList=get_IT_Generators(car)
                end if
+               magnetic=.false.
                exit
             end do
          end if
@@ -1184,6 +1189,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       end if
 
       !> Generate the spacegroup
+      SpaceG%magnetic=magnetic
       if(present(set_inv)) then
         call Group_Constructor(l_gen,SpaceG,set_inv=set_inv)
       else
@@ -1256,6 +1262,16 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
         End Select
       end if
       if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
+
+      !Eliminate the information about time reversal in the symbol of operators
+      !when the space group is non-magnetic
+      if(.not. SpaceG%magnetic) then
+        do i=1,SpaceG%multip
+          lo=len_trim(SpaceG%Symb_Op(i))
+          if(SpaceG%Symb_Op(i)(lo-1:lo) == ",1") &
+             SpaceG%Symb_Op(i)=SpaceG%Symb_Op(i)(1:lo-2)
+        end do
+      end if
 
    End Subroutine Set_SpaceGroup_gen
 

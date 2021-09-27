@@ -435,33 +435,9 @@ SubModule (CFML_Reflections) RFL_Asymm_Unit
       integer, dimension(3), intent(in) :: h
       integer, dimension(3)             :: k
 
-      !---- Local Variable ----!
-      integer, dimension(3) :: hh
-
-      k=0
       !>Laue: mmm
       !> hkl: h >=0, k >=0, l >=0
-      select case (h(1))
-         case (:-1)
-            hh=-h
-         case (0)
-            select case (h(2))
-               case (:-1)
-                  hh=-h
-               case (0)
-                  if (h(3) >= 0) then
-                     hh=h
-                  else
-                     hh=-h
-                  end if
-               case (1:)
-                  hh=h
-            end select
-         case (1:)
-            hh=h
-      end select
-
-      if (hh(1) >= 0 .and. hh(2) >= 0 .and. hh(3) >= 0) k=hh
+      K=abs(H)
 
    End Function Asu_H_Orthorhombic
 

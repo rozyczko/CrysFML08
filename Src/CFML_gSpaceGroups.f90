@@ -99,6 +99,7 @@ Module CFML_gSpaceGroups
     End Type Group_Type
 
     Type, public, extends(Group_Type) :: SPG_Type
+       logical                                    :: magnetic = .true.
        logical                                    :: standard_setting=.true.  !true or false
        integer                                    :: numspg = 0        ! Spacegroup number (IT if standard)
        integer                                    :: numshu = 0        ! Shubnikov group number
@@ -360,12 +361,13 @@ Module CFML_gSpaceGroups
           logical, optional,                           intent(in)  :: R_Shift
        End Subroutine Get_Generators_from_Hall
 
-       Module Subroutine Get_Generators_from_Str(StrGen, d, gen, ngen)
+       Module Subroutine Get_Generators_from_Str(StrGen, d, gen, ngen,time_given)
           !---- Arguments ----!
           character(len=*),                            intent(in)  :: StrGen
           integer,                                     intent(out) :: d
           character(len=*), dimension(:), allocatable, intent(out) :: gen
           integer,                                     intent(out) :: ngen
+          logical, optional,                           intent(out) :: time_given
        End Subroutine Get_Generators_from_Str
 
        Module Subroutine Get_Generators_L(laueClass,nSymOp,symOp,Gen,nGen)

@@ -629,6 +629,8 @@ SubModule (CFML_IOForm) IO_CIF
             end if
             atm%atom(n)%SfacSymb=atm%atom(n)%chemSymb
          end if
+         !Check if the charge/valence is provided ins the SfacSymb item
+         atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
 
          !> Coordinates
          select type (at => atm%atom)

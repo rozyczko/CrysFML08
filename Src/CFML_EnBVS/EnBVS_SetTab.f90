@@ -283,7 +283,7 @@
        soft_true=.False.
        if(present(soft)) soft_true=soft
        if(soft_true) then  !Calculate Rmin and D0 from softBVS parameters and softness
-          call Set_Atomic_Properties()
+          call Set_Atomic_Properties_Table()
           call Set_SBVS_Table()
           do i=1,A%N_Cations
              ic=0; ac=0
@@ -411,8 +411,8 @@
 
              end do  !Anions
           end do  !Cations
-          call deallocate_SBVS_Table()
-          call deallocate_Ap_table()
+          call Remove_SBVS_Table()
+          call Remove_Atomic_Properties_Table()
 
        else  !Just use the tabulated values
 
@@ -481,7 +481,7 @@
 
              end do
           end do
-          call Deallocate_BVEL_Table()
+          call Remove_BVEL_Table()
        end if
 
     End Subroutine Set_Table_BVEL_Params
@@ -595,8 +595,8 @@
           end do
        end do
 
-       call Deallocate_BVS_Table()
-       if(present(soft)) call Deallocate_BVS_Table()
+       call Remove_BVS_Table()
+       if(present(soft)) call Remove_BVS_Table()
 
     End Subroutine Set_Table_d0_b
 
@@ -618,7 +618,7 @@
     !!----    occupation. The first atom in the list must completely
     !!----    occupy its site. If covalent is provided the covalent
     !!----    radius is used instead of the ionic radius. If softbvs is
-    !!----    present the Set_Atomic_Properties subroutine is called for
+    !!----    present the Set_Atomic_Properties_Table subroutine is called for
     !!----    calculating Morse parameters if needed.
     !!----
     !!---- Update: March - 2005, December 2014, January 2015
@@ -675,7 +675,7 @@
 
        end if
 
-       if(present(softbvs) .and. .not. allocated(Ap_Table)) call Set_Atomic_Properties()
+       if(present(softbvs) .and. .not. allocated(Ap_Table)) call Set_Atomic_Properties_Table()
 
        loop1:do i=1, A%natoms
           car=u_case(a%atom(i)%ChemSymb)

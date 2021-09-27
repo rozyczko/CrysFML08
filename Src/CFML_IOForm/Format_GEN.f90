@@ -129,46 +129,8 @@ SubModule (CFML_IOForm) IO_GEN
        end select
 
        !> Attempt to get the oxidation state from "Label"
-       q=0
        if (abs(atm%charge) < EPS) then
-          iv=index(label,"+")
-          select case(iv)
-             case(0) ! No + sign
-                n=index(label,"-")
-                select case(n)
-                   case(2) ! Element with a single character symbol F-1
-                      read(unit=label(3:),fmt="(i1)",iostat=ier) q
-                      if (ier /= 0) q=0
-
-                   case(3) ! Element in the form: F1- or Br-1
-                      read(unit=label(2:2),fmt="(i1)",iostat=ier)  q
-                      if (ier /= 0) then
-                         read(unit=label(4:4),fmt="(i1)",iostat=ier)  q
-                         if (ier /= 0) q=0
-                      end if
-
-                   case(4) ! Element in the form: Br1-
-                      read(unit=label(3:3),fmt="(i1)",iostat=ier)  q
-                      if (ier /= 0) q=0
-                end select
-                q=-q   ! anions
-
-             case(2) ! Element with a single character symbol C+4
-                read(unit=label(3:),fmt="(i1)",iostat=ier)  q
-                if (ier /= 0) q=0
-
-             case(3) ! Element in the form: C4+ or Fe+3
-                read(unit=label(2:2),fmt="(i1)",iostat=ier)  q
-                if (ier /= 0) then
-                   read(unit=label(4:4),fmt="(i1)",iostat=ier)  q
-                   if (ier /= 0) q=0
-                end if
-
-             case(4) ! Element in the form: Fe3+
-                read(unit=label(3:3),fmt="(i1)",iostat=ier)  q
-                if (ier /= 0) q=0
-          end select
-          atm%charge=real(q)
+          atm%charge=charge(label)
        end if
 
        !> Now read the components of the magnetic moment
@@ -672,5 +634,52 @@ SubModule (CFML_IOForm) IO_GEN
        end if
 
     End Subroutine Read_Transf
+
+    Module Function Charge(label) result(q)
+       !---- Arguments ----!
+       character(len=*), intent(in):: label   ! Input string containing oxidation state
+       integer                     :: q
+       !local variables
+       integer :: iv,n,ier
+       q=0
+       iv=index(label,"+")
+       select case(iv)
+          case(0) ! No + sign
+             n=index(label,"-")
+             select case(n)
+                case(2) ! Element with a single character symbol F-1
+                   read(unit=label(3:),fmt="(i1)",iostat=ier) q
+                   if (ier /= 0) q=0
+
+                case(3) ! Element in the form: F1- or Br-1
+                   read(unit=label(2:2),fmt="(i1)",iostat=ier)  q
+                   if (ier /= 0) then
+                      read(unit=label(4:4),fmt="(i1)",iostat=ier)  q
+                      if (ier /= 0) q=0.0
+                   end if
+
+                case(4) ! Element in the form: Br1-
+                   read(unit=label(3:3),fmt="(i1)",iostat=ier)  q
+                   if (ier /= 0) q=0
+             end select
+             q=-q   ! anions
+
+          case(2) ! Element with a single character symbol C+4
+             read(unit=label(3:),fmt="(i1)",iostat=ier)  q
+             if (ier /= 0) q=0
+
+          case(3) ! Element in the form: C4+ or Fe+3
+             read(unit=label(2:2),fmt="(i1)",iostat=ier)  q
+             if (ier /= 0) then
+                read(unit=label(4:4),fmt="(i1)",iostat=ier)  q
+                if (ier /= 0) q=0
+             end if
+
+          case(4) ! Element in the form: Fe3+
+             read(unit=label(3:3),fmt="(i1)",iostat=ier)  q
+             if (ier /= 0) q=0
+       end select
+
+    End Function Charge
 
 End SubModule IO_GEN

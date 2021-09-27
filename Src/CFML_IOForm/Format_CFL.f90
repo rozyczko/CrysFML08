@@ -663,7 +663,7 @@ SubModule (CFML_IOForm) IO_CFL
 
       !> define format fom
       fom   ="(a,tr  ,a)"
-      forma="(a,a  ,tr2,a,tr3,5a14,2f8.2,tr3,a)"
+      forma="(a,a  ,tr2,a,tr3,5a14,2f9.2,tr3,a)"
 
       ish=maxl-4
       select case(ish)
@@ -694,8 +694,8 @@ SubModule (CFML_IOForm) IO_CFL
                text(4)=string_NumStd(at(i)%U_iso, at(i)%U_iso_std)
                text(5)=string_NumStd(at(i)%Occ, at(i)%Occ_std)
 
-               write (unit=iunit,fmt=forma) "Atom   ",trim(at(i)%lab),at(i)%ChemSymb, &
-                     (text(j),j=1,5), at(i)%moment, at(i)%charge, " # "//trim(at(i)%AtmInfo)
+               write (unit=iunit,fmt=forma) "Atom ",trim(at(i)%lab),at(i)%ChemSymb, &
+                     (text(j),j=1,5), at(i)%mom, real(at(i)%charge), " # "//trim(at(i)%AtmInfo)
 
                select case (l_case(at(i)%ThType))
                   case ('ani')
@@ -767,7 +767,7 @@ SubModule (CFML_IOForm) IO_CFL
       if (present(title)) write(unit=lun,fmt="(a)") "TITLE "//trim(title)
 
       write(unit=lun,fmt='(a)')" "
-      write(unit=lun,fmt='(a)') "!  Automatically generated CFL file (Write_CFL)"
+      write(unit=lun,fmt='(a)') "!  Automatically generated CFL file (Write_CFL_file)"
       write(unit=lun,fmt='(a)')" "
 
       !> Cell

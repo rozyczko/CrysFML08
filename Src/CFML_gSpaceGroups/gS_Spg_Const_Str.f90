@@ -25,12 +25,13 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
       type(rational),       dimension(:,:),allocatable :: Lat_tr, aLat_tr
       type(rational),       dimension(:,:),allocatable :: Mat
       integer :: d,i,j,ngen,invt,multip,centred,anticentred,Numops,num_lat,num_alat,mag_type
-
+      logical :: time_given
+      
       !> Init
       call Clear_Error()
       call Init_SpaceGroup(Spg)
       allocate(gen1(maxnum_op))
-      call Get_Generators(ListGen, d, gen, ngen)
+      call Get_Generators(ListGen, d, gen, ngen,time_given)
       if (Err_CFML%Ierr /= 0) return
       call Set_Identity_Matrix(d)
       allocate(Mat(d,d))
@@ -124,6 +125,8 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
             end do
          end if
       end if
+      if(.not. time_given) Spg%magnetic=.false.
+      
    End Subroutine SpaceG_Constructor_Str
 
 End SubModule SPG_ConstructorString

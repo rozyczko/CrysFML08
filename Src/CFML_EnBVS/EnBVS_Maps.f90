@@ -30,7 +30,7 @@
     Module Subroutine Calc_Map_BVEL(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol,emin,npix,outp,bvel_map)
        !---- Arguments ----!
        type (Atoms_Conf_List_type), intent(in) :: A
-       type (SPG_Type),        intent(in) :: SpG
+       type (SPG_Type),             intent(in) :: SpG
        Type (Cell_G_Type),          intent(in) :: Cell
        character(len=*),            intent(in) :: Filecod
        integer,                     intent(in) :: ndimx
@@ -53,15 +53,15 @@
        real(kind=cp)                                :: rx1,ry1,rz1,qval,q1,q2,rep,p,s,cose
        real(kind=cp)                                :: sbvs, dd, occ, radius, rho, dmin, &
                                                        dzero, alpha,c_rep,c_atr !, d_cutoff
-       real(kind=cp), dimension(3)                  :: pto,pta,step,extend
-       real(kind=cp),   dimension(:,:,:), allocatable :: map_bvs
-       integer(kind=2), dimension(:,:,:), allocatable :: contrib
-       type (AtList_Type)                        :: At1, At2
+       real(kind=cp),  dimension(3)                 :: pto,pta,step,extend
+       real(kind=cp),  dimension(:,:,:), allocatable:: map_bvs
+       integer(kind=2),dimension(:,:,:), allocatable:: contrib
+       type (AtList_Type)                           :: At1, At2
        logical                                      :: anion,cation
        !Coulomb constant (1/4pie0) to get energies in eV, use electron charges and distances in angstroms
        real(kind=dp), parameter :: ke=14.399644850445155254866066
        !Principal quantum numbers of the test=ion  and the species of all the atoms of the list
-       real(kind=cp) :: n_tion, ferfc
+       real(kind=cp)                            :: n_tion, ferfc
        real(kind=cp), dimension(:), allocatable :: n_j
        logical :: all_present
 
@@ -72,14 +72,14 @@
 
        all_present=present(delta) .and. present(vol) .and. present(npix) .and. present(emin)
        !---- Preparing the Variables and calculations ----!
-       call Allocate_Atom_List(A%natoms,At1,"Atm",0)
+       call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
        At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                         !coming from A (Atoms_Conf_List_type, set in the main program)
        atm=u_case(atname)
        n1=0
        allocate(n_j(A%N_Spec))
        n_j=0.0
-       if (.not. allocated(Ap_Table)) call Set_Atomic_Properties()
+       if (.not. allocated(Ap_Table)) call Set_Atomic_Properties_Table()
        do j=1,A%N_Spec
          car=u_case(A%species(j))
          do i=1,Ap_species_n
@@ -108,7 +108,7 @@
           return
        end if
 
-       call Extend_Atom_List(At1,At2,Spg,"Atm",.true.)
+       call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)
        !check that all species are well set in the list
        !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL"
        do n=1,At2%natoms
@@ -136,8 +136,8 @@
          read(unit=car(i+1:),fmt=*) qval
          anion=.true.
        end if
-       step=(/ 1.0/real(ndimx),  1.0/real(ndimy), 1.0/real(ndimz) /)
-       extend=(/ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) /)
+       step=[ 1.0/real(ndimx),  1.0/real(ndimy), 1.0/real(ndimz) ]
+       extend=[ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) ]
 
        np=0; npix=0
        !---- Map Calculation ----!
@@ -191,7 +191,7 @@
                    do k1=nz1,nz2
                       do j1=ny1,ny2
                          do i1=nx1,nx2
-                            pta=At2%Atom(n)%x+real((/i1,j1,k1/))
+                            pta=At2%Atom(n)%x+real([i1,j1,k1])
                             dd=max(Distance(pto,pta,Cell),0.0001) !To avoid division by zero
                             if (dd > drmax) cycle
                             contrib(i,j,k)=contrib(i,j,k)+1
@@ -367,7 +367,7 @@
        if (ndimx <= 0 .or. ndimy <= 0 .or. ndimz <= 0) return
 
        !---- Preparing the Variables and calculations ----!
-       call Allocate_Atom_List(A%natoms,At1,"Atm",0)
+       call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
        At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                         !coming from A (Atoms_Conf_List_type, set in the main program)
        atm=u_case(atname)
@@ -389,10 +389,10 @@
           return
        end if
 
-       call Extend_Atom_List(At1,At2,Spg,"Atm",.true.)
-       call Allocate_atom_list(0,At1,"Atm",0) !Deallocate atom list
+       call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)
+       call Allocate_atom_list(0,At1,"Atm_Std",0) !Deallocate atom list
        !check that all species are well set in the list
-       !write(unit=*,fmt="(a)") " => List of atoms for calculating BVS map"
+       !write(unit=*,fmt="(a)") " => List of atoms for calculating BVS map (Calc_Map_BVS)"
        do n=1,At2%natoms
            n2=At2%Atom(n)%ind_ff(1)
            !write(unit=*,fmt="(a,a,3f12.5)") At2%Atom(n)%Lab,At2%Atom(n)%SfacSymb,At2%Atom(n)%x
@@ -473,7 +473,7 @@
                    do k1=nz1,nz2
                       do j1=ny1,ny2
                          do i1=nx1,nx2
-                            pta=At2%Atom(n)%x+real((/i1,j1,k1/))
+                            pta=At2%Atom(n)%x+real([i1,j1,k1])
                             occ=At2%Atom(n)%VarF(1)
                             dd=max(Distance(pto,pta,Cell),0.0001) !To avoid division by zero
                             if (dd > drmax) cycle

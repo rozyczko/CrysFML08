@@ -173,8 +173,8 @@
          sk2 = sk(1) ** 2 + sk(2) ** 2
          e_l = e_l + expok(ik) * sk2
       End Do
-      e_s    = e_s * k_coul / 2.
-      e_l    = e_l * k_coul * fourpi / 2. / Vol
+      e_s    = e_s * k_coul / 2.0
+      e_l    = e_l * k_coul * fourpi / 2.0 / Vol
       e_self = e_self * k_coul * beta  / Sqrt(pi)
       e      = (e_s + e_l - e_self) / Ac%Nat
     End Subroutine Ewald
@@ -983,16 +983,17 @@
 
       !---- Initial conditions ----!
       if (A%natoms <= 0) return
+      call clear_error()
 
       !---- Preparing the Variables and calculations ----!
-      call Allocate_Atom_List(A%natoms,At1,"Atm",0)
+      call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
       At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                        !coming from A (Atoms_Conf_List_type, set in the main program)
       atm=u_case(atname)
       n1=0
       allocate(n_j(A%N_Spec))
       n_j=0.0
-      if (.not. allocated(Ap_Table)) call Set_Atomic_Properties()
+      if (.not. allocated(Ap_Table)) call Set_Atomic_Properties_Table()
       do j=1,A%N_Spec
         car=u_case(A%species(j))
         do i=1,Ap_species_n
@@ -1015,20 +1016,24 @@
             car=A%Species(n1)
          end if
       end do
-      if (n1 ==0) then
+      if (n1 == 0) then
          Err_CFML%Ierr=1
          Err_CFML%Msg = "The point atom "//atname//" is not in the Species Table"
       end if
 
-      call Extend_Atom_List(At1,At2,Spg,"Atm",.true.)
+      call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)  !Here the non-active atoms of At2 are not in At2
+      if(Err_CFML%Ierr /= 0) then
+        write(unit=*,fmt="(a)") " =>"//"Error in Calc_Site_Energy: "//trim(Err_CFML%Msg)
+        return
+      end if
       !call AtList1_ExtenCell_AtList2(Spg,At1,At2,.true.)
       !call Deallocate_atom_list(At1)
       !check that all species are well set in the list
-      !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL"
+      !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL (Calc_Site_Ene)"
       do n=1,At2%natoms
           n2=At2%Atom(n)%ind_ff(1)
-          !write(unit=*,fmt="(a,a,3f12.5)") At2%Atom(n)%Lab,At2%Atom(n)%SfacSymb,At2%Atom(n)%x
-          if (n2 ==0) then
+          !write(unit=*,fmt="(a,a,3f12.5,f8.4)") At2%Atom(n)%Lab,At2%Atom(n)%SfacSymb,At2%Atom(n)%x,real(At2%Atom(n)%charge)
+          if (n2 == 0) then
              Err_CFML%Ierr=1
              Err_CFML%Msg = "The atom "//trim(At2%Atom(n)%lab)//" is not in the Species Table"
              return
@@ -1047,7 +1052,7 @@
         read(unit=car(i+1:),fmt=*) qval
         anion=.true.
       end if
-      extend=(/ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) /)
+      extend=[ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) ]
 
       pto(1)=x
       pto(2)=y
@@ -1080,6 +1085,8 @@
       sbvs=0.0
       rep=0.0
       ncont=0
+      !write(*,"(a,6i4)") "nz1,nz2,ny1,ny2,nx1,nx2: ",nz1,nz2,ny1,ny2,nx1,nx2
+      !write(*,"(a,3f10.5,a,f10.4)") "Coordinates of the site: ",pto, "  drmax: ",drmax
       do n=1,At2%natoms
          n2=At2%Atom(n)%ind_ff(1)
          q2=At2%Atom(n)%charge
@@ -1092,12 +1099,14 @@
          occ=At2%Atom(n)%VarF(1)
          c_rep=occ*q1*q2/sqrt(n_tion*n_j(n2))
          c_atr=occ*dzero
+         !write(*,"(2i4,12f10.4)") n1,n2,q1,q2,rho,dzero,dmin,alpha,d_cutoff,occ,n_tion,n_j(n2), c_rep, c_atr
          ferfc=erfc(drmax/rho)/drmax !always below 10^(-9) when drmax/rho > 4.2
          do k1=nz1,nz2
             do j1=ny1,ny2
                do i1=nx1,nx2
-                  pta=At2%Atom(n)%x+real((/i1,j1,k1/))
+                  pta=At2%Atom(n)%x+real([i1,j1,k1])
                   dd=max(Distance(pto,pta,Cell),0.0001) !To avoid division by zero
+                  !write(*,"(a,i5,3i4,3f10.4,f12.4)") " n,i1,j1,k1,pta,distance: ",n,i1,j1,k1,pta,dd
                   if (dd > drmax) cycle
                   if (sig1 == sig2) then
                      rep=rep + c_rep*(erfc(dd/rho)/dd-ferfc)
@@ -1105,6 +1114,7 @@
                      !if(dd > d_cutoff) cycle
                      sbvs=sbvs+ c_atr*((exp(alpha*(dmin-dd))-1.0)**2-1.0)
                   end if
+                  !write(*,"(a,3f10.4)") " rep,sbvs,distance: ",rep,sbvs,dd
                end do
             end do
          end do
@@ -1112,7 +1122,8 @@
       end do
       !Multiply the repulsion term by the Coulomb constant to convert to eV
       emin=sbvs+ke*rep
-      return
+      !write(*,"(a,2f10.4)")  " => Drmax and Site Energy",drmax,emin
+
     End Subroutine Calc_Site_Ene
 
 
