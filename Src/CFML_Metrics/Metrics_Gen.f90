@@ -177,16 +177,16 @@ Submodule (CFML_Metrics) Metrics_Gen
           else !> one symbol input
              select case(Car(1:1))
                 case('C')
-                    Car(2:2)='A'
+                    CarType(2:2)='A'
 
                 case('A')
-                   Car(2:2)='B'
+                    CarType(2:2)='C'
 
                 case('B')
-                   Car(2:2)='C'   !> defaults to c* // Z for this case
+                    CarType(2:2)='C'        !defaults to c* // Z for this case
 
                 case default
-                   Car='CA'       !> default because invalid first character
+                    CarType='CA'            !default because invalid first character
                 end select
           end if
        end if
@@ -211,23 +211,24 @@ Submodule (CFML_Metrics) Metrics_Gen
              Mat(3,2) = cell(2)*cosd(ang(1))
              Mat(3,3) = cell(3)
 
-          case('AB')  !This is the alternate case in the version prior to  2019
-             ! x//a and Y // b*
-             !  Transponse of the following matrix:
-             !    a = (       a   ,         0           ,       0             )
-             !    b = ( b cosgamma,    b singamma       ,       0             )
-             !    c = (  c cosbeta, -c sinbeta cosalpha*, c sinbeta sinalpha* )
-             cosgas =(cosd(ang(3))*cosd(ang(2))-cosd(ang(1)))/(sind(ang(3))*sind(ang(2)))
-             singas = sqrt(1.0_cp-cosgas**2)
-             Mat(1,1) = cell(1)
-             Mat(1,2) = cell(2)*cosd(ang(3))
-             Mat(1,3) = cell(3)*cosd(ang(2))
-             Mat(2,1) = 0.0_cp
-             Mat(2,2) = cell(2)*sind(ang(3))
-             Mat(2,3) =-cell(3)*sind(ang(2))*cosgas
-             Mat(3,1) = 0.0_cp
-             Mat(3,2) = 0.0_cp
-             Mat(3,3) = cell(3)*sind(ang(2))*singas
+           case('AC')  !This is the alternate case in the version prior to  2019.
+                 ! Incorrectly labelled in 2019 as x//a and Y // b*  => AB!!!!
+                 !  It is really x//a and Z // c* => AC
+                 !  Transponse of the following matrix:
+                 !    a = (       a   ,         0           ,       0             )
+                 !    b = ( b cosgamma,    b singamma       ,       0             )
+                 !    c = (  c cosbeta, -c sinbeta cosalpha*, c sinbeta sinalpha* )
+                 cosgas =(cosd(ang(3))*cosd(ang(2))-cosd(ang(1)))/(sind(ang(3))*sind(ang(2))) ! This is actually cos(alpha*) but called cosgas!!
+                 singas = sqrt(1.0-cosgas**2)
+                 CrystOrt(1,1) = cellv(1)
+                 CrystOrt(1,2) = cellv(2)*cosd(ang(3))
+                 CrystOrt(1,3) = cellv(3)*cosd(ang(2))
+                 CrystOrt(2,1) = 0.0
+                 CrystOrt(2,2) = cellv(2)*sind(ang(3))
+                 CrystOrt(2,3) =-cellv(3)*sind(ang(2))*cosgas
+                 CrystOrt(3,1) = 0.0
+                 CrystOrt(3,2) = 0.0
+                 CrystOrt(3,3) = cellv(3)*sind(ang(2))*singas
 
           case('BC')  ! This is Carpenter orientation with b // Y, c* // Z, coded by RJA
              cosbes=(cosd(ang(1))*cosd(ang(3)) - cosd(ang(2)))/(sind(ang(1))*sind(ang(3)))
