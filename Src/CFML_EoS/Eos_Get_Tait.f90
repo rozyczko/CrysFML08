@@ -6,43 +6,42 @@ SubModule (CFML_EoS) EoS_Tait
    Contains
 
    !!--++
-   !!--++ GET_TAIT
+   !!--++ SUBROUTINE GET_TAIT
    !!--++
-   !!--++ PRIVATE
    !!--++ Returns a,b,c Tait parameters in a vector.
    !!--++
-   !!--++ 17/07/2015
+   !!--++ Date: 17/07/2015
    !!
-   Module Function Get_Tait(Eospar,T) Result(Vec)
+   Module Function Get_Tait(T, Eos) Result(Vec)
       !---- Arguments ----!
-      type(Eos_Type),            intent(in)  :: Eospar  ! Eos Parameters
-      real(kind=cp),             intent(in)  :: T       ! Temperature
-      real(kind=cp),dimension(3)             :: Vec     ! Vector (a,b,c) of Tait parameters
+      real(kind=cp),             intent(in)  :: T    ! Temperature
+      type(Eos_Type),            intent(in)  :: Eos  ! Eos Parameters
+      real(kind=cp), dimension(3)            :: Vec  ! Vector (a,b,c) of Tait parameters
 
       !---- Local Variables ----!
       real(kind=cp) :: k0,kp,kpp
 
       !> Init
       Vec=0.0_cp
-      if (eospar%imodel /= 5) return
+      if (eos%imodel /= 5) return
 
-      select case(eospar%itherm)
+      select case(eos%itherm)
          case (1:5)                  ! normal thermal expansion models with dK/dT
-            k0 =Get_K0_T(T,eospar)
-            kp =Get_Kp0_T(T,eospar)
+            k0 =Get_K0_T(T,eos)
+            kp =Get_Kp0_T(T,eos)
 
          case default               ! includes no thermal model, also pthermal which requires params at Tref
-            k0 =eospar%params(2)
-            kp =eospar%params(3)
+            k0 =eos%params(2)
+            kp =eos%params(3)
       end select
 
-      if (eospar%iorder < 4) then
+      if (eos%iorder < 4) then
          kpp= -1.0_cp*kp/k0        ! implied value for Kpp except for 4th order
       else
-         kpp=eospar%params(4)
+         kpp=eos%params(4)
       end if
 
-      if (eospar%linear) then
+      if (eos%linear) then
          k0  =k0/3.0_cp
          kp  =kp/3.0_cp
          kpp =kpp/3.0_cp
@@ -53,6 +52,7 @@ SubModule (CFML_EoS) EoS_Tait
       if (abs(1_cp+kp) > tiny(0.0)) Vec(2)=Vec(2)-kpp/(1.0_cp+kp)
 
       Vec(3)= (1.0_cp+kp+k0*kpp)/(kp*kp+kp-k0*kpp)
+
    End Function Get_Tait
 
 End SubModule EoS_Tait

@@ -177,16 +177,16 @@ Submodule (CFML_Metrics) Metrics_Gen
           else !> one symbol input
              select case(Car(1:1))
                 case('C')
-                    CarType(2:2)='A'
+                    Car(2:2)='A'
 
                 case('A')
-                    CarType(2:2)='C'
+                    Car(2:2)='C'
 
                 case('B')
-                    CarType(2:2)='C'        !defaults to c* // Z for this case
+                    Car(2:2)='C'        !defaults to c* // Z for this case
 
                 case default
-                    CarType='CA'            !default because invalid first character
+                    Car='CA'            !default because invalid first character
                 end select
           end if
        end if
@@ -220,15 +220,15 @@ Submodule (CFML_Metrics) Metrics_Gen
                  !    c = (  c cosbeta, -c sinbeta cosalpha*, c sinbeta sinalpha* )
                  cosgas =(cosd(ang(3))*cosd(ang(2))-cosd(ang(1)))/(sind(ang(3))*sind(ang(2))) ! This is actually cos(alpha*) but called cosgas!!
                  singas = sqrt(1.0-cosgas**2)
-                 CrystOrt(1,1) = cellv(1)
-                 CrystOrt(1,2) = cellv(2)*cosd(ang(3))
-                 CrystOrt(1,3) = cellv(3)*cosd(ang(2))
-                 CrystOrt(2,1) = 0.0
-                 CrystOrt(2,2) = cellv(2)*sind(ang(3))
-                 CrystOrt(2,3) =-cellv(3)*sind(ang(2))*cosgas
-                 CrystOrt(3,1) = 0.0
-                 CrystOrt(3,2) = 0.0
-                 CrystOrt(3,3) = cellv(3)*sind(ang(2))*singas
+                 Mat(1,1) = cell(1)
+                 Mat(1,2) = cell(2)*cosd(ang(3))
+                 Mat(1,3) = cell(3)*cosd(ang(2))
+                 Mat(2,1) = 0.0
+                 Mat(2,2) = cell(2)*sind(ang(3))
+                 Mat(2,3) =-cell(3)*sind(ang(2))*cosgas
+                 Mat(3,1) = 0.0
+                 Mat(3,2) = 0.0
+                 Mat(3,3) = cell(3)*sind(ang(2))*singas
 
           case('BC')  ! This is Carpenter orientation with b // Y, c* // Z, coded by RJA
              cosbes=(cosd(ang(1))*cosd(ang(3)) - cosd(ang(2)))/(sind(ang(1))*sind(ang(3)))

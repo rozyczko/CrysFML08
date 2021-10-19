@@ -225,6 +225,47 @@
       Integer, dimension(3) :: ry     =0   ! Indices (reciprocal vector) of the basis vector 2
     End Type Zone_Axis_Type
 
+    !!----
+    !!----  TYPE :: STRAIN_TENSOR_TYPE
+    !!--..
+    Type, public :: Strain_Tensor_Type
+       integer                       :: Iref=  0         ! Cell number in dat file used as reference
+       integer                       :: Icell= 0         ! Cell number in dat file used as final cell
+       integer                       :: Istype=0         ! Strain type
+       type(cell_g_type)             :: cell0            ! cfml data structure for the reference cell
+       type(cell_g_type)             :: cell1            ! cfml data structure for the final cell
+       character(len=2)              :: carType          ! Cartesian axial choice: first character specifies real axis
+                                                         ! parallel to Cart, second recip axis with a or a* always
+                                                         ! close to X, b or b* always close to Y
+       character(len=40)             :: System=" "       ! Crystal System  (transferred from dat structures)
+
+       real(kind=cp),dimension(0:1,1:2,1:2) :: pt        ! The p & t of cell 0 and 1: pt(0,1,1) is P1, pt(0,2,1) is T1 etc,
+                                                         ! last value=2 is esd
+
+       !> values normally calculated from two cells
+       real(kind=cp), dimension(3,3)   :: e=       0.0   ! Strains
+       real(kind=cp), dimension(3,3)   :: esd=     0.0   ! Strain esd values
+       real(kind=cp), dimension(3)     :: eval=    0.0   ! Eigen values in ascending order
+       real(kind=cp), dimension(3)     :: evalesd= 0.0   ! Eigen values esds
+       real(kind=cp), dimension(3,3)   :: evec=    0.0   ! Eigenvector components in same order: evec(1:3,i) holds the
+                                                         ! i’th vector components wrt Cartesian axes.
+       real(kind=cp), dimension(3,3,2) :: cart_ang=0.0   ! Angles of eigenvectors to Cartesian axes cart_ang(1:3,i,1)
+                                                         ! has the angles for the i'th eigenvector, cart_ang(1:3,i,2)
+                                                         ! the esd
+       real(kind=cp), dimension(3,3,4) :: cell_ang=0.0   ! Angles of eigenvectors to cell axes of reference cell
+                                                         ! cell_ang(1:3,i,1) has the angles for the i'th eigenvector,
+                                                         ! cell_ang(1:3,i,2) the esd, last index 3,4 angles to recip cell
+       real(kind=cp), dimension(3,2,4) :: dir_close      ! Closest low index hkl and angle to evec i in dir_close(i,1,1:4), same for UVW in dir_close(i,2,1:4)
+
+       !> Property values calculated directly from strain values and PT: Stored because makes output easier!
+       real(kind=cp), dimension(3,3) :: ep=      0.0     ! Strains
+       real(kind=cp), dimension(3,3) :: esdp=    0.0     ! Strain esd values
+       real(kind=cp), dimension(3)   :: evalp=   0.0     ! Eigen values in ascending order
+       real(kind=cp), dimension(3)   :: evalpesd=0.0     ! Eigen values esds
+       character(len=60)             :: property=''      ! property for strain, eg thermal expansion, compressibility
+
+    End Type Strain_Tensor_Type
+
 
     !> Parameters
     real(kind=cp), parameter                 :: TPI2=2.0*PI*PI
