@@ -122,8 +122,8 @@
        type (AtList_Type)                         :: A
        type (Point_Orbit)                         :: orbit
        !real(kind=cp), dimension(:,:),allocatable :: orb
-       character(len=*),parameter,dimension(26) :: let=(/"a","b","c","d","e","f","g","h", &
-          "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"/)
+       character(len=*),parameter,dimension(26) :: let=["a","b","c","d","e","f","g","h", &
+          "i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
        real(kind=cp), allocatable, dimension (:,:) :: vec
        integer,parameter         :: lu=93
        real(kind=cp), parameter  :: epsi = 0.002
@@ -162,7 +162,7 @@
            do k=0,i3
             if(i==0 .and.j==0 .and. k==0) cycle
             m=m+1
-            vec(:,m) = real((/i,j,k/))
+            vec(:,m) = real([i,j,k])
             !write(*,*) "  vect: ",m," :",vec(:,m)
            end do
           end do
@@ -286,7 +286,7 @@
 
     !!----
     !!---- Subroutine Set_Orbits_Inlist(Spg,Pl)
-    !!----    Class(SpG_Type),        intent(in)     :: SpG     !  In -> Space group
+    !!----    Class(SpG_Type),  intent(in)     :: SpG     !  In -> Space group
     !!----    type(point_list_type),  intent(in out) :: pl      !  In -> list of points
     !!----
     !!----    Set up of the integer pointer "pl%p" in the object "pl" of type point_list_type.
@@ -302,8 +302,15 @@
        type(point_list_type), intent(in out) :: pl
 
        !--- Local variables ---!
-       integer                     :: i,j,norb,nt
-       real(kind=cp), dimension(3) :: x,xx,v
+       integer                                  :: i,j,norb,nt,d
+       real(kind=cp), dimension(3)              :: x,xx,v
+       real(kind=cp), dimension(3,SpG%Multip)   :: tr
+       integer,       dimension(3,3,SpG%Multip) :: Mat
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        norb=0
        pl%p=0
@@ -313,7 +320,8 @@
              pl%p(i)=norb
              x=pl%x(:,i)
              do j=1,Spg%multip
-                xx=Apply_OP(Spg%Op(j),x)
+                !xx=Apply_OP(Spg%Op(j),x)
+                xx=Matmul(Mat(:,:,j),x)+tr(:,j)
                 xx=modulo_lat(xx)
                 do nt=1,pl%np
                    if (pl%p(nt) /= 0) cycle

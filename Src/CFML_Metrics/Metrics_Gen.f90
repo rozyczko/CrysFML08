@@ -175,18 +175,19 @@ Submodule (CFML_Metrics) Metrics_Gen
              end if
 
           else !> one symbol input
+
              select case(Car(1:1))
                 case('C')
-                    CarType(2:2)='A'
+                    Car(2:2)='A'
 
                 case('A')
-                    CarType(2:2)='C'
+                    Car(2:2)='C'
 
                 case('B')
-                    CarType(2:2)='C'        !defaults to c* // Z for this case
+                    Car(2:2)='C'        !defaults to c* // Z for this case
 
                 case default
-                    CarType='CA'            !default because invalid first character
+                    Car='CA'            !default because invalid first character
                 end select
           end if
        end if
@@ -211,24 +212,24 @@ Submodule (CFML_Metrics) Metrics_Gen
              Mat(3,2) = cell(2)*cosd(ang(1))
              Mat(3,3) = cell(3)
 
-           case('AC')  !This is the alternate case in the version prior to  2019.
-                 ! Incorrectly labelled in 2019 as x//a and Y // b*  => AB!!!!
-                 !  It is really x//a and Z // c* => AC
-                 !  Transponse of the following matrix:
-                 !    a = (       a   ,         0           ,       0             )
-                 !    b = ( b cosgamma,    b singamma       ,       0             )
-                 !    c = (  c cosbeta, -c sinbeta cosalpha*, c sinbeta sinalpha* )
-                 cosgas =(cosd(ang(3))*cosd(ang(2))-cosd(ang(1)))/(sind(ang(3))*sind(ang(2))) ! This is actually cos(alpha*) but called cosgas!!
-                 singas = sqrt(1.0-cosgas**2)
-                 CrystOrt(1,1) = cellv(1)
-                 CrystOrt(1,2) = cellv(2)*cosd(ang(3))
-                 CrystOrt(1,3) = cellv(3)*cosd(ang(2))
-                 CrystOrt(2,1) = 0.0
-                 CrystOrt(2,2) = cellv(2)*sind(ang(3))
-                 CrystOrt(2,3) =-cellv(3)*sind(ang(2))*cosgas
-                 CrystOrt(3,1) = 0.0
-                 CrystOrt(3,2) = 0.0
-                 CrystOrt(3,3) = cellv(3)*sind(ang(2))*singas
+          case('AC')  !This is the alternate case in the version prior to  2019.
+             ! Incorrectly labelled in 2019 as x//a and Y // b*  => AB!!!!
+             !  It is really x//a and Z // c* => AC
+             !  Transponse of the following matrix:
+             !    a = (       a   ,         0           ,       0             )
+             !    b = ( b cosgamma,    b singamma       ,       0             )
+             !    c = (  c cosbeta, -c sinbeta cosalpha*, c sinbeta sinalpha* )
+             cosgas =(cosd(ang(3))*cosd(ang(2))-cosd(ang(1)))/(sind(ang(3))*sind(ang(2))) ! This is actually cos(alpha*) but called cosgas!!
+             singas = sqrt(1.0-cosgas**2)
+             Mat(1,1) = cell(1)
+             Mat(1,2) = cell(2)*cosd(ang(3))
+             Mat(1,3) = cell(3)*cosd(ang(2))
+             Mat(2,1) = 0.0
+             Mat(2,2) = cell(2)*sind(ang(3))
+             Mat(2,3) =-cell(3)*sind(ang(2))*cosgas
+             Mat(3,1) = 0.0
+             Mat(3,2) = 0.0
+             Mat(3,3) = cell(3)*sind(ang(2))*singas
 
           case('BC')  ! This is Carpenter orientation with b // Y, c* // Z, coded by RJA
              cosbes=(cosd(ang(1))*cosd(ang(3)) - cosd(ang(2)))/(sind(ang(1))*sind(ang(3)))
@@ -903,7 +904,7 @@ Submodule (CFML_Metrics) Metrics_Gen
                                   j=i1*i5*i9+i4*i8*i3+i2*i6*i7-i3*i5*i7-i8*i6*i1-i2*i4*i9     !determinant (much faster than calling determ_A)
                                   if ( j /= 1) cycle
 
-                                  Nu=reshape((/i1,i2,i3,i4,i5,i6,i7,i8,i9/),(/3,3/))
+                                  Nu=reshape([i1,i2,i3,i4,i5,i6,i7,i8,i9],[3,3])
                                   Trm=real(Nu)
                                   call Change_Setting_Cell(Cella,Trm,Cellt)
                                   if (Sum(abs(Cellt%cell(:)-Cellb%cell(:)))+Sum(abs(Cellt%ang(:)-Cellb%ang(:))) < tolt  ) then
@@ -996,8 +997,8 @@ Submodule (CFML_Metrics) Metrics_Gen
        End Select
 
        rm(1)=100000.0; rm(2)=rm(1)
-       bas(:,1) = (/ 71,121, 113/)
-       bas(:,2) = (/117, 91,-111/)
+       bas(:,1) = [71,121, 113]
+       bas(:,2) = [117, 91,-111]
 
        if (present(mode)) then    ! Direct
           s2max=dmin*dmin   !here dmin is really n_max
@@ -1111,13 +1112,13 @@ Submodule (CFML_Metrics) Metrics_Gen
        do_iu: do iu=imax, 0,-1
           do iv=imax,-imax,-1
              do iw=imax,-imax,-1
-                v=(/iu,iv,iw/)
+                v=[iu,iv,iw]
                 if (.not. Co_Prime(v,2)) cycle
 
                 do ih=imax,0,-1
                    do ik=imax,-imax,-1
                       do_il:do il=imax,-imax,-1
-                         h=(/ih,ik,il/)
+                         h=[ih,ik,il]
                          if (.not. Co_Prime(h,2)) cycle
 
                          n=abs(ih*iu+ik*iv+il*iw)
@@ -1129,7 +1130,7 @@ Submodule (CFML_Metrics) Metrics_Gen
                             crossm=atand(dot/real(n,kind=cp))
                             if (abs(crossm) <= tol) then
                                do m=1,ntwo
-                                  if (determ_V((/17,41,71/),v,dtw(:,m) ) == 0) cycle do_il
+                                  if (determ_V([17,41,71],v,dtw(:,m) ) == 0) cycle do_il
                                end do
                                ntwo=ntwo+1
                                dtw(:,ntwo)= v
@@ -1213,7 +1214,7 @@ Submodule (CFML_Metrics) Metrics_Gen
        domina=9.0e+30; dominc=domina
        ab=0; mv=0.0; ang=0.0; row=0; inp=0
 
-       tr=reshape((/1,0,0,0,1,0,0,0,1/),(/3,3/))
+       tr=reshape([1,0,0,0,1,0,0,0,1],[3,3])
        Call Set_Crystal_Cell([1.0_cp,1.0_cp,1.0_cp],[90.0_cp,90.0_cp,90.0_cp],Cell)
        message=" "
 
@@ -1230,7 +1231,7 @@ Submodule (CFML_Metrics) Metrics_Gen
              do iu=-3,3
                 do iv=-3,3
                    do_iw: do iw=0,3
-                      rw=(/iu,iv,iw/)
+                      rw=[iu,iv,iw]
                       !> if(iu == 0 .and. iv == 0 .and. iw == 0) cycle
                       if (.not. Co_Prime(rw,3)) cycle
                       vec=real(iu,kind=cp)*a+real(iv,kind=cp)*b+real(iw,kind=cp)*c
@@ -1292,16 +1293,16 @@ Submodule (CFML_Metrics) Metrics_Gen
                    message="Monoclinic, primitive cell"
 
                 Case(2)
-                   rw=matmul((/0,1,1/),tr)
+                   rw=matmul([0,1,1],tr)
                    if (.not. co_prime(rw,3)) then
                       message="Monoclinic, A-centred cell"
 
                    else
-                      rw=matmul((/1,1,1/),tr)
+                      rw=matmul([1,1,1],tr)
                       if (.not. co_prime(rw,3)) then
                          message="Monoclinic, I-centred cell"
                       else
-                         rw=matmul((/1,1,0/),tr)
+                         rw=matmul([1,1,0],tr)
                          if(.not. co_prime(rw,3)) message="Monoclinic, C-centred cell"
                       end if
                    end if
@@ -1359,19 +1360,19 @@ Submodule (CFML_Metrics) Metrics_Gen
                       message="Orthorhombic, Primitive cell"
 
                    Case(2)
-                      rw=matmul((/0,1,1/),tr)
+                      rw=matmul([0,1,1],tr)
                       if (.not. co_prime(rw,3)) then
                          message="Orthorhombic, A-centred cell"
                       else
-                         rw=matmul((/1,1,1/),tr)
+                         rw=matmul([1,1,1],tr)
                          if (.not. co_prime(rw,3)) then
                             message="Orthorhombic, I-centred cell"
                          else
-                            rw=matmul((/1,1,0/),tr)
+                            rw=matmul([1,1,0],tr)
                             if (.not. co_prime(rw,3)) then
                                message="Orthorhombic, C-centred cell"
                             else
-                               rw=matmul((/1,0,1/),tr)
+                               rw=matmul([1,0,1],tr)
                                if (.not. co_prime(rw,3)) message="Orthorhombic, B-centred cell"
                             end if
                          end if
@@ -1454,7 +1455,7 @@ Submodule (CFML_Metrics) Metrics_Gen
                    do_iu: do iu=-3,3
                       do iv=-3,3
                          do iw=0,3
-                            rw=(/iu,iv,iw/)
+                            rw=[iu,iv,iw]
                             if (.not. Co_prime(rw,3)) cycle
                             vec=real(iu)*a+real(iv)*b+real(iw)*c
                             dot=sqrt(dot_product(vec,vec))
@@ -1480,7 +1481,7 @@ Submodule (CFML_Metrics) Metrics_Gen
                          case(1)
                             message="Primitive hexagonal cell"
                          case(3)
-                            rw=matmul((/2,1,1/),tr)
+                            rw=matmul([2,1,1],tr)
                             if (.not. co_prime(rw,3)) then
                                message="Rhombohedral, obverse setting cell"
                             else
@@ -1700,19 +1701,19 @@ Submodule (CFML_Metrics) Metrics_Gen
                    message="Cubic, Primitive cell"
 
                 Case(2)
-                   rw=matmul((/0,1,1/),tr)
+                   rw=matmul([0,1,1],tr)
                    if (.not. co_prime(rw,3)) then
                       message="Cubic, A-centred cell"
                    else
-                      rw=matmul((/1,1,1/),tr)
+                      rw=matmul([1,1,1],tr)
                       if (.not. co_prime(rw,3)) then
                          message="Cubic, I-centred cell"
                       else
-                         rw=matmul((/1,1,0/),tr)
+                         rw=matmul([1,1,0],tr)
                          if (.not. co_prime(rw,3)) then
                             message="Cubic, C-centred cell"
                          else
-                            rw=matmul((/1,0,1/),tr)
+                            rw=matmul([1,0,1],tr)
                             if (.not. co_prime(rw,3)) message="Cubic, B-centred cell"
                          end if
                       end if
@@ -1848,7 +1849,7 @@ Submodule (CFML_Metrics) Metrics_Gen
 
        umod=sqrt(dot_product(vc,vc))
        if (umod < tiny(1.0_cp)) then
-          vc=(/0.0_cp,0.0_cp,1.0_cp/)
+          vc=[0.0_cp,0.0_cp,1.0_cp]
        else
           vc= vc/umod
        end if

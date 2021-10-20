@@ -51,7 +51,7 @@
     use CFML_Metrics,       only: Cell_G_Type, Get_Deriv_Orth_Cell,Rot_Gibbs_Matrix
     use CFML_Atoms,         only: AtList_Type,Atm_Cell_Type,Equiv_Atm, Wrt_Lab, Atom_Equiv_List_Type, &
                                   Allocate_Atom_List, Atm_Std_Type
-    use CFML_gSpaceGroups,  only: SpG_Type, Apply_OP, Get_Multip_Pos, Is_Lattice_Vec, &
+    use CFML_gSpaceGroups,  only: Spg_Type, Apply_OP, Get_Multip_Pos, Is_Lattice_Vec, &
                                   searchop, Write_SymTrans_Code, Get_Orbit, Point_Orbit
 
     implicit none
@@ -270,7 +270,7 @@
          !---- Arguments ----!
          real(kind=cp),         intent(in)   :: Dmax, Dangl
          type (Cell_G_Type),    intent(in)   :: Cell
-         Class(SpG_Type),       intent(in)   :: SpG
+         Class(SpG_Type), intent(in)   :: SpG
          type (AtList_Type),    intent(in)   :: A
          integer, optional,     intent(in)   :: lun
       End Subroutine Calc_Dist_Angle
@@ -279,7 +279,7 @@
          !---- Arguments ----!
          real(kind=cp),             intent(in)   :: dmax, dangl
          type (Cell_G_Type),        intent(in)   :: Cell
-         Class(SpG_Type),           intent(in)   :: SpG
+         Class(SpG_Type),     intent(in)   :: SpG
          type (AtList_Type),        intent(in)   :: A
          integer, optional,         intent(in)   :: lun
          integer, optional,         intent(in)   :: lun_cons
@@ -356,7 +356,7 @@
          !---- Arguments ----!
          real(kind=cp),         intent(in)       :: dmax
          type (Cell_G_Type),    intent(in)       :: Cell
-         Class(SpG_Type),       intent(in)       :: SpG
+         Class(SpG_Type), intent(in)       :: SpG
          type (Atm_Cell_Type),  intent(in out)   :: Ac
          integer, optional,     intent(in)       :: lun
       End Subroutine P1_Dist
@@ -366,12 +366,12 @@
          integer,               intent(in)   :: lun
          real(kind=cp),         intent(in)   :: dmax
          type (Cell_G_Type),    intent(in)   :: Cell
-         Class(SpG_Type),       intent(in)   :: SpG
+         Class(SpG_Type), intent(in)   :: SpG
          type (AtList_Type),    intent(in)   :: A
       End Subroutine Print_Distances
 
       Module Subroutine Set_New_AsymUnit(SpGn,Ate,Mat,orig,A_n,matkind,debug)
-         Class(SpG_Type) ,              intent(in    ) :: SpGn
+         Class(SpG_Type) ,        intent(in    ) :: SpGn
          type (Atom_Equiv_List_Type),   intent(in    ) :: Ate !In old group
          real(kind=cp), dimension (3,3),intent(in    ) :: Mat
          real(kind=cp), dimension (  3),intent(in    ) :: orig
@@ -383,7 +383,7 @@
 
       Module Subroutine Set_Orbits_Inlist(Spg,Pl)
          !---- Arguments ----!
-         Class(SpG_Type),        intent(in)     :: SpG
+         Class(SpG_Type),  intent(in)     :: SpG
          type(point_list_type),  intent(in out) :: pl
       End Subroutine Set_Orbits_Inlist
 
@@ -392,18 +392,18 @@
          integer,                  intent(in)   :: max_coor
          real(kind=cp),            intent(in)   :: dmax
          type (cell_G_Type),       intent(in)   :: Cell
-         Class(SpG_Type),          intent(in)   :: SpG
+         Class(SpG_Type),    intent(in)   :: SpG
          type (AtList_Type),       intent(in)   :: A
       End Subroutine Set_TDist_Coordination
 
       Module Subroutine Set_TDist_Partial_Coordination(List,max_coor,Dmax, Cell, Spg, A)
          !---- Arguments ----!
-         integer,             intent(in)   :: List
-         integer,             intent(in)   :: max_coor
-         real(kind=cp),       intent(in)   :: dmax
-         type (Cell_G_Type),  intent(in)   :: Cell
-         Class(SpG_Type),     intent(in)   :: SpG
-         type (AtList_Type),  intent(in)   :: A
+         integer,              intent(in)   :: List
+         integer,              intent(in)   :: max_coor
+         real(kind=cp),        intent(in)   :: dmax
+         type (Cell_G_Type),   intent(in)   :: Cell
+         Class(SpG_Type),intent(in)   :: SpG
+         type (AtList_Type),   intent(in)   :: A
       End Subroutine Set_TDist_Partial_Coordination
 
       Module Subroutine Torsion_and_Sigma(Cellp, x1,x2,x3,x4,sx1,sx2,sx3,sx4,tor,s)

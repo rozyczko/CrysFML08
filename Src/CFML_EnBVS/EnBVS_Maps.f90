@@ -6,8 +6,8 @@
     !!---- Module Subroutine Calc_Map_BVEL(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol,emin,npix,outp,bvel_map)
     !!----    !---- Arguments ----!
     !!----    type (Atoms_Conf_List_type), intent(in) :: A
-    !!----    type (SPG_Type),     intent(in) :: SpG
-    !!----    Type (Cell_G_Type),    intent(in) :: Cell
+    !!----    class (SpG_Type),      intent(in) :: SpG
+    !!----    Type (Cell_G_Type),          intent(in) :: Cell
     !!----    character(len=*),            intent(in) :: Filecod
     !!----    integer,                     intent(in) :: ndimx
     !!----    integer,                     intent(in) :: ndimy
@@ -30,7 +30,7 @@
     Module Subroutine Calc_Map_BVEL(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol,emin,npix,outp,bvel_map)
        !---- Arguments ----!
        type (Atoms_Conf_List_type), intent(in) :: A
-       type (SPG_Type),             intent(in) :: SpG
+       class(SpG_Type),       intent(in) :: SpG
        Type (Cell_G_Type),          intent(in) :: Cell
        character(len=*),            intent(in) :: Filecod
        integer,                     intent(in) :: ndimx
@@ -314,8 +314,8 @@
     !!----
     !!---- Module Subroutine Calc_Map_BVS(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol)
     !!----    type (Atoms_Conf_List_type), intent(in) :: A
-    !!----    type (SPG_Type),     intent(in) :: SpG
-    !!----    Type (Cell_G_Type),    intent(in) :: Cell
+    !!----    class(SpG_Type),       intent(in) :: SpG
+    !!----    Type (Cell_G_Type),          intent(in) :: Cell
     !!----    character(len=*),            intent(in) :: Filecod
     !!----    integer,                     intent(in) :: ndimx
     !!----    integer,                     intent(in) :: ndimy
@@ -335,7 +335,7 @@
     Module Subroutine Calc_Map_BVS(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol)
        !---- Arguments ----!
        type (Atoms_Conf_List_type), intent(in) :: A
-       type (SPG_Type),        intent(in) :: SpG
+       class(SpG_Type),       intent(in) :: SpG
        Type (Cell_G_Type),          intent(in) :: Cell
        character(len=*),            intent(in) :: Filecod
        integer,                     intent(in) :: ndimx
@@ -427,8 +427,8 @@
          read(unit=car(i+1:),fmt=*) qval
          anion=.true.
        end if
-       step=(/ 1.0/real(ndimx),  1.0/real(ndimy), 1.0/real(ndimz) /)
-       extend=(/ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) /)
+       step=[ 1.0/real(ndimx),  1.0/real(ndimy), 1.0/real(ndimz) ]
+       extend=[ drmax/cell%cell(1),  drmax/cell%cell(2), drmax/cell%cell(3) ]
 
        np=0; npix=0
        !---- Map Calculation ----!

@@ -123,12 +123,12 @@
 
     !!----
     !!---- Module Subroutine Calc_Dist_Angle(Dmax, Dangl, Cell, Spg, A, Lun)
-    !!----    real(kind=cp),      intent(in)   :: dmax   !  In -> Max. Distance to calculate
-    !!----    real(kind=cp),      intent(in)   :: dangl  !  In -> Max. distance for angle calculations
-    !!----    type (Cell_G_Type), intent(in)   :: Cell   !  In -> Object of Crytal_Cell_Type
-    !!----    Class(SpG_Type),    intent(in)   :: SpG    !  In -> Object of SpG_Type
-    !!----    type (AtList_Type), intent(in)   :: A      !  In -> Object of AtList_Type
-    !!----    integer,  optional, intent(in)   :: lun    !  In -> Logical Unit for writing
+    !!----    real(kind=cp),        intent(in)   :: dmax   !  In -> Max. Distance to calculate
+    !!----    real(kind=cp),        intent(in)   :: dangl  !  In -> Max. distance for angle calculations
+    !!----    type (Cell_G_Type),   intent(in)   :: Cell   !  In -> Object of Crytal_Cell_Type
+    !!----    Class(SpG_Type),      intent(in)   :: SpG    !  In -> Object of SpG_Type
+    !!----    type (AtList_Type),   intent(in)   :: A      !  In -> Object of AtList_Type
+    !!----    integer,  optional,   intent(in)   :: lun    !  In -> Logical Unit for writing
     !!----
     !!----    Subroutine to calculate distances and angles, below the prescribed distances
     !!----    "dmax" and "dangl" (angles of triplets at distance below "dangl" to an atom),
@@ -142,15 +142,15 @@
     !!
     Module Subroutine Calc_Dist_Angle(Dmax, Dangl, Cell, Spg, A, Lun)
        !---- Arguments ----!
-       real(kind=cp),      intent(in)   :: Dmax, Dangl
-       type (Cell_G_Type), intent(in)   :: Cell
-       Class(SpG_Type),    intent(in)   :: SpG
-       type (AtList_Type), intent(in)   :: A
-       integer, optional,  intent(in)   :: lun
+       real(kind=cp),        intent(in)   :: Dmax, Dangl
+       type (Cell_G_Type),   intent(in)   :: Cell
+       Class(SpG_Type),      intent(in)   :: SpG
+       type (AtList_Type),   intent(in)   :: A
+       integer, optional,    intent(in)   :: lun
 
        !---- Local Variables ----!
        logical                            :: iprin
-       integer                            :: i,j,k,lk,i1,i2,i3,jl,npeq,nn,L,nlines, max_coor,ico
+       integer                            :: i,j,k,lk,i1,i2,i3,jl,npeq,nn,L,nlines, max_coor,ico,d
        character(len= 80), dimension(12)  :: texto = " "
        character(len=  5)                 :: nam,nam1,nam2
        character(len= 40)                 :: transla
@@ -163,6 +163,14 @@
 
        real(kind=cp), allocatable,dimension(:,:) :: uu
        real(kind=cp), allocatable,dimension(:,:) :: bcoo
+       real(kind=cp), dimension(3,SpG%Multip)    :: trr
+       integer,       dimension(3,3,SpG%Multip)  :: Mat
+
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+         trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        iprin=.false.
        if (present(lun)) then
@@ -227,12 +235,12 @@
              uu(:,lk)=xo(:)
              nam1=a%atom(k)%lab
              do j=1,npeq
-                xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
+                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)
                          do_jl:do jl=1,Spg%Num_Lat
-                            !tr(1)=Spg%Lat_tr(1,jl); tr(2)=Spg%Lat_tr(2,jl); tr(3)=Spg%Lat_tr(3,jl)
                             tr=Spg%Lat_tr(1:3,jl)
                             Tn(:)=real([i1,i2,i3])+tr
                             x1(:)=xx(:)+tn(:)
@@ -357,7 +365,7 @@
        logical                            :: iprin
        integer,parameter                  :: nconst=3500
        integer                            :: i,j,k,lk,i1,i2,i3,jl,nn,L,&
-                                             itnum1,itnum2,num_const, max_coor,num_angc,ico
+                                             itnum1,itnum2,num_const, max_coor,num_angc,ico,d
        character(len=  6)                 :: nam,nam1,nam2
        character(len= 40)                 :: transla
        character(len= 20)                 :: text,tex,texton
@@ -397,7 +405,14 @@
        character (len=132), dimension(:), allocatable :: cif_dist_text
        character (len=132), dimension(:), allocatable :: cif_angl_text
        !-----------------------------------------------------------------------------------
+       real(kind=cp), dimension(3,SpG%Multip)    :: trr
+       integer,       dimension(3,3,SpG%Multip)  :: Mat
 
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+         trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        iprin=.false.
        if (present(lun)) then
@@ -536,13 +551,13 @@
              End Select
              ss(:)=x_std(:,k)
              do j=1,Spg%Multip
-                xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-
+                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do_i3:do i3=ic1(3),ic2(3)
 
-                            Tn(:)=real((/i1,i2,i3/))
+                            Tn(:)=real([i1,i2,i3])
                             x1(:)=xx(:)+tn(:)
                             do l=1,3
                                t=abs(x1(l)-xo(l))*qd(l)
@@ -582,6 +597,7 @@
                             if(present(lun_cons) .and. dd <= rest_d) then
                               esta=.false.
                               tr=real(Spg%Op(j)%Mat(1:3,4))
+                              !tr=trr(:,j)
                               write(unit=line,fmt="(a4,tr2,a4,i5,3f10.5,tr5,2f7.4)") A%atom(i)%lab ,A%atom(k)%lab ,&
                                      Itnum(j), tn+tr ,dd, sdd
                               if(num_const == 0) then
@@ -676,6 +692,7 @@
                 if (present(lun_cons)) then
                   itnum2=itnum(Coord_Info%N_sym(k,i))
                   tr2(:)=trcoo(:,k)+real(Spg%Op(Coord_Info%N_sym(k,i))%Mat(1:3,4))
+                  !tr2(:)=trcoo(:,k)+trr(:,Coord_Info%N_sym(k,i))
                 end if
                 x1(:)=bcoo(:,k)
                 x2(:)=bcoo(:,j)
@@ -1017,7 +1034,7 @@
     !!
     Module Subroutine Distance_and_Sigma(Cellp,DerM,x0,x1,s0,s1,dis,s)
        !---- Arguments ----!
-       Type(Cell_G_Type),         intent(in)  :: Cellp         ! Cell object
+       Type(Cell_G_Type),               intent(in)  :: Cellp         ! Cell object
        real(kind=cp), dimension(3,3,6), intent(in)  :: DerM          ! Matrix of derivatives of Cellp%Cr_Orth_cel
        real(kind=cp), dimension(3),     intent(in)  :: x0,x1,s0,s1   ! Two points in fractional coordinates and sigmas
        real(kind=cp),                   intent(out) :: dis,s         ! Distance and sigma
@@ -1054,7 +1071,7 @@
     !!----    Class(SpG_Type),      intent(in)    :: SpG       !  In -> Object of SpG_Type
     !!----    type (Atm_Cell_Type), intent(in out):: Ac        !  In -> Object of Atm_Cell_Type
     !!----                                                           Out -> Updated Object of Atm_Cell_Type
-    !!----    integer,optional,         intent(in)    :: lun       !  In -> Logical Unit for writing
+    !!----    integer,optional,     intent(in)    :: lun       !  In -> Logical Unit for writing
     !!----
     !!----    Subroutine calculate distances, below the prescribed distances "dmax",
     !!----    without standard deviations. No symmetry is applied: only lattice translations.
@@ -1194,14 +1211,14 @@
     !!
     Module Subroutine Print_Distances(Lun, Dmax, Cell, Spg, A)
        !-- Arguments --!
-       integer,                  intent(in)   :: lun
-       real(kind=cp),            intent(in)   :: dmax
-       type (Cell_G_Type),       intent(in)   :: Cell
-       Class(SpG_Type),          intent(in)   :: SpG
-       type (AtList_Type),       intent(in)   :: A
+       integer,             intent(in)   :: lun
+       real(kind=cp),       intent(in)   :: dmax
+       type (Cell_G_Type),  intent(in)   :: Cell
+       Class(SpG_Type),     intent(in)   :: SpG
+       type (AtList_Type),  intent(in)   :: A
 
        !---- Local Variables ----!
-       integer                           :: i,j,k,lk,i1,i2,i3,jl,npeq,nn,L,nlines
+       integer                           :: i,j,k,lk,i1,i2,i3,jl,npeq,nn,L,nlines,d
        character(len=80), dimension(12)  :: texto=" "
        character(len=5 )                 :: nam,nam1
        character(len=40)                 :: transla
@@ -1210,7 +1227,15 @@
        integer,          dimension(3)    :: ic1,ic2
        real(kind=cp),    dimension(3)    :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                     :: T,dd
-       real(kind=cp), dimension(3,A%Natoms*Spg%multip) :: uu
+       real(kind=cp),    dimension(3,A%Natoms*Spg%multip) :: uu
+       real(kind=cp),    dimension(3,SpG%Multip)          :: tr
+       integer,          dimension(3,3,SpG%Multip)        :: Mat
+
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        qd(:)=1.0/cell%rcell(:)
        ic2(:)= nint(dmax/cell%cell(:)+1.0)
@@ -1250,7 +1275,8 @@
              uu(:,lk)=xo(:)
              nam1=a%atom(k)%lab
              do j=1,npeq
-                xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)

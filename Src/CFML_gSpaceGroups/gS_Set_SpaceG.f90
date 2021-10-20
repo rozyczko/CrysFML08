@@ -860,11 +860,11 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
                 Grp%nk=nmod                              !(d=1,2,3, ...) number of q-vectors
                 if(Allocated(Grp%kv)) deallocate(Grp%kv)
                 if(Allocated(Grp%sintlim)) deallocate(Grp%sintlim)
-                if(Allocated(Grp%Om)) deallocate(Grp%Om)
                 Allocate(Grp%kv(3,nmod),Grp%sintlim(nmod))
                 !write(*,"(a,i6,a)") " => Allocating Om for : ",Dd*Dd*Grp%Multip, "  elements"
-                Allocate(Grp%Om(Dd,Dd,m))
-                Grp%kv=0.0; Grp%sintlim=0.0; Grp%Om=0.0
+                Allocate(Grp%Rot(3,3,m),Grp%t(3,m),Grp%tI(nmod,m),Grp%M(nmod,3,m),Grp%Ep(nmod,nmod,m))
+
+                Grp%kv=0.0; Grp%sintlim=0.0; Grp%Rot=0; Grp%t=0.0; Grp%tI=0.0; Grp%M=0; Grp%Ep=0
                 !Grp%nq=0     !  This is not allowed in gfortran, probably because they are not
                 !Grp%nharm=0  !  allocatable components and are not under the pointer Grp => SpaceG
                 !the components q_coeff(nk,nq) cannot be allocated until experimental data are read
@@ -956,6 +956,18 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
             SpaceG%Symb_Op(i)= Get_Symb_from_Rational_Mat(SpaceG%Op(i)%Mat,StrCode=xyz_typ)
           end do
 
+          Select Type (Grp => SpaceG)
+            type is (SuperSpaceGroup_Type)
+
+                do i=1,Grp%Multip
+                    Grp%Rot(:,:,i)=Grp%Op(i)%Mat(1:3,1:3)
+                    Grp%t    (:,i)=Grp%Op(i)%Mat(1:3,dd)
+                    Grp%tI   (:,i)=Grp%Op(i)%Mat(4:d,dd)
+                    Grp%M  (:,:,i)=Grp%Op(i)%Mat(4:d,1:3)
+                    Grp%Ep (:,:,i)=Grp%Op(i)%Mat(4:d,4:d)
+                end do
+
+          End Select
       End Select
 
    End Subroutine Set_SpaceGroup_DBase
@@ -1231,6 +1243,7 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
         Case Default
            SpaceG%SPG_lat="X"
       End Select
+
       !> Identify Group Only for Crystallographic or Shubnikov groups
       if(SpaceG%D == 4) then
         call Identify_Group(SpaceG)
@@ -1252,14 +1265,6 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
            SpaceG%spg_symb = str_HM(1:1)//l_case(str_HM(2:))
            !if(n_it > 0 .and. len_trim(SpaceG%spg_symb) == 0) SpaceG%spg_symb=trim(spgr_info(n_it)%hm) !str_HM(1:1)//l_case(str_HM(2:))
         end if
-      else if(SpaceG%D > 4) then !superspace group
-        Select Type (SpaceG)
-          class is (Spg_Oreal_Type)
-            allocate(SpaceG%Om(SpaceG%D,SpaceG%D,SpaceG%multip))
-            do i=1,SpaceG%multip
-              SpaceG%Om(:,:,i)=SpaceG%Op(i)%Mat
-            end do
-        End Select
       end if
       if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
 

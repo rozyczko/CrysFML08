@@ -261,9 +261,9 @@
       logical                        :: co_linear
       real(kind=cp), dimension(3)    :: vu
       integer, dimension(1)          :: im
-      real(kind=cp), parameter, dimension(3,3):: ident=reshape((/1.0_cp,0.0_cp,0.0_cp, &
+      real(kind=cp), parameter, dimension(3,3):: ident=reshape([ 1.0_cp,0.0_cp,0.0_cp, &
                                                                  0.0_cp,1.0_cp,0.0_cp, &
-                                                                 0.0_cp,0.0_cp,1.0_cp/),(/3,3/))
+                                                                 0.0_cp,0.0_cp,1.0_cp],[3,3])
 
       if(present(ang)) ang=0.0
       if(present(w))   w=0.0

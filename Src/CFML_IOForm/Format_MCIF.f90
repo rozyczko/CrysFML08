@@ -141,12 +141,12 @@ SubModule (CFML_IOForm) IO_MCIF
    !!
    Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
       !---- Arguments ----!
-      type(File_Type),                 intent(in)  :: cif
-      class(Cell_Type),                intent(out) :: Cell
-      class(SpG_Type),allocatable,     intent(out) :: SpG
-      Type(AtList_Type),               intent(out) :: Atmlist
-      Type(Kvect_Info_Type), optional, intent(out) :: Kvec
-      Integer,               optional, intent(in)  :: Nphase   ! Select the Phase to read
+      type(File_Type),                  intent(in)  :: cif
+      class(Cell_Type),                 intent(out) :: Cell
+      class(SpG_Type),allocatable,      intent(out) :: SpG
+      Type(AtList_Type),                intent(out) :: Atmlist
+      Type(Kvect_Info_Type), optional,  intent(out) :: Kvec
+      Integer,               optional,  intent(in)  :: Nphase   ! Select the Phase to read
 
       !---- Local Variables ----!
       logical                                      :: SSG
@@ -1705,8 +1705,8 @@ SubModule (CFML_IOForm) IO_MCIF
    Module Subroutine Read_MCIF_AtomSite_Fourier_Wave_Vector(cif, SpG, Kvec, i_ini,i_end)
       !---- Arguments ----!
       Type(File_Type),                 intent(in)    :: cif
-      class(SpG_Type),       optional, intent(inout) :: SpG
-      Type(Kvect_Info_Type), optional, intent(inout) :: Kvec
+      class(SpG_Type),       optional, intent(in out):: SpG
+      Type(Kvect_Info_Type), optional, intent(in out):: Kvec
       integer,               optional, intent(in)    :: i_ini,i_end   ! Index to Finish
 
       !---- Local Variables ----!
@@ -3196,7 +3196,7 @@ SubModule (CFML_IOForm) IO_MCIF
    Module Subroutine Read_MCIF_Parent_SpaceG(cif,Spg,i_ini,i_end)
       !---- Arguments ----!
       Type(File_Type),       intent(in)    :: cif
-      class(SpG_Type),       intent(inout) :: SpG
+      class(SpG_Type),       intent(in out):: SpG
       integer, optional,     intent(in)    :: i_ini,i_end
 
       !---- Local Variables ----!

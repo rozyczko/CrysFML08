@@ -16,20 +16,22 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
    !!
    Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven)
       !---- Arguments ----!
-      type(atlist_type),   intent(in)     :: A         ! Atom list (asymmetric unit)
-      type(atlist_type),   intent(in out) :: B         ! Atom list into the unit cell
-      type(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
-      character(len=*),    intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
-      logical, optional,   intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
+      type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
+      type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
+      class(SpG_Type),intent(in)     :: SpG       ! SpaceGroup
+      character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
+      logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
 
       !---- Local Variables ----!
-      character(len=4)                      :: fmm
-      integer                               :: k,j,l,nt,npeq,n
-      real(kind=cp),dimension(3)            :: xo,xx
-      real(kind=cp),dimension(3,Spg%multip) :: u
-      logical                               :: ccell
+      character(len=4)                         :: fmm
+      integer                                  :: i,k,j,l,nt,npeq,n,d
+      real(kind=cp),dimension(3)               :: xo,xx
+      real(kind=cp),dimension(3,Spg%multip)    :: u
+      logical                                  :: ccell
+      type(atlist_type)                        :: c_atm
+      real(kind=cp), dimension(3,SpG%Multip)   :: tr
+      integer,       dimension(3,3,SpG%Multip) :: Mat
 
-      type(atlist_type) :: c_atm
 
       !> Init
       call clear_error()
@@ -42,6 +44,12 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
          err_CFML%Msg="Extend_List@CFML_Atoms: Incompatible arguments!"
          return
       end if
+
+      d=SpG%d
+      do i=1,SpG%Multip
+        Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+         tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+      End do
 
       npeq=SpG%numops
       if (SpG%centred == 2) npeq=npeq*2
@@ -58,7 +66,8 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
          c_atm%atom(n)%x=xo
 
          loop:do j=2,npeq
-            xx=Apply_OP(SpG%Op(j),xo)
+            !xx=Apply_OP(SpG%Op(j),xo)
+            xx=Matmul(Mat(:,:,j),xo) + tr(:,j)
             xx=modulo_lat(xx)
             do nt=1,l
                if (equal_vector(u(:,nt),xx,3)) then
@@ -147,7 +156,7 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
    !!
    Module Subroutine Set_Atom_Equiv_List(SpG,cell,A,Ate,lun)
       !---- Arguments ----!
-      type(SpG_Type),             intent(in) :: SpG
+      class(SpG_Type),            intent(in) :: SpG
       type(Cell_G_Type),          intent(in) :: Cell
       type(Atlist_Type),          intent(in) :: A
       type(Atom_Equiv_List_Type), intent(out):: Ate
@@ -157,11 +166,18 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
       real(kind=cp),  dimension(3)            :: xx,xo,v,xc
       real(kind=cp),  dimension(3,SpG%Multip) :: u
       character(len=20),dimension(SpG%Multip) :: label
-      integer                                 :: k,j,L,nt
+      integer                                 :: i,k,j,L,nt,d
       character (len=6)                       :: fmm
       character (len=20)                      :: nam
       real(kind=cp), parameter                :: epsi = 0.002
+      real(kind=cp), dimension(3,SpG%Multip)  :: tr
+      integer,       dimension(3,3,SpG%Multip):: Mat
 
+      d=SpG%d
+      do i=1,SpG%Multip
+        Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+         tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+      End do
       if (.not. allocated (Ate%atm)) allocate(Ate%atm(A%natoms))
       ate%nauas=A%natoms
       if (present(lun))  then
@@ -185,7 +201,8 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
          if (present(lun)) write(unit=lun,fmt="(3a,3f10.5,a,3f10.5)") "       ",nam,"  ", xo,"  ", xc
 
          do_eq:DO j=2,SpG%multip
-            xx=Apply_OP(SpG%Op(j),xo)
+            !xx=Apply_OP(SpG%Op(j),xo)
+            xx=Matmul(Mat(:,:,j),xo) + tr(:,j)
             xx=modulo_lat(xx)
             do nt=1,L
                v=u(:,nt)-xx(:)

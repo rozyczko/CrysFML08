@@ -414,7 +414,7 @@ SubModule (CFML_IOForm) IO_CFL
       integer,          optional,      intent(in)     :: i_ini, i_end
 
       !--- Local Variables ---!
-      integer                           :: i,j,ngen,nk,nq,iv,ier,d
+      integer                           :: i,j,ngen,nk,nq,iv,ier,d,dr,Mult
       integer                           :: j_ini, j_end
       character(len=:),     allocatable :: line,uline,setting,strcode
       character(len=40), dimension(192) :: gen
@@ -530,15 +530,21 @@ SubModule (CFML_IOForm) IO_CFL
       !> Now read q-vectors and other items if the class of SpG is SuperSpaceGroup_Type
       Select Type (SpG)
          Class is (SuperSpaceGroup_Type)
+            dr=d-1
+            Mult=SpG%Multip
             if (allocated(SpG%kv))      deallocate (SpG%kv)
             if (allocated(SpG%nharm))   deallocate (SpG%nharm)
             if (allocated(SpG%sintlim)) deallocate (SpG%sintlim)
-            if (allocated(SpG%Om))      deallocate (SpG%Om)
             if (allocated(SpG%q_coeff)) deallocate (SpG%q_coeff)
 
-            allocate(SpG%Om(SpG%D,Spg%D,SpG%Multip))
-            do i=1,SpG%Multip
-               SpG%Om(:,:,i)=real(SpG%Op(i)%Mat(:,:))
+            allocate(SpG%Rot(3,3,Mult),SpG%t(3,Mult),SpG%tI(dr,Mult),SpG%M(dr,3,Mult),SpG%Ep(dr,dr,Mult))
+
+            do i=1,Mult
+                SpG%Rot(:,:,i)=SpG%Op(i)%Mat(1:3,1:3)
+                SpG%t    (:,i)=SpG%Op(i)%Mat(1:3,d)
+                SpG%tI   (:,i)=SpG%Op(i)%Mat(4:dr,d)
+                SpG%M  (:,:,i)=SpG%Op(i)%Mat(4:dr,1:3)
+                SpG%Ep (:,:,i)=SpG%Op(i)%Mat(4:dr,4:dr)
             end do
 
             nk=0; nq=0

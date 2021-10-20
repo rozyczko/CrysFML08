@@ -109,10 +109,13 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
       momd=0.0; momd(Spg%d)=1.0_cp
       if(present(mom)) momd(1:3)=mom(1:3)
 
+      do i=1,Spg%Multip
+        Om(:,:,i)=Spg%Op(i)%Mat
+      end do
+
       Select Type(SpG)
 
         type is (SuperSpaceGroup_Type)
-           Om=SpG%Om
            xs(1:3)=x   !Extend the position and moment to superspace
            ms(1:3) = momd(1:3)
            do i=1,SpG%nk
@@ -120,9 +123,6 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
              ms(3+i)=dot_product(momd(1:3),SpG%kv(:,i))
            end do
         class default
-           do i=1,Spg%Multip
-             Om(:,:,i)=Spg%Op(i)%Mat
-           end do
            xs(1:d)=x(1:d)
            ms(1:d) = momd(1:d)
       End Select

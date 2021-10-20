@@ -142,11 +142,14 @@ Module CFML_gSpaceGroups
        type(rational),dimension(:,:), allocatable :: aLat_tr           ! Anti-translations
     End Type SPG_Type
 
-    Type, public, extends(Spg_Type):: Spg_Oreal_Type
-       real(kind=cp), allocatable,dimension(:,:,:):: Om        ! Operator matrices (3+d+1,3+d+1,Multip) in real form to accelerate calculations
-    End Type Spg_Oreal_Type
+    !Type, public, extends(Spg_Type):: Spg_Oreal_Type         ! Operator matrices (3+d+1,3+d+1,Multip) in real form to accelerate calculations
+    !   real(kind=cp), allocatable,dimension(:,:,:):: Om      ! Suppressed class => Better to copy locally before doing long calculations
+    !End Type Spg_Oreal_Type
 
-    Type, public, extends(Spg_Oreal_Type) :: SuperSpaceGroup_Type
+      !                          / Rot   0   t  \
+      !   Superspace operator:  |   M   ep   tI  |
+      !                          \  0    0   1  /
+    Type, public, extends(SpG_Type) :: SuperSpaceGroup_Type
        integer                                    :: nk=0      ! (nk=1,2,3, ...) number of k-vectors
        integer                                    :: nq=0      ! number of effective set of Q_coeff >= nk
        real(kind=cp), allocatable,dimension(:,:)  :: kv        ! k-vectors (3,nk)
@@ -154,6 +157,11 @@ Module CFML_gSpaceGroups
        real(kind=cp), allocatable,dimension(:)    :: sintlim   ! sintheta/lambda limits (nk)
        integer,       allocatable,dimension(:)    :: nharm     ! number of harmonics along each k-vector
        integer,       allocatable,dimension(:,:)  :: q_coeff   ! Q_coeff(nk,nq)
+       integer,       allocatable,dimension(:,:,:):: Rot       ! Rotational Operator matrices (3,3,Multip) in integer form to accelerate calculations
+       integer,       allocatable,dimension(:,:,:):: M         ! Reciprocal Operator matrices (d,3,Multip) in integer form to accelerate calculations
+       integer,       allocatable,dimension(:,:,:):: Ep        ! Modulation vector transform matrices (d,d,Multip) in integer form to accelerate calculations
+       real(kind=cp), allocatable,dimension(:,:)  :: t      ! Translation in external (physical) space (3,Multip)
+       real(kind=cp), allocatable,dimension(:,:)  :: tI     ! Translation in internal space (d,Multip)
     End Type SuperSpaceGroup_Type
 
     !!----
@@ -212,6 +220,11 @@ Module CFML_gSpaceGroups
     !---- Overload ----!
     !------------------!
 
+    Interface Apply_OP
+       module procedure Apply_OP_rat
+       module procedure Apply_OP_real
+    End Interface Apply_OP
+
     Interface Group_Constructor
        module procedure SpaceG_Constructor_GenV
        module procedure SpaceG_Constructor_Str
@@ -267,12 +280,19 @@ Module CFML_gSpaceGroups
           type(Kvect_Info_Type), intent(inout) :: Kvec
        End Subroutine Allocate_KVector
 
-       Module Function Apply_OP(Op, V) Result(S)
+       Pure Module Function Apply_OP_rat(Op, V) Result(S)
           !---- Arguments ----!
           Type(Symm_Oper_Type),         intent(in) :: Op    ! Symmetry Operator
           real(kind=cp), dimension(3),  intent(in) :: v     ! Vector
           real(kind=cp), dimension(3)              :: S     ! Output vector
-       End Function Apply_OP
+       End Function Apply_OP_rat
+
+       Pure Module Function Apply_OP_real(Mat, V) Result(S)
+          !---- Arguments ----!
+          real(kind=cp), dimension(:,:),intent(in) :: Mat   ! Symmetry Operator in matrix form
+          real(kind=cp), dimension(:),  intent(in) :: v     ! Vector
+          real(kind=cp), dimension(size(v))        :: S     ! Output vector
+       End Function Apply_OP_real
 
        Module Subroutine Allocate_Operators(D, NMax, Op)
           !---- Arguments ----!

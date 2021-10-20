@@ -43,6 +43,7 @@
 
     !---- Use Modules ----!
     Use CFML_GlobalDeps
+    Use CFML_Rational
     Use CFML_Maths,        only: modulo_lat, equal_vector
     Use CFML_Metrics,      only: Cell_G_Type
     Use CFML_Strings,      only: u_case,l_case
@@ -302,8 +303,8 @@
        End Subroutine Allocate_Atom_List
 
        Module Subroutine Check_Symmetry_Constraints(SpG,Atm)
-         class(SpG_Type),   intent(in)     :: SpG
-         type(AtList_Type), intent(in out) :: Atm
+         class(SpG_Type),      intent(in)     :: SpG
+         type(AtList_Type),    intent(in out) :: Atm
        End Subroutine Check_Symmetry_Constraints
 
        Module Subroutine Read_Bin_Atom_List(filename, A, Type_Atm)
@@ -328,15 +329,15 @@
 
        Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven)
           !---- Arguments ----!
-          type(atlist_type),   intent(in)     :: A         ! Atom list (asymmetric unit)
-          type(atlist_type),   intent(in out) :: B         ! Atom list into the unit cell
-          type(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
-          character(len=*),    intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
-          logical, optional,   intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
+          type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
+          type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
+          class(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
+          character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
+          logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
        End Subroutine Extend_List
 
        Module Subroutine Set_Atom_Equiv_List(SpG,cell,A,Ate,lun)
-         type(SpG_Type),             intent(in) :: SpG
+         class(SpG_Type),            intent(in) :: SpG
          type(Cell_G_Type),          intent(in) :: Cell
          type(Atlist_Type),          intent(in) :: A
          type(Atom_Equiv_List_Type), intent(out):: Ate

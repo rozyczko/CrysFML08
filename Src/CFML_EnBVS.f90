@@ -68,6 +68,7 @@
  Module CFML_EnBVS
     !---- Use Files ----!
     Use CFML_GlobalDeps,        only: Sp,Cp,dp,pi,tpi,clear_error,Err_CFML
+    Use CFML_Rational
     Use CFML_Maths,             only: cross_product, Sort, Set_Eps_Math, epss
     use CFML_Strings,           only: Sort_Strings,Get_words, U_Case,pack_string
     Use CFML_Scattering_Tables, only: Get_Ionic_Radius, Get_Chem_Symb, Get_Z_Symb, Get_Covalent_Radius, Set_Chem_Info
@@ -157,7 +158,7 @@
       Module Subroutine Calc_Map_BVEL(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol,emin,npix,outp,bvel_map)
          !---- Arguments ----!
          type (Atoms_Conf_List_type), intent(in) :: A
-         type (SPG_Type),             intent(in) :: SpG
+         class (SpG_Type),            intent(in) :: SpG
          Type (Cell_G_Type),          intent(in) :: Cell
          character(len=*),            intent(in) :: Filecod
          integer,                     intent(in) :: ndimx
@@ -176,7 +177,7 @@
       Module Subroutine Calc_Map_BVS(A,Spg,Cell,Filecod,ndimx,ndimy,ndimz,atname,drmax,delta,vol)
          !---- Arguments ----!
          type (Atoms_Conf_List_type), intent(in) :: A
-         type (SPG_Type),             intent(in) :: SpG
+         class (SpG_Type),            intent(in) :: SpG
          Type (Cell_G_Type),          intent(in) :: Cell
          character(len=*),            intent(in) :: Filecod
          integer,                     intent(in) :: ndimx
@@ -223,7 +224,7 @@
       Module Subroutine Calc_Site_Ene(A,Spg,Cell,x,y,z,atname,drmax,emin)
         !---- Arguments ----!
         Type (Atoms_Conf_List_Type), Intent(in out):: A
-        Type (SPG_Type),             Intent(in)    :: SpG
+        class (SpG_Type),            Intent(in)    :: SpG
         Type (Cell_G_Type),          Intent(in)    :: Cell
         real(kind=cp),               intent(in)    :: x
         real(kind=cp),               intent(in)    :: y
@@ -242,7 +243,7 @@
 
       Module Subroutine Set_Formal_Charges(SpGr,Cell,A,eps_val,iwrt)
         !---- Arguments ----!
-        Type (SPG_Type),       Intent(in)    :: SpGr
+        class (SpG_Type),      Intent(in)    :: SpGr
         Type (Cell_G_Type),    Intent(in)    :: Cell
         Type (AtList_Type),    Intent(in out):: A
         Real(kind=cp),Optional,Intent(in)    :: eps_val

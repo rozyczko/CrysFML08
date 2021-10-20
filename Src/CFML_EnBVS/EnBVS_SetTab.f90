@@ -720,13 +720,16 @@
        if (allocated(A%Species)) deallocate(A%Species)
        allocate(A%Species(ns))
        A%Species=spec(1:ns)
+       !do i=1,ns
+       !  write(*,*) i,A%Species(i)
+       !end do
 
        if (allocated(A%Radius)) deallocate(A%Radius)
        allocate(A%Radius(ns))
 
        do i=1,nc
           im=index(A%Species(i),"+")
-          car=A%Species(i)(im+1:im+2)
+          car=A%Species(i)(im+1:im+1)
           read(unit=car,fmt="(i1)") j
           car=A%Species(i)(1:im-1)
           if(present(covalent) .and. soft_true) then

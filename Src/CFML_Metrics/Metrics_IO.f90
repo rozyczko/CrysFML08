@@ -43,17 +43,17 @@ Submodule (CFML_Metrics) Metrics_IORoutines
              end do
 
              select case(Cell%CartType)
-                case('BA')     ! Angel & Brown setting
-                   write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: y // b; z is in the bc-plane; x is y ^ z = a*   "
+                 case('BA')     ! Angel & Brown setting
+                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: y // b; z is in the bc-plane; x is y ^ z = a*   "
 
-                case('BC')     ! Carpenter setting
-                   write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: y // b; x is in the ab-plane; z is x ^ y = c*   "
+                 case('BC')     ! Carpenter setting
+                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: y // b; x is in the ab-plane; z is x ^ y = c*   "
 
-                case('AB')     ! previous alternate setting
-                   write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: x // a; z is in the ac-plane; y is x ^ z = b*   "
+                 case('AC')     ! previous alternate setting
+                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: x // a; z is along c*; y is within the ab-plane   "
 
-                case default   ! 'CA'
-                   write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: z // c; y is in the bc-plane; x is y ^ z = a*  "
+                 case default   ! 'CA'
+                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: z // c; y is in the bc-plane; x is along y ^ z = a*  "
              end select
 
              Write(unit=lun,fmt="(a)")       "     Crystal_to_Orthonormal_Matrix              Orthonormal_to_Crystal Matrix"

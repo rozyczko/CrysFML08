@@ -183,9 +183,9 @@
 
     !!----
     !!---- Module Subroutine Set_Charges(SpGr,Cell,A,filcod)
-    !!----     Type (SPG_Type),     Intent(in)    :: SpGr
-    !!----     Type (Cell_G_Type),    Intent(in)    :: Cell
-    !!----     Type (AtList_Type),       Intent(inout) :: A
+    !!----     class (SpG_Type),      Intent(in)    :: SpGr
+    !!----     Type (Cell_G_Type),          Intent(in)    :: Cell
+    !!----     Type (AtList_Type),          Intent(inout) :: A
     !!----     Real(kind=cp), Dimension(*), Intent(out)   :: charges
     !!----     Character(len=*), Optional,  Intent(in)    :: filcod
     !!----
@@ -197,7 +197,7 @@
     !!
     Module Subroutine Set_Formal_Charges(SpGr,Cell,A,eps_val,iwrt)
       !---- Arguments ----!
-      Type (SPG_Type),       Intent(in)    :: SpGr
+      class (SpG_Type),Intent(in)    :: SpGr
       Type (Cell_G_Type),    Intent(in)    :: Cell
       Type (AtList_Type),    Intent(in out):: A
       Real(kind=cp),Optional,Intent(in)    :: eps_val
@@ -955,7 +955,7 @@
     Module Subroutine Calc_Site_Ene(A,Spg,Cell,x,y,z,atname,drmax,emin)
       !---- Arguments ----!
       Type (Atoms_Conf_List_Type), Intent(in out):: A
-      Type (SPG_Type),             Intent(in)    :: SpG
+      class (SpG_Type),      Intent(in)    :: SpG
       Type (Cell_G_Type),          Intent(in)    :: Cell
       real(kind=cp),               intent(in)    :: x
       real(kind=cp),               intent(in)    :: y

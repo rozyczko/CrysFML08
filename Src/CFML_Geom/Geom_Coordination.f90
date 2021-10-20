@@ -31,11 +31,19 @@
        type (AtList_Type),       intent(in)   :: A
 
        !---- Local Variables ----!
-       integer                              :: i,j,k,lk,i1,i2,i3,nn,L,ico
-       integer,       dimension(3)          :: ic1,ic2
-       real(kind=cp), dimension(3)          :: xx,x1,xo,Tn,xr, QD
-       real(kind=cp)                        :: T,dd
-       real(kind=cp), dimension(3,max_coor) :: uu
+       integer                                 :: i,j,k,lk,i1,i2,i3,nn,L,ico,d
+       integer,       dimension(3)             :: ic1,ic2
+       real(kind=cp), dimension(3)             :: xx,x1,xo,Tn,xr, QD
+       real(kind=cp)                           :: T,dd
+       real(kind=cp), dimension(3,max_coor)    :: uu
+       real(kind=cp), dimension(3,SpG%Multip)  :: tr
+       integer,       dimension(3,3,SpG%Multip):: Mat
+
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
+          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        qd(:)=1.0/cell%rcell(:)
        ic2(:)= int(dmax/cell%cell(:))+1
@@ -48,7 +56,8 @@
              lk=1
              uu(:,lk)=xo(:)
              do j=1,Spg%Multip
-                xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do_i3:do i3=ic1(3),ic2(3)
@@ -96,7 +105,7 @@
     !!----    real(kind=cp),       intent(in)   :: dangl    !  In -> Max. distance for angle calculations
     !!----    type (Cell_G_Type),  intent(in)   :: Cell     !  In -> Object of Crytal_Cell_Type
     !!----    Class(SpG_Type),     intent(in)   :: SpG      !  In -> Object of SpG_Type
-    !!----    type (AtList_Type),  intent(in)    :: A        !  In -> Object of AtList_Type
+    !!----    type (AtList_Type),  intent(in)   :: A        !  In -> Object of AtList_Type
     !!----
     !!----    Modify the coordination type: Coord_Info for the atoms affected by the change of atom "List"
     !!----    Needs as input the objects Cell (of type Crystal_cell), SpG (of type Space_Group)
@@ -117,12 +126,20 @@
        type (AtList_Type),       intent(in)   :: A
 
        !---- Local Variables ----!
-       integer                              :: i,j,k,lk,i1,i2,i3,nn,L,ic,ico
-       integer,       dimension(3)          :: ic1,ic2
-       integer,       dimension(A%natoms)   :: po,pn
-       real(kind=cp), dimension(3)          :: xx,x1,xo,Tn,xr, QD
-       real(kind=cp)                        :: T,dd
-       real(kind=cp), dimension(3,max_coor) :: uu
+       integer                                 :: i,j,k,lk,i1,i2,i3,nn,L,ic,ico,d
+       integer,       dimension(3)             :: ic1,ic2
+       integer,       dimension(A%natoms)      :: po,pn
+       real(kind=cp), dimension(3)             :: xx,x1,xo,Tn,xr, QD
+       real(kind=cp)                           :: T,dd
+       real(kind=cp), dimension(3,max_coor)    :: uu
+       real(kind=cp), dimension(3,SpG%Multip)  :: tr
+       integer,       dimension(3,3,SpG%Multip):: Mat
+
+       d=SpG%d
+       do i=1,SpG%Multip
+         Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
+          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       End do
 
        po=0; pn=0
        po(List)=1 !This atom has a modified coordination sphere
@@ -143,11 +160,12 @@
           lk=1
           uu(:,lk)=xo(:)
           do j=1,Spg%Multip
-             xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+             !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+             xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
              do i1=ic1(1),ic2(1)
                 do i2=ic1(2),ic2(2)
                    do_i3:do i3=ic1(3),ic2(3)
-                         Tn(:)=real((/i1,i2,i3/))
+                         Tn(:)=real([i1,i2,i3])
                          x1(:)=xx(:)+tn(:)
                          do l=1,3
                             t=abs(x1(l)-xo(l))*qd(l)
@@ -196,11 +214,12 @@
             lk=1
             uu(:,lk)=xo(:)
             do j=1,Spg%Multip
-               xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+               !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
+               xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
                do i1=ic1(1),ic2(1)
                   do i2=ic1(2),ic2(2)
                      do_inter:do i3=ic1(3),ic2(3)
-                           Tn(:)=real((/i1,i2,i3/))
+                           Tn(:)=real([i1,i2,i3])
                            x1(:)=xx(:)+tn(:)
                            do l=1,3
                               t=abs(x1(l)-xo(l))*qd(l)
