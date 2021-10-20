@@ -212,7 +212,7 @@ Submodule (CFML_Metrics) Metrics_Gen
              Mat(3,2) = cell(2)*cosd(ang(1))
              Mat(3,3) = cell(3)
 
-          case('AC')  !This is the alternate case in the version prior to  2019.
+           case('AC')  !This is the alternate case in the version prior to 2019.
              ! Incorrectly labelled in 2019 as x//a and Y // b*  => AB!!!!
              !  It is really x//a and Z // c* => AC
              !  Transponse of the following matrix:

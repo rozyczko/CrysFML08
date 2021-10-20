@@ -6,136 +6,138 @@ SubModule (CFML_Eos) EoS_Set
    Contains
 
    !!--++
-   !!--++ SET_CROSS_NAMES
+   !!--++ SUBROUTINE SET_CROSS_NAMES
    !!--++
-   !!--++ PRIVATE
    !!--++ Set the character variables in eos_type data structures for Cross-terms
    !!--++
-   !!--++ 11/11/2016
+   !!--++ Date: 11/11/2016
    !!
-   Module Subroutine Set_Cross_Names(Eospar)
+   Module Subroutine Set_Cross_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: EoS  ! EoS object
 
       !---- Local Variables ----!
       character(len=50) :: ptext
 
       !> Check for valid model number. If not valid, set zero
-      if (eospar%icross < 0 .or. eospar%icross > N_CROSS_MODELS) eospar%icross=0
+      if (EoS%icross < 0 .or. EoS%icross > N_CROSS_MODELS) EoS%icross=0
 
-      eospar%cmodel=crossmodel_names(eospar%icross)
+      EoS%cmodel=crossmodel_names(EoS%icross)
 
-      select case(eospar%icross)
+      select case(EoS%icross)
          case (0)
-            eospar%parname(5:6) = ' '
+            EoS%parname(8:9) = ' '
 
          case (1)
-            if (len_trim(eospar%vscale_name) > 0)then
-               ptext='units are '//trim(eospar%pscale_name)//'/K'
+            if (len_trim(EoS%vscale_name) > 0)then
+               ptext='units are '//trim(EoS%pscale_name)//'/K'
             else
                ptext='units are P units/K'
             end if
-            if (eospar%linear)then
-               eospar%parname(5) = 'dM/dT'
-               eospar%comment(5) = 'dM/dT '//trim(ptext)
+            if (EoS%linear)then
+               EoS%parname(8) = 'dM/dT'
+               EoS%comment(8) = 'dM/dT '//trim(ptext)
             else
-               eospar%parname(5) = 'dK/dT'//trim(ptext)
-               eospar%comment(5) = 'dK/dT '//trim(ptext)
+               EoS%parname(8) = 'dK/dT'//trim(ptext)
+               EoS%comment(8) = 'dK/dT '//trim(ptext)
             end if
 
          case (2)
-            eospar%parname(5) = 'delta'
-            eospar%comment(5) = 'Anderson delta_T, without units'
-            eospar%parname(6) = 'delPr'
-            eospar%comment(6) = 'delta_prime for Kprime power law, without units'
+            EoS%parname(8) = 'delta'
+            EoS%comment(8) = 'Anderson delta_T, without units'
+            EoS%parname(9) = 'delPr'
+            EoS%comment(9) = 'delta_prime for Kprime power law, without units'
       end select
+
    End Subroutine Set_Cross_Names
 
    !!--++
-   !!--++ SET_EOS_FACTORS
+   !!--++ SUBROUTINE SET_EOS_FACTORS
    !!--++
-   !!--++ PRIVATE
    !!--++ Initialize the EoS Factors without change in the parameters values
    !!--++
-   !!--++ 17/02/2015
+   !!--++ Date: 17/02/2015
    !!
-   Module Subroutine Set_EoS_Factors(Eospar)
+   Module Subroutine Set_EoS_Factors(Eos)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar
+      type (EoS_Type), intent(in out) :: Eos
 
       !> Init
-      eospar%factor=1.0
-      eospar%alphafactor=1.0E5_cp
+      EoS%factor=1.0
+      EoS%alphafactor=1.0E5_cp
 
-      select case(eospar%itherm)
+      select case(EoS%itherm)
          case (-1)       ! pvt table
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply alpha values on printing
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply alpha values on printing
 
          case (0)
-            eospar%factor(10:19) = 1.0_cp
+            EoS%factor(10:19) = 1.0_cp
 
          case (1)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0E8_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0E8_cp
 
          case (2)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0E8_cp
-            eospar%factor(12)  = 1.0_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0E8_cp
+            EoS%factor(12)  = 1.0_cp
 
          case (3)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0E4_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0E4_cp
 
          case (4)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0_cp
 
          case (5)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0_cp
 
          case (6)
-            eospar%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
-            eospar%factor(11)  = 1.0_cp
+            EoS%factor(10)  = 1.0E5_cp                ! factor to multiply values on printing
+            EoS%factor(11)  = 1.0_cp
 
       end select
 
-      select case(eospar%itran)
+      select case(EoS%itran)
          case (1:3)
-            eospar%factor(20:n_eospar) = 1.0_cp
-            eospar%factor(24)          = 1.0E3_cp         ! 1000 for aL
-            eospar%factor(26)          = 1.0E3_cp         ! 1000 for aH
+            EoS%factor(20:n_eospar) = 1.0_cp
+            EoS%factor(24)          = 1.0E3_cp         ! 1000 for aL
+            EoS%factor(26)          = 1.0E3_cp         ! 1000 for aH
       end select
+
+      return
    End Subroutine Set_Eos_Factors
 
    !!----
-   !!---- SET_EOS_NAMES
-   !!----    Set the character variables in eos_type data structures
-   !!----    to match the flags already set
+   !!---- SUBROUTINE SET_EOS_NAMES
    !!----
-   !!---- 17/07/2015
+   !!---- Set the character variables in eos_type data structures
+   !!---- to match the flags already set
+   !!----
+   !!---- Date: 17/07/2015
    !!
-   Module Subroutine Set_Eos_Names(Eospar)
+   Module Subroutine Set_Eos_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar   ! EoS object
+      type (EoS_Type), intent(in out) :: EoS   ! EoS object
 
       !---- Local Variables ----!
       character(len=50),dimension(5)  :: ptext    ! local variable to hold name of pressure scale
 
       !> Check for valid model number. If not valid, set zero
-      if (eospar%imodel < -1 .or. eospar%imodel > N_PRESS_MODELS) eospar%imodel=0
+      if (EoS%imodel < -1 .or. EoS%imodel > N_PRESS_MODELS) EoS%imodel=0
 
       !> Set the Eos name
-      eospar%model=Pmodel_names(eospar%imodel)
-      if (eospar%imodel <= 0) return
+      EoS%model=Pmodel_names(EoS%imodel)
+      if (EoS%imodel <= 0) return
 
       !> set the comments for parameters for volume or linear eos
       !> set the pressure scale text first
       ptext=' '
-      if (len_trim(eospar%pscale_name) > 0) then
-         ptext(2)='units are '//trim(eospar%pscale_name)
-         ptext(4)='units are inverse '//trim(eospar%pscale_name)
+      if (len_trim(EoS%pscale_name) > 0) then
+         ptext(2)='units are '//trim(EoS%pscale_name)
+         ptext(4)='units are inverse '//trim(EoS%pscale_name)
 
       else
          ptext(2)='same units as pressure data'
@@ -143,58 +145,58 @@ SubModule (CFML_Eos) EoS_Set
       end if
 
       !> Set the volume/linear scale name
-      if (len_trim(eospar%vscale_name) > 0) then
-         ptext(1)='units are '//trim(eospar%vscale_name)
+      if (len_trim(EoS%vscale_name) > 0) then
+         ptext(1)='units are '//trim(EoS%vscale_name)
       else
-         if (.not. eospar%linear) then
+         if (.not. EoS%linear) then
             ptext(1)='units as volume data'
          else
             ptext(1)='units as length data'
          end if
       end if
 
-      if (.not. eospar%linear) then
-         eospar%ParName(1:4) =(/'V0   ','K0   ','Kp   ','Kpp  '/)
+      if (.not. EoS%linear) then
+         EoS%ParName(1:4) =(/'V0   ','K0   ','Kp   ','Kpp  '/)
 
-         eospar%comment(1) = 'Reference pressure volume: '//trim(ptext(1))
-         eospar%comment(2) = 'Bulk modulus: '//trim(ptext(2))
-         eospar%comment(3) = 'dK/dP: dimensionless'
+         EoS%comment(1) = 'Reference pressure volume: '//trim(ptext(1))
+         EoS%comment(2) = 'Bulk modulus: '//trim(ptext(2))
+         EoS%comment(3) = 'dK/dP: dimensionless'
+         EoS%comment(4) = 'd2K/dP2: '//trim(ptext(4))
+         EoS%LinearDir  = ' '
 
-         select case(eospar%imodel)
-            case (6)
-               eospar%ParName(4) = 'Z   '
-               eospar%comment(4) = 'N(electrons) in V0'
-
-            case default
-               eospar%comment(4) = 'd2K/dP2: '//trim(ptext(4))
+         select case(EoS%imodel)
+            case (6)                !APL
+               EoS%ParName(5) = 'Z   '
+               EoS%comment(5) = 'N(electrons) in V0'
          end select
 
       else
-         eospar%ParName(1:4) =(/'L0   ','M0   ','Mp   ','Mpp  '/)
+         EoS%ParName(1:4) =(/'L0   ','M0   ','Mp   ','Mpp  '/)
 
-         eospar%comment(1) = 'Reference pressure length: '//trim(ptext(1))
-         eospar%comment(2) = 'Linear modulus: '//trim(ptext(2))
-         eospar%comment(3) = 'dM/dP: dimensionless'
+         EoS%comment(1) = 'Reference pressure length: '//trim(ptext(1))
+         EoS%comment(2) = 'Linear modulus: '//trim(ptext(2))
+         EoS%comment(3) = 'dM/dP: dimensionless'
+         EoS%comment(4) = 'd2M/dP2: '//trim(ptext(4))
 
-         select case(eospar%imodel)
+         select case(EoS%imodel)
             case (6)
-               eospar%ParName(4) = 'Z   '
-               eospar%comment(4) = 'N(electrons) in V0'
+               EoS%ParName(5) = 'Z   '
+               EoS%comment(5) = 'N(electrons) in V0'
 
-            case default
-               eospar%comment(4) = 'd2M/dP2: '//trim(ptext(4))
          end select
+
       end if
 
       !> Thermal models are only set in init_EoS_thermal
 
       !>Adjustl all scale names so that they can be compared in index
-      eospar%pscale_name=trim(adjustl(eospar%pscale_name))
-      eospar%vscale_name=trim(adjustl(eospar%vscale_name))
+      EoS%pscale_name=trim(adjustl(EoS%pscale_name))
+      EoS%vscale_name=trim(adjustl(EoS%vscale_name))
+
    End Subroutine Set_Eos_Names
 
-   !!----
-   !!---- SET_EOS_USE
+      !!----
+   !!---- SUBROUTINE SET_EOS_USE
    !!----
    !!---- sets the 'use' flags for Eos type based on all current settings
    !!----
@@ -203,413 +205,580 @@ SubModule (CFML_Eos) EoS_Set
    !!----      0      parameter not used
    !!----      1      parameter is used, settable, refineable
    !!----      2      parameter is used and/or should be reported, settable, but cannot be refined
-   !!----      3      parameter is used and/or should be reported, not settable, cannot be refined (includes implied values)
+   !!----      3      parameter is used and/or should be reported, not settable, cannot be refined
+   !!----             (includes implied values)
    !!----
-   !!---- 17/07/2015
+   !!---- Date: 17/07/2015
    !!
-   Module Subroutine Set_EoS_Use(Eospar)
+   Module Subroutine Set_EoS_Use(Eos)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: Eos  ! EoS object
 
       !---- Local Variables ----!
-      integer :: i
+      integer                     :: i
+      integer,dimension(N_EOSPAR) :: useflags       ! local copy: useful for avoiding some resets
 
       !> Init
-      eospar%iuse=0
+      useflags=EoS%iuse
+      EoS%iuse=0
+      EoS%allowed_orders=.true.
 
       !> EoS Model
-      select case(eospar%imodel)
+      select case(EoS%imodel)
          case (0)
-            eospar%iuse(1)=1                                      ! None eg thermal only
+            EoS%iuse(1)=1                                    ! None eg thermal only
+            EoS%allowed_orders=.false.
 
-         case (1)
-            eospar%iuse(1:3)=1                                     ! Murnaghan
+         case (1,7)
+            EoS%iuse(1:3)=1                                  ! Murnaghan, Kumar
+            EoS%allowed_orders(2)=.false.
+            EoS%allowed_orders(4)=.false.
 
-         case (6)
-            eospar%iuse(1:3)=1
-            eospar%iuse(4)=2
+         case (2,4,5)                                        ! other isothermal EoS
+            EoS%iuse(1:EoS%iorder)=1
+            if (EoS%iorder < 4) EoS%iuse(EoS%iorder+1:4)=3   ! implied values
 
-         case default
-            eospar%iuse(1:eospar%iorder)=1                          ! other isothermal EoS
-            if (eospar%iorder < 4) eospar%iuse(eospar%iorder+1:4)=3  !implied values
+         case (3)                                            ! Vinet
+            EoS%iuse(1:EoS%iorder)=1
+            if (EoS%iorder < 4) EoS%iuse(EoS%iorder+1:4)=3   ! implied values
+            EoS%allowed_orders(4)=.false.
+
+         case (6)                                            ! APL only
+            EoS%iuse(1:EoS%iorder)=1
+            if (EoS%iorder < 4) EoS%iuse(EoS%iorder+1:4)=3   ! implied values
+            EoS%iuse(5)=2
+
       end select
 
       !> Thermal Model
-      select case(eospar%itherm)
+      select case(EoS%itherm)
          case (1)             ! Berman
-            eospar%iuse(10:11)=1 ! alpha terms
-            eospar%iuse(18)=2    ! Grunesien parameter at Pref,Tref
-            eospar%iuse(19)=2    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  =.false.
+            EoS%iuse(10:11)=1 ! alpha terms
+            EoS%iuse(18)=2    ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=2    ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  =.false.
+            EoS%Osc_allowed  =.false.
 
          case (2)             ! Fei
-            eospar%iuse(10:12)=1 ! alpha terms
-            eospar%iuse(18)=2    ! Grunesien parameter at Pref,Tref
-            eospar%iuse(19)=2    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  =.false.
+            EoS%iuse(10:12)=1 ! alpha terms
+            EoS%iuse(18)=2    ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=2    ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  =.false.
+            EoS%Osc_allowed  =.false.
 
          case (3)             ! HP 1998
-            eospar%iuse(10:11)=1 ! alpha terms
-            eospar%iuse(18)=2
-            eospar%iuse(19)=2    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  =.false.
+            EoS%iuse(10:11)=1 ! alpha terms
+            EoS%iuse(18)=2
+            EoS%iuse(19)=2    ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  =.false.
+            EoS%Osc_allowed  =.false.
 
          case (4)             ! Holland-Powell thermal expansion, in Kroll form
-            if (eospar%imodel ==0) eospar%iuse(3)=2     ! require Kprime_zero but not stable in refinement if no P data (added 27/01/2014 RJA)
-            eospar%iuse(10)=1    ! alpha at Tref
-            eospar%iuse(11)=2    ! Einstein T should be reported but cannot be refined
-            eospar%iuse(18)=2    ! Grunesien parameter at Pref,Tref
-            eospar%iuse(19)=2    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  =.false.
+            if (EoS%imodel ==0) EoS%iuse(3)=2  ! require Kprime_zero but not stable in refinement if no P data (added 27/01/2014 RJA)
+            EoS%iuse(10)=1    ! alpha at Tref
+            EoS%iuse(11)=1    ! Einstein T set refineable 2 Sept 2020
+            EoS%iuse(18)=2    ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=2    ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  =.false.
+            EoS%Osc_allowed  =.false.
 
          case (5)             ! Salje
-            eospar%iuse(10:11)=1
-            eospar%iuse(18)=2    ! Grunesien parameter at Pref,Tref
-            eospar%iuse(19)=2    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .true.
-            eospar%pthermaleos  =.false.
+            EoS%iuse(10:11)=1
+            EoS%iuse(18)=2    ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=2    ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .true.
+            EoS%pthermaleos  =.false.
+            EoS%Osc_allowed  =.false.
 
          case (6)             ! Thermal pressure in H&P form (no dK/dT): requires a eos model as well
-            if (eospar%imodel==0) eospar%iuse(2:3)=2   ! K, Kp refinement is not stable without a pressure model
-            eospar%iuse(5:6)=0     ! No dK/dT parameter:
-            eospar%iuse(10)=1    ! alpha at Tref
-            eospar%iuse(11)=2    ! Einstein T should be reported but cannot be refined
-            eospar%iuse(18)=2    ! Grunesien parameter at Pref,Tref
-            eospar%iuse(19)=3    ! Grunesien q power law parameter
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  =.true.
+            if (EoS%imodel==0) EoS%iuse(2:4)=2   ! K, Kp refinement is not stable without a pressure model
+            EoS%iuse(8:9)=0   ! No dK/dT parameter:
+            EoS%iuse(10)=1    ! alpha at Tref
+            EoS%iuse(11)=1    ! Einstein T
+            EoS%iuse(13)=2    ! Natoms per formula unit
+            EoS%iuse(14)=0    ! Flag for q-compromise: does not appear to user
+            if (PscaleMGD(eos) .and. VscaleMGD(eos)) then
+               EoS%iuse(18)=3    ! Grunesien parameter at Pref,Tref. This is implied by alpha0
 
-         case (7)             ! Thermal pressure in MGD form
-            eospar%iuse(5:6)=0     ! No dK/dT parameter:
-            eospar%iuse(11)=1    ! Debye T
-            eospar%iuse(13)=2    ! Natoms per formula unit
-            eospar%iuse(18)=1    ! Grunesien parameter at Pref,Tref for Ks to Kt
-            eospar%iuse(19)=1    ! Grunesien q power law parameter for Ks to Kt
-            eospar%TRef_fixed   = .false.
-            eospar%pthermaleos  = .true.
+            else
+               EoS%iuse(18)=2    ! If the pscale and vscale are not as required, make free parameter for Ks Kt conversion
+            end if
+            EoS%iuse(19)=0    ! Grunesien q power law parameter: this is a q-comp model
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  =.true.
+            EoS%Osc_allowed  =.false.
+
+         case (7,8)           ! Thermal pressure in MGD or Einstein form,
+            if (EoS%imodel==0) EoS%iuse(2:4)=2   ! K, Kp refinement is not stable without a pressure model
+            EoS%iuse(8:9)=0   ! No dK/dT parameter:
+
+            EoS%iuse(11)=1    ! Debye T
+
+            EoS%iuse(13)=2    ! Natoms per formula unit
+            EoS%iuse(14)=0    ! Flag for q-compromise: does not appear to user
+            EoS%iuse(18)=1    ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=1    ! Grunesien q power law parameter
+            if (EoS%params(14) > 0.5_cp) then
+               EoS%params(19)=0._cp
+               EoS%iuse(19)=0
+            end if
+
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  = .true.
+            EoS%osc_allowed  = .true.
+
       end select
 
       !> Phase transition model
-      select case(eospar%itran)
+      select case(EoS%itran)
          case (1,2)     ! Landau PV or TV
-            eospar%iuse(20)=2           !settable, no refine: sense of transition,
-            eospar%iuse(21)=1           !settable, allow refine: Ptr or Ttr
-            eospar%iuse(24)=1           !settable, allow refine: aL
-            eospar%iuse(25)=1           !settable, allow refine: betaL
-            eospar%iuse(26)=1           !settable, allow refine: aH
-            eospar%iuse(27)=1           !settable, allow refine: betaH
+            EoS%iuse(20)=2           !settable, no refine: sense of transition,
+            EoS%iuse(21)=1           !settable, allow refine: Ptr or Ttr
+            EoS%iuse(24)=1           !settable, allow refine: aL
+            EoS%iuse(25)=1           !settable, allow refine: betaL
+            EoS%iuse(26)=1           !settable, allow refine: aH
+            EoS%iuse(27)=1           !settable, allow refine: betaH
 
          case (3)     ! Landau PVT
-            eospar%iuse(20:22)=2        !settable, no refine: sense of transition, T(tr), dT(Tr)/dP
-            eospar%iuse(24)=1           !settable, allow refine: aL,
-            eospar%iuse(23)=2           !settable, fixed d2Tr/dP2
-            eospar%iuse(25:27)=1        !settable, allow refine:  betaL,aH,betaH
+            EoS%iuse(20:22)=2        !settable, no refine: sense of transition, T(tr), dT(Tr)/dP
+            EoS%iuse(24)=1           !settable, allow refine: aL,
+            EoS%iuse(23)=2           !settable, fixed d2Tr/dP2
+            EoS%iuse(25:27)=1        !settable, allow refine:  betaL,aH,betaH
       end select
 
       !> Shear model
-      select case(eospar%ishear)
+      select case(EoS%ishear)
          case (0)
-            eospar%iuse(30)=0            ! No model, G0 set very large
+            EoS%iuse(30)=0            ! No model, G0 set very large
 
          case (1)
-            eospar%iuse(30:34)=2         ! Polynomial model: settable, not refineable
+            EoS%iuse(30:34)=2         ! Polynomial model: settable, not refineable
       end select
 
       !> Cross terms model
-      if (eospar%pthermaleos) then
-         eospar%icross=0                ! Kill the cross-terms
-         eospar%iuse(5:6)=0
-         eospar%params(5:6)=0.0_cp
+      if (EoS%pthermaleos) then
+         EoS%icross=0                ! Kill the cross-terms
+         EoS%iuse(8:9)=0
+         EoS%params(8:9)=0.0
 
       else
-         select case(eospar%icross)
+         select case(EoS%icross)
             case (0)
-               eospar%iuse(5)=0
+               EoS%iuse(8)=0
 
             case(1)
-               eospar%iuse(5)=1
+               EoS%iuse(8)=1
 
             case(2)
-               eospar%iuse(5)=1
-               eospar%iuse(6)=2              !settable, no refine: del-prime refinement always unstable
+               EoS%iuse(8)=1
+               EoS%iuse(9)=2  !settable, no refine: del-prime refinement always unstable
          end select
       end if
 
+      !> Additional oscillators
+      EoS%iuse(40:49)=0
+      if (EoS%iosc(1) > 0) then
+         EoS%iuse(40:43)=1
+         if (EoS%params(44) > 0.5_cp)EoS%iuse(43)=0
+      end if
+
+      if (EoS%iosc(2) > 0) then
+         EoS%iuse(45:48)=1
+         if (EoS%params(49) > 0.5_cp)EoS%iuse(48)=0
+      end if
+
+      !> Use flags for data scales: leave them unchanged, because we do not have the dataset
+      EoS%iuse(50:59)=useflags(50:59)
+
       !> Set the refine flags to be consistent with the use flags
-      do i=1,n_eospar
-         if (eospar%iuse(i) /=1) eospar%iref(i)=0
+      do i=1,N_EOSPAR
+         if (EoS%iuse(i) /=1) EoS%iref(i)=0
       end do
+
    End Subroutine Set_Eos_Use
 
-   !!----
-   !!---- Set_EoS_Implied_Values
-   !!----    Fix Kp and Kpp values from Model and Order of EoSpar
-   !!----
-   !!---- 17/07/2015
+   !!--++
+   !!--++ SUBROUTINE SET_OSC_NAMES
+   !!--++
+   !!--++ Set the character variables in eos_type data structures for 2nd oscillators
+   !!--++
+   !!--++ Date: 09/03/2020
    !!
-   Module Subroutine Set_EoS_Implied_Values(Eospar)
+   Module Subroutine Set_Osc_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: EoS  ! EoS object
 
       !---- Local Variables ----!
-      real(kind=cp),dimension(N_EOSPar):: ev        ! local copies of room pressure parameter values
+      integer :: i,n0,n1
+
+      !> Check for valid model number. If not valid, set zero
+      if (EoS%iosc(1) < 0 .or. EoS%iosc(1) > N_OSC_MODELS) EoS%iosc(1)=0
+      if (EoS%iosc(2) < 0 .or. EoS%iosc(2) > N_OSC_MODELS) EoS%iosc(2)=0
+
+      !> Set the name
+      EoS%oscmodel(1)=oscmodel_names(EoS%iosc(1))
+      EoS%oscmodel(2)=oscmodel_names(EoS%iosc(2))
+
+      !> Set all the parameter names again, no harm in doing so
+
+      do i=1,2
+          n0=35+5*i
+          n1=39+5*i
+
+          select case(EoS%iosc(i))
+             case (0)
+                EoS%parname(n0:n1) = ' '
+                EoS%comment(n0:n1) = ' '
+
+             case (1)
+                EoS%parname(n0)  ='mfrac'
+                EoS%parname(n0+1)='ThD'
+                EoS%parname(n0+2)='gamma'
+                EoS%parname(n0+3)='q'
+                EoS%parname(n0+4) ='qcomp'
+                EoS%comment(n0)='Fraction of modes with this oscillator'
+                EoS%comment(n0+1)='Debye Temperature in K'
+                EoS%comment(n0+2)='Gruenesien mode gamma for this oscillator'
+                EoS%comment(n0+3)='Gruneisen power law in V/V0  for this oscillator'
+                EoS%comment(n0+4)='Switch for q-compromise model, +1 for compromise'
+
+             case (2)
+                EoS%parname(n0)  ='mfrac'
+                EoS%parname(n0+1)='Th_E '
+                EoS%parname(n0+2)='gamma'
+                EoS%parname(n0+3)='q    '
+                EoS%parname(n0+4) ='qcomp'
+                EoS%comment(n0)='Fraction of modes with this oscillator'
+                EoS%comment(n0+1)='Einstein Temperature in K'
+                EoS%comment(n0+2)='Gruenesien mode gamma for this oscillator'
+                EoS%comment(n0+3)='Gruneisen power law in V/V0  for this oscillator'
+                EoS%comment(n0+4)='Switch for q-compromise model, +1 for compromise'
+
+          end select
+      end do
+
+   End Subroutine Set_Osc_Names
+
+   !!----
+   !!---- SUBROUTINE SET_EOS_IMPLIED_VALUES
+   !!----
+   !!---- Fix Kp and Kpp values from Model and Order of EoSpar
+   !!---- And other implied values
+   !!---- Date: 17/07/2015
+   !!
+   Module Subroutine Set_Eos_Implied_Values(Eos)
+      !---- Arguments ----!
+      type (EoS_Type), intent(in out) :: Eos  ! EoS object
+
+      !---- Local Variables ----!
+      real(kind=cp),dimension(N_EOSPAR):: ev           ! local copies of room pressure parameter values
+      real(kind=cp)                    :: pfg0,c0,c2   ! variables for APL
+      real(kind=cp)                    :: Cvref, y      ! variables used for HP thermal p
 
       !> Local copy
-      call EoS_to_Vec(eospar,ev) !  ev contains volume-like parameters
+      ev= EoS_to_Vec(eos) !  ev contains volume-like parameters
 
-      select case (eospar%imodel)
+      select case (EoS%imodel)
          case (1) ! Murnaghan
-            return      ! no defaults
+            ev(4)=0._cp     !clear Kpp if set
+            ev(5)=0._cp     !clear Z if set
 
          case (2) ! Birch-Murnaghan
-            if (eospar%iorder == 2) ev(3)=4.0_cp
-            if (eospar%iorder == 2 .or. eospar%iorder == 3) then
+            if (EoS%iorder == 2) ev(3)=4.0_cp
+            if (EoS%iorder == 2 .or. EoS%iorder == 3) then
                if (abs(ev(2)) > 0.0) ev(4)=-1.0_cp*((ev(3)-4.0_cp)*(ev(3)-3.0_cp)+35.0_cp/9.0_cp)/ev(2)  !for order 2 and 3
             end if
+            ev(5)=0._cp     !clear Z if set
 
          case (3) ! Vinet
-            if (eospar%iorder == 2) ev(3)=1.0_cp
-            if (eospar%iorder == 2 .or. eospar%iorder == 3) then
+            if (EoS%iorder == 2) ev(3)=1.0_cp
+            if (EoS%iorder == 2 .or. EoS%iorder == 3) then
                if (abs(ev(2)) > 0.0) ev(4)=-1.0_cp*((0.5_cp*ev(3))**2+0.5*ev(3)-19.0_cp/36.0_cp)/ev(2) !for order 2 and 3
             end if
+            ev(5)=0._cp     !clear Z if set
 
          case (4) ! Natural
-            if (eospar%iorder == 2) ev(3)=2.0_cp
-            if (eospar%iorder == 2 .or. eospar%iorder == 3) then
+            if (EoS%iorder == 2) ev(3)=2.0_cp
+            if (EoS%iorder == 2 .or. EoS%iorder == 3) then
                if (abs(ev(2)) > 0.0) ev(4)=-1.0_cp*(1.0_cp + (ev(3)-2.0_cp)+(ev(3)-2.0_cp)**2.0_cp)/ev(2) !for order 2 and 3
             end if
+            ev(5)=0._cp     !clear Z if set
 
          case (5) ! Tait with definitions of order derived from Holland and Powell (2011)
-            if (eospar%iorder == 2) ev(3)=4.0_cp
-            if (eospar%iorder == 2 .or. eospar%iorder == 3)then
+            if (EoS%iorder == 2) ev(3)=4.0_cp
+            if (EoS%iorder == 2 .or. EoS%iorder == 3)then
                if (abs(ev(2)) > 0.0)ev(4)=-1.0_cp*ev(3)/ev(2)
-            endif
+            end if
+            ev(5)=0._cp     !clear Z if set
 
-         case (6) !No defaults
-            return      ! no defaults
+         case (6) ! APL
+            pFG0=AFERMIGAS*(ev(5)/ev(1))**1.66666667_cp
+            c0=-1.0_cp*log(3.0_cp*ev(2)/pFG0)           ! assumes V in A^3
+            if (EoS%iorder == 2)ev(3)=3.0_cp+2.0_cp*c0/3.0_cp
+
+            if (EoS%iorder < 4)then
+               c2=1.5_cp*(ev(3)-3.0_cp)-c0
+               ev(4)=(20._cp + 12._cp*c0 + c0*c0 + 2.0_cp*c2*(9.0_cp+c0) + 4.0_cp*c2*c2)
+               ev(4)=-1.0_cp*ev(4)/9._cp/ev(2)
+            end if
+
+         case(7) ! Kumar
+            if (EoS%iorder == 2)ev(3)=4.0_cp
+            ev(5)=0._cp     !clear Z if set
 
       end select
 
+      !> Thermal models
+      select case(eos%itherm)
+         case(6)        ! Holland-Powell thermal pressure. Set gamma if pscales and vscales appropriate
+             if (pscaleMGD(eos) .and. vscaleMGD(eos)) then
+                !We cannot use get_cv to calculate the CV at this point, because that uses gamma0
+                y=eos%params(11)/eos%tref  !ThetaE/Tref
+                Cvref=3.0_cp*eos%params(13)*8.314_cp * y**2._cp * exp(y)/(exp(y)-1)**2._cp
+                eos%params(18)=eos%params(1)*eos%params(10)*eos%params(2)/Cvref
+                eos%params(18)=eos%params(18)/EPthermal_factor(Eos)
+             end if
+      end select
+
       !> Handle linear or volume
-      if (.not. eospar%linear) then
-         if (eospar%iorder == 2) eospar%params(3)=ev(3)
-         if (eospar%iorder == 2 .or. eospar%iorder == 3) eospar%params(4)=ev(4)
+      if (.not. EoS%linear) then
+         if (EoS%iorder == 2) EoS%params(3)=ev(3)
+         if (EoS%iorder == 2 .or. EoS%iorder == 3) EoS%params(4)=ev(4)
 
       else
-         if (eospar%iorder == 2) eospar%params(3)=ev(3)*3.0_cp
-         if (eospar%iorder == 2 .or. eospar%iorder == 3) eospar%params(4)=ev(4)*3.0_cp
+         if (EoS%iorder == 2) EoS%params(3)=ev(3)*3.0_cp
+         if (EoS%iorder == 2 .or. EoS%iorder == 3) EoS%params(4)=ev(4)*3.0_cp
       end if
-   End Subroutine Set_EoS_Implied_Values
+
+   End Subroutine Set_Eos_Implied_Values
 
    !!--++
-   !!--++ SET_SHEAR_NAMES
+   !!--++ SUBROUTINE SET_SHEAR_NAMES
    !!--++
    !!--++ PRIVATE
    !!--++ Set the character variables in eos_type data structures for SHEAR EoS
    !!--++
-   !!--++ 11/07/2016
+   !!--++
+   !!--++ Date: 11/07/2016
    !!
-   Module Subroutine Set_Shear_Names(Eospar)
+   Module Subroutine Set_Shear_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: EoS  ! EoS object
 
       !---- Local Variables ----!
       integer :: n
 
       !> Check for valid model number. If not valid, set zero
-      if(eospar%ishear < 0 .or. eospar%ishear > N_SHEAR_MODELS) eospar%ishear=0
+      if (EoS%ishear < 0 .or. EoS%ishear > N_SHEAR_MODELS) EoS%ishear=0
 
       !> Set the Eos name
-      eospar%smodel=shearmodel_names(eospar%ishear)
+      EoS%smodel=shearmodel_names(EoS%ishear)
 
       !> Set upper limit to thermal parameter numbers
       n=34
-      if (n > n_eospar) n=n_eospar
+      if (n > N_EOSPAR) n=N_EOSPAR
 
-      select case(eospar%ishear)
+      select case(EoS%ishear)
          case (0)
-            eospar%parname(30:n) = ' '
-            eospar%comment(30:n) = ' '
+            EoS%parname(30:n) = ' '
+            EoS%comment(30:n) = ' '
 
          case (1)
-            eospar%parname(30)='G0'
-            eospar%parname(31)='dG/dP'
-            eospar%parname(32)='d2G/'
-            eospar%parname(33)='d3G/'
-            eospar%parname(34)='dG/dT'
-            eospar%comment(30)='Shear modulus at Pref, Tref, in pressure units'
-            eospar%comment(31)='Pressure derivative of shear modulus: no units'
-            eospar%comment(32)='2nd Pressure derivative of shear modulus: P^-1'
-            eospar%comment(33)='3rd Pressure derivative of shear modulus: P^-2'
-            eospar%comment(34)='Temperature derivative of shear modulus'
+            EoS%parname(30)='G0'
+            EoS%parname(31)='dG/dP'
+            EoS%parname(32)='d2G/'
+            EoS%parname(33)='d3G/'
+            EoS%parname(34)='dG/dT'
+            EoS%comment(30)='Shear modulus at Pref, Tref, in pressure units'
+            EoS%comment(31)='Pressure derivative of shear modulus: no units'
+            EoS%comment(32)='2nd Pressure derivative of shear modulus: P^-1'
+            EoS%comment(33)='3rd Pressure derivative of shear modulus: P^-2'
+            EoS%comment(34)='Temperature derivative of shear modulus'
       end select
+
    End Subroutine Set_Shear_Names
 
    !!--++
-   !!--++ SET_THERMAL_NAMES
+   !!--++ SUBROUTINE SET_THERMAL_NAMES
    !!--++
-   !!--++ PRIVATE
    !!--++ Set the character variables in eos_type data structures for thermal EoS
    !!--++
-   !!--++ 17/07/2015
+   !!--++ Date: 17/07/2015
    !!
-   Module Subroutine Set_Thermal_Names(Eospar)
+   Module Subroutine Set_Thermal_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: EoS  ! EoS object
 
       !---- Local Variables ----!
       integer :: n
 
       !> Check for valid model number. If not valid, set zero
-      if (eospar%itherm < -1 .or. eospar%itherm > N_THERM_MODELS) eospar%itherm=0
+      if (EoS%itherm < -1 .or. EoS%itherm > N_THERM_MODELS) EoS%itherm=0
 
       !> Set the Eos name
-      eospar%tmodel=Tmodel_names(eospar%itherm)
+      EoS%tmodel=Tmodel_names(EoS%itherm)
 
       !> Set upper limit to thermal parameter numbers
       n=19
       if (n > n_eospar) n=n_eospar
 
       !> Set the V0 name and comment here, in case eos is thermal only
-      if (.not. eospar%linear) then
-         eospar%ParName(1) ='V0   '
-         eospar%comment(1) = 'Reference pressure volume:'
-         if (len_trim(eospar%vscale_name) > 0) then
-            eospar%comment(1) = trim(eospar%comment(1))//' units are '//trim(eospar%vscale_name)
+      if (.not. EoS%linear) then
+         EoS%ParName(1) ='V0   '
+         EoS%comment(1) = 'Reference pressure volume:'
+         if (len_trim(EoS%vscale_name) > 0) then
+            EoS%comment(1) = trim(EoS%comment(1))//' units are '//trim(EoS%vscale_name)
          else
-            eospar%comment(1) = trim(eospar%comment(1))//' units as volume data'
+            EoS%comment(1) = trim(EoS%comment(1))//' units as volume data'
          end if
       else          !Linear
-         eospar%ParName(1) ='L0   '
-         eospar%comment(1) ='Reference pressure length:'
-         if (len_trim(eospar%vscale_name) > 0) then
-            eospar%comment(1) = trim(eospar%comment(1))//' units are '//trim(eospar%vscale_name)
+         EoS%ParName(1) ='L0   '
+         EoS%comment(1) ='Reference pressure length:'
+         if (len_trim(EoS%vscale_name) > 0) then
+            EoS%comment(1) = trim(EoS%comment(1))//' units are '//trim(EoS%vscale_name)
          else
-            eospar%comment(1) = trim(eospar%comment(1))//' units as length data'
+            EoS%comment(1) = trim(EoS%comment(1))//' units as length data'
          end if
       end if
 
-      select case(eospar%itherm)
+      select case(EoS%itherm)
          case (0)
-            eospar%parname(10:n) = ' '
-            eospar%comment(10:n) = ' '
+            EoS%parname(10:n) = ' '
+            EoS%comment(10:n) = ' '
 
          case (1)
-            eospar%parname(10:11) = (/'alph0','alph1'/)
-            eospar%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
-            eospar%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
+            EoS%parname(10:11) = (/'alph0','alph1'/)
+            EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
+            EoS%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
 
          case (2)
-            eospar%parname(10:12) = (/'alph0','alph1','alph2'/)
-            eospar%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
-            eospar%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
-            eospar%comment(12) = '1/T^2 term thermal expansion, K'
+            EoS%parname(10:12) = (/'alph0','alph1','alph2'/)
+            EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
+            EoS%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
+            EoS%comment(12) = '1/T^2 term thermal expansion, K'
 
          case (3)
-            eospar%parname(10:11) = (/'alph0','alph1'/)
-            eospar%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
-            eospar%comment(11) = 'Sqrt term of thermal expansion x10^4 K^-1/2'
+            EoS%parname(10:11) = (/'alph0','alph1'/)
+            EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
+            EoS%comment(11) = 'Sqrt term of thermal expansion x10^4 K^-1/2'
 
          case (4)    ! Kroll needs Kp as well (in case no pressure eos)
-            eospar%parname(3) = 'Kp   '
-            eospar%comment(3) = 'dK/dP: dimensionless'
-            if (eospar%linear) then
-                eospar%parname(3) = 'Mp   '
-                eospar%comment(3) = 'dM/dP: dimensionless'
+            EoS%parname(3) = 'Kp   '
+            EoS%comment(3) = 'dK/dP: dimensionless'
+            if (EoS%linear)then
+               EoS%parname(3) = 'Mp   '
+               EoS%comment(3) = 'dM/dP: dimensionless'
             end if
-            eospar%parname(10:11) = (/'alph0','Th_E '/)
-            eospar%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
-            eospar%comment(11) = 'Einstein temperature in K'
+            EoS%parname(10:11) = (/'alph0','Th_E '/)
+            EoS%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
+            EoS%comment(11) = 'Einstein temperature in K'
 
          case (5)
-            eospar%parname(10:11) = (/'p1   ','T_sat'/)
-            eospar%comment(10) = 'Approx 3x highT thermal expansion x10^5 K^-1'
-            eospar%comment(11) = 'Saturation temperature in K'
+            EoS%parname(10:11) = (/'p1   ','T_sat'/)
+            EoS%comment(10) = 'Approx 3x highT thermal expansion x10^5 K^-1'
+            EoS%comment(11) = 'Saturation temperature in K'
 
          case (6)
-            eospar%parname(10:11) = (/'alph0','Th_E '/)
-            eospar%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
-            eospar%comment(11) = 'Einstein temperature in K'
+            EoS%parname(10:11) = (/'alph0','Th_E '/)
+            EoS%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
+            EoS%comment(11) = 'Einstein temperature in K'
+            EoS%parname(13) = 'Natom'
+            EoS%comment(13) = 'Number of atoms per formula unit'
+            EoS%parname(14) = 'qcomp'
+            EoS%comment(14) = 'Switch for q-compromise model, +1 for compromise'
 
          case (7)
-            eospar%parname(11) = 'ThMGD'
-            eospar%comment(11) = 'Debye temperature in K'
-            eospar%parname(13) = 'Natom'
-            eospar%comment(13) = 'Number of atoms per formula unit'
+            EoS%parname(11) = 'ThMGD'
+            EoS%comment(11) = 'Debye temperature in K'
+            EoS%parname(13) = 'Natom'
+            EoS%comment(13) = 'Number of atoms per formula unit'
+            EoS%parname(14) = 'qcomp'
+            EoS%comment(14) = 'Switch for q-compromise model, +1 for compromise'
+
+         case (8)
+            EoS%parname(11) = 'Th_E'
+            EoS%comment(11) = 'Einstein temperature in K'
+            EoS%parname(13) = 'Natom'
+            EoS%comment(13) = 'Number of atoms per formula unit'
+            EoS%parname(14) = 'qcomp'
+            EoS%comment(14) = 'Switch for q-compromise model, +1 for compromise'
       end select
 
       !> Common terms for all thermal
-      eospar%parname(18) = 'Gamm0'
-      eospar%comment(18) = 'Gruneisen parameter at Tref,Pref'
-      eospar%parname(19) = 'q    '
-      eospar%comment(19) = 'Gruneisen power law in V/V0'
+      EoS%parname(18) = 'Gamm0'
+      EoS%comment(18) = 'Gruneisen parameter at Tref,Pref'
+      EoS%parname(19) = 'q    '
+      EoS%comment(19) = 'Gruneisen power law in V/V0'
+
    End Subroutine Set_Thermal_Names
 
    !!--++
-   !!--++ SET_TRANSITION_NAMES
-   !!--++    Set the character variables in eos_type data structures for Transition EoS
+   !!--++ SUBROUTINE SET_TRANSITION_NAMES
    !!--++
-   !!--++ 17/07/2015
+   !!--++ Set the character variables in eos_type data structures for Transition EoS
+   !!--++
+   !!--++ Date: 17/07/2015
    !!
-   Module Subroutine Set_Transition_Names(Eospar)
+   Module Subroutine Set_Transition_Names(EoS)
       !---- Arguments ----!
-      type (EoS_Type), intent(in out) :: Eospar  ! EoS object
+      type (EoS_Type), intent(in out) :: EoS  ! EoS object
 
       !---- Local Variables ----!
       integer :: n
 
       !> Check for valid model number. If not valid, set zero
-      if (eospar%itran < 0 .or. eospar%itran > N_TRANS_MODELS) eospar%itran=0
+      if (EoS%itran < 0 .or. EoS%itran > N_TRANS_MODELS) EoS%itran=0
 
       !> Set the model name
-      eospar%tranmodel=Tranmodel_names(eospar%itran)
+      EoS%tranmodel=Tranmodel_names(EoS%itran)
 
       !> Set upper limit to parameter numbers
       n=29
       if (n > n_eospar) n=n_eospar
 
-      select case(eospar%itran)
+      select case(EoS%itran)
          case (0)
-            eospar%parname(20:n) = ' '
-            eospar%comment(20:n) = ' '
+            EoS%parname(20:n) = ' '
+            EoS%comment(20:n) = ' '
 
          case (1)       ! Landau power law P-V
-            eospar%parname(20:27) = (/'High ','Ptr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
-            eospar%comment(20) = 'Indicator = +1 if high P phase is high sym phase'
-            eospar%comment(21) = 'Transition pressure'
-            eospar%comment(22) = 'dTr/dP: slope of transition boundary'
-            eospar%comment(23) = ''
-            eospar%comment(24) = 'Scaling parameter, low phase x10^3'
-            eospar%comment(25) = 'Power law term, low phase'
-            eospar%comment(26) = 'Scaling parameter, high phase x10^3'
-            eospar%comment(27) = 'Power law term, high phase'
+            EoS%parname(20:27) = (/'High ','Ptr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
+            EoS%comment(20) = 'Indicator = +1 if high P phase is high sym phase'
+            EoS%comment(21) = 'Transition pressure'
+            EoS%comment(22) = ''
+            EoS%comment(23) = ''
+            EoS%comment(24) = 'Scaling parameter, low phase x10^3'
+            EoS%comment(25) = 'Power law term, low phase'
+            EoS%comment(26) = 'Scaling parameter, high phase x10^3'
+            EoS%comment(27) = 'Power law term, high phase'
 
          case (2)       ! Landau power law V-T
-            eospar%parname(20:27) = (/'High ','Ttr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
-            eospar%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
-            eospar%comment(21) = 'Transition temperature'
-            eospar%comment(22) = ''
-            eospar%comment(23) = ''
-            eospar%comment(24) = 'Scaling parameter, low phase x10^3'
-            eospar%comment(25) = 'Power law term, low phase'
-            eospar%comment(26) = 'Scaling parameter, high phase x10^3'
-            eospar%comment(27) = 'Power law term, high phase'
+            EoS%parname(20:27) = (/'High ','Ttr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
+            EoS%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
+            EoS%comment(21) = 'Transition temperature'
+            EoS%comment(22) = ''
+            EoS%comment(23) = ''
+            EoS%comment(24) = 'Scaling parameter, low phase x10^3'
+            EoS%comment(25) = 'Power law term, low phase'
+            EoS%comment(26) = 'Scaling parameter, high phase x10^3'
+            EoS%comment(27) = 'Power law term, high phase'
 
          case (3)       ! Landau power law PVT
-            eospar%parname(20:27) = (/'High ','Ttr  ','Ttr-P','TtrP2','aL   ','betaL','aH   ','betaH'/)
-            eospar%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
-            eospar%comment(21) = 'Transition temperature at P=0'
-            eospar%comment(22) = 'Ttr=Ttr0 + uP + vP^2: P coeff'
-            eospar%comment(23) = 'Ttr=Ttr0 + uP + vP^2: P^2 coeff'
-            eospar%comment(24) = 'Scaling parameter, low phase x10^3'
-            eospar%comment(25) = 'Power law term, low phase'
-            eospar%comment(26) = 'Scaling parameter, high phase x10^3'
-            eospar%comment(27) = 'Power law term, high phase'
+            EoS%parname(20:27) = (/'High ','Ttr  ','Ttr-P','TtrP2','aL   ','betaL','aH   ','betaH'/)
+            EoS%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
+            EoS%comment(21) = 'Transition temperature at P=0'
+            EoS%comment(22) = 'Ttr=Ttr0 + uP + vP^2: P coeff'
+            EoS%comment(23) = 'Ttr=Ttr0 + uP + vP^2: P^2 coeff'
+            EoS%comment(24) = 'Scaling parameter, low phase x10^3'
+            EoS%comment(25) = 'Power law term, low phase'
+            EoS%comment(26) = 'Scaling parameter, high phase x10^3'
+            EoS%comment(27) = 'Power law term, high phase'
       end select
+
    End Subroutine Set_Transition_Names
 
 End SubModule EoS_Set

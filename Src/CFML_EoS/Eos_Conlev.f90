@@ -11,8 +11,9 @@ SubModule (CFML_EoS) EoS_Conlev
    !!----    for a pair of EoS parameters refined by least-squares
    !!----
    !!---- 18/07/2016
+   !!---- Revision: OK
    !!
-   Module Subroutine Calc_Conlev(Eos,ix,iy,isig,xyy,n)
+   Module Subroutine Calc_Conlev(Eos, ix, iy, isig, xyy, n)
       !---- Arguments ----!
       type(Eos_Type),              intent(in)  :: Eos          ! EoS with refined parameters
       integer,                     intent(in)  :: ix,iy        ! input pointers to two variables in the variance-covariance matrix
@@ -34,8 +35,7 @@ SubModule (CFML_EoS) EoS_Conlev
 
       !> Check
       if (isig < 1 .or. isig > 6) then
-         err_CFML%IErr=1
-         err_CFML%Msg="Confidence level is out of range"
+         call set_error(1,"Confidence level is out of range")
          return
       end if
 
@@ -46,9 +46,8 @@ SubModule (CFML_EoS) EoS_Conlev
 
       !> Invert matrix
       det=c11*c22-c12*c12
-      if (abs(det) <=tiny(0.0_cp)) then
-         err_CFML%IErr=1
-         err_CFML%Msg="Determinant value is zero in the Confidence ellipses calculation"
+      if (abs(det) <= tiny(0.0_cp)) then
+         call set_error(1, "Determinant value is zero in the Confidence ellipses calculation")
          return
       end if
 
@@ -102,11 +101,11 @@ SubModule (CFML_EoS) EoS_Conlev
          if (ilast /= 0) exit
 
          if (n == nlimit) then
-            err_CFML%IErr=1
-            err_CFML%Msg="Number of points arrived to the limit for Confidence ellipses"
+            call set_error(1,"Number of points arrived to the limit for Confidence ellipses")
             exit
          end if
       end do
+
    End Subroutine Calc_Conlev
 
    !!----
@@ -114,8 +113,9 @@ SubModule (CFML_EoS) EoS_Conlev
    !!----    Writes out confidence ellipse data to a file
    !!----
    !!---- 05/12/2015
+   !!---- Revision: OK
    !!
-   Module Subroutine Write_Data_Conlev(xyy,n,iout)
+   Module Subroutine Write_Data_Conlev(Xyy, N, Iout)
       !---- Arguments ----!
       real(kind=cp),dimension(:,:),intent(in)   :: xyy  ! output points for plotting
       integer,                     intent(in)   :: n    ! Number of points
@@ -125,7 +125,7 @@ SubModule (CFML_EoS) EoS_Conlev
       integer :: lun,i
 
       !> Check
-      if (n < 1)return
+      if (n < 1) return
 
       !> Unit to print the data
       lun=6
@@ -143,6 +143,7 @@ SubModule (CFML_EoS) EoS_Conlev
    !!----    Writes out header info specific to a confidence ellipse
    !!----
    !!---- 05/12/2015
+   !!---- Revision: OK
    !!
    Module Subroutine Write_Info_Conlev(Eos,ix,iy,isig,iout)
       !---- Arguments ----!

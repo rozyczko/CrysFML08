@@ -3,23 +3,92 @@
 !!----
 SubModule (CFML_EoS) EoS_Volume
    implicit none
+
    Contains
 
    !!--++
-   !!--++ GET_V0_T
+   !!--++ FUNCTION GET_V0_AXIS
+   !!--++
+   !!--++ Returns the value of volume or length of principal axis (ieos) in unit cell
+   !!--++ in cell_eos at Pref,Tref
+   !!--++
+   !!--++ Call this Function directly when the calling routine  knows that the direction
+   !!--++ is a principal axis
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_V0_Axis(Cell_eos, Ieos) result(L)
+      !---- Arguments ----!
+      type(eos_cell_type), intent(in)  :: cell_eos
+      integer,             intent(in)  :: ieos      !axis indicator, as in axis_type%ieos
+      real(kind=cp)                    :: L         !returned length or volume
+
+      !---- Local Variables ----!
+
+      !> init
+      l=10.0_cp
+
+      select case(cell_eos%loaded(ieos))
+         case(1)
+            L=get_volume(cell_eos%eosc%pref,cell_eos%eosc%tref,cell_eos%eos(ieos))
+
+         case(2) ! sym equiv. Always uses eos(1) for a-axis
+            L=get_volume(cell_eos%eosc%pref,cell_eos%eosc%tref,cell_eos%eos(1))
+
+         case(3)
+            L=get_volume_third(cell_eos%eosc%pref,cell_eos%eosc%tref,cell_eos,ieos)
+      end select
+
+   End Function Get_V0_Axis
+
+   !!--++
+   !!--++ FUNCTION GET_V0_CELL
+   !!--++
+   !!--++ Returns the value of volume or length of any axis in unit cell in cell_eos
+   !!--++ at Pref,Tref
+   !!--++ Call this Function when the calling routine does not know if the direction
+   !!--++ is a principal axis or not
+   !!--++ If a principal direction is requested, only axis%ieos is required
+   !!--++ axis%v and axis%atype only used if axis%ieos=-2
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_V0_Cell(Cell_eos, Axis) result(L)
+      !---- Arguments ----!
+      type(eos_cell_type), intent(in)  :: cell_eos
+      type(axis_type),     intent(in)  :: axis
+      real(kind=cp)                    :: L !returned length or volume
+
+      !---- Local Variables ----!
+
+      !> init
+      l=10.0_cp
+
+      select case(axis%ieos)      !invalid numbers just return
+         case(0:6)   !principal direction for which eos exists, or can be calculated
+            L=get_v0_axis(cell_eos,axis%ieos)
+
+         case(-2)   !general direction
+            L=get_volume_general(cell_eos%eosc%pref,cell_eos%eosc%tref,cell_eos,axis)
+      end select
+
+   End Function Get_V0_Cell
+
+   !!--++
+   !!--++ FUNCTION Get_V0_T
    !!--++
    !!--++ PRIVATE
-   !!--++    Returns the volume at P=0 and T=T from V0 and Thermal expansion
-   !!--++    Except for Pthermal, for which it returns V at P=0, T=Tref
-   !!--++    It calculates V0 only for thermal expansion, not including transition effects!
-   !!--++    Therfore this must remain PRIVATE
+   !!--++ Returns the volume at P=0 and T=T from V0 and Thermal expansion
+   !!--++ Except for Pthermal, for which it returns V at P=0, T=Tref
+   !!--++ It calculates V0 only for thermal expansion, not including transition effects!
+   !!--++ Therfore this must remain PRIVATE
    !!--++
-   !!--++ 17/07/2015
+   !!--++ Date: 17/07/2015
    !!
-   Module Function Get_V0_T(T,EosPar) Result(V)
+   Module Function Get_V0_T(T, EoS) Result(V)
       !---- Arguments ----!
       real(kind=cp),  intent(in) :: T        ! Temperature
-      type(Eos_Type), intent(in) :: EoSPar   ! Eos Parameter
+      type(Eos_Type), intent(in) :: EoS   ! Eos Parameter
       real(kind=cp)              :: V
 
       !---- Local Variables ----!
@@ -29,13 +98,13 @@ SubModule (CFML_EoS) EoS_Volume
       real(kind=cp), dimension(n_eospar) :: ev
 
       !> Init
-      Tref=eospar%tref
+      Tref=EoS%tref
 
-      !> Local copy Eospar
-      call EoS_to_Vec(eospar,ev) ! Volume or linear case is covered
+      !> Local copy EoS
+      ev= EoS_to_Vec(EoS) ! Volume or linear case is covered
                                  ! all equations written for volume
       delt=T-Tref
-      select case(eospar%itherm)
+      select case(EoS%itherm)
          case(0)
             v=ev(1)                 ! no thermal eos: V is V0
 
@@ -60,31 +129,31 @@ SubModule (CFML_EoS) EoS_Volume
 
          case(4)                    ! Holland-Powell 2011 in the Kroll form
             !>>>>>kp=ev(3)   : version before 11/11/2016
-            if (eospar%icross == 2) then
-               kp=ev(5)
+            if (EoS%icross == 2) then
+               kp=ev(8)
             else
                kp=ev(3)
             end if
-            if (abs(kp-1) < 0.0001 .or. abs(kp/(kp+2.0_cp)) < 0.0001)then
-               V=ev(1)                             ! In these cases algebra shows V=V0
+            if(abs(kp-1) < 0.0001 .or. abs(kp/(kp+2.0_cp)) < 0.0001)then
+                V=ev(1)                             ! In these cases algebra shows V=V0
             else
-               Tn= ev(11)/Tref                        ! theta/Tref
-               C=Tn*Tn*exp(Tn)/(exp(tn)-1.0_cp)**2.0_cp
-               B=-1.0/kp/(kp+2.0_cp)
-               if (t > 0.05_cp*ev(11)) then                               ! to avoid numerical problems at T=0
-                  A=ev(10)*ev(11)/C *(1.0_cp/(exp(ev(11)/T)-1.0_cp) - 1.0_cp/(exp(Tn)-1.0_cp) )
-               else
-                  A=ev(10)*ev(11)/C *(-1.0_cp/(exp(Tn)-1.0_cp) )          ! because when T=0 then 1.0/exp(Tein/T) = 0
-               end if
-               ! V=ev(1)*(-1.0_cp*kp + (1.0_cp+kp)*(1.0_cp - kp*(kp+2.0_cp)*A/(kp+1.0_cp))**B)
-               AK=1.0_cp - kp*(kp+2.0_cp)*A/(kp+1.0_cp)
-               if (AK < tiny(0.0_cp) )then
-                  V=ev(1)       ! for safe return
-                  err_CFML%Ierr=1
-                  err_CFML%Msg='T exceeds valid limit for Kroll expansion in get_V0_T'
-               else
-                  V=ev(1)*(-1.0_cp*kp + (1.0_cp+kp)*AK**B)
-               end if
+                Tn= ev(11)/Tref                        ! theta/Tref
+                C=Tn*Tn*exp(Tn)/(exp(tn)-1.0_cp)**2.0_cp
+                B=-1.0/kp/(kp+2.0_cp)
+                if (t > 0.05_cp*ev(11)) then                               ! to avoid numerical problems at T=0
+                   A=ev(10)*ev(11)/C *(1.0_cp/(exp(ev(11)/T)-1.0_cp) - 1.0_cp/(exp(Tn)-1.0_cp) )
+                else
+                   A=ev(10)*ev(11)/C *(-1.0_cp/(exp(Tn)-1.0_cp) )          ! because when T=0 then 1.0/exp(Tein/T) = 0
+                end if
+
+                !  V=ev(1)*(-1.0_cp*kp + (1.0_cp+kp)*(1.0_cp - kp*(kp+2.0_cp)*A/(kp+1.0_cp))**B)
+                AK=1.0_cp - kp*(kp+2.0_cp)*A/(kp+1.0_cp)
+                if (AK < tiny(0._cp))then
+                   V=ev(1)       ! for safe return
+                   call set_error(1,'T exceeds valid limit for Kroll expansion in get_V0_T')
+                else
+                   V=ev(1)*(-1.0_cp*kp + (1.0_cp+kp)*AK**B)
+                end if
             end if
 
          case(5)                    ! Salje, Tref fixed at zero
@@ -96,216 +165,31 @@ SubModule (CFML_EoS) EoS_Volume
                V=(ev(1)**(1.0_cp/3.0_cp) + ev(10)*ev(11)*(A-1.0_cp))**3.0_cp
             end if
 
-         case(6,7)
+         case(6,7,8)
             v=ev(1)         ! Pthermal needs V0 at Tref
       end select
 
       !> Linear
-      if (eospar%linear) v=v**(1.0_cp/3.0_cp)
+      if (EoS%linear) v=v**(1.0_cp/3.0_cp)
+
    End Function Get_V0_T
 
    !!----
-   !!---- GET_VOLUME
-   !!----    Find volume from EoS at given P and T
+   !!---- FUNCTION GET_VOLUME
    !!----
-   !!--.. Validated code against Eosfit v5.2 for non-thermal EoS: RJA 25/02/2013
+   !!---- Find volume from EoS at given P and T
    !!----
-   !!---- 16/02/13
+   !!---- Uses a spline to solve for volume if no analytical approach available
+   !!---- Written 3/2019 RJA
+   !!---- Under test
+   !!----
+   !!---- Date: 03/02/2021
    !!
-   Module Function Get_Volume(P,T,EosPar) Result(v)
+   Module Function Get_Volume(P, T, Eos) Result(V)
       !---- Arguments ----!
-      real(kind=cp),  intent(in) :: P       ! Pressure
-      real(kind=cp),  intent(in) :: T       ! Temperature
-      type(Eos_Type), intent(in) :: EoSPar  ! Eos Parameter
-      real(kind=cp)              :: V
-
-      !---- Local Variables ----!
-      real(kind=cp), parameter          :: PREC=0.000001_cp  !precision to find V.
-
-      integer                           :: nstep
-      type(Eos_Type)                    :: EoS  ! Eos copy
-      real(kind=cp)                     :: V0,K0,Kp,k,strain,vfactor
-      real(kind=cp)                     :: Vol, step,dp1,dp2
-      real(kind=cp),dimension(N_EOSPAR) :: ev
-      real(kind=cp),dimension(3)        :: abc          ! Tait parameters
-      real(kind=cp)                     :: pa           ! pa=p-pth
-
-      !> Init
-      v=0.0_cp
-      strain=0.0_cp   ! strain from transition: linear or volume to match eos type
-      pa=p            ! local copy p
-
-      !> If PTV table, go directly
-      if (eospar%imodel == -1) then
-         v=get_props_ptvtable(pa,t,0.0,eospar,'V')     ! get_props_ptvtable returns length if linear
-         return
-      end if
-
-      !> Local copy Eospar
-      call EoS_to_Vec(eospar,ev) ! Volume or linear case is covered
-
-      !> Set appropriate V0, and adjust for thermal pressure:
-      select case (eospar%itherm)
-         case (0)                                   ! 0=no thermal,
-            v0=ev(1)                                  ! v0 is volume eos, (a0)^3 for linear
-
-         case (1:5)
-            v0=get_v0_t(t,eospar)                     ! returns a0 for linear
-            if (eospar%linear) v0=v0**3.0_cp
-
-         case (6)                                     ! HP thermal pressure
-            v0=ev(1)
-            pa=p-pthermal(0.0,t,eospar)               ! adjust pressure to isothermal pressure for murn and tait estimates
-
-         case(7)                                    ! MGD - do a guess on basis parallel isochors of pa
-            v0=ev(1)
-            pa=p - eospar%params(2)*(t-eospar%tref)/100000.         ! have to guess an alpha because that requires V !!!
-      end select
-
-      !> set K0, for various purposes
-      k0=Get_K0_T(T,eospar)              ! Handles thermal pressure case, returns K0 or M0
-      if (eospar%linear) k0=k0/3.0_cp
-
-      kp=Get_Kp0_T(T,eospar)
-      if (eospar%linear) kp=kp/3.0_cp
-
-      !> Get the volume strain due to transition: only a function of P,T NOT V!!
-      if (eospar%itran > 0) then
-         strain=get_transition_strain(P,T,eospar)     ! returns the linear or volume strain as appropriate
-      end if
-
-      !> If there is no eos model, we are finished because V0 is the V at this T
-      if (eospar%imodel == 0) then
-         if (eospar%linear) v0=v0**(1.0_cp/3.0_cp)
-         v=v0*(1.0_cp + strain)
-         return
-      end if
-
-      !> Analytic solution for Murnaghan:  use this for first guess for other EoS except Tait
-      vfactor=(1.0_cp + kp*pa/k0)
-
-      !if (vfactor < 0.0 .and. kp > 0.0)then
-      if (vfactor < 0.0)then
-         v=v0        ! safe value for when 1+kp*pa/k0 is negative
-      else
-         v=v0*(vfactor)**(-1.0_cp/kp)
-      end if
-
-      !> Cannot do the following if MGD pthermal
-      if (eospar%itherm /=7) then
-         if (eospar%imodel ==1) then
-            !> Exact solution for Murnaghan
-            if (eospar%linear) v=v**(1.0_cp/3.0_cp)
-            if (eospar%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
-            !if (vfactor < 0.0 .and. kp > 0.0) then
-            if (vfactor < 0.0) then
-               err_CFML%Ierr=1
-               err_CFML%Msg='Pressure < -K0/Kp: yields meaningless volumes for Murnaghhan EoS'
-            end if
-            return
-         end if
-
-         !> Analytic solution for Tait
-         if (eospar%imodel ==5) then
-            abc=get_tait(eospar,t)                     ! get_tait returns volume-like parameters even for linear
-            if (abc(2)*pa < -0.999999_cp) then
-               err_CFML%Ierr=1
-               err_CFML%Msg='Pressure yields infinite volume for Tait Eos'
-               v=9999.0        ! safe value return
-            else
-               v=v0*(1.0_cp-abc(1)*(1.0_cp-(1.0_cp + abc(2)*pa)**(-1.0_cp*abc(3))))
-               if (eospar%linear) v=v**(1.0_cp/3.0_cp)
-               if (eospar%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
-            end if
-            return
-         end if
-      end if
-
-      !> Find iterative solution for the rest of functions: get_pressure includes the thermal pressure term
-      !> But if there is a transition, we only want the P/V for the bare high-symm phase without softening
-      vol=v
-      if (eospar%linear) vol=vol**(1.0_cp/3.0_cp)
-      eos=eospar        ! copy
-      eos%itran=0       ! turn off transition
-
-      dp1=p-get_pressure(vol,t,eos)
-      if (err_CFML%Ierr==1)then
-         if (eospar%linear)v=v**(1.0_cp/3.0_cp)           ! to ensure reasonable return value if linear
-         return
-      end if
-
-      !> estimate the step to make in vol to get closer
-      k=k0+p*kp                          ! Murn-like guess estimate to avoid recursive call back here when pthermal used
-      if (eospar%linear)k=k*3.0_cp       ! The iteration is working with linear quantities
-      if (abs(k) > abs(dp1/1000.))then
-         step= -1.0_cp*vol*dp1/k            ! by definition of bulk modulus
-      else
-         step = -1.0_cp*vol*dp1/10.        ! trap for k being close to zero, to prevent step becoming NaN
-      end if
-      if(abs(step) < eos%params(1)/1000.)step=eos%params(1)/1000.
-
-      nstep=0
-      iter: do
-         !> Trap infinite loops
-         if (nstep > 10000)then
-            err_CFML%Ierr=2
-            err_CFML%Msg='No convergence in Get_Volume'
-            exit iter
-         endif
-
-         !> Increment Volume
-         vol=vol+step
-         dp2=p-get_pressure(vol,t,eos)
-         if (err_CFML%Ierr==1)exit iter
-         nstep=nstep+1
-
-         !> test for sufficient convergence
-         !if (abs(step) < PREC*Vol)exit  ! 1 part in 100,000 in volume
-         if (abs(dp2) < abs(prec*k0))exit    ! If dP2 very small, finished; from dP= -K.dV/V and prec=dV/V
-         if (abs(step) < PREC*Vol) then  ! 1 part in 100,000 in volume
-            if (abs(abs(dP2)-abs(10.0*step*k0/vol)) > abs(max(0.005,p/1000.)))then   ! was 0.005,1000
-               err_CFML%Ierr=2
-               write(err_CFML%Msg,'(''Convergence problem in Get_Volume: dP = '',f6.3,''>> K0*dV/V'')')dP2
-            end if
-            exit iter
-         end if
-
-         !> not converged, so adjust step size
-         if (dp1*dp2 < 0.0_cp) then
-            !> overshot ptr:reverse step direction and make size smaller
-            step=-0.5_cp*step
-         else
-            if (abs(dp2) > abs(dp1)) then
-               step=-1.0*step      ! wrong direction: reverse
-            else
-        !       step=0.9_cp*dp2/dp1*step         ! correct direction, should get a smaller step size
-        !    end if                              ! the factor of 0.9 is a safety factor to ensure step gets smaller
-                step= -1.0*dp2*step/(dp2-dp1)    ! new version Dec 2018: adjust step size in Newton-Raphson manner
-            end if
-         end if
-
-         dp1=dp2        ! update delta-p values and go back for next cycle
-      end do iter
-
-      !> now set return value depending on success or not
-      v=vol
-
-      if (eospar%itran > 0) v=vol*(1.0_cp + strain)  ! apply transition strain ('vol' is actually linear if linear eos)
-   End Function Get_Volume
-
-   !!----
-   !!---- GET_VOLUME
-   !!----    Find volume from EoS at given P and T
-   !!----
-   !!--.. Validated code against Eosfit v5.2 for non-thermal EoS: RJA 25/02/2013
-   !!----
-   !!---- 16/02/13
-   !!
-   Module Function Get_Volume_New(P,T,EosPar) Result(v)
-      !---- Arguments ----!
-      real(kind=cp),  intent(in) :: P       ! Pressure
-      real(kind=cp),  intent(in) :: T       ! Temperature
-      type(Eos_Type), intent(in) :: EoSPar  ! Eos Parameter
+      real(kind=cp),  intent(in) :: P    ! Pressure
+      real(kind=cp),  intent(in) :: T    ! Temperature
+      type(Eos_Type), intent(in) :: EoS  ! Eos Parameter
       real(kind=cp)              :: V
 
       !---- Local Variables ----!
@@ -313,17 +197,17 @@ SubModule (CFML_EoS) EoS_Volume
 
       integer,parameter                 :: nstep=30
       integer                           :: i,ic
-      real(kind=cp),dimension(nstep):: x,y,d2y
+      real(kind=cp),dimension(nstep)    :: x,y, d2y
 
-
-      type(Eos_Type)                    :: EoS  ! Eos copy
-      real(kind=cp)                     :: V0,K0,Kp,strain,vfactor
-      real(kind=cp)                     :: Vol, vstep, delp_prev,delp,v_prev
+      type(Eos_Type)                    :: EoSc  ! Eos copy
+      real(kind=cp)                     :: V0,K0,Kp,strain,vfactor !,k
+      real(kind=cp)                     :: Vol, vstep, delp_prev,delp,v_prev,a,logterm
       real(kind=cp),dimension(N_EOSPAR) :: ev
       real(kind=cp),dimension(3)        :: abc          ! Tait parameters
       real(kind=cp)                     :: pa           ! pa=p-pth
 
       logical                           :: reverse
+
 
       !> Init
       v=0.0_cp
@@ -331,47 +215,47 @@ SubModule (CFML_EoS) EoS_Volume
       pa=p            ! local copy p
 
       !> If PTV table, go directly
-      if (eospar%imodel == -1) then
-         v=get_props_ptvtable(pa,t,0.0,eospar,'V')     ! get_props_ptvtable returns length if linear
+      if (EoS%imodel == -1) then
+         v=get_props_ptvtable(pa,t,0.0,EoS,'V')     ! get_props_ptvtable returns length if linear
          return
       end if
 
-      !> Local copy Eospar
-      call EoS_to_Vec(eospar,ev) ! Volume or linear case is covered
+      !> Local copy EoS
+      ev= EoS_to_Vec(EoS) ! Volume or linear case is covered
 
       !> Set appropriate V0, and adjust for thermal pressure:
-      select case (eospar%itherm)
+      select case (EoS%itherm)
          case (0)                                   ! 0=no thermal,
             v0=ev(1)                                  ! v0 is volume eos, (a0)^3 for linear
 
          case (1:5)
-            v0=get_v0_t(t,eospar)                     ! returns a0 for linear
-            if (eospar%linear) v0=v0**3.0_cp
+            v0=get_v0_t(t,EoS)                     ! returns a0 for linear
+            if (EoS%linear) v0=v0**3.0_cp
 
-         case (6)                                     ! HP thermal pressure
+         case (6)                                     ! HP or linear thermal pressure
             v0=ev(1)
-            pa=p-pthermal(0.0,t,eospar)               ! adjust pressure to isothermal pressure for murn and tait estimates
+            pa=p-pthermal(0.0,t,EoS)               ! adjust pressure to isothermal pressure for murn and tait estimates
 
-         case(7)                                    ! MGD - do a guess on basis parallel isochors of pa
+         case(7,8)                                    ! MGD - do a guess on basis parallel isochors of pa
             v0=ev(1)
-            pa=p - eospar%params(2)*(t-eospar%tref)/100000.         ! have to guess an alpha because that requires V !!!
+            pa=p - EoS%params(2)*(t-EoS%tref)/100000.         ! have to guess an alpha because that requires V !!!
       end select
 
       !> set K0, for various purposes
-      k0=Get_K0_T(T,eospar)              ! Handles thermal pressure case, returns K0 or M0
-      if (eospar%linear) k0=k0/3.0_cp
+      k0=Get_K0_T(T,EoS)              ! Handles thermal pressure case, returns K0 or M0
+      if (EoS%linear) k0=k0/3.0_cp
 
-      kp=Get_Kp0_T(T,eospar)
-      if (eospar%linear) kp=kp/3.0_cp
+      kp=Get_Kp0_T(T,EoS)
+      if (EoS%linear) kp=kp/3.0_cp
 
       !> Get the volume strain due to transition: only a function of P,T NOT V!!
-      if (eospar%itran > 0) then
-         strain=get_transition_strain(P,T,eospar)     ! returns the linear or volume strain as appropriate
+      if (EoS%itran > 0) then
+         strain=get_transition_strain(P,T,EoS)     ! returns the linear or volume strain as appropriate
       end if
 
       !> If there is no eos model, we are finished because V0 is the V at this T
-      if (eospar%imodel == 0) then
-         if (eospar%linear) v0=v0**(1.0_cp/3.0_cp)
+      if (EoS%imodel == 0) then
+         if (EoS%linear) v0=v0**(1.0_cp/3.0_cp)
          v=v0*(1.0_cp + strain)
          return
       end if
@@ -385,30 +269,43 @@ SubModule (CFML_EoS) EoS_Volume
       end if
 
       !> Cannot do the following if MGD pthermal
-      if (eospar%itherm /=7) then
-         if (eospar%imodel ==1) then
-         !> Exact solution for Murnaghan
-            if (eospar%linear) v=v**(1.0_cp/3.0_cp)
-            if (eospar%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
+      if (EoS%itherm /=7  .and. EoS%itherm /=8) then
+         if (EoS%imodel ==1) then
+            !> Exact solution for Murnaghan
+            if (EoS%linear) v=v**(1.0_cp/3.0_cp)
+            if (EoS%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
             !if (vfactor < 0.0 .and. kp > 0.0) then
             if (vfactor < 0.0) then
-               err_CFML%IErr=1
-               err_CFML%Msg='Pressure < -K0/Kp: yields meaningless volumes for Murnaghhan EoS'
+               call set_error(1,'Pressure < -K0/Kp: yields meaningless volumes for Murnaghhan EoS')
             end if
             return
          end if
 
          !> Analytic solution for Tait
-         if (eospar%imodel ==5) then
-            abc=get_tait(eospar,t)                     ! get_tait returns volume-like parameters even for linear
+         if (EoS%imodel ==5) then
+            abc= get_tait(t,EoS)                     ! get_tait returns volume-like parameters even for linear
             if (abc(2)*pa < -0.999999_cp) then
-               err_CFML%IErr=1
-               err_CFML%Msg='Pressure yields infinite volume for Tait Eos'
+               call set_error(1,'Pressure yields infinite volume for Tait Eos')
                v=9999.0        ! safe value return
             else
                v=v0*(1.0_cp-abc(1)*(1.0_cp-(1.0_cp + abc(2)*pa)**(-1.0_cp*abc(3))))
-               if (eospar%linear) v=v**(1.0_cp/3.0_cp)
-               if (eospar%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
+               if (EoS%linear) v=v**(1.0_cp/3.0_cp)
+               if (EoS%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
+            end if
+            return
+         end if
+
+         !> Analytic solution for Kumar
+         if (EoS%imodel ==7) then
+             a=kp+1.0_cp
+             logterm=a*pa/k0 +1.0_cp    !This is for safety: we should have checked with physical check
+             if (logterm < tiny(0._cp)) then
+                call set_error(1,' ')
+                return
+            else
+               v=v0*(1.0_cp - log(logterm)/a)
+               if (EoS%linear) v=v**(1.0_cp/3.0_cp)
+               if (EoS%itran > 0) v=v*(1.0_cp + strain)     ! apply transition strain (already converted if linear)
             end if
             return
          end if
@@ -419,26 +316,29 @@ SubModule (CFML_EoS) EoS_Volume
 
       !From here work with Vol, starting from Murnaghan estimate
       vol=v
-      if (eospar%linear) vol=vol**(1.0_cp/3.0_cp)
-      eos=eospar        ! copy
-      eos%itran=0       ! turn off transition
+      if (EoS%linear) vol=vol**(1.0_cp/3.0_cp)
+      eosc=EoS        ! copy
+      eosc%itran=0       ! turn off transition
 
       !> initial simple hunt
       delp_prev=huge(0._cp)
       ic = 0
       reverse=.false.
-      Vstep=eos%params(1)/100._cp
+      Vstep=eosc%params(1)/100._cp
       do
          ic=ic+1
          if (ic > 1000)then
-            err_CFML%Ierr=1
-            err_CFML%Msg=' *****No solution found in get_volume after 1000 cycles'
+            call set_error(1,' *****No solution found in get_volume after 1000 cycles')
             return
          end if
 
-         !> ! have to clear the previous errors, otherwise get_pressure will return 0
-         call clear_error()
-         delp=p-get_pressure(Vol,T,eos)
+         call clear_error()                   ! have to clear the previous errors, otherwise get_pressure will return 0
+         delp=p-get_pressure(Vol,T,eosc)
+         if (abs(delp) < 0.000001_cp)then  ! hit correct vol by accident. Happens if P=0 at Tref for MGD
+            v=vol
+            if (EoS%itran > 0) v=vol*(1.0_cp + strain)
+            return
+         end if
 
          if (delp*delp_prev < 0._cp .and. ic > 1)then     ! over-stepped solution: solution between v_prev and v
             vol=vol-delp*Vstep/(delp-delp_prev)                               ! best guess
@@ -446,9 +346,8 @@ SubModule (CFML_EoS) EoS_Volume
          end if
 
          if (abs(delp) > abs(delp_prev))then ! delta-pressure getting bigger
-            if (reverse)then               ! found a minimum between v_prev-vstep and v
-               err_CFML%Ierr=1
-               err_CFML%Msg=' *****No volume found in get_volume'
+            if (reverse) then               ! found a minimum between v_prev-vstep and v
+               call set_error(1,' *****No volume found in get_volume')
                return
             else
                reverse=.true.            ! just going the wrong way
@@ -460,36 +359,146 @@ SubModule (CFML_EoS) EoS_Volume
          Vol=Vol+Vstep
       end do
 
-      !> now calculate PV around the solution: we want increasing P, so this means vstep < 0
+      ! now calculate PV around the solution: we want increasing P, so this means vstep < 0
       Vstep=-1.0_cp*abs(Vstep)
       Vol=Vol-2.0*Vstep
       Vstep=4.0*Vstep/nstep
 
       do i=1,nstep
-         x(i)=get_pressure(vol,t,eos)
+         x(i)=get_pressure(vol,t,eosc)
          y(i)=vol
          vol=vol+vstep
       end do
-      d2y=Second_Derivative(x, y, nstep)
-      vol=spline_interpol(p,x,y,d2y,nstep)
+
+      d2y= Second_Derivative(x, y, nstep)
+      vol= Spline_Interpol(p,x,y,d2y,nstep)
 
       v=vol
-      if (eospar%itran > 0) v=vol*(1.0_cp + strain)  ! apply transition strain ('vol' is actually linear if linear eos)
-   End Function Get_Volume_New
+      if (EoS%itran > 0) v=vol*(1.0_cp + strain)  ! apply transition strain ('vol' is actually linear if linear eos)
+
+   End Function Get_Volume
 
    !!----
-   !!---- GET_VOLUME_K
-   !!----    Returns the value of Volume for a given K  at T without using pressure
-   !!----    This has limited precision when Kp is small, so do not use except to obatin
-   !!----    approximate V (eg for limits to eos)
+   !!---- FUNCTION GET_VOLUME_AXIS
    !!----
-   !!---- 06/03/2019
+   !!---- Returns the value of volume or length of principal axis (ieos) in unit cell
+   !!---- in cell_eos at P,T
+   !!---- Call this Function directly when the calling routine  knows that the direction is a principal axis
+   !!----
+   !!---- Date: 09/09/2020
    !!
-   Module Function Get_Volume_K(K,T,E) Result(V)
+   Module Function Get_Volume_Axis(P, T, Cell_Eos, Ieos) Result(L)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: p,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      integer,            intent(in)  :: ieos      !axis indicator, as in axis_type%ieos
+      real(kind=cp)                   :: L !returned length or volume
+
+      !---- Local Variables ----!
+
+      !> init
+      l=10.0_cp
+
+      select case(cell_eos%loaded(ieos))
+         case(1)
+            L=get_volume(p,t,cell_eos%eos(ieos))
+
+         case(2) ! sym equiv. Always uses eos(1) for a-axis
+            L=get_volume(p,t,cell_eos%eos(1))
+
+         case(3)
+            L=get_volume_third(p,T,cell_eos,ieos)
+
+         case(4)     ! only in mono  ...the d-sapcing of the unique axis
+            L=get_volume(p,t,cell_eos%eos(cell_eos%unique))
+      end select
+
+   End Function Get_Volume_Axis
+
+   !!----
+   !!---- FUNCTION GET_VOLUME_CELL
+   !!----
+   !!---- Returns the value of volume or length of any axis in unit cell in
+   !!---- cell_eos at P,T
+   !!---- Call this Function when the calling routine does not know if the direction
+   !!---- is a principal axis or not
+   !!---- If a principal direction is requested, only axis%ieos is required
+   !!---- axis%v and axis%atype only used if axis%ieos=-2
+   !!----
+   !!---- Date:  09/09/2020
+   !!
+   Module Function Get_Volume_Cell(P, T, Cell_Eos, Axis) Result(L)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: p,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      type(axis_type),    intent(in)  :: axis
+      real(kind=cp)                   :: L !returned length or volume
+
+      !---- Local Variables ----!
+
+      !> init
+      l=10.0_cp
+
+      select case(axis%ieos)      !invalid numbers just return
+         case(0:6)   !principal direction for which eos exists, or can be calculated
+            L=get_volume_axis(p,t,cell_eos,axis%ieos)
+
+         case(-2)   !general direction
+            L=get_volume_general(p,T,cell_eos,axis)
+      end select
+
+   End Function Get_Volume_Cell
+
+   !!--++
+   !!--++ FUNCTION GET_VOLUME_GENERAL
+   !!--++
+   !!--++ Returns the value of volume or length of any axis in unit cell in cell_eos at P,T
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_Volume_General(P, T, Cell_Eos, Axis) Result(L)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: p,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      type(axis_type),    intent(in)  :: axis
+      real(kind=cp)                   :: L !returned length
+
+      !---- Local Variables ----!
+      type(cell_g_type) :: cell
+
+      !> get the unit cell, metric tensors
+      cell= get_params_cell(P,T,cell_eos)
+
+      !> calculate the distance
+      select case(U_case(axis%atype))
+         case('U')
+            L= dot_product(axis%v,matmul(cell%gd,axis%v))
+            L=sqrt(abs(L))
+
+         case('H')
+            L= 1.0_cp/dot_product(axis%v,matmul(cell%gr,axis%v))
+            L=sqrt(abs(L))
+
+         case default
+            L=10.0_cp
+      end select
+
+   End Function Get_Volume_General
+
+   !!--++
+   !!--++ FUNCTION GET_VOLUME_K
+   !!--++
+   !!--++ Returns the value of Volume for a given K  at T without using pressure
+   !!--++ This has limited precision when Kp is small, so do not use except to
+   !!--++ obtain approximate V (eg for limits to eos)
+   !!--++
+   !!--++ Date: 06/03/2019
+   !!
+   Module Function Get_Volume_K(K, T, EoS) Result(V)
       !---- Arguments ----!
       real(kind=cp),  intent(in) :: K       ! Bulk modulus
       real(kind=cp),  intent(in) :: T       ! Temperature
-      type(Eos_Type), intent(in) :: E      ! Eos Parameter
+      type(Eos_Type), intent(in) :: EoS     ! Eos Parameter
       real(kind=cp)              :: V
 
       !---- Local Variables ----!
@@ -499,29 +508,30 @@ SubModule (CFML_EoS) EoS_Volume
       !> Init
       v=0.0_cp
 
-      Vprev=e%params(1)             !This is Vo
-      Kprev=K_cal(Vprev,T,E)        !This is Ko
+      Vprev=EoS%params(1)             !This is Vo
+      Kprev=K_cal(Vprev,T,EoS)        !This is Ko
 
       !> Initial search
-      Vstep=0.001_cp*e%params(1)            !If K is smaller than Ko, must go up in volume
-      if (K > Kprev)Vstep=-1.0_cp*Vstep
+      Vstep=0.001_cp*EoS%params(1)            !If K is smaller than Ko, must go up in volume
+      if (K > Kprev) Vstep=-1.0_cp*Vstep
 
       do
          Vprev=Vprev+Vstep
-         kc=K_cal(Vprev,T,E)
-         if (K < Kprev) then                   !going to volumes > 1.0
-            if (Kc < K) exit
-            if (Vprev > 2.0_cp*e%params(1))then
-               V=2.0_cp*e%params(1)            !stop infinite looping
+         kc=K_cal(Vprev,T,EoS)
+         if (K < Kprev)then                   !going to volumes > 1.0
+            if (Kc < K)exit
+            if (Vprev > 2.0_cp*EoS%params(1) )then
+               V=2.0_cp*EoS%params(1)            !stop infinite looping
                return
             end if
+
          else
             if (Kc > K)exit
-            if (Vprev < 0.001_cp*e%params(1))then
-               V=0.001_cp*e%params(1)      !stop infinite looping
+            if (Vprev < 0.001_cp*EoS%params(1) )then
+               V=0.001_cp*EoS%params(1)      !stop infinite looping
                return
             end if
-         end if
+        end if
       end do
 
       !> set-up for Newton-raphson
@@ -529,109 +539,74 @@ SubModule (CFML_EoS) EoS_Volume
       Kprev=Kc
       V=Vprev-Vstep
 
+    !     write(unit=6,fmt='(a,f10.3,a,f10.3)') 'Got to NR, Kprev = ',Kprev,'      V = ',V
+    !     write(unit=6,fmt='(a,f10.3,a,f10.3)') 'Got to NR, Vprev = ',Vprev,'  Vstep = ',Vstep
+
       do     ! does a newton-raphson search
          ic=ic+1
          if (ic > 10) exit
 
          call clear_error()
-         kc=K_cal(V,T,E)
+         !  write(unit=6,fmt='(a,f10.3,a,f10.3)') 'In NR, T =  ',T,'      V = ',V
+         kc=K_cal(V,T,EoS)
 
-         if (abs(kc-k) < 0.001*k)exit                   !new limit May 2019: was 0.001 now 0.001*K
-         if (ic > 1)then                                !introduced if(ic > 1) May 2019: otherwise delVprev is not initialised and delV becomes nan
+         !   write(unit=6,fmt='(a,f10.3)') 'In  NR, Kc = ',Kc
+         if (abs(kc-k) < 0.001*k) exit                                 !new limit May 2019: was 0.001 now 0.001*K
+         if (ic > 1)then                                              !introduced if(ic > 1) May 2019: otherwise delVprev is not initialised and delV becomes nan
             delV= (k-kc)*(V-Vprev)/(kc-Kprev)
+            !   write(unit=6,fmt='(a,f10.3)') 'In  NR, delv= ',delv
             if (abs(delV) > abs(delVprev))delV=sign(delVprev,delV)       !prevents step getting bigger
+
          else
             delV=Vstep
          end if
 
          Vnew= V + delV
-         if (Vnew < 0.0_cp) Vnew=0.99*V          ! stops V going negative
+         if (Vnew < 0._cp) Vnew=0.99*V          ! stops V going negative
          Kprev=Kc
          Vprev=V
          delVprev=delV
          V=vnew
       end do
 
-      !> Linear case
-      if (e%linear) v=v**(1.0_cp/3.0_cp)
    End Function Get_Volume_K
 
    !!----
-   !!---- GET_VOLUME_K_OLD
+   !!---- FUNCTION GET_VOLUME_S
    !!----
+   !!---- Returns the value of Volume obtained from Strain (S)
    !!----
+   !!---- Date: 15/02/2013
    !!
-   Module Function Get_Volume_K_old(K,T,E) Result(V)
+   Module Function Get_Volume_S(S, T, Eos) Result(V)
       !---- Arguments ----!
-      real(kind=cp),  intent(in) :: K       ! Bulk modulus
-      real(kind=cp),  intent(in) :: T       ! Temperature
-      type(Eos_Type), intent(in) :: E       ! Eos Parameter
-      real(kind=cp)              :: V
-
-      !---- Local Variables ----!
-      real(kind=cp) :: vprev,Kprev,kc,vnew,delv,delvprev
-
-      !> Init
-      v=0.0_cp
-      Vprev=e%params(1)             !This is Vo
-      Kprev=K_cal(Vprev,T,E)        !This is Ko
-
-      V=1.01_cp*e%params(1)
-
-      do     ! does a newton-raphson search
-         call clear_error()
-         kc=K_cal(V,T,E)
-         if (abs(kc-k) < 0.001)exit
-
-         delV= (k-kc)*(V-Vprev)/(kc-Kprev)
-         if (abs(delV) > abs(delVprev)) delV=sign(delVprev,delV)       !prevents step getting bigger
-         Vnew= V + delV
-         if (Vnew < 0.0_cp) Vnew=0.99*V          ! stops V going negative
-         Kprev=Kc
-         Vprev=V
-         delVprev=delV
-         V=vnew
-      end do
-
-      !> Linear case
-      if (e%linear) v=v**(1.0_cp/3.0_cp)
-   End Function Get_Volume_K_old
-
-   !!----
-   !!---- GET_VOLUME_S
-   !!----    Returns the value of Volume obtained from Strain (S)
-   !!----
-   !!---- 15/02/2013
-   !!
-   Module Function Get_Volume_S(S,T,Eospar) Result(V)
-      !---- Arguments ----!
-      real(kind=cp),  intent(in) :: S       ! Strain
-      real(kind=cp),  intent(in) :: T       ! Temperature
-      type(Eos_Type), intent(in) :: EoSPar  ! Eos Parameter
+      real(kind=cp),  intent(in) :: S    ! Strain
+      real(kind=cp),  intent(in) :: T    ! Temperature
+      type(Eos_Type), intent(in) :: EoS  ! Eos Parameter
       real(kind=cp)              :: V
 
       !---- Local Variables ----!
       real(kind=cp)                      :: v0
-      real(kind=cp), dimension(n_eospar) :: ev
+      real(kind=cp), dimension(N_EOSPAR) :: ev
 
       !> Init
       v=0.0_cp
 
       !> Local Eos Copy
-      call EoS_to_Vec(eospar,ev)
+      ev= EoS_to_Vec(EoS)
 
       !> Allow for thermal: s=function of V(P,T)/V(P=0,T)
-      select case (eospar%itherm)
+      select case (EoS%itherm)
          case (0)
             v0=ev(1)
 
-         case (1:7)
-            v0=get_volume(0.0_cp,t,eospar)
-            if (eospar%linear) v0=v0**3.0_cp
+         case (1:n_therm_models)
+            v0=get_volume(0.0_cp,t,EoS)
+            if (EoS%linear) v0=v0**3.0_cp
       end select
 
-      select case (eospar%imodel)
-         case (1,5) ! Murnaghan and Tait, no strain defined
+      select case (EoS%imodel)
+         case (1,5,7) ! Murnaghan and Tait, no strain defined
             v=0.0_cp
 
          case (2) ! Birch-Murnaghan
@@ -645,7 +620,85 @@ SubModule (CFML_EoS) EoS_Volume
       end select
 
       !> Linear case
-      if (eospar%linear) v=v**(1.0_cp/3.0_cp)
+      if (EoS%linear) v=v**(1.0_cp/3.0_cp)
+
    End Function Get_Volume_S
+
+   !!--++
+   !!--++ FUNCTION GET_VOLUME_THIRD
+   !!--++
+   !!--++ Returns the value of volume or length of a principal axis ieos in unit
+   !!--++ cell in cell_eos at P,T when it can be calculated from others
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_Volume_Third(P, T, Cell_Eos, Ieos) Result(L)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in) :: p,T
+      type(eos_cell_type),intent(in) :: cell_eos
+      integer,            intent(in) :: ieos     ! the axis (1,2,3) or V (0) to be calculated
+      real(kind=cp)                  :: l        !returned length or volume
+
+      !---- Local Variables ----!
+      integer       :: i
+      real(kind=cp) :: vfactor
+
+      !> init
+      l=10.0_cp
+
+      !> safety check: if mono or triclinic, should only be called if angle poly used
+      if (U_case(cell_eos%system(1:4)) == 'TRIC' .or. U_case(cell_eos%system(1:3)) == 'MONO')then
+         if (cell_eos%eosang%iangle == 0) then
+            call set_error(1,'Get_Volume_Third called for mono or triclinic, without angle poly set')
+         end if
+      end if
+
+      !> Factor for unit cell volume V = a.b.c.vfactor
+      vfactor=1.0
+      if (U_case(cell_eos%system(1:4)) == 'TRIG' .or. U_case(cell_eos%system(1:3)) == 'HEX ') &
+         vfactor=sqrt(3.0_cp)/2.0_cp
+
+      call init_err_eos()
+
+      select case(U_case(cell_eos%system(1:4)))
+         case('ORTH','MONO','TRIC')
+            vfactor=Get_Angle_Volfactor(P,T,cell_eos)
+
+            select case(ieos)
+               case(0)
+                  l=Get_Volume(P,T,cell_eos%eos(1))*Get_Volume(P,T,cell_eos%eos(2))* &
+                    Get_Volume(P,T,cell_eos%eos(3))*vfactor
+
+               case default
+                  l=Get_Volume(P,T,cell_eos%eos(0))/vfactor
+                  do i=1,3
+                     if (i == ieos)cycle
+                     l=l/Get_Volume(P,T,cell_eos%eos(i))
+                  end do
+            end select
+
+         case('TRIG','HEXA','TETR')
+            select case(ieos)
+               case(0)     ! calc volumes from a and c
+                  l=Get_Volume(P,T,cell_eos%eos(1))**2.0_cp*Get_Volume(P,T,cell_eos%eos(3))*vfactor
+
+               case(1)     ! a from V and c
+                  l=sqrt(Get_Volume(P,T,cell_eos%eos(0))/vfactor/Get_Volume(P,T,cell_eos%eos(3)))
+
+               case(3)     ! c from a and V
+                  l=Get_Volume(P,T,cell_eos%eos(0))/vfactor/Get_Volume(P,T,cell_eos%eos(1))**2.0_cp
+            end select
+
+         case('CUBI','ISOT')
+            select case(ieos)
+               case(0)     ! calc volume from a
+                  l=Get_Volume(P,T,cell_eos%eos(1))**3.0_cp
+
+               case(1:3)     ! a,b, or c from V
+                  l=Get_Volume(P,T,cell_eos%eos(0))**(1.0_cp/3.0_cp)
+            end select
+      end select
+
+   End Function Get_Volume_Third
 
 End SubModule EoS_Volume

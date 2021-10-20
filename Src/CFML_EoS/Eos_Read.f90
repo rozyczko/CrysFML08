@@ -6,12 +6,45 @@ SubModule (CFML_EoS) EoS_Read
    Contains
 
    !!----
+   !!---- FUNCTION SET_XDATATYPES
+   !!----
+   !!----  returns array result xdatatypes(i)=1 if datatype i is present in dataset gdat
+   !!----  if used=.true. then only = 1 if at least one datum of the type is used
+   !!----
+   !!---- Date: 18/02/2021
+   !!
+   Module Function Set_XdataTypes(Gdat, Used) Result(XdataTypes)
+      !---- Arguments ----!
+      type (EoS_Data_List_Type), intent(in) :: Gdat  ! the data list
+      logical,                   intent(in) :: Used  ! .true. to request
+      integer, dimension(0:N_DATA_TYPES)    :: XdataTypes
+
+      !---- Local Variables ----!
+      integer :: i
+
+      !> Init
+      xdatatypes=0
+
+      if (used)then
+         do i=1,gdat%n
+            if (gdat%eosd(i)%iuse == 1)xdatatypes(gdat%eosd(i)%xtype) = 1
+         end do
+
+      else        ! all data, used or not
+         do i=1,gdat%n
+            xdatatypes(gdat%eosd(i)%xtype) = 1
+         end do
+      end if
+
+   End Function Set_XdataTypes
+
+   !!----
    !!---- READ_EOS_DATAFILE
    !!----    General routine to read data for Eos
    !!----
    !!---- 06/12/2018
    !!
-   Module Subroutine Read_EoS_DataFile(fname,dat)
+   Module Subroutine Read_EoS_DataFile(FName, Dat)
       !---- Arguments ----!
       character(len=*),          intent(in)  :: fname   ! File name
       type (eos_data_list_type), intent(out) :: dat     ! data structure
@@ -47,8 +80,7 @@ SubModule (CFML_EoS) EoS_Read
       !> Number of lines
       nlines=number_lines(trim(filedat))
       if (nlines <= 0) then
-         err_CFML%IErr=1
-         Err_CFML%Msg="Impossible to read the file "
+         call set_error(1,"Impossible to read the file ")
          return
       end if
 
@@ -148,8 +180,7 @@ SubModule (CFML_EoS) EoS_Read
 
       call get_words(line,dire,iv)
       if (iv <= 1) then
-         err_CFML%IErr=1
-         Err_CFML%Msg="No keywords found on format line in data file!"
+         call set_error(1,"No keywords found on format line in data file!")
          return
       end if
 
@@ -257,8 +288,7 @@ SubModule (CFML_EoS) EoS_Read
       end do
       ndat=ndat/nl
       if (ndat <=0) then
-         err_CFML%IErr=1
-         Err_CFML%Msg='Number of data points estimated in the data file was zero!'
+         call set_error(1,'Number of data points estimated in the data file was zero!')
          return
       end if
 
@@ -301,8 +331,7 @@ SubModule (CFML_EoS) EoS_Read
          !> Check for brackets indicating esd's consistent with format
          if (esd_as_num) then
             if (index(line,'(') > 0) then
-               err_CFML%IErr=1
-               Err_CFML%Msg='Format says esds as numbers but esd in bracket found on  line '//trim(car)//' of data file!'
+               call set_error(1,'Format says esds as numbers but esd in bracket found on  line '//trim(car)//' of data file!')
                dat%n=ndat
                return
             end if
@@ -312,29 +341,25 @@ SubModule (CFML_EoS) EoS_Read
          nlines_datum=nlines_datum+1
          call get_numstd(line,vet,vetsd,iv)
          if (iv == 0) then
-            err_CFML%IErr=1
-            Err_CFML%Msg='No values found on line '//trim(car)//' of data file!'
+            call set_error(1,'No values found on line '//trim(car)//' of data file!')
             dat%n=ndat
             return
 
          else if (iv > ncdat) then        ! This catches too many data when 1 line/datum
-            err_CFML%IErr=1
-            Err_CFML%Msg='Error reading data at line '//trim(car)//': Too many data items found'
+            call set_error(1,'Error reading data at line '//trim(car)//': Too many data items found')
             dat%n=ndat
             return
          end if
 
          do j=1,iv
             kk=nk+j
-            if (iorden(kk) < 1)then ! This catches too many data when >1 line/datum
-               err_CFML%IErr=1
-               Err_CFML%Msg='Error reading data at line '//trim(car)//' or previous line: Too many data items found'
+            if (iorden(kk) < 1) then ! This catches too many data when >1 line/datum
+               call set_error(1,'Error reading data at line '//trim(car)//' or previous line: Too many data items found')
                dat%n=ndat
                return
 
             else if(iorden(kk) > ncol_data_max) then
-               err_CFML%IErr=1
-               Err_CFML%Msg='Error reading data at line '//trim(car)//':  Did you put sig in format line, but have sig in ()?'
+               call set_error(1,'Error reading data at line '//trim(car)//':  Did you put sig in format line, but have sig in ()?')
                dat%n=ndat
                return
             end if
@@ -374,14 +399,12 @@ SubModule (CFML_EoS) EoS_Read
          !> Test for the correct number of data found
          if (nlines_datum < nl) cycle         ! not read enough lines for this datum yet
          if (nk < ncdat) then
-            err_CFML%IErr=1
-            Err_CFML%Msg='Error reading data at line '//trim(car)//': Not enough data items found'
+            call set_error(1,'Error reading data at line '//trim(car)//': Not enough data items found')
             dat%n=ndat
             return
 
          else if (nk > ncdat) then
-            err_CFML%IErr=1
-            Err_CFML%Msg='Error reading data at line '//trim(car)//': Too many data items found'
+            call set_error(1,'Error reading data at line '//trim(car)//': Too many data items found')
             dat%n=ndat
             return
          end if
@@ -428,11 +451,13 @@ SubModule (CFML_EoS) EoS_Read
       dat%ic_dat=ic_dat         ! flags for original input
 
       !> Default values in function of system
-      call Define_Crystal_System(dat)
+      call Def_Crystal_System(dat)
+
       ! Do not test for error here because we can still set the volume
 
       !> Volume calculation if have cell parameters
       call Set_Volume_from_Cell(dat)
+
    End Subroutine Read_EoS_DataFile
 
    !!----
@@ -456,8 +481,7 @@ SubModule (CFML_EoS) EoS_Read
       call Read_Multiple_Eos_File(Fname,Eoslist)
 
       if (eoslist%n < 1) then
-         err_CFML%IErr=1
-         Err_CFML%Msg="No EoS found in EoS file "
+         call set_error(1,"No EoS found in EoS file ")
       else
          EoS=Eoslist%eos(1)
       end if
@@ -477,10 +501,10 @@ SubModule (CFML_EoS) EoS_Read
       type(Eos_type),               intent(out)  :: eos
 
       !---- Local Variables ----!
-      integer       :: nl, imax,ierr,idoc,nlines,i,c,j
-      character(len=255)                            :: text
-      character(len=10)                             :: forma
-      real                                          :: val
+      integer                   :: nl, imax,ierr,idoc,nlines,i,c,j, jc,kc
+      character(len=255)        :: text,wtext
+      character(len=10)         :: forma
+      real                      :: val
 
       !> initialisation
       call init_eos_type(eos)
@@ -514,56 +538,67 @@ SubModule (CFML_EoS) EoS_Read
 
          else if(index(text,'MODEL') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%imodel
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Model number"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Model number")
 
          else if(index(text,'ORDER') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%iorder
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Order number"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Order number")
 
          else if(index(text,'THERMAL') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%itherm
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Thermal model"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Thermal model")
 
          else if(index(text,'CROSS') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%icross
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Cross-terms model"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Cross-terms model")
 
          else if(index(text,'TRANS') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%itran
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Transition model"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Transition model")
 
          else if(index(text,'SHEAR') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%ishear
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Shear model"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Shear model")
 
+         else if(index(text,'OSC2') /= 0)then
+            read(text(c:),'(i5)',iostat=ierr)eos%iosc(1)
+            if (ierr /=0) call set_error(1,"Error reading the Oscillator2 model")
+
+         else if(index(text,'OSC3') /= 0)then
+            read(text(c:),'(i5)',iostat=ierr)eos%iosc(2)
+            if (ierr /=0) call set_error(1,"Error reading the Oscillator3 model")
 
          else if(index(text,'PSCALE') /= 0)then
             read(text(c:),'(a)',iostat=ierr)eos%pscale_name
-            if (ierr /=0) Err_CFML%Msg="Error reading the Pressure Scale info"
+            if (ierr /=0) call set_error(1,"Error reading the Pressure Scale info")
 
          else if(index(text,'VSCALE') /= 0)then
             read(text(c:),'(a)',iostat=ierr)eos%vscale_name
-            if (ierr /=0) Err_CFML%Msg="Error reading the Volume Scale info"
+            if (ierr /=0) call set_error(1,"Error reading the Volume Scale info")
 
          else if(index(text,'TYPE') /= 0)then
             if(index(U_case(text),'LINEAR') /= 0) eos%linear=.true.
 
          else if(index(text,'PREF') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%pref
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Pressure reference"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Pressure reference")
 
          else if(index(text,'TREF') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%tref
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Temperature reference"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Temperature reference")
 
          else if(index(text,'STOICH') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%stoich
-            if (ierr /=0) Err_CFML%Msg="Error reading the Stochiometry"
+            if (ierr /=0) call set_error(1,"Error reading the Stochiometry")
 
          else if(index(text,'DENSITY0') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%density0
-            if (ierr /=0) Err_CFML%Msg="Error reading the reference density"
+            if (ierr /=0) call set_error(1,"Error reading the reference density")
             if(eos%density0 < 0.00005)eos%density0=0.0_cp                   ! test against min value allowed by format
+
+         else if(index(text,'ANGLES') /= 0)then
+            read(text(c:),'(i5)',iostat=ierr)eos%iangle
+            if (ierr /=0) call set_error(1,"Error reading the Angle Model number")
 
          else if(index(text,'PARAM') /= 0)then
             if (index(U_case(text(c:)),'INF')> 0)then
@@ -571,8 +606,13 @@ SubModule (CFML_EoS) EoS_Read
                val=huge(0._cp)
             else
                read(text(c:),'(i2,f12.6)',iostat=ierr)i,val
+               if (i > 50 .and. i < 60)then  !read scale factor name
+                  jc=index(U_case(text),',')+1
+                  kc=index(U_case(text),')')-1
+                  if (jc > 1 .and. kc > jc)eos%comment(i)=trim(adjustl(text(jc:kc)))
+               end if
             end if
-            if (ierr /=0) Err_CFML%Msg="Error reading the EoS Parameters"
+            if (ierr /=0) call set_error(1,"Error reading the EoS Parameters")
 
             if (i > 0 .and. i <= N_EOSPAR) then
                eos%params(i)=val
@@ -593,15 +633,17 @@ SubModule (CFML_EoS) EoS_Read
                if (ierr /= 0)exit
             end do
             if (ierr /= 0)then
-               Err_CFML%Msg="Error reading the EoS Variance information"
+               call set_error(1,"Error reading the EoS Variance information")
                exit
             end if
          end if
       end do
 
       !> Error during reading
-      if (ierr /=0) then
-         err_CFML%IErr=1
+      if (ierr /=0) return
+
+      if (eos%iangle > 0 .and. eos%imodel+eos%itherm+eos%itran+eos%icross+eos%ishear /=0) then
+         call set_error(1,"EoS file contains both angle and eos models: not allowed")
          return
       end if
 
@@ -609,6 +651,57 @@ SubModule (CFML_EoS) EoS_Read
       if (eos%icross == 0 .and. abs(eos%params(5)) > 0.000001_cp) eos%icross=1
           !>0.000001 is the smallest non-zero number in the eos file format
           !>Old files cannot be icross=2, only =1
+
+      !> Trap move of cross terms from params(5:6) to params(8:9) in Nov 2019
+      !> old files will return icross > 0 but params(5) /= 0, while params(8:9) = 0
+      !> new files wil have params(8) and/or (9) non zero
+      if (eos%icross > 0 .and. abs(eos%params(8)) < 0.000001_cp .and. eos%imodel /=6)then
+         eos%params(8:9) = eos%params(5:6)
+         eos%params(5:6) = 0._cp
+         eos%vcv(8:9,1:imax)=eos%vcv(5:6,1:imax)
+         eos%vcv(1:imax,8:9)=eos%vcv(1:imax,5:6)
+         eos%vcv(5:6,1:imax)=0._cp
+         eos%vcv(1:imax,5:6)=0._cp
+
+         wtext="EoS file in old format for cross terms: check parameter values carefully"
+         call set_error(-1,trim(wtext))
+      end if
+
+      !> Trap move of Z for APL from params(4) to (5): do it after icross so no conflict with cross terms
+      if (eos%imodel == 6 .and. abs(eos%params(5)) < 0.000001_cp)then
+         eos%params(5) = eos%params(4)
+         eos%params(4) = 0._cp     ! Kpp0 will be reset by implied values
+         eos%vcv(5,1:imax)=eos%vcv(4,1:imax)
+         eos%vcv(1:imax,5)=eos%vcv(1:imax,4)
+         eos%vcv(4,1:imax)=0._cp
+         eos%vcv(1:imax,4)=0._cp
+
+         Wtext=trim(Wtext)//"  EoS file in old format for APL EoS: check parameter values carefully"
+         call set_error(-1,trim(wtext))
+      end if
+
+      !> Move angle polynomial values from params(1:30) and clear params(1:30)
+      if (eos%iangle > 0)then
+         do i=1,3
+            j=10*i-9        ! j=1,11,21
+            eos%angpoly(i,0,1)=eos%params(j)
+            eos%angpoly(i,1,1:3)=eos%params(j+1:j+3)      !P terms
+            eos%angpoly(i,2,1:3)=eos%params(j+4:j+6)      !T terms
+            eos%angpoly(i,3,1:3)=eos%params(j+7:j+9)      !PT terms
+         end do
+         eos%params(1:30)=0._cp
+      end if
+
+      !>Trap Natom=0 in HP thermal pressure model
+      if(eos%itherm == 6 .and. eos%params(13) == 0)then
+         eos%params(13)=1.0_cp
+      endif
+
+      !>Warn if extra oscillators
+      if (sum(eos%iosc) > 0) then
+         Wtext=trim(Wtext)//"  Extra oscillators in eos file. These are not supported in this version"
+         call set_error(-1,trim(wtext))
+      endif
 
       !> Now finish setting the other eos components
       call set_eos_names(eos)
@@ -629,10 +722,15 @@ SubModule (CFML_EoS) EoS_Read
 
       call Set_EoS_Implied_Values(eos)           ! set implied values
 
+      if (err_CFML%IErr < 0)then
+         err_CFML%Msg=trim(err_CFML%Msg)//' '//trim(wtext)
+      endif
+
       !> we have to also set the refinement flags to match vcv
       do i=1,n_eospar
          if (abs(eos%vcv(i,i)) > tiny(0.0)) eos%iref(i)=1
       end do
+
    End Subroutine Read_Eos_In
 
    !!----
@@ -668,8 +766,7 @@ SubModule (CFML_EoS) EoS_Read
       !> Number of lines
       nlines=number_lines (trim(filedat))
       if (nlines <= 0) then
-         err_CFML%IErr=1
-         Err_CFML%Msg="Impossible to read the EoS file "
+         call set_error(1,"Impossible to read the EoS file ")
          return
       end if
 
@@ -682,7 +779,7 @@ SubModule (CFML_EoS) EoS_Read
       !> Find how many eos in file, and split up flines
       neos=0
       do i=1,nlines
-         if (index(U_case(flines(i)),'EOSFIT PARAMETER FILE') > 0)then      ! Use this because it is generated by cfml_eos and not the header
+         if (index(U_case(flines(i)),'EOSFIT PARAMETER FILE') > 0) then      ! Use this because it is generated by cfml_eos and not the header
             neos=neos+1
             istart(neos)=i          ! line number of TITLE
          end if

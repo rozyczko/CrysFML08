@@ -11,6 +11,7 @@ SubModule (CFML_EoS) EoS_Allocate
    !!----    This subroutine should be called before using an object of type eos_data_list.
    !!----
    !!---- 17/07/2015
+   !!---- Revision: OK
    !!
    Module Subroutine Allocate_EoS_Data_List(N, E)
       !---- Arguments ----!
@@ -27,8 +28,7 @@ SubModule (CFML_EoS) EoS_Allocate
       allocate (e%eosd(n),stat=ier)
       if (ier /= 0) then
          e%n = 0
-         err_CFML%IErr=1
-         err_CFML%Msg="Problems allocating memory for Eos_Data_List_Type variable"
+         call set_error(1,"Problems allocating memory for Eos_Data_List_Type variable")
          return
       end if
 
@@ -44,6 +44,7 @@ SubModule (CFML_EoS) EoS_Allocate
    !!----    This subroutine should be called before using an object of type eos_list.
    !!----
    !!---- 17/07/2015
+   !!---- Revision: OK
    !!
    Module Subroutine Allocate_EoS_List(N, E)
       !---- Arguments ----!
@@ -60,8 +61,7 @@ SubModule (CFML_EoS) EoS_Allocate
       allocate (e%eos(n),stat=ier)
       if (ier /= 0) then
          e%n = 0
-         err_CFML%IErr=1
-         err_CFML%Msg="Problems allocating memory for Eos_List_Type variable"
+         call set_error(1,"Problems allocating memory for Eos_List_Type variable")
          return
       end if
 
@@ -78,6 +78,7 @@ SubModule (CFML_EoS) EoS_Allocate
    !!----    more needed.
    !!----
    !!---- 17/07/2015
+   !!---- Revision: OK
    !!
    Module Subroutine Deallocate_EoS_Data_List(E)
       !---- Arguments ----!
@@ -94,6 +95,7 @@ SubModule (CFML_EoS) EoS_Allocate
    !!----    more needed.
    !!----
    !!---- 17/07/2015
+   !!---- Revision: OK
    !!
    Module Subroutine Deallocate_EoS_List(E)
       !---- Arguments ----!

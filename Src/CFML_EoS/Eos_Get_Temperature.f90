@@ -4,17 +4,19 @@
 SubModule (CFML_EoS) EoS_Temperature
    implicit none
    Contains
+
    !!----
-   !!---- GET_TEMPERATURE
-   !!----    Returns Temperature at given P,V
+   !!---- FUNCTION GET_TEMPERATURE
    !!----
-   !!---- 01/04/2014
+   !!---- Returns Temperature at given P,V
+   !!----
+   !!---- Date: 01/04/2014
    !!
-   Module Function Get_Temperature(P,V,EosPar) Result(T)
+   Module Function Get_Temperature(P, V, Eos) Result(T)
       !---- Arguments ----!
-      real(kind=cp),  intent(in) :: P       ! Pressure
-      real(kind=cp),  intent(in) :: V       ! Volume
-      type(Eos_Type), intent(in) :: EoSPar  ! Eos Parameter
+      real(kind=cp),  intent(in) :: P    ! Pressure
+      real(kind=cp),  intent(in) :: V    ! Volume
+      type(Eos_Type), intent(in) :: EoS  ! Eos Parameter
       real(kind=cp)              :: t
 
       !---- Local Variables ----!
@@ -23,37 +25,37 @@ SubModule (CFML_EoS) EoS_Temperature
       real(kind=cp)                     :: step,dp1,dp2
 
       !> Init
-      t=eospar%tref
+      t=EoS%tref
       pa=p               ! local copy p
       va=v
 
       !> Check
-      if (eospar%itherm == 0) return          ! no calcs possible without thermal model
+      if (EoS%itherm == 0) return          ! no calcs possible without thermal model
 
       !> First estimate at P=0
-      t=Get_Temperature_P0(va,EosPar)
-      if (eospar%imodel ==0) return
-      if (err_CFML%IErr ==1 ) return
+      t=Get_Temperature_P0(va,EoS)
+      if (EoS%imodel ==0) return
+      if (err_cfml%flag) return
 
       !> Use iterative solution, by minimising p-pcalc
       !> Init this part
       ta=t
-      dp1=p-get_pressure(va,ta,eospar)
+      dp1=p-get_pressure(va,ta,EoS)
       nstep=0
       step=100.0_cp  ! For positive thermal expansion, should increase T from P=0
 
       !> Do iteration
       do
          !> Trap infinite loops
-         if (nstep > 10000) then
-            err_CFML%IErr=1
-            write(err_CFML%Msg,'("No convergence in get_temperature after ",i5," steps, dp= ",f10.4)')nstep,dp1
+         if (nstep > 10000)then
+            call set_error(1,' ')
+            write(err_cfml%msg,'("No convergence in get_temperature after ",i5," steps, dp= ",f10.4)')nstep,dp1
             exit
          end if
 
          !> Increment Temperature
          ta=ta+step
-         dp2=p-get_pressure(va,ta,eospar)
+         dp2=p-get_pressure(va,ta,EoS)
          nstep=nstep+1
 
          !> test for sufficient convergence
@@ -65,7 +67,7 @@ SubModule (CFML_EoS) EoS_Temperature
             step=-0.5_cp*step
          else
             if (abs(dp2) > abs(dp1))then
-               step=-1.0_cp*step      ! wrong direction: reverse
+               step=-1.0*step      ! wrong direction: reverse
             end if                 !(correct direction uses same step again)
          end if
 
@@ -73,19 +75,21 @@ SubModule (CFML_EoS) EoS_Temperature
       end do
 
       t=ta              ! success
+
    End Function Get_Temperature
 
    !!----
-   !!---- GET_TEMPERATURE_P0
-   !!----    Returns Temperature at P=0 for given V0T
+   !!---- FUNCTION GET_TEMPERATURE_P0
    !!----
-   !!---- 17/07/2015
+   !!---- Returns Temperature at P=0 for given V0T
+   !!----
+   !!---- Date: 17/07/2015
    !!
-   Module Function Get_Temperature_P0(Vin,EosPar,Tmin,Tmax) Result(Tk)
+   Module Function Get_Temperature_P0(V, EoS, Tmin, Tmax) Result(Tk)
       !---- Arguments ----!
-      real(kind=cp),           intent(in) :: Vin       ! Volume at temperature T or Pth (Pthermal case)
-      type(Eos_Type),          intent(in) :: EoSPar    ! Eos Parameter
-      real(kind=cp), optional, intent(in) :: Tmin      ! Range for solution in T
+      real(kind=cp),           intent(in) :: V       ! Volume at temperature T or Pth (Pthermal case)
+      type(Eos_Type),          intent(in) :: EoS     ! Eos Parameter
+      real(kind=cp), optional, intent(in) :: Tmin    ! Range for solution in T
       real(kind=cp), optional, intent(in) :: Tmax
       real(kind=cp)                       :: tk
 
@@ -100,17 +104,17 @@ SubModule (CFML_EoS) EoS_Temperature
       real(kind=cp), dimension(N_EOSPAR) :: ev
 
       !> Init
-      Tk=eospar%tref
+      Tk=EoS%tref
 
-      !> Local copy Eospar to handle linear or volume
-      call EoS_to_Vec(eospar,ev)
+      !> Local copy EoS to handle linear or volume
+      ev= EoS_to_Vec(EoS)
 
       !> all equations written for volume
       v00=ev(1)
-      if (eospar%linear) then
-         v0T=Vin**3.0_cp
+      if (EoS%linear) then
+         v0T=V**3.0_cp
       else
-         v0T=Vin
+         v0T=V
       end if
 
       !> Optional arguments
@@ -121,7 +125,7 @@ SubModule (CFML_EoS) EoS_Temperature
       if (present(Tmax)) TKmax=tmax
 
       !> Check
-      Tref=eospar%tref
+      Tref=EoS%tref
       if (v00 <= tiny(0.0)) return
 
       !> Init local variables
@@ -129,7 +133,7 @@ SubModule (CFML_EoS) EoS_Temperature
       t2=0.0
       t3=0.0
 
-      select case (eospar%itherm)
+      select case (EoS%itherm)
          case (1) ! Berman
             ! modified RJA 31.03.2014 to fix case params(11)=0.
             if (abs(ev(11)) < tiny(0.0_cp)) then
@@ -147,26 +151,23 @@ SubModule (CFML_EoS) EoS_Temperature
                      if (t1 >=TKmin .and. t1 <=TKmax)then
                         tk=t1
                      else
-                        err_CFML%IErr=1
-                        err_CFML%Msg='No valid solution for temperature'
+                        call set_error(1,'No valid solution for temperature')
                      end if
 
-                  else if (t2 > 0.0) then
+                  elseif (t2 > 0.0) then
                      if (t2 >=TKmin .and. t2 <=TKmax) then
                         tk=t2
                      else
-                        err_CFML%IErr=1
-                        err_CFML%Msg='No valid solution for temperature'
+                        call set_error(1,'No valid solution for temperature')
                      end if
                   else
-                     err_CFML%IErr=1
-                     err_CFML%Msg='No valid solution for temperature'
+                     call set_error(1,'No valid solution for temperature')
                   end if
                end if
             end if
 
          case (2) ! Fei
-            !> modified RJA 31.03.2014 to fix case params(11)=0.
+            ! modified RJA 31.03.2014 to fix case params(11)=0.
             if (abs(ev(11)) < tiny(0.0_cp)) then
                if (ev(10) > tiny(0.0_cp))tk=Tref+log(v0T/v00)/ev(10)
             else
@@ -193,20 +194,17 @@ SubModule (CFML_EoS) EoS_Temperature
                      if (t1 >=TKmin .and. t1 <=TKmax)then
                         tk=t1
                      else
-                        err_CFML%IErr=1
-                        err_CFML%Msg='No valid solution for temperature'
+                        call set_error(1,'No valid solution for temperature')
                      end if
 
                   elseif (t2 > 0.0) then
                      if (t2 >=TKmin .and. t2 <=TKmax)then
                         tk=t2
                      else
-                        err_CFML%IErr=1
-                        err_CFML%Msg='No valid solution for temperature'
+                        call set_error(1,'No valid solution for temperature')
                      end if
                   else
-                     err_CFML%IErr=1
-                     err_CFML%Msg='No valid solution for temperature'
+                     call set_error(1,'No valid solution for temperature')
                   end if
 
                else
@@ -216,13 +214,15 @@ SubModule (CFML_EoS) EoS_Temperature
                   t3=2.0*sqrt(-q)*cos((th+4.0*pi)/3.0) -a1/3.0
                   if (t1 > 0.0) then
                      if (t1 >=TKmin .and. t1 <=TKmax) tk=t1
+
                   elseif (t2 > 0.0) then
                      if (t2 >=TKmin .and. t2 <=TKmax) tk=t2
+
                   elseif (t3 > 0.0) then
                      if (t3 >=TKmin .and. t3 <=TKmax) tk=t3
+
                   else
-                     err_CFML%IErr=1
-                     err_CFML%Msg='No valid solution for temperature'
+                     call set_error(1,'No valid solution for temperature')
                   end if
                end if
             end if
@@ -245,14 +245,13 @@ SubModule (CFML_EoS) EoS_Temperature
                   if (t2 >=TKmin .and. t2 <=TKmax) tk=t2
                end if
             else
-               err_CFML%IErr=1
-               err_CFML%Msg='No valid solution for temperature'
+               call set_error(1,'No valid solution for temperature')
             end if
 
          case (4) ! Kroll
             !>>>>> kp=ev(3) : version before 11/11/2016
-            if (eospar%icross == 2)then
-               kp=ev(5)                    !uses Anderson delta
+            if (EoS%icross == 2)then
+               kp=ev(8)                    !uses Anderson delta
             else
                kp=ev(3)
             end if
@@ -268,16 +267,14 @@ SubModule (CFML_EoS) EoS_Temperature
 
             c=1.0/(x1*x2+x3)
             if (c <= -1.0_cp) then
-               err_CFML%IErr=1
-               err_CFML%Msg='Temperature calculated as negative'
+               call set_error(1,'No valid solution for temperature')
             else
                d=log(1.0 +c)
                t1=th_e/d
                if (t1 >=TKmin .and. t1 <=TKmax) then
                   tk=t1
                else
-                  err_CFML%IErr=1
-                  err_CFML%Msg='No valid solution for temperature'
+                  call set_error(1,'No valid solution for temperature')
                end if
             end if
 
@@ -343,9 +340,209 @@ SubModule (CFML_EoS) EoS_Temperature
             t1=th_e/d
             if (t1 >=TKmin .and. t1 <=TKmax) tk=t1
 
-         case(7)  !For MGD Pthermal, no real meaningful value of T to return, so set as Tref
-            tk=eospar%tref
+         case(7,8)  !For MGD Pthermal, no real meaningful value of T to return, so set as Tref
+            tk=EoS%tref
+
       end select
+
    End Function Get_Temperature_P0
+
+   !!--++
+   !!--++ FUNCTION GET_DMDT_AXIS
+   !!--++
+   !!--++ Returns the value of temperature derivative of the modulus of principal axis (ieos) in unit
+   !!--++ cell in cell_eos at P,T
+   !!--++
+   !!--++ Call this Function directly when the calling routine  knows that the direction is a principal axis
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_DmDt_Axis(P, T, Cell_eos, Ieos) Result(dMdT)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: P,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      integer,            intent(in)  :: ieos      !axis indicator, as in axis_type%ieos
+      real(kind=cp)                   :: dMdT
+
+      !---- Local Variables ----!
+
+      !> init
+      dmdt=0._cp
+
+      select case(cell_eos%loaded(ieos))
+         case(1)
+            dmdt=dKdT_Cal(p,t,cell_eos%eos(ieos))
+
+         case(2) ! sym equiv. Always uses eos(1) for a-axis
+            dmdt=dKdT_Cal(p,t,cell_eos%eos(1))
+
+         case(3)
+            dmdt=get_dmdt_third(p,T,cell_eos,ieos)
+
+         case(4)
+            dmdt=dKdt_cal(p,t,cell_eos%eos(cell_eos%unique))
+      end select
+
+   End Function Get_DmDt_Axis
+
+   !!--++
+   !!--++ FUNCTION GET_DMDT_CELL
+   !!--++
+   !!--++ Returns the value of temperature derivative of modulus of any axis in unit cell in cell_eos at P,T
+   !!--++ Call this Function when the calling routine does not know if the direction is a principal axis or not
+   !!--++ If a principal direction is requested, only axis%ieos is required
+   !!--++ axis%v and axis%atype only used if axis%ieos=-2
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_DmDt_Cell(P, T, Cell_eos, Axis) Result(dMdT)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: p,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      type(axis_type),    intent(in)  :: axis
+      real(kind=cp)                   :: dMdT
+
+      !---- Local Variables ----!
+
+      !> init
+      dmdt=0.0_cp
+
+      select case(axis%ieos)      !invalid numbers just return
+         case(0:6)   !principal direction for which eos exists, or can be calculated
+            dmdt=get_dmdt_axis(p,t,cell_eos,axis%ieos)
+
+         case(-2)   !general direction
+            dmdt=get_dmdt_general(p,T,cell_eos,axis)
+
+      end select
+
+   End Function Get_DmDt_Cell
+
+   !!--++
+   !!--++ FUNCTION GET_DMDT_GENERAL
+   !!--++
+   !!--++ Returns the value of temperature derivative of modulus of any axis in unit
+   !!--++ cell in cell_eos at P,T
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_DmDt_General(P, T, Cell_eos, Axis) Result(dMdT)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in)  :: p,T
+      type(eos_cell_type),intent(in)  :: cell_eos
+      type(axis_type),    intent(in)  :: axis
+      real(kind=cp)                   :: dMdT
+
+      !---- Local Variables ----!
+      real(kind=cp)   :: tstep,tcal
+      integer         :: i
+
+      !> for spline
+      integer,parameter :: nstep=21   !must be odd
+      integer           :: imid
+      real(kind=cp),dimension(nstep):: x,y,d2y,dy
+
+      tstep=20.
+      tcal=t-int(nstep/2)*tstep
+      do i=1,nstep
+         x(i)=tcal
+         y(i)=get_mod_general(P,Tcal,cell_eos,axis)
+         tcal=tcal+tstep
+      end do
+
+      !call Second_Derivative(x, y, nstep, d2y)
+      dy= First_Derivative(x, y, nstep)
+
+      imid=int(nstep/2) + 1
+      dMdT=dy(imid)
+
+   End Function Get_DmDt_General
+
+   !!--++
+   !!--++ FUNCTION GET_DMDT_THIRD
+   !!--++
+   !!--++ Returns the value of temperature derivative of modulus of a principal axis ieos in unit
+   !!--++ cell in cell_eos at P,T when it can be calculated from others
+   !!--++
+   !!--++ Date: 09/09/2020
+   !!
+   Module Function Get_DmDt_Third(P, T, Cell_eos, Ieos) Result(modp)
+      !---- Arguments ----!
+      real(kind=cp),      intent(in) :: p,T
+      type(eos_cell_type),intent(in) :: cell_eos
+      integer,            intent(in) :: ieos     ! the modulus of the axis (1,2,3) or V (0) to be calculated
+      real(kind=cp)                  :: modp
+
+      !---- Local Variables ----!
+      integer        :: i
+      real(kind=cp)  :: Kp,M1p,M2p,M3p,Mangp,vf
+
+      !> init
+      modp=0.0_cp
+
+      !> safety check: if mono or triclinic, should only be called if angle poly used
+      if (U_case(cell_eos%system(1:4)) == 'TRIC' .or. U_case(cell_eos%system(1:3)) == 'MONO')then
+         if (cell_eos%eosang%iangle == 0) then
+            call set_error(1,'Get_DmDt_Third called for mono or triclinic, without angle poly set')
+         end if
+      end if
+
+      select case(U_case(cell_eos%system(1:4)))
+         case('TRIC','MONO','ORTH')
+            if (U_case(cell_eos%system(1:4)) == 'ORTHO')then
+               Mangp=0._cp
+            else
+               vf=Get_Angle_Volfactor(P,T,cell_eos)
+               Mangp=(Get_Angle_Volfactor_Deriv(P,T,cell_eos,'P') * &
+                      Get_Angle_Volfactor_Deriv(P,T,cell_eos,'T')/vf - &
+                      Get_Angle_Volfactor_Deriv2(P,T,cell_eos,'PT'))/vf
+            end if
+
+            select case(ieos)
+               case(0)
+                  M1p= dKdT_cal(P,T,cell_eos%eos(1))/Get_K(P,T,cell_eos%eos(1))**2.0_cp
+                  M2p= dKdT_cal(P,T,cell_eos%eos(2))/Get_K(P,T,cell_eos%eos(2))**2.0_cp
+                  M3p= dKdT_cal(P,T,cell_eos%eos(3))/Get_K(P,T,cell_eos%eos(3))**2.0_cp
+                  modp=get_mod_third(P,T,cell_eos,0)**2.0_cp*(M1p+M2p+M3p-Mangp)
+
+               case default
+                  modp= dKdT_cal(P,T,cell_eos%eos(0))/Get_K(P,T,cell_eos%eos(0))**2.0_cp
+                  do i=1,3
+                     if (i == ieos)cycle
+                     modp = modp - dKdT_cal(P,T,cell_eos%eos(i))/Get_K(P,T,cell_eos%eos(i))**2.0_cp
+                  end do
+                  modp=modp+Mangp
+                  modp = get_mod_third(P,T,cell_eos,ieos)**2.0_cp * modp
+            end select
+
+         case('TRIG','HEXA','TETR')
+            select case(ieos)
+               case(0)     ! calc V from a and c
+                  M1p= dKdT_cal(P,T,cell_eos%eos(1))/Get_K(P,T,cell_eos%eos(1))**2.0_cp
+                  M3p= dKdT_cal(P,T,cell_eos%eos(3))/Get_K(P,T,cell_eos%eos(3))**2.0_cp
+                  modp=get_mod_third(P,T,cell_eos,0)**2.0_cp*(2.0*M1p+M3p)
+
+               case(1)     ! a from V and c
+                  Kp=  dKdT_cal(P,T,cell_eos%eos(0))/Get_K(P,T,cell_eos%eos(0))**2.0_cp
+                  M3p= dKdT_cal(P,T,cell_eos%eos(3))/Get_K(P,T,cell_eos%eos(3))**2.0_cp
+                  modp=get_mod_third(P,T,cell_eos,1)**2.0_cp*(Kp-M3p)/2.0
+
+               case(3)     ! c from a and V
+                  Kp= dKdT_cal(P,T,cell_eos%eos(0))/Get_K(P,T,cell_eos%eos(0))**2.0_cp
+                  M1p= dKdT_cal(P,T,cell_eos%eos(1))/Get_K(P,T,cell_eos%eos(1))**2.0_cp
+                  modp=get_mod_third(P,T,cell_eos,3)**2.0_cp*(Kp-2.0*M1p)
+            end select
+
+         case('CUBI','ISOT')
+            select case(ieos)
+               case(0)     ! calc volume from a
+                  modp=dKdT_cal(P,T,cell_eos%eos(1))/3.0_cp
+
+               case(1,2,3)     ! a,b, or c from V
+                  modp=dKdT_cal(P,T,cell_eos%eos(0))*3.0_cp
+            end select
+      end select
+
+   End Function Get_DmDt_Third
 
 End SubModule EoS_Temperature

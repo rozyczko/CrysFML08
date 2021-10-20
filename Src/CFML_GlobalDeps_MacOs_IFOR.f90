@@ -91,10 +91,11 @@ Module CFML_GlobalDeps
    character(len=1), parameter   :: TAB     = char(9)            ! TAB character
 
    Type :: Err_Type
-      integer                         :: IErr =0                  ! =0: No error, < 0: Warning, > 0: Error
-      character(len=180)              :: Msg=" "                  ! Text for Message
-      integer                         :: nl=0                     ! number of lines
-      character(len=180),dimension(5) :: Txt=" "                  ! Extra Message information
+      logical                         :: Flag = .False.           ! Flag
+      integer                         :: IErr = 0                 ! =0: No error, < 0: Warning, > 0: Error
+      character(len=180)              :: Msg  = " "               ! Text for Message
+      integer                         :: nl   = 0                 ! number of lines
+      character(len=180),dimension(5) :: Txt  = " "               ! Extra Message information
    End Type Err_Type
    Type (Err_Type)       :: Err_CFML                             ! Error Information for CFML
 
@@ -148,16 +149,38 @@ Module CFML_GlobalDeps
    !!---- CLEAR_ERROR
    !!----    Reset information on Error Variables for CFML
    !!----
-   !!---- 27/03/2019
+   !!---- 19/10/2021
    !!
    Subroutine Clear_Error()
 
+      Err_CFML%Flag=.False.
       Err_CFML%IErr=0
       Err_CFML%Msg =" "
       Err_CFML%nl=0
       Err_CFML%Txt=" "
 
    End Subroutine Clear_Error
+
+   !!----
+   !!---- SET_ERROR
+   !!----    Set Error/Warning variables
+   !!----
+   !!---- 19/10/2021
+   !!
+   Subroutine Set_Error(Ierr, Msg)
+      !---- Arguments ----!
+      integer,          intent(in) :: Ierr
+      character(len=*), intent(in) :: Msg
+
+      if (IErr /=0 ) then
+         Err_CFML%IErr=Ierr
+         Err_CFML%Msg=trim(adjustl(Msg))
+         Err_CFML%Flag=.True.
+      else
+         call clear_error()
+      end if
+
+   End Subroutine Set_Error
 
    !!----
    !!---- SET_CFML_DEBUG
