@@ -91,14 +91,10 @@
       xs(1:3)=x(1:3)
       orb=0.0_cp
 
-      Select Type(SpG)
-        type is (SuperSpaceGroup_Type)
-           Om=SpG%Om
-        class default
-           do j=1,Spg%Multip
-             Om(:,:,j)=Spg%Op(j)%Mat
-           end do
-      End Select
+      do j=1,Spg%Multip
+        Om(:,:,j)=Spg%Op(j)%Mat
+      end do
+
       allocate(ptr(Spg%multip))
       ptr=0
       mult=1
@@ -182,14 +178,9 @@
       xs(1:3)=x(1:3)
       orb=0.0_cp
 
-      Select Type(SpG)
-        type is (SuperSpaceGroup_Type)
-           Om=SpG%Om
-        class default
-           do j=1,Spg%Multip
-             Om(:,:,j)=Spg%Op(j)%Mat
-           end do
-      End Select
+      do j=1,Spg%Multip
+        Om(:,:,j)=Spg%Op(j)%Mat
+      end do
       Write(*,"(a)") " Operators assigned"
       allocate(ptr(Spg%multip))
       ptr=0

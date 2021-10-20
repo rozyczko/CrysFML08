@@ -7,8 +7,8 @@
 
     implicit none
 
-    character(len=2), dimension(11) :: screw=(/"21","31","32","41","42","43","61","62","63","64","65"/)
-    character(len=1), dimension(11) :: rm_screw=(/"2","3","3","4","4","4","6","6","6","6","6"/)
+    character(len=2), dimension(11) :: screw=["21","31","32","41","42","43","61","62","63","64","65"]
+    character(len=1), dimension(11) :: rm_screw=["2","3","3","4","4","4","6","6","6","6","6"]
 
     contains
 
@@ -986,8 +986,8 @@
       character(len=20)                         :: spg_symb
       character(len=60),dimension(SpG%Multip)   :: op_symb
       logical,          dimension(SpG%Multip)   :: done
-      character(len=2), dimension(11)           :: screw=(/"21","31","32","41","42","43","61","62","63","64","65"/)
-      character(len=1), dimension(11)           :: rm_screw=(/"2","3","3","4","4","4","6","6","6","6","6"/)
+      character(len=2), dimension(11)           :: screw=["21","31","32","41","42","43","61","62","63","64","65"]
+      character(len=1), dimension(11)           :: rm_screw=["2","3","3","4","4","4","6","6","6","6","6"]
 
       point_op=0; done=.false.
       if(len_trim(SpG%SPG_Symb) == 0) then
