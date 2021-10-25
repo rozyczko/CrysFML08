@@ -510,6 +510,7 @@
       integer, dimension(3)                :: hkl
       real(kind=cp),    dimension(R%nref)  :: intav, sigmav, sigstat !,absorpt,lambda_laue, tbar,twotet
       integer,          dimension(3,R%nref):: hkls
+      real(kind=cp),    dimension(3,2)     :: kvv ! kvv(:,1)=k  kvv(:,2)=-k
       real(kind=cp),    dimension(4)       :: angles
       real(kind=cp),    dimension(3)       :: h1,h2,h3
       real(kind=cp),    dimension(256)     :: weight  ! A maximum of 256 reflections equivalent to one of them can be treated
@@ -519,7 +520,7 @@
       real    :: total, sig, suma, suman, sumaw, sumanw, Rint, Rwint, aver_sig, &
                  sigg, int_rej, delt, q2, aver_int !,wavel, epsg
       integer :: i,j,k, iou, iv, ns, rej, ival, nn, ihkl, irej,&  !lenf, ier,  nkv
-                 nin, ivp, nk, nequiv, L, drej, Lmin,i_refout
+                 nin, ivp, nk, nequiv, L, drej, Lmin,i_refout, ikv
       logical :: absent,twin_acc
 
       warn=0
@@ -604,18 +605,7 @@
                 absent=h_absent(nint(h1),SpG)    !Fundamental reflections
                 ivp=0
               else
-                do k=1, Gk%nk
-                  h3(:)=  h1-Gk%stark(:,k)
-                  if(Zbelong(h3)) then
-                    ivp=k
-                    if(Gk%k_equiv_minusk) then
-                      hkl(:) = int( h3 )
-                    else
-                      hkl(:) = nint( h3(:))
-                    end if
-                    exit
-                  end if
-                end do
+                call Get_Parent_ref_ik(Gk,h1,hkl,ivp)
               end if
             else         !No Propagation vector is given
               h1=nint(h1)
@@ -658,16 +648,7 @@
                if(cond%hkl_type == 7 .and. abs(R%Ref(i)%Lambda_laue-R%Ref(j)%Lambda_laue) > 0.1) cycle
                h2=R%Ref(j)%hr
                if(cond%prop) then
-                 iv=0
-                 hkl(:) = nint( h2 )
-                  do k=1, Gk%nk
-                    h3(:)=  h2-Gk%stark(:,k)
-                    if(Zbelong(h3)) then
-                     iv=k
-                     hkl(:) = nint( h3(:))
-                     exit
-                    end if
-                  end do
+                 call Get_Parent_ref_ik(Gk,h2,hkl,iv)
                  if(iv /= ivp) cycle
 
                  if(iv == 0) then
@@ -855,12 +836,12 @@
           if(cond%domain) then
              if(.not. Gk%k_equiv_minusk) then
                nk= 2
-               h1= Gk%stark(:,1)
-               h2=-Gk%stark(:,1)
+               kvv(:,1)= Gk%stark(:,1)
+               kvv(:,2)=-Gk%stark(:,1)
                if(cond%hkl_type /= 7) then
                  write(unit=ihkl,fmt="(i6,a)") nk, "  ! Number of Propagation vectors (Domain averaged: only k,-k)"
-                 write(unit=ihkl,fmt="(i4,3f10.4)") 1, h1
-                 write(unit=ihkl,fmt="(i4,3f10.4)") 2, h2
+                 write(unit=ihkl,fmt="(i4,3f10.4)") 1, kvv(:,1)
+                 write(unit=ihkl,fmt="(i4,3f10.4)") 2, kvv(:,2)
                end if
                nk=Gk%nk/2
              else
@@ -871,47 +852,53 @@
              end if
 
 
-             do i=1,nin
-               if(ivk(i) > nk) then  !belongs to -k (this not happens if k eqv -k)
-                 ivk(i)=2
-               else if(ivk(i) > 0) then   !belongs to  k
-                 ivk(i)=1
-               end if
-             end do
+             write(unit=iou,fmt="(/,/,a)") " TRANSFORMATION OF INDICES DUE TO DOMAIN INTRUCTION"
+             write(unit=iou,fmt="(a,/)")   " =================================================="
+             write(unit=iou,fmt="(a)") &
+             "           Original indices  Transformed indices"
+             write(unit=iou,fmt="(a)") &
+             "            ho  ko  lo  ivo       h   k   k   iv     Intensity        Sigma       TwoTheta"
 
              itreat(:) = 0
              ival=0
              do i=1,nin
-              k=ini(i)
-              if(itreat(i) == 0) then
-               ns = 1
-               suma = intav(i)
-               sig  = sigmav(i)
-               suman=0.0
-                do j=i+1,nin
-                    if(abs(R%Ref(k)%s-R%Ref(ini(j))%s) > 0.0002) exit
-                    if( any(hkls(:,i) /= hkls(:,j)) ) cycle
-                    if( ivk(i) /= ivk(j) ) cycle
-                    ns=ns+1
-                    suman=suman + abs(intav(i)-intav(j))
-                    suma=suma + intav(j)
-                    sig = sig + sigmav(j)
-                    itreat(j)=j
-                end do
-                itreat(i)=i
-                suma=real(nk)*suma/real(ns)
-                suman=real(nk)*suman/real(ns)
-                suman=100.0*suman/suma
-                sig=real(nk)*sig/real(ns)
-                ival=ival+1
-                if(cond%hkl_type /= 7) then
-                  write(unit=ihkl,fmt="(3i4,i5,2f14.4,i5,4f8.2,a,f8.2,i5,a)")    &
-                  hkls(:,i),ivk(i), suma, sig,1, R%Ref(k)%twtheta, R%Ref(k)%omega, R%Ref(k)%chi, R%Ref(k)%phi,"     ", suman, ns,trim(warn_mess(warn(k)))
-                else
-                  write(unit=ihkl,fmt=cond%forma)    &
-                  hkls(:,i),ivk(i), suma, sig,R%Ref(k)%icod, R%Ref(k)%Lambda_Laue, R%Ref(k)%twtheta,R%Ref(k)%absorpt,R%Ref(k)%tbar,trim(warn_mess(warn(k)))
-                end if
-              end if !itreat
+                k=ini(i)
+                if(itreat(i) == 0) then
+                   ns = 1
+                   suma = intav(i)
+                   sig  = sigmav(i)
+                   !Transform the indices
+                   hkl=hkls(:,i)
+                   ikv=ivk(i)
+                   call Get_Refequiv_kmk(Gk,hkl,ikv,hkls(:,i),ivk(i))
+                   h1=hkls(:,i)+ kvv(:,ivk(i))
+                   suman=0.0
+                   do j=i+1,nin
+                      if(abs(R%Ref(k)%s-R%Ref(ini(j))%s) > 0.0002) exit
+                      h2= hkls(:,j) + Gk%stark(:,ivk(j))
+                      if(Hk_Equiv(h1,h2,Gk,.true.)) then
+                         ns=ns+1
+                         suman=suman + abs(intav(i)-intav(j))
+                         suma=suma + intav(j)
+                         sig = sig + sigmav(j)
+                         itreat(j)=j
+                      end if
+                   end do
+                   itreat(i)=i
+                   suma=real(nk)*suma/real(ns)
+                   suman=real(nk)*suman/real(ns)
+                   suman=100.0*suman/suma
+                   sig=real(nk)*sig/real(ns)
+                   ival=ival+1
+                   write(unit=iou,fmt="(i6,tr4,3i4,i5,a,3i4,i5,3f14.4)") i,hkl,ikv," -> ",hkls(:,i), ivk(i), suma,sig, R%Ref(k)%twtheta
+                   if(cond%hkl_type /= 7) then
+                     write(unit=ihkl,fmt="(3i4,i5,2f14.4,i5,4f8.2,a,f8.2,i5,a)")    &
+                     hkls(:,i),ivk(i), suma, sig,1, R%Ref(k)%twtheta, R%Ref(k)%omega, R%Ref(k)%chi, R%Ref(k)%phi,"     ", suman, ns,trim(warn_mess(warn(k)))
+                   else
+                     write(unit=ihkl,fmt=cond%forma)    &
+                     hkls(:,i),ivk(i), suma, sig,R%Ref(k)%icod, R%Ref(k)%Lambda_Laue, R%Ref(k)%twtheta,R%Ref(k)%absorpt,R%Ref(k)%tbar,trim(warn_mess(warn(k)))
+                   end if
+                end if !itreat
              end do
              write(unit=*,fmt="(a,i6)") " => Number of domain-averaged reflections    : ",ival
 
@@ -1060,5 +1047,62 @@
       close(unit=irej)
 
     End Subroutine Treat_Reflections_Conv
+
+    Subroutine Get_Refequiv_kmk(Gkv,h,iv,ek,ik)
+      Type (Group_k_Type),       intent(in) :: Gkv
+      integer, dimension(3),     intent(in) :: h    !Measured parent reflection corresponding to a given k-arm (iv)
+      integer,                   intent(in) :: iv
+      integer, dimension(3),    intent(out) :: ek   !Equivalent parent reflection corresponding to k1 (ik=1) or -k1(ik=2)
+      integer,                  intent(out) :: ik
+      integer ::i,imk
+      real, dimension(3) :: hiv, ht
+
+      imk = Gkv%nk/2 + 1
+      if(iv == 1) then
+        ek = h
+        ik = 1
+        return
+      else if ( iv == imk) then
+        ek = h
+        ik = 2
+        return
+      end if
+      hiv=h+Gkv%stark(:,iv)
+      do i=2, Gkv%G0%multip
+         ht=matmul(hiv,real(Gkv%g0%Op(i)%Mat(1:3,1:3)))
+         call Get_Parent_ref_ik(Gkv,ht,ek,ik)
+         if(ik == 1) then
+            return
+         else if (ik == imk) then
+            ik=2
+            return
+         else
+            cycle
+         end if
+      end do
+    End Subroutine Get_Refequiv_kmk
+
+    Subroutine Get_Parent_ref_ik(Gkv,h,hkl,ik)
+      Type (Group_k_Type),       intent(in) :: Gkv
+      real,    dimension(3),     intent(in) :: h     !Real reflection satellite
+      integer, dimension(3),    intent(out) :: hkl   !Parent reflection
+      integer,                  intent(out) :: ik    !Index of the propagation vector arm
+
+      real, dimension(3):: ht
+      integer ::k
+
+      do k=1, Gkv%nk
+        ht=  h-Gkv%stark(:,k)
+        if(Zbelong(ht)) then
+          ik=k
+          if(Gkv%k_equiv_minusk) then
+            hkl(:) = int(ht)
+          else
+            hkl(:) = nint(ht(:))
+          end if
+          exit
+        end if
+      end do
+    End Subroutine Get_Parent_ref_ik
 
   End Module DataRed_Treat_Reflections_Mod

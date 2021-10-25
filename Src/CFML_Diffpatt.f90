@@ -33,7 +33,7 @@
 !!---- License along with this library; if not, see <http://www.gnu.org/licenses/>.
 !!----
 !!----
-!!---- MODULE: CFML_Diffraction_Patterns
+!!---- MODULE: CFML_DiffPatt
 !!----   INFO: Diffraction Patterns Information
 !!----
 !!

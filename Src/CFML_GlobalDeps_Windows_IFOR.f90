@@ -17,6 +17,7 @@
 !!----    Javier Gonzalez-Platas  (ULL)
 !!----
 !!---- Contributors:
+!!----    Nebil A. Katcho    (ILL)
 !!----    Laurent Chapon     (ILL)
 !!----    Marc Janoschek     (Los Alamos National Laboratory, USA)
 !!----    Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
@@ -41,7 +42,7 @@
 !!---- MODULE: CFML_GlobalDeps (Windows version)
 !!----   INFO:Precision for CrysFML library and Operating System information
 !!----        All the global variables defined in this module are implicitly
-!!----       public.
+!!----        public.
 !!
 Module CFML_GlobalDeps
    !---- Variables ----!

@@ -1,5 +1,5 @@
  Module Cw_Diffraction_Pv
-
+   use CFML_GlobalDeps, only: cp
    use CFML_Optimization_LSQ, only: Max_Free_par, LSQ_State_Vector_type, LSQ_Conditions_type, LSQ_Data_Type
    Use CFML_Profiles, only: init_prof_val, prof_val
    implicit none
@@ -9,24 +9,24 @@
    public:: Sum_PV_peaks, set_nampar,CWL_sub_profile, powder_patt_der, powder_patt_nder
 
    !Global public variables
-   integer,public, parameter         :: nbac=100    !maximum number of background parameters
-   integer,public, parameter         :: ngl =9      !maximum number of global parameters
-   integer,public, parameter         :: npeaks=(Max_Free_par-(nbac+ngl))/4
-   integer,public, parameter         :: npe_sub=15
-   real,public,    parameter         :: rad=57.29577951
-   real,private,   dimension(npeaks) :: Intens,ri2,dt2,t2
-   real,public ,   dimension(npeaks) :: fwhm1,fwhm2,eta1,eta2
-   real,public ,   dimension(npeaks) :: der_u,der_v,der_w,der_z,der_x
-   real,public ,   dimension(npeaks) :: der_u2,der_v2,der_w2,der_z2,der_x2
-   real,public,    dimension(nbac)   :: bac_pos
-   integer,public                    :: inter,itype,jobtyp,icont,npeakx
-   integer,public                    :: n_ba     ! number of points to define the background
-   real,public                       :: rla1,rla2,rla,ratio
-   character (len=132),public        :: title
-   character (len=80),public         :: filecode,filedat !codes of input data files
-   real,public                       :: hg, hl, h, eta
-   integer, private                  :: jstart
-   logical, public                   :: use_asymm=.false., use_hps=.false.
+   integer,      public, parameter         :: nbac=100    !maximum number of background parameters
+   integer,      public, parameter         :: ngl =9      !maximum number of global parameters
+   integer,      public, parameter         :: npeaks=(Max_Free_par-(nbac+ngl))/4
+   integer,      public, parameter         :: npe_sub=15
+   real(kind=cp),public, parameter         :: rad=57.29577951
+   real(kind=cp),private,dimension(npeaks) :: Intens,ri2,dt2,t2
+   real(kind=cp),public ,dimension(npeaks) :: fwhm1,fwhm2,eta1,eta2
+   real(kind=cp),public ,dimension(npeaks) :: der_u,der_v,der_w,der_z,der_x
+   real(kind=cp),public ,dimension(npeaks) :: der_u2,der_v2,der_w2,der_z2,der_x2
+   real(kind=cp),public, dimension(nbac)   :: bac_pos
+   integer,public                          :: inter,itype,jobtyp,icont,npeakx
+   integer,public                          :: n_ba     ! number of points to define the background
+   real(kind=cp),public                    :: rla1,rla2,rla,ratio
+   character (len=132),public              :: title
+   character (len=80),public               :: filecode,filedat !codes of input data files
+   real(kind=cp),public                    :: hg, hl, h, eta
+   integer, private                        :: jstart
+   logical, public                         :: use_asymm=.false., use_hps=.false.
 
 
    Type(LSQ_State_Vector_type),    public :: vs  !State vector containing pv, code, vs%nampar,etc..
@@ -36,69 +36,67 @@
   contains
 
    subroutine powder_patt_der(m,n,x,fvec,fjac,iflag)
-    Use CFML_GlobalDeps, Only: cp
-    Integer,                       Intent(In)    :: m, n
-    Real (Kind=cp),Dimension(:),   Intent(In)    :: x
-    Real (Kind=cp),Dimension(:),   Intent(In Out):: fvec
-    Real (Kind=cp),Dimension(:,:), Intent(Out)   :: fjac
-    Integer,                       Intent(In Out):: iflag
+     Integer,                      Intent(In)    :: m, n
+     Real(Kind=cp),Dimension(:),   Intent(In)    :: x
+     Real(Kind=cp),Dimension(:),   Intent(In Out):: fvec
+     Real(Kind=cp),Dimension(:,:), Intent(Out)   :: fjac
+     Integer,                      Intent(In Out):: iflag
 
-    !Local variables
-    integer                     :: i,j,no
-    real                        :: xval,yval,chi,chiold=1.0e30
-    type(LSQ_State_Vector_type) :: lvs
-    Real (Kind=cp),Dimension(n) :: der
-    lvs=vs                 !Set the local state vector
-    no=0
-    do i=1,lvs%np
-      if(lvs%code(i) == 0) cycle
-      no=no+1
-      lvs%pv(i)=x(no)      !Update the state vector with the input free parameters
-    end do
+     !Local variables
+     integer                     :: i,j,no
+     real(kind=cp)               :: xval,yval,chi,chiold=1.0e30
+     type(LSQ_State_Vector_type) :: lvs
+     Real(Kind=cp),Dimension(n)  :: der
+     lvs=vs                 !Set the local state vector
+     no=0
+     do i=1,lvs%np
+       if(lvs%code(i) == 0) cycle
+       no=no+1
+       lvs%pv(i)=x(no)      !Update the state vector with the input free parameters
+     end do
 
-    Select Case (iflag)
+     Select Case (iflag)
 
-       case(1)
-         chi=0.0
-         do i=1,m
-           call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs)
-           fvec(i)= (d%y(i)-d%yc(i))/d%sw(i)
-           chi=chi+fvec(i)*fvec(i)
-         end do
-         chi=chi/real(m-n)
-         if(chi <= chiold) then
-           c%nfev=c%nfev+1
-           !write(unit=*,fmt="(a,i6,a,F14.6)") " => Iteration number: ",c%nfev, "      Chi2=",chi
-           chiold=chi
-         end if
+        case(1)
+          chi=0.0
+          do i=1,m
+            call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs)
+            fvec(i)= (d%y(i)-d%yc(i))/d%sw(i)
+            chi=chi+fvec(i)*fvec(i)
+          end do
+          chi=chi/real(m-n)
+          if(chi <= chiold) then
+            c%nfev=c%nfev+1
+            !write(unit=*,fmt="(a,i6,a,F14.6)") " => Iteration number: ",c%nfev, "      Chi2=",chi
+            chiold=chi
+          end if
 
-       case(2)
+        case(2)
 
-         do i=1,m
-           call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs,.true.)
-           no=0
-           do j=1,lvs%np
-              if(lvs%code(j) == 0) cycle
-              no=no+1
-              der(no)=lvs%dpv(j)       !Update the state vector with the input free parameters
-           end do
-           fjac(i,1:n)= der(1:n) * (-1.0/d%sw(i))
-         end do
-         c%njev=c%njev+1
-    End Select
+          do i=1,m
+            call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs,.true.)
+            no=0
+            do j=1,lvs%np
+               if(lvs%code(j) == 0) cycle
+               no=no+1
+               der(no)=lvs%dpv(j)       !Update the state vector with the input free parameters
+            end do
+            fjac(i,1:n)= der(1:n) * (-1.0/d%sw(i))
+          end do
+          c%njev=c%njev+1
+     End Select
 
    End subroutine powder_patt_der
 
    subroutine powder_patt_nder(m,n,x,fvec,iflag)
-     Use CFML_GlobalDeps, Only: cp
-     Integer,                       Intent(In)    :: m, n
-     Real (Kind=cp),Dimension(:),   Intent(In)    :: x
-     Real (Kind=cp),Dimension(:),   Intent(In Out):: fvec
-     Integer,                       Intent(In Out):: iflag
+     Integer,                   Intent(In)    :: m, n
+     Real(Kind=cp),Dimension(:),Intent(In)    :: x
+     Real(Kind=cp),Dimension(:),Intent(In Out):: fvec
+     Integer,                   Intent(In Out):: iflag
 
      !Local variables
      integer                     :: i,j,no
-     real                        :: xval,yval
+     real(kind=cp)                        :: xval,yval
      type(LSQ_State_Vector_type) :: lvs
 
      lvs=vs                 !Set the local state vector
@@ -147,7 +145,7 @@
        do i=1,npeak
          write(unit=vs%nampar(j),  fmt="(a,i1)")   "Bragg_Pos_",i
          write(unit=vs%nampar(j+1),fmt="(a,i1)")   "Intensity_",i
-         write(unit=vs%nampar(j+2),fmt="(a,i1)")   "Shf_Gamma_",i
+         write(unit=vs%nampar(j+2),fmt="(a,i1)")   "Shf_FWHM_",i
          write(unit=vs%nampar(j+3),fmt="(a,i1)")   "Shf_EtaPV_",i
         j=j+4
        end do
@@ -162,7 +160,7 @@
        do i=10,npeak
          write(unit=vs%nampar(j),  fmt="(a,i2)")   "Bragg_Pos_",i
          write(unit=vs%nampar(j+1),fmt="(a,i2)")   "Intensity_",i
-         write(unit=vs%nampar(j+2),fmt="(a,i2)")   "Shf_Gamma_",i
+         write(unit=vs%nampar(j+2),fmt="(a,i2)")   "Shf_FWHM_",i
          write(unit=vs%nampar(j+3),fmt="(a,i2)")   "Shf_EtaPV_",i
         j=j+4
        end do
@@ -190,17 +188,17 @@
    Subroutine Sum_PV_Peaks(I,Xval,Ycalc,Vsa,CalDer)
       !---- Arguments ----!
       integer,                    intent(in)    :: i
-      real,                       intent(in)    :: xval
-      real,                       intent(out)   :: ycalc
+      real(kind=cp),              intent(in)    :: xval
+      real(kind=cp),              intent(out)   :: ycalc
       Type(LSQ_State_Vector_type),intent(in out):: Vsa
       logical,optional,           intent(in)    :: calder
 
       !---Local variables ---!
       integer                        :: ncount,j,npea,l,ib,ib1,ib2,i1,i2
-      real                           :: tet,spv,s2der,asder1,asder2,etader,tth,tang,bgr, &
+      real(kind=cp)                  :: tet,spv,s2der,asder1,asder2,etader,tth,tang,bgr, &
                                         dprdt,dprdg,dprde,dprds,dprdd,profil, ss1,v1,  &
                                         ss2,v2,del1,del2,gamma1,gamma2,tn,tn2,tet2
-      real                           :: uder,vder,wder,zder,xder
+      real(kind=cp)                  :: uder,vder,wder,zder,xder
 
       v2 = 0
 
@@ -212,6 +210,7 @@
 
          DO j=jstart,vsa%np,4
             npea=npea+1
+            if(Vsa%Pv(j+1) < 0.0) Vsa%Pv(j+1)=0.1
             Intens(npea)=Vsa%Pv(j+1)*ratio
             tet=Vsa%Pv(j)/2.0/rad
             tn=tan(tet)
@@ -377,15 +376,15 @@
    ! Calculation of individual peak profiles
 
    Subroutine Cwl_Sub_Profile(Vsa,d,npks,ysub)
-     Type(LSQ_State_Vector_type),intent(in)     :: Vsa
-     Type(LSQ_Data_type),        intent(in)     :: d
-     integer,                    intent(in)     :: npks
-     real,dimension(d%nobs,npks),intent(out)    :: ysub
+     Type(LSQ_State_Vector_type),         intent(in)     :: Vsa
+     Type(LSQ_Data_type),                 intent(in)     :: d
+     integer,                             intent(in)     :: npks
+     real(kind=cp),dimension(d%nobs,npks),intent(out)    :: ysub
      !
-     integer                                    :: i,j,l,jstart,i1,i2,ib,ib1,ib2
-     real                                       :: spv,tth,tang,bgr, &
-                                                   ss1,v1,dprdt,dprdg,dprde,dprds,dprdd,profil,  &
-                                                   ss2,v2,del1,del2,gamma1,gamma2
+     integer       :: i,j,l,jstart,i1,i2,ib,ib1,ib2
+     real(kind=cp) :: spv,tth,tang,bgr, &
+                      ss1,v1,dprdt,dprdg,dprde,dprds,dprdd,profil,  &
+                      ss2,v2,del1,del2,gamma1,gamma2
 
      ratio=1.0/(1.0+Vsa%Pv(1))
      jstart=ngl+n_ba+1

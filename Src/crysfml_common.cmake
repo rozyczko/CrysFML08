@@ -200,6 +200,16 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_BckPeaks
+set(BCKPEAKS_SRC CFML_BckPeaks.f90)
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${BCKPEAKS_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${BCKPEAKS_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 # CFML_ExtintCorr
 file(GLOB SUBMOD_EXTINCORR_SRC CFML_ExtinCorr/*.f90)
 set(EXTINCORR_SRC CFML_ExtinCorr.f90
@@ -248,8 +258,8 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
-# CFML_Propagk
-set(PROPAGK_SRC CFML_Propagk.f90)
+# CFML_Propagation_vectors
+set(PROPAGK_SRC CFML_Propagation_vectors.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PROPAGK_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
@@ -388,6 +398,7 @@ set(CRYSFML_COMMON_SRC
     ${PROFILES_1_SRC}
     ${PROFILES_2_SRC}
     ${DIFFPATT_SRC}
+    ${BCKPEAKS_SRC}
     ${EXTINCORR_SRC}
     ${EOS_SRC}
     ${ATOMS_SRC}

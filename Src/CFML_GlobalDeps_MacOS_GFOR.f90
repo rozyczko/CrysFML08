@@ -17,6 +17,7 @@
 !!----    Javier Gonzalez-Platas  (ULL)
 !!----
 !!---- Contributors:
+!!----    Nebil A. Katcho    (ILL)
 !!----    Laurent Chapon     (ILL)
 !!----    Marc Janoschek     (Los Alamos National Laboratory, USA)
 !!----    Oksana Zaharko     (Paul Scherrer Institute, Switzerland)

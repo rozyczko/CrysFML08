@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Equivalence
+SubModule (CFML_Reflections) RFL_H_Equiv
    implicit none
    Contains
    !!----
@@ -50,4 +50,4 @@ SubModule (CFML_Reflections) RFL_Equivalence
       end do
    End Function H_Equiv
 
-End SubModule RFL_Equivalence
+End SubModule RFL_H_Equiv

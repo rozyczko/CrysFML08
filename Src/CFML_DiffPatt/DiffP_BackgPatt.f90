@@ -38,7 +38,7 @@ Submodule (CFML_DiffPatt) Bckg_Patt
        call clear_error()
        if (pat%npts <= 1) then
           err_CFML%Ierr=1
-          err_CFML%Msg="Calc_BackGround@DIFFPAT: There aren't points in the Pattern used for Background calculation!"
+          err_CFML%Msg="Calc_BackGround@DIFFPAT: There's no points in the Pattern used for Background calculation!"
           return
        end if
 
@@ -56,7 +56,7 @@ Submodule (CFML_DiffPatt) Bckg_Patt
        end do
        if (nt < 1) then
           err_CFML%Ierr=1
-          err_CFML%Msg="Calc_BackGround@DIFFPAT: There aren't background points into the range"
+          err_CFML%Msg="Calc_BackGround@DIFFPAT: There's no background points into the range"
           return
        end if
 
