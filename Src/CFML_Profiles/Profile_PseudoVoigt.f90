@@ -9,12 +9,12 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
     !!----
     !!---- FUNCTION PSEUDOVOIGT
     !!----
-    !!----
+    !!----  Par=[H,eta]
     !!---- Update: October - 2005
     !!
     Pure Module Function Pseudovoigt(X,Par) Result (Pv_Val)
        !---- Arguments ----!
-       real(kind=cp),              intent(in) :: x
+       real(kind=cp),              intent(in) :: x !x=T-T0
        real(kind=cp), dimension(:),intent(in) :: par
        real(kind=cp)                          :: pv_val
 
@@ -37,14 +37,15 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
     !!----
     !!---- SUBROUTINE PSEUDOVOIGT_DER
     !!----
-    !!----  Pv_Val is the value of the function for the argument x
-    !!----  Par=(/H,eta/)  and Dpar(1:3)=(/derx,derH,derEta/)
+    !!---- Compact calculation of the pseudo-Voigt function and drivatives.
+    !!---- Pv_Val is the value of the function for the argument x=T-T0
+    !!----  Par=[H,eta]  and Dpar(1:3)=[derx,derH,derEta], derx is the derivative w.r.t. T0
     !!----
-    !!---- Update: October - 2005
+    !!---- Update: October - 2021
     !!
     Pure Module Subroutine Pseudovoigt_Der(X,Par,Pv_Val,Dpar)
        !---- Arguments ----!
-       real(kind=cp),                       intent(in) :: x
+       real(kind=cp),                       intent(in) :: x  ! x=T-T0
        real(kind=cp), dimension(:),         intent(in) :: par
        real(kind=cp),                       intent(out):: pv_val
        real(kind=cp), optional,dimension(:),intent(out):: dpar
@@ -67,24 +68,14 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
        pv_val = eta*lor + (1.0_cp - eta)*gauss
 
        if (present(dpar)) then
-          derEta= lor-gauss  !Eta
-
-          lorp = -2.0_cp *lor*lor*bl*x/al  !x
-          gaussp = -2.0_cp * gauss * bg * x  !x
-          derx=eta*lorp+(1.0_cp-eta)*gaussp  !x
-
-          !dalH= -al*invH
-          !dblH= -2.0*bl*invH
-          !dlorH= lor/al *dalH - lor*lor/al *x2 * dblH
+          derEta= lor-gauss                  !Eta
+          lorp =  2.0_cp *lor*lor*bl*x/al    !dL/dT0 = -L'(x)  !The sign is changed because it is d/dT0 and not d/dx
+          gaussp =  2.0_cp * gauss * bg * x  !dG/dT0 = -G'(x)
+          derx=eta*lorp+(1.0_cp-eta)*gaussp  !dPV/dT0
           dlorH= (2.0_cp*bl*lor*x2/al -1.0_cp)*invH*lor
-
-          !dagH=-ag*invH
-          !dbgH=-2.0*bg*invH
-          !dgaussH= dagH*gauss/ag - gauss * x2*dbgH = -invH*gauss+2.0*bg*invH*gauss*x2
           dgaussH= (2.0_cp*bg*x2-1.0_cp)*invH*gauss
-
           derH=eta*dlorH + (1.0_cp-eta) * dgaussH
-          dpar(1:3)=(/derx,derH,derEta/)
+          dpar(1:3)=[derx,derH,derEta]
        end if
 
     End Subroutine Pseudovoigt_Der
@@ -165,6 +156,7 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
     !!----
     !!---- FUNCTION SPLIT_PSEUDOVOIGT
     !!----
+    !!---- Par=[H1,H2,eta1,eta2]
     !!----
     !!---- Update: October - 2005
     !!
@@ -202,11 +194,13 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
     !!----
     !!---- SUBROUTINE SPLIT_PSEUDOVOIGT_DER
     !!----
-    !!---- Update: October - 2005
+    !!---- Par=[H1,H2,eta1,eta2]
+    !!---- DPar=[derx,derH1,derH2,derEta1,derEta2]
+    !!---- Update: October - 2021
     !!
     Pure Module Subroutine Split_Pseudovoigt_Der(X,Par,Pv_Val,Dpar)
        !---- Arguments ----!
-       real(kind=cp),                       intent(in) :: x
+       real(kind=cp),                       intent(in) :: x  !x=T-T0, derx is derivative w.r.t. T0
        real(kind=cp), dimension(:),         intent(in) :: par
        real(kind=cp),                       intent(out):: pv_val
        real(kind=cp), optional,dimension(:),intent(out):: dpar
@@ -240,19 +234,12 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
 
        if (present(dpar)) then
 
-            lorp = -2.0_cp *lor*lor*bl*x     !x
-          gaussp = -2.0_cp * gauss * bg * x  !x
+            lorp = 2.0_cp *lor*lor*bl*x     !x=T-T0 derivative w.r.t. T0 (change of sign)
+          gaussp = 2.0_cp * gauss * bg * x  !x
           derx=(eta*lorp+(1.0_cp-eta)*gaussp)/Norm  !x
           !
-          !dblH= -2.0*bl*invH
-          !dlorH=  - lor*lor *x2 * dblH = lor*lor *x2 * 2.0*bl*invH
           dlorH= 2.0_cp*bl*x2*invH*lor*lor
-
-          !
-          !dbgH=-2.0*bg*invH
-          !dgaussH= - gauss * x2*dbgH = 2.0*bg*invH*gauss*x2
           dgaussH= 2.0_cp*bg*x2*invH*gauss
-
           Numer  = eta*dlorH + (1.0_cp-eta) * dgaussH
 
           if (x < 0.0_cp) then
@@ -287,7 +274,7 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
 
           end if
 
-          dpar(1:5)=(/derx,derH1,derH2,derEta1,derEta2/)
+          dpar(1:5)=[derx,derH1,derH2,derEta1,derEta2]
 
        end if
 

@@ -421,7 +421,7 @@
     !!----     real(kind=cp),     dimension(Max_Free_Par) :: pv         !Vector of parameters
     !!----     real(kind=cp),     dimension(Max_Free_Par) :: spv        !Vector of standard deviations
     !!----     real(kind=cp),     dimension(Max_Free_Par) :: dpv        !Vector of derivatives at a particular point
-    !!----     integer(kind=2),   dimension(Max_Free_Par) :: code       !pointer for selecting variable parameters
+    !!----     integer(kind=4),   dimension(Max_Free_Par) :: code       !pointer for selecting variable parameters
     !!----     character(len=40), dimension(Max_Free_Par) :: nampar     !Names of parameters
     !!----  End Type LSQ_State_Vector_Type
     !!----
@@ -442,7 +442,7 @@
        real(kind=cp),     dimension(Max_Free_Par) :: pv         !Vector of parameters
        real(kind=cp),     dimension(Max_Free_Par) :: spv        !Vector of standard deviations
        real(kind=cp),     dimension(Max_Free_Par) :: dpv        !Vector of derivatives at a particular point
-       integer(kind=2),   dimension(Max_Free_Par) :: code       !pointer for selecting variable parameters
+       integer(kind=4),   dimension(Max_Free_Par) :: code       !pointer for selecting variable parameters
        character(len=40), dimension(Max_Free_Par) :: nampar     !Names of parameters
     End Type LSQ_State_Vector_type
 

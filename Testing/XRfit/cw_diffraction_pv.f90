@@ -6,7 +6,7 @@
    private
 
    !Public subroutines
-   public:: Sum_PV_peaks, set_nampar,CWL_sub_profile, powder_patt_der, powder_patt_nder
+   public:: Sum_PV_peaks, set_nampar,CWL_sub_profile, powder_patt_der, powder_patt_nder, powder_patt_odr
 
    !Global public variables
    integer,      public, parameter         :: nbac=100    !maximum number of background parameters
@@ -18,13 +18,13 @@
    real(kind=cp),public ,dimension(npeaks) :: fwhm1,fwhm2,eta1,eta2
    real(kind=cp),public ,dimension(npeaks) :: der_u,der_v,der_w,der_z,der_x
    real(kind=cp),public ,dimension(npeaks) :: der_u2,der_v2,der_w2,der_z2,der_x2
-   real(kind=cp),public, dimension(nbac)   :: bac_pos
+   real(kind=cp),public, dimension(nbac)   :: bac_pos,bac_int
    integer,public                          :: inter,itype,jobtyp,icont,npeakx
    integer,public                          :: n_ba     ! number of points to define the background
    real(kind=cp),public                    :: rla1,rla2,rla,ratio
    character (len=132),public              :: title
    character (len=80),public               :: filecode,filedat !codes of input data files
-   real(kind=cp),public                    :: hg, hl, h, eta
+   real(kind=cp),public                    :: hg, hl, h, eta, chi2, chiold=1.0e30
    integer, private                        :: jstart
    logical, public                         :: use_asymm=.false., use_hps=.false.
 
@@ -33,7 +33,74 @@
    Type(LSQ_Conditions_type ),save,public :: c   !conditions of the algorithm
    Type(LSQ_Data_Type),            public :: d   !Data to be refined (set in the main program)
 
+
+
+
   contains
+
+
+   subroutine powder_patt_odr(n,m,np,nq,ldn,ldm,ldnp,beta,xplusd,ifixb,  &
+                              ifixx,ldifx,ideval,f,fjacb,fjacd,istop)
+     Integer,                              Intent(In)    :: n       !Number of observations
+     Integer,                              Intent(In)    :: m       !Number of colums of array X+D (n,m)
+     Integer,                              Intent(In)    :: np      !Number of function parameters
+     Integer,                              Intent(In)    :: nq      !Number of responses per observation
+     Integer,                              Intent(In)    :: ldn     !Leading dimension >= n
+     Integer,                              Intent(In)    :: ldm     !Leading dimension >= m
+     Integer,                              Intent(In)    :: ldnp    !Leading dimension >= np
+     Real(Kind=cp),Dimension(np),          Intent(In)    :: beta    !Current values of parameters
+     Real(Kind=cp),Dimension(ldn,m),       Intent(In)    :: xplusd  !Current Values of the explanatory variables X+D
+     Integer,      Dimension(np),          Intent(In)    :: ifixb   !0 fixed, 1 varied
+     Integer,                              Intent(In)    :: ldifx   !leading dimension of array ifixx
+     Integer,      Dimension(ldifx,m),     Intent(In)    :: ifixx   !=0
+     Integer,                              Intent(In)    :: ideval
+     Real(Kind=cp),Dimension(ldn,nq),      Intent(In Out):: f
+     Real(Kind=cp),Dimension(ldn,ldnp,nq), Intent(Out)   :: fjacb
+     Real(Kind=cp),Dimension(ldn,ldm,nq),  Intent(Out)   :: fjacd
+     Integer,                              Intent(In Out):: istop
+
+     !Local variables
+     integer                     :: i,j,no
+     real(kind=cp)               :: xval,yval,resid
+     type(LSQ_State_Vector_type) :: lvs
+     Real(Kind=cp),Dimension(np) :: der
+
+
+
+     fjacd=0.0
+     lvs=vs                   !Set the local state vector
+     do i=1,lvs%np
+       if(ifixb(i) == 0) cycle
+       lvs%pv(i)=beta(i)      !Update the state vector with the input free parameters
+     end do
+
+     if(mod(ideval,10) >= 1) then
+          chi2=0.0
+          do i=1,n
+            call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs)
+            f(i,1)= d%yc(i)
+            resid= (d%y(i)-d%yc(i))/d%sw(i)
+            chi2=chi2+resid*resid
+          end do
+          chi2=chi2/real(n-np)
+          if(chi2 <= chiold) then
+            c%nfev=c%nfev+1
+            chiold=chi2
+          end if
+     end if
+
+     if(mod(ideval/10,10) >= 1) then
+          do i=1,n
+            call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs,.true.)
+            no=0
+            do j=1,lvs%np
+               fjacb(i,j,1)=lvs%dpv(j)
+            end do
+          end do
+          c%njev=c%njev+1
+     end if
+
+   End subroutine powder_patt_odr
 
    subroutine powder_patt_der(m,n,x,fvec,fjac,iflag)
      Integer,                      Intent(In)    :: m, n
@@ -44,10 +111,10 @@
 
      !Local variables
      integer                     :: i,j,no
-     real(kind=cp)               :: xval,yval,chi,chiold=1.0e30
+     real(kind=cp)               :: xval,yval
      type(LSQ_State_Vector_type) :: lvs
      Real(Kind=cp),Dimension(n)  :: der
-     lvs=vs                 !Set the local state vector
+     lvs=vs                 !Set Final value of Marquardt F-Lambdathe local state vector
      no=0
      do i=1,lvs%np
        if(lvs%code(i) == 0) cycle
@@ -58,17 +125,17 @@
      Select Case (iflag)
 
         case(1)
-          chi=0.0
+          chi2=0.0
           do i=1,m
             call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs)
             fvec(i)= (d%y(i)-d%yc(i))/d%sw(i)
-            chi=chi+fvec(i)*fvec(i)
+            chi2=chi2+fvec(i)*fvec(i)
           end do
-          chi=chi/real(m-n)
-          if(chi <= chiold) then
+          chi2=chi2/real(m-n)
+          if(chi2 <= chiold) then
             c%nfev=c%nfev+1
-            !write(unit=*,fmt="(a,i6,a,F14.6)") " => Iteration number: ",c%nfev, "      Chi2=",chi
-            chiold=chi
+            !write(unit=*,fmt="(a,i6,a,F14.6)") " => Iteration number: ",c%nfev, "      Chi2=",chi2
+            chiold=chi2
           end if
 
         case(2)
@@ -202,7 +269,7 @@
 
       v2 = 0
 
-      IF (i == 1) then    !Making intermediate calculations that are not depending on the
+     IF (i == 1) then    !Making intermediate calculations that are not depending on the
                           !particular observation. This is the reason why only for i=1
          npea=0
          ratio=1.0/(1.0+Vsa%Pv(1))
@@ -288,7 +355,11 @@
            exit
         end if
      end do
-     tang=(tth-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+     if(abs(bac_pos(i2)-bac_pos(i1)) < 0.01) then
+        tang=0.0
+     else
+        tang=(tth-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+     end if
      bgr=Vsa%pv(ib1)+(Vsa%pv(ib2)-Vsa%pv(ib1))*tang
      l=0
 
@@ -408,8 +479,14 @@
             exit
            end if
          end do
-         tang=(tth-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+         if(abs(bac_pos(i2)-bac_pos(i1)) < 0.01) then
+            tang=0.0
+         else
+            tang=(tth-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+         end if
          bgr=Vsa%Pv(ib1)+(Vsa%Pv(ib2)-Vsa%Pv(ib1))*tang
+
+
          del1=tth-Vsa%Pv(j)
          gamma1=fwhm1(l)
          eta=eta1(l)
