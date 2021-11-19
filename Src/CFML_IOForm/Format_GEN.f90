@@ -20,7 +20,7 @@ SubModule (CFML_IOForm) IO_GEN
        Class(Atm_Type),  intent(out)   :: Atm   ! Parameters on variable At
 
        !---- Local variables -----!
-       integer                           :: iv, nlong1,n,ier,q
+       integer                           :: iv, nlong1,n !,ier,q
 
        real(kind=cp), dimension (10)     :: vet1
        real(kind=cp), dimension (10)     :: vet2

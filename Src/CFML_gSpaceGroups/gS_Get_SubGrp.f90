@@ -37,7 +37,7 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
       logical,                  optional,intent( in) :: printd
 
       !--- Local variables ---!
-      integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,idx,ng,i1,i2,nalloc
+      integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,ng,i1,i2,nalloc !,idx
       character (len=40), dimension(:),allocatable :: gen,gen_min
       character (len=40), dimension(Spg%Num_Lat)   :: gen_lat
       character (len=256),dimension(:),allocatable :: list_gen

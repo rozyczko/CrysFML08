@@ -101,7 +101,7 @@ SubModule (CFML_EoS) EoS_ModDir
       !> for spline
       integer,parameter              :: NSTEP=11   !must be odd
       integer                        :: imid
-      real(kind=cp),dimension(NSTEP) :: x,y,d2y,dy
+      real(kind=cp),dimension(NSTEP) :: x,y,dy !,d2y
 
       !> find largest linear modulus of axes
       kmax=tiny(0._cp)
@@ -296,7 +296,7 @@ SubModule (CFML_EoS) EoS_ModDir
       !> for spline
       integer,parameter                 :: NSTEP=11   !must be odd
       integer                           :: imid
-      real(kind=cp),dimension(NSTEP)    :: x,y,d2y,dy
+      real(kind=cp),dimension(NSTEP)    :: x,y,dy !,d2y
 
       !> find largest linear modulus of axes
       kmax=tiny(0.0_cp)

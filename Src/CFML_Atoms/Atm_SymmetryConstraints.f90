@@ -10,7 +10,7 @@ Submodule (CFML_Atoms) Atm_Symmetry_Constraints
      !!
      Module Subroutine Check_Symmetry_Constraints(SpG,Atm)
        class(SpG_Type),   intent(in)     :: SpG
-       type(AtList_Type),       intent(in out) :: Atm
+       type(AtList_Type), intent(in out) :: Atm
 
        !--- Local variables ---!
        integer :: i,codini

@@ -72,7 +72,7 @@ SubModule (CFML_EoS) Get_Angle
       !> for spline
       integer,parameter              :: nstep=11   !must be odd
       integer                        :: imid
-      real(kind=cp),dimension(nstep) :: x,y,d2y,dy
+      real(kind=cp),dimension(nstep) :: x,y,dy !,d2y
       type(cell_g_type)              :: c
 
       !>init

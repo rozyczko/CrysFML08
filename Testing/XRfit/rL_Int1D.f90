@@ -23,12 +23,13 @@
     public  :: get_texte, output_plot, read_CFL
     private :: Backa
     ! Global variables
-    real(kind=cp),                 public :: step, norm_mon
+    real(kind=cp),                 public :: step, norm_mon, fwh_f=0.01, eta_f=0.0, fwh_s=0.01, eta_s=0.3, w_f=1.2, w_s=1.5, &
+                                             fwh_g=0.03, eta_g=0.0
     real(kind=cp), dimension(6),   public :: cell= [5.0,5.0,5.0,90.0,90.0,90.0]
     integer,                       public :: nkvec=0,jsc=1
     real(kind=cp), dimension(3,24),public :: kvec=0.0
     logical,                       public :: cell_given=.false., kvec_given=.false.,sigma_given=.false., &
-                                             spg_given=.false., pkb_given=.false., scan_range=.false.
+                                             spg_given=.false., pkb_given=.false., scan_range=.false.,fwg_given=.false.
     real(kind=cp), dimension(3),   public :: h_ini, h_fin
     character(len=2), dimension(3),public :: scan_along=["a*","b*","c*"]
     type(Spg_Type),                public :: SpG
@@ -76,14 +77,15 @@
       end do
     End Subroutine Get_Texte
 
-    Subroutine Output_Plot(nobs,xx,fobs,fcalc,nref,chi2,refl)
+    Subroutine Output_Plot(nobs,xx,fobs,fcalc,nref,chi2,refl,ini)
       integer,                     intent(in) :: nobs, nref
       real,dimension(:),           intent(in) :: xx,fobs,fcalc
       real,                        intent(in) :: chi2
       character (len=*),           intent(in) :: refl
+      logical, optional,           intent(in) :: ini
       ! Local variables
       integer                          :: i,j,k,l,inum,ki,kj,ico,ifinal,i_plot=22
-      real                             :: shb,shd,dif,yma,ymi,pos,posb,gam
+      real                             :: shb,shd,dif,yma,ymi,pos,posb,gam, bgr
       real                             :: iposr
       character (len=90)  :: refplot
 
@@ -94,7 +96,11 @@
         if(fobs(i) > yma ) yma =fobs(i)
         if(fobs(i) < ymi ) ymi =fobs(i)
       End Do
-      write(refplot,"(a,i6.6)") "Scan_",nref
+      if(present(ini)) then
+         write(refplot,"(a,i6.6)") "ini_Scan_",nref
+      else
+         write(refplot,"(a,i6.6)") "Scan_",nref
+      end if
       Open(Unit=i_plot,File=trim(refplot)//".xrf",status="replace",action="write")
 
       shb   = 0.0                         ! idem wpl_pfit.f90
@@ -121,9 +127,13 @@
         pos=xx(i)
         dif=fobs(i)-fcalc(i)+shd
         posb=vs%pv(j)
+        if(poly_back) then
+           call Back_Chebychev(pos,x_ini,x_fin,n_ba,vs%pv(ngl+1:ngl+n_ba),bgr)
+        else
+           bgr=backa(pos)
+        end if
         write(unit=i_plot,fmt="(f10.4,4f10.2,f10.4,f10.2,tr1,f10.2,2f8.4)")  &
-             xx(i),fobs(i),fcalc(i), dif, backa(pos)-shb,  &
-             posb,iposr, vs%pv(j+1), fwhm(i), eta(i)
+             xx(i),fobs(i),fcalc(i), dif, bgr-shb, posb,iposr, vs%pv(j+1), fwhm(i), eta(i)
         j=j+4
       End Do
 
@@ -131,8 +141,12 @@
         Do  i=npeakx+1,nobs
           pos=xx(i)
           dif=fobs(i)-fcalc(i)+shd       ! shd < 0.
-          write(unit=i_plot,fmt="(f10.4,4f10.2)") pos,fobs(i),fcalc(i),dif,  &
-              backa(pos)-shb
+          if(poly_back) then
+             call Back_Chebychev(pos,x_ini,x_fin,n_ba,vs%pv(ngl+1:ngl+n_ba),bgr)
+          else
+             bgr=backa(pos)
+          end if
+           write(unit=i_plot,fmt="(f10.4,4f10.2)") pos,fobs(i),fcalc(i),dif,bgr-shb
         End Do
       End If
       close (unit=i_plot)
@@ -176,6 +190,7 @@
               else
                 scan_range=.true.
               end if
+
            Case("CELL")
               read(texte(5:),*,iostat=ier)  cell
               if(ier == 0) cell_given=.true.
@@ -191,6 +206,46 @@
               nkvec=nkvec+1
               read(texte(5:),*,iostat=ier)  kvec(:,nkvec)
               if(ier == 0) kvec_given=.true.
+
+           Case("POLY")
+              read(texte(5:),*,iostat=ier)  n_ba
+              if(ier == 0) poly_back=.true.
+
+           Case("FWHETAG")   !If provided, local FWHM and Eta should be a fraction of the given values or null
+              read(texte(8:),*,iostat=ier)  fwh_g, eta_g
+              if(ier /= 0) then
+                fwh_g=0.03
+                eta_g=0.00
+              end if
+              fwg_given=.true.
+
+           Case("FWHETAF")
+              read(texte(8:),*,iostat=ier)  fwh_f, eta_f, w_f
+              if(ier /= 0) then
+                if(fwg_given) then
+                  fwh_f=0.003
+                  eta_f=0.00
+                    w_f=1.2
+                else
+                  fwh_f=0.03
+                  eta_f=0.00
+                    w_f=1.2
+                end if
+              end if
+
+           Case("FWHETAS")
+              read(texte(8:),*,iostat=ier)  fwh_s, eta_s, w_s
+              if(ier /= 0) then
+                if(fwg_given) then
+                  fwh_s=0.03
+                  eta_s=0.00
+                    w_s=1.5
+                else
+                  fwh_s=0.05
+                  eta_s=0.30
+                    w_s=15
+                end if
+              end if
 
            Case("PKB_PSBKI")
               read(texte(10:),*,iostat=ier) pkb_cond%peak_threshold,pkb_cond%shoulder_threshold, &
@@ -445,24 +500,34 @@
                         end if
                      end do
                      npeakx=npeakx+1
-                     vs%pv(j)  = pos    !Position
-                     vs%pv(j+1)= d%y(i)-averb           !Intensity
-                     if(d%y(i) < 0.05 * averb .or. vs%pv(j+1) <= 1.02 * lower(j+1)) then
-                       vs%pv(j+1) = 0.05*averb
+                     bgr=Backg(pos,n_ba,bac_pos(1:n_ba),bac_int(1:n_ba))
+                     vs%pv(j)  = pos                          !Position
+                     vs%pv(j+1)= 0.1*(d%y(i)-bgr)             !Intensity, a factor 10 lower than peak intensity
+                     if(d%y(i) < 0.05 * bgr .or. vs%pv(j+1) <= 1.02 * lower(j+1)) then
+                       vs%pv(j+1) = 0.105*bgr
                        weak=.true.
                      end if
-                     vs%pv(j+2)= 0.03                  !Fwhm
-                     vs%pv(j+3)= 0.05                  !Eta
-                     if(detected .and. .not. weak) then
-                       vs%code(j:j+2)=1
+                     !Try to estimate Fwhm
+                     fwh=FWHM_Peak(Pat, pos, d%y(i), bgr, 0.25)
+                     vs%pv(j+2)=fwh
+                     if(fwh > 0.0) then
+                         vs%pv(j+2)=fwh
                      else
-                       vs%code(j+1)=1 !Only the intensity is refined
+                         vs%pv(j+2)= 0.1              !Local Fwhm
                      end if
-                     lower(j)=pos-0.25
-                     upper(j)=pos+0.25
+                     vs%pv(j+3)= 0.1                  !Eta
+                     if(detected .and. .not. weak) then
+                       vs%code(j:j+3)=1               !Eta is also refined
+                     else
+                       vs%code(j+1:j+2)=1 !Position fixed
+                       !vs%code(j:j+2)=1
+                     end if
+                     lower(j)=pos-0.05
+                     upper(j)=pos+0.05
                      upper(j+1)=1.0e+20
+                     lower(j+1)=0.0
                      lower(j+2)=0.0
-                     upper(j+2)=0.35
+                     upper(j+2)=0.60
                      lower(j+3)=0.0
                      upper(j+3)=1.0
                      j=j+4
@@ -479,24 +544,34 @@
                         end if
                      end do
                      npeakx=npeakx+1
-                     vs%pv(j)  = pos             !Position
-                     !vs%pv(j+1)= max(maxval(d%y(max(k-4,1):min(k+4,d%nobs)))-averb,averb*0.08)             !Intensity
-                     if(d%y(i) < 0.05 * averb .or. vs%pv(j+1) <= 1.02 * lower(j+1)) then
-                       vs%pv(j+1) = 0.05*averb
+                     bgr=Backg(pos,n_ba,bac_pos(1:n_ba),bac_int(1:n_ba))
+                     vs%pv(j)  = pos                          !Position
+                     vs%pv(j+1)= 0.1*(d%y(i)-bgr)             !Intensity, a factor 10 lower than peak intensity
+                     if(d%y(i) < 0.05 * bgr .or. vs%pv(j+1) <= 1.02 * lower(j+1)) then
+                       vs%pv(j+1) = 0.105*bgr
                        weak=.true.
                      end if
-                     vs%pv(j+2)= 0.03                   !Fwhm
-                     vs%pv(j+3)= 0.05                   !Eta
-                     if(detected .and. .not. weak) then
-                       vs%code(j:j+2)=1
+                     !Try to estimate Fwhm
+                     fwh=FWHM_Peak(Pat, pos, d%y(i), bgr, 0.25)
+                     vs%pv(j+2)=fwh
+                     if(fwh > 0.0) then
+                         vs%pv(j+2)=fwh
                      else
-                       vs%code(j+1)=1 !Only the intensity is refined
+                         vs%pv(j+2)= 0.1              !Local Fwhm
                      end if
-                     lower(j)=pos-0.25
-                     upper(j)=pos+0.25
+                     vs%pv(j+3)= 0.1                  !Eta
+                     if(detected .and. .not. weak) then
+                       vs%code(j:j+3)=1               !Eta is also refined
+                     else
+                       vs%code(j+1:j+2)=1 !Position fixed
+                       !vs%code(j:j+2)=1
+                     end if
+                     lower(j)=pos-0.05
+                     upper(j)=pos+0.05
                      upper(j+1)=1.0e+20
+                     lower(j+1)=0.0
                      lower(j+2)=0.0
-                     upper(j+2)=0.35
+                     upper(j+2)=0.60
                      lower(j+3)=0.0
                      upper(j+3)=1.0
                      j=j+4
@@ -548,6 +623,192 @@
        !end if
      End Subroutine set_initial_conditions_qscan
 
+     Subroutine set_initial_conditions_poly(x1,x2,nscan)
+       real(kind=cp),        intent(in)     :: x1,x2 ! [x1,x2] region to be analysed
+       integer,              intent(in)     :: nscan
+       !
+       integer              :: i,j,k,L,n, jmax,ini,fin, ns,nf
+       type(pkb_type)       :: pkb_pk, pkb_bck
+       logical              :: exclude, weak
+       real(kind=cp)        :: pos, averb, max_int, resid, ch, fwh, bgr, min_int
+       real(kind=cp),dimension(:),allocatable :: peak_pos
+       logical,      dimension(:),allocatable :: satellite
+       integer,dimension(3) :: ihkl
+       character(len=132)   :: refl
+
+       lower= -1.0e+36; upper=1.0e+36
+
+       vs%pv(:)=0.0; vs%code(:)=0
+       if(fwg_given) then
+          vs%pv(1)= fwh_g  !Assignment of global g0_HPv in r.l.u.
+          vs%code(1)= 1
+       else
+          vs%pv(1)= 0.0  !Assignment of global g0_HPv in r.l.u.
+       end if
+       upper(1)= 0.5
+       lower(1)= 0.0
+
+       vs%pv(2)=-0.0  !Assignment of global g1_HPv in r.l.u.
+       lower(2)=-0.5
+       upper(2)= 0.5
+       vs%code(2)=0
+
+       vs%pv(3)= 0.0   !Assignment of global g2_HPv in r.l.u.
+       lower(3)=-0.5
+       upper(3)= 0.5
+       vs%code(3)= 0
+
+       if(fwg_given) then
+          vs%pv(4)= eta_g  !Assignment of global g0_EtaPV
+          if(eta_g > 0.05) vs%code(4)= 1
+       else
+          vs%pv(4)= 0.0  !Assignment of global g0_EtaPV
+       end if
+       lower(4)= 0.0
+       upper(4)= 1.0
+
+       vs%pv(5)= 0.0     !Assignment of global g1_EtaPV in r.l.u.
+       lower(5)=-0.5
+       upper(5)= 0.5
+       vs%code(5)= 0
+
+       !Estimation of the constant term of background
+       max_int=maxval(d%y); min_int=minval(d%y)
+       max_int=min_int+0.05*(max_int-min_int)
+       n=0
+       do i=1,d%nobs
+         if(d%y(i) < max_int) then
+            n=n+1
+            averb=averb+d%y(i)
+         end if
+       end do
+       averb=averb/real(n)
+
+       j=ngl+1  ! ngl: number of global parameters
+       vs%pv(j)=averb
+       vs%code(j)=1
+       do j=2,n_ba
+         vs%pv(j+ngl)=0.01/real(j)
+         vs%code(j+ngl)=1
+       end do
+
+       !Prediction of peak positions for integer and real reflections (propagation vectors)
+       !Maximum number of fundamental reflections
+       ini=nint(d%x(1)); fin=nint(d%x(d%nobs))
+       !Number of fundamental and satellite peaks
+       nf=fin-ini+1
+       ns=0
+       if(nkvec > 0) then
+         ns=2*nkvec*nf
+       end if
+       allocate(peak_pos(nf+ns),satellite(nf+ns))
+       peak_pos=0.0; satellite=.false.
+       n=0
+       do i=ini,fin
+         pos=real(i)
+         if(pos > d%x(1) .and. pos < d%x(d%nobs)) then
+           exclude=.false.
+           if(spg_given) then
+             ihkl=nint(h_ini)
+             ihkl(jsc)=i
+             exclude=h_absent(ihkl,SpG)
+           end if
+           if(.not. exclude) then
+             n=n+1
+             peak_pos(n) = pos
+           end if
+         end if
+
+         if(nkvec > 0) then
+           do L=1,nkvec
+             pos=real(i)-kvec(jsc,L)
+             if(pos > d%x(1) .and. pos < d%x(d%nobs)) then
+               n=n+1
+               peak_pos(n) = pos
+               satellite(n)=.true.
+             end if
+             pos=real(i)+kvec(jsc,L)
+             if(pos > d%x(1) .and. pos < d%x(d%nobs)) then
+               n=n+1
+               peak_pos(n) = pos
+               satellite(n)=.true.
+             end if
+           end do
+         end if
+       end do
+       NPEAKX=n
+       vs%np = ngl+ n_ba + 4 * npeakx
+       j=ngl+n_ba+1
+       do i=1,NPEAKX
+         pos = peak_pos(i)
+         k=Locate(d%x,pos,d%nobs)
+         vs%pv(j)  = pos                          !Position
+         weak=.false.
+         if(d%y(k) < 1.2*max_int) weak=.true.
+         vs%pv(j+1)= 0.1*(d%y(k)-averb)           !Intensity, a factor 10 lower than peak intensity
+         if(satellite(i)) then
+           vs%pv(j+2)=fwh_s
+           vs%pv(j+3)=eta_s
+           lower(j)=pos-w_s*(fwh_s+fwh_g)
+           upper(j)=pos+w_s*(fwh_s+fwh_g)
+           upper(j+1)=1.0e+20
+           lower(j+1)=0.0
+           lower(j+2)=0.01*fwh_s
+           upper(j+2)=3.0*fwh_s
+         else
+           vs%pv(j+2)=fwh_f
+           vs%pv(j+3)=eta_f
+           lower(j)=pos-w_f*(fwh_f+fwh_g)
+           upper(j)=pos+w_f*(fwh_f+fwh_g)
+           upper(j+1)=1.0e+20
+           lower(j+1)=0.0
+           lower(j+2)=0.01*fwh_f
+           upper(j+2)=3.0*fwh_f
+         end if
+         lower(j+3)=0.0
+         upper(j+3)=1.0
+         !vs%code(j+1)=1 !Intensities are always refined
+         if(weak) then
+            vs%code(j)=0
+         else
+            vs%code(j)=1 !positions always refined if strong
+         end if
+         j=j+4
+       end do
+
+       do i=1, vs%np
+         if(vs%pv(i) < lower(i)) then
+            !write(*,"(a,i3,g14.4,a,g14.4)") " Parameter ",i,vs%pv(i),"( "//trim(vs%nampar(i))//" ) lower than ",lower(i)
+            vs%pv(i)=lower(i)+0.0001
+         else if(vs%pv(i) > upper(i)) then
+            !write(*,"(a,i3,g14.4,a,g14.4)") " Parameter ",i,vs%pv(i),"( "//trim(vs%nampar(i))//" ) higher than ",upper(i)
+            vs%pv(i)=upper(i)-0.0001
+         end if
+       end do
+       ! Provisory code for testing the initial conditions
+        write(*,"(a)") " Testing the calculation with the initial conditions"
+        ch=0.0
+        do i=1,d%nobs
+          call Sum_PV_Peaks(i,d%x(i),d%yc(i),vs)
+          !write(*,"(i6,3f14.4)") i,d%x(i),d%y(i),d%yc(i)
+          resid= (d%y(i)-d%yc(i))/d%sw(i)
+          ch=ch+resid*resid
+        end do
+        ch=ch/real(d%nobs-vs%np)
+        write(*,"(a,g14.5)") " Initial Chi2: ",ch
+        !if(ch > 1000.0 ) then  !Write the initial conditions
+        !   j=ngl+n_ba+1
+        !   do i=1, npeakx
+        !     write(*,"(a,4f12.4)") " Pos, Int, FWHM, eta: ",vs%pv(j),vs%pv(j+1),vs%pv(j+2),vs%pv(j+3)
+        !     write(*,"(a,4i12)")   "               Codes: ",vs%code(j),vs%code(j+1),vs%code(j+2),vs%code(j+3)
+        !     j=j+4
+        !   end do
+        !end if
+        write(refl,"(a,3f6.2,a,3f6.2,a)") "Scan(",h_ini,"->", h_fin,") "
+        call Output_Plot(d%nobs,d%x,d%y,d%yc,nscan,ch,refl,.true.)
+
+     End Subroutine set_initial_conditions_poly
+
 
      Subroutine manage_LSQ()
 
@@ -582,7 +843,7 @@
     Integer                   :: lun=1, i_out=7, i_hkl=8, i_odr=99, i_sc=10
     integer, dimension (2500) :: num_pix
     Logical                   :: esta, redo, exclude
-    Real(kind=cp)             :: timi,timf,sumpix,aver,normp, pos, averb,fwh,fg,sfwh
+    Real(kind=cp)             :: timi,timf,aver,normp, pos, averb,fwh,fg,sfwh
     real(kind=cp)             :: monitor, inten, sigma,aux1,aux2,aux3
     real(kind=cp),dimension(3):: hkl
 
@@ -659,6 +920,7 @@
         write(unit=i_out,fmt="(i4,a,3f8.4,a)") i," kvec: [",kvec(:,i)," ]"
       end do
     end if
+
     if(pkb_given) then
       Write(unit=i_out,fmt="(a)") " => Provided conditions for background/peak search: "
     else
@@ -740,12 +1002,20 @@
          end do
          step=step/d%nobs
 
-         !Setting Background points
-         !Determining the number of peaks for Qscans
+         !Setting initial conditions
          vs%pv(1:ngl)=0.0
          vs%code(1:ngl)=0
+         x_ini=d%x(1)
+         x_fin=d%x(d%nobs)
 
-         call set_initial_conditions_qscan(d%x(1),d%x(no),Pat)
+
+         if(poly_back) then
+             call set_initial_conditions_poly(d%x(1),d%x(no),np)
+         else
+             call set_initial_conditions_qscan(d%x(1),d%x(no),Pat)
+         end if
+         vs%np = ngl+ n_ba + 4 * npeakx
+
          if(Err_CFML%flag) then
             !Output of the scan giving rise to problems
             write(unit=line,fmt="(a,i6.6,a)") "Scan_",np,".xys"
@@ -770,14 +1040,12 @@
          c%percent=50.0
 
          write(unit=i_out,fmt="(a,tr1,i5  )")" => Number of peaks :",npeakx
-         write(unit=i_out,fmt="(a,tr1,i5  )")" => Number of background points :",n_ba
+         write(unit=i_out,fmt="(a,tr1,i5  )")" => Number of background parameters :",n_ba
          write(unit=i_out,fmt="(a,tr1,i5  )")" => Number of cycles:",c%icyc
          if(npeakx == 0) then
            write(unit=i_out,fmt="(a)")" => ZERO Number of peaks, skipping this scan ...."
            cycle
          end if
-
-         vs%np = ngl+ n_ba + 4 * npeakx
 
          !save input data
          j = 0
@@ -798,10 +1066,17 @@
          write(unit=i_out,fmt="(a,f14.6,i3)")   " =>         g1_EtaPV :", vs%pv(5),vs%code(5)
 
          write(unit=i_out,fmt="(/,a)")          " => Background parameters"
-         write(unit=i_out,fmt="(a)")            "      Scatt. Variable     Background  Flag"
-         do j=1,n_ba
-           write(unit=i_out,fmt="(2f18.4,i4)")   bac_pos(j), vs%pv(j+ngl),vs%code(j+ngl)
-         end do
+         if(poly_back) then
+           write(unit=i_out,fmt="(a,i3,a)")          "      Chebychev polynomial of ",n_ba," coefficients"
+           do j=1,n_ba
+             write(unit=i_out,fmt="(i3,f18.4,i4)")   j, vs%pv(j+ngl),vs%code(j+ngl)
+           end do
+         else
+           write(unit=i_out,fmt="(a)")            "      Scatt. Variable     Background  Flag"
+           do j=1,n_ba
+             write(unit=i_out,fmt="(2f18.4,i4)")   bac_pos(j), vs%pv(j+ngl),vs%code(j+ngl)
+           end do
+         end if
 
          write(unit=i_out,fmt="(/,a,/)")                                                    &
               "      Position      Intensity      FWHM          D-Eta            Flags"
@@ -820,19 +1095,44 @@
          !write(unit=*,fmt="(a,2f14.4)") " => Background in range: ",bac_pos(1),bac_pos(n_ba)
 
          ll=0
+         chiold=1.0e35  !Initialize chi-old for each scan
          do
            call ODR_LSQ(powder_patt_odr,d,vs,c,lower,upper,c_print,lun=i_odr )
            ll=ll+1
            j=ngl+n_ba+1
-           redo=.false.
+           aver=0.0 !Maximum intensity
            do i=ngl+n_ba+1,vs%np
-              if( vs%pv(j+1) <= 1.02*lower(j+1))  then
-                vs%code(j:j+3) = 0
-                vs%pv(j+1) = 0.0001
-                redo=.true.
-              end if
-              j=j+4
+             if(vs%pv(j+1) > aver) aver=vs%pv(j+1)
+             j=j+4
            end do
+           j=ngl+n_ba+1
+           redo=.false.
+           if( ll == 1) then
+              do i=ngl+n_ba+1,vs%np
+                 if( vs%code(j+1) == 0 .and. vs%pv(j+1) > 0.15*aver) then
+                   vs%code(j)=0
+                   vs%code(j+1)=1
+                   redo=.true.
+                 end if
+                 if( vs%pv(j+1) <= 1.02*lower(j+1))  then
+                   vs%code(j:j+3) = 0
+                   vs%pv(j+1) = 0.001
+                   redo=.true.
+                 end if
+                 j=j+4
+              end do
+           else if(ll == 2) then
+              !do i=ngl+n_ba+1,vs%np
+              !   if( vs%code(j+1) == 0 .and. vs%pv(j+1) > 0.03*aver) then
+              !     vs%code(j)=0
+              !     vs%code(j+1)=1
+              !     redo=.true.
+              !   end if
+              !   j=j+4
+              !end do
+              vs%code(4) = 1
+              redo=.true.
+           end if
            if(redo .and. ll < 10) cycle
            exit
          end do
@@ -845,8 +1145,6 @@
          do i=1,npeakx
            hkl=h_ini
            hkl(jsc)=vs%pv(j)
-           !fg=sqrt(vs%pv(6))
-           !fwh=fg+vs%pv(j+2)
            fwh=vs%pv(j+2)
            sfwh=vs%spv(j+2)
            write(unit=line,fmt="(a,3f9.4,6f12.4)") trim(testchi2)//"  hkl, Int, Sig, FWHM, Sig: ",&

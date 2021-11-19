@@ -1596,7 +1596,7 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Hall
       integer                        :: n1,n2,n_lat,n_alat,n_antic
       integer,          dimension(3) :: ish
       integer,        dimension(3,3) :: s
-      real(kind=cp),  dimension(3,3) :: sinv
+      !real(kind=cp),  dimension(3,3) :: sinv
       real(kind=cp),    dimension(3) :: t
       logical                        :: pout=.false., need_shift=.false.
       character(len=40),    dimension(Ngen) :: symb_gen

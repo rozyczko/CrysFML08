@@ -211,7 +211,7 @@ SubModule (CFML_EoS) Alpha_Calc
       !> for spline
       integer, parameter             :: NSTEP=21   !must be odd
       integer                        :: imid
-      real(kind=cp), dimension(NSTEP):: x,y,d2y,dy
+      real(kind=cp), dimension(NSTEP):: x,y,dy !,d2y
 
       tstep=20.
       tcal=t-int(NSTEP/2)*tstep

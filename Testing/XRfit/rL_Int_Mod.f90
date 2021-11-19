@@ -7,7 +7,7 @@
    private
 
    !Public subroutines
-   public:: Sum_PV_peaks, set_nampar, powder_patt_odr
+   public:: Sum_PV_peaks, set_nampar, powder_patt_odr, Back_Chebychev
 
    !Global public variables
    integer,      public, parameter         :: nbac=100    !maximum number of background parameters
@@ -22,8 +22,9 @@
    integer,public                          :: n_ba     ! number of points to define the background
    character (len=132),public              :: title
    character (len=80),public               :: filecode,filedat !codes of input data files
-   real(kind=cp),public                    :: chi2, chiold=1.0e30
+   real(kind=cp),public                    :: chi2, chiold,x_ini,x_fin
    integer, private                        :: jstart
+   logical, public                         :: poly_back !Polynomial background.
 
 
    Type(LSQ_State_Vector_type),    public :: vs  !State vector containing pv, code, vs%nampar,etc..
@@ -34,7 +35,6 @@
 
 
   contains
-
 
    subroutine powder_patt_odr(n,m,np,nq,ldn,ldm,ldnp,beta,xplusd,ifixb,  &
                               ifixx,ldifx,ideval,f,fjacb,fjacd,istop)
@@ -57,7 +57,7 @@
      Integer,                              Intent(In Out):: istop
 
      !Local variables
-     integer                     :: i,j,no
+     integer                     :: i,j
      real(kind=cp)               :: xval,yval,resid
      type(LSQ_State_Vector_type) :: lvs
      Real(Kind=cp),Dimension(np) :: der
@@ -89,7 +89,6 @@
      if(mod(ideval/10,10) >= 1) then
           do i=1,n
             call Sum_PV_Peaks(i,d%x(i),d%yc(i),lvs,.true.)
-            no=0
             do j=1,lvs%np
                fjacb(i,j,1)=lvs%dpv(j)
             end do
@@ -126,6 +125,32 @@
      end do
    End Subroutine set_nampar
 
+   Subroutine Back_Chebychev(x,x1,x2,n,par,bk,der)
+      Real(kind=cp),                         intent(in)  :: x,x1,x2
+      Integer,                               intent(in)  :: n
+      Real(kind=cp), dimension(:),           intent(in)  :: par
+      Real(kind=cp),                         intent(out) :: bk
+      Real(kind=cp), dimension(:), optional, intent(out) :: der
+      !--- Local variables ---!
+      Real(kind=cp) :: thx,rj,derv,c
+      integer :: j
+
+      bk=par(1)
+      if(present(der)) then
+        der(1:n)= 0.0
+        der(1)  = 1.0
+      end if
+      thx=2.0*(x-0.5*(x1+x2))/(x2-x1)
+      if(thx < -1.0) thx=-1.0
+      if(thx >  1.0) thx= 1.0
+      c=acos(thx)
+      do j=1,n-1
+        rj=real(j,kind=cp)
+        derv=cos(rj*c)
+        bk=bk+par(j+1)*derv
+        if(present(der)) der(j+1)=der(j+1)+derv
+      end do
+   End Subroutine Back_Chebychev
    !!----
    !!---- Subroutine Sum_Pv_Peaks(I,Xval,Ycalc,Vsa,CalDer)
    !!----
@@ -158,6 +183,7 @@
                                        del,pos,etav,fwh
      real(kind=cp)                  :: g0Hder,g1Hder,g2Hder,g0Etader,g1Etader
      real(kind=cp), dimension(3)    :: par_der
+     real(kind=cp), dimension(24)   :: parv,deriv  !Background parameters for Chebychev polynomials
 
      if (i == 1) then    !Making intermediate calculations that are not depending on the
                          !particular observation. This is the reason why only for i=1
@@ -198,26 +224,37 @@
      g0Hder=0.0; g1Hder=0.0; g2Hder=0.0; g0Etader=0.0; g1Etader=0.0
      vsa%dpv(1:vsa%np)=0.0  !Nullify all derivatives
 
-     ! Calculation of the background
-     i1=1
-     i2=n_ba
-     ib1=ngl+1
-     ib2=ib1+1
-     do ib=1,n_ba-1
-        if (xval >= bac_pos(ib) .and. xval <= bac_pos(ib+1)) then
-           i1=ib
-           i2=ib+1
-           ib1=ngl+i1
-           ib2=ib1+1
-           exit
+
+     if(poly_back) then
+        parv(1:n_ba)=Vsa%Pv(ngl+1:ngl+n_ba)
+        if(present(Calder)) then
+           call Back_Chebychev(xval,x_ini,x_fin,n_ba,parv(1:n_ba),bgr,deriv(1:n_ba))
+           Vsa%dpv(ngl+1:ngl+n_ba) = deriv(1:n_ba)
+        else
+           call Back_Chebychev(xval,x_ini,x_fin,n_ba,parv(1:n_ba),bgr)
         end if
-     end do
-     if(abs(bac_pos(i2)-bac_pos(i1)) < 0.01) then
-        tang=0.0
      else
-        tang=(xval-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+        ! Calculation of the background
+        i1=1
+        i2=n_ba
+        ib1=ngl+1
+        ib2=ib1+1
+        do ib=1,n_ba-1
+           if (xval >= bac_pos(ib) .and. xval <= bac_pos(ib+1)) then
+              i1=ib
+              i2=ib+1
+              ib1=ngl+i1
+              ib2=ib1+1
+              exit
+           end if
+        end do
+        if(abs(bac_pos(i2)-bac_pos(i1)) < 0.01) then
+           tang=0.0
+        else
+           tang=(xval-bac_pos(i1))/(bac_pos(i2)-bac_pos(i1))
+        end if
+        bgr=Vsa%pv(ib1)+(Vsa%pv(ib2)-Vsa%pv(ib1))*tang
      end if
-     bgr=Vsa%pv(ib1)+(Vsa%pv(ib2)-Vsa%pv(ib1))*tang
 
      l=0
      Do j=jstart,vsa%np,4
@@ -250,8 +287,10 @@
 
      ! Assign derivatives to array Vsa%dpv
      If (present(Calder)) then
-        Vsa%dpv(ib1)=1.0-tang
-        Vsa%dpv(ib2)=tang
+        if(.not. poly_back) then
+          Vsa%dpv(ib1)=1.0-tang
+          Vsa%dpv(ib2)=tang
+        end if
         Vsa%dpv(1)=g0Hder
         Vsa%dpv(2)=g0Etader
         Vsa%dpv(3)=g1Etader

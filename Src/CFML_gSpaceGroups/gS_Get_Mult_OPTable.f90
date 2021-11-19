@@ -57,7 +57,7 @@ SubModule (CFML_gSpaceGroups) SPG_Multip_OP_Table
       integer, dimension(:), allocatable               :: inv
 
       !---- Local Variables ----!
-      integer:: i,j,m,Multip
+      integer:: i,j,Multip !,m
       type(Symm_Oper_Type) :: Opm, identity_OP
 
       multip=size(Op)

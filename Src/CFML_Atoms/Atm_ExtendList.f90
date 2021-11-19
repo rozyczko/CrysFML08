@@ -60,7 +60,8 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
          if (.not. A%atom(k)%active) cycle
          l=1       ! Number of representant atom i asymmetric unit
          n=n+1     ! Number of atom in the list
-         c_atm%Atom(n)=A%atom(k)        !First atom of the orbit
+         !c_atm%Atom(n)=A%atom(k)        !First atom of the orbit (unsupported by gfortran!!!!)
+
          xo= modulo_lat(A%atom(k)%x)
          u(:,l)= xo
          c_atm%atom(n)%x=xo
@@ -88,20 +89,27 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
                   write(unit=fmm,fmt="(i3)") l
             end select
             !c_atm%Atom(n)     = A%atom(k)     ! Valid for Intel and not for GFortran
+            !Workaround for gfortran
             c_atm%Atom(n)%lab     = trim(A%atom(k)%lab)//"_"//adjustl(fmm)
-            c_atm%Atom(n)%Mult    = real(l)/SpG%multip
-            c_atm%Atom(n)%x       = xx
-            c_atm%Atom(n)%Chemsymb= A%atom(k)%Chemsymb
+            c_atm%Atom(n)%ChemSymb= A%atom(k)%ChemSymb
+            c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
             c_atm%Atom(n)%Z       = A%atom(k)%Z
+            c_atm%Atom(n)%Mult    = real(l)/SpG%multip
             c_atm%Atom(n)%Charge  = A%atom(k)%Charge
+            c_atm%Atom(n)%x       = xx
+            c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
+            c_atm%Atom(n)%Occ     = A%atom(k)%Occ
             c_atm%Atom(n)%UType   = A%atom(k)%UType
             c_atm%Atom(n)%ThType  = A%atom(k)%ThType
-            c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
+            c_atm%Atom(n)%U       = A%atom(k)%U
             c_atm%Atom(n)%Magnetic= A%atom(k)%Magnetic
+            c_atm%Atom(n)%Mom     = A%atom(k)%Mom
             c_atm%Atom(n)%Moment  = A%atom(k)%Moment
-            c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
             c_atm%Atom(n)%Ind_ff  = A%atom(k)%Ind_ff
+            c_atm%Atom(n)%AtmInfo = A%atom(k)%AtmInfo
+            c_atm%Atom(n)%wyck    = A%atom(k)%wyck
             c_atm%Atom(n)%VarF    = A%atom(k)%VarF
+            c_atm%Atom(n)%active  = A%atom(k)%active
 
             !select type(atm => A%atom(k))
             !   class is (Atm_Std_Type)
@@ -121,7 +129,6 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
             !      !c_atm%Atom(n)%dcs_std= A%atom(k)%dcs_std
             !end select
 
-            c_atm%Active(n)   = A%Active(k)
 
          end do loop
       end do

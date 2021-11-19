@@ -35,7 +35,6 @@ SubModule (CFML_gSpaceGroups) SPG_Mat_From_Symb
 
       character(len=len(Symb))                                     :: string, pSymb, translation
       character(len=3),dimension(10)                               :: x_typ
-      character(len=6),dimension(10)                               :: a_typ
       character(len=len(Symb)), dimension(size(Mat,dim=1))         :: split
       character(len=10),        dimension(size(Mat,dim=1))         :: subst
       character(len=40),dimension(size(Mat,dim=1),size(Mat,dim=1)) :: matrix

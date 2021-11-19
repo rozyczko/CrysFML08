@@ -987,10 +987,9 @@ SubModule (CFML_gSpaceGroups) SPG_SpaceGroup_Procedures
       logical,                         optional, intent(in ) :: debug, set_inv
 
       !---- Local Variables ----!
-      integer                                      :: i,j,n_gen, n_it, d, ier
+      integer                                      :: i,n_gen, n_it, d, ier !,j
       integer                                      :: n_laue, n_pg, lo !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
-      character(len=35), dimension(15)             :: items
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
       character(len=5)                             :: car
       character(len=256)                           :: gList,loc_str

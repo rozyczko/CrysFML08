@@ -113,7 +113,7 @@
 
        ! Local variables
        integer                                    :: i,j,k,m,ifail,L,n,Ls,ip,L1
-       integer                                    :: i1,i2,i3,maxa,maxp,maxm,mult
+       integer                                    :: i1,i2,i3,maxa,maxp,maxm !,mult
        real(kind=cp), dimension(3,3)              :: S,Sinv
        real(kind=cp)                              :: determ
        logical                                    :: newp,fail

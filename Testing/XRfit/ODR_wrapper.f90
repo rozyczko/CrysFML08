@@ -14,7 +14,7 @@
     !!--++
     !!--++ Update: October - 2021
     !!
-    real(kind=cp), dimension(Max_Free_Par,Max_Free_Par), private  :: correl     !Variance/covariance/correlation matrix
+    real(kind=cp), dimension(:,:), allocatable, private  :: correl     !Variance/covariance/correlation matrix
 
     contains
 
@@ -94,6 +94,8 @@
                   wrk3i,wrk4i,wrk5i,wrk6i,wrk7i,loweri,upperi,lwkmn)
        vs%spv(1:vs%np)=work(sdi:sdi+vs%np-1)  !Standard deviations
 
+       if(allocated(correl)) deallocate(correl)
+       allocate(correl(vs%np,vs%np))
        do i=1,vs%np
          do j=1,vs%np
             correl(i,j) = work(vcvi-1+i+(j-1)*vs%np)

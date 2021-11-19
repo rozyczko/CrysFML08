@@ -535,7 +535,7 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
       real(kind=cp)                           :: suma,alpha
       integer,           dimension(48)        :: ss_ptr
       real(kind=cp),     dimension(3,48)      :: atr
-      real(kind=cp),     dimension(6*SpG%nq)  :: cod,multi,val
+      real(kind=cp),     dimension(6*SpG%nq)  :: cod,multi !,val
       real(kind=cp),     dimension(3)         :: x
       real(kind=dp),     dimension(6,6)       :: subm
       real(kind=dp),  dimension(6*SpG%nq,6*SpG%nq) :: Ctr,sCtr
