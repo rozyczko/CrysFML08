@@ -551,7 +551,7 @@
        type(LSQ_State_Vector_type),intent(in)     :: vs
     End Subroutine Info_LSQ_LM_VS
 
-    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
+    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal,text_info)
        !---- Arguments ----!
        real(kind=cp),              intent(in)     :: chi2
        real(kind=cp),              intent(in)     :: FL
@@ -565,6 +565,7 @@
        type(LSQ_State_Vector_type),intent(in)     :: vs
        character(len=*),           intent(in)     :: algor
        character(len=*), optional, intent(in)     :: out_obscal
+       character(len=*), optional, intent(in)     :: text_info
     End Subroutine Info_LSQ_Output
 
     Module Subroutine LM_Der(Model_Functn, m, c, Vs, chi2, calder, infout,residuals)
@@ -698,7 +699,7 @@
        End Interface
     End Subroutine lmdif1
 
-    Module Subroutine Marquardt_Fit_v1(Model_Functn,X,Y,W,Yc,Nobs,c,vs,Ipr,Chi2,scroll_lines)
+    Module Subroutine Marquardt_Fit_v1(Model_Functn,X,Y,W,Yc,Nobs,c,vs,Ipr,Chi2,scroll_lines,text_info)
        !---- Arguments ----!
        real(kind=cp),   dimension(:), intent(in)             :: x,y
        real(kind=cp),   dimension(:), intent(in out)         :: w
@@ -708,6 +709,7 @@
        type(LSQ_State_Vector_type),   intent(in out)         :: vs
        real(kind=cp),                 intent(   out)         :: chi2
        character(len=*),dimension(:), intent(out), optional  :: scroll_lines
+       character(len=*),              intent(in),  optional  :: text_info
 
        Interface
         Subroutine Model_Functn(iv,Xv,ycalc,aa,der)
@@ -721,7 +723,7 @@
        End Interface
     End Subroutine Marquardt_Fit_v1
 
-    Module Subroutine Marquardt_Fit_v2(Model_Functn,d,c,vs,Ipr,Chi2,scroll_lines)
+    Module Subroutine Marquardt_Fit_v2(Model_Functn,d,c,vs,Ipr,Chi2,scroll_lines,text_info)
        !---- Arguments ----!
        Type(LSQ_Data_Type),           intent(in out)         :: d
        type(LSQ_conditions_type),     intent(in out)         :: c
@@ -729,6 +731,7 @@
        integer,                       intent(in)             :: Ipr
        real(kind=cp),                 intent(   out)         :: chi2
        character(len=*),dimension(:), intent(out), optional  :: scroll_lines
+       character(len=*),              intent(in),  optional  :: text_info
 
        Interface
         Subroutine Model_Functn(iv,xv,ycalc,Vsa,calder)
@@ -1173,7 +1176,7 @@
           If (pivot) ipvt(j) = j
        End Do
 
-       !     Reduce a to r with Householder transformations.
+       !     Reduce A to R with Householder transformations.
        minmn = Min(m,n)
        Do j = 1, minmn
           If (pivot) Then
@@ -1236,23 +1239,23 @@
     !!--++
     !!--..    Original documentation:
     !!--..
-    !!--..    Given an m by n matrix a, an n by n diagonal matrix d, and an m-vector b,
+    !!--..    Given an m by n matrix A, an n by n diagonal matrix D, and an m-vector b,
     !!--..    the problem is to determine an x which solves the system
     !!--..
-    !!--..        a*x = b ,     d*x = 0 ,
+    !!--..        A*x = b ,     D*x = 0 ,
     !!--..
     !!--..    in the least squares sense.
     !!--..
     !!--..    This subroutine completes the solution of the problem if it is provided
-    !!--..    with the necessary information from the qr factorization, with column
-    !!--..    pivoting, of a.  That is, if a*p = q*r, where p is a permutation matrix,
-    !!--..    q has orthogonal columns, and r is an upper triangular matrix with diagonal
+    !!--..    with the necessary information from the QR factorization, with column
+    !!--..    pivoting, of A.  That is, if A*P = Q*R, where P is a permutation matrix,
+    !!--..    Q has orthogonal columns, and R is an upper triangular matrix with diagonal
     !!--..    elements of nonincreasing magnitude, then qrsolv expects the full upper
-    !!--..    triangle of r, the permutation matrix p, and the first n components of
-    !!--..    (q transpose)*b.  The system a*x = b, d*x = 0, is then equivalent to
+    !!--..    triangle of R, the permutation matrix P, and the first n components of
+    !!--..    (Q transpose)*b.  The system A*x = b, D*x = 0, is then equivalent to
     !!--..
     !!--..               t       t
-    !!--..        r*z = q *b ,  p *d*p*z = 0 ,
+    !!--..        R*z = q *b ,  p *d*p*z = 0 ,
     !!--..
     !!--..    where x = p*z. if this system does not have full rank,
     !!--..    then a least squares solution is obtained.  On output qrsolv

@@ -40,12 +40,12 @@ rem
    if [%_COMP%]==[gfortran] (
       if [%_DEBUG%]==[Y] (
          if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran64_debug)
-         (set OPT0=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics)
-         (set OPT1=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics)
+         (set OPT0=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics -fmax-stack-var-size=6000000)
+         (set OPT1=-g -O0 -std=f2008 -Wall -fdec-math -fbacktrace  -ffree-line-length-0 -fall-intrinsics -fmax-stack-var-size=6000000)
       ) else (
          if [%_VER%]==[m32] (set DIRECTORY=gfortran) else (set DIRECTORY=gfortran64)
-         (set OPT0=-O0 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics)
-         (set OPT1=-O3 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics)
+         (set OPT0=-O0 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics -fmax-stack-var-size=6000000)
+         (set OPT1=-O3 -std=f2008 -ffree-line-length-0 -fdec-math -fall-intrinsics -fmax-stack-var-size=6000000)
       )
       (set OPT2=)
    )
@@ -62,7 +62,7 @@ rem
       gfortran -c ODR_wrapper.f90       %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
       gfortran -c rL_kvInt_Mod.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
       gfortran -c rL_kvInt1D.f90          %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
-      gfortran -o rL_kvInt1D.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml -L%CRYSFML%\%DIRECTORY%\ODR_sp -lodr_sp
+      gfortran -o rL_kvInt1D_gf.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml -L%CRYSFML%\%DIRECTORY%\ODR_sp -lodr_sp
    )
 rem
 rem   if exist %FULLPROF% copy XRFit.exe %FULLPROF%

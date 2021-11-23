@@ -48,7 +48,7 @@
        if (inum == 0) then
           write(unit=lun,fmt="(/,a,i2,a)") " => There is no correlations greater than ",c%corrmax,"% "
        else
-          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," values of Correlation > ",c%corrmax,"%"
+          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," pairs of parameters with Correlation > ",c%corrmax,"%"
        end if
 
        write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS",&
@@ -120,7 +120,7 @@
        if (inum == 0) then
           write(unit=lun,fmt="(/,a,i2,a)") " => There is no correlations greater than ",c%corrmax,"% "
        else
-          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," values of Correlation > ",c%corrmax,"%"
+          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," pairs of parameters with Correlation > ",c%corrmax,"%"
        end if
 
        write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS",&
@@ -141,7 +141,7 @@
     End Subroutine Info_LSQ_LM_VS
 
     !!----
-    !!----  Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
+    !!----  Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal,text_info)
     !!----   real(kind=cp),              intent(in)     :: chi2       !Final Chi2
     !!----   real(kind=cp),              intent(in)     :: FL         !Final Marquardt lambda
     !!----   integer,                    intent(in)     :: nobs       !Number of data points
@@ -152,15 +152,16 @@
     !!----   integer,                    intent(in)     :: lun        !Logical unit for output
     !!----   type(LSQ_conditions_type),  intent(in)     :: c          !Conditions of the refinement
     !!----   type(LSQ_State_Vector_type),intent(in)     :: vs         !State vector (parameters of the model)
+    !!----   character(len=*),           intent(in)     :: algor      !Used algorithm CURFIT or LEVMAR
     !!----   character(len=*), optional, intent(in)     :: out_obscal !If present the vectors X,Y,Yc,Sig(=sqrt(1/w))
     !!----                                                            !Are output in a file called LM_fit.xy
-    !!----   character(len=*),           intent(in)     :: algor      !Used algorithm CURFIT or LEVMAR
+    !!----   character(len=*), optional, intent(in)     :: text_info  !If present, this text is written in the unit Lun
     !!----
     !!----  Subroutine for output information of the least squares program at the end of refinement
     !!----
     !!---- Update: August - 2009, January 2021
     !!
-    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal)
+    Module Subroutine Info_LSQ_Output(Chi2,FL,Nobs,X,Y,Yc,W,Lun,c,vs,algor,out_obscal,text_info)
        !---- Arguments ----!
        real(kind=cp),              intent(in)     :: chi2
        real(kind=cp),              intent(in)     :: FL
@@ -174,13 +175,19 @@
        type(LSQ_State_Vector_type),intent(in)     :: vs
        character(len=*),           intent(in)     :: algor
        character(len=*), optional, intent(in)     :: out_obscal
-
+       character(len=*), optional, intent(in)     :: text_info
        !---- Local variables ----!
        integer       :: i,j,inum, lob=22
        real(kind=dp) :: rfact,rwfact,riobs,rex
        real(kind=cp) :: del,g2
+       character(len=:), allocatable :: info_text
 
        !---- Final calculation and writings R-Factors calculations ----!
+       if(present(text_info)) then
+         info_text=" FOR "//trim(text_info)
+       else
+         info_text="  "
+       end if
        rfact=0.0
        rwfact=0.0
        riobs=0.0
@@ -227,10 +234,10 @@
        if (inum == 0) then
           write(unit=lun,fmt="(/,a,i2,a)") " => There is no correlations greater than ",c%corrmax,"% "
        else
-          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," values of Correlation > ",c%corrmax,"%"
+          write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," pairs of parameters with Correlation > ",c%corrmax,"%"
        end if
 
-       write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS",&
+       write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS"//info_text,&
                                            "      --------------------------------------------------------"
        write(unit=lun,fmt="(/,a,/)") &
        "    #   Parameter name                       No.(Model)         Final-Value   Standard Deviation"

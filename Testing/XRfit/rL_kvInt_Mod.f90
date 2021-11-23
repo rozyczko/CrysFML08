@@ -182,8 +182,8 @@
 
      fjacd=0.0
      !To avoid warnings
-      ! if(istop == 9876543) write(*,*) "This is unbelivable!"
-      ! if(ifixb(1) == 987 .and. ifixx(1,1) == 654 .and. xplusd(1,1) == 456) write(*,*) "This is also unbelivable!!"
+        if(istop == 987654) write(*,*) "This is unbelivable!"
+        if(ifixb(1) == 987 .and. ifixx(1,1) == 654 .and. xplusd(1,1) == 456) write(*,*) "This is also unbelivable!!"
      !end doing nothing to avoid warnings
      lvs=vs                   !Set the local state vector
      do i=1,lvs%np
@@ -227,7 +227,6 @@
 
      !Local variables
      integer                     :: i,j,no
-     real(kind=cp)               :: xval,yval
      type(LSQ_State_Vector_type) :: lvs
      Real(Kind=cp),Dimension(n)  :: der
      lvs=vs                 !Set Final value of Marquardt F-Lambdathe local state vector

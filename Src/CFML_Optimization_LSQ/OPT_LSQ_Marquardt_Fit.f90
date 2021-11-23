@@ -383,7 +383,7 @@
     End Subroutine Curfit_v2
 
     !!----
-    !!---- Module Subroutine Marquardt_Fit(Model_Functn, X, Y, W, Yc, Nobs, c, vs, Ipr, Chi2, scroll_lines)
+    !!---- Module Subroutine Marquardt_Fit(Model_Functn, X, Y, W, Yc, Nobs, c, vs, Ipr, Chi2, scroll_lines,text_info)
     !!----    real(kind=cp), dimension(:),             intent(in)     :: x             !Vector of x-values
     !!----    real(kind=cp), dimension(:),             intent(in)     :: y             !Vector of observed y-values
     !!----    real(kind=cp), dimension(:),             intent(in out) :: w             !Vector of weights-values (1/variance)
@@ -395,6 +395,7 @@
     !!----    real(kind=cp),                           intent(out)    :: chi2          !Reduced Chi-2
     !!----    character(len=*),dimension(:), optional, intent(out)    :: scroll_lines  !If present, part of the output is stored
     !!----                                                                             !in this text for treatment in the calling program
+    !!----    character(len=*),              optional, intent(in)     :: text_info     !If present, a text is passed to Info_LSQ_Output
     !!----
     !!----    Model_functn                                                             !Name of the subroutine calculating yc(i) for point x(i)
     !!----    Interface                                                                !Interface for the Model_Functn subroutine
@@ -448,6 +449,7 @@
     !!--++    real(kind=cp),              intent(out)    :: chi2   !Reduced Chi-2
     !!--++    character(len=*),dimension(:), intent(out), optional  :: scroll_lines  !If present, part of the output is stored
     !!--++                                                                           !in this text for treatment in the calling program
+    !!--++    character(len=*),dimension(:), optional, intent(out)    :: scroll_lines  !If present, part of the output is stored
     !!--++
     !!--++    Model_functn                                            !Name of the subroutine calculating yc(i) for point x(i)
     !!--++    Interface                                               !Interface for the Model_Functn subroutine
@@ -494,7 +496,7 @@
     !!----
     !!---- Update: March - 2005
     !!
-    Module Subroutine Marquardt_Fit_v1(Model_Functn,X,Y,W,Yc,Nobs,c,vs,Ipr,Chi2,scroll_lines)
+    Module Subroutine Marquardt_Fit_v1(Model_Functn,X,Y,W,Yc,Nobs,c,vs,Ipr,Chi2,scroll_lines,text_info)
        !---- Arguments ----!
        real(kind=cp),   dimension(:), intent(in)             :: x,y
        real(kind=cp),   dimension(:), intent(in out)         :: w
@@ -504,6 +506,7 @@
        type(LSQ_State_Vector_type),   intent(in out)         :: vs
        real(kind=cp),                 intent(   out)         :: chi2
        character(len=*),dimension(:), intent(out), optional  :: scroll_lines
+       character(len=*),              intent(in),  optional  :: text_info
 
        Interface
         Subroutine Model_Functn(iv,Xv,ycalc,aa,der)
@@ -683,7 +686,11 @@
           end do
        end if
 
-       call Info_LSQ_Output(chi2,FL,nobs,x,y,yc,w,Ipr,c,vs,"CURFIT")
+       if(present(text_info)) then
+          call Info_LSQ_Output(chi2,FL,nobs,x,y,yc,w,Ipr,c,vs,"CURFIT",text_info)
+       else
+          call Info_LSQ_Output(chi2,FL,nobs,x,y,yc,w,Ipr,c,vs,"CURFIT")
+       end if
 
     End Subroutine Marquardt_Fit_v1
 
@@ -759,7 +766,7 @@
     !!--++
     !!--++ Update: August - 2009
     !!
-    Module Subroutine Marquardt_Fit_v2(Model_Functn,d,c,vs,Ipr,Chi2,scroll_lines)
+    Module Subroutine Marquardt_Fit_v2(Model_Functn,d,c,vs,Ipr,Chi2,scroll_lines,text_info)
        !---- Arguments ----!
        Type(LSQ_Data_Type),           intent(in out)         :: d
        type(LSQ_conditions_type),     intent(in out)         :: c
@@ -767,6 +774,7 @@
        integer,                       intent(in)             :: Ipr
        real(kind=cp),                 intent(   out)         :: chi2
        character(len=*),dimension(:), intent(out), optional  :: scroll_lines
+       character(len=*),              intent(in),  optional  :: text_info     !If present, a text is passed to Info_LSQ_Output
 
        Interface
         Subroutine Model_Functn(iv,xv,ycalc,Vsa,calder)
@@ -925,8 +933,11 @@
           call curfit_v2(Model_Functn,d,c,vs,fl,chi2,ifail,nt)
        end if
 
-
-       call Info_LSQ_Output(chi2,FL,d%nobs,d%x,d%y,d%yc,d%sw,Ipr,c,vs,"CURFIT")
+       if(present(text_info)) then
+          call Info_LSQ_Output(chi2,FL,d%nobs,d%x,d%y,d%yc,d%sw,Ipr,c,vs,"CURFIT",text_info)
+       else
+          call Info_LSQ_Output(chi2,FL,d%nobs,d%x,d%y,d%yc,d%sw,Ipr,c,vs,"CURFIT")
+       end if
 
     End Subroutine Marquardt_Fit_v2
 

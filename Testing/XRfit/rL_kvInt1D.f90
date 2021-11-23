@@ -18,7 +18,7 @@
 
     real(kind=cp), dimension(6),   public :: cell= [5.0,5.0,5.0,90.0,90.0,90.0]
     logical,                       public :: cell_given=.false., kvec_given=.false.,sigma_given=.false., zero_given=.false., &
-                                             spg_given=.false., scan_range=.false.,fwgf_given=.false.,fwgs_given=.false.
+                                             spg_given=.false., scan_range=.false.,fwgf_given=.false.,fwgs_given=.false.,plot_ini=.false.
     real(kind=cp), dimension(3),   public :: h_ini, h_fin
     character(len=2), dimension(3),public :: scan_along=["a*","b*","c*"]
     type(Spg_Type),                public :: SpG
@@ -159,6 +159,9 @@
            Case("ALGOR")
               algor=adjustl(u_case(texte(6:)))
 
+           Case("PLOTINI")
+              plot_ini=.true.
+
            Case("SCANS")
               read(texte(6:),*,iostat=ier)  scan_ini, scan_fin
               if(ier /= 0) then
@@ -248,7 +251,6 @@
     use CFML_GlobalDeps,   only : cp, Err_CFML
     use CFML_BckPeaks
     use Input_output_data_mod
-    use CFML_DiffPatt,     only : DiffPat_E_type, Allocate_Pattern, FWHM_peak
     use rL_kvInt_Mod,      only : ngl,n_ba, NPEAKX, vs, c, d, Sum_PV_Peaks, nkvec,kvec, jsc, peak_pos,Intens, &
                                   fwhms,fwhmf,etas,etaf, satellite
     use CFML_Reflections,  only : h_absent
@@ -258,29 +260,6 @@
     public
 
     contains
-
-     Function Backg(x,n,b_pos,b_int) result(bgr)
-         real(kind=cp),              intent(in) :: x
-         integer,                    intent(in) :: n
-         real(kind=cp),dimension(n), intent(in) :: b_pos,b_int
-         real(kind=cp)                          :: bgr
-
-         integer       :: i1,i2,ib
-         real(kind=cp) :: tang
-         do ib=1,n-1
-           if(x >= b_pos(ib) .and. x <= b_pos(ib+1)) then
-             i1=ib
-             i2=ib+1
-            exit
-           end if
-         end do
-         if(abs(b_pos(i2)-b_pos(i1)) < 0.01) then
-            tang=0.0
-         else
-            tang=(x-b_pos(i1))/(b_pos(i2)-b_pos(i1))
-         end if
-         bgr=b_int(i1)+(b_int(i2)-b_int(i1))*tang
-     End Function Backg
 
      Subroutine set_initial_conditions(nscan)
        integer, intent(in)  :: nscan
@@ -301,33 +280,33 @@
        vs%code(1)= 1
 
        if(fwgf_given) then
-          vs%pv(4)= fwh0_f  !Assignment of global g0f_HPv in r.l.u.
-          vs%pv(5)= fwh1_f  !Assignment of global g1f_HPv in r.l.u./pos
-          vs%pv(6)= fwh2_f  !Assignment of global g2f_HPv in r.l.u./pos^2
+          vs%pv(4) = fwh0_f  !Assignment of global g0f_HPv in r.l.u.
+          vs%pv(5) = fwh1_f  !Assignment of global g1f_HPv in r.l.u./pos
+          vs%pv(6) = fwh2_f  !Assignment of global g2f_HPv in r.l.u./pos^2
           vs%pv(10)= eta0_f  !Assignment of global g0f_EtaPV
           vs%pv(11)= eta1_f  !Assignment of global g1f_EtaPV
        else
-          vs%pv(4)= 0.03  !Assignment of global g0_HPv in r.l.u.
-          vs%pv(5)= 0.00  !Assignment of global g1_HPv in r.l.u.
-          vs%pv(6)= 0.00  !Assignment of global g2_HPv in r.l.u.
-          vs%pv(10)= 0.0  !Assignment of global g0f_EtaPV
-          vs%pv(11)= 0.0  !Assignment of global g1f_EtaPV
+          vs%pv(4) = 0.03  !Assignment of global g0_HPv in r.l.u.
+          vs%pv(5) = 0.00  !Assignment of global g1_HPv in r.l.u.
+          vs%pv(6) = 0.00  !Assignment of global g2_HPv in r.l.u.
+          vs%pv(10)= 0.00  !Assignment of global g0f_EtaPV
+          vs%pv(11)= 0.00  !Assignment of global g1f_EtaPV
        end if
        if(fwgs_given) then
-          vs%pv(7)= fwh0_s  !Assignment of global g0f_HPv in r.l.u.
-          vs%pv(8)= fwh1_s  !Assignment of global g1f_HPv in r.l.u./pos
-          vs%pv(9)= fwh2_s  !Assignment of global g2f_HPv in r.l.u./pos^2
+          vs%pv(7) = fwh0_s  !Assignment of global g0f_HPv in r.l.u.
+          vs%pv(8) = fwh1_s  !Assignment of global g1f_HPv in r.l.u./pos
+          vs%pv(9) = fwh2_s  !Assignment of global g2f_HPv in r.l.u./pos^2
           vs%pv(12)= eta0_s  !Assignment of global g0f_EtaPV
           vs%pv(13)= eta1_s  !Assignment of global g1f_EtaPV
        else
-          vs%pv(7)= 0.03  !Assignment of global g0_HPv in r.l.u.
-          vs%pv(8)= 0.00  !Assignment of global g1_HPv in r.l.u.
-          vs%pv(9)= 0.00  !Assignment of global g2_HPv in r.l.u.
-          vs%pv(12)= 0.0  !Assignment of global g0f_EtaPV
-          vs%pv(13)= 0.0  !Assignment of global g1f_EtaPV
+          vs%pv(7) = 0.03  !Assignment of global g0_HPv in r.l.u.
+          vs%pv(8) = 0.00  !Assignment of global g1_HPv in r.l.u.
+          vs%pv(9) = 0.00  !Assignment of global g2_HPv in r.l.u.
+          vs%pv(12)= 0.00  !Assignment of global g0f_EtaPV
+          vs%pv(13)= 0.00  !Assignment of global g1f_EtaPV
        end if
-       vs%code(4) = 1
-       vs%code(7) = 1
+       vs%code(4)  = 1
+       vs%code(7)  = 1
        vs%code(10) = 1
        vs%code(12) = 1
 
@@ -401,25 +380,107 @@
          end if
        end do
        ! Provisory code for testing the initial conditions
-        !write(*,"(a)") " Testing the calculation with the initial conditions"
-        ch=0.0
-        do i=1,d%nobs
-          call Sum_PV_Peaks(i,d%x(i),d%yc(i),vs)
-          resid= (d%y(i)-d%yc(i))/d%sw(i) !here d%sw is sigma
-          ch=ch+resid*resid
-        end do
-        ch=ch/real(d%nobs-vs%np)
-        write(*,"(a,g14.5,a,i4)") " Initial Chi2: ",ch, " for scan #",nscan
-        !write(refl,"(a,3f6.2,a,3f6.2,a)") "Scan(",h_ini,"->", h_fin,") "
-        !call Output_Plot(d%nobs,d%x,d%y,d%yc,nscan,ch,refl,.true.)
+       call Test_Initial_Parameters(nscan,.false.)
+       if(plot_ini) then
+         write(refl,"(a,3f6.2,a,3f6.2,a)") "Scan(",h_ini,"->", h_fin,") "
+         call Output_Plot(d%nobs,d%x,d%y,d%yc,nscan,ch,refl,.true.)
+       end if
 
      End Subroutine set_initial_conditions
 
+     Subroutine Test_Initial_Parameters(nscan,weight)
+        integer, intent(in) :: nscan
+        logical, intent(in) :: weight
+        real(kind=cp) :: ch, resid
+        integer       :: i
+        write(*,"(a)") " => Calculation of the Chi2 for initial parameters:"
+        ch=0.0
+        do i=1,d%nobs
+          call Sum_PV_Peaks(i,d%x(i),d%yc(i),vs)
+          if(weight) then
+            resid= d%sw(i)*(d%y(i)-d%yc(i))**2  !here d%sw is weight
+            ch=ch+resid
+          else
+            resid= (d%y(i)-d%yc(i))/d%sw(i) !here d%sw is sigma
+            ch=ch+resid*resid
+          end if
+        end do
+        ch=ch/real(d%nobs-vs%np)
+        write(*,"(a,g14.5,a,i4)") " => Initial Chi2: ",ch, " for scan #",nscan
+     End Subroutine Test_Initial_Parameters
 
-     Subroutine manage_LSQ()
 
+     Subroutine manage_LSQ(L,redo)
+        integer, intent(in)     :: L
+        logical, intent(in out) :: redo
+        integer :: i,j
+        real(kind=cp) :: maxi
 
+           j=ngl+n_ba+1
+           maxi=0.0 !Maximum intensity
+           do i=1,npeakx
+             if(vs%pv(j+1) > maxi) maxi=vs%pv(j+1)
+             j=j+4
+           end do
+           j=ngl+n_ba+1
+           redo=.false.
+           if( L == 1) then
+              vs%code(2)=1  ! Zero1  Linear variation of the zero-shift
+              vs%code(5)=1  ! g1f_Hpv  Linear Variation of FWHM
+              vs%code(8)=1  ! g1s_Hpv
+
+              j=ngl+n_ba+1
+              do i=1,npeakx
+                 if( vs%pv(j+1) <= 0.11) then  !Negative intensites fixed to 0.5 (2.5)
+                    vs%pv(j+1) = 0.01
+                    vs%code(j+1)=0          !Fixed intensities
+                 else
+                    vs%code(j+1)=1
+                 end if
+                 !write(*,"(a,i3,a,f14.4,i4)") " Peak # ",i, "   Intensity:",vs%pv(j+1),vs%code(j+1)
+                 j=j+4
+              end do
+              redo=.true.
+              !j=13
+              !write(*,*) "Assignment of propagation vector parameters", jsc
+              !do i=1,nkvec
+              !  do k=1,3
+              !     j=j+1
+              !     if(k == jsc) then
+              !        vs%code(j)=1
+              !        redo=.true.
+              !     end if
+              !  end do
+              !end do
+              if(algor == "LEVENBERG-MARQUARDT" .or. algor == "CURFIT") then
+                 j = 0
+                 do i=1,vs%np
+                  if (vs%code(i) /= 0) j = j + 1
+                 end do
+                 c%npvar = j    ! number of refined parameters
+              end if
+           else if(L == 2) then
+              do i=1,npeakx
+                 if( vs%pv(j+1) <= 0.15) then  !Negative intensites fixed to 0.01 (2.15)
+                    vs%pv(j+1) = 0.01 !This put a positive number of the final intensity conserving the
+                    if(vs%spv(j+1) <= 0.0 ) then   !sigma obtained by LSQ
+                      vs%spv(j+1)= 2.15
+                    end if
+                 end if
+                 j=j+4
+              end do
+              redo=.false.
+           end if
      End Subroutine manage_LSQ
+
+     Subroutine Write_Initial_Conditions(L)
+        integer, intent(in) :: L
+        integer :: i
+        write(*,"(a,i3)") " Initial parameters for trial #",L
+        do i=1,vs%np
+           write(*,"(i4,a,f14.4,i3)") i, "  "//vs%nampar(i),vs%pv(i),vs%code(i)
+        end do
+     End Subroutine Write_Initial_Conditions
 
   End Module LSQ_management
 
@@ -436,7 +497,6 @@
     use CFML_Optimization_LSQ
     Use CFML_Maths,        only : zbelong,Set_Eps_Math,Locate
     use CFML_Strings,      only : pack_string
-    use CFML_DiffPatt,     only : DiffPat_E_type
     use rL_kvInt_Mod
     use LSQ_management
     use Input_output_data_mod
@@ -446,7 +506,7 @@
 
     Integer                   :: ll,ier,no,np,i,j,k,L,narg, numor
     Integer                   :: lun=1, i_out=7, i_hkl=8, i_odr=99, i_sc=10
-    Logical                   :: redo, exclude
+    Logical                   :: redo, exclude, weig
     Real(kind=cp)             :: timi,timf,aver, pos, fwh,sfwh
     real(kind=cp)             :: inten, sigma,aux1,aux2,aux3,chir
     real(kind=cp),dimension(3):: rhkl
@@ -484,17 +544,19 @@
     end if
     Open(Unit=i_out, File=trim(filecode)//".out",status="replace",action="write")
     Open(Unit=i_hkl, File=trim(filecode)//".hkl",status="replace",action="write")
-    Open(Unit=i_odr, File=trim(filecode)//".odr",status="replace",action="write")
-    if(c_print == 0) then
-        write(unit=i_odr,fmt="(a)")   " The output to this file has been blocked by the user: CPRINT=0"
-        write(unit=i_odr,fmt="(/,a)") " Recommended values for CPRINT to be provided in the CFL file"
-        write(unit=i_odr,fmt="(a)")   "   CPRINT  1001    <- Short Initial and Final summary  "
-        write(unit=i_odr,fmt="(a)")   "   CPRINT  0001    <- Short Final summary  "
-        write(unit=i_odr,fmt="(a)")   "   CPRINT  2002    <- Long Initial and Final summary"
-        write(unit=i_odr,fmt="(a)")   "   CPRINT  0004    <- Short Final summary in *.odr file and the screen"
-        write(unit=i_odr,fmt="(a)")   "   CPRINT  1111    <- Short Initial, Intermediate and Final summary"
-        write(unit=i_odr,fmt="(a)")   " See the Guide to ODRPACK95 for more options"
-        close(unit=i_odr)
+    if(algor=="ODR") then
+        Open(Unit=i_odr, File=trim(filecode)//".odr",status="replace",action="write")
+        if(c_print == 0) then
+            write(unit=i_odr,fmt="(a)")   " The output to this file has been blocked by the user: CPRINT=0"
+            write(unit=i_odr,fmt="(/,a)") " Recommended values for CPRINT to be provided in the CFL file"
+            write(unit=i_odr,fmt="(a)")   "   CPRINT  1001    <- Short Initial and Final summary  "
+            write(unit=i_odr,fmt="(a)")   "   CPRINT  0001    <- Short Final summary  "
+            write(unit=i_odr,fmt="(a)")   "   CPRINT  2002    <- Long Initial and Final summary"
+            write(unit=i_odr,fmt="(a)")   "   CPRINT  0004    <- Short Final summary in *.odr file and the screen"
+            write(unit=i_odr,fmt="(a)")   "   CPRINT  1111    <- Short Initial, Intermediate and Final summary"
+            write(unit=i_odr,fmt="(a)")   " See the Guide to ODRPACK95 for more options"
+            close(unit=i_odr)
+        end if
     end if
     !-------------------Start Program
     c%percent=50.0
@@ -616,24 +678,6 @@
          !   end if
          !end do
 
-
-         if(Err_CFML%flag) then
-            !Output of the scan giving rise to problems
-            write(unit=line,fmt="(a,i6.6,a)") "Scan_",np,".xys"
-            open(unit=i_sc, file=trim(line),status="replace",action="write")
-            write(unit=i_sc,fmt="(a)") "Problems in refinement: "//trim(texte)
-            write(unit=i_sc,fmt="(a)") "! "
-            write(unit=i_sc,fmt="(a)") "! "
-            write(unit=i_sc,fmt="(a)") "! "
-            write(unit=i_sc,fmt="(a)") "! "
-            write(unit=i_sc,fmt="(a)") "! "
-            do i=1,d%nobs
-                write(unit=i_sc,fmt="(3f14.4)") d%x(i),d%y(i),d%sw(i)
-            end do
-            close(unit=i_sc)
-            cycle
-         end if
-
          c%icyc=250
          c%iw=0
          c%corrmax=50.0
@@ -705,80 +749,40 @@
          !write(unit=*,fmt="(a,i6    )") " => Number of points: ",no
          !write(unit=*,fmt="(a,2f14.4)") " => Treating data in range: ",d%x(1),d%x(1)
 
-         ll=0
-         chiold=1.0e35  !Initialize chi-old for each scan
+         L=0
+         chiold=1.0e35  !Initialize chi-old for each scan (used only in ODR)
          !For marquardt fit d%sw should be the weights
-         if(algor == "CURFIT") d%sw=ww
+         weig=.false.
+         if(algor == "CURFIT" .or. algor == "MARQUARDT") then
+            d%sw=ww
+            weig=.true.
+         end if
          if(index(algor,"L") /= 0) algor="LEVENBERG-MARQUARDT"
-         profile=" "
+         profile=" "; texte=" "
+         write(texte,"(a,i3) ") " Scan #",np
          do
-           write(*,*) " Trial #",ll
+           write(*,*) " Trial #",L
+           if(L > 0) then
+             call Test_Initial_Parameters(np,weig)
+           end if
            Select Case(trim(algor))
               Case("CURFIT","MARQUARDT")
-                     call marquardt_fit(Sum_PV_Peaks,d,c,vs,i_out,chir,profile)
+                     call marquardt_fit(Sum_PV_Peaks,d,c,Vs,i_out,chir,profile,text_info=trim(texte))
               Case("ODR")
-                    call ODR_LSQ(profile_patt_odr,d,vs,c,lower,upper,c_print,lun=i_odr )
+                    call ODR_LSQ(profile_patt_odr,d,Vs,c,lower,upper,c_print,lun=i_odr )
               Case("LEVENBERG-MARQUARDT")
                    call Levenberg_Marquardt_Fit(profile_patt_LVM, d%nobs, c, Vs, chir, .true., texte)
            End Select
-           ll=ll+1
-           j=ngl+n_ba+1
-           aver=0.0 !Maximum intensity
-           do i=ngl+n_ba+1,vs%np
-             if(vs%pv(j+1) > aver) aver=vs%pv(j+1)
-             j=j+4
-           end do
-           j=ngl+n_ba+1
-           redo=.false.
-           if( ll == 1) then
-              vs%code(2)=1
-              vs%code(5)=1
-              vs%code(8)=1
-              do i=ngl+n_ba+1,vs%np
-                 !if( vs%code(j+1) == 0 .and. vs%pv(j+1) > 0.05*aver) then
-                 if( vs%code(j+1) == 0) then
-                   vs%code(j+1)=1
-                   redo=.true.
-                 end if
-                 j=j+4
-              end do
-              !j=13
-              !write(*,*) "Assignment of propagation vector parameters", jsc
-              !do i=1,nkvec
-              !  do k=1,3
-              !     j=j+1
-              !     if(k == jsc) then
-              !        vs%code(j)=1
-              !        redo=.true.
-              !     end if
-              !  end do
-              !end do
-              if(algor == "LEVENBERG-MARQUARDT") then
-                 j = 0
-                 do i=1,vs%np
-                  if (vs%code(i) /= 0) j = j + 1
-                 end do
-                 c%npvar = j    ! number of refined parameters
-              end if
-           else if(ll == 2) then
-              !do i=ngl+n_ba+1,vs%np
-              !   if( vs%code(j+1) == 0 .and. vs%pv(j+1) > 0.03*aver) then
-              !     vs%code(j)=0
-              !     vs%code(j+1)=1
-              !     redo=.true.
-              !   end if
-              !   j=j+4
-              !end do
-              !vs%code(4) = 1
-              !redo=.true.
-           end if
-           if(redo .and. ll < 10) cycle
+           L=L+1 !Increment the trial number
+           call manage_LSQ(L,redo)
+           !call Write_Initial_Conditions(L)
+           if(redo .and. L < 10) cycle
            exit
          end do
          if(algor == "ODR") then
             call Info_ODR_VS(Chi2,i_out,c,vs)
          else if (algor == "LEVENBERG-MARQUARDT") then
-            call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,ww,i_out,c,vs,algor)
+            call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,ww,i_out,c,vs,algor,text_info=trim(texte))
          else
             !Nothing to do because "CURFIT" calls directly to Info_LSQ_Output
          end if
