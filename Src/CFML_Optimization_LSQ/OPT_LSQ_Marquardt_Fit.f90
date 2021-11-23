@@ -825,7 +825,7 @@
                 scroll_lines(ntex)=line
               else
                  if(ifail /= 1) write(unit=*,fmt="(a)") trim(line)
-            end if
+             end if
              if (ABS(chi2-chi1)*100/Chi2 <= 0.001 .and. ifail==1) then
                 c%reached=.true.
                 line= " "

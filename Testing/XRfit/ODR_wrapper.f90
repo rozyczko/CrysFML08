@@ -19,9 +19,9 @@
     contains
 
      Subroutine ODR_LSQ(fcn,d,vs,c,lower,upper,iprint,lun)
+       Type(LSQ_Data_Type),                       intent(in out) :: d   !Data to be refined (set in the main program)
        Type(LSQ_State_Vector_type),               intent(in out) :: vs  !State vector containing pv, code, vs%nampar,etc..
        Type(LSQ_Conditions_type ),                intent(in)     :: c   !conditions of the algorithm
-       Type(LSQ_Data_Type),                       intent(in out) :: d   !Data to be refined (set in the main program)
        real(kind=cp), dimension(vs%np), optional, intent(in)     :: lower,upper
        integer,                         optional, intent(in)     :: iprint,lun
        interface
@@ -87,12 +87,28 @@
        !Call to the following subroutine to obtain the indices of the different parts of the working array
        !that contains information about estimated standard deviations of the final parameters: index SDI
        !call dwinf(n,m=1,np,nq=1,ldwe=1,ld2we=1,.false.....
-
-       call dwinf(d%nobs,1,vs%np,1,1,1,.false.,deltai,epsi,xplusi,fni,sdi,vcvi,rvari,wssi,wssdei,wssepi,rcondi,etai,  &
+       isodr=.false.
+       call dwinf(d%nobs,1,vs%np,1,1,1,isodr,deltai,epsi,xplusi,fni,sdi,vcvi,rvari,wssi,wssdei,wssepi,rcondi,etai,  &
                   olmavi,taui,alphai,actrsi,pnormi,rnorsi,prersi,partli,sstoli,taufci,epsmai,beta0i,betaci,betasi,  &
                   betani,si,ssi,ssfi,qrauxi,ui,fsi,fjacbi,we1i,diffi,deltsi,deltni,ti,tti,omegai,fjacdi,wrk1i,wrk2i,&
                   wrk3i,wrk4i,wrk5i,wrk6i,wrk7i,loweri,upperi,lwkmn)
-       vs%spv(1:vs%np)=work(sdi:sdi+vs%np-1)  !Standard deviations
+
+       !WORK(SDI) is the first element of a p×1 array SD containing the standard deviations
+       !SDBETA of the function parameters BETA, i.e., the square roots of the diagonal
+       !entries of the covariance matrix, where
+       !WORK(SDI-1+K) = SD(K) = sqrt(V(K,K))=sigma(beta) for K = 1, . . . , p.
+       !
+       !The standard deviations are only computed when the
+       !third digit of JOB is less than or equal to 1. (See §2.A.ii, subroutine
+       !argument JOB, and §4.B.) Rows of SD corresponding to fixed elements
+       !of BETA, and to elements dropped because they induced rank deficiency,
+       !are set to zero.
+       !SDI = 2nm + 2nq + 1.
+       do i=1,vs%np
+          vs%spv(i)=work(sdi-1+i)
+          write(*,"(i5,a,2f15.5)") i,vs%nampar(i),vs%pv(i),vs%spv(i)
+       end do
+       !vs%spv(1:vs%np)=work(sdi:sdi+vs%np-1)  !Standard deviations
 
        if(allocated(correl)) deallocate(correl)
        allocate(correl(vs%np,vs%np))
@@ -162,13 +178,13 @@
        write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS",&
                                            "      --------------------------------------------------------"
        write(unit=lun,fmt="(/,a,/)") &
-       "    #   Parameter name                          Final-Value   Standard Deviation"
+       "    #   Parameter name                               Final-Value   Standard Deviation"
 
        do i=1,vs%np
           if (vs%code(i) /= 0) then
-            write(unit=lun,fmt="(i5,a,2f20.5)")    i ,"    "//vs%nampar(i), vs%pv(i),vs%spv(i)
+            write(unit=lun,fmt="(i5,a,2f15.5)")    i ,"    "//vs%nampar(i), vs%pv(i),vs%spv(i)
           else
-            write(unit=lun,fmt="(i5,a,f20.5,a20)") i ,"    "//vs%nampar(i), vs%pv(i),"Fixed"
+            write(unit=lun,fmt="(i5,a,f15.5,a15)") i ,"    "//vs%nampar(i), vs%pv(i),"Fixed"
           end if
        end do
 

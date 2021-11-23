@@ -659,7 +659,7 @@ Module  TOF_Diffraction
             dval(5)  = dval(5)  + Intens(l)*deriv%sigma*der_sig0(l)!DOmega/Dsigma * Dsigma/DSig-0
             dval(6)  = dval(6)  + Intens(l)*deriv%eta              !DOmega/Deta
             dval(j)  = dval(j)  - Intens(l)*deriv%dt               !DOmega/Ddel * Ddel/Dp(j) <- Bragg Pos.
-            dval(j+1)= dval(j+1)+ omega                         !Dprofil/Dri  <- Integr. Intensity
+            dval(j+1)= dval(j+1)+ omega                            !Dprofil/Dri  <- Integr. Intensity
             dval(j+2)= dval(j+2)+ Intens(l)*deriv%sigma            !DOmega/DSh-sigma
             dval(j+3)= dval(j+3)+ Intens(l)*deriv%alfa             !DOmega/DSh-alfa
             dval(j+4)= dval(j+4)+ Intens(l)*deriv%beta             !DOmega/DSh-beta

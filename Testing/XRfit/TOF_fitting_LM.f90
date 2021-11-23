@@ -78,13 +78,13 @@
       character(len=126) :: xrf_file
  !    Rewriting the input file
       inquire(unit=8,opened=opn)
-      if(.not. opn .and. icont == 0) then  
+      if(.not. opn .and. icont == 0) then
          open(Unit=8,file=trim(filecode)//".new",status="replace",action="write")
-      else 
+      else
          inquire(file=trim(filecode)//".new",opened=opn)
-         if(.not. opn) then 
+         if(.not. opn) then
            open(Unit=8,file=trim(filecode)//".new",status="replace",action="write")
-         else 
+         else
            open(Unit=8,file=trim(filecode)//".pik",status="replace",action="write")
          end if
       end if
@@ -186,7 +186,7 @@
           End Do
         End If
       close (unit=23)
-      
+
       inquire(unit=22,opened=opn)
       if(.not. opn) &
       open(unit=22,file=trim(filecode)//".irf",status="replace",action="write")
@@ -465,7 +465,7 @@
       if(sum(vs%code(j:j+5)) > 0) npeaks_rf=npeaks_rf+1
       j=j+nshp_tof
      END DO
-     
+
      if(icont == 0) close(unit=1)
 
      call set_nampar_tof(n_ba,npeaks)
