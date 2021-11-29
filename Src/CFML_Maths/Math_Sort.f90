@@ -228,4 +228,26 @@ Submodule (CFML_Maths) Maths_Sort
 
     End Function Sort_R
 
+    Module Subroutine bubblesort(A,n)
+       integer, dimension(:), intent(in out) :: A
+       integer, optional,     intent(in)     :: n
+       integer :: i, j, temp,m
+       logical :: swapped
+
+       m=size(A)
+       if(present(n)) m=n
+       do j = m-1, 1, -1
+          swapped = .false.
+          do i = 1, j
+             if (A(i) > A(i+1)) then
+                temp = A(i)
+                A(i) = A(i+1)
+                A(i+1) = temp
+                swapped = .true.
+             end if
+          end do
+          if (.not. swapped) exit
+       end do
+    End Subroutine bubblesort
+
 End Submodule Maths_Sort

@@ -3,11 +3,13 @@
    use CFML_Optimization_LSQ, only: Max_Free_par, LSQ_State_Vector_type, LSQ_Conditions_type, LSQ_Data_Type
    Use CFML_Profiles,         only: Pseudovoigt_Der
    Use CFML_Strings,          only: pack_string
+   Use CFML_Maths,            only: sort
    implicit none
    private
 
    !Public subroutines
-   public:: Sum_PV_peaks, set_nampar, profile_patt_odr, profile_patt_LVM, Back_Chebychev, gen_peaks, Allocate_Globals
+   public:: Sum_PV_peaks, set_nampar, profile_patt_odr, profile_patt_LVM, Back_Chebychev, gen_peaks, Allocate_Globals, &
+            Set_weakness, Sigma_Back, Update_Peaks
 
    !Global public variables
    character(len=132),public          :: title
@@ -17,18 +19,18 @@
    integer,      public               :: npeakx,jsc
    integer,      public               :: n_ba         ! number of background parameters
    integer,      public               :: nkvec        ! number of propagation vectors
-   real(kind=cp),public               :: chi2, chiold,x_ini,x_fin
+   real(kind=cp),public               :: chi2, chiold,x_ini,x_fin, threshold=3.0
    integer,      public,dimension(:,:),allocatable :: hkl   !(3+nkvec,npeakx) !Allocated in generation of peaks
    integer,      public,dimension(:),  allocatable :: nharm !( nkvecx)        !Allocated after reading CFL
    real(kind=cp),public,dimension(:,:),allocatable :: kvec  !(3,nkvec)        !Allocated after reading CFL
    real(kind=cp),public,dimension(:),  allocatable :: peak_pos,corr_pp  !(npeakx) !Allocated in generation of peaks and Allocate_Globals, ideal and corrected peak positions
    real(kind=cp),public,dimension(:),  allocatable :: Intens    !(npeakx) All items below need a call to Allocate_Globals
-   real(kind=cp),public,dimension(:),  allocatable :: fwhmf,etaf,fwhms,etas
+   real(kind=cp),public,dimension(:),  allocatable :: fwhmf,etaf,fwhms,etas,fwhm,eta,sfwhm,seta
    real(kind=cp),public,dimension(:),  allocatable :: der_g0H,der_g1H,der_g2H
    real(kind=cp),public,dimension(:),  allocatable :: der_g0Eta,der_g1Eta
    real(kind=cp),public,dimension(:),  allocatable :: der_z0,der_z1,der_z2
    real(kind=cp),public,dimension(:,:),allocatable :: der_k
-   logical,      public,dimension(:),  allocatable :: satellite  !Allocated in generation of peaks
+   logical,      public,dimension(:),  allocatable :: satellite,weak_dyn  !Allocated in generation of peaks and Allocate_Globals
 
    Type(LSQ_State_Vector_type),      public :: vs  !State vector containing pv, code, vs%nampar,etc..
    Type(LSQ_Conditions_type ),save,  public :: c   !conditions of the algorithm
@@ -48,13 +50,14 @@
      real(kind=cp), dimension(3,nkv),          intent(in)  :: kv          ! Modulation vectors
      integer,       dimension(  nkv),          intent(in)  :: nhar        ! Maximum harmonic index
      integer,                                  intent(out) :: n           ! Number of generated peaks
-     integer,     dimension(:,:),  allocatable,intent(out) :: h           ! Indices of of reflections
+     integer,     dimension(:,:),  allocatable,intent(out) :: h           ! Indices of reflections
      real(kind=cp), dimension(:),  allocatable,intent(out) :: peakp       ! Peak positions in r.l.u. along "js"
      logical,       dimension(:),  allocatable,intent(out) :: satel       ! Satellite indicator
      !
      !--- Local variables ---!
-     integer       :: i,j,k,L, ini, fin, nf, ns, np
+     integer       :: i,j,k,L, ini, fin, nf, ns, np, isc
      real(kind=cp) :: pos, x1,x2
+     integer, dimension(:), allocatable :: ind
 
      x1=h_ini(js); x2=h_fin(js)
      ini=nint(x1); fin=nint(x2)
@@ -71,8 +74,9 @@
      if(allocated(h)) deallocate(h)
      if(allocated(peakp)) deallocate(peakp)
      if(allocated(satel)) deallocate(satel)
+     if(allocated(ind)) deallocate(ind)
      allocate(h(3+nkv,np))   !The allocation here may be higher than the final number of peaks "n"
-     allocate(peakp(np),satel(np))
+     allocate(peakp(np),satel(np), ind(np))
      peakp=0.0; satel=.false.
      h=0
      peakp=0.0
@@ -104,6 +108,19 @@
          end do
        end if
      end do
+     !Reorder the peaks to make them increasing in jsc coordinate
+
+     ind=sort(peakp,n)
+     open(newunit=isc,status="scratch",form="unformatted",action="readwrite")
+     do i=1,n
+       j=ind(i)
+       write(isc) peakp(j),h(:,j),satel(j)
+     end do
+     rewind(unit=isc)
+     do i=1,n
+      read(isc) peakp(i),h(:,i),satel(i)
+     end do
+     close(isc)
    End Subroutine Gen_Peaks
 
    Subroutine Allocate_Globals(n)
@@ -112,8 +129,12 @@
      allocate(Intens(n))
      Intens=0.0
      if(allocated(fwhmf))  deallocate(fwhmf)
-     allocate(fwhmf(n))
-     fwhmf=0.0
+     if(allocated(fwhm))  deallocate(fwhm)
+     if(allocated(sfwhm))  deallocate(sfwhm)
+     if(allocated(eta))  deallocate(eta)
+     if(allocated(seta))  deallocate(seta)
+     allocate(fwhmf(n),fwhm(n),eta(n),sfwhm(n),seta(n))
+     fwhmf=0.0; fwhm=0.0; eta=0.0; sfwhm=0.0; seta=0.0
      if(allocated(fwhms))  deallocate(fwhms)
      allocate(fwhms(n))
      fwhmf=0.0
@@ -153,6 +174,9 @@
      if(allocated(der_k))  deallocate(der_k)
      allocate(der_k(9,n))
      der_k=0.0
+     if(allocated(weak_dyn))  deallocate(weak_dyn)
+     allocate(weak_dyn(n))
+     weak_dyn=.false.
    End Subroutine Allocate_Globals
 
    Subroutine profile_patt_odr(n,m,np,nq,ldn,ldm,ldnp,beta,xplusd,ifixb,  &
@@ -325,22 +349,41 @@
       Real(kind=cp) :: thx,rj,derv,c
       integer :: j
 
-      bk=par(1)
-      if(present(der)) then
-        der(1:n)= 0.0
-        der(1)  = 1.0
-      end if
       thx=2.0*(x-0.5*(x1+x2))/(x2-x1)
       if(thx < -1.0) thx=-1.0
       if(thx >  1.0) thx= 1.0
       c=acos(thx)
-      do j=1,n-1
-        rj=real(j,kind=cp)
+      bk=0.0
+      do j=1,n
+        rj=real(j-1,kind=cp)
         derv=cos(rj*c)
-        bk=bk+par(j+1)*derv
-        if(present(der)) der(j+1)=der(j+1)+derv
+        bk=bk+par(j)*derv
+        if(present(der)) der(j)=derv
       end do
    End Subroutine Back_Chebychev
+
+   Function Sigma_Back(x,x1,x2,n,sig_par) result(sigmab)
+     real(kind=cp),               intent(in) :: x,x1,x2
+     integer,                     intent(in) :: n
+     real(kind=cp), dimension(n), intent(in) :: sig_par
+     real(kind=cp)                           :: sigmab
+      !--- Local variables ---!
+      Real(kind=cp) :: thx,rj,derv,c
+      integer :: j
+
+      sigmab=0.0
+      thx=2.0*(x-0.5*(x1+x2))/(x2-x1)
+      if(thx < -1.0) thx=-1.0
+      if(thx >  1.0) thx= 1.0
+      c=acos(thx)
+      do j=1,n
+        rj=real(j-1,kind=cp)
+        derv=cos(rj*c)
+        sigmab=sigmab+(derv*sig_par(j))**2
+      end do
+      sigmab=sqrt(sigmab)
+   End Function Sigma_Back
+
    !!----
    !!---- Subroutine Sum_Pv_Peaks(I,Xval,Ycalc,Vsa,CalDer)
    !!----
@@ -546,5 +589,70 @@
         Vsa%dpv(14:22)=  kder    !     "k1_x", "k1_y", "k1_z", "k2_x", "k2_y", "k2_z"  ....
      End If
    End Subroutine Sum_PV_Peaks
+
+   Function Ymax_peak(L) result(YmaxP)
+      integer,intent(in) :: L
+      real(kind=cp)      :: YmaxP
+      !
+      real(kind=cp):: fwh,etav,profil
+      if(satellite(L)) then
+        fwh=fwhms(L)
+        etav=etas(L)
+      else
+        fwh=fwhmf(L)
+        etav=etaf(L)
+      end if
+      call Pseudovoigt_Der(0.0,[fwh,etav],profil)
+      YmaxP=Intens(L)*profil !Maximum contribution to ycalc of peak L
+   End Function Ymax_peak
+
+   Subroutine Set_weakness()
+     integer :: L
+     real(kind=cp) :: ymax,sbgr
+     do L=1,npeakx
+        ymax=Ymax_peak(L)
+        sbgr=Sigma_Back(corr_pp(L),x_ini,x_fin,n_ba,vs%spv(ngl+1:ngl+n_ba))
+        if(ymax > threshold*sbgr) then
+          weak_dyn(L) = .false.
+        else
+          weak_dyn(L) = .true.
+        end if
+     end do
+   End Subroutine Set_weakness
+
+   Subroutine Update_Peaks()
+     integer       :: i,j
+     real(kind=cp) :: pos,fwh,sfwh,et,set
+     j=ngl+n_ba+1
+     Do i=1,npeakx
+        pos= peak_pos(i)
+        corr_pp(i) = pos + Vs%Pv(j) + Vs%Pv(1) + pos*(Vs%Pv(2)+Vs%Pv(3)*pos)
+        Intens(i)=Vs%Pv(j+1)
+        if(Intens(i) < 0.1 .and. vs%spv(j+1) <= 0.1 ) then   !sigma obtained by LSQ
+          vs%spv(j+1)= Sigma_Back(corr_pp(i),x_ini,x_fin,n_ba,vs%spv(ngl+1:ngl+n_ba)) / threshold
+          if(vs%spv(j+1) < 0.1) vs%spv(j+1)=2.5
+        else if(vs%spv(j+1) <= 0.01) then
+            vs%spv(j+1)=sqrt(vs%pv(j+1))
+        end if
+        if(satellite(i)) then
+          fwh=Vs%Pv(7) + pos*(Vs%Pv(8) + pos*Vs%Pv(9))     !Global Satellite reflections FWHM
+          fwhms(i)= fwh + Vs%Pv(j+2)                       !FWHM calculated for all satellite peaks
+          etas(i) = Vs%Pv(12) + Vs%Pv(13)*pos + Vs%Pv(j+3) !Global eta for satellite peaks
+          fwhm(i)=fwhms(i)
+          sfwhm(i)=sqrt(Vs%sPv(7)**2 + (pos*Vs%sPv(8))**2 + (pos*pos*Vs%sPv(9))**2 + vs%spv(j+2)**2)
+          eta(i) = etas(i)
+          seta(i)=sqrt(Vs%sPv(12)**2+ (pos*Vs%sPv(13))**2 + vs%spv(j+3)**2)
+        else
+          fwh=Vs%Pv(4) + pos*(Vs%Pv(5) + pos*Vs%Pv(6))     !Global Fundamental reflections FWHM
+          fwhmf(i)= fwh + Vs%Pv(j+2)                       !FWHM calculated for all fundamental peaks
+          etaf(i) = Vs%Pv(10) + Vs%Pv(11)*pos + Vs%Pv(j+3) !Global eta for fundamental peaks
+          fwhm(i)=fwhmf(i)
+          sfwhm(i)=sqrt(Vs%sPv(4)**2 + (pos*Vs%sPv(5))**2 + (pos*pos*Vs%sPv(6))**2 + vs%spv(j+2)**2)
+          eta(i) = etaf(i)
+          seta(i)=sqrt(Vs%sPv(10)**2+ (pos*Vs%sPv(11))**2 + vs%spv(j+3)**2)
+        end if
+        j=j+4
+     End do
+   End Subroutine Update_Peaks
 
  End Module rL_kvInt_Mod

@@ -87,7 +87,7 @@
               RowEchelonForm,                &
               Set_EPS_Math, SmithNormalForm, Svdcmp, Swap, Resolv_Sist_1x2,      &
               Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3,&
-              Lat_Modulo, Get_Plane_from_3Points, Get_Centroid_Coord
+              Lat_Modulo, Get_Plane_from_3Points, Get_Centroid_Coord, bubblesort
 
 
 
@@ -1230,6 +1230,11 @@
           integer                    , intent(in ) :: n         ! Dimension
           integer, dimension(n)                    :: indx      ! Index
        End Function Sort_R
+
+       Module Subroutine bubblesort(A,n)
+          integer, dimension(:), intent(in out) :: A
+          integer, optional,     intent(in)     :: n   !This is for ordering of a part of the array A  (n < dim(A))
+       End Subroutine bubblesort
 
        Pure Module Function Spline_D2Y(x,y,n,yp1,ypn) Result(ys)
           !---- Arguments ----!

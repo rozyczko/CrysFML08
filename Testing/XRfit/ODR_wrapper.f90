@@ -106,7 +106,7 @@
        !SDI = 2nm + 2nq + 1.
        do i=1,vs%np
           vs%spv(i)=work(sdi-1+i)
-          write(*,"(i5,a,2f15.5)") i,vs%nampar(i),vs%pv(i),vs%spv(i)
+          !write(*,"(i5,a,2f15.5)") i,vs%nampar(i),vs%pv(i),vs%spv(i)
        end do
        !vs%spv(1:vs%np)=work(sdi:sdi+vs%np-1)  !Standard deviations
 

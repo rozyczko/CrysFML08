@@ -34,6 +34,7 @@
       logical :: mag_only     = .false.
       logical :: print_all    = .false.
       logical :: split_mag    = .false.
+      logical :: pure_nuc     = .false.
       logical :: to_OG        = .false.
       character(len=:), allocatable :: title,forma
       character(len=:), allocatable :: filhkl
@@ -170,6 +171,9 @@
 
             Case("MAG_ONLY")
               cond%mag_only=.true.
+
+            Case("NUCLEAR","NOMAG")
+              cond%pure_nuc=.true.
 
             Case("EPSIL")
                read(unit=line(j:),fmt=*)  cond%epsg

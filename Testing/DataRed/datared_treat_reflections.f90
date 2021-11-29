@@ -23,7 +23,7 @@
     End Interface Treat_Reflections
 
    contains
-
+!                                            (R,cond,cell,SpG,Gk,tw,lun)
     Subroutine Treat_Reflections_nonConv(mode,R,cond,cell,SpG,kinfo,tw,lun,debug)
       character(Len=*),     intent(in)     :: mode
       type(Reflection_List),intent(in out) :: R
@@ -168,10 +168,18 @@
          if(mod(i,i_refout) == 0) write(unit=*,fmt="(a,i10)") "=> Reflection:",i
          info=Get_h_Info(hh,SpG,cond%magnetic)
          R%Ref(i)%imag=info(4)
-         if(sum(info(2:3)) > 1) then !"( i4,2F14.4,i5,4f8.2,a)"
-          write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
-          rej=rej+1
-          cycle
+         if(cond%pure_nuc) then
+           if(info(2) == 1) then
+             write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
+             rej=rej+1
+             cycle
+           end if
+         else
+           if(sum(info(2:3)) > 1) then !"( i4,2F14.4,i5,4f8.2,a)"
+             write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
+             rej=rej+1
+             cycle
+           end if
          end if
          R%Ref(i)%imag=info(4)
          if (itreat(i) == 0) then   !If not yet treated do the following
@@ -610,6 +618,7 @@
             else         !No Propagation vector is given
               h1=nint(h1)
               absent=h_absent(nint(h1),SpG)
+              write(*,*) nint(h1),absent
             end if
 
             if(absent) then  !reject absent reflections
