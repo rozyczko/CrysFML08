@@ -72,7 +72,7 @@
     End Type Reflection_List
 
     character(len=*),parameter,dimension(0:1),public :: warn_mess=["                      ", " <- Dubious reflection"]
-    character(len=*),parameter,dimension(0:2),public :: inf=["Nuclear  Reflection", "Magnetic Reflection","Mixed    Reflection"]
+    character(len=*),parameter,dimension(0:3),public :: inf=["Nuclear  Reflection", "Magnetic Reflection","Mixed    Reflection","                   "]
 
     contains
 

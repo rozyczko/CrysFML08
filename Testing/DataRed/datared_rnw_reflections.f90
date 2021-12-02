@@ -711,7 +711,7 @@
         write(unit=iou,fmt="(a)") line
         if(present(gen)) then
            do i=1,R%nref
-             write(unit=iou,fmt=fm0) i,R%Ref(i)%h,"  ",R%Ref(i)%hr,R%Ref(i)%intens,R%Ref(i)%sigma,R%Ref(i)%s,"   "//inf(R%Ref(i)%imag)
+             write(unit=iou,fmt=fm0) i,R%Ref(i)%h,"  ",R%Ref(i)%hr,R%Ref(i)%intens,R%Ref(i)%sigma,R%Ref(i)%s,"   "//trim(inf(R%Ref(i)%imag))
            end do
         else
            do i=1,R%nref

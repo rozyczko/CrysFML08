@@ -169,6 +169,7 @@
          info=Get_h_Info(hh,SpG,cond%magnetic)
          R%Ref(i)%imag=info(4)
          if(cond%pure_nuc) then
+           R%Ref(i)%imag=3
            if(info(2) == 1) then
              write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
              rej=rej+1
@@ -181,7 +182,7 @@
              cycle
            end if
          end if
-         R%Ref(i)%imag=info(4)
+
          if (itreat(i) == 0) then   !If not yet treated do the following
             indp=indp+1  !update the number of independent reflections
             itreat(i)=i  !Make this reflection treated
@@ -198,10 +199,10 @@
             sumai=sig*R%Ref(i)%intens
             call H_Equiv_List(hh, SpG, cond%Friedel, Mult,H_List,ipos)
             h_rep(:,indp)=H_List(:,ipos)
-            write(unit=iou,fmt=fm1) i,hh,"                  ",R%Ref(i)%intens,R%Ref(i)%sigma,R%Ref(i)%numor,R%Ref(i)%twtheta,"   "//inf(R%Ref(i)%imag)
+            write(unit=iou,fmt=fm1) i,hh,"                  ",R%Ref(i)%intens,R%Ref(i)%sigma,R%Ref(i)%numor,R%Ref(i)%twtheta,"   "//trim(inf(R%Ref(i)%imag))
             ! info= 0 => Reflection allowed (lattice, Nuclear, Magnetic, Ref-character)
             ! For the three initial componentes 0:allowed, 1:absent
-            ! Ref-character Info(4): 0:pure nuclear, 1:pure magnetic, 2:nuclear+magnetic
+            ! Ref-character Info(4): 0:pure nuclear, 1:pure magnetic, 2:nuclear+magnetic, 3: nomag
             if(cond%magnetic .and. R%Ref(i)%imag == 1) then
               n_mag=1
               intav_mag(indp)=R%Ref(i)%Intens
@@ -220,10 +221,19 @@
                kk=R%Ref(j)%h
                info=Get_h_Info(kk,SpG,cond%magnetic)
                R%Ref(j)%imag=info(4)
-               if(sum(info(2:3)) > 1) then
-                 write(unit=irej,fmt=fm3) R%Ref(j)%h,R%Ref(j)%intens,R%Ref(j)%sigma,1,R%Ref(j)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
-                 rej=rej+1
-                 cycle
+               if(cond%pure_nuc) then
+                  R%Ref(i)%imag=3
+                  if(info(2) == 1) then
+                    write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
+                    rej=rej+1
+                    cycle
+                  end if
+               else
+                  if(sum(info(2:3)) > 1) then
+                    write(unit=irej,fmt=fm3) R%Ref(j)%h,R%Ref(j)%intens,R%Ref(j)%sigma,1,R%Ref(j)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
+                    rej=rej+1
+                    cycle
+                  end if
                end if
                if (abs(R%Ref(i)%s-R%Ref(j)%s) > s_eps) exit
                if (h_equiv(hh,kk,SpG,cond%Friedel)) then ! if  hh eqv kk (Friedel law according to Frd)
