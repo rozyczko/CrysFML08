@@ -1,6 +1,6 @@
   Module ODR_wrapper
     use CFML_GlobalDeps,       only : cp, Err_CFML
-    use CFML_Optimization_LSQ, only : LSQ_State_Vector_type,LSQ_Conditions_type,LSQ_Data_Type,Max_Free_Par
+    use CFML_Optimization_LSQ, only : LSQ_State_Vector_type,LSQ_Conditions_type,LSQ_Data_Type
     use ODRPACK95
     implicit none
 
@@ -8,7 +8,7 @@
     Public :: ODR_LSQ, Info_ODR_VS
     !!--++
     !!--++ CORREL
-    !!--++    real(kind=cp), dimension(Max_Free_Par,Max_Free_Par), public  :: correl
+    !!--++    real(kind=cp), dimension(:,:), allocatable, private  :: correl
     !!--++
     !!--++    Variance/covariance/correlation matrix
     !!--++
@@ -70,7 +70,7 @@
        !allocate(work(lwork))  <= it is an output parameter from ODR
        job= 00032  !Analytical derivatives for ordinary LSQ, sigmas calculated at the solution
        ww=0.0
-       where(d%sw > 0.01_cp) ww=1.0/(d%sw*d%sw)
+       where(d%sw > 0.0_cp) ww=1.0_cp/(d%sw*d%sw)
        i_odr=6; i_print=1001
        if(present(lun)) i_odr=lun
        if(present(iprint)) i_print=iprint
@@ -147,16 +147,25 @@
     !!----
     !!---- Update: October 31 - 2021
     !!
-    Subroutine Info_ODR_VS(Chi2,Lun,c,vs)
+    Subroutine Info_ODR_VS(Chi2,Lun,c,vs,d,text_info)
        !---- Arguments ----!
        real(kind=cp),              intent(in)     :: chi2
        integer,                    intent(in)     :: lun
        type(LSQ_conditions_type),  intent(in)     :: c
        type(LSQ_State_Vector_type),intent(in)     :: vs
+       Type(LSQ_Data_Type),        intent(in)     :: d
+       character(len=*),optional,  intent(in)     :: text_info
 
        !---- Local variables ----!
        integer       :: i,j,inum
+       real(kind=cp) :: del,rwfact,rfact,riobs,rex
+       character(len=:), allocatable :: info_text
 
+       if(present(text_info)) then
+         info_text=" FOR "//trim(text_info)
+       else
+         info_text="  "
+       end if
        !---- Correlation matrix ----!
        write(unit=lun,fmt="(/,a,/)")   " => Correlation Matrix: "
        inum=0
@@ -175,20 +184,31 @@
           write(unit=lun,fmt="(/,a,i3,a,i2,a)") " => There are ",inum," values of Correlation > ",c%corrmax,"%"
        end if
 
-       write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS",&
+       write(unit=lun,fmt="(/,/,a,/,a,/)") "      FINAL LIST OF REFINED PARAMETERS AND STANDARD DEVIATIONS"//info_text,&
                                            "      --------------------------------------------------------"
        write(unit=lun,fmt="(/,a,/)") &
-       "    #   Parameter name                               Final-Value   Standard Deviation"
-
+       "    #   Parameter name                       No.(Model)         Final-Value   Standard Deviation"
+       inum=0
        do i=1,vs%np
-          if (vs%code(i) /= 0) then
-            write(unit=lun,fmt="(i5,a,2f15.5)")    i ,"    "//vs%nampar(i), vs%pv(i),vs%spv(i)
-          else
-            write(unit=lun,fmt="(i5,a,f15.5,a15)") i ,"    "//vs%nampar(i), vs%pv(i),"Fixed"
+          if (vs%code(i)/=0) then
+            inum=inum+1
+            write(unit=lun,fmt="(i5,a,i6,2f20.5)") inum,"    "//vs%nampar(i),i,vs%pv(i),vs%spv(i)
           end if
        end do
-
-       write(unit=lun,fmt="(/,a,g13.5)") " => Final value of Chi2: ",chi2
+       rfact=0.0
+       rwfact=0.0
+       riobs=0.0
+       do i=1,d%nobs
+          riobs=riobs+d%y(i)
+          del=d%y(i)-d%yc(i)
+          rfact=rfact+abs(del)
+          rwfact=rwfact+del*del/(d%sw(i)*d%sw(i))
+       end do
+       rfact=rfact/riobs*100.0
+       rwfact=sqrt(rwfact/riobs)*100.0
+       rex=sqrt(real(d%nobs-c%npvar)/riobs)*100.0
+       write(unit=lun,fmt="(/,(3(a,f8.3)))") "    Rfact= ",rfact,"   Rwfact= ",rwfact,"   Rex= ",rex
+       write(unit=lun,fmt="(/,a,g13.5)")     " => Final value of Chi2: ",chi2
 
     End Subroutine Info_ODR_VS
 

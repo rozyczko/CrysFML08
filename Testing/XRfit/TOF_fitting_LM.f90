@@ -69,7 +69,7 @@
       character(len=*), intent(in)              :: algor
       integer,          intent(in)              :: icont
       ! Local variables
-      integer                          :: i,j,k,l,ico,ifinal
+      integer                          :: i,j,k,l,ico,ifinal,i_irf=22,i_pik=8,i_xrf=23
       real(kind=cp)                    :: shb,shd,dif,yma,ymi,tof,tofbragg,alpha,beta,gamm,sigma,&
                                           hg,dsp,dsp2,dsp4,fwhm,eta
       real(kind=cp)                    :: iposr
@@ -77,58 +77,58 @@
       integer, save :: icount=0
       character(len=126) :: xrf_file
  !    Rewriting the input file
-      inquire(unit=8,opened=opn)
+      inquire(unit=i_pik,opened=opn)
       if(.not. opn .and. icont == 0) then
-         open(Unit=8,file=trim(filecode)//".new",status="replace",action="write")
+         open(Unit=i_pik,file=trim(filecode)//".new",status="replace",action="write")
       else
          inquire(file=trim(filecode)//".new",opened=opn)
          if(.not. opn) then
-           open(Unit=8,file=trim(filecode)//".new",status="replace",action="write")
+           open(Unit=i_pik,file=trim(filecode)//".new",status="replace",action="write")
          else
-           open(Unit=8,file=trim(filecode)//".pik",status="replace",action="write")
+           open(Unit=i_pik,file=trim(filecode)//".pik",status="replace",action="write")
          end if
       end if
       ico=0
       if(c%constr) ico=1
-      write(unit=8,fmt="(a)") trim(title)
-      write(unit=8,fmt="(a)")       &
+      write(unit=i_pik,fmt="(a)") trim(title)
+      write(unit=i_pik,fmt="(a)")       &
       "!    TOF_init       TOF_fin      Nbac Npeak  Ncyc  Inst  Jobt  Cont Weight Corr Constr Percent  Algorithm"
 
-      write(unit=8,fmt="(2f15.4,10i6,a)")  &
+      write(unit=i_pik,fmt="(2f15.4,10i6,a)")  &
               ain,afin,n_ba,npeakx,c%icyc,itype,jobtyp,icont,c%iw,c%corrmax,ico,nint(c%percent), "      "//algor
 
-      write(unit=8,fmt="(f14.6,a)") d2tof , "  <=  d to T.O.F. coefficient"
-      write(unit=8,fmt="(a)") "!  Global Profile Parameters:"
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(1),vs%code(1),   " <= Global-alpha0  &  Flag "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2),   " <= Global-alpha1  &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3),   " <= Global-alpha2  &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(4),vs%code(4),   " <= Global-alpha3  &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5),   " <= Global-beta0   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6),   " <= Global-beta1   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(7),vs%code(7),   " <= Global-beta2   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(8),vs%code(8),   " <= Global-beta3   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(9),vs%code(9),   " <= Global-Sig-2   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(10),vs%code(10), " <= Global-Sig-1   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(11),vs%code(11), " <= Global-Sig-0   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(12),vs%code(12), " <= Global-Sig-Q   &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(13),vs%code(13), " <= Global-eta0    &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(14),vs%code(14), " <= Global-eta1    &       "
-      write(unit=8,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(15),vs%code(15), " <= Global-eta2    &       "
-      write(unit=8,fmt="(a)") "!  Background Parameters:"
-      write(unit=8,fmt="(a)") "!       TOF        Background   Flag "
+      write(unit=i_pik,fmt="(f14.6,a)") d2tof , "  <=  d to T.O.F. coefficient"
+      write(unit=i_pik,fmt="(a)") "!  Global Profile Parameters:"
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(1),vs%code(1),   " <= Global-alpha0  &  Flag "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2),   " <= Global-alpha1  &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3),   " <= Global-alpha2  &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(4),vs%code(4),   " <= Global-alpha3  &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5),   " <= Global-beta0   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6),   " <= Global-beta1   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(7),vs%code(7),   " <= Global-beta2   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(8),vs%code(8),   " <= Global-beta3   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(9),vs%code(9),   " <= Global-Sig-2   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(10),vs%code(10), " <= Global-Sig-1   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(11),vs%code(11), " <= Global-Sig-0   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(12),vs%code(12), " <= Global-Sig-Q   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(13),vs%code(13), " <= Global-eta0    &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(14),vs%code(14), " <= Global-eta1    &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(15),vs%code(15), " <= Global-eta2    &       "
+      write(unit=i_pik,fmt="(a)") "!  Background Parameters:"
+      write(unit=i_pik,fmt="(a)") "!       TOF        Background   Flag "
       do j=1,n_ba   !write background paramers
-       write(unit=8,fmt="(2f14.4,i6)") BackGroundPoint(j)%x, vs%pv(j+nglob_tof), vs%code(j+nglob_tof)
+       write(unit=i_pik,fmt="(2f14.4,i6)") BackGroundPoint(j)%x, vs%pv(j+nglob_tof), vs%code(j+nglob_tof)
       end do
       l=nglob_tof+n_ba+1
-      write(unit=8,fmt="(a)") "!  Reflection Parameters:"
-      write(unit=8,fmt="(a)") "!    TOF-Bragg     Intensity   Shift-sigma   Shift-alpha    Shift-beta     Shift-eta     Flags"
+      write(unit=i_pik,fmt="(a)") "!  Reflection Parameters:"
+      write(unit=i_pik,fmt="(a)") "!    TOF-Bragg     Intensity   Shift-sigma   Shift-alpha    Shift-beta     Shift-eta     Flags"
       do i=1,npeakx    !write peak parameters
-        write(unit=8,fmt="(3f14.4,3f14.6,2x,6i2,i8)") &
+        write(unit=i_pik,fmt="(3f14.4,3f14.6,2x,6i2,i8)") &
              vs%pv(l),vs%pv(l+1),vs%pv(l+2),vs%pv(l+3),vs%pv(l+4),vs%pv(l+5),(vs%code(l+k),k=0,5),i
         l=l+nshp_tof
       end do
-      write(unit=8,fmt="(a,g14.6)") "!  Chi2 = ",chi2
-      if(icont == 0) close(unit=8)
+      write(unit=i_pik,fmt="(a,g14.6)") "!  Chi2 = ",chi2
+      if(icont == 0) close(unit=i_pik)
 
       yma= -1.E9   !
       ymi=  1.E9   !
@@ -137,28 +137,27 @@
         if(fobs(i) < ymi ) ymi =fobs(i)
       end do
 
-       !open(unit=22,file=trim(filecode)//".xys",status="replace")
-        shb   = 0.0                         ! idem wpl_pfit.f90
-        shd   = ymi - 0.2*(yma-ymi)
-        iposr = ymi - 0.1*(yma-ymi)
+       shb   = 0.0                         ! idem wpl_pfit.f90
+       shd   = ymi - 0.2*(yma-ymi)
+       iposr = ymi - 0.1*(yma-ymi)
        if(icont /= 0) then
          icount=icount+1
          write(xrf_file,"(a,i3.3,a)") trim(filecode)//"_",icount,".xrf"
-         open(unit=23,file=trim(xrf_file),status="replace",action="write")
+         open(unit=i_xrf,file=trim(xrf_file),status="replace",action="write")
        else
          if(icount /= 0) then
-            open(unit=23,file=trim(filecode)//"_fin.xrf",status="replace",action="write")
+            open(unit=i_xrf,file=trim(filecode)//"_fin.xrf",status="replace",action="write")
          else
-            open(unit=23,file=trim(filecode)//".xrf",status="replace",action="write")
+            open(unit=i_xrf,file=trim(filecode)//".xrf",status="replace",action="write")
          end if
        end if
-        write(unit=23,fmt="(2A)") " ",TRIM(title)
-        write(unit=23,fmt="(2a)")      " => Data file name: ",TRIM(filedat)
-        write(unit=23,fmt="(a,I4)")    " => Instrm        : ", itype
-        write(unit=23,fmt="(a,2f14.5)")" => Dtt1(usec)    : ", d2tof, 0.0
-        write(unit=23,fmt="(a,I9)")    " => Numb.of.points: ", nob
-        write(unit=23,fmt="(a,i9)")    " => Numb.of.peaks : ", npeakx
-        write(unit=23,fmt="(a)")   &
+        write(unit=i_xrf,fmt="(2A)") " ",TRIM(title)
+        write(unit=i_xrf,fmt="(2a)")      " => Data file name: ",TRIM(filedat)
+        write(unit=i_xrf,fmt="(a,I4)")    " => Instrm        : ", itype
+        write(unit=i_xrf,fmt="(a,2f14.5)")" => Dtt1(usec)    : ", d2tof, 0.0
+        write(unit=i_xrf,fmt="(a,I9)")    " => Numb.of.points: ", nob
+        write(unit=i_xrf,fmt="(a,i9)")    " => Numb.of.peaks : ", npeakx
+        write(unit=i_xrf,fmt="(a)")   &
         "  Time-of-flight      Yobs          Ycalc       Yobs-Ycal        Backg     Bragg"//   &
         "              Posr     Intensity        Sigma           Alpha        Beta           Eta"
         IF(npeakx > nob) THEN
@@ -171,7 +170,7 @@
           tof=xx(i)
           dif=fobs(i)-fcalc(i)+shd
           tofbragg=vs%pv(j)
-          write(unit=23,fmt="(f14.4,4f14.2,2f14.4,tr1,2f14.4,4f14.6)")  &
+          write(unit=i_xrf,fmt="(f14.4,4f14.2,2f14.4,tr1,2f14.4,4f14.6)")  &
                tof,fobs(i),fcalc(i), dif, backa(tof)-shb,  &
                tofbragg,iposr, vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5)
           j=j+nshp_tof
@@ -181,18 +180,18 @@
           Do  i=npeakx+1,nob
             tof=xx(i)
             dif=fobs(i)-fcalc(i)+shd       ! shd < 0.
-            write(unit=23,fmt="(f14.4,4f14.2)") tof,fobs(i),fcalc(i),dif,  &
+            write(unit=i_xrf,fmt="(f14.4,4f14.2)") tof,fobs(i),fcalc(i),dif,  &
                 backa(tof)-shb
           End Do
         End If
-      close (unit=23)
+      close (unit=i_xrf)
 
-      inquire(unit=22,opened=opn)
+      inquire(unit=i_irf,opened=opn)
       if(.not. opn) &
-      open(unit=22,file=trim(filecode)//".irf",status="replace",action="write")
+      open(unit=i_irf,file=trim(filecode)//".irf",status="replace",action="write")
 
-      write(unit=22,fmt="(a)") "!  d-spacing       Sigma^2         Gamma         Alpha          Beta        Shift"
-      write(unit=22,fmt="(a,i6)") "LIST_SIG_GAM_ALF_BET_SHIFT",npeakx
+      write(unit=i_irf,fmt="(a)") "!  d-spacing            Sigma^2           Gamma           Alpha            Beta          Shift"
+      write(unit=i_irf,fmt="(a,i6)") "LIST_SIG_GAM_ALF_BET_SHIFT",npeakx
       l=nglob_tof+n_ba+1
       do i=1,npeakx    !write peak parameters
         dsp=vs%pv(l)/d2tof
@@ -206,10 +205,10 @@
         FWHM= sqrt_8ln2*sqrt(abs(sigma))
         call get_HG_HL(fwhm,eta,hg,gamm)
         sigma=(hg/sqrt_8ln2)**2
-        write(unit=22,fmt="(6f16.7,i8)") dsp, sigma, gamm, alpha, beta, 0.0,i
+        write(unit=i_irf,fmt="(6f16.7,i8)") dsp, sigma, gamm, alpha, beta, 0.0,i
         l=l+nshp_tof
       end do
-      if(icont == 0) close (unit=22)
+      if(icont == 0) close (unit=i_irf)
       return
      End subroutine output_plot
 
@@ -270,10 +269,11 @@
       use TOF_diffraction
       use Input_output_data_mod
       use CFML_DiffPatt,  only : DiffPat_E_Type
+      use ODR_wrapper
 
       Implicit None
 
-      Integer              :: ier,ifail
+      Integer              :: ier,ifail,i_inp=1
       Character(Len=256)   :: texte
       Character(Len=4)     :: ext
       Character(Len=6)     :: algor
@@ -281,8 +281,8 @@
       Integer              :: i,j,k,ico
 
       Real(kind=cp)                           :: timi,timf
-      !real(kind=cp),dimension(:), allocatable :: ww
-      !Character(Len=15),dimension(20)         :: words
+      real(kind=cp),dimension(:), allocatable :: ww
+      Character(Len=15),dimension(20)         :: words
       Integer                                 :: narg,lr,ln
       Type(DiffPat_E_Type)                    :: df  !Diffraction pattern
 
@@ -323,7 +323,7 @@
       WRITE(unit=*,fmt='(a)')'            ------------------------------------ '
       WRITE(unit=*,fmt='(a)')'                  --- PROGRAM: TOF-FIT ---'
       WRITE(unit=*,fmt='(a)')'            (Author: J. Rodriguez-Carvajal, ILL)'
-      WRITE(unit=*,fmt='(a)')'                (version 5.0 January - 2021) '
+      WRITE(unit=*,fmt='(a)')'                (version 5.1 December - 2021) '
       WRITE(unit=*,fmt='(a)')'            ------------------------------------ '
       write(unit=*,fmt="(a)") " "
 
@@ -353,7 +353,7 @@
             filedat=texte
          end if
       end if
-      Open(Unit=1,File=Trim(Filecode)//ext,STATUS="old",iostat=ier,action="read",position="rewind")
+      Open(Unit=i_inp,File=Trim(Filecode)//ext,STATUS="old",iostat=ier,action="read",position="rewind")
       if( ier /= 0 ) then
         write(unit=*,fmt="(a,a)") " => Error openning ",trim(filecode)//ext
         STOP
@@ -365,7 +365,8 @@
 
     Do   ! repeat until icont = 0 !
 
-     call get_texte(1,texte,ok)
+     write(unit=*,fmt="(/,a)") " => Reading input file: "//Trim(Filecode)//ext
+     call get_texte(i_inp,texte,ok)
      if(ok) then
        read(unit=texte,fmt="(a)",iostat=ier) title
        if(ier /= 0) then
@@ -377,13 +378,12 @@
           write(unit=*,fmt="(a)") " => Error in pik input file at reading TITLE ! "
           stop
      end if
-     write(*,"(a)") " => Line: "//trim(texte)
-     call get_texte(1,texte,ok)
+     !write(*,"(a)") " => Line: "//trim(texte)
+     call get_texte(i_inp,texte,ok)
      if(ok) then
-         !call get_words(texte,words,k)
-         !algor=trim(words(k))
-         !if(algor /= "CURFIT" .and. algor /= "LEVMAR") algor="CURFIT"
-         algor="CURFIT"  !Waiting for
+         call get_words(texte,words,k)
+         algor=trim(words(k))
+         if(algor /= "CURFIT" .and. algor /= "LEVMAR" .and. trim(algor) /= "ODR") algor="CURFIT"
          read(unit=texte,fmt=*,iostat=ier) ain,afin,n_ba,npeakx,c%icyc,itype,jobtyp,icont,c%iw, c%corrmax, ico, c%percent
          if(ier /= 0) then
            write(unit=*,fmt="(a)") " => Error at reading text: tof_ini, tof_fin, n_ba, etc ! "
@@ -393,11 +393,11 @@
          write(unit=*,fmt="(a)") " => Error in pik input file at reading: tof_ini, tof_fin, n_ba, etc ! "
          stop
      end if
-     write(*,"(a)") " => Line: "//trim(texte)
+     !write(*,"(a)") " => Line: "//trim(texte)
      if(c%corrmax < 1.0) c%corrmax=50.0
      if (ico/=0) c%constr = .true.
      npeaks=npeakx
-     call get_texte(1,texte,ok)
+     call get_texte(i_inp,texte,ok)
      if(ok) then
          read(unit=texte,fmt=*,iostat=ier) d2tof
          if(ier /= 0) then
@@ -408,14 +408,14 @@
          write(unit=*,fmt="(a)") " => Error in pik input file at reading: d2tof ! "
          stop
      end if
-     write(*,"(a)") " => Line: "//trim(texte)
+     !write(*,"(a)") " => Line: "//trim(texte)
      if(n_ba > nbac) then
        write(unit=*,fmt="(a)") "  ! Warning: too many background parameters !"
        stop
      end if
 
      do j=1,nglob_tof         !read global parameters
-       call get_texte(1,texte,ok)
+       call get_texte(i_inp,texte,ok)
        if(ok) then
            read(unit=texte,fmt=*,iostat=ier) vs%pv(j), vs%code(j)
            if(ier /= 0) then
@@ -426,10 +426,10 @@
          write(unit=*,fmt="(a,i2)") " => Error in pik input file at reading global parameter #",j
          stop
        end if
-       write(*,"(a)") " => Line: "//trim(texte)
+       !write(*,"(a)") " => Line: "//trim(texte)
      end do
      do j=1,n_ba        !read background parameters
-        call get_texte(1,texte,ok)
+        call get_texte(i_inp,texte,ok)
         if(ok) then
            read(unit=texte,fmt=*,iostat=ier) BackGroundPoint(j)%x, vs%pv(j+nglob_tof), vs%code(j+nglob_tof)
            if(ier /= 0) then
@@ -441,7 +441,7 @@
            write(unit=*,fmt="(a,i3)") " => Error in pik input file at reading background point #",j
            stop
         end if
-        write(*,"(a,i3)") " => Line: "//trim(texte)//"   Back#",j
+        !write(*,"(a,i3)") " => Line: "//trim(texte)//"   Back#",j
      end do
      if(ain > BackGroundPoint(1)%x )     ain=BackGroundPoint(1)%x
      if(afin < BackGroundPoint(n_ba)%x ) afin=BackGroundPoint(n_ba)%x
@@ -449,7 +449,7 @@
      j=nglob_tof+n_ba+1
      npeaks_rf=0
      DO i=1,npeaks       !read peak parameters
-      call get_texte(1,texte,ok)
+      call get_texte(i_inp,texte,ok)
       if(ok) then
            read(unit=texte,fmt=*,iostat=ier) vs%pv(j),vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5),(vs%code(j+k),k=0,5)
            if(ier /= 0) then
@@ -460,26 +460,40 @@
            write(unit=*,fmt="(a,i3)") " => Error in pik input file at reading peak #",i
            stop
       end if
-      write(*,"(a,i3)") " => Line: "//trim(texte)//"   Peak#",i
+      !write(*,"(a,i3)") " => Line: "//trim(texte)//"   Peak#",i
 
       if(sum(vs%code(j:j+5)) > 0) npeaks_rf=npeaks_rf+1
       j=j+nshp_tof
      END DO
 
-     if(icont == 0) close(unit=1)
-
+     if(icont == 0) then
+        write(unit=*,fmt="(a)") " => Closing input file: "//Trim(Filecode)//ext
+        close(unit=i_inp)
+     end if
      call set_nampar_tof(n_ba,npeaks)
 
       !   Read intensity data
 
+      write(unit=*,fmt="(a)") " => Reading data file: "//Trim(filedat)
       Call Input_Data(filedat,itype,df)
 
-      call cpu_time(timi)
+      call cpu_time(timi)  !Starting refinement
+      write(unit=*,fmt="(a)") " => Starting refinement with algorithm: "//Trim(algor)
       Call Tof_Profile_Fitting(Filecode, ain,afin,df, Ifail,algor)
-      call cpu_time(timf)
-
-      call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,d%sw,7,c,vs,algor)
+      call cpu_time(timf)  !Ending refinement
+      write(unit=*,fmt="(a)") " => Writing refinement results ... "
+      if(algor == "ODR") then
+         call Info_ODR_VS(Chi2,i_out,c,vs,d)
+      else if (algor == "LEVMAR") then
+         if(allocated(ww)) deallocate(ww)
+         allocate(ww(d%nobs))
+         ww=0.0
+         where(d%sw > 0.0_cp) ww=1.0_cp/(d%sw*d%sw)
+         call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,ww,i_out,c,vs,algor,text_info=trim(texte))
+      end if
+      write(unit=*,fmt="(a)") " => Writing plot file ... "
       call Output_Plot(d%nobs,d%x,d%y,d%yc,chi2,algor,icont)
+      write(unit=*,fmt="(a,f10.4,a)") " => CPU time: ", timf-timi, " seconds"
       if(icont == 0) exit
     End Do  !icont
 

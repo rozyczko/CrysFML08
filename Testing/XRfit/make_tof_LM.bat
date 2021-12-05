@@ -52,15 +52,17 @@ rem
 rem
 rem > Compilation
    if [%_COMP%]==[ifort] (
-      ifort /c TOF_Module_LM.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c TOF_fitting_LM.f90     /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /exe:TOF_fit_LM *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000
+      ifort /c ODR_wrapper.f90     /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
+      ifort /c TOF_Module_LM.f90   /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
+      ifort /c TOF_fitting_LM.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
+      ifort /exe:TOF_fit_LM *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib  %CRYSFML%\%DIRECTORY%\ODR_sp\odr_sp.lib    /link /stack:300000000
    )
 rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c TOF_Module_LM.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c TOF_fitting_LM.f90       %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -o TOF_fit_LM.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c ODR_wrapper.f90          %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
+      gfortran -c TOF_Module_LM.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
+      gfortran -c TOF_fitting_LM.f90       %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
+      gfortran -o TOF_fit_LM.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml  -L%CRYSFML%\%DIRECTORY%\ODR_sp -lodr_sp
    )
 rem
    if exist %FULLPROF% copy TOF_fit_LM.exe %FULLPROF%

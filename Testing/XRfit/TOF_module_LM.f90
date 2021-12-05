@@ -10,6 +10,7 @@ Module  TOF_Diffraction
    Use CFML_Profiles, only: tof_Jorgensen_VonDreele, lorcomp, deriv_TOF_type, Get_HG_HL
    use CFML_DiffPatt
    use CFML_strings
+   use ODR_wrapper
 
    !---- Global Variables ----!
    implicit none
@@ -73,7 +74,7 @@ Module  TOF_Diffraction
         real(kind=cp)                      :: y
    End Type BackGround_Type
    Type(BackGround_Type),dimension(nBackGroundPoints_Max) :: BackGroundPoint
-   integer       :: npeaks,npeaks_rf
+   integer       :: npeaks,npeaks_rf,c_print=0001
    real(kind=cp) :: d2tof
    character(len=256),public ::  filedat,title,filecode
 
@@ -85,7 +86,8 @@ Module  TOF_Diffraction
    integer                :: n_ba               ! Number of points to define the background
    integer                :: jobtyp             ! 0 Refinement, 1: Simulation
    integer                :: jstart,itype
-   real(kind=cp)          :: Chi2
+   integer                :: i_out=7, i_odr=11
+   real(kind=cp)          :: Chi2, Chiold=1.9e+35
 
    integer, dimension(nBackGroundPoints_Max),private :: bac_code           ! Backgroud refinement codes
    integer, parameter,                   private         :: npeaks_max=300
@@ -98,8 +100,73 @@ Module  TOF_Diffraction
    real(kind=cp), dimension(npeaks_max), private,save    :: der_alf0,der_alf1,der_alf2,der_alf3
    real(kind=cp), dimension(npeaks_max), private,save    :: der_bet0,der_bet1,der_bet2,der_bet3
    real(kind=cp), dimension(npeaks_max), private,save    :: der_eta0,der_eta1,der_eta2
+   real(kind=cp), dimension(:), allocatable  :: lower,upper
 
  Contains
+
+   Subroutine TOF_powder_patt_odr(n,m,np,nq,ldn,ldm,ldnp,beta,xplusd,ifixb,  &
+                              ifixx,ldifx,ideval,f,fjacb,fjacd,istop)
+     Integer,                              Intent(In)    :: n       !Number of observations
+     Integer,                              Intent(In)    :: m       !Number of colums of array X+D (n,m)
+     Integer,                              Intent(In)    :: np      !Number of function parameters
+     Integer,                              Intent(In)    :: nq      !Number of responses per observation
+     Integer,                              Intent(In)    :: ldn     !Leading dimension >= n
+     Integer,                              Intent(In)    :: ldm     !Leading dimension >= m
+     Integer,                              Intent(In)    :: ldnp    !Leading dimension >= np
+     Real(Kind=cp),Dimension(np),          Intent(In)    :: beta    !Current values of parameters
+     Real(Kind=cp),Dimension(ldn,m),       Intent(In)    :: xplusd  !Current Values of the explanatory variables X+D
+     Integer,      Dimension(np),          Intent(In)    :: ifixb   !0 fixed, 1 varied
+     Integer,                              Intent(In)    :: ldifx   !leading dimension of array ifixx
+     Integer,      Dimension(ldifx,m),     Intent(In)    :: ifixx   !=0
+     Integer,                              Intent(In)    :: ideval
+     Real(Kind=cp),Dimension(ldn,nq),      Intent(In Out):: f
+     Real(Kind=cp),Dimension(ldn,ldnp,nq), Intent(Out)   :: fjacb
+     Real(Kind=cp),Dimension(ldn,ldm,nq),  Intent(Out)   :: fjacd
+     Integer,                              Intent(In Out):: istop
+
+     !Local variables
+     integer                     :: i,j
+     real(kind=cp)               :: resid
+     type(LSQ_State_Vector_type) :: lvs
+
+     fjacd=0.0
+     !To avoid warnings
+        if(istop == 987654) write(*,*) "This is unbelivable!"
+        if(ifixb(1) == 987 .and. ifixx(1,1) == 654 .and. xplusd(1,1) == 456) write(*,*) "This is also unbelivable!!"
+     !end doing nothing to avoid warnings
+     lvs=vs  !Set the local state vector
+     do i=1,lvs%np
+       if(ifixb(i) == 0) cycle
+       lvs%pv(i)=beta(i)      !Update the state vector with the input free parameters
+     end do
+
+     if(mod(ideval,10) >= 1) then
+          chi2=0.0
+          do i=1,n
+            call Sum_Jorgensen_Vondreele_Peaks(i,d%x(i),d%yc(i),lvs)
+            f(i,1)= d%yc(i)
+            resid= (d%y(i)-d%yc(i))/d%sw(i)
+            chi2=chi2+resid*resid
+          end do
+          chi2=chi2/real(n-c%npvar)
+          if(chi2 <= chiold) then
+            c%nfev=c%nfev+1
+            chiold=chi2
+            write(*,"(a,f14.4,a,i6)") " => Chi2: ",chi2,"  ... diminishig Cycle: ",c%nfev
+          end if
+     end if
+
+     if(mod(ideval/10,10) >= 1) then
+          do i=1,n
+            call Sum_Jorgensen_Vondreele_Peaks(i,d%x(i),d%yc(i),lvs,.true.)
+            do j=1,lvs%np
+               fjacb(i,j,1)=lvs%dpv(j)
+            end do
+          end do
+          c%njev=c%njev+1
+     end if
+
+   End Subroutine TOF_powder_patt_odr
 
    Subroutine TOF_powder_patt(m,n,x,fvec,fjac,iflag)
     Integer,                       Intent(In)    :: m, n
@@ -375,7 +442,7 @@ Module  TOF_Diffraction
       integer                                  :: i,j, no, ierror
       real(Kind=cp), allocatable, dimension(:) :: wf
       character(len=1)                         :: ans
-      Character (Len=512)                      :: texte
+      Character (Len=512)                      :: texte,filecod
       logical :: opn
       ! Init
       chi2 = 0.
@@ -389,24 +456,24 @@ Module  TOF_Diffraction
       i=index(filecode,".",back=.true.)-1
       if(i <= 0) i=len_trim(filecode)
       ! General output file
-      inquire(unit=7,opened=opn)
+      inquire(unit=i_out,opened=opn)
       if(.not. opn) &
-         OPEN(UNIT=7, FILE=filecode(1:i)//'_pf.out',STATUS='replace')
-      WRITE(unit=7,fmt='(a)')' '
-      WRITE(unit=7,fmt='(a)')'            ------------------------------------ '
-      WRITE(unit=7,fmt='(a)')'                  --- PROGRAM: TOF-FIT ---'
-      WRITE(unit=7,fmt='(a)')'            (Author: J. Rodriguez-Carvajal, ILL)'
-      WRITE(unit=7,fmt='(a)')'                (version 5.0 January - 2021) '
-      WRITE(unit=7,fmt='(a)')'            ------------------------------------ '
+         open(unit=i_out, file=filecode(1:i)//'_pf.out',status='replace')
+      WRITE(unit=i_out,fmt='(a)')' '
+      WRITE(unit=i_out,fmt='(a)')'            ------------------------------------ '
+      WRITE(unit=i_out,fmt='(a)')'                  --- PROGRAM: TOF-FIT ---'
+      WRITE(unit=i_out,fmt='(a)')'            (Author: J. Rodriguez-Carvajal, ILL)'
+      WRITE(unit=i_out,fmt='(a)')'                (version 5.1 December - 2021) '
+      WRITE(unit=i_out,fmt='(a)')'            ------------------------------------ '
 
-      WRITE(7,'(/a,a)') ' => TITLE: ' ,Pat%title
+      WRITE(i_out,'(/a,a)') ' => TITLE: ' ,Pat%title
 
-      write(unit=7,fmt="(/,a)")    " => TOF range, peaks and cycles read "
-      write(unit=7,fmt="(a,f14.3)")" => TOF(init)       : ",fit_xmin
-      write(unit=7,fmt="(a,f14.3)")" => TOF(fin )       : ",fit_xmax
-      write(unit=7,fmt="(a,i5  )") " => Number of peaks : ",npeaks
-      write(unit=7,fmt="(a,i5  )") " => Number of background points : ",n_ba
-      write(unit=7,fmt="(a,i5  )") " => Number of cycles: ",c%icyc
+      write(unit=i_out,fmt="(/,a)")    " => TOF range, peaks and cycles read "
+      write(unit=i_out,fmt="(a,f14.3)")" => TOF(init)       : ",fit_xmin
+      write(unit=i_out,fmt="(a,f14.3)")" => TOF(fin )       : ",fit_xmax
+      write(unit=i_out,fmt="(a,i5  )") " => Number of peaks : ",npeaks
+      write(unit=i_out,fmt="(a,i5  )") " => Number of background points : ",n_ba
+      write(unit=i_out,fmt="(a,i5  )") " => Number of cycles: ",c%icyc
 
       ! Number of parameters
       vs%np = nglob_tof+ n_ba + 6 * npeaks
@@ -418,40 +485,40 @@ Module  TOF_Diffraction
       end do
       c%npvar  = j    ! Number of refined parameters
 
-      write(unit=7,fmt="(/a)")         " => Global parameters          Flag"
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha0",   vs%pv( 1),vs%code( 1)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha1",   vs%pv( 2),vs%code( 2)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha2",   vs%pv( 3),vs%code( 3)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-alpha3",   vs%pv( 4),vs%code( 4)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta0 ",   vs%pv( 5),vs%code( 5)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta1 ",   vs%pv( 6),vs%code( 6)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta2 ",   vs%pv( 7),vs%code( 7)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-beta3 ",   vs%pv( 8),vs%code( 8)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-2 ",   vs%pv( 9),vs%code( 9)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-1 ",   vs%pv(10),vs%code(10)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-0 ",   vs%pv(11),vs%code(11)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-Sig-Q ",   vs%pv(12),vs%code(12)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta0  ",   vs%pv(13),vs%code(13)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta1  ",   vs%pv(14),vs%code(14)
-      write(unit=7,fmt="(a,f14.6,i3)") " => Global-eta2  ",   vs%pv(15),vs%code(15)
-      write(unit=7,fmt="(/a)")           " => Background parameters"
-      write(unit=7,fmt="(a)")            "      Scatt. Variable     Background  Flag"
+      write(unit=i_out,fmt="(/a)")         " => Global parameters          Flag"
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-alpha0",   vs%pv( 1),vs%code( 1)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-alpha1",   vs%pv( 2),vs%code( 2)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-alpha2",   vs%pv( 3),vs%code( 3)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-alpha3",   vs%pv( 4),vs%code( 4)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-beta0 ",   vs%pv( 5),vs%code( 5)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-beta1 ",   vs%pv( 6),vs%code( 6)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-beta2 ",   vs%pv( 7),vs%code( 7)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-beta3 ",   vs%pv( 8),vs%code( 8)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-Sig-2 ",   vs%pv( 9),vs%code( 9)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-Sig-1 ",   vs%pv(10),vs%code(10)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-Sig-0 ",   vs%pv(11),vs%code(11)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-Sig-Q ",   vs%pv(12),vs%code(12)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-eta0  ",   vs%pv(13),vs%code(13)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-eta1  ",   vs%pv(14),vs%code(14)
+      write(unit=i_out,fmt="(a,f14.6,i3)") " => Global-eta2  ",   vs%pv(15),vs%code(15)
+      write(unit=i_out,fmt="(/a)")           " => Background parameters"
+      write(unit=i_out,fmt="(a)")            "      Scatt. Variable     Background  Flag"
 
       do j=1,n_ba
-        write(unit=7,fmt="(2f18.4,i4)")   BackGroundPoint(j)%x, vs%pv(j+nglob_tof),vs%code(j+nglob_tof)
+        write(unit=i_out,fmt="(2f18.4,i4)")   BackGroundPoint(j)%x, vs%pv(j+nglob_tof),vs%code(j+nglob_tof)
       end do
 
-      write(unit=7,fmt="(/A/)")                                                    &
+      write(unit=i_out,fmt="(/A/)")                                                    &
            "    Position       Intensity    Shift-Sigma   Shift-alpha    Shift-beta    Shift-Eta       Flags"
       j=nglob_tof+n_ba+1
       do i=1,npeaks
-         write(unit=7,fmt="(f14.6,f14.2,4F14.6,5x,6i2)")                          &
+         write(unit=i_out,fmt="(f14.6,f14.2,4F14.6,5x,6i2)")                          &
                vs%pv(j),vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5),   &
                vs%code(j),vs%code(j+1),vs%code(j+2),vs%code(j+3),vs%code(j+4),vs%code(j+5)
          j=j+nshp_tof
       end do
 
-      write(unit=7,fmt= "(/a,i4/)") " => Total number of refined parameters: ", c%npvar
+      write(unit=i_out,fmt= "(/a,i4/)") " => Total number of refined parameters: ", c%npvar
 
       ! How many points are in the fit zone?
       no = 0
@@ -478,7 +545,7 @@ Module  TOF_Diffraction
           j=j+1
           if(j > no) exit
           d%y(j)=Pat%y(i)
-          d%sw(j)=sqrt(Pat%sigma(i)) !Using the LM method one should store the standard deviation
+          d%sw(j)=sqrt(Pat%sigma(i)) !Using the LM/ODR methods one should store the standard deviation
           wf(j)=1.0/Pat%sigma(i)
           d%x(j)=Pat%x(i)
         end if
@@ -486,6 +553,15 @@ Module  TOF_Diffraction
       d%nobs=no
       no=j
       c%tol=0.000001
+      !For using CURFIT d%sw correspond to the weights
+      if(algor == "CURFIT") then
+          d%sw=wf
+      else if(trim(algor) == "ODR") then
+         inquire(unit=i_odr,opened=opn)
+         if(.not. opn) &
+         open(unit=i_odr, file=trim(filecode)//'.odr',status='replace')
+         call set_limits()
+      end if
       if(jobtyp == 0) then
          Select Case (algor)
            Case("LEVMAR")
@@ -506,15 +582,28 @@ Module  TOF_Diffraction
                end if
                exit
              end do
+
            Case("CURFIT")
              do
-               call marquardt_fit(Sum_Jorgensen_VonDreele_peaks,d,c,vs,7,chi2)
+               call marquardt_fit(Sum_Jorgensen_VonDreele_peaks,d,c,vs,i_out,chi2)
                if(c%failed) exit
                if (.not. c%reached) then
                   write(unit=*,fmt="(a)",advance='no')' => Convergence not reached!. Do you want continue?'
                   read(unit=*,fmt="(a)") ans
                   if( ans == 'y' .or. ans == 'Y') cycle
                end if
+               exit
+             end do
+
+           Case("ODR")
+             do
+               call ODR_LSQ(TOF_powder_patt_odr,d,vs,c,lower,upper,c_print,lun=i_odr)
+               !if(c%failed) exit
+               !if (.not. c%reached) then
+               !   write(unit=*,fmt="(a)",advance='no')' => Convergence not reached!. Do you want continue?'
+               !   read(unit=*,fmt="(a)") ans
+               !   if( ans == 'y' .or. ans == 'Y') cycle
+               !end if
                exit
              end do
 
@@ -639,6 +728,39 @@ Module  TOF_Diffraction
 
       return
    End Subroutine Set_Nampar_TOF
+
+   Subroutine Set_Limits()
+     integer :: i,j
+     if(allocated(lower)) deallocate(lower)
+     if(allocated(upper)) deallocate(upper)
+     allocate(lower(vs%np),upper(vs%np))
+     lower=-9.9e+35; upper=9.9e+35
+     !vs%nampar( 1)="Global-alpha0"        No clear limits for these parameters
+     !vs%nampar( 2)="Global-alpha1"
+     !vs%nampar( 3)="Global-alpha2"
+     !vs%nampar( 4)="Global-alpha3"
+     !vs%nampar( 5)="Global-beta0 "
+     !vs%nampar( 6)="Global-beta1 "
+     !vs%nampar( 7)="Global-beta2 "
+     !vs%nampar( 8)="Global-beta3 "
+     !vs%nampar( 9)="Global-Sig-2 "
+     !vs%nampar(10)="Global-Sig-1 "
+     !vs%nampar(11)="Global-Sig-0 "
+     !vs%nampar(12)="Global-Sig-Q "
+     !vs%nampar(14)="Global-eta1  "
+     !vs%nampar(15)="Global-eta2  "
+     lower(13) = 0.0; upper(13) = 1.0  !Eta0
+     j=nglob_tof+n_ba+1
+     do i=1,npeaks
+        lower(j+1) = 0.0001   !"Intensity"  Positive intensities
+        lower(j+2) =-0.1      !"Shf_Sigma"
+        lower(j+5) =-1.0      !"Shf___Eta"
+        upper(j+5) = 1.0
+        !write(unit=vs%pv(j+3),fmt="(a,i1)")   "Shf_Alpha_",i
+        !write(unit=vs%pv(j+4),fmt="(a,i1)")   "Shf__Beta_",i
+        j=j+nshp_tof
+     end do
+   End Subroutine Set_Limits
 
    !!----
    !!---- Subroutine Sum_Jorgensen_Vondreele_Peaks(I,Tof,Ycalc,Vsa,CalDer)

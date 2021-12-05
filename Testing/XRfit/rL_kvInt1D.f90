@@ -14,7 +14,7 @@
     ! Global variables
     real(kind=cp),                 public :: fwh0_f=0.03,fwh1_f=0.00,fwh2_f=0.00, eta0_f=0.0,eta1_f=0.0, &
                                              fwh0_s=0.04,fwh1_s=0.00,fwh2_s=0.00, eta0_s=0.0,eta1_s=0.0, w_f=1.2, w_s=1.5, &
-                                             zero0,zero1,zero2, highchi-25.0
+                                             zero0,zero1,zero2, highchi=25.0
 
     real(kind=cp), dimension(6),   public :: cell
     logical,                       public :: cell_given=.false., kvec_given=.false.,sigma_given=.false., zero_given=.false., &
@@ -1108,7 +1108,7 @@
 
 
          if(algor == "ODR") then
-            call Info_ODR_VS(Chi2,i_out,c,vs)
+            call Info_ODR_VS(Chi2,i_out,c,vs,d)
          else if (algor == "LEVENBERG-MARQUARDT") then
             call Info_LSQ_Output(Chi2,0.0,d%nobs,d%x,d%y,d%yc,ww,i_out,c,vs,algor,text_info=trim(texte))
          else
