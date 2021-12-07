@@ -91,11 +91,11 @@ Module  TOF_Diffraction
 
    integer, dimension(nBackGroundPoints_Max),private :: bac_code           ! Backgroud refinement codes
    integer, parameter,                   private         :: npeaks_max=300
-   real(kind=cp), dimension(npeaks_max), private,save    :: Intens
-   real(kind=cp), dimension(npeaks_max), private,save    :: sigma0
-   real(kind=cp), dimension(npeaks_max), private,save    :: alpha0
-   real(kind=cp), dimension(npeaks_max), private,save    :: beta0
-   real(kind=cp), dimension(npeaks_max), private,save    :: eta0
+   real(kind=cp), dimension(npeaks_max), public,save     :: Intens
+   real(kind=cp), dimension(npeaks_max), public,save     :: sigma0
+   real(kind=cp), dimension(npeaks_max), public,save     :: alpha0
+   real(kind=cp), dimension(npeaks_max), public,save     :: beta0
+   real(kind=cp), dimension(npeaks_max), public,save     :: eta0
    real(kind=cp), dimension(npeaks_max), private,save    :: der_sig2,der_sig1,der_sig0,der_sigQ
    real(kind=cp), dimension(npeaks_max), private,save    :: der_alf0,der_alf1,der_alf2,der_alf3
    real(kind=cp), dimension(npeaks_max), private,save    :: der_bet0,der_bet1,der_bet2,der_bet3
@@ -730,12 +730,14 @@ Module  TOF_Diffraction
    End Subroutine Set_Nampar_TOF
 
    Subroutine Set_Limits()
-     integer :: i,j
+     integer :: i,j,ilim
+     real(kind=cp) :: val2,val3,val4
+     character(len=20) :: comment
      if(allocated(lower)) deallocate(lower)
      if(allocated(upper)) deallocate(upper)
      allocate(lower(vs%np),upper(vs%np))
      lower=-9.9e+35; upper=9.9e+35
-     !vs%nampar( 1)="Global-alpha0"        No clear limits for these parameters
+     !vs%nampar( 1)="Global-alpha0"
      !vs%nampar( 2)="Global-alpha1"
      !vs%nampar( 3)="Global-alpha2"
      !vs%nampar( 4)="Global-alpha3"
@@ -749,17 +751,44 @@ Module  TOF_Diffraction
      !vs%nampar(12)="Global-Sig-Q "
      !vs%nampar(14)="Global-eta1  "
      !vs%nampar(15)="Global-eta2  "
+     if(c%constr) then
+       do j=1,15
+          if(abs(vs%pv(j)) > 0.01) then
+              lower(j)=vs%pv(j)-abs(vs%pv(j))*c%percent*0.01_cp
+              upper(j)=vs%pv(j)+abs(vs%pv(j))*c%percent*0.01_cp
+          else
+            lower(j)=-c%percent*0.01_cp
+            upper(j)=+c%percent*0.01_cp
+          end if
+       end do
+     end if
      lower(13) = 0.0; upper(13) = 1.0  !Eta0
+     lower(14:15) =-0.2; upper(14:15) = 0.2  !Eta1,2
      j=nglob_tof+n_ba+1
+     val2=max(0.25*sum(abs(vs%pv(9:12))),1.0); val3=max(0.25*sum(abs(vs%pv(1:4))),0.2); val4=max(0.25*sum(abs(vs%pv(5:8))),0.2)
      do i=1,npeaks
+        if(c%constr) then
+          lower(j)=vs%pv(j)-val2*c%percent*0.01_cp  !Shift of peaks (in terms of sigmas/fwhm)
+          upper(j)=vs%pv(j)+val2*c%percent*0.01_cp
+          lower(j+2)=-val2-val2*c%percent*0.01_cp  !Shift of fwhm
+          upper(j+2)= val2+val2*c%percent*0.01_cp
+          lower(j+3)=-val3-val3*c%percent*0.01_cp  !Shift of alpha
+          upper(j+3)= val3+val3*c%percent*0.01_cp
+          lower(j+4)=-val4-val4*c%percent*0.01_cp  !Shift of beta
+          upper(j+4)= val4+val4*c%percent*0.01_cp
+        end if
         lower(j+1) = 0.0001   !"Intensity"  Positive intensities
-        lower(j+2) =-0.1      !"Shf_Sigma"
-        lower(j+5) =-1.0      !"Shf___Eta"
-        upper(j+5) = 1.0
-        !write(unit=vs%pv(j+3),fmt="(a,i1)")   "Shf_Alpha_",i
-        !write(unit=vs%pv(j+4),fmt="(a,i1)")   "Shf__Beta_",i
+        lower(j+5) =-0.5      !"Shf___Eta"
+        upper(j+5) = 0.5
         j=j+nshp_tof
      end do
+     !open(newunit=ilim,file="limits.txt",status="replace",action="write")
+     !do i=1,vs%np
+     !   comment=" "
+     !   if(vs%pv(i) < lower(i) .or. vs%pv(i) > upper(i)) comment="  <== Wrong limits!"
+     !   write(ilim,"(i6,a,g14.5,i3,2g14.5,a)") i,"  "//vs%nampar(i), vs%pv(i), vs%code(i),lower(i),upper(i), comment
+     !end do
+     !close(unit=ilim)
    End Subroutine Set_Limits
 
    !!----

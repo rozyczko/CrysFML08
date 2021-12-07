@@ -172,7 +172,8 @@
           tofbragg=vs%pv(j)
           write(unit=i_xrf,fmt="(f14.4,4f14.2,2f14.4,tr1,2f14.4,4f14.6)")  &
                tof,fobs(i),fcalc(i), dif, backa(tof)-shb,  &
-               tofbragg,iposr, vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5)
+               tofbragg,iposr, Intens(i),sigma0(i),alpha0(i),beta0(i),eta0(i)
+               !tofbragg,iposr, vs%pv(j+1),vs%pv(j+2),vs%pv(j+3),vs%pv(j+4),vs%pv(j+5)
           j=j+nshp_tof
         End Do
 
