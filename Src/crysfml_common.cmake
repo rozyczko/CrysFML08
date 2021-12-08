@@ -259,7 +259,7 @@ else()
 endif()
 
 # CFML_Propagation_vectors
-set(PROPAGK_SRC CFML_Propagation_vectors.f90)
+set(PROPAGK_SRC CFML_Propagation_Vectors.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PROPAGK_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
