@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_Socabim
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_Socabim
 
  implicit none
 
@@ -356,4 +356,4 @@ SubModule (CFML_DiffPatt) RPatt_Socabim
         close(unit=i_dat)
      End subroutine Read_Pattern_Socabim
 
-End SubModule RPatt_Socabim
+End SubModule DiffP_ReadPatt_Socabim

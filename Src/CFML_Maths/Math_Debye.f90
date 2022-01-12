@@ -3,7 +3,8 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Sbm_Debye
+Submodule (CFML_Maths) Math_Debye
+ implicit none
 
  Contains
     !!----
@@ -723,4 +724,4 @@ Submodule (CFML_Maths) Sbm_Debye
 
     End Function DebyeN
 
-End Submodule Sbm_Debye
+End Submodule Math_Debye

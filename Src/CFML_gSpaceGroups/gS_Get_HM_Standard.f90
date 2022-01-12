@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_HM_Standard
+SubModule (CFML_gSpaceGroups) gS_Get_HM_Standard
    implicit none
    Contains
 
@@ -41,4 +41,4 @@ SubModule (CFML_gSpaceGroups) SPG_HM_Standard
        end do
    End Function Get_HM_Standard
 
-End Submodule SPG_HM_Standard
+End Submodule gS_Get_HM_Standard

@@ -1,5 +1,5 @@
 
-Submodule (CFML_Atoms) Atm_Symmetry_Constraints
+Submodule (CFML_Atoms) Atm_SymmetryConstraints
   implicit none
 
   contains
@@ -45,4 +45,4 @@ Submodule (CFML_Atoms) Atm_Symmetry_Constraints
        Atm%symm_checked=.true.
      End Subroutine Check_Symmetry_Constraints
 
-End Submodule Atm_Symmetry_Constraints
+End Submodule Atm_SymmetryConstraints

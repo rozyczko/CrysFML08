@@ -1,4 +1,4 @@
- Submodule (CFML_Geom) Matrices
+ Submodule (CFML_Geom) Geom_Matrices
     implicit none
    contains
 
@@ -306,4 +306,4 @@
       end if
     End Subroutine Get_Matrix_moving_v_to_u
 
- End Submodule Matrices
+ End Submodule Geom_Matrices

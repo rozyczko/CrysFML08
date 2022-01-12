@@ -649,7 +649,7 @@ Module CFML_EoS
          real(kind=cp),     intent(in) :: T
          type(Eos_Type),    intent(in) :: EoS
          integer, optional, intent(in) :: I
-         real(kind=cp)              :: G
+         real(kind=cp)                 :: G
       End Function Get_Grun_PT
 
       Module Function Get_Grun_Th(P, T, Eos)  Result(G)
@@ -664,6 +664,7 @@ Module CFML_EoS
          real(kind=cp),     intent(in) :: V
          type(Eos_Type),    intent(in) :: EoS
          integer, optional, intent(in) :: i
+         real(kind=cp)                 :: Grun
       End Function Get_Grun_V
 
       Module Function Get_K(P,T,EoS) Result(K)
@@ -1053,6 +1054,7 @@ Module CFML_EoS
          integer,        intent(in) :: J
          real(kind=cp),  intent(in) :: P
          type(Eos_Type), intent(in) :: EoS
+         real(kind=cp)              :: V
       End Function Murn_Interpolate_PTV_Table
 
       Module Function Murn_PTV_Table(I, J, Eos) Result(Eosm)

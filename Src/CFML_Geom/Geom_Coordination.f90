@@ -1,5 +1,5 @@
 
- Submodule (CFML_Geom) Coordination
+ Submodule (CFML_Geom) Geom_Coordination
     implicit none
   contains
 
@@ -246,4 +246,4 @@
        end do !i
     End Subroutine Set_TDist_Partial_Coordination
 
- End Submodule Coordination
+ End Submodule Geom_Coordination

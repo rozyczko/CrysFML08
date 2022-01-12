@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Tof_Jorgensen_Vondreele
+SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
   implicit none
    Contains
    !!----
@@ -138,4 +138,4 @@ SubModule (CFML_Profiles) PRF_Tof_Jorgensen_Vondreele
 
    End Subroutine Tof_Jorgensen_Vondreele
 
-End SubModule PRF_Tof_Jorgensen_Vondreele
+End SubModule Profile_Tof_Jorg_Vondreele

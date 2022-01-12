@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Gaussian
+SubModule (CFML_Profiles) Profile_Gaussian
   implicit none
    Contains
    !!----
@@ -89,4 +89,4 @@ SubModule (CFML_Profiles) PRF_Gaussian
 
    End Subroutine Prof_Gaussian
 
-End SubModule PRF_Gaussian
+End SubModule Profile_Gaussian

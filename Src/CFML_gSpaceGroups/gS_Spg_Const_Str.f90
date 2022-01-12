@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_ConstructorString
+SubModule (CFML_gSpaceGroups) gs_Spg_Const_Str
    implicit none
    Contains
 
@@ -26,7 +26,7 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
       type(rational),       dimension(:,:),allocatable :: Mat
       integer :: d,i,j,ngen,invt,multip,centred,anticentred,Numops,num_lat,num_alat,mag_type
       logical :: time_given
-      
+
       !> Init
       call Clear_Error()
       call Init_SpaceGroup(Spg)
@@ -126,8 +126,8 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorString
          end if
       end if
       if(.not. time_given) Spg%magnetic=.false.
-      
+
    End Subroutine SpaceG_Constructor_Str
 
-End SubModule SPG_ConstructorString
+End SubModule gs_Spg_Const_Str
 

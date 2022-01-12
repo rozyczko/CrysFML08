@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_IOForm) IO_CIF
+SubModule (CFML_IOForm) Format_CIF
    implicit none
 
    !---- Local Variables ----!
@@ -3013,5 +3013,5 @@ SubModule (CFML_IOForm) IO_CIF
 
    End Subroutine Write_CIF_Spg
 
-End SubModule IO_CIF
+End SubModule Format_CIF
 

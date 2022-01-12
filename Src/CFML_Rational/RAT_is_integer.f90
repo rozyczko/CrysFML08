@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Rational) RAT_Is_Integer_Rational
+SubModule (CFML_Rational) RAT_Is_Integer
  implicit none
  Contains
 
@@ -70,4 +70,4 @@ SubModule (CFML_Rational) RAT_Is_Integer_Rational
 
    End Function Is_Integer_Rational_Scalar
 
-End SubModule RAT_Is_Integer_Rational
+End SubModule RAT_Is_Integer

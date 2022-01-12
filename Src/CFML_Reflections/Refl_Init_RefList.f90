@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Init_Reflist
+SubModule (CFML_Reflections) Refl_Init_Reflist
    implicit none
    Contains
 
@@ -67,4 +67,4 @@ SubModule (CFML_Reflections) RFL_Init_Reflist
 
    End Subroutine Initialize_RefList
 
-End SubModule RFL_Init_Reflist
+End SubModule Refl_Init_Reflist

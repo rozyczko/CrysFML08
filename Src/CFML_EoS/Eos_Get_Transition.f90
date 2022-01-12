@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Transition
+SubModule (CFML_EoS) EoS_Get_Transition
    implicit none
 
    Contains
@@ -189,4 +189,4 @@ SubModule (CFML_EoS) EoS_Transition
 
    End Function Transition_Phase
 
-End SubModule EoS_Transition
+End SubModule EoS_Get_Transition

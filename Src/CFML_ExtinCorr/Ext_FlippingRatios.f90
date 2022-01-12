@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_ExtinCorr) FlippingRat
+SubModule (CFML_ExtinCorr) Ext_FlippingRatios
   implicit none
    Contains
 
@@ -205,4 +205,4 @@ SubModule (CFML_ExtinCorr) FlippingRat
 
    End Subroutine Correct_FlippingRatios
 
-End SubModule FlippingRat
+End SubModule Ext_FlippingRatios

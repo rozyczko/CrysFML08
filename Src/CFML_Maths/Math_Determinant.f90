@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Determinant
+Submodule (CFML_Maths) Math_Determinant
  Contains
 
     !!----
@@ -336,6 +336,7 @@ Submodule (CFML_Maths) Determinant
        det=cmplx(1.0,0.0)
        pc=0; pl=0
        cs=cmplx(0.0,0.0)
+       aa=A(1:n,1:n)
 
        do k=1,n
           !> Searching greatest pivot
@@ -553,4 +554,4 @@ Submodule (CFML_Maths) Determinant
 
     End Function Determ_V_R
 
-End Submodule Determinant
+End Submodule Math_Determinant

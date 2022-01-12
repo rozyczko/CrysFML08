@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_BVS_Tables) TAB_SetBVS_Routines
+SubModule (CFML_BVS_Tables) TAB_Set_BVST
    Implicit none
   Contains
 
@@ -2744,4 +2744,4 @@ SubModule (CFML_BVS_Tables) TAB_SetBVS_Routines
       PaulingX(108) = 0.00
    End Subroutine Set_Pauling_Electronegativity
 
-End SubModule TAB_SetBVS_Routines
+End SubModule TAB_Set_BVST

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Tsub
+SubModule (CFML_Random) Random_T
   implicit none
    Contains
    !!----
@@ -67,4 +67,4 @@ SubModule (CFML_Random) Random_Tsub
 
    End Function Random_T
 
-End SubModule Random_Tsub
+End SubModule Random_T

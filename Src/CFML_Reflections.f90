@@ -58,7 +58,7 @@ Module CFML_Reflections
 
    !---- List of public subroutines ----!
    public :: H_Equiv_List, Initialize_RefList, Gener_Reflections, Search_Extinctions, &
-             Write_Info_RefList
+             Write_Info_RefList, Init_Refl_Conditions
 
    !---- Parameters ----!
    real(kind=cp), parameter :: EPS_REF  = 0.0002_cp   ! Epsilon for comparisons within this module

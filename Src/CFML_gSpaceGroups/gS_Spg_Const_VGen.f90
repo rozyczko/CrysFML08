@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_ConstructorGen
+SubModule (CFML_gSpaceGroups) gs_Spg_Const_VGen
    implicit none
    Contains
 
@@ -128,4 +128,4 @@ SubModule (CFML_gSpaceGroups) SPG_ConstructorGen
       end if
    End Subroutine SpaceG_Constructor_GenV
 
-End SubModule SPG_ConstructorGen
+End SubModule gs_Spg_Const_VGen

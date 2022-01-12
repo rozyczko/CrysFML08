@@ -1,4 +1,4 @@
-Submodule (CFML_DiffPatt) AddPatt
+Submodule (CFML_DiffPatt) DiffP_Add_Patterns
 
  implicit none
 
@@ -107,4 +107,4 @@ Submodule (CFML_DiffPatt) AddPatt
         Pat%ymax=maxval(Pat%y)
     End Subroutine Add_Patterns
 
-End Submodule AddPatt
+End Submodule DiffP_Add_Patterns

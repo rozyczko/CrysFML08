@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_Messages) Mess_Errors
+SubModule (CFML_Messages) Con_Err_Message
   Implicit none
    Contains
 
@@ -44,4 +44,4 @@ SubModule (CFML_Messages) Mess_Errors
 
    End Subroutine Error_Message
 
-End SubModule Mess_Errors
+End SubModule Con_Err_Message

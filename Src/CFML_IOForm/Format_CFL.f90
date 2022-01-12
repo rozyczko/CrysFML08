@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_IOForm) IO_CFL
+SubModule (CFML_IOForm) Format_CFL
    !---- Variables ----!
    implicit none
 
@@ -1229,4 +1229,4 @@ SubModule (CFML_IOForm) IO_CFL
 
    End Subroutine Get_Job_Info
 
-End SubModule IO_CFL
+End SubModule Format_CFL

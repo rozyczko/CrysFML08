@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
- SubModule (CFML_geom) Angle_calculations
+ SubModule (CFML_geom) Geom_Angles
     implicit none
    Contains
     !!----
@@ -643,4 +643,4 @@
 
     End Subroutine Torsion_and_Sigma
 
- End SubModule Angle_calculations
+ End SubModule Geom_Angles

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_IOForm) IO_GEN
+SubModule (CFML_IOForm) Format_GEN
    !---- Variables ----!
    implicit none
 
@@ -682,4 +682,4 @@ SubModule (CFML_IOForm) IO_GEN
 
     End Function Charge
 
-End SubModule IO_GEN
+End SubModule Format_GEN

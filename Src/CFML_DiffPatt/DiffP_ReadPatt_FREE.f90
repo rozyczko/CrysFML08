@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) RPatt_FREE
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_FREE
 
  implicit none
 
@@ -220,4 +220,4 @@ SubModule (CFML_DiffPatt) RPatt_FREE
       close(unit=i_dat)
    End Subroutine Read_Pattern_Free
 
-End SubModule RPatt_FREE
+End SubModule DiffP_ReadPatt_FREE

@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) RPatt
+SubModule (CFML_DiffPatt) DiffP_ReadPatterns
 
   implicit none
 
@@ -415,4 +415,4 @@ SubModule (CFML_DiffPatt) RPatt
       end if
    End Subroutine Read_Pattern_One
 
-End SubModule RPatt
+End SubModule DiffP_ReadPatterns

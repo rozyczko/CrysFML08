@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_PSI
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_PSI
 
  implicit none
 
@@ -110,4 +110,4 @@ SubModule (CFML_DiffPatt) RPatt_PSI
        close(unit=i_dat)
     End Subroutine Read_Pattern_DMC
 
-End SubModule RPatt_PSI
+End SubModule DiffP_ReadPatt_PSI

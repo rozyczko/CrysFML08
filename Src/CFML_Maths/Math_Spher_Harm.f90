@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Maths_SpherHarmon
+Submodule (CFML_Maths) Maths_Spher_Harm
  implicit none
  Contains
 
@@ -652,7 +652,7 @@ Submodule (CFML_Maths) Maths_SpherHarmon
 
     End Subroutine Pikout_Lj_Cubic
 
- End Submodule Maths_SpherHarmon
+ End Submodule Maths_Spher_Harm
 
 
 

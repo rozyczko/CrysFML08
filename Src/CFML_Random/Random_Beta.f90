@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Beta_sub
+SubModule (CFML_Random) Random_Beta
   implicit none
    Contains
    !!----
@@ -83,4 +83,4 @@ SubModule (CFML_Random) Random_Beta_sub
 
    End Function Random_Beta
 
-End SubModule Random_Beta_sub
+End SubModule Random_Beta

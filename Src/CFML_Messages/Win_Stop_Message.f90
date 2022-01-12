@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_Messages) Wmess_StoppingMess
+SubModule (CFML_Messages) Win_Stop_Message
   Implicit none
    Contains
 
@@ -25,4 +25,4 @@ SubModule (CFML_Messages) Wmess_StoppingMess
 
    End Subroutine Stop_Message
 
-End SubModule Wmess_StoppingMess
+End SubModule Win_Stop_Message

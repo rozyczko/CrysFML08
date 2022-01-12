@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Get_GeneratorsL
+SubModule (CFML_gSpaceGroups) gS_Get_Generators
    implicit none
    Contains
     !!----
@@ -200,4 +200,4 @@ SubModule (CFML_gSpaceGroups) SPG_Get_GeneratorsL
         end if
     End Subroutine Get_Generators_L
 
-End SubModule SPG_Get_GeneratorsL
+End SubModule gS_Get_Generators

@@ -110,7 +110,7 @@
 
        call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)
        !check that all species are well set in the list
-       !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL"
+       !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL (Calc_Map_BVEL)"
        do n=1,At2%natoms
            n2=At2%Atom(n)%ind_ff(1)
            !write(unit=*,fmt="(a,a,3f12.5)") At2%Atom(n)%Lab,At2%Atom(n)%SfacSymb,At2%Atom(n)%x
@@ -359,7 +359,7 @@
        real(kind=cp), dimension(:,:,:), allocatable :: map_bvs
        real(kind=cp), dimension(:,:),   allocatable :: peaks
        real(kind=cp), dimension(:),     allocatable :: VD_peaks
-       type (AtList_Type)                        :: At1, At2
+       type (AtList_Type)                           :: At1, At2
        logical                                      :: new_peak,anion,cation
 
        !---- Initial conditions ----!

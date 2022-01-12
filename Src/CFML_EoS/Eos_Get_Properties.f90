@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Property
+SubModule (CFML_EoS) EoS_Get_Property
    implicit none
    Contains
 
@@ -271,4 +271,4 @@ SubModule (CFML_EoS) EoS_Property
 
    End Function Get_Props_PTVTable
 
-End SubModule EoS_Property
+End SubModule EoS_Get_Property

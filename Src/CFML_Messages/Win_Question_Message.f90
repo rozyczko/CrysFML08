@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_Messages) Wmess_Question
+SubModule (CFML_Messages) Win_Question_Message
   Implicit none
    Contains
    !!----
@@ -26,4 +26,4 @@ SubModule (CFML_Messages) Wmess_Question
 
 
 
-End SubModule Wmess_Question
+End SubModule Win_Question_Message

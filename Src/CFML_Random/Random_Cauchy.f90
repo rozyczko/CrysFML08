@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Cauchy_sub
+SubModule (CFML_Random) Random_Cauchy
   implicit none
    Contains
    !!----
@@ -29,4 +29,4 @@ SubModule (CFML_Random) Random_Cauchy_sub
 
    End Function Random_Cauchy
 
-End SubModule Random_Cauchy_sub
+End SubModule Random_Cauchy

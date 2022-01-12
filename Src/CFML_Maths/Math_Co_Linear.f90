@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Co_Linear
+Submodule (CFML_Maths) Math_Co_Linear
  Contains
 
     !!----
@@ -160,4 +160,4 @@ Submodule (CFML_Maths) Co_Linear
 
     End Function Co_Linear_R
 
-End Submodule Co_Linear
+End Submodule Math_Co_Linear

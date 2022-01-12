@@ -1,4 +1,4 @@
-Submodule (CFML_Metrics) Metrics_ThConversion
+Submodule (CFML_Metrics) Metrics_ThConver
  Implicit none
  Contains
     !!----
@@ -201,4 +201,4 @@ Submodule (CFML_Metrics) Metrics_ThConversion
 
     End Function Get_B_from_U
 
-End Submodule Metrics_ThConversion
+End Submodule Metrics_ThConver

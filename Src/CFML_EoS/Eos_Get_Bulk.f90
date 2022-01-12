@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Bulk
+SubModule (CFML_EoS) EoS_Get_Bulk
    implicit none
    Contains
 
@@ -159,4 +159,4 @@ SubModule (CFML_EoS) EoS_Bulk
 
    End Function Get_Kpp0_T
 
-End SubModule EoS_Bulk
+End SubModule EoS_Get_Bulk

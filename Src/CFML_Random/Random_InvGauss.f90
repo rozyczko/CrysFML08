@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Gauss
+SubModule (CFML_Random) Random_InvGauss
   implicit none
    Contains
    !!----
@@ -80,4 +80,4 @@ SubModule (CFML_Random) Random_Gauss
 
    End Function Random_Inv_Gauss
 
-End SubModule Random_Gauss
+End SubModule Random_InvGauss

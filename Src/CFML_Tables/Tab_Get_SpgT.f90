@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Symmetry_Tables) TAB_SpgGener
+SubModule (CFML_Symmetry_Tables) TAB_Get_SpgT
    Implicit none
    Contains
    !!----
@@ -299,4 +299,4 @@ SubModule (CFML_Symmetry_Tables) TAB_SpgGener
 
    End Subroutine Set_IT_Gen
 
-End SubModule TAB_SpgGener
+End SubModule TAB_Get_SpgT

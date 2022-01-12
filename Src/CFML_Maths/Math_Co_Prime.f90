@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) CFML_Math_002
+Submodule (CFML_Maths) Math_Co_Prime
  Contains
 
     !!----
@@ -123,4 +123,4 @@ Submodule (CFML_Maths) CFML_Math_002
 
     End Subroutine Co_Prime_vector
 
-End Submodule CFML_Math_002
+End Submodule Math_Co_Prime

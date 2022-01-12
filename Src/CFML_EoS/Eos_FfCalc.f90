@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_FfCal
+SubModule (CFML_EoS) EoS_FfCalc
    implicit none
    Contains
 
@@ -162,4 +162,4 @@ SubModule (CFML_EoS) EoS_FfCal
 
    End Subroutine FfCal_EoS
 
-End SubModule EoS_FfCal
+End SubModule EoS_FfCalc

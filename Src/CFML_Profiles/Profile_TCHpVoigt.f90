@@ -1,4 +1,4 @@
-SubModule (CFML_Profiles) PRF_TCH_pVoigt
+SubModule (CFML_Profiles) Profile_TCHpVoigt
   implicit none
    Contains
 
@@ -114,4 +114,4 @@ SubModule (CFML_Profiles) PRF_TCH_pVoigt
 
     End Subroutine Get_HG_HL
 
-End SubModule PRF_TCH_pVoigt
+End SubModule Profile_TCHpVoigt

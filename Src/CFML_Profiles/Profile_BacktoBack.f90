@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_BacktoBack
+SubModule (CFML_Profiles) Profile_BacktoBack
   implicit none
    Contains
    !!----
@@ -69,4 +69,4 @@ SubModule (CFML_Profiles) PRF_BacktoBack
 
    End Subroutine Back_To_Back_Exp_Der
 
-End SubModule PRF_BacktoBack
+End SubModule Profile_BacktoBack

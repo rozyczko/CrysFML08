@@ -165,10 +165,10 @@ SubModule (CFML_EoS) EoS_GPT_Crun
       real(kind=cp),     intent(in) :: V    ! Volume or length if linear
       type(Eos_Type),    intent(in) :: EoS  ! Eos Parameter
       integer, optional, intent(in) :: i    ! which oscillator
+      real(kind=cp) :: Grun                 !The resulting gruneisen gamma
 
       !---- Local Variables ----!
       integer       :: io
-      real(kind=cp) :: Grun                 !The resulting gruneisen gamma
       real(kind=cp) :: VV0,q
 
       !>local copy of pointer to oscillator

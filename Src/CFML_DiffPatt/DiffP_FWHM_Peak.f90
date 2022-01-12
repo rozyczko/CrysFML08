@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) FWHMPeak
+SubModule (CFML_DiffPatt) DiffP_FWHM_Peak
 
  implicit none
 
@@ -85,4 +85,5 @@ SubModule (CFML_DiffPatt) FWHMPeak
 
       v=xmr-xml
    End Function FWHM_Peak
-End SubModule FWHMPeak
+
+End SubModule DiffP_FWHM_Peak

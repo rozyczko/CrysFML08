@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Rational) RAT_Operator_Multiply
+Submodule (CFML_Rational) RAT_operator_multiply
  implicit none
  Contains
     !!----
@@ -53,4 +53,4 @@ Submodule (CFML_Rational) RAT_Operator_Multiply
 
     End Function Rational_Integer_Multiply
 
-End Submodule RAT_Operator_Multiply
+End Submodule RAT_operator_multiply

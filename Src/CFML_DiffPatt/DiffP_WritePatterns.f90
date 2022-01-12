@@ -1,4 +1,4 @@
-Submodule (CFML_DiffPatt) WPatt
+Submodule (CFML_DiffPatt) DiffP_WritePatterns
 
   implicit none
 
@@ -430,4 +430,4 @@ Submodule (CFML_DiffPatt) WPatt
        close(unit=i_dat)
     End Subroutine Write_Pattern_INSTRM5
 
-End Submodule WPatt
+End Submodule DiffP_WritePatterns

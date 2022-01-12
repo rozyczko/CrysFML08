@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Strings) STR_StrTools
+Submodule (CFML_Strings) StringTools
    !---- Parameters ----!
    implicit none
 
@@ -620,4 +620,4 @@ Submodule (CFML_Strings) STR_StrTools
 
     End Subroutine Sort_PR_Partition
 
-End Submodule STR_StrTools
+End Submodule StringTools

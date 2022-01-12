@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Math_Legendre
+Submodule (CFML_Maths) Math_Poly_Legendre
  implicit none
  Contains
 
@@ -64,4 +64,4 @@ Submodule (CFML_Maths) Math_Legendre
 
     End Function Poly_Legendre
 
-End Submodule Math_Legendre
+End Submodule Math_Poly_Legendre

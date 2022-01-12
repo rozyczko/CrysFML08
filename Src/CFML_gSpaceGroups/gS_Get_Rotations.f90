@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Get_Rotations_Attributes
+SubModule (CFML_gSpaceGroups) gS_Get_Rotations
    implicit none
    Contains
 
@@ -289,4 +289,4 @@ SubModule (CFML_gSpaceGroups) SPG_Get_Rotations_Attributes
       end select
    End Function Get_Rotation_Order
 
-End Submodule SPG_Get_Rotations_Attributes
+End Submodule gS_Get_Rotations

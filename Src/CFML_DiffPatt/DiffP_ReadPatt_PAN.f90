@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_Pan
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_PAN
 
  implicit none
 
@@ -602,4 +602,4 @@ SubModule (CFML_DiffPatt) RPatt_Pan
        close(unit=i_dat)
     End Subroutine Read_Pattern_Panalytical_XRDML
 
-End Submodule RPatt_Pan
+End Submodule DiffP_ReadPatt_PAN

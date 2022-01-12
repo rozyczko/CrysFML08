@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_CopyDat
+SubModule (CFML_EoS) EoS_CopyEDat
    implicit none
    Contains
 
@@ -26,4 +26,4 @@ SubModule (CFML_EoS) EoS_CopyDat
 
    End Subroutine Copy_Eos_Data_List
 
-End SubModule EoS_CopyDat
+End SubModule EoS_CopyEDat

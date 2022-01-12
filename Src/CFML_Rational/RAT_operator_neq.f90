@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Rational) RAT_Operator_NE
+Submodule (CFML_Rational) RAT_operator_neq
  implicit none
  Contains
     !!----
@@ -51,4 +51,4 @@ Submodule (CFML_Rational) RAT_Operator_NE
 
     End Function Integer_Rational_NE
 
-End Submodule RAT_Operator_NE
+End Submodule RAT_operator_neq

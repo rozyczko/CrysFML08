@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) Get_Angle
+SubModule (CFML_EoS) EoS_Get_Angle
    implicit none
 
    Contains
@@ -358,4 +358,4 @@ SubModule (CFML_EoS) Get_Angle
 
    End Function Get_Angle_VolFactor_Deriv2
 
-End SubModule Get_Angle
+End SubModule EoS_Get_Angle

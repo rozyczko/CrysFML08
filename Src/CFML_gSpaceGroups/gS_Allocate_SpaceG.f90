@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Allocate_SpaceGroup
+SubModule (CFML_gSpaceGroups) gS_Allocate_SpaceG
    implicit none
    Contains
 
@@ -92,5 +92,5 @@ SubModule (CFML_gSpaceGroups) SPG_Allocate_SpaceGroup
 
    End Subroutine Allocate_KVector
 
-End SubModule SPG_Allocate_SpaceGroup
+End SubModule gS_Allocate_SpaceG
 

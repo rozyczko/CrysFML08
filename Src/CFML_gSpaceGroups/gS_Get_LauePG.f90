@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Laue_PG
+SubModule (CFML_gSpaceGroups) gS_Get_LauePG
    implicit none
    Contains
 
@@ -724,4 +724,4 @@ SubModule (CFML_gSpaceGroups) SPG_Laue_PG
 
    End Subroutine Identify_Crystal_System
 
-End SubModule SPG_Laue_PG
+End SubModule gS_Get_LauePG

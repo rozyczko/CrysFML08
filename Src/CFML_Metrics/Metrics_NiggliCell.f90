@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-Submodule (CFML_Metrics) Metrics_Niggli_Cell
+Submodule (CFML_Metrics) Metrics_NiggliCell
  Implicit none
  Contains
     !!----
@@ -419,4 +419,4 @@ Submodule (CFML_Metrics) Metrics_Niggli_Cell
 
     End Subroutine Niggli_Cell_Mat
 
-End Submodule Metrics_Niggli_Cell
+End Submodule Metrics_NiggliCell

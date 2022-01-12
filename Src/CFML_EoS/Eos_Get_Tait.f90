@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Tait
+SubModule (CFML_EoS) Eos_Get_Tait
    implicit none
    Contains
 
@@ -55,4 +55,4 @@ SubModule (CFML_EoS) EoS_Tait
 
    End Function Get_Tait
 
-End SubModule EoS_Tait
+End SubModule Eos_Get_Tait

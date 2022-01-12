@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_ILL
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_ILL
 
  implicit none
 
@@ -316,4 +316,4 @@ SubModule (CFML_DiffPatt) RPatt_ILL
        close(unit=i_dat)
     End Subroutine Read_Pattern_D1B_D20
 
-End SubModule RPatt_ILL
+End SubModule DiffP_ReadPatt_ILL

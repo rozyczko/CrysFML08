@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) RPatt_XYSIG
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_XYSIG
 
   implicit none
 
@@ -379,4 +379,4 @@ SubModule (CFML_DiffPatt) RPatt_XYSIG
       close(unit=i_dat)
    End Subroutine Read_Pattern_XYSigma
 
-End SubModule RPatt_XYSIG
+End SubModule DiffP_ReadPatt_XYSIG

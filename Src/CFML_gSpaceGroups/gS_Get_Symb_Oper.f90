@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_String_from_Op
+SubModule (CFML_gSpaceGroups) gS_Get_Symb_Oper
    implicit none
    !> Local Variable
    real(kind=cp), parameter :: LEPS=0.0002_cp
@@ -205,5 +205,5 @@ SubModule (CFML_gSpaceGroups) SPG_String_from_Op
       symb=trim(sym(1))//","//trim(sym(2))//","//trim(sym(3))
    End Function String_from_MAT_TR_I
 
-End SubModule SPG_String_from_Op
+End SubModule gS_Get_Symb_Oper
 

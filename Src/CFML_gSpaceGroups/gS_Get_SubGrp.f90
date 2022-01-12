@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_SubGroups
+SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
    implicit none
    Contains
    !!----
@@ -487,4 +487,4 @@ SubModule (CFML_gSpaceGroups) SPG_SubGroups
      end do
    End Function Is_in_Group
 
-End SubModule SPG_SubGroups
+End SubModule gS_Get_SubGrp

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_ExtinCorr) Beck_Copp
+SubModule (CFML_ExtinCorr) Ext_BeckerCoppens
   implicit none
    Contains
 
@@ -72,4 +72,4 @@ SubModule (CFML_ExtinCorr) Beck_Copp
 
    End Subroutine Becker_Coppens
 
-End SubModule Beck_Copp
+End SubModule Ext_BeckerCoppens

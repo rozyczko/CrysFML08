@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
- SubModule (CFML_geom) Allocations
+ SubModule (CFML_geom) Geom_Allocations
     implicit none
    Contains
     !!----
@@ -132,5 +132,5 @@
     End Subroutine Deallocate_Point_List
 
 
- End SubModule Allocations
+ End SubModule Geom_Allocations
 

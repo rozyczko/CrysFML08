@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Finger
+SubModule (CFML_Profiles) Profile_Finger
   implicit none
    Contains
    !!----
@@ -335,4 +335,4 @@ SubModule (CFML_Profiles) PRF_Finger
 
    End Subroutine Prof_Val
 
-End SubModule PRF_Finger
+End SubModule Profile_Finger

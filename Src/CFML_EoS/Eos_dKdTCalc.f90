@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_dKdT
+SubModule (CFML_EoS) EoS_dKdTCalc
    implicit none
 
    Contains
@@ -68,4 +68,4 @@ SubModule (CFML_EoS) EoS_dKdT
 
    End Function dKdT_Cal
 
-End SubModule EoS_dKdT
+End SubModule EoS_dKdTCalc

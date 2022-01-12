@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_IOForm) IO_MCIF
+SubModule (CFML_IOForm) Format_MCIF
 
    !---- Local Variables ----!
    implicit none
@@ -3419,5 +3419,5 @@ SubModule (CFML_IOForm) IO_MCIF
    End Subroutine Write_MCIF_SpaceG_Magn_Transf
 
 
-End SubModule IO_MCIF
+End SubModule Format_MCIF
 

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Match_Shubnikov_Group
+SubModule (CFML_gSpaceGroups) gS_Match_Shubnikov_Grp
    implicit none
    Contains
     !!----
@@ -285,4 +285,4 @@ SubModule (CFML_gSpaceGroups) SPG_Match_Shubnikov_Group
 
     End Subroutine Match_Shubnikov_Group
 
-End SubModule SPG_Match_Shubnikov_Group
+End SubModule gS_Match_Shubnikov_Grp

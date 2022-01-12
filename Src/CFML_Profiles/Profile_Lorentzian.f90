@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Lorentzian
+SubModule (CFML_Profiles) Profile_Lorentzian
   implicit none
    Contains
    !!----
@@ -86,4 +86,4 @@ SubModule (CFML_Profiles) PRF_Lorentzian
 
    End Subroutine Prof_Lorentzian
 
-End SubModule PRF_Lorentzian
+End SubModule Profile_Lorentzian

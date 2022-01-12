@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_APL
+SubModule (CFML_EoS) EoS_Get_APL
    implicit none
    Contains
 
@@ -70,4 +70,4 @@ SubModule (CFML_EoS) EoS_APL
 
    End Function Get_APL
 
-End SubModule EoS_APL
+End SubModule EoS_Get_APL

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_chi2_gamma
+SubModule (CFML_Random) Random_Gamma
   implicit none
    Contains
    !!----
@@ -241,4 +241,4 @@ SubModule (CFML_Random) Random_chi2_gamma
 
    End Function Random_Weibull
 
-End SubModule Random_chi2_gamma
+End SubModule Random_Gamma

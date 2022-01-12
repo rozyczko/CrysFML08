@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_NLS
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_NLS
 
  implicit none
 
@@ -108,4 +108,4 @@ SubModule (CFML_DiffPatt) RPatt_NLS
       close(unit=i_dat)
    End Subroutine Read_Pattern_NLS
 
-End SubModule RPatt_NLS
+End SubModule DiffP_ReadPatt_NLS

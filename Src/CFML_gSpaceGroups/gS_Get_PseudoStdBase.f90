@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Pseudo_Standard_Base
+SubModule (CFML_gSpaceGroups) gS_Get_PseudoStdBase
    implicit none
    Contains
    !!----
@@ -98,4 +98,4 @@ SubModule (CFML_gSpaceGroups) SPG_Pseudo_Standard_Base
 
    End Subroutine Get_Pseudo_Standard_Base
 
-End SubModule SPG_Pseudo_Standard_Base
+End SubModule gS_Get_PseudoStdBase

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Rational) RAT_Assign
+Submodule (CFML_Rational) RAT_Assignment
  implicit none
  Contains
     !!----
@@ -112,4 +112,4 @@ Submodule (CFML_Rational) RAT_Assign
 
     End Subroutine Assign_Real_Rational_CP
 
-End Submodule RAT_Assign
+End Submodule RAT_Assignment

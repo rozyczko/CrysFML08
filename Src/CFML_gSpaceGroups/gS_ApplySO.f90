@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Apply_OP
+SubModule (CFML_gSpaceGroups) gS_ApplySO
    implicit none
    Contains
    !!----
@@ -43,4 +43,4 @@ SubModule (CFML_gSpaceGroups) SPG_Apply_OP
       S=va(1:size(v))
    End Function Apply_OP_real
 
-End SubModule SPG_Apply_OP
+End SubModule gS_ApplySO

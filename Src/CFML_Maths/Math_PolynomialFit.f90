@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Math_Polynomial
+Submodule (CFML_Maths) Math_PolynomialFit
   implicit none
 
 Contains
@@ -97,4 +97,4 @@ Contains
 
    End Function Polynomial_Fit
 
-End Submodule Math_Polynomial
+End Submodule Math_PolynomialFit

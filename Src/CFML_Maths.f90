@@ -46,7 +46,7 @@
  Module CFML_Maths
     !---- Use Modules ----!
 
-    Use CFML_GlobalDeps, only: CP, SP, DP, Err_CFML, Clear_Error, PI, TO_RAD, TO_DEG, EPS, DEPS
+    Use CFML_GlobalDeps, only: CP, SP, DP, Err_CFML, Clear_Error, TPI, PI, TO_RAD, TO_DEG, EPS, DEPS
 
     !---- Variables ----!
     implicit none

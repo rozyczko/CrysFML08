@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_BVS_Tables) TAB_DelBVS_Routines
+SubModule (CFML_BVS_Tables) TAB_Del_BVST
    Implicit none
   Contains
 
@@ -57,4 +57,4 @@ SubModule (CFML_BVS_Tables) TAB_DelBVS_Routines
 
    End Subroutine Remove_sBVS_Table
 
-End SubModule TAB_DelBVS_Routines
+End SubModule TAB_Del_BVST

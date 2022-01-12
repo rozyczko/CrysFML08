@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Get_Origin_Shift
+SubModule (CFML_gSpaceGroups) gS_Get_OriginShift
    implicit none
    Contains
    !!----
@@ -96,4 +96,4 @@ SubModule (CFML_gSpaceGroups) SPG_Get_Origin_Shift
 
    End Subroutine Get_Origin_Shift
 
-End Submodule SPG_Get_Origin_Shift
+End Submodule gS_Get_OriginShift

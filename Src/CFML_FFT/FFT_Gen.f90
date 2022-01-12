@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-Submodule (CFML_FFT) FFTGen
+Submodule (CFML_FFT) FFT_Gen
   implicit none
  Contains
     !!--++
@@ -301,4 +301,4 @@ Submodule (CFML_FFT) FFTGen
 
     End Subroutine Fftn
 
-End SubModule FFTGen
+End SubModule FFT_Gen

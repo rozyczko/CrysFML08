@@ -955,7 +955,7 @@
     Module Subroutine Calc_Site_Ene(A,Spg,Cell,x,y,z,atname,drmax,emin)
       !---- Arguments ----!
       Type (Atoms_Conf_List_Type), Intent(in out):: A
-      class (SpG_Type),      Intent(in)    :: SpG
+      class (SpG_Type),            Intent(in)    :: SpG
       Type (Cell_G_Type),          Intent(in)    :: Cell
       real(kind=cp),               intent(in)    :: x
       real(kind=cp),               intent(in)    :: y
@@ -965,16 +965,16 @@
       real(kind=cp),               intent(out)   :: emin
 
       !---- Local variables ----!
-      character(len=4)                             :: car,atm
-      integer                                      :: i,j,n,n1,n2 !,k
-      integer                                      :: nx1,nx2,ny1,ny2,nz1,nz2
-      integer                                      :: i1,j1,k1,sig1,sig2,ncont
-      real(kind=cp)                                :: rx1,ry1,rz1,qval,q1,q2,rep
-      real(kind=cp)                                :: sbvs, dd, occ, radius, rho, dmin, d_cutoff, &
-                                                      dzero, alpha,c_rep,c_atr
-      real(kind=cp), dimension(3)                  :: pto,pta,extend
-      Type (AtList_Type)                           :: At1, At2
-      logical                                      :: anion,cation
+      character(len=4)                           :: car,atm
+      integer                                    :: i,j,n,n1,n2 !,k
+      integer                                    :: nx1,nx2,ny1,ny2,nz1,nz2
+      integer                                    :: i1,j1,k1,sig1,sig2,ncont
+      real(kind=cp)                              :: rx1,ry1,rz1,qval,q1,q2,rep
+      real(kind=cp)                              :: sbvs, dd, occ, radius, rho, dmin, d_cutoff, &
+                                                    dzero, alpha,c_rep,c_atr
+      real(kind=cp), dimension(3)                :: pto,pta,extend
+      Type (AtList_Type)                         :: At1, At2
+      logical                                    :: anion,cation
       !Coulomb constant (1/4pie0) to get energies in eV, use electron charges and distances in angstroms
       real(kind=dp), parameter :: ke=14.399644850445155254866066
       !Principal quantum numbers of the test=ion  and the species of all the atoms of the list
@@ -1022,6 +1022,7 @@
       end if
 
       call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)  !Here the non-active atoms of At2 are not in At2
+
       if(Err_CFML%Ierr /= 0) then
         write(unit=*,fmt="(a)") " =>"//"Error in Calc_Site_Energy: "//trim(Err_CFML%Msg)
         return
@@ -1029,7 +1030,13 @@
       !call AtList1_ExtenCell_AtList2(Spg,At1,At2,.true.)
       !call Deallocate_atom_list(At1)
       !check that all species are well set in the list
+
       !Write(unit=*,fmt="(a)") " => List of atoms for calculating BVEL (Calc_Site_Ene)"
+      !do n=1,At2%natoms
+      !    n2=At2%Atom(n)%ind_ff(1)
+      !    write(*,"(a30,3f10.5,2i6)") trim(At2%atom(n)%Lab)//"  "//At2%atom(n)%ChemSymb//"  ", At2%atom(n)%x, At2%atom(n)%charge, At2%atom(n)%ind_ff(1)
+      !end do
+
       do n=1,At2%natoms
           n2=At2%Atom(n)%ind_ff(1)
           !write(unit=*,fmt="(a,a,3f12.5,f8.4)") At2%Atom(n)%Lab,At2%Atom(n)%SfacSymb,At2%Atom(n)%x,real(At2%Atom(n)%charge)

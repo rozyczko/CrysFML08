@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
+SubModule (CFML_Magnetic_Database) TAB_Read_MagneticDBase
    Implicit none
    Contains
    !!----
@@ -297,4 +297,4 @@ SubModule (CFML_Magnetic_Database) TAB_MagDB_Read
    End Subroutine Read_Magnetic_Binary
 
 
-End SubModule TAB_MagDB_Read
+End SubModule TAB_Read_MagneticDBase

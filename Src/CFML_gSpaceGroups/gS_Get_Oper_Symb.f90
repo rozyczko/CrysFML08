@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Get_Op_from_Symb
+SubModule (CFML_gSpaceGroups) gS_Get_Oper_Symb
    implicit none
    Contains
 
@@ -27,5 +27,5 @@ SubModule (CFML_gSpaceGroups) SPG_Get_Op_from_Symb
 
    End Function Get_Op_from_Symb
 
-End SubModule SPG_Get_Op_from_Symb
+End SubModule gS_Get_Oper_Symb
 

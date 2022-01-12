@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Maths_Cross
+Submodule (CFML_Maths) Maths_Mat_Cross
  implicit none
  Contains
 
@@ -67,4 +67,4 @@ Submodule (CFML_Maths) Maths_Cross
                        -vec(2),   vec(1),     0 /),(/3,3/))
     End Function Mat_Cross_I
 
-End Submodule Maths_Cross
+End Submodule Maths_Mat_Cross

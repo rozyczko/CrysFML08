@@ -3,7 +3,7 @@
 !!----
 !!---- 30/04/19
 !!
-SubModule (CFML_DiffPatt) RPatt_CIF
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_CIF
 
  implicit none
 
@@ -186,4 +186,4 @@ SubModule (CFML_DiffPatt) RPatt_CIF
       end select
    End Subroutine Read_Pattern_CIF
 
-End SubModule RPatt_CIF
+End SubModule DiffP_ReadPatt_CIF

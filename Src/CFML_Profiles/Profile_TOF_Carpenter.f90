@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Tof_Carpenter
+SubModule (CFML_Profiles) Profile_Tof_Carpenter
   implicit none
    Contains
    !!----
@@ -245,4 +245,4 @@ SubModule (CFML_Profiles) PRF_Tof_Carpenter
 
    End Subroutine Tof_Carpenter
 
-End SubModule PRF_Tof_Carpenter
+End SubModule Profile_Tof_Carpenter

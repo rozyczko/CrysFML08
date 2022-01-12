@@ -1,4 +1,4 @@
-Submodule (CFML_DiffPatt) Bckg_Patt
+Submodule (CFML_DiffPatt) DiffP_BackgPatt
 
  implicit none
 
@@ -347,4 +347,4 @@ Submodule (CFML_DiffPatt) Bckg_Patt
        end do  do_i
     End Subroutine Set_Background_Inter
 
-End Submodule Bckg_Patt
+End Submodule DiffP_BackgPatt

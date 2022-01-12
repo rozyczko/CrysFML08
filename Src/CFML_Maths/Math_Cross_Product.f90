@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Cross_Product
+Submodule (CFML_Maths) Math_Cross_Product
  Contains
 
     !!----
@@ -64,4 +64,4 @@ Submodule (CFML_Maths) Cross_Product
 
     End Function Cross_Product_I
 
-End Submodule Cross_Product
+End Submodule Math_Cross_Product

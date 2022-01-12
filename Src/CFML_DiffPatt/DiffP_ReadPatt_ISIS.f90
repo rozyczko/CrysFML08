@@ -1,4 +1,5 @@
-SubModule (CFML_DiffPatt) RPatt_ISIS
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_ISIS
+
    !---- Global Variables for this SubModule ----!
    implicit none
 
@@ -197,4 +198,4 @@ SubModule (CFML_DiffPatt) RPatt_ISIS
        close(unit=i_dat)
     End Subroutine Read_Pattern_Isis_M
 
-End SubModule RPatt_ISIS
+End SubModule DiffP_ReadPatt_ISIS

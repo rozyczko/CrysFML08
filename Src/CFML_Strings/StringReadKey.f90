@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
- Submodule (CFML_Strings) STR_Read_Key
+ Submodule (CFML_Strings) StringReadKey
    !---- Parameters ----!
    implicit none
 
@@ -247,4 +247,4 @@
 
     End Subroutine Read_Key_ValueSTD
 
- End Submodule STR_Read_Key
+ End Submodule StringReadKey

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Equivalent_List
+SubModule (CFML_Reflections) Refl_H_EquivList
    implicit none
    Contains
    !!----
@@ -78,4 +78,4 @@ SubModule (CFML_Reflections) RFL_Equivalent_List
 
    End Subroutine H_Equiv_List
 
-End SubModule RFL_Equivalent_List
+End SubModule Refl_H_EquivList

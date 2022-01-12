@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Get_Cosets
+SubModule (CFML_gSpaceGroups) gS_Get_Cosets
    implicit none
    Contains
    !!----
@@ -63,5 +63,5 @@ SubModule (CFML_gSpaceGroups) SPG_Get_Cosets
       cosets=ind(1:n)
    End Subroutine Get_Cosets
 
-End SubModule SPG_Get_Cosets
+End SubModule gS_Get_Cosets
 

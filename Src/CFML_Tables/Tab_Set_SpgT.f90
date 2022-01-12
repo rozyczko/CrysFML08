@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Symmetry_Tables) Set_Routines
+SubModule (CFML_Symmetry_Tables) TAB_Set_SpgT
    Implicit none
    Contains
    !!----
@@ -7322,4 +7322,4 @@ SubModule (CFML_Symmetry_Tables) Set_Routines
       wyckoff_info_loaded=.true.
    End Subroutine Set_Wyckoff_Info
 
-End SubModule Set_Routines
+End SubModule TAB_Set_SpgT

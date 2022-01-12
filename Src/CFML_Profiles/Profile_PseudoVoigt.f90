@@ -3,7 +3,7 @@
 !!----
 !!---- 21/04/19
 !!
-SubModule (CFML_Profiles) PRF_Pseudovoigt
+SubModule (CFML_Profiles) Profile_PseudoVoigt
   implicit none
    Contains
     !!----
@@ -281,4 +281,4 @@ SubModule (CFML_Profiles) PRF_Pseudovoigt
     End Subroutine Split_Pseudovoigt_Der
 
 
- End SubModule PRF_Pseudovoigt
+ End SubModule Profile_PseudoVoigt

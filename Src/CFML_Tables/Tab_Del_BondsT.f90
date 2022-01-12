@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Bonds_Tables) TAB_Del_Routines
+SubModule (CFML_Bonds_Tables) TAB_Del_Bonds
    Implicit none
   Contains
 
@@ -18,4 +18,4 @@ SubModule (CFML_Bonds_Tables) TAB_Del_Routines
 
    End Subroutine Remove_Bonds_Table
 
-End SubModule TAB_Del_Routines
+End SubModule TAB_Del_Bonds

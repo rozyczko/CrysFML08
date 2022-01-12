@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Maths_Sbm_Rank
+Submodule (CFML_Maths) Maths_Rank
  implicit none
  Contains
 
@@ -230,4 +230,4 @@ Submodule (CFML_Maths) Maths_Sbm_Rank
 
     End Subroutine Svdcmp
 
-End Submodule Maths_Sbm_Rank
+End Submodule Maths_Rank

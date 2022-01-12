@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Reorder_Operators
+SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
    implicit none
    Contains
 
@@ -212,7 +212,7 @@ SubModule (CFML_gSpaceGroups) SPG_Reorder_Operators
       if (i_centre /= 0) then   !First apply the centre of symmetry
          do i=1,Numops
             m=m+1
-            Op(m) = Op_centre * Op(i) 
+            Op(m) = Op_centre * Op(i)
          end do
       end if
 
@@ -258,5 +258,5 @@ SubModule (CFML_gSpaceGroups) SPG_Reorder_Operators
       end do
    End Subroutine Reorder_Operators
 
-End SubModule SPG_Reorder_Operators
+End SubModule gS_Reorder_Oper
 

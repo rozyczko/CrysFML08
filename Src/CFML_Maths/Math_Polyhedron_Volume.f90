@@ -1,4 +1,4 @@
- Submodule (CFML_Maths) Math_PolyVol_Centroid
+ Submodule (CFML_Maths) Math_Polyhedron_Volume
   implicit none
 
    contains
@@ -333,4 +333,4 @@
        return
     End Subroutine Get_Plane_from_3Points
 
- End Submodule Math_PolyVol_Centroid
+ End Submodule Math_Polyhedron_Volume

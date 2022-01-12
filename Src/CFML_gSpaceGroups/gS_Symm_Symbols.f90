@@ -1,5 +1,5 @@
 
- Submodule(CFML_gSpaceGroups) SPG_Symmetry_Symbol
+ Submodule(CFML_gSpaceGroups) gS_Symm_Symbols
    implicit none
    real(kind=cp), parameter :: eps_symm  = 0.0002_cp
    contains
@@ -727,4 +727,4 @@
 
     End Function Write_SymTrans_Code
 
- End Submodule SPG_Symmetry_Symbol
+ End Submodule gS_Symm_Symbols

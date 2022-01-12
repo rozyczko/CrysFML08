@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) Spg_Match_SpaceGroup_3D
+SubModule (CFML_gSpaceGroups) gS_Match_SpG3D
    implicit none
    Contains
    !!----
@@ -190,4 +190,4 @@ SubModule (CFML_gSpaceGroups) Spg_Match_SpaceGroup_3D
 
    End subroutine Match_SpaceGroup_3D
 
-End SubModule Spg_Match_SpaceGroup_3D
+End SubModule gS_Match_SpG3D

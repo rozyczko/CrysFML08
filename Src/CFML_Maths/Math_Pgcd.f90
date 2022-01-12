@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Math_pgcd
+Submodule (CFML_Maths) Math_Pgcd
  implicit none
  Contains
     !!----
@@ -63,5 +63,5 @@ Submodule (CFML_Maths) Math_pgcd
 
     End Function Lcm
 
-End Submodule Math_pgcd
+End Submodule Math_Pgcd
 

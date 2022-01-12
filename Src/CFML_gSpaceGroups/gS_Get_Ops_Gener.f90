@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Get_OPS_from_Generators
+SubModule (CFML_gSpaceGroups) gS_Get_OPS_Gener
    implicit none
    Contains
 
@@ -92,5 +92,5 @@ SubModule (CFML_gSpaceGroups) SPG_Get_OPS_from_Generators
       end if
    End Subroutine Get_OPS_from_Generators
 
-End SubModule SPG_Get_OPS_from_Generators
+End SubModule gS_Get_OPS_Gener
 

@@ -1,4 +1,4 @@
-  Submodule (CFML_Geom) Orbits
+  Submodule (CFML_Geom) Geom_Orbits
     implicit none
     contains
 
@@ -334,4 +334,4 @@
 
     End Subroutine Set_Orbits_Inlist
 
-  End Submodule Orbits
+  End Submodule Geom_Orbits

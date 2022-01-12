@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_IOForm) IO_SHX
+SubModule (CFML_IOForm) Format_SHX
     implicit none
    Contains
 
@@ -990,4 +990,4 @@ SubModule (CFML_IOForm) IO_SHX
 
    End Subroutine Read_XTal_SHX
 
-End SubModule IO_SHX
+End SubModule Format_SHX

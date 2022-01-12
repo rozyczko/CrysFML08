@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Bonds_Tables) TAB_SetBond_Routines
+SubModule (CFML_Bonds_Tables) TAB_Set_BondsT
    Implicit none
   Contains
 
@@ -2154,4 +2154,4 @@ SubModule (CFML_Bonds_Tables) TAB_SetBond_Routines
 
    End Subroutine Set_Bonds_Table
 
-End SubModule TAB_SetBond_Routines
+End SubModule TAB_Set_BondsT

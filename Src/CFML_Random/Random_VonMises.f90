@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Von_Mises_sub
+SubModule (CFML_Random) Random_VonMises
   implicit none
   Contains
    !!----
@@ -122,4 +122,4 @@ SubModule (CFML_Random) Random_Von_Mises_sub
 
    End Function Integral
 
-End SubModule Random_Von_Mises_sub
+End SubModule Random_VonMises

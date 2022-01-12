@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_Messages) Mess_Printing
+SubModule (CFML_Messages) Con_Print_Message
   Implicit none
    Contains
 
@@ -30,4 +30,4 @@ SubModule (CFML_Messages) Mess_Printing
 
    End Subroutine Print_Message
 
-End SubModule Mess_Printing
+End SubModule Con_Print_Message

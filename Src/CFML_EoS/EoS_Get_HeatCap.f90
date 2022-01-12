@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_HeatCapacity
+SubModule (CFML_EoS) EoS_Get_HeatCap 
    implicit none
 
    Contains
@@ -148,4 +148,4 @@ SubModule (CFML_EoS) EoS_HeatCapacity
 
    End Function Get_Cv
 
-End SubModule EoS_HeatCapacity
+End SubModule EoS_Get_HeatCap

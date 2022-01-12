@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_LLB
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_LLB
 
  implicit none
 
@@ -143,4 +143,4 @@ SubModule (CFML_DiffPatt) RPatt_LLB
        close(unit=i_dat)
     End Subroutine Read_Pattern_G41
 
-End SubModule RPatt_LLB
+End SubModule DiffP_ReadPatt_LLB

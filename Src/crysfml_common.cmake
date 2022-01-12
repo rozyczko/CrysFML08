@@ -126,13 +126,13 @@ set(SUBMOD_TABLES_2_SRC CFML_Tables/Tab_Set_ScatterT.f90
                         CFML_Tables/Tab_Get_SpgSymbols.f90
                         CFML_Tables/Tab_Set_SpgT.f90
                         CFML_Tables/Tab_Set_BVST.f90)
-set(TABLES_1_SRC CFML_Tables_Scattering.f90
-                 CFML_Tables_Bonds.f90
+set(TABLES_1_SRC CFML_Scattering_Tables.f90
+                 CFML_Bonds_Tables.f90
                  ${SUBMOD_TABLES_1_SRC})
-set(TABLES_2_SRC CFML_Tables_Symmetry.f90
-                 CFML_Tables_BVS.f90
-                 CFML_Tables_MagneticDB.f90
-                 CFML_Tables_SuperSpaceDB.f90)
+set(TABLES_2_SRC CFML_Symmetry_Tables.f90
+                 CFML_BVS_Tables.f90
+                 CFML_Magnetic_Database.f90
+                 CFML_SuperSpace_Database.f90)
 set(TABLES_3_SRC ${SUBMOD_TABLES_2_SRC})
 
 if(${COMPILER_NAME} STREQUAL ifort)
@@ -329,7 +329,7 @@ endif()
 
 # CFML_Optimization_SAnn
 file(GLOB SUBMOD_OPT_SAN_SRC CFML_Optimization_SAnn/*.f90)
-set(OPT_SAN_SRC CFML_Optimization_SAnn.f90
+set(OPT_SAN_SRC CFML_Simulated_Annealing.f90
                  ${SUBMOD_OPT_SAN_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${OPT_SAN_SRC}

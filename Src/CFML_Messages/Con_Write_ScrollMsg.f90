@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_Messages) ScrollMsg
+SubModule (CFML_Messages) Con_Write_ScrollMsg
   Implicit none
    Contains
 
@@ -18,4 +18,4 @@ SubModule (CFML_Messages) ScrollMsg
 
    End Subroutine Write_Scroll_Text
 
-End SubModule ScrollMsg
+End SubModule Con_Write_ScrollMsg

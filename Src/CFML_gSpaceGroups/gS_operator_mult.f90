@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Oper_Mult
+SubModule (CFML_gSpaceGroups) gS_Operator_Mult
    implicit none
    Contains
 
@@ -35,4 +35,4 @@ SubModule (CFML_gSpaceGroups) SPG_Oper_Mult
       Op3%dt=Op1%dt*Op2%dt
     End Function Multiply_Symm_Oper
 
-End SubModule SPG_Oper_Mult
+End SubModule gS_Operator_Mult

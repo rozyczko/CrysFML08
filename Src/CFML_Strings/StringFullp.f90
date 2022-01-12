@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Strings) STR_FullPString
+Submodule (CFML_Strings) StringFullp
    !---- Parameters ----!
    implicit none
 
@@ -814,4 +814,4 @@ Submodule (CFML_Strings) STR_FullPString
 
     End Subroutine TreatNumerField
 
-End Submodule STR_FullPString
+End Submodule StringFullp

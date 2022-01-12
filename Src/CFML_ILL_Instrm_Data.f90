@@ -1626,8 +1626,8 @@ Module CFML_ILL_Instrm_Data
                  if (Pat%x(nn) < x1 .or. Pat%x(nn) > x2) cycle
 
                  nc=nc+1
-                 call splint(xx(1:ncc(j),j,i),yy(1:ncc(j),j,i),d2y(1:ncc(j),j,i),ncc(j),Pat%x(nn),yfc)
 
+                 yfc = Spline_Interpol(Pat%x(nn),xx(1:ncc(j),j,i),y(1:ncc(j),j,i),d2y(1:ncc(j),j,i),ncc(j))
                  Pat%y(nn)=Pat%y(nn)+ yfc
                  fac=cnorm/Pnumors(ind(i))%monitor
                  if (correction) fac= fac/abs(Cal%effic(k,j))
@@ -1947,7 +1947,7 @@ Module CFML_ILL_Instrm_Data
           path = trim(path)//Extension
           inquire(file=trim(path),exist=exists)
           if (exists) then ! uncompress into temp directory
-             call system(trim(uncompresscommand)//' '//trim(path)//' > '//trim(ILL_temp_directory)//numstr)
+             call execute_command_line(trim(uncompresscommand)//' '//trim(path)//' > '//trim(ILL_temp_directory)//numstr)
              if (present(actual_path)) actual_path = path
              path = trim(ILL_temp_directory)//numstr
              return ! found numor so return
@@ -1980,7 +1980,7 @@ Module CFML_ILL_Instrm_Data
           path = trim(path)//Extension
           inquire(file=trim(path),exist=exists)
           if (exists) then ! uncompress into temp directory
-             call system(trim(uncompresscommand)//' '//trim(path)//' > '//trim(ILL_temp_directory)//numstr)
+             call execute_command_line(trim(uncompresscommand)//' '//trim(path)//' > '//trim(ILL_temp_directory)//numstr)
              if (present(actual_path)) actual_path = path
              path = trim(ILL_temp_directory)//numstr
              return ! found numor so return

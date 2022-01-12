@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Tensor
+SubModule (CFML_EoS) EoS_Get_Tensor
    implicit none
    Contains
 
@@ -175,4 +175,4 @@ SubModule (CFML_EoS) EoS_Tensor
 
    End Subroutine Get_Tensor_Eos
 
-End SubModule EoS_Tensor
+End SubModule EoS_Get_Tensor

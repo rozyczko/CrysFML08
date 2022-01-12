@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Multip_OP_Table
+SubModule (CFML_gSpaceGroups) gS_Get_Mult_OPTable
    implicit none
    Contains
 
@@ -76,5 +76,5 @@ SubModule (CFML_gSpaceGroups) SPG_Multip_OP_Table
       end do do_i
    End Function Get_Inv_OP
 
-End SubModule SPG_Multip_OP_Table
+End SubModule gS_Get_Mult_OPTable
 

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_SuperSpace_Database) TAB_SuperSpace_Database_Read
+SubModule (CFML_SuperSpace_Database) TAB_Read_SSG_DBase
    Implicit none
    Contains
    !!----
@@ -289,4 +289,4 @@ SubModule (CFML_SuperSpace_Database) TAB_SuperSpace_Database_Read
 
    End Subroutine Read_single_SSG
 
-End SubModule TAB_SuperSpace_Database_Read
+End SubModule TAB_Read_SSG_DBase

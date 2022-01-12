@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_SinTL
+SubModule (CFML_Reflections) Refl_H_S
    implicit none
    Contains
    !!----
@@ -44,4 +44,4 @@ SubModule (CFML_Reflections) RFL_SinTL
                2.0*hkl(1)*hkl(3)*Cell%GR(1,3) + 2.0*hkl(2)*hkl(3)*Cell%GR(2,3) )
    End Function H_S_int
 
-End SubModule RFL_SinTL
+End SubModule Refl_H_S

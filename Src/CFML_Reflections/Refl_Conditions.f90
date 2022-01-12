@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Refl_Conditions
+SubModule (CFML_Reflections) Refl_Conditions
    implicit none
    Contains
 
@@ -18,7 +18,7 @@ SubModule (CFML_Reflections) RFL_Refl_Conditions
       integer, optional, intent(in) :: Iunit
 
       if (.not. hkl_ref_cond_ini) then
-         call init_ref_cond()
+         call Init_Refl_Conditions()
          hkl_ref_cond_ini=.true.
       end if
 
@@ -58,7 +58,7 @@ SubModule (CFML_Reflections) RFL_Refl_Conditions
 
       !> Load Information
       if (.not. hkl_ref_cond_ini) then
-         call init_ref_cond()
+         call Init_Refl_Conditions()
          hkl_ref_cond_ini=.true.
       end if
 
@@ -1522,4 +1522,4 @@ SubModule (CFML_Reflections) RFL_Refl_Conditions
 
    End Subroutine Write_Screw_Axis_Conditions
 
-End SubModule RFL_Refl_Conditions
+End SubModule Refl_Conditions

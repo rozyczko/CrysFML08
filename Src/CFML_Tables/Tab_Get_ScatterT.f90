@@ -1,7 +1,7 @@
 !----
 !!----
 !!----
-SubModule (CFML_Scattering_Tables) TAB_GetSC_Routines
+SubModule (CFML_Scattering_Tables) TAB_Get_ScatterT
    Implicit none
   Contains
 
@@ -287,4 +287,4 @@ SubModule (CFML_Scattering_Tables) TAB_GetSC_Routines
 
    End Function Get_Z_Symb
 
-End SubModule TAB_GetSC_Routines
+End SubModule TAB_Get_ScatterT

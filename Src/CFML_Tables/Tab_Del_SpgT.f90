@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Symmetry_Tables) TAB_DelSymm_Routines
+SubModule (CFML_Symmetry_Tables) TAB_Del_SpgT
    Implicit none
    Contains
    !!----
@@ -60,4 +60,4 @@ SubModule (CFML_Symmetry_Tables) TAB_DelSymm_Routines
 
    End Subroutine Remove_Wyckoff_Info
 
-End SubModule TAB_DelSymm_Routines
+End SubModule TAB_Del_SpgT

@@ -1,4 +1,4 @@
- Submodule (CFML_Geom) Distances
+ Submodule (CFML_Geom) Geom_Distances
     implicit none
   contains
     !!----
@@ -1309,4 +1309,4 @@
 
     End Subroutine Print_Distances
 
- End Submodule Distances
+ End Submodule Geom_Distances

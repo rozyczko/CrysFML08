@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Atoms)  Write_Atoms
+SubModule (CFML_Atoms)  Atm_Write_AtmList
   implicit none
   Contains
 
@@ -322,4 +322,4 @@ SubModule (CFML_Atoms)  Write_Atoms
 
    End Subroutine Write_Atom_List
 
-End SubModule Write_Atoms
+End SubModule Atm_Write_AtmList

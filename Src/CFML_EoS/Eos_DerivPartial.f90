@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Partial_P
+SubModule (CFML_EoS) EoS_DerivPartial 
 
    implicit none
 
@@ -464,4 +464,4 @@ SubModule (CFML_EoS) EoS_Partial_P
 
    End Function Deriv_Partial_P_Scales
 
-End SubModule EoS_Partial_P
+End SubModule EoS_DerivPartial

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Init_Profval
+SubModule (CFML_Profiles) Profile_Init_Profval
   implicit none
    Contains
    !!----
@@ -874,4 +874,4 @@ SubModule (CFML_Profiles) PRF_Init_Profval
 
    End Subroutine Init_Prof_Val
 
-End SubModule PRF_Init_Profval
+End SubModule Profile_Init_Profval

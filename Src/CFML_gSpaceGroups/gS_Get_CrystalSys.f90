@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Get_Crystal_System
+SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
    implicit none
    Contains
    !!----
@@ -156,4 +156,4 @@ SubModule (CFML_gSpaceGroups) SPG_Get_Crystal_System
       str=SYS_CRY(n)
    End Function Get_Crystal_System_from_Laue
 
-End SubModule SPG_Get_Crystal_System
+End SubModule gS_Get_CrystalSys

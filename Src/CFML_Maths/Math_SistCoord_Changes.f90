@@ -3,7 +3,7 @@
 !!----
 !!----
 !!
-Submodule (CFML_Maths) Maths_ConvCoordinates
+Submodule (CFML_Maths) Maths_SistCoord_Changes
  implicit none
  Contains
     !!----
@@ -190,4 +190,4 @@ Submodule (CFML_Maths) Maths_ConvCoordinates
 
     End Function Get_Cylin_from_Spher
 
-End Submodule Maths_ConvCoordinates
+End Submodule Maths_SistCoord_Changes

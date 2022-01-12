@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Write_RefList
+SubModule (CFML_Reflections) Refl_Write_List
    implicit none
    Contains
 
@@ -102,4 +102,4 @@ SubModule (CFML_Reflections) RFL_Write_RefList
 
    End Subroutine Write_Info_RefList
 
-End SubModule RFL_Write_RefList
+End SubModule Refl_Write_List

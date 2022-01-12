@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Pressure
+SubModule (CFML_EoS) EoS_Get_Pressure
    implicit none
    Contains
 
@@ -533,4 +533,4 @@ SubModule (CFML_EoS) EoS_Pressure
 
    End Function Get_Pressure_X
 
-End SubModule EoS_Pressure
+End SubModule EoS_Get_Pressure

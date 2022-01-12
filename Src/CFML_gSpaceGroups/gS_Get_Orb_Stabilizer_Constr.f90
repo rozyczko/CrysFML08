@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
+SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
     implicit none
 
     character (len=*), dimension(26),parameter   :: &
@@ -728,4 +728,4 @@ SubModule (CFML_gSpaceGroups) SPG_Stabilizer_Constraints
 
    End Subroutine Get_TFourier_ctr
 
-End SubModule SPG_Stabilizer_Constraints
+End SubModule gS_Get_Orb_Stabilizer_Constr

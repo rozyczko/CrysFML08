@@ -2,7 +2,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_ExtinCorr) SHX
+SubModule (CFML_ExtinCorr) Ext_ShelxCorr
   implicit none
    Contains
    !!----
@@ -77,4 +77,4 @@ SubModule (CFML_ExtinCorr) SHX
 
    End Subroutine SHELX_Extinction
 
-End SubModule  SHX
+End SubModule  Ext_ShelxCorr

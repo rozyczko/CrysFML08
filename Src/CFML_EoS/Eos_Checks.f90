@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Check_Scales
+SubModule (CFML_EoS) EoS_Checks
    implicit none
    Contains
 
@@ -641,4 +641,4 @@ SubModule (CFML_EoS) EoS_Check_Scales
 
    End Subroutine EoSParams_Check
 
-End SubModule EoS_Check_Scales
+End SubModule EoS_Checks

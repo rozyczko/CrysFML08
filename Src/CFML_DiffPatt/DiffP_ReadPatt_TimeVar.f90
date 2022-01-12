@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) RPatt_TimeVar
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_TimeVar
 
  implicit none
 
@@ -133,4 +133,4 @@ SubModule (CFML_DiffPatt) RPatt_TimeVar
       close(unit=i_dat)
    End subroutine Read_Pattern_TimeVar
 
-End SubModule RPatt_TimeVar
+End SubModule DiffP_ReadPatt_TimeVar

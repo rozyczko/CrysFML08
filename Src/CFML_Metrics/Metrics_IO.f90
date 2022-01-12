@@ -1,4 +1,4 @@
-Submodule (CFML_Metrics) Metrics_IORoutines
+Submodule (CFML_Metrics) Metrics_IO
    !---- Variables ----!
    implicit none
 
@@ -176,4 +176,4 @@ Submodule (CFML_Metrics) Metrics_IORoutines
 
     End Subroutine Write_Bin_Crystal_Cell
 
-End Submodule Metrics_IORoutines
+End Submodule Metrics_IO

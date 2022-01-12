@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Temperature
+SubModule (CFML_EoS) Eos_Get_Temperature
    implicit none
    Contains
 
@@ -545,4 +545,4 @@ SubModule (CFML_EoS) EoS_Temperature
 
    End Function Get_DmDt_Third
 
-End SubModule EoS_Temperature
+End SubModule Eos_Get_Temperature

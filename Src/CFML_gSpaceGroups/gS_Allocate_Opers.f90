@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Allocate_Operators
+SubModule (CFML_gSpaceGroups) gS_Allocate_Opers
    implicit none
    Contains
 
@@ -49,4 +49,4 @@ SubModule (CFML_gSpaceGroups) SPG_Allocate_Operators
       end do
    End Subroutine Allocate_Operators
 
-End SubModule SPG_Allocate_Operators
+End SubModule gS_Allocate_Opers

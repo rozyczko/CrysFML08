@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Atoms) Generating_Atoms_inCell
+SubModule (CFML_Atoms) Atm_ExtendList
   implicit none
    Contains
 
@@ -18,7 +18,7 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
       !---- Arguments ----!
       type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
       type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
-      class(SpG_Type),intent(in)     :: SpG       ! SpaceGroup
+      class(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
       character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
       logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
 
@@ -60,11 +60,31 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
          if (.not. A%atom(k)%active) cycle
          l=1       ! Number of representant atom i asymmetric unit
          n=n+1     ! Number of atom in the list
-         !c_atm%Atom(n)=A%atom(k)        !First atom of the orbit (unsupported by gfortran!!!!)
 
          xo= modulo_lat(A%atom(k)%x)
          u(:,l)= xo
-         c_atm%atom(n)%x=xo
+         !c_atm%Atom(n)=A%atom(k)        !First atom of the orbit (unsupported by gfortran!!!!)
+         !Workaround for gfortran
+         c_atm%Atom(n)%lab     = trim(A%atom(k)%lab)//"_1"
+         c_atm%Atom(n)%ChemSymb= A%atom(k)%ChemSymb
+         c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
+         c_atm%Atom(n)%Z       = A%atom(k)%Z
+         c_atm%Atom(n)%Mult    = real(l)/SpG%multip
+         c_atm%Atom(n)%Charge  = A%atom(k)%Charge
+         c_atm%Atom(n)%x       = xo
+         c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
+         c_atm%Atom(n)%Occ     = A%atom(k)%Occ
+         c_atm%Atom(n)%UType   = A%atom(k)%UType
+         c_atm%Atom(n)%ThType  = A%atom(k)%ThType
+         c_atm%Atom(n)%U       = A%atom(k)%U
+         c_atm%Atom(n)%Magnetic= A%atom(k)%Magnetic
+         c_atm%Atom(n)%Mom     = A%atom(k)%Mom
+         c_atm%Atom(n)%Moment  = A%atom(k)%Moment
+         c_atm%Atom(n)%Ind_ff  = A%atom(k)%Ind_ff
+         c_atm%Atom(n)%AtmInfo = A%atom(k)%AtmInfo
+         c_atm%Atom(n)%wyck    = A%atom(k)%wyck
+         c_atm%Atom(n)%VarF    = A%atom(k)%VarF
+         c_atm%Atom(n)%active  = A%atom(k)%active
 
          loop:do j=2,npeq
             !xx=Apply_OP(SpG%Op(j),xo)
@@ -239,4 +259,4 @@ SubModule (CFML_Atoms) Generating_Atoms_inCell
       if (present(lun))  write(unit=lun,fmt="(/)")
    End Subroutine Set_Atom_Equiv_List
 
-End SubModule Generating_Atoms_inCell
+End SubModule Atm_ExtendList

@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_Profiles) PRF_Hat
+SubModule (CFML_Profiles) Profile_Hat
   implicit none
    Contains
    !!----
@@ -62,4 +62,4 @@ SubModule (CFML_Profiles) PRF_Hat
    End Subroutine Hat_Der
 
 
-End SubModule PRF_Hat
+End SubModule Profile_Hat

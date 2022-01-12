@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Unitary_Vector_H
+SubModule (CFML_Reflections) Refl_UnitaryVec
    implicit none
    Contains
    !!----
@@ -25,4 +25,4 @@ SubModule (CFML_Reflections) RFL_Unitary_Vector_H
       u=u/sqrt(u(1)*u(1)+u(2)*u(2)+u(3)*u(3))
    End Function Unitary_Vector_H
 
-End SubModule RFL_Unitary_Vector_H
+End SubModule Refl_UnitaryVec

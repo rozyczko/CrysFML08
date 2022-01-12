@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Multiplicity
+SubModule (CFML_Reflections) Refl_H_Mult
    implicit none
    Contains
 
@@ -56,4 +56,4 @@ SubModule (CFML_Reflections) RFL_Multiplicity
       end if
    End Function H_Mult
 
-End SubModule RFL_Multiplicity
+End SubModule Refl_H_Mult

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Absences_Info
+SubModule (CFML_Reflections) Refl_H_Absent
    implicit none
    Contains
    !!----
@@ -162,4 +162,4 @@ SubModule (CFML_Reflections) RFL_Absences_Info
       end if
    End Function Get_h_info
 
-End SubModule RFL_Absences_Info
+End SubModule Refl_H_Absent

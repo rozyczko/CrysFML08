@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) Alpha_Calc
+SubModule (CFML_EoS) Eos_AlphaCalc
    implicit none
 
    Contains
@@ -300,4 +300,4 @@ SubModule (CFML_EoS) Alpha_Calc
 
    End Function Get_Alpha_Third
 
-End SubModule Alpha_Calc
+End SubModule Eos_AlphaCalc

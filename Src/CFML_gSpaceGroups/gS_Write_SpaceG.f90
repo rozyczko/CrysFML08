@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Write_Info
+SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
    implicit none
    Contains
 
@@ -183,5 +183,5 @@ SubModule (CFML_gSpaceGroups) SPG_Write_Info
       end if
    End Subroutine Write_SpaceGroup_Info
 
-End SubModule SPG_Write_Info
+End SubModule gS_Write_SpaceG
 

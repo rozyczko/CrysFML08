@@ -1,4 +1,4 @@
-SubModule (CFML_gSpaceGroups) SPG_Get_A_Matrix_Crys
+SubModule (CFML_gSpaceGroups) gS_Get_X_Matrix
    implicit none
    Contains
 
@@ -1001,4 +1001,4 @@ SubModule (CFML_gSpaceGroups) SPG_Get_A_Matrix_Crys
        end do
    End Function Get_VecPerp_To_RotAxis
 
-End SubModule SPG_Get_A_Matrix_Crys
+End SubModule gS_Get_X_Matrix

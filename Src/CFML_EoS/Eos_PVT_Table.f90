@@ -18,10 +18,11 @@ SubModule (CFML_EoS) EoS_PTVTable
       integer,        intent(in) :: J      ! pointers to table point just beyond P,T required
       real(kind=cp),  intent(in) :: P      ! pressure required
       type(Eos_Type), intent(in) :: EoS    ! Eos Parameter
+      real(kind=cp)              :: V
 
       !---- Local Variables ----!
       integer         :: is
-      real(kind=cp)   :: k12,K23,KP,V0,K0,V
+      real(kind=cp)   :: k12,K23,KP,V0,K0
 
       !> Set up pointer
       is=i-2

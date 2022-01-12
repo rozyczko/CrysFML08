@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Reflections) RFL_Generation_of_Reflections
+SubModule (CFML_Reflections) Refl_Generate
    implicit none
    Contains
    !!----
@@ -260,4 +260,4 @@ SubModule (CFML_Reflections) RFL_Generation_of_Reflections
       end do
    End Subroutine Gener_Reflections
 
-End SubModule RFL_Generation_of_Reflections
+End SubModule Refl_Generate

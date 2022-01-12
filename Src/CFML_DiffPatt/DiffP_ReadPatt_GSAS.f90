@@ -1,4 +1,4 @@
-SubModule (CFML_DiffPatt) RPatt_GSAS
+SubModule (CFML_DiffPatt) DiffP_ReadPatt_GSAS
 
  implicit none
 
@@ -261,4 +261,4 @@ SubModule (CFML_DiffPatt) RPatt_GSAS
       close(unit=i_dat)
    End Subroutine Read_Pattern_Gsas
 
-End SubModule RPatt_GSAS
+End SubModule DiffP_ReadPatt_GSAS

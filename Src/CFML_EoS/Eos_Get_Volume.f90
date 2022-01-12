@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_Volume
+SubModule (CFML_EoS) Eos_Get_Volume
    implicit none
 
    Contains
@@ -701,4 +701,4 @@ SubModule (CFML_EoS) EoS_Volume
 
    End Function Get_Volume_Third
 
-End SubModule EoS_Volume
+End SubModule Eos_Get_Volume

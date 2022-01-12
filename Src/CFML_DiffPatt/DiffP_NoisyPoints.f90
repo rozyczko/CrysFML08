@@ -1,5 +1,5 @@
 !!----
-SubModule (CFML_DiffPatt) NoisyPatt
+SubModule (CFML_DiffPatt) DiffP_NoisyPoints
 
  implicit none
 
@@ -119,4 +119,5 @@ SubModule (CFML_DiffPatt) NoisyPatt
        Pat%y=yc
 
    End Subroutine Del_NoisyPoints
-End SubModule NoisyPatt
+
+End SubModule DiffP_NoisyPoints

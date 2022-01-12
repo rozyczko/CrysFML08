@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Scattering_Tables) TAB_SetSC_Routines
+SubModule (CFML_Scattering_Tables) TAB_Set_ScatterT
    Implicit none
   Contains
 
@@ -1474,4 +1474,5 @@ SubModule (CFML_Scattering_Tables) TAB_SetSC_Routines
                                                     (/ 10.510900,  26.125700,   3.142360,  57.799698/),  0.003038) /)
 
    End  Subroutine Set_Xray_Form
-End SubModule TAB_SetSC_Routines
+
+End SubModule TAB_Set_ScatterT

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Atoms) Init_Allocating_Atoms
+SubModule (CFML_Atoms) Atm_Allocating_Atoms
    implicit none
    Contains
 
@@ -160,7 +160,7 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
       end select
 
    End Subroutine Init_Atom_Type
-   
+
    !!----
    !!---- ALLOCATE_ATOM_LIST
    !!----    Allocation of objet A of type atom_list.
@@ -299,4 +299,4 @@ SubModule (CFML_Atoms) Init_Allocating_Atoms
       Ac%ddlab       = " "
    End Subroutine Allocate_Atoms_Cell
 
-End SubModule Init_Allocating_Atoms
+End SubModule Atm_Allocating_Atoms

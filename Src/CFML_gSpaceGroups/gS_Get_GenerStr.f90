@@ -2,7 +2,7 @@
 !!----
 !!----
 !!
-SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
+SubModule (CFML_gSpaceGroups) gS_Get_GenerStr
    implicit none
    Contains
 
@@ -116,5 +116,5 @@ SubModule (CFML_gSpaceGroups) SPG_Generators_from_Str
       gen_string=loc_str
    End Subroutine ISO_to_jones_notation
 
-End SubModule SPG_Generators_from_Str
+End SubModule gS_Get_GenerStr
 
