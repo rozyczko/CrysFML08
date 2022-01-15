@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Poisson
+SubModule (CFML_Random) Random_Poisson_Sm
   implicit none
    Contains
    !!--++
@@ -156,4 +156,4 @@ SubModule (CFML_Random) Random_Poisson
 
    End Function Random_Poisson
 
-End SubModule Random_Poisson
+End SubModule Random_Poisson_Sm

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Binomial
+SubModule (CFML_Random) Random_Binomial_Sm
 
   implicit none
    Contains
@@ -427,4 +427,4 @@ SubModule (CFML_Random) Random_Binomial
 
    End Function Random_Neg_Binomial
 
-End Submodule Random_Binomial
+End Submodule Random_Binomial_Sm

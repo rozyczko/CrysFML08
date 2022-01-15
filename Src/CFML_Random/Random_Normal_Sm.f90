@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Random) Random_Normal
+SubModule (CFML_Random) Random_Normal_Sm
   implicit none
    Contains
    !!----
@@ -142,4 +142,4 @@ SubModule (CFML_Random) Random_Normal
 
    End Subroutine Random_Mvnorm
 
-End Submodule Random_Normal
+End Submodule Random_Normal_Sm
