@@ -168,6 +168,41 @@ rem   Submodules CFML_Strings
       move /y *.obj .. > nul
       cd ..
 rem
+   echo .... Optimization 
+   ifx /c CFML_Optimization.f90                 /nologo %OPT1% %OPT2%  /module:.\mod
+rem   Submodules CFML_Optimization
+      cd .\CFML_Optimization
+      ifx /c OPT_Cg_Quasi_Newton.f90             /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_Global_Csendes.f90              /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_Local_Optim.f90                 /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_Simplex.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+rem
+   echo .... Optimization LSQ 
+   ifx /c CFML_Optimization_LSQ.f90              /nologo %OPT1% %OPT2%  /module:.\mod
+rem   Submodules CFML_Optimization_LSQ
+      cd .\CFML_Optimization_LSQ
+      ifx /c OPT_LSQ_LevebergMarquardt_AnalyDer.f90 /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_LSQ_LevebergMarquardt_NumDer.f90   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_LSQ_Marquardt_Fit.f90              /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c OPT_LSQ_Output.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+rem
+   echo .... Simulated Annealing 
+   ifx /c CFML_Simulated_Annealing.f90            /nologo %OPT1% %OPT2% /module:.\mod
+rem   Submodules CFML_Simulated_Annealing
+      cd .\CFML_Optimization_SAnn
+      ifx /c SAnn_General.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SAnn_inout.f90                       /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SAnn_LocalOpt.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SAnn_MultiConf.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SAnn_SetnCheck.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+
+rem
    echo .... Rational arithmetics
    ifx /c CFML_Rational.f90                        /nologo %OPT1% %OPT2% /module:.\mod
 rem
@@ -348,6 +383,12 @@ rem   Submodules CFML_DiffPatt
       move /y *.obj .. > nul
       cd ..
 rem
+   echo .... Background-Peak search
+   ifx /c CFML_BckPeaks.f90                     /nologo %OPT1% %OPT2% /module:.\mod
+rem
+   echo .... Legacy ILL_Instrument procedures (CFML_ILL_Instrm_Data)
+     ifx /c CFML_ILL_Instrm_Data.f90            /nologo %OPT1% %OPT2%  /module:.\mod   
+rem
    echo .... Extintion corrections
    ifx /c CFML_ExtinCorr.f90                    /nologo %OPT1% %OPT2% /module:.\mod
 rem
@@ -403,20 +444,22 @@ rem   Submodules CFML_EoS
       cd ..
 rem
    echo .... Atoms procedures
-   ifx /c CFML_Atoms.f90                     /nologo %OPT1% %OPT2% /module:.\mod
+   ifx /c CFML_Atoms.f90                  /nologo %OPT1% %OPT2% /module:.\mod
 rem
 rem   Submodules CFML_Atoms
       cd .\CFML_Atoms
-      ifx /c Atm_Allocating_Atoms.f90        /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Atm_ExtendList.f90              /nologo %OPT1% %OPT2%  /module:..\mod
-	  ifx /c Atm_RW_Bin_AtmList.f90          /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Atm_SymmetryConstraints.f90     /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Atm_Write_AtmList.f90           /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Atm_Allocating_Atoms.f90     /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Atm_ExtendList.f90           /nologo %OPT1% %OPT2%  /module:..\mod
+	  ifx /c Atm_RW_Bin_AtmList.f90       /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Atm_SymmetryConstraints.f90  /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Atm_Write_AtmList.f90        /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
 rem
+   echo .... Export to VTK procedures
+     ifx /c CFML_Export_VTK.f90           /nologo %OPT1% %OPT2%  /module:.\mod
    echo .... Reflections procedures
-   ifx /c CFML_Reflections.f90                      /nologo %OPT1% %OPT2% /module:.\mod
+     ifx /c CFML_Reflections.f90          /nologo %OPT1% %OPT2% /module:.\mod
 rem
 rem   Submodules CFML_Reflections
       cd .\CFML_Reflections
@@ -437,18 +480,18 @@ rem   Submodules CFML_Reflections
       cd ..
 rem
       echo .... Propagation vectors procedures
-      ifx /c CFML_Propagation_Vectors.f90          /nologo %OPT1% %OPT2% /module:.\mod
+      ifx /c CFML_Propagation_Vectors.f90  /nologo %OPT1% %OPT2% /module:.\mod
 rem
       echo .... I/O Formats procedures
-      ifx /c CFML_IOForm.f90                       /nologo %OPT1% %OPT2% /module:.\mod
+      ifx /c CFML_IOForm.f90               /nologo %OPT1% %OPT2% /module:.\mod
 rem
 rem    Submodules CFML_IOForm
       cd .\CFML_IOForm
-      ifx /c Format_GEN.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Format_SHX.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Format_CIF.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Format_CFL.f90                         /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Format_MCIF.f90                        /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Format_GEN.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Format_SHX.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Format_CIF.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Format_CFL.f90                /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Format_MCIF.f90               /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
 rem
@@ -464,7 +507,21 @@ rem
       ifx /c Geom_Orbits.f90            /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
-     
+
+rem
+      echo .... SXTAL Geometry calculations (CFML_Geometry_SXTAL)
+      ifx /c CFML_SXTAL_Geom.f90    /nologo %OPT1% %OPT2%  /module:.\mod
+rem   Submodules of CFML_Geometry_SXTAL      
+      cd .\CFML_SXTAL_Geom
+      ifx /c SXTAL_Angles.f90           /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SXTAL_FlatCone.f90         /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SXTAL_IO.f90               /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SXTAL_Matx_Zvect.f90       /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SXTAL_PSD.f90              /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c SXTAL_UB.f90               /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+rem
       echo .... Maps/Percolation procedures
       ifx /c CFML_Maps.f90               /nologo %OPT1% %OPT2% /module:.\mod
 rem
@@ -475,6 +532,20 @@ rem    Submodules CFML_Maps
       ifx /c Maps_Percolation.f90        /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
+      
+rem
+      echo .... Energy/Bond-Valence/BVEL calculations
+      ifx /c CFML_EnBVS.f90               /nologo %OPT1% %OPT2% /module:.\mod
+rem
+rem    Submodules CFML_EnBVS
+      cd .\CFML_EnBVS
+      ifx /c EnBVS_CostF.f90    /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c EnBVS_Energy.f90   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c EnBVS_Maps.f90     /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c EnBVS_SetTab.f90   /nologo %OPT1% %OPT2%  /module:..\mod
+      move /y *.obj .. > nul
+      cd ..
+      
       goto END
 rem
 rem rem
@@ -497,12 +568,10 @@ rem    echo .... Extinction, Structure Factors, SXTAL geometry, Propag Vectors
 rem rem
 rem    ifx /c CFML_sfac.f90                            /nologo %OPT1% %OPT2%
 rem    ifx /c CFML_sxtal_Geom.f90                      /nologo %OPT1% %OPT2%
-rem    ifx /c CFML_propagk.f90                         /nologo %OPT1% %OPT2%
 rem rem
 rem    echo .... Maps, BVS, Energy Configurations
 rem rem
 rem    ifx /c CFML_Export_Vtk.f90                      /nologo %OPT1% %OPT2%
-rem    ifx /c CFML_conf_calc.f90                       /nologo %OPT1% %OPT2%
 rem rem
 rem    echo .... Magnetic Symmetry, Simulated Annealing, Keywords Parser
 rem rem

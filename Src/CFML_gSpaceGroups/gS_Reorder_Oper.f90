@@ -48,6 +48,10 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
       d=n-1
       allocate(identity(d,d),invers(d,d),imat(d,d))
       call allocate_op(n,Op_identp)   ! {1|0}'
+      call allocate_op(n,Op_centre)   ! Allocate auxiliary operators
+      call allocate_op(n,Op_aux)      ! Before using them
+      call allocate_op(n,Op_aux1)     ! It seems some compilers are not able to allocate on assingment
+      call allocate_op(n,Op_aux2)
 
       identity=ZERO; nul=.false.; mag_type=1
       do i=1,d
@@ -145,7 +149,8 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
          end if
 
          if (i_centre /= 0) then
-            Op_aux=Op_centre*Op(j)
+            !write(*,*) "Operator #",j
+            Op_aux=Op_centre*Op(j)      ! Problem with ifx
             do i=j+1,Multip
                if (nul(i)) cycle
                if (Op_aux == Op(i) ) then
