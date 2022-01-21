@@ -144,15 +144,15 @@ rem   Submodules CFML_FFT
 rem
 rem   Submodules CFML_Random
       cd .\CFML_Random
-      ifx /c Random_Beta.f90                       /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_Binomial.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_Cauchy.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_Gamma.f90                      /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_InvGauss.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_Normal.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_Poisson.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_T.f90                          /nologo %OPT1% %OPT2%  /module:..\mod
-      ifx /c Random_VonMises.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Beta_Sm.f90                       /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Binomial_Sm.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Cauchy_Sm.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Gamma_Sm.f90                      /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_InvGauss_Sm.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Normal_Sm.f90                     /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_Poisson_Sm.f90                    /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_T_Sm.f90                          /nologo %OPT1% %OPT2%  /module:..\mod
+      ifx /c Random_VonMises_Sm.f90                   /nologo %OPT1% %OPT2%  /module:..\mod
       move /y *.obj .. > nul
       cd ..
 rem
