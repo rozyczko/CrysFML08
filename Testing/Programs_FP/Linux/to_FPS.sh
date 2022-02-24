@@ -14,3 +14,7 @@ make_hall.sh $COMP
 # "#### TOF_fit_LM Program ####"
 chmod +x make_tof_LM.sh
 make_tof_LM.sh $COMP
+##
+# "#### nDataRed Program ####"
+chmod +x make_DataRed.sh
+make_DataRed.sh $COMP
