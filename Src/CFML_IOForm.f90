@@ -682,7 +682,11 @@ Module CFML_IOForm
 
        select case (trim(u_case(ext)))
           case ('CFL')
-             call Read_XTal_CFL(f, Cell, SpG, Atm)  !SpG is allocated inside the subroutine
+             if (present(IPhase)) then
+                call Read_XTal_CFL(f, Cell, SpG, Atm, NPhase=IPhase)
+             else
+                call Read_XTal_CFL(f, Cell, SpG, Atm)  !SpG is allocated inside the subroutine
+             end if
           case ('CIF')
              allocate(SpG_Type :: SpG)
              call Read_XTal_CIF(f, Cell, SpG, Atm)
