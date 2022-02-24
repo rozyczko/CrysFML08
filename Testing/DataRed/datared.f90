@@ -139,7 +139,7 @@
     write(unit=*,fmt="(a,a)")   "      Reflections  file: ", trim(cond%fileout)//"_mag_og.int"
     write(unit=*,fmt="(a,a)")   "           Reject  file: ", trim(cond%fileout)//".rej"
     write(unit=*,fmt="(a)")   " "
-
+    call CloseProgram()
     Contains
       Subroutine CloseProgram()
          character(len=1) :: ans

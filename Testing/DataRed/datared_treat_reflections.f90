@@ -165,7 +165,7 @@
       indp=0
       do i=1,R%nref       !Loop over all reflections
          hh(:)=R%Ref(i)%h
-         if(mod(i,i_refout) == 0) write(unit=*,fmt="(a,i10)") "=> Reflection:",i
+         if(mod(i,i_refout) == 0) write(unit=*,fmt="(a,i10)") " => Reflection:",i
          info=Get_h_Info(hh,SpG,cond%magnetic)
          R%Ref(i)%imag=info(4)
          if(cond%pure_nuc) then
@@ -609,7 +609,7 @@
 
       !----------------------------------------------------
       do i=1,R%nref        !Loop over all measured reflections
-          if(mod(i,i_refout) == 0) write(unit=*,fmt="(a,i10)") "=> Reflection:",i
+          if(mod(i,i_refout) == 0) write(unit=*,fmt="(a,i10)") " => Reflection:",i
           if(itreat(i) == 0) then   !If not yet treated do the following
             absent=.false.
             h1(:)=R%Ref(i)%hr
