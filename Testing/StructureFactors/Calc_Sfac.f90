@@ -15,17 +15,17 @@ Program Calc_Structure_Factors
    use CFML_Reflections,               only: Refl_Type,SRefl_Type, RefList_Type, Initialize_RefList, Gener_Reflections, &
                                              Get_MaxNumRef, H_Uni
    use CFML_IOForm,                    only: Read_Xtal_Structure
-   use CFML_Structure_Factors,         only: Init_Structure_Factors, Structure_Factors, &
-                                             Calc_StrFactor, Write_Structure_Factors
+   use CFML_Structure_Factors,         only: StrfList_Type,Init_Structure_Factors, Structure_Factors, &
+                                             Calc_StrFactor, Write_Structure_Factors, Write_Structure_Factors_Mag
 
    !---- Variables ----!
    implicit none
 
-   type (File_Type)                             :: fich_cfl
-   type (AtList_Type)                           :: A
-   type (Cell_G_Type)                           :: Cell
-   type (RefList_Type)                          :: hkl
-   class (SPG_Type),                allocatable :: SpG
+   type (File_Type)              :: fich_cfl
+   type (AtList_Type)            :: A
+   type (Cell_G_Type)            :: Cell
+   type (RefList_Type)           :: hkl
+   class (SPG_Type), allocatable :: SpG
 
    character(len=132)          :: line
    character(len=256)          :: filcod     ! Name of the input file
@@ -38,6 +38,11 @@ Program Calc_Structure_Factors
    integer                     :: narg
    logical                     :: arggiven=.false.,sthlgiven=.false.
    logical                     :: lfil1,lfil2,lfil3
+   
+   !> Parte Magnetica
+   integer                     :: codini=0
+   real, dimension(3)          :: codes=(/11.0,21.0,31.0/)
+   type (StrfList_Type)        :: Stf
 
    !> Arguments on the command line
    narg=command_argument_count()
@@ -121,10 +126,11 @@ Program Calc_Structure_Factors
    !> Atoms
    if (Spg%Magnetic) then
       !> Get information on moment constraints and modify the list of atoms accordingly
-      !do i=1,A%natoms
-      !   if (A%Atom(i)%mom < 0.001) cycle  ! Skip non-magnetic atoms
-      !   call Get_moment_ctr(A%Atom(i)%X,A%Atom(i)%M_xyz,Spg,codini,codes, Ipr=lun)
-      !end do
+      do i=1,A%natoms
+         codes=1.0
+         if (A%Atom(i)%mom < 0.001) cycle  ! Skip non-magnetic atoms
+         call Get_Moment_CTR(A%Atom(i)%x,A%Atom(i)%moment,SpG,codini,codes)
+      end do
    end if   
    call Write_Atom_List(A,lun)   
       
@@ -143,7 +149,6 @@ Program Calc_Structure_Factors
    !> Creating a list of reflections
    MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
    call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
-   
    call H_Uni(Cell,Spg,.true.,0.0,stlmax,'s',MaxNumRef,hkl)
    !call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)    
 
@@ -186,6 +191,13 @@ Program Calc_Structure_Factors
    call Write_Structure_Factors(hkl,lun, 'ELE')
    if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
 
+   !> Magnetic structure factors
+   if (Spg%Magnetic) then
+      call clear_error()
+      call Magnetic_Structure_Factors(Cell,A,SpG,stlmax,hkl,Stf,lun)
+      call Write_Structure_Factors_Mag(hkl, Stf, Lun, Full)
+   end if   
+   
 
    write(unit=*,fmt="(a)") " Normal End of: PROGRAM STRUCTURE FACTORS "
    write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".sfa"
