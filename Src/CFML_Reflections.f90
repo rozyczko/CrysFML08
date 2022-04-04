@@ -57,7 +57,7 @@ Module CFML_Reflections
              Get_MaxNumRef, Get_Asymm_Unit_H, Get_h_info
 
    !---- List of public subroutines ----!
-   public :: H_Equiv_List, Initialize_RefList, Gener_Reflections, Search_Extinctions, &
+   public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Search_Extinctions, &
              Write_Info_RefList, Init_Refl_Conditions
 
    !---- Parameters ----!
@@ -354,6 +354,20 @@ Module CFML_Reflections
          integer,          optional, intent(in) :: Iunit
          character(len=*), optional, intent(in) :: Mode
       End Subroutine Write_Info_RefList
+      
+      Module Subroutine H_Uni(Cell, Spg, Friedel, Vmin, Vmax, Code, MaxRef, Reflex, No_order, Check_ok, Hlim)
+         !---- Arguments ----!
+         type (Cell_G_Type),               intent(in)     :: Cell
+         class (SpG_Type) ,                intent(in)     :: Spg
+         logical,                          intent(in)     :: Friedel
+         real(kind=cp),                    intent(in)     :: vmin,vmax 
+         character(len=1),                 intent(in)     :: code      
+         integer,                          intent(in)     :: MaxRef    
+         type (RefList_Type),              intent(in out) :: reflex
+         logical,                optional, intent(in)     :: no_order
+         logical,                optional, intent(out)    :: check_ok
+         integer, dimension(3,2),optional, intent(in)     :: hlim
+      End Subroutine H_Uni
 
    End Interface
 

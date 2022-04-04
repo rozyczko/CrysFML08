@@ -956,6 +956,52 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       end if  !derivatives
 
    End Subroutine Calc_StrFactor
+   
+   !!----
+   !!---- SUBROUTINE MAGNETIC_STRUCTURE_FACTORS
+   !!----
+   !!----    Calculation of Structure Factors (nuclear and magnetic) when
+   !!----    the crystal and magnetic structure is described by a Shubnikov
+   !!----    group
+   !!----
+   !!---- Update: April - 2022
+   !!
+   !Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, lun)
+   !   !---- Arguments ----!
+   !   type(RefList_Type),    intent(in out) :: Reflex
+   !   type(Cell_G_Type),     intent(in)     :: Cell
+   !   type(AtList_type),     intent(in out) :: Atm
+   !   type(SpG_type),        intent(in)     :: Grp
+   !   real(kind=cp),         intent(in)     :: Smax ! maximum sinTheta/Lambda)
+   !   type(StrfList_Type),   intent(out)    :: Stf
+   !   integer, optional,     intent(in)     :: lun
+   !
+   !   !---- Local variables ----!
+   !   character(len=50) :: mess
+   !   integer           :: i
+   !   logical           :: ok
+   !   Type(Scattering_Species_Type) :: Scf
+   !   type(reflect_type),dimension(:),allocatable :: rf
+   !
+   !
+   !   call Hkl_Gen_Shub(Cell,Grp,maxs,Reflex%NRef,rf)
+   !   Stf%Nref=Reflex%NRef
+   !   allocate(Stf%Strf(Stf%Nref),Reflex%Ref(Reflex%NRef))
+   !   if(present(lun)) then
+   !     call Set_Form_Factors(Atm,Scf,ok,mess,lun=lun,mag=.true.)
+   !   else
+   !     call Set_Form_Factors(Atm,Scf,ok,mess,mag=.true.)
+   !   end if
+   !   if(.not. ok) then
+   !     write(unit=*,fmt="(a)") " => "//trim(mess)
+   !     return
+   !   end if
+   !   do i=1,Reflex%Nref
+   !     Reflex%Ref(i)=rf(i)
+   !     call Calc_Mag_Structure_Factor("P",Reflex%Ref(i),Cell,Grp,Atm,Scf,Stf%Strf(i))
+   !   end do
+   !   return
+   !End Subroutine Magnetic_Structure_Factors
  
    
 End SubModule SF_Calculations   

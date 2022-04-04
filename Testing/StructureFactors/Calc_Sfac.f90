@@ -12,7 +12,8 @@ Program Calc_Structure_Factors
    use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_Info
    use CFML_Atoms,                     only: AtList_Type, Write_Atom_List
    use CFML_Metrics,                   only: Cell_G_Type, Write_Crystal_Cell
-   use CFML_Reflections,               only: Refl_Type,SRefl_Type, RefList_Type, Initialize_RefList, Gener_Reflections
+   use CFML_Reflections,               only: Refl_Type,SRefl_Type, RefList_Type, Initialize_RefList, Gener_Reflections, &
+                                             Get_MaxNumRef, H_Uni
    use CFML_IOForm,                    only: Read_Xtal_Structure
    use CFML_Structure_Factors,         only: Init_Structure_Factors, Structure_Factors, &
                                              Calc_StrFactor, Write_Structure_Factors
@@ -35,7 +36,8 @@ Program Calc_Structure_Factors
    complex                     :: fc
 
    integer                     :: narg
-   Logical                     :: esta, arggiven=.false.,sthlgiven=.false.
+   logical                     :: arggiven=.false.,sthlgiven=.false.
+   logical                     :: lfil1,lfil2,lfil3
 
    !> Arguments on the command line
    narg=command_argument_count()
@@ -58,13 +60,13 @@ Program Calc_Structure_Factors
         "            ------ PROGRAM STRUCTURE FACTORS ------"                      , &
         "                ---- Version 1.0 April-2022 ----"                         , &
         "    *******************************************************************"  , &
-        "    * Calculates structure factors reading a *.CFL or a *.CIF file    *"  , &
+        "    * Calculates structure factors reading a CFL, CIF or MCIF file    *"  , &
         "    *******************************************************************"  , &
         "                      (JRC- April 2022 )"
    write(unit=*,fmt=*) " "
 
    if (.not. arggiven) then
-      write(unit=*,fmt="(a)", advance='no') " => Code of the file xx.cif(cfl) (give xx): "
+      write(unit=*,fmt="(a)", advance='no') " => Code of the file xx.(cif|mcif|cfl) (give xx): "
       read(unit=*,fmt="(a)") filcod
       if (len_trim(filcod) == 0) stop
    end if
@@ -79,41 +81,56 @@ Program Calc_Structure_Factors
           "            ------ PROGRAM STRUCTURE FACTORS ------"                      , &
           "                ---- Version 1.0 April-2022----"                          , &
           "    *******************************************************************"  , &
-          "    * Calculates structure factors reading a *.CFL or a *.CIF file    *"  , &
+          "    * Calculates structure factors reading a CFL, CIF or MCIF file    *"  , &
           "    *******************************************************************"  , &
           "                      (JRC- April 2022 )"
 
-   inquire(file=trim(filcod)//".cif",exist=esta)
-   if (esta) then
+   !> Asking for files...
+   inquire(file=trim(filcod)//".cif", exist=lfil1)
+   inquire(file=trim(filcod)//".mcif",exist=lfil2)
+   inquire(file=trim(filcod)//".cfl", exist=lfil3)
+   
+   if ( (.not. lfil1) .and. (.not. lfil2) .and. (.not. lfil3)) then
+      write(unit=*,fmt="(a)") " File: "//trim(filcod)//".(cif|mcif|cfl)  does'nt exist!"
+      close(unit=lun)
+      stop
+   end if
+         
+   if (lfil1) then
       call Read_Xtal_Structure(trim(filcod)//".cif", Cell, SpG, A)
    
-   else
-      inquire(file=trim(filcod)//".cfl",exist=esta)
-      if ( .not. esta) then
-         write(unit=*,fmt="(a)") " File: "//trim(filcod)//".cif (or .cfl) does'nt exist!"
-         stop
-      end if
+   else if (lfil2) then
+      call Read_Xtal_Structure(trim(filcod)//".mcif",Cell,SpG, A)
+   
+   else if (lfil3) then
       call Read_Xtal_Structure(trim(filcod)//".cfl",Cell, SpG, A, FType=fich_cfl)
-   end if
-
+   end if      
+   
    if (err_CFML%Ierr /= 0) then
       write(unit=*,fmt="(a)") trim(err_CFML%Msg)
+      close(unit=lun)
+      stop
+   end if   
+
+   !> Cell parameters    
+   call Write_Crystal_Cell(Cell,lun)
    
-   else
-      call Write_Crystal_Cell(Cell,lun)
-      call Write_SpaceGroup_Info(SpG,lun)
-      call Write_Atom_List(A,lun)   
+   !> Spacegroup
+   call Write_SpaceGroup_Info(SpG,lun)
+   
+   !> Atoms
+   if (Spg%Magnetic) then
+      !> Get information on moment constraints and modify the list of atoms accordingly
+      !do i=1,A%natoms
+      !   if (A%Atom(i)%mom < 0.001) cycle  ! Skip non-magnetic atoms
+      !   call Get_moment_ctr(A%Atom(i)%X,A%Atom(i)%M_xyz,Spg,codini,codes, Ipr=lun)
+      !end do
+   end if   
+   call Write_Atom_List(A,lun)   
       
-      !> Creating a list of reflections
-      call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)    
-      if (HKL%Nref <=0 ) then                                         
-         print*, " Problems generating a list of reflections!"    
-         stop                                                     
-      end if                                                      
-                                                            
-      
-      !> Look for wavelength in CFL file
-      lambda=0.70926 !Mo kalpha (used only for x-rays)
+   !> Wavelength in a CFL file
+   lambda=0.70926 !Mo kalpha (used only for x-rays)
+   if (lfil3) then
       do i=1,fich_cfl%nlines
          line=adjustl(fich_cfl%line(i)%str)
          if (u_case(line(1:6)) == "LAMBDA") then
@@ -121,43 +138,57 @@ Program Calc_Structure_Factors
             if (ier /= 0) lambda=0.70926
          end if
       end do
-
-      !> Calculation for X-rays assume Mo-kalpha if Lambda not given
-      call Init_Structure_Factors(hkl, A, Spg, 'XRay', lambda, lun)
-      call Structure_Factors(hkl, A, SpG)
-      call Write_Structure_Factors(hkl,lun)
-      if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
-      
-      !> Calculation for neutron scattering
-      call clear_error()
-      call Init_Structure_Factors(hkl, A, Spg, 'NUC', lun=lun)
-      call Structure_Factors(hkl, A, SpG, 'NUC')
-      call Write_Structure_Factors(hkl, lun, 'NUC')
-      if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
-      
-      !> Calculation for Electron Diffraction
-      call clear_error()
-      call Init_Structure_Factors(hkl, A, Spg, 'ELE',lun=lun)
-      call Structure_Factors(hkl, A, SpG,'ELE')
-      call Write_Structure_Factors(hkl,lun, 'ELE')
-      if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
-
-      !> Test of another structure factor subroutine
-      write(unit=lun,fmt="(/,a,/)") "   H   K   L   Mult  SinTh/Lda    |Fc|       Phase        F-Real      F-Imag      Num"
-      select type (rr => hkl%ref)
-         type is (srefl_type)
-            do i=1, hkl%nref
-               sn=rr(i)%s * rr(i)%s
-               call Calc_StrFactor(i,sn,A,Spg,'P','N',sf2,fc=fc)
-               write(unit=lun,fmt="(3i4,i5,5f12.5,i8,f12.5)") &
-                     rr(i)%h, rr(i)%mult, rr(i)%S, rr(i)%Fc, &
-                     rr(i)%Phase, real(fc), aimag(fc), i, sqrt(sf2)
-            end do
-      end select      
-
-      write(unit=*,fmt="(a)") " Normal End of: PROGRAM STRUCTURE FACTORS "
-      write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".sfa"
    end if
+      
+   !> Creating a list of reflections
+   MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
+   call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
+   
+   call H_Uni(Cell,Spg,.true.,0.0,stlmax,'s',MaxNumRef,hkl)
+   !call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)    
+
+   if (hkl%Nref <=0 ) then                                         
+      print*, " Problems generating a list of reflections!"    
+      stop                                                     
+   end if     
+   
+   !> Calculation for neutron scattering
+   call clear_error()
+   call Init_Structure_Factors(hkl, A, Spg, 'NUC', lun=lun)
+   call Structure_Factors(hkl, A, SpG, 'NUC')
+   call Write_Structure_Factors(hkl, lun, 'NUC')
+   if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)   
+   
+   !> Test of another structure factor subroutine
+   write(unit=lun,fmt="(/,a,/)") "   H   K   L   Mult  SinTh/Lda    |Fc|       Phase        F-Real      F-Imag      Num"
+   select type (rr => hkl%ref)
+      type is (srefl_type)
+         do i=1, hkl%nref
+            sn=rr(i)%s * rr(i)%s
+            call Calc_StrFactor(i,sn,A,Spg,'P','N',sf2,fc=fc)
+            write(unit=lun,fmt="(3i4,i5,5f12.5,i8,f12.5)") &
+                  rr(i)%h, rr(i)%mult, rr(i)%S, rr(i)%Fc, &
+                  rr(i)%Phase, real(fc), aimag(fc), i, sqrt(sf2)
+         end do
+   end select                                               
+   
+   !> Calculation for X-rays assume Mo-kalpha if Lambda not given
+   call Init_Structure_Factors(hkl, A, Spg, 'XRay', lambda, lun)
+   call Structure_Factors(hkl, A, SpG)
+   call Write_Structure_Factors(hkl,lun)
+   if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
+   
+   
+   !> Calculation for Electron Diffraction
+   call clear_error()
+   call Init_Structure_Factors(hkl, A, Spg, 'ELE',lun=lun)
+   call Structure_Factors(hkl, A, SpG,'ELE')
+   call Write_Structure_Factors(hkl,lun, 'ELE')
+   if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
+
+
+   write(unit=*,fmt="(a)") " Normal End of: PROGRAM STRUCTURE FACTORS "
+   write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".sfa"
 
    close(unit=lun)
 End Program Calc_Structure_Factors
