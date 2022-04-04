@@ -178,11 +178,11 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       !---- Local Variables ----!
       integer                            :: i,ier
       ! Types :: Atm_Type, Atm_Std_Type, MAtm_Std_Type, Atm_Ref_Type, MAtm_Ref_Type
-      type(Atm_Type)     , dimension(n)  :: Atm
-      type(Atm_Std_Type) , dimension(n)  :: Atm_Std
-      type(MAtm_Std_Type), dimension(n)  :: MAtm_Std
-      type(Atm_Ref_Type) , dimension(n)  :: Atm_Ref
-      type(MAtm_Ref_Type), dimension(n)  :: MAtm_Ref
+      type(Atm_Type)       :: Atm
+      type(Atm_Std_Type)   :: Atm_Std
+      type(MAtm_Std_Type)  :: MAtm_Std
+      type(Atm_Ref_Type)   :: Atm_Ref
+      type(MAtm_Ref_Type)  :: MAtm_Ref
 
       !> Init
       if (n <= 0) then
