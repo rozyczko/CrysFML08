@@ -383,6 +383,18 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_Structure_Factors
+file(GLOB SUBMOD_SF_SRC CFML_Structure_Factors/*.f90)
+set(SF_SRC CFML_Structure_Factors.f90
+                 ${SUBMOD_SF_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${SF_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${SF_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 #  List of all the source files 
 set(CRYSFML_COMMON_SRC
     ${GLOBAL_DEPS_SRC}
@@ -413,7 +425,8 @@ set(CRYSFML_COMMON_SRC
     ${Export_VTK_SRC} 
     ${EnBVS_SRC}
     ${InstrmILL_SRC}
-    ${SXTALgeom_SRC})
+    ${SXTALgeom_SRC}
+    ${SF_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)

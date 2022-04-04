@@ -11,13 +11,12 @@ SubModule (CFML_Reflections) Refl_Generate
    !!----
    !!---- 21/06/2019
    !!
-   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Num_Ref,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
       !---- Arguments ----!
       class(Cell_G_Type),                          intent(in)     :: Cell
       real(kind=cp),                               intent(in)     :: Sintlmax
       logical,                                     intent(in)     :: Mag
-      integer,                                     intent(out)    :: Num_ref
-      class(Refl_Type), dimension(:), allocatable, intent(out)    :: Reflex
+      type(RefList_Type),                          intent(in out) :: Reflex
       class(Spg_Type) ,              optional,     intent(in)     :: SpG
       type(kvect_info_type),         optional,     intent(in)     :: Kinfo
       character(len=*),              optional,     intent(in)     :: Order
@@ -29,7 +28,7 @@ SubModule (CFML_Reflections) Refl_Generate
       real(kind=cp)         :: epsr=0.00001, delt=0.0001
       real(kind=cp)         :: sval,max_s !,vmin,vmax
       integer               :: h,k,l,hmin,kmin,lmin,hmax,kmax,lmax, maxref,i,j,indp,indj, &
-                               maxpos, mp, iprev,Dd, nf, ia, i0, nk, nharm,n
+                               maxpos, mp, iprev,Dd, nf, ia, i0, nk, nharm,n,num_ref
       integer,      dimension(:),   allocatable :: hh,kk,nulo
       integer,      dimension(:,:), allocatable :: hkl,hklm
       integer,      dimension(:),   allocatable :: indx,indtyp,ind,ini,fin,itreat
@@ -232,31 +231,33 @@ SubModule (CFML_Reflections) Refl_Generate
       end if !present "order"
 
       !> Final assignments
-      if (allocated(reflex)) deallocate(reflex)
-      allocate(reflex(num_ref))
+      if (kvect .or. magg) then
+         call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
+      else
+         call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
+      end if   
 
       do i=1,num_ref
-         allocate(reflex(i)%h(Dd)) !needed in f95
-         reflex(i)%h      = hkl(:,i)
+         reflex%ref(i)%h = hkl(:,i)
          if(dd > 3) then
            kk               = abs(hkl(4:3+nk,i))
-           reflex(i)%pcoeff = 0 !Fundamental reflections point to the Fourier coefficient [00...]
+           reflex%ref(i)%pcoeff = 0 !Fundamental reflections point to the Fourier coefficient [00...]
            do_n: do n=1,kinfo%nq
               do k=1,nk
                  if (equal_vector(kk(1:nk),abs(kinfo%q_coeff(1:nk,n))))  then
-                    reflex(i)%pcoeff=n
+                    reflex%ref(i)%pcoeff=n
                     exit do_n
                  end if
               end do
            end do do_n
          end if
-         reflex(i)%s      = sv(i)
+         reflex%ref(i)%s      = sv(i)
          if (present(SpG)) then
-            reflex(i)%mult = h_mult(reflex(i)%h,SpG,Frd)
+            reflex%ref(i)%mult = h_mult(reflex%ref(i)%h,SpG,Frd)
          else
-           reflex(i)%mult = 1
+           reflex%ref(i)%mult = 1
          end if
-         reflex(i)%imag = indtyp(i)
+         reflex%ref(i)%imag = indtyp(i)
       end do
    End Subroutine Gener_Reflections
 

@@ -70,7 +70,7 @@ Module CFML_Reflections
    !!--..
    !!
    Type, public :: Refl_Type
-      integer,dimension(:), allocatable :: H            ! H
+      integer,dimension(:), allocatable :: H             ! H
       integer                           :: Mult  = 0     ! Mutiplicity
       real(kind=cp)                     :: S     = 0.0   ! Sin(Theta)/lambda=1/2d
       integer                           :: Imag  = 0     ! 0: nuclear reflection, 1:magnetic, 2=both
@@ -284,13 +284,12 @@ Module CFML_Reflections
          integer, dimension(3)               :: k
       End Function Get_Asymm_Unit_H
 
-      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Num_Ref,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
          !---- Arguments ----!
          class(Cell_G_Type),                          intent(in)     :: Cell
          real(kind=cp),                               intent(in)     :: Sintlmax
          logical,                                     intent(in)     :: Mag
-         integer,                                     intent(out)    :: Num_ref
-         class(Refl_Type), dimension(:), allocatable, intent(out)    :: Reflex
+         type(RefList_Type),                          intent(in out) :: Reflex
          class(Spg_Type) ,              optional,     intent(in)     :: SpG
          type(kvect_info_type),         optional,     intent(in)     :: Kinfo
          character(len=*),              optional,     intent(in)     :: Order
@@ -340,12 +339,14 @@ Module CFML_Reflections
          integer,                        intent(out)  :: nlines
          character(len=*), dimension(:), intent(out)  :: filevar
       End Subroutine Search_Extinctions_File
-
-      Module Subroutine Initialize_RefList(N, Reflex)
+      
+      Module Subroutine Initialize_RefList(N, Reflex, Ctype, D)
          !---- Arguments ----!
-         integer,             intent(in)    :: N
+         integer,             intent(in)     :: N
          type(RefList_Type),  intent(in out) :: Reflex
-      End Subroutine Initialize_RefList
+         character(len=*),    intent(in)     :: Ctype
+         integer, optional,   intent(in)     :: D
+      End Subroutine Initialize_RefList   
 
       Module Subroutine Write_Info_RefList(Reflex, Iunit, Mode)
          !---- Arguments ----!
