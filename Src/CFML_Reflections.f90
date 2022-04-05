@@ -368,6 +368,14 @@ Module CFML_Reflections
          logical,                optional, intent(out)    :: check_ok
          integer, dimension(3,2),optional, intent(in)     :: hlim
       End Subroutine H_Uni
+      
+      Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex)
+         !---- Arguments ----!
+         type (Cell_G_Type),    intent(in)     :: Cell
+         type (SpG_Type) ,      intent(in)     :: SpG
+         real(kind=cp),         intent(in)     :: Smax        
+         type (RefList_Type),   intent(in out) :: Reflex
+      End Subroutine Gener_Reflections_Shub
 
    End Interface
 

@@ -352,6 +352,32 @@ Module CFML_Structure_Factors
           real(kind=cp),dimension(:),optional,intent(out):: deriv
           complex, optional,                  intent(out):: fc  
        End Subroutine Calc_StrFactor   
+       
+       Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, lun)
+          !---- Arguments ----!
+          type(RefList_Type),    intent(in out) :: Reflex
+          type(Cell_G_Type),     intent(in)     :: Cell
+          type(AtList_type),     intent(in out) :: Atm
+          type(SpG_type),        intent(in)     :: Grp
+          real(kind=cp),         intent(in)     :: Smax 
+          type(StrfList_Type),   intent(out)    :: Stf
+          integer, optional,     intent(in)     :: lun
+       End Subroutine Magnetic_Structure_Factors
+       
+       Module Subroutine Calc_Mag_Structure_Factor(Hm, Cell, Grp, Atm, Scf, Mode, Strf, Magonly, Mdom, Tdom, Twin)
+          !---- Arguments ----!
+          class (Refl_Type),                     intent(in)  :: Hm        
+          type(Cell_G_type),                     intent(in)  :: Cell
+          type(SpG_type),                        intent(in)  :: Grp
+          type(AtList_type),                     intent(in)  :: Atm
+          type(Scattering_Species_Type),         intent(in)  :: Scf      
+          character(len=*),                      intent(in)  :: Mode     
+          type(Strf_Type),                       intent(out) :: Strf
+          logical,                     optional, intent(in)  :: Magonly
+          integer, dimension(3,3),     optional, intent(In)  :: Mdom     
+          real(kind=cp), dimension(3), optional, intent(In)  :: Tdom     
+          character(len=*),            optional, intent(In)  :: Twin    
+       End Subroutine Calc_Mag_Structure_Factor   
       
    End Interface   
     
