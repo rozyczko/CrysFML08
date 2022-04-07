@@ -245,8 +245,9 @@
     End Type Atom_Equiv_List_Type
 
     !!----
-    !!---- TYPE :: ALIST_TYPE
-    !!--..
+    !!---- Type, Public :: ALIST_TYPE
+    !!----
+    !!---- Updated: April - 2022
     !!
     Type, Public :: AtList_Type
        integer                                    :: natoms=0        ! Number of atoms in the list
@@ -254,7 +255,7 @@
        logical                                    :: symm_checked=.false.
        logical,         dimension(:), allocatable :: Active          ! Flag for active or not
        class(Atm_Type), dimension(:), allocatable :: Atom            ! Atoms
-    End type AtList_Type
+    End Type AtList_Type
 
     !---- Overload Zone ----!
 
@@ -296,8 +297,8 @@
 
        Module Subroutine Allocate_Atom_List(N, A,Type_Atm, d)
           !---- Arguments ----!
-          integer,             intent(in)       :: n    ! Atoms in the List
-          type(Atlist_type),   intent(in out)   :: A    ! Objet to be allocated
+          integer,             intent(in)       :: n    
+          type(Atlist_type),   intent(in out)   :: A    
           character(len=*),    intent(in)       :: Type_Atm !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
           integer,             intent(in)       :: d    ! Number of k-vectors
        End Subroutine Allocate_Atom_List

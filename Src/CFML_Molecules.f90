@@ -295,7 +295,8 @@
     !---- Use Modules ----!
     use CFML_GlobalDeps,    only: CP, EPS, TO_RAD, err_cfml, clear_error, set_error
     use CFML_gSpacegroups,  only: SpG_type, Write_SpaceGroup_Info
-    Use CFML_Atoms,         only: AtList_Type, Atm_Type, Atm_Std_Type, MAtm_Std_Type, Atm_Ref_Type, MAtm_Ref_Type
+    Use CFML_Atoms,         only: AtList_Type, Init_Atom_Type, Allocate_Atom_List, &
+                                  Atm_Type, Atm_Std_Type, Atm_Ref_Type, MAtm_Std_Type, MAtm_Ref_Type
     Use CFML_Metrics,       only: Cell_G_Type, Write_Crystal_Cell
     Use CFML_Strings,       only: L_Case, U_Case, File_Type, Get_Num, Cut_String, Get_words
     Use CFML_Maths,         only: Cross_Product, Get_Spher_from_Cart
@@ -315,9 +316,10 @@
     public :: Cartesian_to_Fractional, Cartesian_to_Spherical, Cartesian_to_ZMatrix, &
               Empiric_Formula, &
               Fractional_to_Cartesian, Fractional_to_Spherical, Fractional_to_Zmatrix, Fix_Orient_Cartesian, &
-              Init_Molecule, &
+              Init_Molecule, Init_MolCrystal, &
+              Molec_to_AtList, MolCrystal_to_AtList, &
               ReadInfo_Free_Atoms, ReadInfo_Molecule, &
-              Spherical_to_Cartesian, Spherical_to_Fractional, Spherical_to_Zmatrix, &
+              Spherical_to_Cartesian, Spherical_to_Fractional, Spherical_to_Zmatrix, Set_MolReference, &
               WriteInfo_Molecule, WriteInfo_Molecular_Crystal, WriteInfo_Free_Atoms, &
               Zmatrix_to_Cartesian, Zmatrix_to_Fractional, Zmatrix_to_Spherical
 
@@ -588,6 +590,38 @@
           character(len=*),        intent(out) :: Formula
           real(kind=cp), optional, intent(out) :: Form_Weight
        End Subroutine Empiric_Formula_Molcrys
+       
+       Module Subroutine Init_MolCrystal(MolX, NMol, NAtm, AtmType)
+          !---- Argument ----!
+          type(MolCrystal_Type),  intent(out) :: MolX
+          integer,          optional, intent(in)  :: Nmol       !Molucule object
+          integer,          optional, intent(in)  :: NAtm       !Free atoms 
+          character(len=*), optional, intent(in)  :: Atmtype 
+       End Subroutine Init_MolCrystal
+       
+       Module Subroutine Set_MolReference(Mol, NMol, NAtom_O, NAtom_X, NAtom_XY)
+          !---- Arguments ----!
+          type (Molecule_type),           intent(in out) :: Mol
+          type (Molecule_type), optional, intent(   out) :: NMol
+          integer,              optional, intent(in)     :: NAtom_O
+          integer,              optional, intent(in)     :: NAtom_X
+          integer,              optional, intent(in)     :: NAtom_XY
+       End Subroutine Set_MolReference
+       
+       Module Subroutine Molec_to_AtList(Mol, Type_Atm, AtList, Coor_Type, Cell)
+          !---- Arguments ----!
+          type (Molecule_Type),         intent(in)   :: Mol
+          character(len=*),             intent(in)   :: Type_Atm
+          type (AtList_Type),           intent(out)  :: AtList
+          character(len=*),   optional, intent(in)   :: Coor_type
+          type (Cell_G_type), optional, intent(in)   :: Cell
+       End Subroutine Molec_to_AtList
+       
+       Module Subroutine MolCrystal_to_AtList(Molcrys, AtList)
+          !---- Arguments ----!
+          type (MolCrystal_Type), intent(in)  :: Molcrys
+          type (AtList_Type),     intent(out) :: AtList
+       End Subroutine MolCrystal_to_AtList
           
     End Interface
 

@@ -109,5 +109,59 @@ Submodule (CFML_Molecules) Mol_Initialize
       end if
 
    End Subroutine Init_Molecule
+   
+   !!----
+   !!---- Subroutine Init_MolCrystal
+   !!----
+   !!----    Initialization for Molecular Crystal object
+   !!----
+   !!---- Update: April - 2022
+   !!
+   Module Subroutine Init_MolCrystal(MolX, NMol, NAtm, AtmType)
+      !---- Argument ----!
+      type(MolCrystal_Type),  intent(out) :: MolX
+      integer,          optional, intent(in)  :: Nmol       !Molucule object
+      integer,          optional, intent(in)  :: NAtm       !Free atoms 
+      character(len=*), optional, intent(in)  :: Atmtype  
+
+      !---- Local Variables ----!  
+      integer :: i
+      type(Atm_Ref_Type)  :: at1
+      type(MAtm_Ref_Type) :: at2
+
+      molx%N_Free    = 0
+      molx%N_Mol     = 0
+      molx%N_Species = 0
+      molx%Npat      = 0
+
+      if (allocated(molx%mol))  deallocate(molx%mol)
+      if (allocated(molx%atm))  deallocate(molx%atm)
+
+      if (present(Nmol) .and. nmol > 0) then
+         molx%N_Mol = nmol
+         allocate(molx%mol(nmol))
+         do i=1,nmol
+            call init_molecule(molx%mol(i))
+         end do
+      end if
+
+      if (present(Natm) .and. natm > 0) then
+         molx%N_Free = natm
+         if (present(Atmtype) ) then
+            if (u_case(trim(AtmType)) == 'MAG') then
+               allocate(molx%atm(natm), source=at2)
+            else
+               allocate(molx%atm(natm), source=at1)
+            end if 
+         else
+            allocate(molx%atm(natm), source=at1)
+         end if 
+           
+         do i=1,natm
+            call init_atom_type(molx%atm(i),0)
+         end do
+      end if
+      
+   End Subroutine Init_MolCrystal
  
 End Submodule Mol_Initialize 
