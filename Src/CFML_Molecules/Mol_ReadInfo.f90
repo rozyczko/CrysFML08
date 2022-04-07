@@ -570,7 +570,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          call Cut_string(line, ic, Atname)
          
          !> Chemical symbol
-         call Cut_string(line, ic, Atname)
+         call Cut_string(line, ic, AtSymb)
          
          !> Vary?
          var=' '
@@ -629,6 +629,9 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                   return
                end if 
          end select
+         
+         mol%Atname(k)=trim(atname)
+         mol%AtSymb(k)=trim(atsymb)
          
          !> Codes?
          if (var=='VARY') then
