@@ -282,7 +282,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
       in_xtal=.false.
       
       !> Molecule 
-      i=0   
+      i=0  
       if (present(nl_ini)) i=nl_ini-1
       
       n_end=filetype%nlines
@@ -294,6 +294,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          
          line=adjustl(filetype%line(i)%str)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
+         npos=index(line,'!')
+         if (npos > 0) line=line(:npos-1)
          if (u_case(line(1:4)) /= "MOLE") cycle
          ini=5
          
@@ -353,6 +355,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          
             line=adjustl(filetype%line(i)%str)
             if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+            npos=index(line,'!')
+            if (npos > 0) line=line(:npos-1)
             
             !> Format
             call get_words(line, dire, ic)
@@ -414,6 +418,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          
             line=adjustl(filetype%line(i)%str)
             if (line(1:1) == '!' .or. line(1:1) == '#') cycle
+            npos=index(line,'!')
+            if (npos > 0) line=line(:npos-1)
             
             call get_num(line,vet,ivet,iv)
             if (iv /= 6) then
@@ -433,6 +439,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
@@ -449,6 +457,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
@@ -467,6 +477,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
@@ -483,6 +495,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
@@ -501,6 +515,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 9) then
@@ -519,6 +535,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
    
                call get_num(line,vet,ivet,iv)
                if (iv /= 9) then
@@ -545,6 +563,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          if (i > n_end) exit
          line=adjustl(filetype%line(i)%str)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+         npos=index(line,'!')
+         if (npos > 0) line=line(:npos-1)
          
          !> Atom Name 
          call Cut_string(line, ic, Atname)
@@ -620,6 +640,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                end if
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
+               npos=index(line,'!')
+               if (npos > 0) line=line(:npos-1)
                exit
             end do
             call get_num(line,vet,ivet,iv)

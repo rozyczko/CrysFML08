@@ -98,7 +98,7 @@ Submodule (CFML_Molecules) Mol_Orientation
       if (present(natom_xy)) n_xy=natom_xy
 
       if (Mol%natoms > 0) call Init_Molecule(IMol,Mol%natoms)
-      call Fix_Reference(Mol,IMol,n_or,n_x,n_xy)
+      call Set_MolReference(Mol, IMol, n_or, n_x, n_xy)
       if (err_CFML%IErr /=0) return
 
       !> Traslation the Origin 
