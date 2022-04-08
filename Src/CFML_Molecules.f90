@@ -350,19 +350,19 @@
                                                                                !"TL ": Translational + Librational
                                                                                !"TLS": Translational + Librational + Correlation
        real(kind=cp), dimension(3)                     :: xcentre=0.0_cp       !Fractional coordinates of the centre
-       real(kind=cp), dimension(3)                     :: mxcentre=1.0_cp      !Refinement codes (or multipliers) of Fractional coordinates of the centre
+       real(kind=cp), dimension(3)                     :: mxcentre=0.0_cp      !Refinement codes (or multipliers) of Fractional coordinates of the centre
        integer,       dimension(3)                     :: lxcentre=0           !Numbers of LSQ parameters for Fractional coordinates of the centre
        real(kind=cp), dimension(3)                     :: Orient=0.0_cp        !Orientation angles (Euler angles or variant ...)
-       real(kind=cp), dimension(3)                     :: mOrient=1.0_cp       !Refinement codes (or multipliers) of Orientation angles (Euler angles or variant ...)
+       real(kind=cp), dimension(3)                     :: mOrient=0.0_cp       !Refinement codes (or multipliers) of Orientation angles (Euler angles or variant ...)
        integer,       dimension(3)                     :: lOrient=0            !Numbers of LSQ parameters for Orientation angles (Euler angles or variant ...)
        real(kind=cp), dimension(6)                     :: T_TLS=0.0_cp         !Translational Thermal factor tensor
-       real(kind=cp), dimension(6)                     :: mT_TLS=1.0_cp        !Refinement codes (or multipliers) of Translational Thermal factor tensor
+       real(kind=cp), dimension(6)                     :: mT_TLS=0.0_cp        !Refinement codes (or multipliers) of Translational Thermal factor tensor
        integer,       dimension(6)                     :: lT_TLS=0             !Numbers of LSQ parameters for Translational Thermal factor tensor
        real(kind=cp), dimension(6)                     :: L_TLS=0.0_cp         !Librational Thermal factor tensor
-       real(kind=cp), dimension(6)                     :: mL_TLS=1.0_cp        !Refinement codes (or multipliers) of Librational Thermal factor tensor
+       real(kind=cp), dimension(6)                     :: mL_TLS=0.0_cp        !Refinement codes (or multipliers) of Librational Thermal factor tensor
        integer,       dimension(6)                     :: lL_TLS=0             !Numbers of LSQ parameters for Librational Thermal factor tensor
        real(kind=cp), dimension(3,3)                   :: S_TLS=0.0_cp         !TL-correlation Thermal factor
-       real(kind=cp), dimension(3,3)                   :: mS_TLS=1.0_cp        !Refinement codes (or multipliers) of TL-correlation Thermal factor
+       real(kind=cp), dimension(3,3)                   :: mS_TLS=0.0_cp        !Refinement codes (or multipliers) of TL-correlation Thermal factor
        integer,       dimension(3,3)                   :: lS_TLS=0             !Numbers of LSQ parameters for TL-correlation Thermal factor
        real(kind=cp), dimension(3,3)                   :: Euler=0.0_cp         !Euler matrix
        character(len=20), allocatable, dimension(  :)  :: AtName               !Atom Name

@@ -26,23 +26,23 @@ Submodule (CFML_Molecules) Mol_Initialize
       mol%therm_type =" "
 
       mol%xcentre    =0.0_cp
-      mol%mxcentre   =1.0_cp
+      mol%mxcentre   =0.0_cp
       mol%lxcentre   =0
 
       mol%orient     =0.0_cp
-      mol%mOrient    =1.0_cp
+      mol%mOrient    =0.0_cp
       mol%lorient    =0
 
       mol%t_tls      =0.0_cp
-      mol%mT_TLS     =1.0_cp
+      mol%mT_TLS     =0.0_cp
       mol%lt_tls     =0
 
       mol%l_tls      =0.0_cp
-      mol%mL_TLS     =1.0_cp
+      mol%mL_TLS     =0.0_cp
       mol%ll_tls     =0
 
       mol%s_tls      =0.0_cp
-      mol%mS_TLS     =1.0_cp
+      mol%mS_TLS     =0.0_cp
       mol%ls_tls     =0
 
       mol%euler      =0.0_cp
@@ -92,13 +92,13 @@ Submodule (CFML_Molecules) Mol_Initialize
             mol%AtZ     =0
             mol%Ptr     =0
             mol%I_Coor  =0.0_cp
-            mol%mI_Coor =1.0_cp
+            mol%mI_Coor =0.0_cp
             mol%lI_Coor =0
             mol%U_iso   =0.0_cp
-            mol%mU_iso  =1.0_cp
+            mol%mU_iso  =0.0_cp
             mol%lU_iso  =0
             mol%Occ     =0.0_cp
-            mol%mocc    =1.0_cp
+            mol%mocc    =0.0_cp
             mol%lOcc    =0
             mol%Nb      =0
             mol%INb     =0

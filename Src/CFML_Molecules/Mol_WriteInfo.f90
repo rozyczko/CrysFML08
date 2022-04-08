@@ -137,9 +137,9 @@ Submodule (CFML_Molecules) Mol_WriteInfo
       if (Mol%in_xtal ) then
          do i=1,Mol%natoms
             if (Mol%AtSymb(i) /= "ZE") geom_cent=geom_cent + Mol%I_Coor(:,i)
-            write(unit=uni,fmt="(t29,a,tr2,a,3f12.5,3i4,2f12.5)")  &
-                    Mol%AtName(i), Mol%AtSymb(i),Mol%I_Coor(:,i),  &
-                    Mol%Conn(:,i), Mol%U_iso(i),  Mol%Occ(i)
+            write(unit=uni,fmt="(t29,a,t38,a4,3f12.5,3i4,2f12.5)")  &
+                 trim(Mol%AtName(i)), trim(Mol%AtSymb(i)),Mol%I_Coor(:,i),  &
+                 Mol%Conn(:,i), Mol%U_iso(i),  Mol%Occ(i)
             var=" "
             do j=1,3
                if (abs(Mol%mI_Coor(j,i)) > EPS) var="VARY"
@@ -155,9 +155,9 @@ Submodule (CFML_Molecules) Mol_WriteInfo
       else
          do i=1,Mol%natoms
             if (Mol%AtSymb(i) /= "DU") geom_cent=geom_cent + Mol%I_Coor(:,i)
-            write(unit=uni,fmt="(t29,a,tr2,a,3f12.5,3i4       )")  &
-                   Mol%Atname(i), Mol%Atsymb(i), Mol%I_coor(:,i),  &
-                   Mol%conn(:,i)
+            write(unit=uni,fmt="(t29,a,t38,a4,3f12.5,3i4       )")  &
+                 trim(Mol%Atname(i)), trim(Mol%Atsymb(i)), Mol%I_coor(:,i),  &
+                 Mol%conn(:,i)
          end do
       end if
 
