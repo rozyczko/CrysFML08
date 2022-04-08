@@ -57,7 +57,8 @@ Module CFML_Reflections
              Get_MaxNumRef, Get_Asymm_Unit_H, Get_h_info
 
    !---- List of public subroutines ----!
-   public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Search_Extinctions, &
+   public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Gener_Reflections_Shub, &
+             Search_Extinctions, &
              Write_Info_RefList, Init_Refl_Conditions
 
    !---- Parameters ----!

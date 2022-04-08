@@ -60,9 +60,9 @@ Module CFML_Structure_Factors
     public :: Additional_Scattering_Factors, Allocate_Scattering_Species, &
               Calc_General_StrFactor, Calc_hkl_StrFactor, Calc_StrFactor, &
               Init_Structure_Factors, Init_Calc_hkl_StrFactors, Init_Calc_StrFactors, &
-              Modify_SF, &
+              Modify_SF, Magnetic_Structure_Factors, &
               Set_Form_Factors, Structure_Factors,  &
-              Write_Structure_Factors
+              Write_Structure_Factors, Write_Structure_Factors_Mag
               
     !---- Definitions ----!
     

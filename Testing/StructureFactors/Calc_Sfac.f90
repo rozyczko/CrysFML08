@@ -16,7 +16,7 @@ Program Calc_Structure_Factors
                                              Get_MaxNumRef, H_Uni
    use CFML_IOForm,                    only: Read_Xtal_Structure
    use CFML_Structure_Factors,         only: StrfList_Type,Init_Structure_Factors, Structure_Factors, &
-                                             Calc_StrFactor, Write_Structure_Factors, Write_Structure_Factors_Mag
+                                             Calc_StrFactor, Magnetic_Structure_Factors,Write_Structure_Factors, Write_Structure_Factors_Mag
 
    !---- Variables ----!
    implicit none
@@ -195,7 +195,7 @@ Program Calc_Structure_Factors
    if (Spg%Magnetic) then
       call clear_error()
       call Magnetic_Structure_Factors(Cell,A,SpG,stlmax,hkl,Stf,lun)
-      call Write_Structure_Factors_Mag(hkl, Stf, Lun, Full)
+      call Write_Structure_Factors_Mag(hkl, Stf, Lun, .true.)
    end if   
    
 
