@@ -407,6 +407,18 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_KeyCodes
+file(GLOB SUBMOD_KEYCODES_SRC CFML_KeyCodes/*.f90)
+set(KEYCODES_SRC CFML_KeyCodes.f90
+                 ${SUBMOD_MOLECULES_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${KEYCODES_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${KEYCODES_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 #  List of all the source files 
 set(CRYSFML_COMMON_SRC
     ${GLOBAL_DEPS_SRC}
@@ -439,7 +451,8 @@ set(CRYSFML_COMMON_SRC
     ${InstrmILL_SRC}
     ${SXTALgeom_SRC}
     ${SF_SRC}
-    ${MOLECULES_SRC})
+    ${MOLECULES_SRC}
+    ${KEYCODES_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)
