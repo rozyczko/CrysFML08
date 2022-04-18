@@ -7,7 +7,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    !!---- Subroutine WriteInfo_RefParams
    !!----
    !!----    Write the information about Refinement parameters in file associated with
-   !!----    logical unit "iunit". 
+   !!----    logical unit "iunit".
    !!----    If no argument is passed the standard output (iunit=6) is used
    !!----
    !!---- Update: April - 2022
@@ -31,7 +31,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
                                   "   L.Bound       U.Bound       Step       BCon  Par "
       do i=1,NP_Ref
          write(unit=lun,fmt="(i6,tr5,a20,5f14.5, i4, i6)") i, Vec_NamePar(i), Vec_RefPar(i), Vec_RefParSTD, &
-                                                              Vec_LimPar(:,i), Vec_BCon(i), Vec_PointPar(i)
+                                                              Vec_LimPar(:,i), Vec_BCond(i), Vec_PointPar(i)
       end do
 
    End Subroutine WriteInfo_RefParams
@@ -64,7 +64,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
          write(unit=lun,fmt="(a,/)") " ============================================================"
          write(unit=lun,fmt="(a)") &
               " Rest#    Atom1         Atom2              Dobs        Dcalc       Sigma   (Do-Dc)/Sigma"
-         
+
          cost=0.0_cp
          do i=1,NP_Rest_Dis
             i1=Dis_rest(i)%p(1)

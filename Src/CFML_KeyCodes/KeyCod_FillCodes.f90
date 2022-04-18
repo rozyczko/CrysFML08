@@ -4,13 +4,13 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
 
    Contains
    !!--++
-   !!--++ SUBROUTINE FILL_REFCODES_ATOM
-   !!--++ 
+   !!--++ SUBROUTINE FILL_REFCODES_ATM
+   !!--++
    !!--++   Write on Vectors the Information for Free Atoms
-   !!--++   
+   !!--++
    !!--++ Update: April - 2022
    !!
-   Module Subroutine Fill_RefCodes_Atom(Keyword, Npar, Bounds, Ic, Natm, Spg, AtList)
+   Module Subroutine Fill_RefCodes_Atm(Keyword, Npar, Bounds, Ic, Natm, Spg, AtList)
       !---- Arguments ----!
       character(len=*),              intent(in)     :: Keyword     ! VARY/FIX/....
       integer,                       intent(in)     :: NPar        ! Specific parameter X_,Y_,Occ_,...
@@ -32,7 +32,7 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
          call set_error(1," The directive have to be apply on a specific atom!")
          return
       end if
-   
+
       !> keyword
       cdire=u_case(Keyword)
       select case (trim(cdire))
@@ -50,39 +50,39 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
                   call Fix_XYZ_Atm(Atlist, Natm, 2)
 
                case ( 3) ! Z
-                  call Fix_XYZ_Atm(Atlist, Natm, 3) 
- 
+                  call Fix_XYZ_Atm(Atlist, Natm, 3)
+
                case ( 4) ! XYZ
                   call Fix_XYZ_Atm(Atlist, Natm, 0)
 
-               case ( 5) ! OCC 
+               case ( 5) ! OCC
                   call Fix_Occ_Atm(Atlist, Natm)
 
-               case ( 6) ! U_ISO 
+               case ( 6) ! U_ISO
                   call Fix_U_Atm(Atlist, Natm,0)
 
-               case ( 7) ! U 
+               case ( 7) ! U
                   call Fix_U_Atm(Atlist, Natm,-1)
 
                case ( 8) ! U11
                   call Fix_U_Atm(Atlist, Natm,1)
-  
+
                case ( 9) ! U22
                   call Fix_U_Atm(Atlist, Natm,2)
- 
-               case (10) ! U33 
+
+               case (10) ! U33
                   call Fix_U_Atm(Atlist, Natm,3)
 
                case (11) ! U12
                   call Fix_U_Atm(Atlist, Natm,4)
- 
-               case (12) ! U13 
+
+               case (12) ! U13
                   call Fix_U_Atm(Atlist, Natm,5)
-                     
+
                case (13) ! U23
                   call Fix_U_Atm(Atlist, Natm,6)
- 
-               case (14) ! ALL 
+
+               case (14) ! ALL
                   call Fix_XYZ_Atm(Atlist, Natm, 0)
                   call Fix_Occ_Atm(Atlist, Natm)
                   call Fix_U_Atm(Atlist, Natm,0)
@@ -103,30 +103,30 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
                case ( 4) ! XYZ
                   call Vary_XYZ_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
 
-               case ( 5) ! OCC 
+               case ( 5) ! OCC
                   call Vary_OCC_Atm(Atlist, NAtm, Bounds, Ic)
 
-               case ( 6) ! U_ISO 
+               case ( 6) ! U_ISO
                   call Vary_U_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
 
-               case ( 7) ! U 
+               case ( 7) ! U
                   call Vary_U_Atm(Atlist, NAtm, -1, Spg, Bounds, Ic)
 
                case ( 8:13) ! U's'
                   call Vary_U_Atm(Atlist, NAtm, NPar-7, Spg, Bounds, Ic)
-                  
-               case (14) ! ALL 
+
+               case (14) ! ALL
                   call Vary_XYZ_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
                   call Vary_OCC_Atm(Atlist, NAtm, Bounds, Ic)
                   call Vary_U_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
                   call Vary_U_Atm(Atlist, NAtm, -1, Spg, Bounds, Ic)
-            
+
             end select ! Npar
 
       end select ! Vary
 
-   End Subroutine Fill_RefCodes_Atom
-   
+   End Subroutine Fill_RefCodes_Atm
+
 
 
 End SubModule KeyCod_FillCodes
