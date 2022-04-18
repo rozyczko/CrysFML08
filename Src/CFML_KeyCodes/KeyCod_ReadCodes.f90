@@ -52,10 +52,10 @@ Submodule (CFML_KeyCodes) KeyCod_ReadCodes
                end if
 
             case ("VARY")    ! VARY .....
-               call cut_sting(line,nlong)
+               call cut_string(line,nlong)
 
                !> general directives
-               call split_general_atm(line,ndir,Ind_gen, dir_gen)
+               call split_genrefcod_atm(line,ndir,Ind_gen, dir_gen)
 
                !> Locals  directives
                call Split_LocRefCod_ATM(line, nloc, dir_loc, Ind_loc, dir_lab, IPh)
