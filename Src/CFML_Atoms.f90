@@ -57,7 +57,7 @@
     !---- List of public procedures ----!
     public :: Allocate_Atom_List, Extend_Atom_List, Init_Atom_Type, Read_Bin_Atom_List, &
               Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell, Index_AtLab_on_AtList
-    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints
+    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints, Change_AtomList_Type
 
 
     !---- Parameters ----!
@@ -306,14 +306,39 @@
           !---- Arguments ----!
           integer,             intent(in)       :: n
           type(Atlist_type),   intent(in out)   :: A
-          character(len=*),    intent(in)       :: Type_Atm !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
-          integer,             intent(in)       :: d    ! Number of k-vectors
+          character(len=*),    intent(in)       :: Type_Atm
+          integer,             intent(in)       :: d
        End Subroutine Allocate_Atom_List
+
+       Module Subroutine Change_AtomList_Type(AtList, TypeAtm, Nv)
+          !---- Arguments ----!
+          type(AtList_Type), intent(in out) :: AtList
+          character(len=*),  intent(in)     :: TypeAtm
+          integer, optional, intent(in)     :: Nv
+       End Subroutine Change_AtomList_Type
 
        Module Subroutine Check_Symmetry_Constraints(SpG,Atm)
          class(SpG_Type),      intent(in)     :: SpG
          type(AtList_Type),    intent(in out) :: Atm
        End Subroutine Check_Symmetry_Constraints
+
+       Module Subroutine CopyInfo_Atm_Type(At1, At2)
+          !---- Arguments ----T
+          class(Atm_Type), intent(in out):: At1
+          class(Atm_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_Atm_Type
+
+       Module Subroutine CopyInfo_Std_Type(At1, At2)
+          !---- Arguments ----T
+          class(Atm_Std_Type), intent(in out):: At1
+          class(Atm_Std_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_Std_Type
+
+       Module Subroutine CopyInfo_MStd_Type(At1, At2)
+          !---- Arguments ----T
+          class(MAtm_Std_Type), intent(in out):: At1
+          class(MAtm_Std_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_MStd_Type
 
        Module Subroutine Read_Bin_Atom_List(filename, A, Type_Atm)
           !---- Arguments ----!
