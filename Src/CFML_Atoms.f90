@@ -56,7 +56,7 @@
 
     !---- List of public procedures ----!
     public :: Allocate_Atom_List, Extend_Atom_List, Init_Atom_Type, Read_Bin_Atom_List, &
-              Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell
+              Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell, Index_AtLab_on_AtList
     public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints
 
 
@@ -281,6 +281,13 @@
           character (len=8)              :: bilabel
        End Function Wrt_Lab
 
+       Pure Module Function Index_AtLab_on_AtList(AtLab, AtList) Result(Indx)
+          !---- Arguments ----!
+          character(len=*),  intent(in) :: AtLab
+          type(AtList_Type), intent(in) :: AtList
+          integer                       :: Indx
+       End Function Index_AtLab_on_AtList
+
        Module Subroutine Init_Atom_Type(Atm,d)
           !---- Arguments ----!
           class(Atm_Type), intent(in out)   :: Atm
@@ -297,8 +304,8 @@
 
        Module Subroutine Allocate_Atom_List(N, A,Type_Atm, d)
           !---- Arguments ----!
-          integer,             intent(in)       :: n    
-          type(Atlist_type),   intent(in out)   :: A    
+          integer,             intent(in)       :: n
+          type(Atlist_type),   intent(in out)   :: A
           character(len=*),    intent(in)       :: Type_Atm !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
           integer,             intent(in)       :: d    ! Number of k-vectors
        End Subroutine Allocate_Atom_List

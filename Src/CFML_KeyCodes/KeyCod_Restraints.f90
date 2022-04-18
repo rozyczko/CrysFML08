@@ -6,7 +6,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
    !!----
    !!---- SUBROUTINE ALLOCATE_RESTRAINTS_VEC
    !!----
-   !!----    Allocate vectors Ang_Rest, Dist_Rest, Tor_Rest. 
+   !!----    Allocate vectors Ang_Rest, Dist_Rest, Tor_Rest.
    !!----
    !!---- Update: April - 2022
    !!
@@ -15,25 +15,25 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       Type(file_type),  intent( in) :: Ffile
       integer, optional,intent(out) :: NDfix
       integer, optional,intent(out) :: NAfix
-      integer, optional,intent(out) :: NTfix         
-      
+      integer, optional,intent(out) :: NTfix
+
       !---- Local variables ----!
       integer :: i,j,nc,nr,iv1,iv2,npos
-      
+
       if (allocated(Ang_Rest)) deallocate(Ang_Rest)
       if (allocated(Dis_Rest)) deallocate(Dis_Rest)
       if (allocated(Tor_Rest)) deallocate(Tor_Rest)
-      
+
       NP_Rest_Dis=0
       NP_Rest_Ang=0
       NP_Rest_Tor=0
-      
+
       if (present(NDfix)) NDfix=0
-      if (present(NAfix)) NAfix=0 
+      if (present(NAfix)) NAfix=0
       if (present(NTfix)) NTfix=0
-      
+
       call clear_error()
-      
+
       !> Dimension for DFIX
       nr=0
       do i=1,ffile%nlines
@@ -41,17 +41,17 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (u_case(line(1:4)) /= "DFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
-      
+
          call cut_string(line)
          call get_words(line,dire,nc)
-         
+
          !> value
          call get_num(dire(1),vet,ivet,iv1)
          if (iv1 /= 1) then
             call set_error(1," Bad arguments on DFIX directive: "//trim(line))
             return
          end if
-      
+
          !> Sigma (optional)
          call get_num(dire(2),vet,ivet,iv2)
          if (iv2 == 1) then
@@ -62,21 +62,22 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (mod(nc,2) /= 0) then
             call set_error(1," Bad arguments on DFIX directive: "//trim(line))
             return
-         end if   
+         end if
          nr=nr+nc/2
-      end do   
-      
+      end do
+
       if (nr > 0) then
          allocate(Dis_Rest(nr))
-         dist_rest%IPh =0
+         dis_rest%IPh =0
          dis_rest%obs  =0.0_cp
          dis_rest%cal  =0.0_cp
          dis_rest%Sig  =0.0_cp
-         dis_rest%P    =0
+         dis_rest%P(1) =0
+         dis_rest%P(2) =0
          dis_rest%Code =" "
       end if
       if (present(NDfix)) NDfix=nr
-      
+
       !> Dimension for AFIX
       nr=0
       do i=1,ffile%nlines
@@ -84,17 +85,17 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (u_case(line(1:4)) /= "AFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
-      
+
          call cut_string(line)
          call get_words(line,dire,nc)
-      
+
          !> value
          call get_num(dire(1),vet,ivet,iv1)
          if (iv1 /= 1) then
             call set_error(1," Bad arguments on AFIX directive: "//trim(line))
             return
          end if
-      
+
          !> Sigma (optional)
          call get_num(dire(2),vet,ivet,iv2)
          if (iv2 == 1) then
@@ -105,21 +106,24 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (mod(nc,3) /= 0) then
             call set_error(1," Bad arguments on AFIX directive: "//trim(line))
             return
-         end if   
+         end if
          nr=nr+nc/3
-      end do   
-      
+      end do
+
       if (nr >0) then
          allocate(Ang_Rest(nr))
          ang_rest%IPh  =0
          ang_rest%Obs  =0.0_cp
          ang_rest%Cal  =0.0_cp
          ang_rest%Sig  =0.0_cp
-         ang_rest%P    = 0
-         ang_rest%Code =" "
+         ang_rest%P(1) = 0
+         ang_rest%P(2) = 0
+         ang_rest%P(3) = 0
+         ang_rest%Code(1) =" "
+         ang_rest%Code(2) =" "
       end if
       if (present(NAfix)) NAfix=nr
-      
+
       !> Dimension for TFIX
       nr=0
       do i=1,ffile%nlines
@@ -127,17 +131,17 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (u_case(line(1:4)) /= "TFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
-         
+
          call cut_string(line)
          call get_words(line,dire,nc)
-      
+
          !> value
          call get_num(dire(1),vet,ivet,iv1)
          if (iv1 /= 1) then
             call set_error(1," Bad arguments on TFIX directive: "//trim(line))
             return
          end if
-      
+
          !> Sigma (optional)
          call get_num(dire(2),vet,ivet,iv2)
          if (iv2 == 1) then
@@ -148,18 +152,23 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          if (mod(nc,4) /= 0) then
             call set_error(1," Bad arguments on TFIX directive: "//trim(line))
             return
-         end if   
+         end if
          nr=nr+nc/4
-      end do   
-      
+      end do
+
          if (nr > 0) then
             allocate(Tor_Rest(nr))
             tor_rest%IPh  =0
             tor_rest%Obs  =0.0_cp
             tor_rest%Cal  =0.0_cp
             tor_rest%Sig  =0.0_cp
-            tor_rest%p    =0
-            tor_rest%Code =" "
+            tor_rest%p(1) =0
+            tor_rest%p(2) =0
+            tor_rest%p(3) =0
+            tor_rest%p(4) =0
+            tor_rest%Code(1) =" "
+            tor_rest%Code(2) =" "
+            tor_rest%Code(3) =" "
          end if
          if (present(NTfix)) NTfix=nr
 
@@ -184,7 +193,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       integer,dimension(2,NP)         :: p
       integer                         :: i,j,k,nc,iv,nr,npos
-      integer                         :: iph 
+      integer                         :: iph
       real(kind=cp)                   :: dis,sig
       character(len=8), dimension(NP) :: symtrans=" "
       character(len=8)                :: symcode=" "
@@ -202,7 +211,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       if (iv /= 1) then
          call set_error(1," Error in DFIX line: "//trim(string))
          return
-      end if   
+      end if
       dis=vet(1)
 
       !> Sigma
@@ -236,8 +245,8 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
                if (trim(u_case(dire(i+1))) == trim(u_case(A(j)%Lab))) ivet(2)=j
                if (all(ivet(1:2) > 0) ) exit
             end do
-         end associate   
-         
+         end associate
+
          if (any(ivet(1:2) == 0)) then
             call set_error(1,"Some of the atom names in"//trim(string)//" were not found in the asymmetric unit")
             return
@@ -264,7 +273,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          dis_rest(k)%sig=sig
          dis_rest(k)%p = p(:,i)
          dis_rest(k)%Code=symtrans(i)
-      end do   
+      end do
       NP_Rest_Dis=NP_Rest_Dis+nr
 
    End Subroutine Get_DFIX_Line
@@ -285,22 +294,22 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       !---- Local variables ----!
       integer, parameter                :: NP=30
-      
+
       integer, dimension(3,NP)          :: p=0
-      integer                           :: i,j,k,iv,nc,npos,iph 
+      integer                           :: i,j,k,iv,nc,npos,iph,nr
       character(len=8), dimension(2,NP) :: symtrans=" "
       character(len=8), dimension(2)    :: symcode=" "
       real(kind=cp)                     :: ang,sig
-      
+
       !> Init
       call clear_error()
 
       if (len_trim(string) == 0 .or. .not. allocated(ang_rest)) return
 
-      !> words 
+      !> words
       call get_words(string, dire, nc)
 
-      !> Angle 
+      !> Angle
       call get_num(dire(1),vet,ivet,iv)
       if (iv /= 1) then
          call set_error(1,"Error in AFIX line: "//trim(string))
@@ -331,7 +340,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
             symcode(1)=dire(i+1)(npos+1:)
             dire(i+1)=dire(i+1)(:npos-1)
          end if
-         
+
          npos=index(dire(i+2),"_")
          if (npos /=0) then
             symcode(2)=dire(i+2)(npos+1:)
@@ -347,13 +356,13 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
                if (all(ivet(1:3) > 0) ) exit
             end do
          end associate
-            
+
          if (any(ivet(1:3) == 0)) then
             call set_error(1,"Some of the atom names in "//trim(string)//" were not found in the asymmetric unit")
             return
          end if
 
-         !> New Relation 
+         !> New Relation
          nr=nr+1
          p(:,nr)=ivet(1:3)
          symtrans(:,nr)=symcode
@@ -374,7 +383,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
          ang_rest(k)%Sig=sig
          ang_rest(k)%p = p(:,i)
          ang_rest(k)%Code=symtrans(:,i)
-      end do   
+      end do
       NP_Rest_Ang=NP_Rest_Ang+nr
 
    End Subroutine Get_AFIX_Line
@@ -395,9 +404,9 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       !---- Local variables ----!
       integer, parameter                :: NP=30
-      
+
       integer, dimension(4,NP)          :: p=0
-      integer                           :: i,j,k,iv,nc,npos,iph 
+      integer                           :: i,j,k,iv,nc,npos,iph,nr
       character(len=8), dimension(3,NP) :: symtrans=" "
       character(len=8), dimension(3)    :: symcode=" "
       real(kind=cp)                     :: tor,sig
@@ -410,7 +419,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       !> Words
       call get_words(string,dire,nc)
 
-      !> Angle 
+      !> Angle
       call get_num(dire(1),vet,ivet,iv)
       if (iv /= 1) then
          call set_error(1,"Error in TFIX line: "//trim(string))
@@ -441,7 +450,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
             symcode(1)=dire(i+1)(npos+1:)
             dire(i+1)=dire(i+1)(:npos-1)
          end if
-         
+
          npos=index(dire(i+2),"_")
          if (npos /=0) then
             symcode(2)=dire(i+2)(npos+1:)
@@ -463,13 +472,13 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
                if (trim(u_case(dire(i+3))) == trim(u_case(A(j)%Lab))) ivet(4)=j
                if (all(ivet(1:4) > 0) ) exit
             end do
-         end associate   
+         end associate
          if (any(ivet(1:4) == 0)) then
             call set_error(1,"Some of the atom names in "//trim(string)//" were not found in the asymmetric unit")
             return
          end if
 
-         !> New Relation 
+         !> New Relation
          nr=nr+1
          p(:,nr)=ivet(1:4)
          symtrans(:,nr)=symcode

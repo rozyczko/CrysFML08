@@ -64,7 +64,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
 
       !---- Local variables ----!
       real(kind=cp),     parameter      :: EPSS=0.01_cp
-      
+
       character (len=1), dimension(6)   :: cdd
       integer                           :: i,j,order
       integer,           dimension(48)  :: ss_ptr
@@ -106,7 +106,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
       codd=[Rsym(1,1),Rsym(2,2),Rsym(3,3),Rsym(1,2),Rsym(1,3),Rsym(2,3)]
       cdd=['a','b','c','d','e','f']
       multip=1.0_cp
-      
+
       !> Search systematically all the possible constraints
       if (codd(1) == codd(2) .and. codd(1) == codd(3)) then ! a a a
          if (codd(4) == codd(5) .and. codd(4) == codd(6) ) then ! a a a d d d
@@ -116,7 +116,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(4:6)=0.0_cp
                betas(2:3)=betas(1)
                cod(2:3)=cod(1); cod(4:6)=0.0_cp
-            
+
             else
                cdd=['a','a','a','d','d','d']     ! 5 A A A D   D   D
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
@@ -124,21 +124,21 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(2:3)=betas(1)
                cod(2:3)=cod(1); cod(5:6)=cod(4)
             end if
-         
+
          else if (codd(4) == -codd(5) .and. codd(4) == -codd(6) ) then !a a a d -d -d
             cdd=['a','a','a','d','d','d']       ! 6 A A A D  -D  -D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, -1.0_cp]
             betas(5:6)=-betas(4)
             betas(2:3)=betas(1)
             cod(2:3)=cod(1); cod(5:6)=cod(4)
-        
+
          else if (codd(4) == -codd(5) .and. codd(4) ==  codd(6) ) then !a a a d -d  d
             cdd=['a','a','a','d','d','d']       ! 7 A A A D  -D   D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, 1.0_cp]
             betas(5)=-betas(4); betas(6)=betas(4)
             betas(2:3)=betas(1)
             cod(2:3)=cod(1); cod(5:6)= cod(4)
-        
+
          else if (codd(4) ==  codd(5) .and. codd(4) == -codd(6) ) then !a a a d  d -d
             cdd=['a','a','a','d','d','d']       ! 8 A A A D   D  -D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp]
@@ -154,7 +154,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
             betas(4:6)=0.0
             betas(2)=betas(1)
             cod(2)=cod(1); cod(4:6)= 0.0_cp
-         
+
          else if (codd(5) == codd(6) .and. codd(5) == 0) then ! a a c x 0 0
             if (codd(4) == codd(1)/2) then
                cdd=['a','a','c','a','0','0']     ! 9 A A C A/2 0   0
@@ -162,7 +162,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(5:6)=0.0_cp; betas(4)=betas(1)*0.5_cp
                betas(2)=betas(1)
                cod(2)=cod(1); cod(4)= cod(1); cod(5:6)=0.0_cp
-            
+
             else
                cdd=['a','a','c','d','0','0']     !11 A A C D   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp]
@@ -170,7 +170,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(2)=betas(1)
                cod(2)=cod(1); cod(5:6)=0.0_cp
             end if
-        
+
          else
             if (codd(5) == codd(6)) then  ! a a c d e e
                cdd=['a','a','c','d','e','e']     !20 A A C D   E   E
@@ -178,7 +178,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(6)=betas(5)
                betas(2)=betas(1)
                cod(2)=cod(1); cod(6)=cod(5)
-            
+
             else if (codd(5) == -codd(6)) then  ! a a c d e -e
                cdd=['a','a','c','d','e','e']     !19 A A C D   E  -E
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp]
@@ -197,7 +197,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   betas(4:6)=0.0_cp
                   betas(3)=betas(1)
                   cod(3)=cod(1); cod(4:6)=0.0_cp
-            
+
                else                  ! a b a 0 e 0
                   cdd=['a','b','a','0','e','0']     !12 A B A 0   E   0
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 1.0_cp, 0.0_cp]
@@ -205,7 +205,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   betas(3)=betas(1)
                   cod(3)=cod(1); cod(4)=0.0_cp;  cod(6)=0.0_cp
                end if
-          
+
             else  !! a b a d e d
                cdd=['a','b','a','d','e','d']       !22 A B A D   E   D
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
@@ -231,7 +231,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   betas(4:6)=0.0_cp
                   betas(3)=betas(2)
                   cod(3)=cod(2); cod(4:6)=0.0_cp
-            
+
                else                  ! a b b 0 0 f
                   cdd=['a','b','b','0','0','f']     !13 A B B 0   0   F
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 1.0_cp]
@@ -239,7 +239,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   betas(3)=betas(2)
                   cod(3)=cod(2); cod(4:5)=0.0_cp
                end if
-          
+
             else  !! a b b d d f
                cdd=['a','b','b','d','d','f']       !24 A B B D   D   F
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
@@ -247,7 +247,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                betas(3)=betas(2)
                cod(3)=cod(2); cod(5)=cod(4)
             end if
-        
+
          else if (codd(4) == -codd(5)) then ! a b b d -d e
             cdd=['a','b','b','d','d','f']         !23 A B B D  -D   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, 1.0_cp]
@@ -263,27 +263,27 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
                betas(4:6)=0.0_cp
                cod(4:6)=0.0_cp
-          
+
             else
                cdd=['a','b','c','0','0','f']          !18 A B C 0   0   F
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 1.0_cp]
                betas(4:5)=0.0_cp
                cod(4:5)=0.0_cp
             end  if
-        
+
          else if (codd(5) == codd(6) .and. codd(5) == 0) then  ! a b c x 0 0
             if (codd(4) == codd(1)/2) then ! a b c a/2 0 0
                cdd=['a','b','c','a','0','0']          !15 A B C A/2 0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp; betas(4)=betas(1)*0.5_cp
                cod(4)=cod(1); cod(5:6)=0.0_cp
-          
+
             else if(codd(4) == codd(2)/2) then    !a b c b/2 0 0
                cdd=['a','b','c','b','0','0']          !14 A B C B/2 0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp; betas(4)=betas(2)*0.5_cp
                cod(4)=cod(2); cod(5:6)=0.0_cp
-          
+
             else
                cdd=['a','b','c','d','0','0']          !16 A B C D   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp]
@@ -296,31 +296,31 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 1.0_cp, 0.0_cp]
             betas(4)=0.0_cp; betas(6)=0.0_cp
             cod(4)=0.0_cp; cod(6)=0.0_cp
-        
+
          else if (codd(4) == codd(1)/2 .and. codd(5) == 0) then !a b c a/2 0 f
             cdd=['a','b','c','a','0','f']            !26 A B C A/2 0   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 1.0_cp]
             betas(4)=betas(1)*0.5_cp; betas(5)=0.0_cp
             cod(4)=cod(1); cod(5)=0.0_cp
-        
+
          else if (codd(4) == codd(2)/2 .and. codd(6) == 0) then !a b c b/2 e 0
             cdd=['a','b','c','b','e','0']            !27 A B C B/2 E   0
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 1.0_cp, 0.0_cp]
             betas(4)=betas(2)*0.5_cp; betas(6)=0.0_cp
             cod(4)=cod(2); cod(6)=0.0_cp
-        
+
          else if (codd(4) == codd(2)/2 .and. codd(5) == codd(6)/2) then !a b c b/2 f/2 f
             cdd=(/'a','b','c','b','f','f'/)            !25 A B C B/2 F/2 F
             multip=(/1.0,1.0,1.0,0.5,0.5,1.0/)
             betas(4)=betas(2)*0.5; betas(5)=betas(6)*0.5
             cod(4)=cod(2); cod(5)=cod(6)
-        
+
          else if(codd(4) == codd(1)/2 .and. codd(6) == codd(5)/2) then !a b c a/2 e e/2
             cdd=['a','b','c','a','e','e']            !28 A B C A/2 E   E/2
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 1.0_cp, 0.5_cp]
             betas(4)=betas(1)*0.5_cp; betas(6)=betas(5)*0.5_cp
             cod(4)=cod(1); cod(6)=cod(5)
-        
+
          else
             cdd=['a','b','c','d','e','f']            !29 A B C D   E   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
@@ -330,7 +330,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
       do j=1,6
          if (multip(j) < EPSS .or. cdd(j) == "0" ) then
             icodes(j) = 0
-         
+
          else
             icodes(j) = nint(cod(j))
          end if
@@ -345,7 +345,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
          end do
       end if
    End Subroutine Get_AtomBet_CTR
-   
+
    !!--++
    !!--++  Subroutine Get_Atompos_Ctr
    !!--++
@@ -359,7 +359,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
    !!--++     Updated: April - 2022
    !!
    Module Subroutine Get_AtomPos_CTR(X, Spgr, Codini, ICodes, Multip, Ord, Ss, Att,Ipr)
-      !---- Arguments ----! 
+      !---- Arguments ----!
       real(kind=cp), dimension(3),            intent(in)     :: X
       type(SpG_type),                         intent(in)     :: Spgr
       integer,                                intent(in out) :: Codini
@@ -372,7 +372,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
 
       !---- Local variables ----!
       real(kind=cp),     parameter     :: EPSS=0.001_cp
-      
+
       integer                          :: i,j,k,order,L,L1,L2,ipar,j1
       integer,          dimension(3,3) :: RSym
       integer,          dimension(48)  :: ss_ptr
@@ -382,7 +382,7 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
       character(len=40)                :: symbol,tsymbol,sym_symb
       character(len=10), dimension(3)  :: nsymb
       character(len=3),  dimension(3)  :: ssymb
-      
+
       type(Symm_Oper_Type)             :: Op
 
       if (present(ord) .and. present(ss) .and. present(att)) then
@@ -413,20 +413,21 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
             !Rsym=Spgr%SymOp(ss_ptr(k))%Rot
             !tr=Spgr%SymOp(ss_ptr(k))%tr + atr(:,k)
             Rsym=Spgr%Op(ss_ptr(k))%Mat(1:3,1:3)
-            tr=Spgr%Op(ss_ptr(k))%Mat(1:3,4) + atr(:k)
-            
+            tr=Spgr%Op(ss_ptr(k))%Mat(1:3,4)
+            tr=tr+atr(:,k)
+
             !call Get_SymSymb(Rsym,tr,Sym_Symb)
             !call symmetry_symbol(Sym_Symb,tsymbol)
             Sym_Symb=Get_Symb_from_OP(Rsym,tr)
             tsymbol=symmetry_symbol(Rsym,tr)
-            
+
             i=index(tsymbol,";")
             if (i /= 0) then
                symbol=tsymbol(1:i-1)
                !call Read_Xsym(tsymbol(i+1:),1,Rsym,Tr,.false.)
                Op=Get_Op_from_Symb(tsymbol(i+1:))
                tr=Op%Mat(1:3,4)
-               
+
                if (sum(abs(x-tr)) < EPSS) then
                   ssymb=["  0","  0","  0"]
                   if (present(Ipr)) then
@@ -435,11 +436,11 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   end if
                   cycle
                end if
-            
+
             else
                symbol=tsymbol
             end if
-            
+
             ipar=index(symbol,")")              !Translation element appears before position
             L =index(symbol(ipar+1:)," ")+ipar  !Position of the first blank after translation
             L1=index(symbol(ipar+1:),",")+ipar  !Position of the first comma after translation
@@ -462,13 +463,13 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
                   ssymb(i)="  0"
                   cycle
                end if
-               
+
                !> Now remove 2s on the right of x,y, or z
                j1=index(nsymb(i),"2")
                if ( j1 /= 0) then
                   if (len_trim(nsymb(i)) == j1) nsymb(i)=nsymb(i)(1:j1-1)
                end if
-               
+
                !> Now remove -s on the right of x,y, or z
                j1=index(nsymb(i),"-")
                if ( j1 /= 0) then
@@ -528,34 +529,34 @@ Submodule (CFML_KeyCodes) KeyCod_Constraints
             if (index(ssymb(i),"-a") /= 0) then
                Icodes(i)=Icodes(1)
                multip(i)=-multip(1)
-          
+
             else if (index(ssymb(i),"a") /= 0) then
                Icodes(i)=Icodes(1)
                multip(i)=multip(1)
 
                if (index(ssymb(i),"2") /= 0) then
                   multip(i)=2.0* multip(1)
-            
+
                else if (index(ssymb(1),"2") /= 0) then
                   multip(i)=0.5* multip(1)
                end if
             end if
          end do
-   
+
       else  !the x-coordinate is fixed, analyse y and z
          if (index(ssymb(2),"b") /= 0 .and. index(ssymb(3),"b") /= 0) then
             Icodes(3)=Icodes(2)
             if (ssymb(2) == ssymb(3)) then
                multip(3)= multip(2)
-          
+
             else if (ssymb(3) == " -b" .and. ssymb(2) == "  b") then
                multip(3)= -multip(2)
-          
+
             else if (ssymb(3) == "  b" .and. ssymb(2) == " -b") then
                multip(3)= -multip(2)
             end if
          end if
-      end if 
+      end if
 
       do j=1,3
          if (abs(multip(j)) < EPSS) then

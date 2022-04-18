@@ -5,7 +5,7 @@ Submodule (CFML_KeyCodes) KeyCod_VecRef
    Contains
    !!----
    !!---- SUBROUTINE ALLOCATE_VECREF
-   !!----    
+   !!----
    !!---- Update: April - 2022
    !!
    Module Subroutine Allocate_VecRef(N)
@@ -24,12 +24,12 @@ Submodule (CFML_KeyCodes) KeyCod_VecRef
       if (allocated(Vec_PointPar))  deallocate(Vec_PointPar)
       if (N <= 0) return
 
-      allocate(Vec_RefPar(n), Vec_RefSave(n), Vec_RefParSTD(n),Vec_RefShift(n), Vec_RefPointPar(n), Vec_BCond(n))
+      allocate(Vec_RefPar(n), Vec_RefSave(n), Vec_RefParSTD(n),Vec_RefShift(n), Vec_PointPar(n), Vec_BCond(n))
       Vec_RefPar   =0.0_cp
       Vec_RefSave  =0.0_cp
       Vec_RefParSTD=0.0_cp
       Vec_RefShift =0.0_cp
-      Vec_RefPointPar=0
+      Vec_PointPar=0
 
       allocate(Vec_NamePar(n))
       Vec_NamePar=" "
