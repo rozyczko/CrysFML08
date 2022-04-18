@@ -187,7 +187,7 @@ Program KeyCodes
 
       !> Allocating vector for Refinement parameters
       call Allocate_VecRef(AtList%natoms * 15)
-      print*,'Numero Maximo de Parametros:',NP_Ref_Max
+      print*,'Numero Maximo de Parametros:',NP_Ref_Max,NP_Ref
 
       do i=n_ini,n_end
          line=adjustl(ffile%line(i)%str)
@@ -201,7 +201,7 @@ Program KeyCodes
                call cut_string(line,nlong)
 
                !> general directives
-               call split_genrefcod_atm(line,ndir,Idir,dir_gen)
+               call split_genrefcod_atm(line,ndir,Idir)
 
                !> Locals  directives
                call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
@@ -217,7 +217,7 @@ Program KeyCodes
                      do k=ndir+1,nc
                         na=Index_AtLab_on_AtList(dire(k),At)
                         if (na /= 0) then
-                           call Fill_RefCodes_Atom('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
+                           call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
                         end if
                      end do
                   end do
@@ -227,7 +227,7 @@ Program KeyCodes
                   do j=1,nloc
                      na=Index_AtLab_on_AtList(dir_lab(j),At)
                      if (na /= 0) then
-                        call Fill_RefCodes_Atom('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+                        call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
                      end if
                   end do
                end if
