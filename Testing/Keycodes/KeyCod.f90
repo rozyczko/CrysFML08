@@ -186,24 +186,19 @@ Program KeyCodes
 
       !> Allocating vector for Refinement parameters
       call Allocate_VecRef(AtList%natoms * 15)
-      print*,'Numero Maximo de Parametros:',NP_Ref_Max, NP_Ref
-      pause '.......'
 
       !> Check the Atom type in the list
       select type (A => Atlist%atom)
          type is (Atm_Type)
-            print*, 'We need to change the Atom type to Atm_Ref_Type'
             call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
 
          type is (Atm_Std_Type)
-            print*, 'We need to change the Atom type to Atm_Ref_Type'
             call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
 
          type is (Atm_Ref_Type)
             ! Change no necessary
 
          type is (Matm_Std_Type)
-            print*, 'We need to change the Atom type to MAtm_Ref_Type'
             call Change_AtomList_Type(AtList, 'MAtm_Ref_Type', 0)
 
          type is (Matm_Ref_Type)

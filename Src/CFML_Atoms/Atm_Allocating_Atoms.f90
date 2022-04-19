@@ -210,6 +210,13 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
 
          case("matm_ref_type")
             allocate(A%atom(n),source=MAtm_Ref,stat=ier)
+
+         case default
+            call set_error(1," The argument on Type_Atm is unknown for Allocate_Atom_List procedure")
+            A%natoms=0
+            if (allocated(A%Active)) deallocate(A%Active)
+            if (allocated(A%Atom)) deallocate(A%Atom)
+            return
       end select
 
       allocate (A%active(n),stat=ier)

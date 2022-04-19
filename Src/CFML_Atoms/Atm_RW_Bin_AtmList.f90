@@ -25,7 +25,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       type(atlist_type),  intent(in out) :: A
       character(len=*),   intent(in)     :: Type_Atm
       !integer,            intent(in)     :: d !Number of k-vectors
-      
+
       !---- Local Variables ----!
       integer                            :: i,n,ierr,lun
       type (atm_type)      :: atm
@@ -47,6 +47,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       !> First: read number of atoms
       n=0
       call Allocate_Atom_List(N, A,Type_Atm,3)
+      if (err_CFML%IErr /=0) return
 
       read(unit=lun,iostat=ierr) n
       if (ierr /= 0) then
@@ -59,6 +60,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
 
       !> Allocating
       call Allocate_Atom_List(N, A,Type_Atm,3)
+      if (err_CFML%IErr /=0) return
 
       !> Read active
       read(unit=lun,iostat=ierr)  A%active
