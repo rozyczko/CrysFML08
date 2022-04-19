@@ -72,7 +72,7 @@
 
        all_present=present(delta) .and. present(vol) .and. present(npix) .and. present(emin)
        !---- Preparing the Variables and calculations ----!
-       call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
+       call Allocate_Atom_List(A%natoms,At1,"Atm_Std_Type",0)
        At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                         !coming from A (Atoms_Conf_List_type, set in the main program)
        atm=u_case(atname)
@@ -367,7 +367,7 @@
        if (ndimx <= 0 .or. ndimy <= 0 .or. ndimz <= 0) return
 
        !---- Preparing the Variables and calculations ----!
-       call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
+       call Allocate_Atom_List(A%natoms,At1,"Atm_Std_Type",0)
        At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                         !coming from A (Atoms_Conf_List_type, set in the main program)
        atm=u_case(atname)
@@ -389,8 +389,8 @@
           return
        end if
 
-       call Extend_Atom_List(At1,At2,Spg,"Atm_Std",.true.)
-       call Allocate_atom_list(0,At1,"Atm_Std",0) !Deallocate atom list
+       call Extend_Atom_List(At1,At2,Spg,"Atm_Std_Type",.true.)
+       call Allocate_atom_list(0,At1,"Atm_Std_Type",0) !Deallocate atom list
        !check that all species are well set in the list
        !write(unit=*,fmt="(a)") " => List of atoms for calculating BVS map (Calc_Map_BVS)"
        do n=1,At2%natoms
@@ -586,7 +586,7 @@
 
        !---- End Procedure ----!
        if (allocated(map_bvs)) deallocate(map_bvs)
-       call Allocate_atom_list(0,At2,"Atm",0) !Deallocate atom list
+       call Allocate_atom_list(0,At2,"Atm_type",0) !Deallocate atom list
 
     End Subroutine Calc_Map_BVS
 

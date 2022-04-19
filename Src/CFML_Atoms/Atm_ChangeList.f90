@@ -31,7 +31,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
 
       select case (trim(u_case(TypeAtm)))
          case ('ATM_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'Atm', 0)
+            call Allocate_Atom_List(AtList%Natoms, At,'Atm_Type', 0)
             select type (A => AtList%Atom)
                type is (Atm_Type)
                   !> Atm_Type -> Atm_Type
@@ -82,7 +82,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
             end select
 
          case ('ATM_STD_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'Atm_Std', 0)
+            call Allocate_Atom_List(AtList%Natoms, At,'Atm_Std_Type', 0)
             select type (A => AtList%Atom)
                type is (Atm_Type)
                   !> Atm_type -> Atm_Std_type
@@ -145,7 +145,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
             end select
 
          case ('MATM_STD_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Std', Iv)
+            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Std_Type', Iv)
             select type (A => AtList%Atom)
                type is (Atm_Type)
                   !> Atm_Type -> MAtm_Std_Type
@@ -209,7 +209,12 @@ SubModule (CFML_Atoms) Atm_ChangeList
             end select
 
          case ('ATM_REF_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'Atm_Ref', 0)
+            print*,'Allocating New atomList'
+            call Allocate_Atom_List(AtList%Natoms, At,'Atm_Ref_Type', 0)
+            if (err_CFML%IErr /=0) then
+               print*, trim(err_CFML%Msg)
+               return
+            end if
             select type (A => AtList%Atom)
                type is (Atm_Type)
                   !> Atm_type -> Atm_Ref_Type
@@ -220,6 +225,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
                   end do
+
+                  print*, 'Passed the informartion to the new variable'
 
                type is (Atm_std_Type)
                   !> Atm_Std_Type -> Atm_Ref_Type
@@ -272,7 +279,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
             end select
 
          case ('MATM_REF_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Ref', Iv)
+            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Ref_Type', Iv)
             select type (A => AtList%Atom)
                type is (Atm_Type)
                   !> Atm_Type -> Matm_Ref_Type
@@ -360,7 +367,11 @@ SubModule (CFML_Atoms) Atm_ChangeList
             call Allocate_Atom_List(At%Natoms, AtList,'MAtm_Ref_Type', Iv)
 
       end select
+      print*,' Allocated the AtList type before to copy'
+
       AtList = At
+
+      print*,' Copied de values!!!'
 
       !> Deallocating At
       call Allocate_Atom_List(0, At,' ', 0)
