@@ -201,9 +201,11 @@ Module CFML_KeyCodes
 
    !---- Interface Zone ----!
    Interface
-      Module Subroutine Allocate_Restraints_Vec(Ffile, NDfix, NAfix, NTFix)
+      Module Subroutine Allocate_Restraints_Vec(Ffile, N_ini, N_end, NDfix, NAfix, NTFix)
          !---- Arguments ----!
          Type(file_type),  intent( in) :: Ffile
+         integer, optional,intent( in) :: N_Ini
+         integer, optional,intent( in) :: N_End
          integer, optional,intent(out) :: NDfix
          integer, optional,intent(out) :: NAfix
          integer, optional,intent(out) :: NTfix

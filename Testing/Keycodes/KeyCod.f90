@@ -16,7 +16,9 @@ Program KeyCodes
 
    use CFML_KeyCodes,     only: KEY_ATM, split_genrefcod_atm, Split_LocRefCod_ATM, &
                                 Fill_RefCodes_Atm, WriteInfo_RefParams, Allocate_VecRef,&
-                                NP_Ref, NP_Ref_Max
+                                NP_Ref, NP_Ref_Max, Allocate_Restraints_Vec, Get_Afix_Line, &
+                                Get_DFix_Line, Get_TFix_Line, NP_Rest_Ang, NP_Rest_Dis, NP_Rest_Tor, &
+                                Ang_Rest, Dis_Rest, Tor_Rest, WriteInfo_Restraints
 
    !---- Variables ----!
    Implicit None
@@ -133,6 +135,13 @@ Program KeyCodes
 
       call Read_RefCodes_ATM(ffile, nc_i, nc_f, Spgr, At)
 
+      !> Print info
+      call WriteInfo_RefParams()
+      call WriteInfo_RefParams(lun)
+
+      call WriteInfo_Restraints(At)
+      call WriteInfo_Restraints(At, lun)
+
       !> ----------------
       !> End Testing Zone
       !> ----------------
@@ -174,9 +183,12 @@ Program KeyCodes
 
       character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
       integer                               :: ndir, nloc, nc,nt
-      integer                               :: i,j,k,nlong, na
+      integer                               :: i,j,k,nlong, na, ii
+      integer                               :: n_dfix,n_afix,n_tfix
+
       integer, dimension(NMAX_GEN)          :: Idir, Idir2,Iph
       real, dimension(3)                    :: Bounds
+      logical                               :: done
 
       !> Init
       call clear_error()
@@ -209,7 +221,8 @@ Program KeyCodes
          return
       end if
 
-
+      !> Restrains Information?
+      call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dFIX, n_afix, n_tfix)
 
       do i=n_ini,n_end
          line=adjustl(ffile%line(i)%str)
@@ -238,19 +251,29 @@ Program KeyCodes
                   do j=1,ndir
                      do k=ndir+1,nc
                         na=Index_AtLab_on_AtList(dire(k),Atlist)
-                        if (na ==0) then
-                           print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
-                           return
+                        if (na > 0) then
+                           call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
+                        else
+                           !> Species
+                           done=.false.
+                           do ii=1,AtList%Natoms
+                              if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                              call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, ii, Spg, Atlist)
+                              done=.true.
+                           end do
+                           if (.not. done) then
+                              print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
+                              return
+                           end if
                         end if
-                        call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
-                     end do
-                  end do
+                     end do ! Objects
+                  end do ! ndir
                end if
 
                if (nloc > 0) then
                   do j=1,nloc
                      na=Index_AtLab_on_AtList(dir_lab(j),AtList)
-                     if (na ==0) then
+                     if (na==0) then
                         print*, 'Not found the Atom given in the list! -> '//trim(dir_lab(j))
                         return
                      end if
@@ -277,13 +300,23 @@ Program KeyCodes
                   do j=1,ndir
                      do k=ndir+1,nc
                         na=Index_AtLab_on_AtList(dire(k),Atlist)
-                        if (na ==0) then
-                           print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
-                           return
+                        if (na > 0) then
+                           call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
+                        else
+                           !> Species
+                           done=.false.
+                           do ii=1,AtList%Natoms
+                              if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                              call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, ii, Spg, Atlist)
+                              done=.true.
+                           end do
+                           if (.not. done) then
+                              print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
+                              return
+                           end if
                         end if
-                        call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
-                     end do
-                  end do
+                     end do !k
+                  end do ! ndir
                end if
 
                if (nloc > 0) then
@@ -297,22 +330,23 @@ Program KeyCodes
                   end do
                end if
 
+            case ("EQUA") ! Equal (Constraints)
+               call cut_string(line,nlong)
 
             case ("AFIX") ! AFIX ang sigma    (Angles restraints)
                call cut_string(line,nlong)
+               call Get_AFIX_Line(line, AtList)
 
             case ("DFIX") ! DFIX d sigma      (Distance restraints)
                call cut_string(line,nlong)
+               call Get_DFIX_Line(line, AtList)
 
             case ("TFIX") ! TFIX ang sigma    (Torsion angle restraints)
                call cut_string(line,nlong)
+               call Get_TFIX_Line(line, AtList)
 
          end select
       end do
-
-      !> Print info
-      call WriteInfo_RefParams()
-      call WriteInfo_RefParams(lun)
 
    End Subroutine Read_RefCodes_ATM
 
