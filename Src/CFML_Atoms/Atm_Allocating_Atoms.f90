@@ -196,19 +196,19 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
 
       !> Allocating variables
       Select Case(trim(l_case(Type_Atm)))
-         case("atm")
+         case("atm_type")
             allocate(A%atom(n),source=Atm,stat=ier)
 
-         case("atm_std")
+         case("atm_std_type")
             allocate(A%atom(n),source=Atm_Std,stat=ier)
 
-         case("matm_std")
+         case("matm_std_type")
             allocate(A%atom(n),source=MAtm_Std,stat=ier)
 
-         case("atm_ref")
+         case("atm_ref_type")
             allocate(A%atom(n),source=Atm_Ref,stat=ier)
 
-         case("matm_ref")
+         case("matm_ref_type")
             allocate(A%atom(n),source=MAtm_Ref,stat=ier)
       end select
 

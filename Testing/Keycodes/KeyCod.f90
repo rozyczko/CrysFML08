@@ -10,8 +10,9 @@ Program KeyCodes
    use CFML_gSpaceGroups, only: SpG_Type, Write_SpaceGroup_Info
    use CFML_IOForm,       only: Read_Xtal_Structure
    use CFML_Metrics,      only: Cell_G_Type, Write_Crystal_Cell
-   use CFML_Atoms,        only: AtList_Type, Atm_Ref_Type, Write_Atom_List, &
-                                Index_AtLab_on_AtList
+   use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
+                                Matm_Std_Type, Matm_Ref_type, Write_Atom_List, &
+                                Index_AtLab_on_AtList, Change_AtomList_Type
 
    use CFML_KeyCodes,     only: KEY_ATM, split_genrefcod_atm, Split_LocRefCod_ATM, &
                                 Fill_RefCodes_Atm, WriteInfo_RefParams, Allocate_VecRef,&
@@ -35,8 +36,6 @@ Program KeyCodes
    logical                         :: esta, arg_given=.false.
    real(kind=cp)                   :: tini,tfin, total_time
    real(kind=cp), dimension(10)    :: vet
-
-   integer, parameter              ::NKEY_ATM=14
 
 
    !> Arguments on the command line
@@ -187,7 +186,35 @@ Program KeyCodes
 
       !> Allocating vector for Refinement parameters
       call Allocate_VecRef(AtList%natoms * 15)
-      print*,'Numero Maximo de Parametros:',NP_Ref_Max,NP_Ref
+      print*,'Numero Maximo de Parametros:',NP_Ref_Max, NP_Ref
+      pause '.......'
+
+      !> Check the Atom type in the list
+      select type (A => Atlist%atom)
+         type is (Atm_Type)
+            print*, 'We need to change the Atom type to Atm_Ref_Type'
+            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
+
+         type is (Atm_Std_Type)
+            print*, 'We need to change the Atom type to Atm_Ref_Type'
+            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
+
+         type is (Atm_Ref_Type)
+            ! Change no necessary
+
+         type is (Matm_Std_Type)
+            print*, 'We need to change the Atom type to MAtm_Ref_Type'
+            call Change_AtomList_Type(AtList, 'MAtm_Ref_Type', 0)
+
+         type is (Matm_Ref_Type)
+            ! Change no necessary
+      end select
+      if (err_CFML%Ierr /= 0) then
+         print*, trim(err_CFML%Msg)
+         return
+      end if
+
+
 
       do i=n_ini,n_end
          line=adjustl(ffile%line(i)%str)
@@ -207,7 +234,7 @@ Program KeyCodes
                call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
 
                if (ndir > 0 .and. nloc > 0) then
-                  call set_error(1, "Bad format for FIX directive!")
+                  print*, "Bad format for FIX directive!"
                   return
                end if
 
@@ -215,20 +242,24 @@ Program KeyCodes
                   call get_words(line,dire,nc)
                   do j=1,ndir
                      do k=ndir+1,nc
-                        na=Index_AtLab_on_AtList(dire(k),At)
-                        if (na /= 0) then
-                           call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
+                        na=Index_AtLab_on_AtList(dire(k),Atlist)
+                        if (na ==0) then
+                           print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
+                           return
                         end if
+                        call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
                      end do
                   end do
                end if
 
                if (nloc > 0) then
                   do j=1,nloc
-                     na=Index_AtLab_on_AtList(dir_lab(j),At)
-                     if (na /= 0) then
-                        call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+                     na=Index_AtLab_on_AtList(dir_lab(j),AtList)
+                     if (na ==0) then
+                        print*, 'Not found the Atom given in the list! -> '//trim(dir_lab(j))
+                        return
                      end if
+                     call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
                   end do
                end if
 
@@ -242,12 +273,35 @@ Program KeyCodes
                call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
 
                if (ndir > 0 .and. nloc > 0) then
-                  call set_error(1, "Bad format for VARY directive!")
+                  print*, "Bad format for VARY directive!"
                   return
                end if
 
-               !> Testing
-               !>--------
+               if (ndir > 0) then
+                  call get_words(line,dire,nc)
+                  do j=1,ndir
+                     do k=ndir+1,nc
+                        na=Index_AtLab_on_AtList(dire(k),Atlist)
+                        if (na ==0) then
+                           print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
+                           return
+                        end if
+                        call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
+                     end do
+                  end do
+               end if
+
+               if (nloc > 0) then
+                  do j=1,nloc
+                     na=Index_AtLab_on_AtList(dir_lab(j),AtList)
+                     if (na ==0) then
+                        print*, 'Not found the Atom given in the list! -> '//trim(dir_lab(j))
+                        return
+                     end if
+                     call Fill_RefCodes_Atm('VARY', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+                  end do
+               end if
+
 
             case ("AFIX") ! AFIX ang sigma    (Angles restraints)
                call cut_string(line,nlong)
@@ -260,6 +314,10 @@ Program KeyCodes
 
          end select
       end do
+
+      !> Print info
+      call WriteInfo_RefParams()
+      call WriteInfo_RefParams(lun)
 
    End Subroutine Read_RefCodes_ATM
 

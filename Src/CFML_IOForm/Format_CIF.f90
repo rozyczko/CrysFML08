@@ -487,9 +487,9 @@ SubModule (CFML_IOForm) Format_CIF
       ssg=is_ssg_struct(cif,j_ini,j_end)
 
       if (.not. ssg) then
-         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'Atm_std',0)
+         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'Atm_std_type',0)
       else
-         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'MAtm_Std',0)
+         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'MAtm_Std_type',0)
       end if
 
       !> Search loop for atoms
@@ -587,9 +587,9 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       if (ssg) then
-         call allocate_atom_list(n,Atm,'MAtm_std',0)
+         call allocate_atom_list(n,Atm,'MAtm_std_type',0)
       else
-         call allocate_atom_list(n,Atm,'Atm_std',0)
+         call allocate_atom_list(n,Atm,'Atm_std_type',0)
       end if
 
       !> reading atoms
@@ -916,9 +916,9 @@ SubModule (CFML_IOForm) Format_CIF
       !> Put the first atom the first having a full occupation factor 1.0
       if (n <=0) return
 
-      call allocate_atom_list(n, AtmList,'atm_std',0)
+      call allocate_atom_list(n, AtmList,'atm_std_type',0)
       AtmList%atom=atm%atom(1:n)
-      call allocate_atom_list(0,Atm,'atm_std',0)
+      call allocate_atom_list(0,Atm,'atm_std_type',0)
 
    End Subroutine Read_CIF_Atoms
 

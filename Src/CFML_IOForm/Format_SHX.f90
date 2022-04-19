@@ -41,9 +41,9 @@ SubModule (CFML_IOForm) Format_SHX
          return
       end if
 
-      call Allocate_Atom_List(0, Atmlist,'Atm_std',0)
+      call Allocate_Atom_List(0, Atmlist,'Atm_std_type',0)
 
-      call allocate_atom_list(shx%nlines,At,'Atm_std',0)
+      call allocate_atom_list(shx%nlines,At,'Atm_std_type',0)
       n=0
       flag_atm=.false.
       do i=1, shx%nlines
@@ -253,9 +253,9 @@ SubModule (CFML_IOForm) Format_SHX
       if (n <= 0) return
 
       !> Adjusting ...
-      call Allocate_Atom_List(n, Atmlist, 'Atm_std',0)
+      call Allocate_Atom_List(n, Atmlist, 'Atm_std_type',0)
       AtmList%atom=At%atom(1:n)
-      call Allocate_Atom_List(0, At,'Atm_std',0)
+      call Allocate_Atom_List(0, At,'Atm_std_type',0)
 
       !> Post calculations
       do i=1,n

@@ -986,7 +986,7 @@
       call clear_error()
 
       !---- Preparing the Variables and calculations ----!
-      call Allocate_Atom_List(A%natoms,At1,"Atm_Std",0)
+      call Allocate_Atom_List(A%natoms,At1,"Atm_Std_type",0)
       At1%atom=A%atom  !Atom list A%Atom(:)%ind_ff(1) contains the pointer to the species
                        !coming from A (Atoms_Conf_List_type, set in the main program)
       atm=u_case(atname)
