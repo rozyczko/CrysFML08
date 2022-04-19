@@ -15,6 +15,6 @@ Atom O4  O-2   0.3678(2)    0.0566(1)  0.2633(2)    0.77     1.0
 COMMANDS
   vary xyz occ Ni Fe
   vary uiso_O1 x_O2 y_O3
-  fix occ_O4
+  fix occ_Ni
 END COMMANDS
 

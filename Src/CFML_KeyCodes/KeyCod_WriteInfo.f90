@@ -30,7 +30,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
       write(unit=lun, fmt="(a,a)")" N.Par             Name             Value         Sigma     ",&
                                   "   L.Bound       U.Bound       Step       BCon  Par "
       do i=1,NP_Ref
-         write(unit=lun,fmt="(i6,tr5,a20,5f14.5, i4, i6)") i, Vec_NamePar(i), Vec_RefPar(i), Vec_RefParSTD, &
+         write(unit=lun,fmt="(i6,tr5,a20,5f14.5, i4, i6)") i, Vec_NamePar(i), Vec_RefPar(i), Vec_RefParSTD(i), &
                                                               Vec_LimPar(:,i), Vec_BCond(i), Vec_PointPar(i)
       end do
 
