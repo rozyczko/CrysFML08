@@ -4,7 +4,7 @@ Submodule (CFML_KeyCodes) KeyCod_Delete
 
    Contains
    !!--++
-   !!--++ Subroutine Del_RefCode_Atom
+   !!--++ Subroutine Del_RefCode_Atm
    !!--++
    !!--++    Delete the number of Refinable Parameter (NPar) on the Atom list
    !!--++

@@ -10,15 +10,18 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
    !!----
    !!---- Update: April - 2022
    !!
-   Module Subroutine Allocate_Restraints_Vec(Ffile, NDfix, NAfix, NTFix)
+   Module Subroutine Allocate_Restraints_Vec(Ffile, N_ini, N_end, NDfix, NAfix, NTFix)
       !---- Arguments ----!
-      Type(file_type),  intent( in) :: Ffile
-      integer, optional,intent(out) :: NDfix
-      integer, optional,intent(out) :: NAfix
-      integer, optional,intent(out) :: NTfix
+      Type(file_type),   intent( in) :: Ffile
+      integer, optional, intent( in) :: N_ini
+      integer, optional, intent( in) :: N_end
+      integer, optional, intent(out) :: NDfix
+      integer, optional, intent(out) :: NAfix
+      integer, optional, intent(out) :: NTfix
 
       !---- Local variables ----!
       integer :: i,j,nc,nr,iv1,iv2,npos
+      integer :: l_ini, l_end
 
       if (allocated(Ang_Rest)) deallocate(Ang_Rest)
       if (allocated(Dis_Rest)) deallocate(Dis_Rest)
@@ -34,9 +37,14 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       call clear_error()
 
+      l_ini=1
+      l_end=ffile%nlines
+      if (present(n_ini)) l_ini=n_ini
+      if (present(n_end)) l_end=n_end
+
       !> Dimension for DFIX
       nr=0
-      do i=1,ffile%nlines
+      do i=l_ini,l_end
          line=adjustl(ffile%line(i)%str)
          if (u_case(line(1:4)) /= "DFIX") cycle
          npos=index(line,'!')
@@ -80,7 +88,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       !> Dimension for AFIX
       nr=0
-      do i=1,ffile%nlines
+      do i=l_ini,l_end
          line=adjustl(ffile%line(i)%str)
          if (u_case(line(1:4)) /= "AFIX") cycle
          npos=index(line,'!')
@@ -126,7 +134,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
 
       !> Dimension for TFIX
       nr=0
-      do i=1,ffile%nlines
+      do i=l_ini,l_end
          line=adjustl(ffile%line(i)%str)
          if (u_case(line(1:4)) /= "TFIX") cycle
          npos=index(line,'!')
