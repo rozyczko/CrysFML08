@@ -44,7 +44,7 @@
 Module CFML_KeyCodes
    !---- Use Modules ----!
    Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error
-   Use CFML_Atoms,        only: AtList_Type, Atm_Ref_Type, MAtm_Ref_Type
+   Use CFML_Atoms,        only: MAX_MOD,AtList_Type, Atm_Ref_Type, MAtm_Ref_Type
    Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
                                 Get_OP_from_Symb, Symmetry_symbol
@@ -61,7 +61,7 @@ Module CFML_KeyCodes
              Fill_RefCodes_Atm, &
              Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
-             WriteInfo_RefParams, WriteInfo_Restraints
+             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
 
    !---- Definitions ----!
 
@@ -176,6 +176,8 @@ Module CFML_KeyCodes
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
 
    !---- Public ----!
+   integer, public :: NP_Constr  =0  ! Number of Constraints relations
+
    integer, public :: NP_Ref_Max =0  ! Number of Maximum refinable Parameters
    integer, public :: NP_Ref     =0  ! Number of Refinable parameters
 
@@ -365,11 +367,18 @@ Module CFML_KeyCodes
          integer, optional,   intent(in) :: Iunit
       End Subroutine WriteInfo_RefParams
 
-      Module Subroutine WriteInfo_Restraints(AtList, Iunit)
+      Module Subroutine WriteInfo_Restraints(AtList, Calc, Iunit)
          !---- Arguments ----!
          type(AtList_Type), intent(in) :: AtList
+         logical, optional, intent(in) :: Calc
          integer, optional, intent(in) :: iunit
       End Subroutine WriteInfo_Restraints
+
+      Module Subroutine WriteInfo_Constraints(AtList, Iunit)
+         !---- Arguments ----!
+         type(AtList_Type), intent(in) :: AtList
+         integer, optional, intent(in) :: Iunit
+      End Subroutine WriteInfo_Constraints
 
    End Interface
 
