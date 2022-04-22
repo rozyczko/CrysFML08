@@ -246,9 +246,9 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
             dire(i+1)=dire(i+1)(:npos-1)
          end if
 
+         ivet=0
          associate(A => AtList%Atom)
             do j=1,AtList%natoms
-               ivet=0
                if (trim(u_case(dire(i))) == trim(u_case(A(j)%Lab))) ivet(1)=j
                if (trim(u_case(dire(i+1))) == trim(u_case(A(j)%Lab))) ivet(2)=j
                if (all(ivet(1:2) > 0) ) exit
@@ -272,6 +272,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       !> Adding relations
       iph=1
       if (present(IPhase)) iph=IPhase
+
       k=NP_Rest_Dis
       do i=1,nr
          k=k+1
@@ -355,9 +356,9 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
             dire(i+2)=dire(i+2)(:npos-1)
          end if
 
+         ivet=0
          associate(A => AtList%Atom)
             do j=1,AtList%natoms
-               ivet=0
                if (trim(u_case(dire(i)))   == trim(u_case(A(j)%Lab))) ivet(1)=j
                if (trim(u_case(dire(i+1))) == trim(u_case(A(j)%Lab))) ivet(2)=j
                if (trim(u_case(dire(i+2))) == trim(u_case(A(j)%Lab))) ivet(3)=j
@@ -471,9 +472,9 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
             dire(i+3)=dire(i+3)(:npos-1)
          end if
 
+         ivet=0
          associate (A => AtList%Atom)
             do j=1,AtList%natoms
-               ivet=0
                if (trim(u_case(dire(i)))   == trim(u_case(A(j)%Lab))) ivet(1)=j
                if (trim(u_case(dire(i+1))) == trim(u_case(A(j)%Lab))) ivet(2)=j
                if (trim(u_case(dire(i+2))) == trim(u_case(A(j)%Lab))) ivet(3)=j

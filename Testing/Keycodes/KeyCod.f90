@@ -140,7 +140,7 @@ Program KeyCodes
       call WriteInfo_RefParams(lun)
 
       call WriteInfo_Restraints(At)
-      call WriteInfo_Restraints(At, lun)
+      call WriteInfo_Restraints(At, Iunit=lun)
 
       !> ----------------
       !> End Testing Zone
@@ -179,20 +179,13 @@ Program KeyCodes
       type(AtList_Type),  intent(in out) :: AtList
 
       !---- Local variables ----!
-      integer, parameter :: NMAX_GEN = 20
+      integer :: i, k, nt, nlong
+      integer :: n_dfix,n_afix,n_tfix
 
-      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
-      integer                               :: ndir, nloc, nc,nt
-      integer                               :: i,j,k,nlong, na, ii
-      integer                               :: n_dfix,n_afix,n_tfix
-
-      integer, dimension(NMAX_GEN)          :: Idir, Idir2,Iph
-      real, dimension(3)                    :: Bounds
-      logical                               :: done
 
       !> Init
       call clear_error()
-      bounds = [0.0, 1.0, 0.1]
+
       nt=n_end-n_ini +1
       if (nt <=0) return
 
@@ -222,7 +215,7 @@ Program KeyCodes
       end if
 
       !> Restrains Information?
-      call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dFIX, n_afix, n_tfix)
+      call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dfix, n_afix, n_tfix)
 
       do i=n_ini,n_end
          line=adjustl(ffile%line(i)%str)
@@ -232,102 +225,16 @@ Program KeyCodes
          if( k /= 0) line=line(:k-1)
 
          select case (u_case(line(1:4)))
-            case ("FIX ", "FIXE")   ! FIX .....
-               call cut_string(line,nlong)
-
-               !> general directives
-               call split_genrefcod_atm(line,ndir,Idir)
-
-               !> Locals  directives
-               call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
-
-               if (ndir > 0 .and. nloc > 0) then
-                  print*, "Bad format for FIX directive!"
-                  return
+            case ("FIX ", "FIXE")   ! FIX
+               call ReadCode_FIX_ATM(line, AtList, Spg)
+               if (err_CFML%IErr /=0) then
+                  print*,err_CFML%Msg
                end if
 
-               if (ndir > 0) then
-                  call get_words(line,dire,nc)
-                  do j=1,ndir
-                     do k=ndir+1,nc
-                        na=Index_AtLab_on_AtList(dire(k),Atlist)
-                        if (na > 0) then
-                           call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
-                        else
-                           !> Species
-                           done=.false.
-                           do ii=1,AtList%Natoms
-                              if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
-                              call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, ii, Spg, Atlist)
-                              done=.true.
-                           end do
-                           if (.not. done) then
-                              print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
-                              return
-                           end if
-                        end if
-                     end do ! Objects
-                  end do ! ndir
-               end if
-
-               if (nloc > 0) then
-                  do j=1,nloc
-                     na=Index_AtLab_on_AtList(dir_lab(j),AtList)
-                     if (na==0) then
-                        print*, 'Not found the Atom given in the list! -> '//trim(dir_lab(j))
-                        return
-                     end if
-                     call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
-                  end do
-               end if
-
-            case ("VARY")    ! VARY .....
-               call cut_string(line,nlong)
-
-               !> general directives
-               call split_genrefcod_atm(line,ndir,Idir,dir_gen)
-
-               !> Locals  directives
-               call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
-
-               if (ndir > 0 .and. nloc > 0) then
-                  print*, "Bad format for VARY directive!"
-                  return
-               end if
-
-               if (ndir > 0) then
-                  call get_words(line,dire,nc)
-                  do j=1,ndir
-                     do k=ndir+1,nc
-                        na=Index_AtLab_on_AtList(dire(k),Atlist)
-                        if (na > 0) then
-                           call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
-                        else
-                           !> Species
-                           done=.false.
-                           do ii=1,AtList%Natoms
-                              if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
-                              call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, ii, Spg, Atlist)
-                              done=.true.
-                           end do
-                           if (.not. done) then
-                              print*, 'Not found the Atom given in the list! -> '//trim(dire(k))
-                              return
-                           end if
-                        end if
-                     end do !k
-                  end do ! ndir
-               end if
-
-               if (nloc > 0) then
-                  do j=1,nloc
-                     na=Index_AtLab_on_AtList(dir_lab(j),AtList)
-                     if (na ==0) then
-                        print*, 'Not found the Atom given in the list! -> '//trim(dir_lab(j))
-                        return
-                     end if
-                     call Fill_RefCodes_Atm('VARY', Idir2(j), Bounds, 1, Na, Spg, Atlist)
-                  end do
+            case ("VARY")    ! VARY
+               call ReadCode_VARY_ATM(line, AtList, Spg)
+               if (err_CFML%IErr /=0) then
+                  print*,err_CFML%Msg
                end if
 
             case ("EQUA") ! Equal (Constraints)
@@ -349,6 +256,180 @@ Program KeyCodes
       end do
 
    End Subroutine Read_RefCodes_ATM
+
+   !!----
+   !!---- ReadCode_FIX_ATM
+   !!----
+   !!---- Update: April - 2022
+   !!
+   Subroutine ReadCode_FIX_ATM(String, AtList, Spg)
+      !---- Arguments ----!
+      character(len=*),   intent(in)     :: String
+      type(AtList_Type),  intent(in out) :: AtList
+      class (SpG_type),   intent(in)     :: Spg
+
+      !---- Local Variables ----!
+      integer, parameter :: NMAX_GEN = 20
+
+      character(len=3)                      :: car
+      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
+      integer                               :: npos, nlong, ndir, nloc, nc
+      integer                               :: ii,j,k,na
+      integer, dimension(NMAX_GEN)          :: Idir, Idir2, IPh
+      real, dimension(3)                    :: Bounds
+      logical                               :: done
+
+      !> Init
+      call clear_error()
+
+      !> copy
+      line=trim(adjustl(string))
+
+      car=u_case(line(1:3))
+      if (car /= 'FIX') then
+         call set_error(1,'Wrong Directive for FIX instruction: '//trim(line))
+         return
+      end if
+
+      !> Cut FIX word
+      call cut_string(line,nlong)
+
+      !> general directives
+      call split_genrefcod_atm(line,ndir,Idir)
+
+      !> Locals  directives
+      call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
+
+      if (ndir > 0 .and. nloc > 0) then
+         call set_error(1,'Wrong form for FIX: '//trim(line))
+         return
+      end if
+
+      bounds = [0.0, 1.0, 0.1]
+
+      if (ndir > 0) then
+         call get_words(line,dire,nc)
+         do j=1,ndir
+            do k=ndir+1,nc
+               na=Index_AtLab_on_AtList(dire(k),Atlist)
+               if (na > 0) then
+                  call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
+               else
+                  !> Species
+                  done=.false.
+                  do ii=1,AtList%Natoms
+                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                     call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, ii, Spg, Atlist)
+                     done=.true.
+                  end do
+
+                  if (.not. done) then
+                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
+                     return
+                  end if
+               end if
+            end do ! Objects
+         end do ! ndir
+      end if
+
+      if (nloc > 0) then
+         do j=1,nloc
+            na=Index_AtLab_on_AtList(dir_lab(j),AtList)
+            if (na==0) then
+               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
+               return
+            end if
+            call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+         end do
+      end if
+
+   End Subroutine ReadCode_FIX_ATM
+
+   !!----
+   !!---- ReadCode_VARY_ATM
+   !!----
+   !!---- Update: April - 2022
+   !!
+   Subroutine ReadCode_VARY_ATM(String, AtList, Spg)
+      !---- Arguments ----!
+      character(len=*),   intent(in)     :: String
+      type(AtList_Type),  intent(in out) :: AtList
+      class (SpG_type),   intent(in)     :: Spg
+
+      !---- Local Variables ----!
+      integer, parameter :: NMAX_GEN = 20
+
+      character(len=3)                      :: car
+      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
+      integer                               :: npos, nlong, ndir, nloc, nc
+      integer                               :: ii,j,k,na
+      integer, dimension(NMAX_GEN)          :: Idir, Idir2, IPh
+      real, dimension(3)                    :: Bounds
+      logical                               :: done
+
+      !> Init
+      call clear_error()
+
+      !> copy
+      line=trim(adjustl(string))
+
+      car=u_case(line(1:3))
+      if (car /= 'VAR') then
+         call set_error(1,'Wrong Directive for VARY instruction: '//trim(line))
+         return
+      end if
+
+      !> Cut FIX word
+      call cut_string(line,nlong)
+
+      !> general directives
+      call split_genrefcod_atm(line,ndir,Idir,dir_gen)
+
+      !> Locals  directives
+      call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
+
+      if (ndir > 0 .and. nloc > 0) then
+         call set_error(1,'Wrong form for VARY: '//trim(line))
+         return
+      end if
+
+      bounds = [0.0, 1.0, 0.1]
+      if (ndir > 0) then
+         call get_words(line,dire,nc)
+         do j=1,ndir
+            do k=ndir+1,nc
+               na=Index_AtLab_on_AtList(dire(k),Atlist)
+               if (na > 0) then
+                  call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
+               else
+                  !> Species
+                  done=.false.
+                  do ii=1,AtList%Natoms
+                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                     call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, ii, Spg, Atlist)
+                     done=.true.
+                  end do
+                  if (.not. done) then
+                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
+                     return
+                  end if
+               end if
+            end do !k
+         end do ! ndir
+      end if
+
+      if (nloc > 0) then
+         do j=1,nloc
+            na=Index_AtLab_on_AtList(dir_lab(j),AtList)
+            if (na==0) then
+               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
+               return
+            end if
+            call Fill_RefCodes_Atm('VARY', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+         end do
+      end if
+
+   End Subroutine ReadCode_VARY_ATM
 
 
 
