@@ -190,6 +190,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
 
          !> Deallocating atom list
          if (allocated(A%Active)) deallocate(A%Active)
+         if (allocated(A%IPh))    deallocate(A%IPh)
          if (allocated(A%Atom)) deallocate(A%Atom)
          return
       end if
@@ -215,12 +216,12 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
             call set_error(1," The argument on Type_Atm is unknown for Allocate_Atom_List procedure")
             A%natoms=0
             if (allocated(A%Active)) deallocate(A%Active)
+            if (allocated(A%IPh)) deallocate(A%IPh)
             if (allocated(A%Atom)) deallocate(A%Atom)
             return
       end select
 
-      allocate (A%active(n),stat=ier)
-
+      allocate (A%active(n), A%IPh(n), stat=ier)
       if (ier /= 0) then
          Err_CFML%Ierr=1
          write(unit=Err_CFML%Msg,fmt="(a,i6,a)") "Error allocating atom List for N =",N," atoms"
@@ -228,6 +229,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       end if
 
       A%active=.true.
+      A%IPh=1
       A%mcomp="crystal"
 
       do i=1,n

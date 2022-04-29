@@ -46,6 +46,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -56,6 +57,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -66,6 +68,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -76,6 +79,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -92,6 +96,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -108,6 +113,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -122,6 +128,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -136,6 +143,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -157,6 +165,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -167,6 +176,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -181,6 +191,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -201,6 +212,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (MAtm_Std_Type)
@@ -223,6 +235,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -233,6 +246,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -253,6 +267,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -267,6 +282,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -288,6 +304,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   do i=1,AtList%Natoms
                      call copyinfo_atm_type(at%atom(i),A(i))
@@ -298,6 +315,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -312,6 +330,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (atm_std_type)
@@ -326,6 +345,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
+                  At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
                      class is (MAtm_Std_Type)

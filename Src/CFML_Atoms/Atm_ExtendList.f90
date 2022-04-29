@@ -61,6 +61,9 @@ SubModule (CFML_Atoms) Atm_ExtendList
          l=1       ! Number of representant atom i asymmetric unit
          n=n+1     ! Number of atom in the list
 
+         c_atm%Active(n) =A%Active(k)
+         c_atm%Iph(n)    =A%Iph(k)
+
          xo= modulo_lat(A%atom(k)%x)
          u(:,l)= xo
          !c_atm%Atom(n)=A%atom(k)        !First atom of the orbit (unsupported by gfortran!!!!)
@@ -100,6 +103,10 @@ SubModule (CFML_Atoms) Atm_ExtendList
             l=l+1
             u(:,l)=xx(:)
             n=n+1
+
+            c_atm%active(n)=A%Active(k)
+            c_atm%Iph(n)    =A%Iph(k)
+
             select case (l)
                case(:9)
                   write(unit=fmm,fmt="(i1)") l
@@ -108,6 +115,8 @@ SubModule (CFML_Atoms) Atm_ExtendList
                case(100:999)
                   write(unit=fmm,fmt="(i3)") l
             end select
+
+
             !c_atm%Atom(n)     = A%atom(k)     ! Valid for Intel and not for GFortran
             !Workaround for gfortran
             c_atm%Atom(n)%lab     = trim(A%atom(k)%lab)//"_"//adjustl(fmm)
@@ -162,6 +171,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
 
       call allocate_atom_list(n,B,Type_Atm,0)
       B%Active=c_atm%active(1:n)
+      B%Iph=c_atm%iph(1:n)
       B%Atom=c_atm%atom(1:n)
 
       !> DEallocate
@@ -212,6 +222,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
          write(unit=lun,fmt="(a,/)") "     =============================================== "
       end if
       do k=1,A%natoms
+
          ate%atm(k)%ChemSymb = A%atom(k)%ChemSymb
          xo(:) =Modulo_Lat(A%atom(k)%x(:))
          L=1

@@ -14,11 +14,7 @@ Program KeyCodes
                                 Matm_Std_Type, Matm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
 
-   use CFML_KeyCodes,     only: KEY_ATM, split_genrefcod_atm, Split_LocRefCod_ATM, &
-                                Fill_RefCodes_Atm, WriteInfo_RefParams, Allocate_VecRef,&
-                                NP_Ref, NP_Ref_Max, Allocate_Restraints_Vec, Get_Afix_Line, &
-                                Get_DFix_Line, Get_TFix_Line, NP_Rest_Ang, NP_Rest_Dis, NP_Rest_Tor, &
-                                Ang_Rest, Dis_Rest, Tor_Rest, WriteInfo_Restraints
+   use CFML_KeyCodes
 
    !---- Variables ----!
    Implicit None
@@ -92,20 +88,20 @@ Program KeyCodes
       !> Write Information
       open(newunit=lun,file=trim(filcod)//".log", status="replace",action="write")
 
-      write(unit=lun,fmt="(a,/)") " KEYCODE TESTING"
-
       call Write_Crystal_Cell(Cell,lun)
       write(unit=lun,fmt="(a,/)") " "
 
       call Write_SpaceGroup_Info(SpGr,lun)
       write(unit=lun,fmt="(a,/)") " "
 
-      call Write_Atom_List(At,lun)
+      call Write_Atom_List(At,Iunit=lun)
 
       !> -------------
       !> Testing Zone
       !> -------------
       nc_i=0; nc_f=0
+
+      !> Determine the zone of commands in the file
       do i=1,ffile%nlines
          line=adjustl(ffile%line(i)%str)
          if (line(1:1) =='!') cycle
@@ -133,6 +129,7 @@ Program KeyCodes
          stop
       end if
 
+      !> ==== Check Keycodes for Atoms ====
       call Read_RefCodes_ATM(ffile, nc_i, nc_f, Spgr, At)
 
       !> Print info
@@ -217,28 +214,37 @@ Program KeyCodes
       !> Restrains Information?
       call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dfix, n_afix, n_tfix)
 
+      print*,' ==> Directives KeyCODE Information Procedure <=='
       do i=n_ini,n_end
+         !> load information on line variable
          line=adjustl(ffile%line(i)%str)
          if (line(1:1) ==" ") cycle
          if (line(1:1) =="!") cycle
          k=index(line,"!")
          if( k /= 0) line=line(:k-1)
 
+         !> Directives
          select case (u_case(line(1:4)))
             case ("FIX ", "FIXE")   ! FIX
+               print*,' ==> FIX Directive: '//trim(line)
                call ReadCode_FIX_ATM(line, AtList, Spg)
                if (err_CFML%IErr /=0) then
                   print*,err_CFML%Msg
                end if
 
             case ("VARY")    ! VARY
+               print*,' ==> VARY Directive: '//trim(line)
                call ReadCode_VARY_ATM(line, AtList, Spg)
                if (err_CFML%IErr /=0) then
                   print*,err_CFML%Msg
                end if
 
             case ("EQUA") ! Equal (Constraints)
-               call cut_string(line,nlong)
+               print*,' ==> EQUA Directive: '//trim(line)
+               call ReadCode_EQUAL_ATM(line, AtList, Spg)
+               if (err_CFML%IErr /=0) then
+                  print*,err_CFML%Msg
+               end if
 
             case ("AFIX") ! AFIX ang sigma    (Angles restraints)
                call cut_string(line,nlong)
@@ -258,11 +264,11 @@ Program KeyCodes
    End Subroutine Read_RefCodes_ATM
 
    !!----
-   !!---- ReadCode_FIX_ATM
+   !!---- ReadCode_EQUAL_ATM
    !!----
    !!---- Update: April - 2022
    !!
-   Subroutine ReadCode_FIX_ATM(String, AtList, Spg)
+   Subroutine ReadCode_EQUAL_ATM(String, AtList, Spg)
       !---- Arguments ----!
       character(len=*),   intent(in)     :: String
       type(AtList_Type),  intent(in out) :: AtList
@@ -273,11 +279,12 @@ Program KeyCodes
 
       character(len=3)                      :: car
       character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
-      integer                               :: npos, nlong, ndir, nloc, nc
-      integer                               :: ii,j,k,na
-      integer, dimension(NMAX_GEN)          :: Idir, Idir2, IPh
+      integer                               :: npos, nlong, n_dir, n_loc, nc
+      integer                               :: ii,j,jj,k,iv,na, nb
+      integer, dimension(NMAX_GEN)          :: Ind_dir, Ind_dir2, IPh_dir, Iph_loc
+      real                                  :: fac
       real, dimension(3)                    :: Bounds
-      logical                               :: done
+      logical                               :: done, with_val
 
       !> Init
       call clear_error()
@@ -286,154 +293,738 @@ Program KeyCodes
       line=trim(adjustl(string))
 
       car=u_case(line(1:3))
-      if (car /= 'FIX') then
-         call set_error(1,'Wrong Directive for FIX instruction: '//trim(line))
+      if (car /= 'EQU') then
+         call set_error(1,'Wrong Directive for EQUAL instruction: '//trim(line))
          return
       end if
 
-      !> Cut FIX word
+      !> Cut EQUAL word
       call cut_string(line,nlong)
 
       !> general directives
-      call split_genrefcod_atm(line,ndir,Idir)
+      call split_genrefcod_atm(line, n_dir, Ind_dir, IPh_dir, dir_gen)
 
       !> Locals  directives
-      call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
+      call Split_LocRefCod_ATM(line, n_loc, dir_loc, Ind_dir2, Iph_loc, dir_lab)
 
-      if (ndir > 0 .and. nloc > 0) then
-         call set_error(1,'Wrong form for FIX: '//trim(line))
+      if (n_dir > 0 .and. n_loc > 0) then
+         call set_error(1,'Wrong form for EQUAL: '//trim(line))
          return
       end if
 
       bounds = [0.0, 1.0, 0.1]
-
-      if (ndir > 0) then
+      if (n_dir > 0) then
          call get_words(line,dire,nc)
-         do j=1,ndir
-            do k=ndir+1,nc
-               na=Index_AtLab_on_AtList(dire(k),Atlist)
-               if (na > 0) then
-                  call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, Na, Spg, Atlist)
-               else
-                  !> Species
-                  done=.false.
-                  do ii=1,AtList%Natoms
-                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
-                     call Fill_RefCodes_Atm('FIX', Idir(j), Bounds, 1, ii, Spg, Atlist)
-                     done=.true.
-                  end do
+
+         do j=1,n_dir
+            done=.false.
+
+            !> First Atom
+            k=n_dir+1
+            na=Index_AtLab_on_AtList(dire(k),iph_dir(j),Atlist)
+
+            if (na > 0) then
+               !> First reference is an atom label
+
+               do while( k < nc)
+                  !> Second Atom
+                  k=k+1
+                  nb=Index_AtLab_on_AtList(dire(k),iph_dir(j),Atlist)
+
+                  !> The next is an multiplier?
+                  with_val=.false.
+                  fac=1.0_cp
+                  if (k+1 <= nc) then
+                     call get_num(dire(k+1),vet,ivet,iv)
+                     if (iv == 1) then
+                        fac=vet(1)
+                        with_val=.true.
+                     end if
+                  end if
+
+                  done=.true.
+                  if (nb > 0) then
+                     !> Second reference is an atom label
+                     select case (ind_dir(j))
+                        case (1:3) ! X,Y,Z
+                           if (with_val) then
+                              call equal_xyz_atm(Atlist, na,nb,ind_dir(j),fac)
+                           else
+                              call equal_xyz_atm(Atlist, na,nb,ind_dir(j))
+                           end if
+
+                        case (4)   ! XYZ
+                           if (with_val) then
+                              call equal_xyz_atm(Atlist, na,nb,0,fac)
+                           else
+                              call equal_xyz_atm(Atlist, na,nb,0)
+                           end if
+
+                        case (5)   ! OCC
+                           if (with_val) then
+                              call equal_occ_atm(Atlist, na,nb,fac)
+                           else
+                              call equal_occ_atm(Atlist, na,nb)
+                           end if
+
+                        case (6)   ! Uiso
+                           if (with_val) then
+                              call equal_u_atm(Atlist, na,nb,0,Spg,fac)
+                           else
+                              call equal_u_atm(Atlist, na,nb,0,Spg)
+                           end if
+                        case (7)   ! All U's
+                           if (with_val) then
+                              call equal_u_atm(Atlist, na,nb,-1,Spg,fac)
+                           else
+                              call equal_u_atm(Atlist, na,nb,-1,Spg)
+                           end if
+
+                        case (8:13)! Uij
+                           if (with_val) then
+                              call equal_u_atm(Atlist, na,nb,ind_dir(j)-7,Spg,fac)
+                           else
+                              call equal_u_atm(Atlist, na,nb,ind_dir(j)-7,Spg)
+                           end if
+
+                        case (14)  ! ALL
+                           if (with_val) then
+                              call equal_xyz_atm(Atlist, na,nb,0,fac)
+                              call equal_occ_atm(Atlist, na,nb,fac)
+                              call equal_u_atm(Atlist, na,nb,-1,Spg,fac)
+                           else
+                              call equal_xyz_atm(Atlist, na,nb,0)
+                              call equal_occ_atm(Atlist, na,nb)
+                              call equal_u_atm(Atlist, na,nb,-1,Spg)
+                           end if
+
+                        case default
+                           done=.false.
+                     end select
+
+                  else
+                     done=.false.
+
+                     !> Chemical Specie in second reference
+                     do ii=1,AtList%Natoms
+                        if (iph_dir(j) > 0) then
+                           if (atList%iph(ii) /= iph_dir(j)) cycle
+                        end if
+                        if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+
+                        !>Don't give the same chemical species !!
+                        if (trim(u_case(Atlist%atom(na)%ChemSymb)) == trim(u_case(AtList%atom(ii)%ChemSymb))) then
+                           call set_error(1, 'Both references have the same chemical symbols: '//trim(dire(n_dir+1)) &
+                                             //'  '//trim(dire(k)) )
+                           return
+                        end if
+
+                        done=.true.
+                        select case (ind_dir(j))
+                           case (1:3) ! X,Y,Z
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, na,ii,ind_dir(j),fac)
+                              else
+                                 call equal_xyz_atm(Atlist, na,ii,ind_dir(j))
+                              end if
+
+                           case (4)   ! XYZ
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, na,ii,0,fac)
+                              else
+                                 call equal_xyz_atm(Atlist, na,ii,0)
+                              end if
+
+                           case (5)   ! OCC
+                              if (with_val) then
+                                 call equal_occ_atm(Atlist, na,ii,fac)
+                              else
+                                 call equal_occ_atm(Atlist, na,ii)
+                              end if
+
+                           case (6)   ! Uiso
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, na,ii,0,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, na,ii,0,Spg)
+                              end if
+                           case (7)   ! All U's
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, na,ii,-1,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, na,ii,-1,Spg)
+                              end if
+
+                           case (8:13)! Uij
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, na,ii,ind_dir(j)-7,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, na,ii,ind_dir(j)-7,Spg)
+                              end if
+
+                           case (14)  ! ALL
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, na,ii,0,fac)
+                                 call equal_occ_atm(Atlist, na,ii,fac)
+                                 call equal_u_atm(Atlist, na,ii,-1,Spg,fac)
+                              else
+                                 call equal_xyz_atm(Atlist, na,ii,0)
+                                 call equal_occ_atm(Atlist, na,ii)
+                                 call equal_u_atm(Atlist, na,ii,-1,Spg)
+                              end if
+                           case default
+                              done=.false.
+                        end select
+
+                     end do
+                  end if ! nb
 
                   if (.not. done) then
-                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
+                     call set_error(1,'Not found the Atom Reference: '//trim(dire(n_dir+1))//'  '//trim(dire(k)) )
                      return
                   end if
+
+                  if (with_val) k=k+1
+
+               end do
+
+            else
+               !> First reference is a Chemical symbol
+               done=.false.
+               do ii=1,AtList%Natoms
+                  if (iph_dir(j) > 0) then
+                     if (atList%iph(ii) /= iph_dir(j)) cycle
+                  end if
+                  if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+
+                  do while( k < nc)
+                     !> Second Atom
+                     k=k+1
+                     nb=Index_AtLab_on_AtList(dire(k),iph_dir(j),Atlist)
+
+                     !> The next is an multiplier?
+                     with_val=.false.
+                     fac=1.0_cp
+                     if (k+1 <= nc) then
+                        call get_num(dire(k+1),vet,ivet,iv)
+                        if (iv == 1) then
+                           fac=vet(1)
+                           with_val=.true.
+                        end if
+                     end if
+
+                     if (nb > 0) then
+                        done=.true.
+                        !> Second reference is an atom label
+                        select case (ind_dir(j))
+                           case (1:3) ! X,Y,Z
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, ii,nb,ind_dir(j),fac)
+                              else
+                                 call equal_xyz_atm(Atlist, ii,nb,ind_dir(j))
+                              end if
+
+                           case (4)   ! XYZ
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, ii,nb,0,fac)
+                              else
+                                 call equal_xyz_atm(Atlist, ii,nb,0)
+                              end if
+
+                           case (5)   ! OCC
+                              if (with_val) then
+                                 call equal_occ_atm(Atlist, ii,nb,fac)
+                              else
+                                 call equal_occ_atm(Atlist, ii,nb)
+                              end if
+
+                           case (6)   ! Uiso
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, ii,nb,0,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, ii,nb,0,Spg)
+                              end if
+
+                           case (7)   ! All U's
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, ii,nb,-1,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, ii,nb,-1,Spg)
+                              end if
+
+                           case (8:13)! Uij
+                              if (with_val) then
+                                 call equal_u_atm(Atlist, ii,nb,ind_dir(j)-7,Spg,fac)
+                              else
+                                 call equal_u_atm(Atlist, ii,nb,ind_dir(j)-7,Spg)
+                              end if
+
+                           case (14)  ! ALL
+                              if (with_val) then
+                                 call equal_xyz_atm(Atlist, ii,nb,0,fac)
+                                 call equal_occ_atm(Atlist, ii,nb,fac)
+                                 call equal_u_atm(Atlist, ii,nb,-1,Spg,fac)
+                              else
+                                 call equal_xyz_atm(Atlist, ii,nb,0)
+                                 call equal_occ_atm(Atlist, ii,nb)
+                                 call equal_u_atm(Atlist, ii,nb,-1,Spg)
+                              end if
+
+                           case default
+                              done=.false.
+                        end select
+
+                     else
+                        !> Second reference is a chemical symbol
+                        done=.false.
+                        do jj=1,AtList%Natoms
+                           if (iph_dir(j) > 0) then
+                              if (atList%iph(jj) /= iph_dir(j)) cycle
+                           end if
+                           if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(jj)%ChemSymb))) cycle
+
+                           !> Don't give the same chemical species
+                           if (trim(u_case(Atlist%atom(ii)%ChemSymb)) == trim(u_case(AtList%atom(jj)%ChemSymb))) then
+                              call set_error(1, 'Both references have the same chemical symbols: '//trim(line) )
+                              return
+                           end if
+
+                           done=.true.
+                           select case (ind_dir(j))
+                              case (1:3) ! X,Y,Z
+                                 if (with_val) then
+                                    call equal_xyz_atm(Atlist, ii,jj,ind_dir(j),fac)
+                                 else
+                                    call equal_xyz_atm(Atlist, ii,jj,ind_dir(j))
+                                 end if
+
+                              case (4)   ! XYZ
+                                 if (with_val) then
+                                    call equal_xyz_atm(Atlist, ii,jj,0,fac)
+                                 else
+                                    call equal_xyz_atm(Atlist, ii,jj,0)
+                                 end if
+
+                              case (5)   ! OCC
+                                 if (with_val) then
+                                    call equal_occ_atm(Atlist, ii,jj,fac)
+                                 else
+                                    call equal_occ_atm(Atlist, ii,jj)
+                                 end if
+
+                              case (6)   ! Uiso
+                                 if (with_val) then
+                                    call equal_u_atm(Atlist, ii,jj,0,Spg,fac)
+                                 else
+                                    call equal_u_atm(Atlist, ii,jj,0,Spg)
+                                 end if
+                              case (7)   ! All U's
+                                 if (with_val) then
+                                    call equal_u_atm(Atlist, ii,jj,-1,Spg,fac)
+                                 else
+                                    call equal_u_atm(Atlist, ii,jj,-1,Spg)
+                                 end if
+
+                              case (8:13)! Uij
+                                 if (with_val) then
+                                    call equal_u_atm(Atlist, ii,jj,ind_dir(j)-7,Spg,fac)
+                                 else
+                                    call equal_u_atm(Atlist, ii,jj,ind_dir(j)-7,Spg)
+                                 end if
+
+                              case (14)  ! ALL
+                                 if (with_val) then
+                                    call equal_xyz_atm(Atlist, ii,jj,0,fac)
+                                    call equal_occ_atm(Atlist, ii,jj,fac)
+                                    call equal_u_atm(Atlist, ii,jj,-1,Spg,fac)
+                                 else
+                                    call equal_xyz_atm(Atlist, ii,jj,0)
+                                    call equal_occ_atm(Atlist, ii,jj)
+                                    call equal_u_atm(Atlist, ii,jj,-1,Spg)
+                                 end if
+
+                              case default
+                                 done=.false.
+                           end select
+
+                        end do
+                     end if
+
+                     if (.not. done) then
+                        call set_error(1,'Not found the Atom Reference: '//trim(line) )
+                        return
+                     end if
+
+                     if (with_val) k =k+1
+                  end do
+               end do
+
+               if (.not. done) then
+                  call set_error(1,'Not found the Atom label: '//trim(line) )
+                  return
                end if
-            end do ! Objects
+            end if
+
          end do ! ndir
       end if
 
-      if (nloc > 0) then
-         do j=1,nloc
-            na=Index_AtLab_on_AtList(dir_lab(j),AtList)
-            if (na==0) then
-               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
-               return
+
+      if (n_loc > 0) then
+         j=1
+         do while(j < n_loc)
+            na=Index_AtLab_on_AtList(dir_lab(j), iph_loc(j), AtList)
+            nb=Index_AtLab_on_AtList(dir_lab(j+1), iph_loc(j+1), AtList)
+
+            !>Multiplier
+            with_val=.false.
+            if (j+2 <= n_loc) then
+               call get_num(dir_lab(j+2), vet,ivet,iv)
+               if (iv ==1) then
+                  fac=vet(1)
+                  with_val=.true.
+               end if
             end if
-            call Fill_RefCodes_Atm('FIX', Idir2(j), Bounds, 1, Na, Spg, Atlist)
+
+            if (na > 0) then
+               !> First reference is an atom label
+
+               if (nb > 0) then
+                  !> Second reference is an atom label
+
+               else
+                  !> Second reference is a chemical species
+
+               end if
+
+            else
+               !> First reference is a chemical symbol
+
+               if (nb > 0) then
+                  !> Second reference is an atom label
+
+               else
+                  !> Second reference is a chemical species
+
+               end if
+
+            end if
+
+
+            if (with_val) then
+               j=j+3
+            else
+               j=j+2
+            end if
          end do
       end if
 
-   End Subroutine ReadCode_FIX_ATM
+   End Subroutine ReadCode_EQUAL_ATM
 
-   !!----
-   !!---- ReadCode_VARY_ATM
-   !!----
-   !!---- Update: April - 2022
+   !!--++
+   !!--++ Subroutine Equal_XYZ_Atm
+   !!--++
+   !!--++    Equal Coordinates Codes
+   !!--++
+   !!--++ Update: April - 2022
    !!
-   Subroutine ReadCode_VARY_ATM(String, AtList, Spg)
+   Subroutine EQUAL_XYZ_Atm(Atlist, NAtm1, Natm2, Ind, Fac)
       !---- Arguments ----!
-      character(len=*),   intent(in)     :: String
-      type(AtList_Type),  intent(in out) :: AtList
-      class (SpG_type),   intent(in)     :: Spg
+      type(AtList_Type),           intent(in out) :: AtList
+      integer,                     intent(in)     :: NAtm1
+      integer,                     intent(in)     :: NAtm2
+      integer,                     intent(in)     :: Ind    ! 1:X, 2:Y, 3:Z, 0:XYZ
+      real, optional,              intent(in)     :: Fac
+
 
       !---- Local Variables ----!
-      integer, parameter :: NMAX_GEN = 20
+      integer :: i,nc
+      integer :: n1,n2
+      real    :: val0
 
-      character(len=3)                      :: car
-      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
-      integer                               :: npos, nlong, ndir, nloc, nc
-      integer                               :: ii,j,k,na
-      integer, dimension(NMAX_GEN)          :: Idir, Idir2, IPh
-      real, dimension(3)                    :: Bounds
-      logical                               :: done
+      associate (A => AtList%atom(NAtm1), B=> AtList%atom(NAtm2) )
+         select type (A)
+            type is (Atm_Ref_Type)
+               select type (B)
+                  type is (Atm_Ref_type)
+                     select case (Ind)
+                        case (1:3)
+                           val0=A%m_x(Ind)
+                           n1=A%l_x(Ind)
 
-      !> Init
-      call clear_error()
+                           n2=B%l_x(Ind)
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_x(ind)=fac
+                           else
+                              B%m_x(ind)=val0
+                           end if
+                           B%l_x(ind)=n1
 
-      !> copy
-      line=trim(adjustl(string))
+                           NP_Constr=NP_Constr+1
 
-      car=u_case(line(1:3))
-      if (car /= 'VAR') then
-         call set_error(1,'Wrong Directive for VARY instruction: '//trim(line))
-         return
-      end if
+                        case (0)
+                           do i=1,3
+                              val0=A%m_x(i)
+                              n1=A%l_x(i)
 
-      !> Cut FIX word
-      call cut_string(line,nlong)
+                              n2=B%l_x(i)
+                              call Del_RefCode_Atm(AtList, n2)
+                              if (present(Fac)) then
+                                 B%m_x(i)=fac
+                              else
+                                 B%m_x(i)=val0
+                              end if
+                              B%l_x(i)=n1
 
-      !> general directives
-      call split_genrefcod_atm(line,ndir,Idir,dir_gen)
+                              NP_Constr=NP_Constr+1
+                           end do
 
-      !> Locals  directives
-      call Split_LocRefCod_ATM(line, nloc, dir_loc, Idir2, dir_lab, IPh)
+                     end select  ! Ind
+               end select
 
-      if (ndir > 0 .and. nloc > 0) then
-         call set_error(1,'Wrong form for VARY: '//trim(line))
-         return
-      end if
+            type is (Matm_Ref_Type)
+               select type (B)
+                  type is (Matm_Ref_Type)
+                     select case (Ind)
+                        case (1:3)
+                           val0=A%m_x(Ind)
+                           n1=A%l_x(Ind)
 
-      bounds = [0.0, 1.0, 0.1]
-      if (ndir > 0) then
-         call get_words(line,dire,nc)
-         do j=1,ndir
-            do k=ndir+1,nc
-               na=Index_AtLab_on_AtList(dire(k),Atlist)
-               if (na > 0) then
-                  call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, Na, Spg, Atlist)
-               else
-                  !> Species
-                  done=.false.
-                  do ii=1,AtList%Natoms
-                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
-                     call Fill_RefCodes_Atm('VARY', Idir(j), Bounds, 1, ii, Spg, Atlist)
-                     done=.true.
-                  end do
-                  if (.not. done) then
-                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
-                     return
-                  end if
-               end if
-            end do !k
-         end do ! ndir
-      end if
+                           n2=B%l_x(Ind)
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_x(ind)=fac
+                           else
+                              B%m_x(ind)=val0
+                           end if
+                           B%l_x(ind)=n1
 
-      if (nloc > 0) then
-         do j=1,nloc
-            na=Index_AtLab_on_AtList(dir_lab(j),AtList)
-            if (na==0) then
-               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
-               return
-            end if
-            call Fill_RefCodes_Atm('VARY', Idir2(j), Bounds, 1, Na, Spg, Atlist)
-         end do
-      end if
+                           NP_Constr=NP_Constr+1
 
-   End Subroutine ReadCode_VARY_ATM
+                        case (0)
+                           do i=1,3
+                              val0=A%m_x(i)
+                              n1=A%l_x(i)
+
+                              n2=B%l_x(i)
+                              call Del_RefCode_Atm(AtList, n2)
+                              if (present(Fac)) then
+                                 B%m_x(i)=fac
+                              else
+                                 B%m_x(i)=val0
+                              end if
+                              B%l_x(i)=n1
+
+                              NP_Constr=NP_Constr+1
+                           end do
+
+                     end select
+               end select
+         end select ! A
+      end associate
+
+   End Subroutine EQUAL_XYZ_Atm
+
+   !!--++
+   !!--++ Subroutine Equal_OCC_Atm
+   !!--++
+   !!--++    Equal Occupancy Codes
+   !!--++
+   !!--++ Update: April - 2022
+   !!
+   Subroutine EQUAL_OCC_Atm(Atlist, NAtm1, Natm2, Fac)
+      !---- Arguments ----!
+      type(AtList_Type),           intent(in out) :: AtList
+      integer,                     intent(in)     :: NAtm1
+      integer,                     intent(in)     :: NAtm2
+      real, optional,              intent(in)     :: Fac
 
 
+      !---- Local Variables ----!
+      integer :: i,nc
+      integer :: n1,n2
+      real    :: val0
+
+      associate (A => AtList%atom(NAtm1), B=> AtList%atom(NAtm2) )
+         select type (A)
+            type is (Atm_Ref_Type)
+               select type (B)
+                  type is (Atm_ref_Type)
+                     val0=A%m_occ
+                     n1=A%l_occ
+
+                     n2=B%l_occ
+                     call Del_RefCode_Atm(AtList, n2)
+                     if (present(Fac)) then
+                        B%m_occ=fac
+                     else
+                        B%m_occ=val0
+                     end if
+                     B%l_occ=n1
+               end select
+
+               NP_Constr=NP_Constr+1
+
+            type is (Matm_Ref_Type)
+               select type (B)
+                  type is (Matm_ref_Type)
+                     val0=A%m_occ
+                     n1=A%l_occ
+
+                     n2=B%l_occ
+                     call Del_RefCode_Atm(AtList, n2)
+                     if (present(Fac)) then
+                        B%m_occ=fac
+                     else
+                        B%m_occ=val0
+                     end if
+                     B%l_occ=n1
+               end select
+
+               NP_Constr=NP_Constr+1
+         end select ! A
+
+      end associate
+
+   End Subroutine EQUAL_OCC_Atm
+
+   !!--++
+   !!--++ Subroutine Equal_U_Atm
+   !!--++
+   !!--++    Equal Thermal Codes
+   !!--++
+   !!--++ Update: April - 2022
+   !!
+   Subroutine EQUAL_U_Atm(Atlist, NAtm1, Natm2, Ind, Spg, Fac)
+      !---- Arguments ----!
+      type(AtList_Type),           intent(in out) :: AtList
+      integer,                     intent(in)     :: NAtm1
+      integer,                     intent(in)     :: NAtm2
+      integer,                     intent(in)     :: Ind    ! 0:Usio, 1-6:Uij, -1: All
+      class(SpG_Type),             intent(in)     :: Spg
+      real, optional,              intent(in)     :: Fac
 
 
+      !---- Local Variables ----!
+      integer :: i,nc
+      integer :: n1,n2
+      real    :: val0
+
+      associate (A => AtList%atom(NAtm1), B=> AtList%atom(NAtm2) )
+         select type (A)
+            type is (Atm_Ref_Type)
+               select type (b)
+                  type is (Atm_Ref_Type)
+                     select case (Ind)
+                        case (0) ! Uiso
+                           val0=A%m_U_iso
+                           n1=A%l_U_iso
+
+                           n2=B%l_U_iso
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_U_iso=fac
+                           else
+                              B%m_U_iso=val0
+                           end if
+                           B%l_U_iso=n1
+
+                           NP_Constr=NP_Constr+1
+
+                        case (1:6) ! Uij
+                           val0=A%m_U(Ind)
+                           n1=A%l_U(Ind)
+
+                           n2=B%l_U(Ind)
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_U(ind)=fac
+                           else
+                              B%m_U(ind)=val0
+                           end if
+                           B%l_U(ind)=n1
+                           !call Get_AtomBet_CTR(B%x,B%u,Spg, NP_Ref, A%L_u, A%m_u)
+
+                           NP_Constr=NP_Constr+1
+
+                        case (-1) ! All U's
+                           do i=1,6
+                              val0=A%m_U(i)
+                              n1=A%l_U(i)
+
+                              n2=B%l_U(i)
+                              call Del_RefCode_Atm(AtList, n2)
+                              if (present(Fac)) then
+                                 B%m_U(i)=fac
+                              else
+                                 B%m_U(i)=val0
+                              end if
+                              B%l_U(i)=n1
+                              !call Get_AtomBet_CTR(B%x,B%u,Spg, NP_Ref, A%L_u, A%m_u)
+
+                              NP_Constr=NP_Constr+1
+                           end do
+                     end select  ! Ind
+               end select
+
+            type is (Matm_Ref_Type)
+               select type (B)
+                  type is (Matm_Ref_Type)
+                     select case (Ind)
+                        case (0) ! Uiso
+                           val0=A%m_U_iso
+                           n1=A%l_U_iso
+
+                           n2=B%l_U_iso
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_U_iso=fac
+                           else
+                              B%m_U_iso=val0
+                           end if
+                           B%l_U_iso=n1
+
+                           NP_Constr=NP_Constr+1
+
+                        case (1:6) ! Uij
+                           val0=A%m_U(Ind)
+                           n1=A%l_U(Ind)
+
+                           n2=B%l_U(Ind)
+                           call Del_RefCode_Atm(AtList, n2)
+                           if (present(Fac)) then
+                              B%m_U(ind)=fac
+                           else
+                              B%m_U(ind)=val0
+                           end if
+                           B%l_U(ind)=n1
+                           !call Get_AtomBet_CTR(B%x,B%u,Spg, NP_Ref, A%L_u, A%m_u)
+
+                           NP_Constr=NP_Constr+1
+
+                        case (-1) ! All
+                           do i=1,6
+                              val0=A%m_U(i)
+                              n1=A%l_U(i)
+
+                              n2=B%l_U(i)
+                              call Del_RefCode_Atm(AtList, n2)
+                              if (present(Fac)) then
+                                 B%m_U(i)=fac
+                              else
+                                 B%m_U(i)=val0
+                              end if
+                              B%l_U(i)=n1
+                              !call Get_AtomBet_CTR(B%x,B%u,Spg, NP_Ref, A%L_u, A%m_u)
+
+                              NP_Constr=NP_Constr+1
+                           end do
+                     end select  ! Ind
+               end select
+         end select ! A
+      end associate
+
+   End Subroutine EQUAL_U_Atm
 
 End Program KeyCodes
 

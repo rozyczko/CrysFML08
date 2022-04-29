@@ -173,7 +173,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
       type(AtList_Type),           intent(in out) :: AtList
       integer,                     intent(in)     :: NAtm
       integer,                     intent(in)     :: Ind    ! 1:X, 2:Y, 3:Z, 0:XYZ
-      type(SpG_Type),              intent(in)     :: Spg
+      class(SpG_Type),              intent(in)    :: Spg
       real(kind=cp), dimension(3), intent(in)     :: Bounds ! Lower, Upper and Step limits
       integer,                     intent(in)     :: Ic
 
@@ -323,8 +323,8 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
       !---- Arguments ----!
       type(AtList_Type),           intent(in out) :: AtList
       integer,                     intent(in)     :: NAtm
-      integer,                     intent(in)     :: Ind    ! 1:X, 2:Y, 3:Z, 0:XYZ
-      type(SpG_Type),              intent(in)     :: Spg
+      integer,                     intent(in)     :: Ind    ! 0:Uiso, 1-6:Uij, -1:All thermal
+      class(SpG_Type),              intent(in)     :: Spg
       real(kind=cp), dimension(3), intent(in)     :: Bounds ! Lower, Upper and Step limits
       integer,                     intent(in)     :: Ic
 
