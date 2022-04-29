@@ -71,6 +71,15 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
          return
       end if
 
+      !> Read IPh
+      read(unit=lun,iostat=ierr)  A%IPh
+      if (ierr /= 0) then
+         err_CFML%IErr=1
+         err_CFML%Msg="Read_Bin_Atoms_List@CFML_ATOMS: Error reading IPh atoms!"
+         close(unit=lun)
+         return
+      end if
+
       !> Load information
       select type (aat => A%Atom)
          type is (atm_type)
@@ -159,6 +168,9 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
 
       !> Second: Write active list
       write(unit=lun) a%active
+
+      !> Third: Write IPh list
+      write(unit=lun) a%iph
 
       select type (aat => A%Atom)
          type is (atm_type)

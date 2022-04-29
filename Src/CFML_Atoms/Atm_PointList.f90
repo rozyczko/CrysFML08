@@ -10,9 +10,10 @@ SubModule (CFML_Atoms) Atm_PointList
    !!----
    !!---- Date: April - 2022
    !!
-   Pure Module Function Index_AtLab_on_AtList(AtLab, AtList) Result(Indx)
+   Pure Module Function Index_AtLab_on_AtList(AtLab, IPhase, AtList) Result(Indx)
       !---- Arguments ----!
       character(len=*),  intent(in) :: AtLab
+      integer,           intent(in) :: IPhase
       type(AtList_Type), intent(in) :: AtList
       integer                       :: Indx
 
@@ -23,6 +24,9 @@ SubModule (CFML_Atoms) Atm_PointList
       Indx=0
 
       do i=1,AtList%natoms
+         if (IPhase > 0 ) then
+            if (AtList%Iph(i) /= IPhase) cycle
+         end if
          if (trim(u_case(Atlab)) == trim(u_case(AtList%Atom(i)%Lab))) then
             Indx=i
             exit

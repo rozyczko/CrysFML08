@@ -85,8 +85,8 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
                case (14) ! ALL
                   call Fix_XYZ_Atm(Atlist, Natm, 0)
                   call Fix_Occ_Atm(Atlist, Natm)
-                  call Fix_U_Atm(Atlist, Natm,0)
-                  call Fix_U_Atm(Atlist, Natm,-1)
+                  call Fix_U_Atm(Atlist,  Natm,0)
+                  call Fix_U_Atm(Atlist,  Natm,-1)
 
             end select ! Npar
 
@@ -118,12 +118,12 @@ Submodule (CFML_KeyCodes) KeyCod_FillCodes
                case (14) ! ALL
                   call Vary_XYZ_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
                   call Vary_OCC_Atm(Atlist, NAtm, Bounds, Ic)
-                  call Vary_U_Atm(Atlist, NAtm, 0, Spg, Bounds, Ic)
-                  call Vary_U_Atm(Atlist, NAtm, -1, Spg, Bounds, Ic)
+                  call Vary_U_Atm(Atlist,  NAtm, 0, Spg, Bounds, Ic)
+                  call Vary_U_Atm(Atlist,  NAtm, -1, Spg, Bounds, Ic)
 
             end select ! Npar
 
-      end select ! Vary
+      end select ! Directives
 
    End Subroutine Fill_RefCodes_Atm
 
