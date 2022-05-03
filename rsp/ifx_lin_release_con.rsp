@@ -1,0 +1,4 @@
+options install --prefix ifx_release
+options --profile release
+options --compiler ifx
+options --flag "-static -heap-arrays -O2 -reentrancy:none"

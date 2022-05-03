@@ -1,0 +1,4 @@
+options install --prefix ifx_debug
+options --profile debug
+options --compiler ifx
+options --flag "/Warn:nointerfaces /static /heap-arrays"

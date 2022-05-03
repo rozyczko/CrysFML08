@@ -1,0 +1,4 @@
+options install --prefix ifort_release
+options --compiler ifort
+options --flag "-O2 -heap-arrays -nologo"
+option  --profile release

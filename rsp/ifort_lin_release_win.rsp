@@ -1,0 +1,4 @@
+options install --prefix ifort_release_win
+options --compiler ifort
+options --flag "-O2 -heap-arrays -nologo -I ../../../../usr/local/wint/lib.i64"
+option  --profile release
