@@ -49,6 +49,7 @@ if [%_CHANGE%]==[to_f90] (
    
    if [%_WINT%]==[win] (
      
+     ren CFML_Messages.xxx         CFML_Messages.f90
      cd CFML_Messages
      ren CFML_Messages.xxx         CFML_Messages.f90
      ren Con_Err_Message.xxx       Con_Err_Message.f90
