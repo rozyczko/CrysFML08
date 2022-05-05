@@ -225,7 +225,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
       AtList%Atom(1:Nat)%Active   =.true.
       
       do i=1,Nat
-         call Get_ChemSymb(AtList%Atom(i)%SfacSymb, AtList%Atom(i)%ChemSymb)
+         AtList%Atom(i)%ChemSymb = Get_Chem_Symb(AtList%Atom(i)%SfacSymb)
          AtList%Atom(i)%X=IMol%I_Coor(:,i)
          AtList%Atom(i)%U     =0.0_cp
          AtList%Atom(i)%Moment=0.0_cp
@@ -298,7 +298,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
       type (AtList_Type),     intent(out) :: AtList
 
       !---- Local variables ----!
-      integer               :: i, n, d
+      integer               :: i, j, n, d
       integer               :: Nat, NaF, NMol
       type (AtList_Type)    :: A
 
@@ -341,7 +341,35 @@ Submodule (CFML_Molecules) Mol_to_AtList
          if (err_CFML%Ierr /= 0) return
          
          if (A%natoms <= 0) cycle
-         AtList%Atom(n+1:n+A%natoms)=A%Atom(1:A%natoms)
+         !AtList%Atom(n+1:n+A%natoms)=A%Atom(1:A%natoms) !this assignment is not compiled by gfortran -> individual components should be used
+         AtList%Atom(n+1:n+A%natoms)%Lab     =A%Atom(1:A%natoms)%Lab
+         AtList%Atom(n+1:n+A%natoms)%ChemSymb=A%Atom(1:A%natoms)%ChemSymb
+         AtList%Atom(n+1:n+A%natoms)%SfacSymb=A%Atom(1:A%natoms)%SfacSymb
+         AtList%Atom(n+1:n+A%natoms)%Z       =A%Atom(1:A%natoms)%Z
+         AtList%Atom(n+1:n+A%natoms)%Mult    =A%Atom(1:A%natoms)%Mult
+         AtList%Atom(n+1:n+A%natoms)%Charge  =A%Atom(1:A%natoms)%Charge
+         do j=1,3
+           AtList%Atom(n+1:n+A%natoms)%X(j)  =A%Atom(1:A%natoms)%X(j)
+         end do
+         AtList%Atom(n+1:n+A%natoms)%U_iso   =A%Atom(1:A%natoms)%U_iso
+         AtList%Atom(n+1:n+A%natoms)%Occ     =A%Atom(1:A%natoms)%Occ
+         AtList%Atom(n+1:n+A%natoms)%UType   =A%Atom(1:A%natoms)%UType
+         AtList%Atom(n+1:n+A%natoms)%ThType  =A%Atom(1:A%natoms)%ThType
+         do j=1,6
+           AtList%Atom(n+1:n+A%natoms)%U(j)  =A%Atom(1:A%natoms)%U(j)
+         end do
+         AtList%Atom(n+1:n+A%natoms)%Magnetic=A%Atom(1:A%natoms)%Magnetic
+         AtList%Atom(n+1:n+A%natoms)%Mom     =A%Atom(1:A%natoms)%Mom
+         do j=1,3
+            AtList%Atom(n+1:n+A%natoms)%Moment(j)  =A%Atom(1:A%natoms)%Moment(j)
+            AtList%Atom(n+1:n+A%natoms)%Ind_ff(j)  =A%Atom(1:A%natoms)%Ind_ff(j)
+         end do
+         AtList%Atom(n+1:n+A%natoms)%AtmInfo =A%Atom(1:A%natoms)%AtmInfo
+         AtList%Atom(n+1:n+A%natoms)%wyck    =A%Atom(1:A%natoms)%wyck
+         do j=1,5
+            AtList%Atom(n+1:n+A%natoms)%VarF(j)    =A%Atom(1:A%natoms)%VarF(j)
+         end do
+         AtList%Atom(n+1:n+A%natoms)%active  =A%Atom(1:A%natoms)%Active         
          n=n+A%natoms
          call allocate_atom_list(0,A,' ',0)
       end do
