@@ -55,7 +55,8 @@ Module CFML_EoS
    !---- Use Modules ----!
    Use CFML_GlobalDeps,only: CP, PI, TO_RAD, err_cfml, clear_error, set_error
    Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH
-   Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell
+   Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell, Cell_Type, &
+                             Volume_from_Cell,SigmaV_From_Cell
    Use CFML_Strings,   only: u_case, string_real, string_numstd, number_lines, get_words, get_numstd, &
                              get_separator_pos, get_num, string_numstd, reading_lines, read_key_str
 
@@ -1782,6 +1783,7 @@ Contains
 
       !---- Local Variables ----!
       integer         :: i
+      type(Cell_type) :: cell
 
       !> Check
       if (dat%eosd(1)%v > 0.0) return
@@ -1789,8 +1791,14 @@ Contains
 
       !> Calculations
       do i=1,dat%n
-         call Volume_Sigma_from_Cell(dat%eosd(i)%cell,dat%eosd(i)%ang,dat%eosd(i)%sigc, &
-                                     dat%eosd(i)%siga,dat%eosd(i)%v,dat%eosd(i)%sigv)
+        cell%cell=dat%eosd(i)%cell
+        cell%scell=dat%eosd(i)%sigc
+        cell%ang=dat%eosd(i)%ang
+        cell%sang=dat%eosd(i)%siga
+        dat%eosd(i)%v=Volume_from_Cell(cell%cell,cell%ang)
+        dat%eosd(i)%sigv=SigmaV_From_Cell(Cell)
+        ! call Volume_Sigma_from_Cell(dat%eosd(i)%cell,dat%eosd(i)%ang,dat%eosd(i)%sigc, &
+        !                             dat%eosd(i)%siga,dat%eosd(i)%v,dat%eosd(i)%sigv)
       end do
    End Subroutine Set_Volume_from_Cell
 

@@ -46,7 +46,8 @@ Module CFML_Structure_Factors
     Use CFML_Atoms,                       only: AtList_type, Atm_Ref_Type, MAtm_Ref_Type
     Use CFML_gSpaceGroups,                only: Spg_Type
     Use CFML_Metrics,                     only: Cell_G_Type
-    Use CFML_Reflections,                 only: RefList_Type, Refl_Type, SRefl_Type, MRefl_Type
+    Use CFML_Reflections,                 only: RefList_Type, Refl_Type, SRefl_Type, MRefl_Type, &
+                                                Gener_Reflections_Shub
     Use CFML_Scattering_Tables
     Use CFML_Rational
 
@@ -63,31 +64,31 @@ Module CFML_Structure_Factors
               Modify_SF, Magnetic_Structure_Factors, &
               Set_Form_Factors, Structure_Factors,  &
               Write_Structure_Factors, Write_Structure_Factors_Mag
-              
+
     !---- Definitions ----!
-    
+
     !----
     !--++ F(h)=Sum_j[Fj(h){Aj(h)+i Bj(h)}]
     !----
-    
+
     !!--++
     !!--++    TYPE :: HR_Type
     !!--++       Define a H vector
     !!--++
-    !!--.. 
+    !!--..
     !!
     Type, Private :: HR_Type
        real, dimension(3) :: H=0
     End Type HR_Type
-    
+
     !!----
     !!---- TYPE, PUBLIC :: Scattering_Species_Type
     !!----
-    !!----     Type encapsulting scattering factors for neutrons and X-rays. 
+    !!----     Type encapsulting scattering factors for neutrons and X-rays.
     !!----     Constructed by calling Set_Form_Factors
     !!----
     Type, Public :: Scattering_Species_Type
-       integer                                            :: Num_Species=0        ! Number of species     
+       integer                                            :: Num_Species=0        ! Number of species
        integer                                            :: Num_Magspc =0        ! number of magnetic species
        character(len=6),        dimension(:), allocatable :: Symb
        character(len=6),        dimension(:), allocatable :: Symb_Mag
@@ -98,7 +99,7 @@ Module CFML_Structure_Factors
        type(Xray_Form_Type),    dimension(:), allocatable :: Xcoef
        type(Magnetic_Form_Type),dimension(:), allocatable :: Mcoef
     End Type Scattering_Species_Type
-    
+
     !!----
     !!---- TYPE, PUBLIC :: STRF_TYPE
     !!--..
@@ -111,7 +112,7 @@ Module CFML_Structure_Factors
        complex(kind=cp), dimension(3)   :: MiV  =0.0      ! Magnetic interaction vector w.r.t. unitary Crystal Frame
        complex(kind=cp), dimension(3)   :: MiVC =0.0      ! Magnetic interaction vector in Cartesian components w.r.t. Crystal Frame
     End Type  Strf_Type
-    
+
     !!----
     !!---- TYPE, PUBLIC :: STRF_LIST_TYPE
     !!--..
@@ -120,12 +121,12 @@ Module CFML_Structure_Factors
        integer                                   :: Nref=0 ! Number of Reflections
        Type(Strf_Type), dimension(:),allocatable :: Strf
     End Type  StrfList_Type
-    
+
     logical, private :: SF_Initialized=.false.                        ! Variable indicating if the module has been initialized
-    
+
     integer,                                    private :: NSpecies=0 ! Number of chemical species for X-rays scattering form factors
     integer,       dimension(:),   allocatable, private :: P_A        ! Integer pointer from atoms to species. Dim=N_atoms
-    
+
     real(kind=cp), dimension(:,:), allocatable, private :: AF0    ! Array for Atomic Factor. Dim=(Natoms,NRef)
     real(kind=cp), dimension(:),   allocatable, private :: AFP    ! Array for real part of anomalous scattering form factor. Dim=(Natoms)
     real(kind=cp), dimension(:),   allocatable, private :: AFPP   ! Array for imaginary part of anomalous scattering form factor. Dim=(Natoms)
@@ -147,45 +148,45 @@ Module CFML_Structure_Factors
        Module Procedure Write_Structure_Factors_Crys
        Module Procedure Write_Structure_Factors_Mag
     End Interface Write_Structure_Factors
-    
+
     !---- Interface Zone ----!
     Interface
-      
-       Module Function Fj(S,A,B,C) Result(Res)     
-          !---- Arguments ----!                         
-          real(kind=cp),             intent(in) :: s    
-          real(kind=cp),dimension(4),intent(in) :: a    
-          real(kind=cp),dimension(4),intent(in) :: b    
-          real(kind=cp),             intent(in) :: c    
-          real(kind=cp)                         :: res  
-       End Function Fj  
-       
+
+       Module Function Fj(S,A,B,C) Result(Res)
+          !---- Arguments ----!
+          real(kind=cp),             intent(in) :: s
+          real(kind=cp),dimension(4),intent(in) :: a
+          real(kind=cp),dimension(4),intent(in) :: b
+          real(kind=cp),             intent(in) :: c
+          real(kind=cp)                         :: res
+       End Function Fj
+
        Module Subroutine Create_Table_HR_HT(Reflex, Grp)
           !---- Arguments ----!
           type(RefList_Type), intent(in) :: Reflex
-          type(Spg_type),     intent(in) :: Grp 
-       End Subroutine Create_Table_HR_HT   
-       
+          type(Spg_type),     intent(in) :: Grp
+       End Subroutine Create_Table_HR_HT
+
        Module Subroutine Calc_Table_AB(Nref, Atm, Grp)
           !---- Arguments ----!
           integer,            intent(in) :: Nref
           type(AtList_type),  intent(in) :: Atm
           type(SpG_type),     intent(in) :: Grp
        End Subroutine Calc_Table_AB
-       
+
        Module Subroutine Calc_Table_TH(Reflex, Atm)
           !---- Argument ----!
           type(RefList_Type), intent(in) :: Reflex
           type(AtList_type),  intent(in) :: Atm
        End Subroutine Calc_Table_TH
-       
+
        Module Subroutine Create_Table_AF0_Electrons(Reflex, Atm, lun)
           !---- Arguments ----!
           type(RefList_Type), intent(in) :: Reflex
           type(AtList_type),  intent(in) :: Atm
           integer, optional,  intent(in) :: lun
        End Subroutine Create_Table_AF0_Electrons
-       
+
        Module Subroutine Create_Table_AF0_Xray(Reflex, Atm, lambda, lun)
           !---- Arguments ----!
           type(RefList_Type),      intent(in) :: Reflex
@@ -193,13 +194,13 @@ Module CFML_Structure_Factors
           real(kind=cp), optional, intent(in) :: lambda
           integer,       optional, intent(in) :: lun
        End Subroutine Create_Table_AF0_Xray
-       
+
        Module Subroutine Create_Table_AFP_NeutNuc(Atm, lun)
           !---- Arguments ----!
           type(AtList_type), intent(in) :: Atm
           integer, optional, intent(in) :: lun
        End Subroutine Create_Table_AFP_NeutNuc
-       
+
        Module Subroutine Create_Table_fabc_Xray(Atm, Lambda, Elect, lun)
           !---- Arguments ----!
           type(AtList_type),           intent(in) :: Atm
@@ -207,14 +208,14 @@ Module CFML_Structure_Factors
           integer,           optional, intent(in) :: elect
           integer,           optional, intent(in) :: lun
        End Subroutine Create_Table_fabc_Xray
-       
+
        Module Subroutine Write_Structure_Factors_Crys(Reflex, Lun, Mode)
           !---- Argument ----!
           type(RefList_Type),         intent(in) :: Reflex
           integer,                    intent(in) :: lun
           character(len=*), optional, intent(in) :: Mode
        End Subroutine Write_Structure_Factors_Crys
-       
+
        Module Subroutine Write_Structure_Factors_Mag(Reflex, Stf, Lun, Full)
           !---- Argument ----!
           type(RefList_Type),      intent(in) :: Reflex
@@ -222,19 +223,19 @@ Module CFML_Structure_Factors
           integer,                 intent(in) :: lun
           logical, optional,       intent(in) :: full
        End Subroutine Write_Structure_Factors_Mag
-       
+
        Module Subroutine Allocate_Scattering_Species(N, Scf)
           !---- Arguments ----!
           integer,                       intent(in)  :: n
           type(Scattering_Species_Type), intent(out) :: Scf
-       End Subroutine Allocate_Scattering_Species  
-       
+       End Subroutine Allocate_Scattering_Species
+
        Module Subroutine Additional_Scattering_Factors(Fil, Add_Scatt)
           !---- Arguments ----!
           type(File_Type),               intent(in)  :: fil
-          Type(Scattering_Species_Type), intent(out) :: add_Scatt 
-       End Subroutine Additional_Scattering_Factors 
-       
+          Type(Scattering_Species_Type), intent(out) :: add_Scatt
+       End Subroutine Additional_Scattering_Factors
+
        Module Subroutine Init_Structure_Factors(Reflex, Atm, Grp, Mode, Lambda, Lun)
           !---Arguments ---!
           type(RefList_Type),          intent(in) :: Reflex
@@ -242,9 +243,9 @@ Module CFML_Structure_Factors
           type(SpG_type),              intent(in) :: Grp
           character(len=*),  optional, intent(in) :: Mode
           real(kind=cp),     optional, intent(in) :: lambda
-          integer,           optional, intent(in) :: lun 
+          integer,           optional, intent(in) :: lun
        End Subroutine Init_Structure_Factors
-       
+
        Module Subroutine Init_Calc_StrFactors(Reflex, Atm, Grp, Mode, Lambda, Lun)
           !---Arguments ---!
           type(RefList_Type),         intent(in) :: Reflex
@@ -254,7 +255,7 @@ Module CFML_Structure_Factors
           real(kind=cp),    optional, intent(in) :: lambda
           integer,          optional, intent(in) :: lun
        End Subroutine Init_Calc_StrFactors
-       
+
        Module Subroutine Init_Calc_hkl_StrFactors(Atm, Mode, Lambda, Lun)
           !---Arguments ---!
           type(AtList_type),           intent(in) :: Atm
@@ -262,7 +263,7 @@ Module CFML_Structure_Factors
           real(kind=cp),     optional, intent(in) :: lambda
           integer,           optional, intent(in) :: lun
        End Subroutine Init_Calc_hkl_StrFactors
-       
+
        Module Subroutine Set_Fixed_Tables(Reflex, Atm, Grp, Mode, Lambda, Lun)
           !---- Arguments ----!
           type(RefList_Type),         intent(in) :: Reflex
@@ -272,7 +273,7 @@ Module CFML_Structure_Factors
           real(kind=cp),    optional, intent(in) :: lambda
           integer,          optional, intent(in) :: lun
        End Subroutine Set_Fixed_Tables
-       
+
        Module Subroutine Set_Form_Factors(Atm, Scf, Lambda, Add_Scatt, Mag, Lun)
           !---- Arguments ----!
           type(AtList_type),                      intent(in out):: Atm
@@ -282,7 +283,7 @@ Module CFML_Structure_Factors
           logical,                      optional, intent(in)    :: mag
           integer,                      optional, intent(in)    :: lun
        End Subroutine Set_Form_Factors
-       
+
        Module Subroutine Modify_SF(Reflex, Atm, Grp, List, Nlist, Partyp, Mode)
           !---- Arguments ----!
           type(RefList_Type),         intent(in out) :: Reflex
@@ -293,21 +294,21 @@ Module CFML_Structure_Factors
           character(len=*), optional, intent(in)     :: partyp
           character(len=*), optional, intent(in)     :: Mode
        End Subroutine Modify_SF
-       
+
        Module Subroutine Sum_AB(Reflex, Natm, Icent)
           !---- Arguments ----!
           type(RefList_Type), intent(in out)  :: Reflex
           integer,            intent(in)      :: Natm
           integer,            intent(in)      :: icent
        End Subroutine Sum_AB
-       
+
        Module Subroutine Sum_AB_NeutNuc(Reflex, Natm, Icent)
           !---- Arguments ----!
           type(RefList_Type),   intent(in out) :: Reflex
           integer,              intent(in)     :: Natm
           integer,              intent(in)     :: icent
        End Subroutine Sum_AB_NeutNuc
-       
+
        Module Subroutine Structure_Factors(Reflex, Atm, Grp, Mode, Lambda)
           !---- Arguments ----!
           type(RefList_Type),           intent(in out) :: Reflex
@@ -316,70 +317,70 @@ Module CFML_Structure_Factors
           character(len=*),   optional, intent(in)     :: Mode
           real(kind=cp),      optional, intent(in)     :: lambda
        End Subroutine Structure_Factors
-       
+
        Module Subroutine Calc_General_StrFactor(Hn, Sn, Atm, Grp, Scf, fn, fx, fe)
           !---- Arguments ----!
           real(kind=cp),dimension(3),    intent(in) :: Hn
-          real(kind=cp),                 intent(in) :: Sn 
+          real(kind=cp),                 intent(in) :: Sn
           type(AtList_type),             intent(in) :: Atm
           type(SpG_type),                intent(in) :: Grp
           type(Scattering_Species_Type), intent(in) :: Scf
           complex, optional,             intent(out):: fn,fx,fe
        End Subroutine Calc_General_StrFactor
-       
+
        Module Subroutine Calc_hkl_StrFactor(Hn, Sn, Atm, Grp, Mode, Rad, Sf2, Deriv, fc)
           !---- Arguments ----!
           integer,dimension(3),                  intent(in) :: Hn
-          real(kind=cp),                         intent(in) :: Sn    
+          real(kind=cp),                         intent(in) :: Sn
           type(AtList_type),                     intent(in) :: Atm
           type(SpG_type),                        intent(in) :: Grp
-          character(len=*),                      intent(in) :: Mode   
-          character(len=*),                      intent(in) :: Rad   
+          character(len=*),                      intent(in) :: Mode
+          character(len=*),                      intent(in) :: Rad
           real(kind=cp),                         intent(out):: sf2
           real(kind=cp), dimension(:), optional, intent(out):: deriv
           complex,                     optional, intent(out):: fc
-       End Subroutine Calc_hkl_StrFactor 
-       
+       End Subroutine Calc_hkl_StrFactor
+
        Module Subroutine Calc_StrFactor(Nn, Sn, Atm, Grp, Mode, Rad, Sf2, Deriv, fc)
           !---- Arguments ----!
           integer,                            intent(in) :: nn
-          real(kind=cp),                      intent(in) :: sn    
+          real(kind=cp),                      intent(in) :: sn
           type(AtList_type),                  intent(in) :: Atm
           type(SpG_type),                     intent(in) :: Grp
-          character(len=*),                   intent(in) :: mode   
-          character(len=*),                   intent(in) :: rad   
+          character(len=*),                   intent(in) :: mode
+          character(len=*),                   intent(in) :: rad
           real(kind=cp),                      intent(out):: sf2
           real(kind=cp),dimension(:),optional,intent(out):: deriv
-          complex, optional,                  intent(out):: fc  
-       End Subroutine Calc_StrFactor   
-       
+          complex, optional,                  intent(out):: fc
+       End Subroutine Calc_StrFactor
+
        Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, lun)
           !---- Arguments ----!
           type(RefList_Type),    intent(in out) :: Reflex
           type(Cell_G_Type),     intent(in)     :: Cell
           type(AtList_type),     intent(in out) :: Atm
           type(SpG_type),        intent(in)     :: Grp
-          real(kind=cp),         intent(in)     :: Smax 
+          real(kind=cp),         intent(in)     :: Smax
           type(StrfList_Type),   intent(out)    :: Stf
           integer, optional,     intent(in)     :: lun
        End Subroutine Magnetic_Structure_Factors
-       
+
        Module Subroutine Calc_Mag_Structure_Factor(Hm, Cell, Grp, Atm, Scf, Mode, Strf, Magonly, Mdom, Tdom, Twin)
           !---- Arguments ----!
-          class (Refl_Type),                     intent(in)  :: Hm        
+          class (Refl_Type),                     intent(in)  :: Hm
           type(Cell_G_type),                     intent(in)  :: Cell
           type(SpG_type),                        intent(in)  :: Grp
           type(AtList_type),                     intent(in)  :: Atm
-          type(Scattering_Species_Type),         intent(in)  :: Scf      
-          character(len=*),                      intent(in)  :: Mode     
+          type(Scattering_Species_Type),         intent(in)  :: Scf
+          character(len=*),                      intent(in)  :: Mode
           type(Strf_Type),                       intent(out) :: Strf
           logical,                     optional, intent(in)  :: Magonly
-          integer, dimension(3,3),     optional, intent(In)  :: Mdom     
-          real(kind=cp), dimension(3), optional, intent(In)  :: Tdom     
-          character(len=*),            optional, intent(In)  :: Twin    
-       End Subroutine Calc_Mag_Structure_Factor   
-      
-   End Interface   
-    
+          integer, dimension(3,3),     optional, intent(In)  :: Mdom
+          real(kind=cp), dimension(3), optional, intent(In)  :: Tdom
+          character(len=*),            optional, intent(In)  :: Twin
+       End Subroutine Calc_Mag_Structure_Factor
+
+   End Interface
+
 End Module CFML_Structure_Factors
 

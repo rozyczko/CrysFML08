@@ -783,7 +783,7 @@
       Use CFML_gSpaceGroups
       Use CFML_Propagation_Vectors, only: K_Star, Write_Group_K, Set_Gk, Group_k_Type
       Use CFML_SuperSpace_Database
-      Use CFML_IOForm, only : Read_CFL_SpG,Read_CFL_Cell,Read_kinfo
+      Use CFML_IOForm, only : Read_CFL_SpG,Read_CFL_Cell
       use CFML_Rational
       use getting_ssg
 

@@ -1,4 +1,4 @@
-  Module getting_ssg
+  Module getting_ssg_generators
     use CFML_GlobalDeps
     use CFML_gSpaceGroups
     use CFML_Rational
@@ -1404,13 +1404,13 @@
       End Select
     End Subroutine Get_Set_of_Generators
 
-  End Module getting_ssg
+  End Module getting_ssg_generators
 
     Program Get_Generators_SPG_Symbol
       Use CFML_GlobalDeps
       Use CFML_gSpaceGroups
       use CFML_Rational
-      use getting_ssg
+      use getting_ssg_generators
       use CFML_Symmetry_Tables
 
       integer                                    :: i,n,k,iout,ierror

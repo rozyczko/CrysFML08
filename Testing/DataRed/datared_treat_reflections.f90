@@ -62,8 +62,8 @@
       real(kind=cp),    dimension(R%nref)             :: intav_sat
       real(kind=cp),    dimension(R%nref)             :: intav_fun
       real(kind=cp),    dimension(256)                :: weight  ! A maximum of 256 reflections equivalent to one of them can be treated
-      class(Refl_Type), dimension(:), allocatable     :: Reflex
-      type(Reflection_List) :: Refl
+      type(Reflection_List) :: Refl !Extension with observed reflections
+      type(RefList_Type)    :: Reflex
 
       D=size(R%Ref(1)%h)
       write(unit=fm1(5:5),fmt="(i1)") D
@@ -115,19 +115,20 @@
         open(newunit=ideb,file="generated_reflections.txt",status="replace",action="write")
         Select Case (mode)
           Case("SUPER")
-            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Num_Ref,Reflex,SpG,kinfo,"order",.true.,cond%mag_only)
+            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Reflex,SpG,kinfo,"order",.true.,cond%mag_only)
           Case("SHUB")
-            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Num_Ref,Reflex,SpG,order="order",powder=.true.,mag_only=cond%mag_only)
+            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Reflex,SpG,order="order",powder=.true.,mag_only=cond%mag_only)
         End Select
+        Num_Ref=Reflex%Nref
         Refl%Nref=Num_Ref
         allocate(Refl%Ref(Num_Ref))
         do i=1, Num_Ref
           allocate(Refl%Ref(i)%h(D))
-          Refl%Ref(i)%h      = Reflex(i)%h
-          Refl%Ref(i)%Mult   = Reflex(i)%Mult
-          Refl%Ref(i)%s      = Reflex(i)%s
-          Refl%Ref(i)%imag   = Reflex(i)%Imag
-          Refl%Ref(i)%Pcoeff = Reflex(i)%Pcoeff
+          Refl%Ref(i)%h      = Reflex%Ref(i)%h
+          Refl%Ref(i)%Mult   = Reflex%Ref(i)%Mult
+          Refl%Ref(i)%s      = Reflex%Ref(i)%s
+          Refl%Ref(i)%imag   = Reflex%Ref(i)%Imag
+          Refl%Ref(i)%Pcoeff = Reflex%Ref(i)%Pcoeff
         end do
         call Write_Reflections(Refl,cond,kinfo,ideb,.true.)
       end if

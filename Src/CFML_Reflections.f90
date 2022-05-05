@@ -340,14 +340,14 @@ Module CFML_Reflections
          integer,                        intent(out)  :: nlines
          character(len=*), dimension(:), intent(out)  :: filevar
       End Subroutine Search_Extinctions_File
-      
+
       Module Subroutine Initialize_RefList(N, Reflex, Ctype, D)
          !---- Arguments ----!
          integer,             intent(in)     :: N
          type(RefList_Type),  intent(in out) :: Reflex
          character(len=*),    intent(in)     :: Ctype
          integer, optional,   intent(in)     :: D
-      End Subroutine Initialize_RefList   
+      End Subroutine Initialize_RefList
 
       Module Subroutine Write_Info_RefList(Reflex, Iunit, Mode)
          !---- Arguments ----!
@@ -355,27 +355,28 @@ Module CFML_Reflections
          integer,          optional, intent(in) :: Iunit
          character(len=*), optional, intent(in) :: Mode
       End Subroutine Write_Info_RefList
-      
+
       Module Subroutine H_Uni(Cell, Spg, Friedel, Vmin, Vmax, Code, MaxRef, Reflex, No_order, Check_ok, Hlim)
          !---- Arguments ----!
          type (Cell_G_Type),               intent(in)     :: Cell
          class (SpG_Type) ,                intent(in)     :: Spg
          logical,                          intent(in)     :: Friedel
-         real(kind=cp),                    intent(in)     :: vmin,vmax 
-         character(len=1),                 intent(in)     :: code      
-         integer,                          intent(in)     :: MaxRef    
+         real(kind=cp),                    intent(in)     :: vmin,vmax
+         character(len=1),                 intent(in)     :: code
+         integer,                          intent(in)     :: MaxRef
          type (RefList_Type),              intent(in out) :: reflex
          logical,                optional, intent(in)     :: no_order
          logical,                optional, intent(out)    :: check_ok
          integer, dimension(3,2),optional, intent(in)     :: hlim
       End Subroutine H_Uni
-      
-      Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex)
+
+      Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex,Friedel)
          !---- Arguments ----!
          type (Cell_G_Type),    intent(in)     :: Cell
          type (SpG_Type) ,      intent(in)     :: SpG
-         real(kind=cp),         intent(in)     :: Smax        
+         real(kind=cp),         intent(in)     :: Smax
          type (RefList_Type),   intent(in out) :: Reflex
+         logical,  optional,    intent(in)     :: Friedel
       End Subroutine Gener_Reflections_Shub
 
    End Interface
