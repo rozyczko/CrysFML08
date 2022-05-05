@@ -85,7 +85,15 @@ then
      mv Con_Write_ScrollMsg.xxx   Con_Write_ScrollMsg.f90
      cd ..
    else
-      mv CFML_IO_MessagesWin.xxx             CFML_IO_MessagesWin.f90
+      mv CFML_Messages_Win.xxx       CFML_Messages_Win.f90
+      cd CFML_Messages
+      mv Win_Err_Message.xxx         Win_Err_Message.f90
+      mv Win_Info_Message.xxx        Win_Info_Message.f90
+      mv Win_Question_Message.xxx    Win_Question_Message.f90
+      mv Win_Stop_Message.xxx        Win_Stop_Message.f90
+      mv Win_Warning_Message.xxx     Win_Warning_Message.f90
+      mv Win_Write_ScrollMsg.xxx     Win_Write_ScrollMsg.f90
+      cd ..
    fi
 else
    echo "---- NOTHING DONE! This script should be invoked with argument xxx or f90 and optionally a second argument win!"

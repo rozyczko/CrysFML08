@@ -79,7 +79,7 @@ cd ..
 #
     if [ $COMP == "ifort" ]; then
       cd ./Src
-      mv  CFML_GlobalDeps_Linux_Intel.xxx  CFML_GlobalDeps.f90
+      mv  CFML_GlobalDeps_Linux_IFOR.xxx  CFML_GlobalDeps.f90
       cd ..
         if [ $WINT == "win" ]; then  # Winteracter mode (dependency different for all OS)
             if [ $DEBUG == "Y" ];then
@@ -96,7 +96,7 @@ cd ..
         fi
 
       cd ./Src
-      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux_Intel.xxx
+      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux_IFOR.xxx
       cd ..
     fi
 #
@@ -105,7 +105,7 @@ cd ..
 #
     if [ $COMP == "ifx" ]; then
       cd ./Src
-      mv  CFML_GlobalDeps_Linux_Intel.xxx  CFML_GlobalDeps.f90
+      mv  CFML_GlobalDeps_Linux_IFOR.xxx  CFML_GlobalDeps.f90
       cd ..
         if [ $WINT == "win" ]; then
             if [ $DEBUG == "Y" ]; then
@@ -122,7 +122,7 @@ cd ..
         fi
 
       cd ./Src
-      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux_Intel.xxx
+      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux_IFOR.xxx
       cd ..
     fi
 #
@@ -131,7 +131,7 @@ cd ..
 #
     if [ $COMP == "gfortran" ]; then
       cd ./Src
-      mv  CFML_GlobalDeps_Linux.xxx  CFML_GlobalDeps.f90
+      mv  CFML_GlobalDeps_Linux_GFOR.xxx  CFML_GlobalDeps.f90
       cd ..
         if [ $WINT == "win" ]; then
             if [ $DEBUG == "Y" ]; then
@@ -148,7 +148,7 @@ cd ..
         fi
 
       cd ./Src
-      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux.xxx
+      mv CFML_GlobalDeps.f90 CFML_GlobalDeps_Linux_GFOR.xxx
       cd ..
     fi
 #
