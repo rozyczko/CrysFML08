@@ -115,7 +115,7 @@
       integer,                        intent(out) :: ngen
       character(len=*), dimension(:), intent(out) :: List_symb
       !--- Local variables ---!
-      integer                                   :: i,j,n,m,e_numops
+      integer                                   :: i,j,n,m
       integer,          dimension(3,3)          :: s
       real(kind=cp),    dimension(3)            :: t
       character(len=6), dimension(8)            :: sgen,msgen
@@ -789,12 +789,12 @@
 
       implicit none
 
-      integer                         :: nkv,i,j,n,maxorder,ngen !,j,k,m,multip
+      integer                         :: nkv,i,j,maxorder,ngen !,n,j,k,m,multip
       character(len=1)                :: ans
       character(len=50)               :: str !,forma
       real(kind=cp), dimension(3,12)  :: kv
       type(Group_k_Type),dimension(12):: Gk
-      type(SpG_Type)                  :: SpG,intSpG,st_intSpG
+      type(SpG_Type)                  :: SpG,intSpG !,st_intSpG
       type(SpG_Type),dimension(12)    :: Grpk
       logical                         :: ext=.true.
       type(rational),dimension(4,4)   :: Pmat

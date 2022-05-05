@@ -20,24 +20,18 @@
     type(Cell_G_Type)                :: Cell, Cell_n
     class(SpG_Type),allocatable      :: SpaceGroup,SpaceGroup_n
     type(AtList_Type)                :: A, A_n   !List of atoms in the asymmetric unit
-    type(Atom_Equiv_List_Type)       :: Ate,Ate_n  !List of all atoms in the cell
+    type(Atom_Equiv_List_Type)       :: Ate  !List of all atoms in the cell
 
-    character(len=1)         :: ans
-    character(len=5)         :: so_ord
-    character(len=20)        :: nam
-    character(len=20)        :: spp, sppg,symb !symbol of space group
-    character(len=80)        :: line , title, cmdline, trans_symb
-    character(len=256)       :: filcod,outfil,texto
+    character(len=80)        :: line , cmdline, trans_symb
+    character(len=256)       :: filcod,outfil
     integer, parameter       :: lun1=1,lun2=6,lun=2
-    integer                  :: i, j, numops, ier, ln, nauas,  len_cmdline, &
-                                lenf, lr, nsg, nat, i1,i2
-    integer                  :: l,ng, indx, k, order,mulg, norbi, n, indice,i_cfl,mult,na
-    integer                  :: nlines, nlong, n_ini,n_end
-    real                     :: seconds, End_time, start_time, rminutes, hours, det,occ
-    integer, dimension(3,3)  :: Mat        !Auxiliary matrix
+    integer                  :: i, j, ln, len_cmdline, &
+                                lenf, lr
+    integer                  :: n_ini,n_end
+    real                     :: End_time, start_time, det
     real, dimension(3,3)     :: trans      !matrix transforming the cells
     real, dimension(3)       :: orig       !origin of the transformed cell in old cell
-    logical                  :: iprin, trans_given, trn_std, full_given, esta
+    logical                  :: trans_given, trn_std, esta
     integer                  :: narg
     real, parameter,dimension(3,3) :: identity=reshape ([1,0,0,0,1,0,0,0,1],[3,3])
     type(rational), dimension(4,4) :: rMat
