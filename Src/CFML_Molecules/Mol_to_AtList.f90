@@ -1,14 +1,14 @@
 Submodule (CFML_Molecules) Mol_to_AtList
 
    implicit none
- 
+
  Contains
    !!----
    !!---- SUBROUTINE MOLEC_TO_ATLIST
    !!----
    !!---- Subroutine to pass all information from Molecule_Type
-   !!---- to AtList_Type. 
-   !!---- Coor_type determine the type of cordinates parameter 
+   !!---- to AtList_Type.
+   !!---- Coor_type determine the type of cordinates parameter
    !!---- in output. ("F", "S", "C", "Z")
    !!---- In general Cell if necessary to obtain on Output fractional
    !!---- coordinates or special case for ZMatrix.
@@ -31,17 +31,17 @@ Submodule (CFML_Molecules) Mol_to_AtList
       !> Init
       call clear_error()
       AtList%natoms=0
-      
+
       !> Number of Atoms
       Nat=mol%natoms
       if (Nat <= 0) then
          call set_error(1, "Number of atoms in the Molecule was zero!")
          return
-      end if   
+      end if
 
       car="F"
       if (present(coor_type)) car=adjustl(coor_type)
-      
+
       !> Internal copy
       call init_molecule(IMol,nat)
       IMol=mol
@@ -52,7 +52,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
             select case (mol%coor_type)
                case ("C")
                   ! No changes
-                  
+
                case ("F")
                   if (present(cell)) then
                      call Fractional_to_Cartesian(IMol,cell)
@@ -202,12 +202,12 @@ Submodule (CFML_Molecules) Mol_to_AtList
 
       end select
 
-      !>Allocating Atom_List_Type 
+      !>Allocating Atom_List_Type
       d=0   ! k vectors
-      call Allocate_Atom_List(Nat, AtList, Type_atm, d)    
+      call Allocate_Atom_List(Nat, AtList, Type_atm, d)
 
-      !> Passing Information 
-      
+      !> Passing Information
+
       !> Default (Atm_Type)
       AtList%Atom(1:Nat)%Lab      =IMol%AtName(1:Nat)
       AtList%Atom(1:Nat)%SfacSymb =IMol%AtSymb(1:Nat)
@@ -223,7 +223,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
       AtList%Atom(1:Nat)%AtmInfo  =" "
       AtList%Atom(1:Nat)%wyck     =" "
       AtList%Atom(1:Nat)%Active   =.true.
-      
+
       do i=1,Nat
          AtList%Atom(i)%ChemSymb = Get_Chem_Symb(AtList%Atom(i)%SfacSymb)
          AtList%Atom(i)%X=IMol%I_Coor(:,i)
@@ -231,7 +231,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
          AtList%Atom(i)%Moment=0.0_cp
          AtList%Atom(i)%Ind_ff=0
          AtList%Atom(i)%VarF  =0.0_cp
-      end do   
+      end do
 
       !> Class Atm_Std_Type
       select type(A => AtList%Atom)
@@ -242,9 +242,9 @@ Submodule (CFML_Molecules) Mol_to_AtList
                A(i)%X_Std=0.0_cp
                A(i)%U_Std=0.0_cp
                A(i)%Moment_Std=0.0_cp
-            end do  
+            end do
       end select
-      
+
       !> Class Atm_Ref_Type
       select type(A => AtList%Atom)
          type is (Atm_Ref_Type)
@@ -259,11 +259,11 @@ Submodule (CFML_Molecules) Mol_to_AtList
                A(i)%l_moment=0
                A(i)%m_U=0.0_cp
                A(i)%l_U=0
-            end do   
-            
-         class is (MAtm_Std_Type) 
-      end select      
-      
+            end do
+
+         class is (MAtm_Std_Type)
+      end select
+
       !> Type MAtm_Ref_Type
       select type (A => AtList%Atom)
          type is (MAtm_Ref_Type)
@@ -276,14 +276,14 @@ Submodule (CFML_Molecules) Mol_to_AtList
                A(i)%l_X=IMol%lI_Coor(:,i)
                A(i)%m_U=0.0_cp
                A(i)%l_U=0
-            end do   
-            
-      end select      
-      
+            end do
+
+      end select
+
       call init_molecule(IMol)
 
    End Subroutine Molec_to_AtList
-   
+
    !!----
    !!---- Subroutine MolCrystal_to_AtList
    !!----
@@ -304,7 +304,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
 
       !> Init
       call clear_error()
-      
+
       !> Number of Atoms
       NaF=molcrys%n_free
       NMol=molcrys%n_mol
@@ -316,30 +316,30 @@ Submodule (CFML_Molecules) Mol_to_AtList
       if (Nat <= 0) then
          call set_error(1, " No atoms were defined in the MolCrystal object!")
          return
-      end if   
+      end if
 
 
-      !>Allocating Atom_List_Type 
+      !>Allocating Atom_List_Type
       d=0   ! k vectors
       select type (Atm => MolCrys%Atm)
          type is (Atm_Std_Type)
-            call Allocate_Atom_List(Nat, AtList, 'Atm_Std', d) 
-         type is (Atm_Ref_Type)   
-            call Allocate_Atom_List(Nat, AtList, 'Atm_Ref', d) 
-         type is (MAtm_Std_Type)   
-            call Allocate_Atom_List(Nat, AtList, 'MAtm_Std', d) 
+            call Allocate_Atom_List(Nat, AtList, 'Atm_Std_Type', d)
+         type is (Atm_Ref_Type)
+            call Allocate_Atom_List(Nat, AtList, 'Atm_Ref_Type', d)
+         type is (MAtm_Std_Type)
+            call Allocate_Atom_List(Nat, AtList, 'MAtm_Std_Type', d)
          type is (MAtm_Ref_Type)
-            call Allocate_Atom_List(Nat, AtList, 'MAtm_Ref', d)    
-      end select      
-      
-      !> Fill information from Molecules Part 
+            call Allocate_Atom_List(Nat, AtList, 'MAtm_Ref_Type', d)
+      end select
+
+      !> Fill information from Molecules Part
       n=0
       do i=1,NMol
          if (molcrys%mol(i)%natoms <= 0) cycle
-         
-         call Molec_to_AtList(molcrys%mol(i), 'Atm_Ref',A,"F", molcrys%cell)
+
+         call Molec_to_AtList(molcrys%mol(i), 'Atm_Ref_Type',A,"F", molcrys%cell)
          if (err_CFML%Ierr /= 0) return
-         
+
          if (A%natoms <= 0) cycle
          !AtList%Atom(n+1:n+A%natoms)=A%Atom(1:A%natoms) !this assignment is not compiled by gfortran -> individual components should be used
          AtList%Atom(n+1:n+A%natoms)%Lab     =A%Atom(1:A%natoms)%Lab
@@ -398,10 +398,10 @@ Submodule (CFML_Molecules) Mol_to_AtList
             AtList%Atom(n+i)%wyck    =molcrys%atm(i)%wyck
             AtList%Atom(n+i)%VarF    =molcrys%atm(i)%VarF
             AtList%Atom(n+i)%active  =molcrys%atm(i)%Active
-            
+
          end do
-      end if   
-       
+      end if
+
    End Subroutine MolCrystal_to_AtList
- 
-End Submodule Mol_to_AtList 
+
+End Submodule Mol_to_AtList

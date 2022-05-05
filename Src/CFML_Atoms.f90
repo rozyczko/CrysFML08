@@ -56,8 +56,8 @@
 
     !---- List of public procedures ----!
     public :: Allocate_Atom_List, Extend_Atom_List, Init_Atom_Type, Read_Bin_Atom_List, &
-              Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell
-    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints
+              Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell, Index_AtLab_on_AtList
+    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints, Change_AtomList_Type
 
 
     !---- Parameters ----!
@@ -254,6 +254,7 @@
        character(len=9)                           :: mcomp="Crystal" ! For magnetic moments and modulation functions Mcs and Dcs It may be also "Cartesian" or "Spherical"
        logical                                    :: symm_checked=.false.
        logical,         dimension(:), allocatable :: Active          ! Flag for active or not
+       integer,         dimension(:), allocatable :: IPh             ! Index...for Phase
        class(Atm_Type), dimension(:), allocatable :: Atom            ! Atoms
     End Type AtList_Type
 
@@ -281,10 +282,18 @@
           character (len=8)              :: bilabel
        End Function Wrt_Lab
 
+       Pure Module Function Index_AtLab_on_AtList(AtLab, IPhase, AtList) Result(Indx)
+          !---- Arguments ----!
+          character(len=*),  intent(in) :: AtLab
+          integer,           intent(in) :: IPhase
+          type(AtList_Type), intent(in) :: AtList
+          integer                       :: Indx
+       End Function Index_AtLab_on_AtList
+
        Module Subroutine Init_Atom_Type(Atm,d)
           !---- Arguments ----!
           class(Atm_Type), intent(in out)   :: Atm
-          integer,         intent(in)       :: d     ! Number of k-vectors
+          integer,         intent(in)       :: d
        End Subroutine Init_Atom_Type
 
        Module Subroutine Allocate_Atoms_Cell(Nasu,Mul,Dmax,Ac)
@@ -297,16 +306,41 @@
 
        Module Subroutine Allocate_Atom_List(N, A,Type_Atm, d)
           !---- Arguments ----!
-          integer,             intent(in)       :: n    
-          type(Atlist_type),   intent(in out)   :: A    
-          character(len=*),    intent(in)       :: Type_Atm !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
-          integer,             intent(in)       :: d    ! Number of k-vectors
+          integer,             intent(in)       :: n
+          type(Atlist_type),   intent(in out)   :: A
+          character(len=*),    intent(in)       :: Type_Atm
+          integer,             intent(in)       :: d
        End Subroutine Allocate_Atom_List
+
+       Module Subroutine Change_AtomList_Type(AtList, TypeAtm, Nv)
+          !---- Arguments ----!
+          type(AtList_Type), intent(in out) :: AtList
+          character(len=*),  intent(in)     :: TypeAtm
+          integer, optional, intent(in)     :: Nv
+       End Subroutine Change_AtomList_Type
 
        Module Subroutine Check_Symmetry_Constraints(SpG,Atm)
          class(SpG_Type),      intent(in)     :: SpG
          type(AtList_Type),    intent(in out) :: Atm
        End Subroutine Check_Symmetry_Constraints
+
+       Module Subroutine CopyInfo_Atm_Type(At1, At2)
+          !---- Arguments ----T
+          class(Atm_Type), intent(in out):: At1
+          class(Atm_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_Atm_Type
+
+       Module Subroutine CopyInfo_Std_Type(At1, At2)
+          !---- Arguments ----T
+          class(Atm_Std_Type), intent(in out):: At1
+          class(Atm_Std_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_Std_Type
+
+       Module Subroutine CopyInfo_MStd_Type(At1, At2)
+          !---- Arguments ----T
+          class(MAtm_Std_Type), intent(in out):: At1
+          class(MAtm_Std_Type), intent(in)    :: At2
+       End Subroutine CopyInfo_MStd_Type
 
        Module Subroutine Read_Bin_Atom_List(filename, A, Type_Atm)
           !---- Arguments ----!
@@ -321,20 +355,21 @@
           type(atlist_type),  intent(in) :: A
        End Subroutine Write_Bin_Atom_List
 
-       Module Subroutine Write_Atom_List(A, Iunit, SpG)
+       Module Subroutine Write_Atom_List(A, Iphas, Iunit, SpG)
           !---- Arguments ----!
-          type(atlist_type),                   intent(in) :: A        ! Atom list object
-          integer, optional,                   intent(in) :: IUnit    ! Logical unit
+          type(atlist_type),                   intent(in) :: A
+          integer, optional,                   intent(in) :: Iphas
+          integer, optional,                   intent(in) :: IUnit
           type(SuperSpaceGroup_type),optional, intent(in) :: SpG
        End Subroutine Write_Atom_List
 
        Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven)
           !---- Arguments ----!
-          type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
-          type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
-          class(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
-          character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
-          logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
+          type(atlist_type),    intent(in)     :: A
+          type(atlist_type),    intent(in out) :: B
+          class(SpG_Type),      intent(in)     :: SpG
+          character(len=*),     intent(in)     :: Type_Atm
+          logical, optional,    intent(in)     :: Conven
        End Subroutine Extend_List
 
        Module Subroutine Set_Atom_Equiv_List(SpG,cell,A,Ate,lun)

@@ -190,30 +190,38 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
 
          !> Deallocating atom list
          if (allocated(A%Active)) deallocate(A%Active)
+         if (allocated(A%IPh))    deallocate(A%IPh)
          if (allocated(A%Atom)) deallocate(A%Atom)
          return
       end if
 
       !> Allocating variables
       Select Case(trim(l_case(Type_Atm)))
-         case("atm")
+         case("atm_type")
             allocate(A%atom(n),source=Atm,stat=ier)
 
-         case("atm_std")
+         case("atm_std_type")
             allocate(A%atom(n),source=Atm_Std,stat=ier)
 
-         case("matm_std")
+         case("matm_std_type")
             allocate(A%atom(n),source=MAtm_Std,stat=ier)
 
-         case("atm_ref")
+         case("atm_ref_type")
             allocate(A%atom(n),source=Atm_Ref,stat=ier)
 
-         case("matm_ref")
+         case("matm_ref_type")
             allocate(A%atom(n),source=MAtm_Ref,stat=ier)
+
+         case default
+            call set_error(1," The argument on Type_Atm is unknown for Allocate_Atom_List procedure")
+            A%natoms=0
+            if (allocated(A%Active)) deallocate(A%Active)
+            if (allocated(A%IPh)) deallocate(A%IPh)
+            if (allocated(A%Atom)) deallocate(A%Atom)
+            return
       end select
 
-      allocate (A%active(n),stat=ier)
-
+      allocate (A%active(n), A%IPh(n), stat=ier)
       if (ier /= 0) then
          Err_CFML%Ierr=1
          write(unit=Err_CFML%Msg,fmt="(a,i6,a)") "Error allocating atom List for N =",N," atoms"
@@ -221,6 +229,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       end if
 
       A%active=.true.
+      A%IPh=1
       A%mcomp="crystal"
 
       do i=1,n

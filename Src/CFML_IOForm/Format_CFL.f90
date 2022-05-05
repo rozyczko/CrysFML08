@@ -900,17 +900,17 @@ SubModule (CFML_IOForm) Format_CFL
 
       if ((.not. set_moment) .and. (.not. set_matm_std)) then
          !> Type of Atoms: Atm_std
-         call read_cfl_Atoms(cfl,AtmList,'Atm_std',0,n_ini,n_end)
+         call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
 
       else if (set_moment .and. (.not. set_matm_std)) then
          !> Type of Atoms: Atm_std
-         call read_cfl_Atoms(cfl,AtmList,'Atm_std',0,n_ini,n_end)
+         call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
 
       else if (set_moment .and. set_matm_std) then
          !> Type of Atoms: Matm_std
          call read_cfl_kvectors(cfl,kvec,n_ini,n_end)
          if (err_CFML%Ierr ==1) return
-         call read_cfl_Atoms(cfl,AtmList,'Matm_std',Kvec%nk,n_ini,n_end)
+         call read_cfl_Atoms(cfl,AtmList,'Matm_std_type',Kvec%nk,n_ini,n_end)
 
       else
          !> Type of atoms not defined

@@ -174,7 +174,7 @@
        !Factor 2
        maxp=2*maxa*determ    !maximum multiplicity in the new cell of a particular atom type
        !write(*,*) " Allocating atoms_list and Point list for ", maxp*Ate%nauas, " and ", maxp, " values"
-       call Allocate_Atom_List(maxp*Ate%nauas, A,"atm_std", 0) !Atom list in the new cell, we must use "maxp"*Ate%nauas and not "maxa"
+       call Allocate_Atom_List(maxp*Ate%nauas, A,"atm_std_type", 0) !Atom list in the new cell, we must use "maxp"*Ate%nauas and not "maxa"
        Call Allocate_Point_List(maxp*Ate%nauas,Pl,Ifail)
        if(ifail /= 0) then
          !write(*,*) " Error allocating PL for ",maxp," values"
@@ -261,7 +261,7 @@
 
        !write(*,*) "  Orbits correct"
        !write(*,*) "  Allocate_Atom_List for ",Ls," atoms"
-       call Allocate_Atom_List(Ls, A_n,"atm_std",0)
+       call Allocate_Atom_List(Ls, A_n,"atm_std_type",0)
        fail=Err_CFML%Ierr == 1
        if(fail) then
          if(present(debug)) then

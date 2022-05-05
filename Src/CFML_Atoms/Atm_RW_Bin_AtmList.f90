@@ -25,7 +25,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       type(atlist_type),  intent(in out) :: A
       character(len=*),   intent(in)     :: Type_Atm
       !integer,            intent(in)     :: d !Number of k-vectors
-      
+
       !---- Local Variables ----!
       integer                            :: i,n,ierr,lun
       type (atm_type)      :: atm
@@ -47,6 +47,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       !> First: read number of atoms
       n=0
       call Allocate_Atom_List(N, A,Type_Atm,3)
+      if (err_CFML%IErr /=0) return
 
       read(unit=lun,iostat=ierr) n
       if (ierr /= 0) then
@@ -59,12 +60,22 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
 
       !> Allocating
       call Allocate_Atom_List(N, A,Type_Atm,3)
+      if (err_CFML%IErr /=0) return
 
       !> Read active
       read(unit=lun,iostat=ierr)  A%active
       if (ierr /= 0) then
          err_CFML%IErr=1
          err_CFML%Msg="Read_Bin_Atoms_List@CFML_ATOMS: Error reading active atoms!"
+         close(unit=lun)
+         return
+      end if
+
+      !> Read IPh
+      read(unit=lun,iostat=ierr)  A%IPh
+      if (ierr /= 0) then
+         err_CFML%IErr=1
+         err_CFML%Msg="Read_Bin_Atoms_List@CFML_ATOMS: Error reading IPh atoms!"
          close(unit=lun)
          return
       end if
@@ -157,6 +168,9 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
 
       !> Second: Write active list
       write(unit=lun) a%active
+
+      !> Third: Write IPh list
+      write(unit=lun) a%iph
 
       select type (aat => A%Atom)
          type is (atm_type)
