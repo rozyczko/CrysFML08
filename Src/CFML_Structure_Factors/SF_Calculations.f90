@@ -979,7 +979,6 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       !---- Local variables ----!
       integer                                   :: i
       Type(Scattering_Species_Type)             :: Scf
-      type(MRefl_type),dimension(:),allocatable :: rf
    
    
       call Gener_Reflections_Shub(Cell, Grp, Smax, Reflex)
@@ -997,7 +996,6 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          return
       end if
       do i=1,Reflex%Nref
-         Reflex%Ref(i)=rf(i)
          call Calc_Mag_Structure_Factor(Reflex%Ref(i),Cell,Grp,Atm,Scf,"P",Stf%Strf(i))
       end do
    End Subroutine Magnetic_Structure_Factors

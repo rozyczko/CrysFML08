@@ -525,7 +525,7 @@
                  if(done(i)) cycle
                  if(op_symb(i)(1:1) == "2" ) then
                    if(msgen(2) == "21") then
-                     if(index(op_symb(i),"(") .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
+                     if(index(op_symb(i),"(") /= 0 .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
                        point_op(2)=i
                        done(i)=.true.
                        List_Symb(2) = trim(List_Symb(2))//dire(1)
@@ -678,7 +678,7 @@
                  if(done(i)) cycle
                  if(op_symb(i)(1:1) == "2" ) then
                    if(msgen(2) == "21") then
-                     if(index(op_symb(i),"(") .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
+                     if(index(op_symb(i),"(") /= 0 .and. (index(op_symb(i),"x,0") /= 0 .or. index(op_symb(i),"x,1") /= 0)) then
                        point_op(2)=i
                        done(i)=.true.
                        List_Symb(2) = trim(List_Symb(2))//dire(1)
@@ -783,7 +783,7 @@
       Use CFML_gSpaceGroups
       Use CFML_Propagation_Vectors, only: K_Star, Write_Group_K, Set_Gk, Group_k_Type
       Use CFML_SuperSpace_Database
-      Use CFML_IOForm, only : Read_CFL_SpG,Read_CFL_Cell,Read_kinfo
+      Use CFML_IOForm, only : Read_CFL_SpG,Read_CFL_Cell
       use CFML_Rational
       use getting_ssg
 

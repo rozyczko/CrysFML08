@@ -487,7 +487,17 @@
                      mult=orb%mult
                      occ=real(mult)/real(SubGroup(i)%Multip)
                      na=na+1
-                     Asub%Atom(na)=A%atom(n)
+                     !Asub%Atom(na)=A%atom(n) !This is not compiled by gfortran -> explicit assignment of components is needed
+                     Asub%Atom(na)%SfacSymb=A%atom(n)%SfacSymb
+                     Asub%Atom(na)%ChemSymb=A%atom(n)%ChemSymb
+                     Asub%Atom(na)%Z=A%atom(n)%Z
+                     Asub%Atom(na)%charge=A%atom(n)%charge
+                     Asub%Atom(na)%Mult=Mult
+                     Asub%Atom(na)%UType=A%atom(n)%UType
+                     Asub%Atom(na)%ThType=A%atom(n)%ThType
+                     Asub%Atom(na)%U_iso=A%atom(n)%U_iso
+                     Asub%Atom(na)%U=A%atom(n)%U
+                     
                      Asub%Atom(na)%Lab=nam
                      Asub%Atom(na)%x=xp
                      Asub%Atom(na)%occ=occ
@@ -519,7 +529,17 @@
                    mult=orb%mult
                    occ=real(mult)/real(SubGroup(i)%Multip)
                    na=na+1
-                   Asub%Atom(na)=A%atom(n)
+                   !Asub%Atom(na)=A%atom(n) !This is not compiled by gfortran -> explicit assignment of components is needed
+                   Asub%Atom(na)%SfacSymb=A%atom(n)%SfacSymb
+                   Asub%Atom(na)%ChemSymb=A%atom(n)%ChemSymb
+                   Asub%Atom(na)%Z=A%atom(n)%Z
+                   Asub%Atom(na)%charge=A%atom(n)%charge
+                   Asub%Atom(na)%Mult=Mult
+                   Asub%Atom(na)%UType=A%atom(n)%UType
+                   Asub%Atom(na)%ThType=A%atom(n)%ThType
+                   Asub%Atom(na)%U_iso=A%atom(n)%U_iso
+                   Asub%Atom(na)%U=A%atom(n)%U
+                   
                    Asub%Atom(na)%Lab=nam
                    Asub%Atom(na)%x=xp
                    Asub%Atom(na)%occ=occ

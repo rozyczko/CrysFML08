@@ -235,7 +235,7 @@ SubModule (CFML_Reflections) Refl_Generate
          call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
       else
          call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
-      end if   
+      end if
 
       do i=1,num_ref
          reflex%ref(i)%h = hkl(:,i)
@@ -260,38 +260,41 @@ SubModule (CFML_Reflections) Refl_Generate
          reflex%ref(i)%imag = indtyp(i)
       end do
    End Subroutine Gener_Reflections
-   
+
    !!----
-   !!---- SUBROUTINE GENER_REFLECTIONS_SHUB 
+   !!---- SUBROUTINE GENER_REFLECTIONS_SHUB
    !!----
    !!----    Calculate unique reflections below the maximum
    !!----    sin_theta/lambda provided.  The output is ordered.
    !!----
    !!---- Updated: April 2022
    !!
-   Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex)
+   Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex,Friedel)
       !---- Arguments ----!
       type (Cell_G_Type),    intent(in)     :: Cell
       type (SpG_Type) ,      intent(in)     :: SpG
       real(kind=cp),         intent(in)     :: Smax        ! maximum SinTheta/Lambda
       type (RefList_Type),   intent(in out) :: Reflex
+      logical, optional,     intent(in)     :: Friedel
 
       !---- Local variables ----!
-      real(kind=cp)         :: sval 
+      real(kind=cp)         :: sval
       integer               :: h,k,l,hmin,kmin,lmin,hmax,kmax,lmax, maxref,i,j,indp,indj, &
                                maxpos, mp, iprev,num_ref
-      integer, dimension(3) :: hh,kk,nulo
-      integer, dimension(:,:), allocatable :: hkl,hklm
-      integer, dimension(:),   allocatable :: indx,ini,fin,itreat
-      real,    dimension(:),   allocatable :: sv,sm
-
+      integer,       dimension(3) :: hh,kk,nulo
+      integer,       dimension(:,:), allocatable :: hkl,hklm
+      integer,       dimension(:),   allocatable :: indx,ini,fin,itreat
+      real(kind=cp), dimension(:),   allocatable :: sv,sm
+      logical :: Frd
+      Frd=.true.
+      if(present(Friedel)) Frd=Friedel
       !> Init
       nulo=0
       hmax=nint(Cell%cell(1)*2.0*smax+1.0)
       kmax=nint(Cell%cell(2)*2.0*smax+1.0)
       lmax=nint(Cell%cell(3)*2.0*smax+1.0)
-      hmin=-hmax; kmin=-kmax; lmin= -lmax
-      maxref= (2*hmax+1)*(2*kmax+1)*(2*lmax+1)
+      hmin=-hmax; kmin=-kmax; lmin = 0  !-lmax
+      maxref= (2*hmax+1)*(2*kmax+1)*(lmax+1) !(2*lmax+1)
       allocate(hkl(3,maxref),indx(maxref),sv(maxref))
 
 
@@ -304,9 +307,9 @@ SubModule (CFML_Reflections) Refl_Generate
                if (h_equal(hh,nulo)) cycle
                sval=h_s(hh,cell)
                if (sval > smax) cycle
-               
-               if (H_Latt_Absent(hh,Spg%Lat_tr,Spg%Num_Lat)) cycle  
-               
+
+               if (H_Latt_Absent(hh,Spg%Lat_tr,Spg%Num_Lat)) cycle
+
                num_ref=num_ref+1
                if (num_ref > maxref) then
                   num_ref=maxref
@@ -326,9 +329,9 @@ SubModule (CFML_Reflections) Refl_Generate
          hklm(:,i)=hkl(:,j)
          sm(i)=sv(j)
       end do
-      
+
       deallocate(hkl,sv,indx)
-      
+
       itreat=0; ini=0; fin=0
       indp=0
       do i=1,num_ref ! Loop over all reflections
@@ -338,11 +341,11 @@ SubModule (CFML_Reflections) Refl_Generate
             itreat(i)=i  !Make this reflection treated
             ini(indp)=i  !put pointers for initial and final equivalent reflections
             fin(indp)=i
-          
+
             do j=i+1,num_ref  !look for equivalent reflections to the current (i) in the list
                if (abs(sm(i)-sm(j)) > 0.000001) exit
                kk=hklm(:,j)
-               if (h_equiv(hh,kk,SpG)) then ! if  hh eqv kk
+               if (h_equiv(hh,kk,SpG,Frd)) then ! if  hh eqv kk
                   itreat(j) = i                 ! add kk to the list equivalent to i
                   fin(indp)=j
                end if
@@ -352,7 +355,7 @@ SubModule (CFML_Reflections) Refl_Generate
 
       !> Selection of the most convenient independent reflections
       allocate(hkl(3,indp),sv(indp),indx(indp))
-      
+
       indx=2 !nuclear and magnetic contribution by default
       do i=1,indp
          maxpos=0
@@ -371,7 +374,7 @@ SubModule (CFML_Reflections) Refl_Generate
          if (hkl(1,i) < 0) hkl(:,i)=-hkl(:,i)
          sv(i)=sm(indj)
       end do
-      
+
       !> Now apply systematic absences other than lattice type
       num_ref=0
       do i=1,indp
@@ -389,14 +392,14 @@ SubModule (CFML_Reflections) Refl_Generate
          hklm(:,num_ref)=hh
          sm(num_ref) = sv(i)
       end do
-      
+
       !> Final assignments
       select type (r => Reflex%ref)
          type is (Srefl_type)
             call Initialize_RefList(Num_ref, reflex, 'SRefl', SpG%d-1)
          type is (MRefl_type)
             call Initialize_RefList(Num_ref, reflex, 'MRefl', SpG%d-1)
-         class default      
+         class default
             call Initialize_RefList(Num_ref, reflex, 'Refl', SpG%d-1)
       end select
       do i=1,num_ref

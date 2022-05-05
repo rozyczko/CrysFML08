@@ -1,0 +1,3 @@
+options install --prefix ifort_debug
+options --profile debug
+options --compiler ifort

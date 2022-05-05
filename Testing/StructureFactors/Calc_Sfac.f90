@@ -7,13 +7,13 @@
 !!
 Program Calc_Structure_Factors
    !---- Use Modules ----!
-   use CFML_GlobalDeps,                only: Err_CFML, clear_error                
+   use CFML_GlobalDeps,                only: Err_CFML, clear_error
    use CFML_Strings,                   only: U_Case, File_Type
-   use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_Info
+   use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_Info, get_moment_ctr
    use CFML_Atoms,                     only: AtList_Type, Write_Atom_List
    use CFML_Metrics,                   only: Cell_G_Type, Write_Crystal_Cell
    use CFML_Reflections,               only: Refl_Type,SRefl_Type, RefList_Type, Initialize_RefList, Gener_Reflections, &
-                                             Get_MaxNumRef, H_Uni
+                                             Get_MaxNumRef, H_Uni,Gener_Reflections_Shub
    use CFML_IOForm,                    only: Read_Xtal_Structure
    use CFML_Structure_Factors,         only: StrfList_Type,Init_Structure_Factors, Structure_Factors, &
                                              Calc_StrFactor, Magnetic_Structure_Factors,Write_Structure_Factors, Write_Structure_Factors_Mag
@@ -38,7 +38,7 @@ Program Calc_Structure_Factors
    integer                     :: narg
    logical                     :: arggiven=.false.,sthlgiven=.false.
    logical                     :: lfil1,lfil2,lfil3
-   
+
    !> Parte Magnetica
    integer                     :: codini=0
    real, dimension(3)          :: codes=(/11.0,21.0,31.0/)
@@ -75,7 +75,7 @@ Program Calc_Structure_Factors
       read(unit=*,fmt="(a)") filcod
       if (len_trim(filcod) == 0) stop
    end if
-   
+
    if (.not. sthlgiven) then
       write(unit=*,fmt="(a)", advance='no') " => Maximum sinTheta/Lambda: "
       read(unit=*,fmt=*) stlmax
@@ -94,35 +94,35 @@ Program Calc_Structure_Factors
    inquire(file=trim(filcod)//".cif", exist=lfil1)
    inquire(file=trim(filcod)//".mcif",exist=lfil2)
    inquire(file=trim(filcod)//".cfl", exist=lfil3)
-   
+
    if ( (.not. lfil1) .and. (.not. lfil2) .and. (.not. lfil3)) then
       write(unit=*,fmt="(a)") " File: "//trim(filcod)//".(cif|mcif|cfl)  does'nt exist!"
       close(unit=lun)
       stop
    end if
-         
+
    if (lfil1) then
       call Read_Xtal_Structure(trim(filcod)//".cif", Cell, SpG, A)
-   
+
    else if (lfil2) then
       call Read_Xtal_Structure(trim(filcod)//".mcif",Cell,SpG, A)
-   
+
    else if (lfil3) then
       call Read_Xtal_Structure(trim(filcod)//".cfl",Cell, SpG, A, FType=fich_cfl)
-   end if      
-   
+   end if
+
    if (err_CFML%Ierr /= 0) then
       write(unit=*,fmt="(a)") trim(err_CFML%Msg)
       close(unit=lun)
       stop
-   end if   
+   end if
 
-   !> Cell parameters    
+   !> Cell parameters
    call Write_Crystal_Cell(Cell,lun)
-   
+
    !> Spacegroup
    call Write_SpaceGroup_Info(SpG,lun)
-   
+
    !> Atoms
    if (Spg%Magnetic) then
       !> Get information on moment constraints and modify the list of atoms accordingly
@@ -131,9 +131,9 @@ Program Calc_Structure_Factors
          if (A%Atom(i)%mom < 0.001) cycle  ! Skip non-magnetic atoms
          call Get_Moment_CTR(A%Atom(i)%x,A%Atom(i)%moment,SpG,codini,codes)
       end do
-   end if   
-   call Write_Atom_List(A,lun)   
-      
+   end if
+   call Write_Atom_List(A,lun)
+
    !> Wavelength in a CFL file
    lambda=0.70926 !Mo kalpha (used only for x-rays)
    if (lfil3) then
@@ -145,25 +145,25 @@ Program Calc_Structure_Factors
          end if
       end do
    end if
-      
+
    !> Creating a list of reflections
    MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
    call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
    call H_Uni(Cell,Spg,.true.,0.0,stlmax,'s',MaxNumRef,hkl)
-   !call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)    
+   !call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)
 
-   if (hkl%Nref <=0 ) then                                         
-      print*, " Problems generating a list of reflections!"    
-      stop                                                     
-   end if     
-   
+   if (hkl%Nref <=0 ) then
+      print*, " Problems generating a list of reflections!"
+      stop
+   end if
+
    !> Calculation for neutron scattering
    call clear_error()
    call Init_Structure_Factors(hkl, A, Spg, 'NUC', lun=lun)
    call Structure_Factors(hkl, A, SpG, 'NUC')
    call Write_Structure_Factors(hkl, lun, 'NUC')
-   if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)   
-   
+   if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
+
    !> Test of another structure factor subroutine
    write(unit=lun,fmt="(/,a,/)") "   H   K   L   Mult  SinTh/Lda    |Fc|       Phase        F-Real      F-Imag      Num"
    select type (rr => hkl%ref)
@@ -175,15 +175,15 @@ Program Calc_Structure_Factors
                   rr(i)%h, rr(i)%mult, rr(i)%S, rr(i)%Fc, &
                   rr(i)%Phase, real(fc), aimag(fc), i, sqrt(sf2)
          end do
-   end select                                               
-   
+   end select
+
    !> Calculation for X-rays assume Mo-kalpha if Lambda not given
    call Init_Structure_Factors(hkl, A, Spg, 'XRay', lambda, lun)
    call Structure_Factors(hkl, A, SpG)
    call Write_Structure_Factors(hkl,lun)
    if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
-   
-   
+
+
    !> Calculation for Electron Diffraction
    call clear_error()
    call Init_Structure_Factors(hkl, A, Spg, 'ELE',lun=lun)
@@ -194,10 +194,10 @@ Program Calc_Structure_Factors
    !> Magnetic structure factors
    if (Spg%Magnetic) then
       call clear_error()
-      call Magnetic_Structure_Factors(Cell,A,SpG,stlmax,hkl,Stf,lun)
+      call Magnetic_Structure_Factors(hkl, Cell, A, SpG, stlmax, Stf, lun)
       call Write_Structure_Factors_Mag(hkl, Stf, Lun, .true.)
-   end if   
-   
+   end if
+
 
    write(unit=*,fmt="(a)") " Normal End of: PROGRAM STRUCTURE FACTORS "
    write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".sfa"

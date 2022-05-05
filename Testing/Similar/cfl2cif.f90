@@ -6,7 +6,7 @@
     Use CFML_gSpaceGroups, only: Set_SpaceGroup, Write_SpaceGroup_Info, SpG_Type, &
                                  get_stabilizer, Get_multip_pos, Get_Mat_From_Symb, &
                                  get_orbit, Get_SubGroups_full, Identify_Group, &
-                                 Change_Setting_SpaceG, Get_SubGroups
+                                 Change_Setting_SpaceG, Get_SubGroups_gen
     Use CFML_Strings,      only: l_case, number_lines, pack_string, u_case, File_Type
     Use CFML_Atoms,        only: AtList_Type, Allocate_Atom_list, Write_Atom_List, &
                                  Extend_Atom_List,Atom_Equiv_List_Type, Atm_Cell_Type
@@ -18,7 +18,7 @@
 
     type(File_Type)                  :: file_dat
     type(Cell_G_Type)                :: Cell, Cell_n
-    type(SpG_Type)                   :: SpaceGroup,SpaceGroup_n
+    class(SpG_Type),allocatable      :: SpaceGroup,SpaceGroup_n
     type(AtList_Type)                :: A, A_n   !List of atoms in the asymmetric unit
     type(Atom_Equiv_List_Type)       :: Ate,Ate_n  !List of all atoms in the cell
 
