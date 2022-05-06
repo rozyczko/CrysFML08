@@ -187,7 +187,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
             d=d+eos%angpoly(ia,3,3)*2.0_cp*p*dt
 
       end select
-      d=d*to_rad
+      d=d*TO_RAD
 
    End Function Get_Angle_Poly_Deriv
 

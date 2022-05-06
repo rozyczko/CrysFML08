@@ -320,7 +320,6 @@ SubModule (CFML_EoS) EoS_ModDir
       imid=int(NSTEP/2) + 1
       Mp=dy(imid)
 
-      return
    End Function Get_Modp_General
 
    !!--++

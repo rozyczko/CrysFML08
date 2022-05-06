@@ -288,7 +288,6 @@ SubModule (CFML_EoS) EoS_DerivPartial
          end select                                 !other thermal equations have nothing to convert
       end if
 
-      return
    End Function Deriv_Partial_P_Analytic
 
    !!----

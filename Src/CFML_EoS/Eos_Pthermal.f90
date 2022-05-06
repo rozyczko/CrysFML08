@@ -241,7 +241,6 @@ SubModule (CFML_EoS) EoS_Pthermal
          Eth=3.0_cp*Natom*8.314_cp*Theta/(exp(Theta/T)-1.0_cp)
       end if
 
-      return
    End Function EthEinstein
 
    !!----

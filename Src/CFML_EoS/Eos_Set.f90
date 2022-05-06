@@ -63,7 +63,7 @@ SubModule (CFML_Eos) EoS_Set
       type (EoS_Type), intent(in out) :: Eos
 
       !> Init
-      EoS%factor=1.0
+      EoS%factor=1.0_cp
       EoS%alphafactor=1.0E5_cp
 
       select case(EoS%itherm)
@@ -107,7 +107,6 @@ SubModule (CFML_Eos) EoS_Set
             EoS%factor(26)          = 1.0E3_cp         ! 1000 for aH
       end select
 
-      return
    End Subroutine Set_Eos_Factors
 
    !!----
@@ -156,7 +155,7 @@ SubModule (CFML_Eos) EoS_Set
       end if
 
       if (.not. EoS%linear) then
-         EoS%ParName(1:4) =(/'V0   ','K0   ','Kp   ','Kpp  '/)
+         EoS%ParName(1:4) =['V0   ','K0   ','Kp   ','Kpp  ']
 
          EoS%comment(1) = 'Reference pressure volume: '//trim(ptext(1))
          EoS%comment(2) = 'Bulk modulus: '//trim(ptext(2))
@@ -171,7 +170,7 @@ SubModule (CFML_Eos) EoS_Set
          end select
 
       else
-         EoS%ParName(1:4) =(/'L0   ','M0   ','Mp   ','Mpp  '/)
+         EoS%ParName(1:4) =['L0   ','M0   ','Mp   ','Mpp  ']
 
          EoS%comment(1) = 'Reference pressure length: '//trim(ptext(1))
          EoS%comment(2) = 'Linear modulus: '//trim(ptext(2))
@@ -651,18 +650,18 @@ SubModule (CFML_Eos) EoS_Set
             EoS%comment(10:n) = ' '
 
          case (1)
-            EoS%parname(10:11) = (/'alph0','alph1'/)
+            EoS%parname(10:11) = ['alph0','alph1']
             EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
             EoS%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
 
          case (2)
-            EoS%parname(10:12) = (/'alph0','alph1','alph2'/)
+            EoS%parname(10:12) = ['alph0','alph1','alph2']
             EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
             EoS%comment(11) = 'Linear term thermal expansion x10^8 K^-2'
             EoS%comment(12) = '1/T^2 term thermal expansion, K'
 
          case (3)
-            EoS%parname(10:11) = (/'alph0','alph1'/)
+            EoS%parname(10:11) = ['alph0','alph1']
             EoS%comment(10) = 'Constant of thermal expansion x10^5 K^-1'
             EoS%comment(11) = 'Sqrt term of thermal expansion x10^4 K^-1/2'
 
@@ -673,17 +672,17 @@ SubModule (CFML_Eos) EoS_Set
                EoS%parname(3) = 'Mp   '
                EoS%comment(3) = 'dM/dP: dimensionless'
             end if
-            EoS%parname(10:11) = (/'alph0','Th_E '/)
+            EoS%parname(10:11) = ['alph0','Th_E ']
             EoS%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
             EoS%comment(11) = 'Einstein temperature in K'
 
          case (5)
-            EoS%parname(10:11) = (/'p1   ','T_sat'/)
+            EoS%parname(10:11) = ['p1   ','T_sat']
             EoS%comment(10) = 'Approx 3x highT thermal expansion x10^5 K^-1'
             EoS%comment(11) = 'Saturation temperature in K'
 
          case (6)
-            EoS%parname(10:11) = (/'alph0','Th_E '/)
+            EoS%parname(10:11) = ['alph0','Th_E ']
             EoS%comment(10) = 'Constant of thermal expansion at Tref x10^5 K^-1'
             EoS%comment(11) = 'Einstein temperature in K'
             EoS%parname(13) = 'Natom'
@@ -746,7 +745,7 @@ SubModule (CFML_Eos) EoS_Set
             EoS%comment(20:n) = ' '
 
          case (1)       ! Landau power law P-V
-            EoS%parname(20:27) = (/'High ','Ptr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
+            EoS%parname(20:27) = ['High ','Ptr  ','     ','     ','aL   ','betaL','aH   ','betaH']
             EoS%comment(20) = 'Indicator = +1 if high P phase is high sym phase'
             EoS%comment(21) = 'Transition pressure'
             EoS%comment(22) = ''
@@ -757,7 +756,7 @@ SubModule (CFML_Eos) EoS_Set
             EoS%comment(27) = 'Power law term, high phase'
 
          case (2)       ! Landau power law V-T
-            EoS%parname(20:27) = (/'High ','Ttr  ','     ','     ','aL   ','betaL','aH   ','betaH'/)
+            EoS%parname(20:27) = ['High ','Ttr  ','     ','     ','aL   ','betaL','aH   ','betaH']
             EoS%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
             EoS%comment(21) = 'Transition temperature'
             EoS%comment(22) = ''
@@ -768,7 +767,7 @@ SubModule (CFML_Eos) EoS_Set
             EoS%comment(27) = 'Power law term, high phase'
 
          case (3)       ! Landau power law PVT
-            EoS%parname(20:27) = (/'High ','Ttr  ','Ttr-P','TtrP2','aL   ','betaL','aH   ','betaH'/)
+            EoS%parname(20:27) = ['High ','Ttr  ','Ttr-P','TtrP2','aL   ','betaL','aH   ','betaH']
             EoS%comment(20) = 'Indicator = +1 if high T phase is high sym phase'
             EoS%comment(21) = 'Transition temperature at P=0'
             EoS%comment(22) = 'Ttr=Ttr0 + uP + vP^2: P coeff'

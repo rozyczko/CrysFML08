@@ -105,6 +105,7 @@ SubModule (CFML_EoS) EoS_Init
       E%SigV = 0.0_cp
       E%sigc = 0.0_cp
       E%siga = 0.0_cp
+      
    End Subroutine Init_EoS_Data_Type
 
    !!----
