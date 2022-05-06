@@ -483,7 +483,21 @@
                      mult=orb%mult
                      occ=real(mult)/real(SubGroup(i)%Multip)
                      na=na+1
-                     Asub%Atom(na)=A%atom(n)
+                     !Asub%Atom(na)=A%atom(n) !it does not compile with gfortran
+                     Asub%Atom(na)%ChemSymb=A%atom(n)%ChemSymb
+                     Asub%Atom(na)%SfacSymb=A%atom(n)%SfacSymb
+                     Asub%Atom(na)%Z=A%atom(n)%Z
+                     Asub%Atom(na)%Mult=Mult
+                     Asub%Atom(na)%Charge=A%atom(n)%Charge
+                     Asub%Atom(na)%U_iso=A%atom(n)%U_iso
+                     Asub%Atom(na)%U=A%atom(n)%U
+                     Asub%Atom(na)%Mom=A%atom(n)%Mom
+                     Asub%Atom(na)%Moment=A%atom(n)%Moment
+                     Asub%Atom(na)%Ind_ff=A%atom(n)%Ind_ff
+                     Asub%Atom(na)%AtmInfo=A%atom(n)%AtmInfo
+                     Asub%Atom(na)%wyck=A%atom(n)%wyck
+                     Asub%Atom(na)%VarF=A%atom(n)%VarF
+
                      Asub%Atom(na)%Lab=nam
                      Asub%Atom(na)%x=xp
                      Asub%Atom(na)%occ=occ
@@ -515,7 +529,23 @@
                    mult=orb%mult
                    occ=real(mult)/real(SubGroup(i)%Multip)
                    na=na+1
-                   Asub%Atom(na)=A%atom(n)
+                   !Asub%Atom(na)=A%atom(n) !it does not compile with gfortran
+                   !(1) Error: Nonallocatable variable must not be polymorphic in intrinsic
+                   !assignment at (1) - check that there is a matching specific subroutine for '=' operator
+                   Asub%Atom(na)%ChemSymb=A%atom(n)%ChemSymb
+                   Asub%Atom(na)%SfacSymb=A%atom(n)%SfacSymb
+                   Asub%Atom(na)%Z=A%atom(n)%Z
+                   Asub%Atom(na)%Mult=Mult
+                   Asub%Atom(na)%Charge=A%atom(n)%Charge
+                   Asub%Atom(na)%U_iso=A%atom(n)%U_iso
+                   Asub%Atom(na)%U=A%atom(n)%U
+                   Asub%Atom(na)%Mom=A%atom(n)%Mom
+                   Asub%Atom(na)%Moment=A%atom(n)%Moment
+                   Asub%Atom(na)%Ind_ff=A%atom(n)%Ind_ff
+                   Asub%Atom(na)%AtmInfo=A%atom(n)%AtmInfo
+                   Asub%Atom(na)%wyck=A%atom(n)%wyck
+                   Asub%Atom(na)%VarF=A%atom(n)%VarF
+
                    Asub%Atom(na)%Lab=nam
                    Asub%Atom(na)%x=xp
                    Asub%Atom(na)%occ=occ
