@@ -227,7 +227,6 @@ SubModule (CFML_EoS) EoS_Get_Pressure
       end if
 
 
-
       !> copy Eos parameters to local
       ev= EoS_to_Vec(EoS)         ! Volume or linear case is covered
 

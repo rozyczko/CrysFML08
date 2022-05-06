@@ -78,7 +78,7 @@ SubModule (CFML_EoS) EoS_Get_Bulk
       if (.not. eos%Pthermaleos)then
          select case(eos%icross)
             case(1)
-               k0=eos%params(2)+eos%params(8)*(t-eos%tref)  !Old linear variation of K with T
+               k0=eos%params(2)+eos%params(8)*(t-eos%tref) !Old linear variation of K with T
 
             case(2)
                vr=eos%params(1)/Get_V0_T(T,Eos)          ! Get_V0_T returns a0 for linear

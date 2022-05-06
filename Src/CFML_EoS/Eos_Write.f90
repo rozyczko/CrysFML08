@@ -1170,7 +1170,7 @@ SubModule (CFML_EoS) EoS_Write_Info
       character(len=:),  allocatable :: text                ! character string with results
 
       !---- Local variable ----!
-      integer,parameter       :: nout=21
+      integer,parameter       :: NOUT=21
       character(len=1)        :: tscale   ! local name of tscale
       integer,dimension(nout) :: ip=(/6,6,9,8,6,5,  5, 9, 7, 7,    5,  9, 7,7,6,6,6,6,6,6,6/) ! format for output
       integer                 :: i

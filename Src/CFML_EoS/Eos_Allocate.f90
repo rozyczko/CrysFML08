@@ -36,6 +36,7 @@ SubModule (CFML_EoS) EoS_Allocate
       do i=1,n
          call init_eos_data_type(e%eosd(i))
       end do
+      
    End Subroutine Allocate_EoS_Data_List
 
    !!----
@@ -69,6 +70,7 @@ SubModule (CFML_EoS) EoS_Allocate
       do i=1,n
          call init_eos_type(e%eos(i))
       end do
+      
    End Subroutine Allocate_EoS_List
 
    !!----
@@ -86,6 +88,7 @@ SubModule (CFML_EoS) EoS_Allocate
 
       if (allocated(E%eosd)) deallocate (E%eosd)
       E%n=0
+      
    End Subroutine Deallocate_EoS_Data_List
 
    !!----
@@ -103,6 +106,7 @@ SubModule (CFML_EoS) EoS_Allocate
 
       if (allocated(E%eos)) deallocate (E%eos)
       E%n=0
+      
    End Subroutine Deallocate_EoS_List
 
 End SubModule EoS_Allocate
