@@ -158,16 +158,16 @@
     !!----   as the corresponding multipliers for constraints.
     !!----
     Type, Public, Extends(Atm_Std_Type) :: Atm_Ref_Type
-       integer,      dimension(3)               :: L_X       =0      ! Code number of free parameters
-       integer                                  :: L_Occ     =0
-       integer                                  :: L_U_iso   =0
-       integer,      dimension(3)               :: L_moment  =0
-       integer,      dimension(6)               :: L_U       =0
-       real(kind=cp),dimension(3)               :: M_X       =0.0_cp ! Multipliers
-       real(kind=cp)                            :: M_Occ     =0.0_cp
-       real(kind=cp)                            :: M_U_iso   =0.0_cp
-       real(kind=cp),dimension(3)               :: M_moment  =0.0_cp
-       real(kind=cp),dimension(6)               :: M_U       =0.0_cp
+       integer,      dimension(3)       :: L_X       =0      ! Code number of free parameters
+       integer                          :: L_Occ     =0
+       integer                          :: L_U_iso   =0
+       integer,      dimension(3)       :: L_moment  =0
+       integer,      dimension(6)       :: L_U       =0
+       real(kind=cp),dimension(3)       :: M_X       =0.0_cp ! Multipliers
+       real(kind=cp)                    :: M_Occ     =0.0_cp
+       real(kind=cp)                    :: M_U_iso   =0.0_cp
+       real(kind=cp),dimension(3)       :: M_moment  =0.0_cp
+       real(kind=cp),dimension(6)       :: M_U       =0.0_cp
     End Type Atm_Ref_Type
 
     !!----
