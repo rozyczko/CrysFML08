@@ -144,11 +144,8 @@
               U_Equiv, Volume_from_Cell
 
     !---- Public Subroutine ----!
-    public :: Calc_Paxes_Angles, &
-              Change_Setting_Cell, Niggli_Cell, &
-              Fix_Tensor, Find_Lowindex_Dir, &
+    public :: Change_Setting_Cell, Niggli_Cell, &
               Get_Conventional_Cell, Get_Cryst_Family, Get_Primitive_Cell, &
-              Init_Strain_Tensor,&
               Read_Bin_Crystal_Cell, Set_Crystal_Cell, &
               Write_Crystal_Cell, Write_Bin_Crystal_Cell
 
@@ -301,28 +298,11 @@
 
        Pure Module Function Cart_Vector(Mode,V,Cell) Result(Vc)
           !---- Arguments ----!
-          character(len=*),            intent(in) :: mode      
-          real(kind=cp), dimension(3), intent(in) :: v         
-          class(Cell_G_Type),          intent(in) :: Cell      
+          character(len=*),            intent(in) :: mode      !  D: Direct, R: Reciprocal, BL or BLD
+          real(kind=cp), dimension(3), intent(in) :: v         !  Vector
+          class(Cell_G_Type),          intent(in) :: Cell      !  Cell object
           real(kind=cp), dimension(3)             :: vc
        End Function Cart_Vector
-       
-       Module Subroutine Find_Lowindex_Dir(Cvec,Cell,Space,Irange,Ind,Ang)
-          !---- Arguments ----!
-          real(kind=cp), dimension(3), intent(in)  :: Cvec    
-          class(cell_G_type),          intent(in)  :: Cell    
-          character(len=*),            intent(in)  :: Space   
-          integer,                     intent(in)  :: Irange  
-          real(kind=cp),dimension(3),  intent(out) :: Ind     
-          real(kind=cp),               intent(out) :: Ang  
-       End Subroutine Find_Lowindex_Dir
-       
-       Module Subroutine Calc_Paxes_Angles(x,c,index_range)
-          !---- Arguments ----!
-          type(Strain_Tensor_Type), intent(inout) :: X
-          class(cell_G_type),       intent(in)    :: c            
-          integer,                  intent(in)    :: index_range  
-       End Subroutine Calc_Paxes_Angles
 
        Module Subroutine Change_Setting_Cell_Mat(Cell,Mat,Celln,Matkind)
           !---- Arguments ----!
@@ -338,12 +318,6 @@
           character(len=*),              intent (in)     :: sett
           class(Cell_G_Type),            intent(out)     :: Celln
        End Subroutine Change_Setting_Cell_Symb
-       
-       Module Subroutine Fix_Tensor(A,Sys_In)
-          !---- Arguments ----!
-          real(kind=cp), dimension(3,3), intent(in out) :: A
-          character(len=*),              intent(in)    :: Sys_in
-       End Subroutine Fix_Tensor
 
        Pure Module Function Get_B_from_Betas(Beta,Cell) Result(B)
           !---- Arguments ----!
@@ -469,11 +443,6 @@
           real(kind=cp), optional,         intent(in) :: tol    ! Tolerance
           real(kind=cp), dimension(3,3)             :: trm    ! Transformation matrix
        End Function Get_Transfm_Matrix
-       
-       Module Subroutine Init_Strain_Tensor(T)
-         !---- Argument ----!
-         type(Strain_Tensor_Type), intent(in out) :: T
-       End Subroutine Init_Strain_Tensor   
 
        Module Subroutine Niggli_Cell_ABC(VCell,Niggli_Point,Cell,Trans)
           !---- Arguments ----!
