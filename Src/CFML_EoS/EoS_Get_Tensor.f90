@@ -32,7 +32,7 @@ SubModule (CFML_EoS) EoS_Get_Tensor
 
       !> Init
       cartype=x%cartype
-      call init_strain_tensor(x) 
+      !call init_strain_tensor(x) !This routine doesn't exist
       x%cartype=U_case(cartype)
       x%system=cell_eos%system
       dtype='P'

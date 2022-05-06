@@ -3,8 +3,7 @@
 !!----
 SubModule (CFML_EoS) EoS_Strain
    implicit none
-   
-Contains
+   Contains
 
    !!----
    !!---- FUNCTION STRAIN

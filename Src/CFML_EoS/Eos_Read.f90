@@ -485,7 +485,6 @@ SubModule (CFML_EoS) EoS_Read
       else
          EoS=Eoslist%eos(1)
       end if
-      
    End Subroutine Read_Eos_File
 
    !!--++
@@ -506,7 +505,6 @@ SubModule (CFML_EoS) EoS_Read
       character(len=255)        :: text,wtext
       character(len=10)         :: forma
       real                      :: val
-      logical                   :: warn
 
       !> initialisation
       call init_eos_type(eos)
@@ -516,8 +514,6 @@ SubModule (CFML_EoS) EoS_Read
       ierr=0
       idoc=0                      ! local counter
       nlines=size(flines)
-      warn=.false.
-      wtext=' '
 
       do
          nl=nl+1
@@ -539,10 +535,7 @@ SubModule (CFML_EoS) EoS_Read
          else if(index(text,'COMMENT') /= 0)then
             idoc=idoc+1
             if(idoc <= size(eos%doc))eos%doc(idoc)=trim(text(c:))
-            
-         else if(index(text,'SYSTEM') /= 0)then
-             eos%system=trim(adjustl(text(c:)))
-                
+
          else if(index(text,'MODEL') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%imodel
             if (ierr /=0) call set_error(1,"Error reading the EoS Model number")
@@ -585,10 +578,6 @@ SubModule (CFML_EoS) EoS_Read
 
          else if(index(text,'TYPE') /= 0)then
             if(index(U_case(text),'LINEAR') /= 0) eos%linear=.true.
-            
-         else if(index(text,'DIRECTION') /= 0)then
-            read(text(c:),'(a)',iostat=ierr)eos%LinearDir
-            if (ierr /=0) call set_error(1,"Error reading the direction info")   
 
          else if(index(text,'PREF') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%pref
@@ -635,6 +624,11 @@ SubModule (CFML_EoS) EoS_Read
             forma="(   e12.5)"
             write(unit=forma(2:4),fmt="(i3)") imax
             do i=1,imax
+               ! The variable format <> is a VAX extension that is taken into account by Intel Fortran
+               ! however Gfortran does not support it. It is better to use a general variable for writing
+               ! dynamically whatever kind of format.
+
+               !read(unit=flines(nl+i),fmt='(<imax>e12.5)',iostat=ierr)eos%vcv(i,1:imax)
                read(unit=flines(nl+i),fmt=forma,iostat=ierr) eos%vcv(i,1:imax)
                if (ierr /= 0)exit
             end do
@@ -654,7 +648,7 @@ SubModule (CFML_EoS) EoS_Read
       end if
 
       !> Do stuff to allow for old files made prior to Nov 2016 not having icross:
-      if (eos%icross == 0 .and. abs(eos%params(8)) > 0.000001_cp) eos%icross=1
+      if (eos%icross == 0 .and. abs(eos%params(5)) > 0.000001_cp) eos%icross=1
           !>0.000001 is the smallest non-zero number in the eos file format
           !>Old files cannot be icross=2, only =1
 
@@ -668,9 +662,9 @@ SubModule (CFML_EoS) EoS_Read
          eos%vcv(1:imax,8:9)=eos%vcv(1:imax,5:6)
          eos%vcv(5:6,1:imax)=0._cp
          eos%vcv(1:imax,5:6)=0._cp
-         warn=.true.
+
          wtext="EoS file in old format for cross terms: check parameter values carefully"
-         !call set_error(-1,trim(wtext))
+         call set_error(-1,trim(wtext))
       end if
 
       !> Trap move of Z for APL from params(4) to (5): do it after icross so no conflict with cross terms
@@ -681,9 +675,9 @@ SubModule (CFML_EoS) EoS_Read
          eos%vcv(1:imax,5)=eos%vcv(1:imax,4)
          eos%vcv(4,1:imax)=0._cp
          eos%vcv(1:imax,4)=0._cp
-         warn=.true.
+
          Wtext=trim(Wtext)//"  EoS file in old format for APL EoS: check parameter values carefully"
-         !call set_error(-1,trim(wtext))
+         call set_error(-1,trim(wtext))
       end if
 
       !> Move angle polynomial values from params(1:30) and clear params(1:30)
@@ -705,9 +699,8 @@ SubModule (CFML_EoS) EoS_Read
 
       !>Warn if extra oscillators
       if (sum(eos%iosc) > 0) then
-         warn=.true.
          Wtext=trim(Wtext)//"  Extra oscillators in eos file. These are not supported in this version"
-         !call set_error(-1,trim(wtext))
+         call set_error(-1,trim(wtext))
       endif
 
       !> Now finish setting the other eos components
@@ -716,7 +709,6 @@ SubModule (CFML_EoS) EoS_Read
       call Set_Transition_Names(eos)
       call Set_Shear_Names(eos)
       call Set_Cross_Names(eos)
-      call Set_Osc_Names(eos)
       call Set_EoS_Use(eos)
       call set_eos_factors(eos)           ! sets the eos factors without resetting param values
 
@@ -729,8 +721,9 @@ SubModule (CFML_EoS) EoS_Read
       end do
 
       call Set_EoS_Implied_Values(eos)           ! set implied values
-      if (warn) then
-         call set_error(-1, trim(err_CFML%Msg)//' '//trim(wtext))
+
+      if (err_CFML%IErr < 0)then
+         err_CFML%Msg=trim(err_CFML%Msg)//' '//trim(wtext)
       endif
 
       !> we have to also set the refinement flags to match vcv
@@ -806,7 +799,6 @@ SubModule (CFML_EoS) EoS_Read
          call read_eos_in(flines(istart(i):istart(i+1)-1),eos)
          eoslist%eos(i)=eos
       end do
-      
    End Subroutine Read_Multiple_Eos_File
 
 End SubModule EoS_Read

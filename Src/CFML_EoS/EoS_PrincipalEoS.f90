@@ -50,7 +50,6 @@ SubModule (CFML_EoS) EoS_PrinEoS
                   ieos=i
             end select
       end select
-      
    End Function Principal_EoS
 
 End SubModule EoS_PrinEoS
