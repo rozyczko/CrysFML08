@@ -54,10 +54,9 @@
 Module CFML_EoS
    !---- Use Modules ----!
    Use CFML_GlobalDeps,only: CP, PI, TO_RAD, err_cfml, clear_error, set_error
-   Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH, &
-                             Orient_Eigenvectors
+   Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH
    Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell, Cell_Type, &
-                             Volume_from_Cell,SigmaV_From_Cell, Init_Strain_Tensor, Fix_Tensor
+                             Volume_from_Cell,SigmaV_From_Cell
    Use CFML_Strings,   only: u_case, string_real, string_numstd, number_lines, get_words, get_numstd, &
                              get_separator_pos, get_num, string_numstd, reading_lines, read_key_str
 
@@ -187,7 +186,7 @@ Module CFML_EoS
                                                                        'GAMMA', &
                                                                        'SIGGA']
 
-   character(len=*), public, parameter, dimension(1:7) :: CELLLABEL =  [ 'a    ', &
+   character(len=*), public, parameter, dimension(1:7) :: CELLLABEL =  ['a    ',  &
                                                                          'b    ', &
                                                                          'c    ', &
                                                                          'alpha', &
@@ -203,7 +202,7 @@ Module CFML_EoS
                                                                          'd010', &
                                                                          'd001']  !labels for axis eos
 
-   real(kind=cp), public, parameter               :: AFERMIGAS    = 2337.0                               ! Fermi Gas constant in GPa/A^5
+   real(kind=cp), public, parameter               :: AFERMIGAS    = 2337.0                                 ! Fermi Gas constant in GPa/A^5
    real(kind=cp), public, parameter, dimension(6) :: DELCHI       =[ 2.30, 4.61, 6.17, 9.21,11.80,18.40] ! Delta Chi2 values
    real(kind=cp), public, parameter, dimension(6) :: DELCHI_LEVELS=[68.30,90.00,95.40,99.00,99.73,99.99] ! Confidence Levels
 
