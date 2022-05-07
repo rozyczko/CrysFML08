@@ -164,7 +164,7 @@ Module CFML_KeyCodes
                      "PH   "]
 
    character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
-                     "U    ", "V    ", "W    ", "UVW  ",                  &
+                     "U    ", "V    ", "W    ", "UVW  ",                   &
                      "BKG  ", "SC   ", "EXTI ", "PAT  "]
 
    !-------------------!

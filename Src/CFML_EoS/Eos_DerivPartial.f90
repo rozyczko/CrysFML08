@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_EoS) EoS_DerivPartial 
+SubModule (CFML_EoS) EoS_DerivPartial
 
    implicit none
 
