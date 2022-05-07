@@ -7,7 +7,7 @@
 
       implicit none
 
-      integer :: iclass,nmod,i,j,k,m,multip
+      integer :: iclass,nmod,i,k,m,multip
       character(len=50)  :: str,forma
       !type(SuperSpaceGroup_Type) :: SSpaceGroup
 
