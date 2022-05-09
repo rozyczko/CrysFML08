@@ -1,12 +1,12 @@
   Program Cell_Relations
-    use CFML_GlobalDeps,       only: err_CFML
+    !use CFML_GlobalDeps,       only: err_CFML
     use CFML_Metrics,          only: Cell_G_Type,   &
                                      Change_Setting_Cell,Set_Crystal_Cell, Write_Crystal_Cell,   &
                                      get_primitive_cell
     use CFML_gSpaceGroups,     only: SPG_type, Set_SpaceGroup, Get_Symb_From_Mat
     use CFML_Strings,          only: l_case, Get_Separator_Pos
     use CFML_Maths,            only: Inverse_Matrix,determ3D
-    use CFML_Reflections,      only: Refl_Type,Gener_Reflections !Hkl_Gen_Sxtal
+    use CFML_Reflections,      only: RefList_Type,Gener_Reflections !Hkl_Gen_Sxtal
     implicit none
     integer, parameter          :: n_ref=300, nk=24
     integer, dimension(2)       :: pos
@@ -16,7 +16,7 @@
     real,    dimension(3,nk)    :: k_ind
     real,    dimension(3,3)     :: base,trans,newc,gn,tp,stp,itp,istp,trans_inv,ttrans,ttrans_inv
     real,    dimension(3)       :: hkl_bas,k_bas,hkl
-    type(Refl_Type),dimension(n_ref) :: hkl_sup
+    type(RefList_Type)          :: hkl_sup
     type(SPG_type)              :: SpGr
     character(len=1)            :: lat_type,slat_type
     character(len=50)           :: abc_symb,iabc_symb
@@ -150,7 +150,7 @@
           do i7=ia1,ia2                  !   |C|   |i7  i8  i9| |c|
            do i8=ib1,ib2
             do i9=ic1,ic2
-             j=i1*i5*i9+i4*i8*i3+i2*i6*i7-i3*i5*i7-i8*i6*i1-i2*i4*i9     !determinant (much faster than calling determ_A)
+             j=i1*i5*i9+i4*i8*i3+i2*i6*i7-i3*i5*i7-i8*i6*i1-i2*i4*i9     !determinant (much faster than calling determ3D)
              !if( j /= irvol) cycle
              if( abs(j-irvol) > 1) cycle
              mat=transpose(reshape((/i1,i2,i3,i4,i5,i6,i7,i8,i9/),(/3,3/)))
@@ -273,29 +273,29 @@
       trans=matmul(istp,matmul(real(bestmat),tp))
       trans_inv=Inverse_Matrix(trans)
       !call Get_Symb_From_Mat(trans,abc_symb,(/"a","b","c"/))
-      abc_symb=Get_Symb_From_Mat(trans,[0.0,0.0,0.0])
+      abc_symb=Get_Symb_From_Mat(trans,[0.0,0.0,0.0],.true.)
       call Get_Separator_Pos(abc_symb,",",pos,ncar)
       abc_symb=" A="//abc_symb(1:pos(1)-1)//"  B="//abc_symb(pos(1)+1:pos(2)-1)//"  C="//abc_symb(pos(2)+1:)
       !call Get_Symb_From_Mat(trans_inv,iabc_symb,(/"A","B","C"/))
-      iabc_symb=Get_Symb_From_Mat(trans_inv,[0.0,0.0,0.0])
+      iabc_symb=Get_Symb_From_Mat(trans_inv,[0.0,0.0,0.0],.true.)
       call Get_Separator_Pos(iabc_symb,",",pos,ncar)
       iabc_symb=" a="//iabc_symb(1:pos(1)-1)//"  b="//iabc_symb(pos(1)+1:pos(2)-1)//"  c="//iabc_symb(pos(2)+1:)
 
       write(unit=lout,fmt="(/t17,a,t64,a/)") trim(abc_symb),trim(iabc_symb)
       write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a)")      "       | A |    /",trans(1,:)," \ | a |      | a |   /",trans_inv(1,:)," \ | A |"
-      write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B | = | ",trans(2,:),"  || b |      | b |= | ",trans_inv(2,:),"  || B |       determinant:",determ_a(trans)
+      write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B | = | ",trans(2,:),"  || b |      | b |= | ",trans_inv(2,:),"  || B |       determinant:",determ3D(trans)
       write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a)")      "       | C |    \",trans(3,:)," / | c |      | c |   \",trans_inv(3,:)," / | C |"
 
       write(unit=*,fmt="(//a)") " => FINAL conventional cell transformation:"
       write(unit=*,fmt="(/t17,a,t64,a/)") trim(abc_symb),trim(iabc_symb)
       write(unit=*,fmt="(a, 3f8.4,a,3f8.4,a)")      "       | A |    /",trans(1,:)," \ | a |      | a |   /",trans_inv(1,:)," \ | A |"
-      write(unit=*,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B | = | ",trans(2,:),"  || b |      | b |= | ",trans_inv(2,:),"  || B |       determinant:",determ_a(trans)
+      write(unit=*,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B | = | ",trans(2,:),"  || b |      | b |= | ",trans_inv(2,:),"  || B |       determinant:",determ3D(trans)
       write(unit=*,fmt="(a, 3f8.4,a,3f8.4,a)")      "       | C |    \",trans(3,:)," / | c |      | c |   \",trans_inv(3,:)," / | C |"
       ttrans=transpose(trans)
       ttrans_inv=transpose(trans_inv)
 
       write(unit=lout,fmt="(/,a, 3f8.4,a,3f8.4,a)")    "       | A*|    /",ttrans(1,:)," \ | a*|      | a*|   /",ttrans_inv(1,:)," \ | A*|"
-      write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B*| = | ",ttrans(2,:),"  || b*|      | b*|= | ",ttrans_inv(2,:),"  || B*|       determinant:",determ_a(trans_inv)
+      write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a,f8.4)") "       | B*| = | ",ttrans(2,:),"  || b*|      | b*|= | ",ttrans_inv(2,:),"  || B*|       determinant:",determ3D(trans_inv)
       write(unit=lout,fmt="(a, 3f8.4,a,3f8.4,a)")      "       | C*|    \",ttrans(3,:)," / | c*|      | c*|   \",ttrans_inv(3,:)," / | C*|"
 
       !Search propagation vectors relating the two unit cells
@@ -303,15 +303,16 @@
       !call Hkl_Gen_Sxtal(supercell,SpGr,0.0,0.25,Num_Ref,hkl_sup)
       !call Gener_Reflections(supercell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
       call Gener_Reflections(supercell,0.25,.false.,hkl_sup,SpGr)
+      Num_ref=hkl_sup%Nref
       write(unit=lout,fmt="(/,a)") " ==============================================================="
       write(unit=lout,fmt="(a)")   " Indexing of superstructure reflection in the substructure basis"
       write(unit=lout,fmt="(a,/)") " ==============================================================="
-      write(unit=lout,fmt="(a)") "         Num_Ref   Hs    Ks    Ls         Hb      Kb      Lb     hb    kb    lb           k-vector"
+      write (unit=lout,fmt="(a)") "         Num_Ref   Hs    Ks    Ls         Hb      Kb      Lb     hb    kb    lb           k-vector"
       do i=1,Num_ref
-      	hkl_bas=matmul(trans_inv,hkl_sup(i)%h)
+      	hkl_bas=matmul(trans_inv,hkl_sup%Ref(i)%h)
       	k_bas=hkl_bas-real(nint(hkl_bas))
       	call k_independent(k_bas)
-      	write(unit=lout,fmt="(t8,i8,3i6,tr4,3f8.4,3i6,tr4,3f9.5)") i, hkl_sup(i)%h,hkl_bas,nint(hkl_bas),k_bas
+      	write(unit=lout,fmt="(t8,i8,3i6,tr4,3f8.4,3i6,tr4,3f9.5)") i, hkl_sup%Ref(i)%h,hkl_bas,nint(hkl_bas),k_bas
       end do
 
       if(k1_given) then
@@ -326,12 +327,12 @@
         write(unit=lout,fmt="(a)") "         Num_Ref     Hs      Ks      Ls         Hb      Kb      Lb     hb    kb    lb           k-vector"
 
         do i=1,Num_ref
-        	hkl=hkl_sup(i)%h+k2
+        	hkl=hkl_sup%Ref(i)%h+k2
         	hkl_bas=matmul(trans_inv,hkl)
         	k_bas=hkl_bas-real(nint(hkl_bas))
         	call k_independent(k_bas)
         	write(unit=lout,fmt="(t4,a,i8,3f8.4,tr4,3f8.4,3i6,tr4,3f9.5)") " +k ",i, hkl,hkl_bas,nint(hkl_bas),k_bas
-        	hkl=hkl_sup(i)%h-k2
+        	hkl=hkl_sup%Ref(i)%h-k2
         	hkl_bas=matmul(trans_inv,hkl)
         	k_bas=hkl_bas-real(nint(hkl_bas))
         	call k_independent(k_bas)

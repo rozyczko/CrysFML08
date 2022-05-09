@@ -14,12 +14,12 @@
 
     use CFML_GlobalDeps,     only: Clear_Error, Err_CFML
     use CFML_Maths,          only: negligible
-    use CFML_gSpaceGroups,   only: SPG_Type 
+    use CFML_gSpaceGroups,   only: SPG_Type
     use CFML_Strings,        only: Pack_String, Frac_Trans_1Dig
-    use CFML_Geom,           only: angle_uv, angle_dihedral,P1_dist 
-    use CFML_Atoms,          only: Atm_Cell_Type 
+    use CFML_Geom,           only: angle_uv, angle_dihedral,P1_dist
+    use CFML_Atoms,          only: Atm_Cell_Type
     use CFML_Metrics,        only: Cell_G_Type
-    use Super_Exchange 
+    use Super_Exchange
 
     implicit none
     private
@@ -40,14 +40,14 @@
     real, dimension(3,3), parameter,public :: M_C=reshape([  1.0,-1.0, 0.0, &
                                                              1.0, 1.0, 0.0, &
                                                              0.0, 0.0, 1.0 ],[3,3])
-    real, dimension(3,3), parameter,public :: M_I=reshape([  1.0, 0.0, 0.0, &      
-                                                             0.0, 1.0, 0.0, &      
+    real, dimension(3,3), parameter,public :: M_I=reshape([  1.0, 0.0, 0.0, &
+                                                             0.0, 1.0, 0.0, &
                                                             -1.0,-1.0, 2.0 ],[3,3])
-    real, dimension(3,3), parameter,public :: M_R=reshape([  1.0, 0.0,-1.0, &     
-                                                             1.0, 1.0, 1.0, &      
+    real, dimension(3,3), parameter,public :: M_R=reshape([  1.0, 0.0,-1.0, &
+                                                             1.0, 1.0, 1.0, &
                                                             -1.0,-1.0, 2.0 ],[3,3])
-    real, dimension(3,3), parameter,public :: M_F=reshape([  1.0, 1.0,-1.0, &      
-                                                            -1.0, 1.0, 1.0, &      
+    real, dimension(3,3), parameter,public :: M_F=reshape([  1.0, 1.0,-1.0, &
+                                                            -1.0, 1.0, 1.0, &
                                                              1.0,-1.0, 1.0 ],[3,3])
     real, dimension(3,3),public :: M_coor, M_basis
 
@@ -767,15 +767,15 @@
   Program Simbo
    use CFML_GlobalDeps,     only: Clear_Error, Err_CFML
    use CFML_Maths,          only: negligible, Inverse_Matrix, Set_Eps_Math
-   use CFML_gSpaceGroups,   only: SPG_Type, Set_SpaceGroup, Write_SpaceGroup_Info 
+   use CFML_gSpaceGroups,   only: SPG_Type, Set_SpaceGroup, Write_SpaceGroup_Info
    use CFML_Strings,        only: l_case,u_case,Pack_String, Frac_Trans_1Dig,number_lines,File_Type
    use CFML_Geom,           only: Allocate_Coordination_Type,calc_dist_angle
-   use CFML_Atoms 
-   use CFML_Metrics 
+   use CFML_Atoms
+   use CFML_Metrics
    use CFML_IOForm
    use Simbo_mod
-   use Super_Exchange 
-   
+   use Super_Exchange
+
    Implicit None
 
    character(len=120), allocatable, dimension(:) :: file_dat
@@ -787,7 +787,7 @@
    type (AtList_Type)    :: Ap      !List of atoms inside a primitive cell
    type (Atm_Cell_Type)  :: Acm, Ac !Magnetic atoms and all atoms inside a primitive cell
    type (SE_Connection), dimension (max_magt,max_magt) :: spaths     !a maximun of max_magt magnetic atoms in the cell
-   type (Job_Info_type):: Job_Info
+   !type (Job_Info_type):: Job_Info
    type (File_Type)    :: File_inp
    character(len=1)    :: ans
    character(len=20)   :: sp1
@@ -959,15 +959,15 @@
 
    !call Allocate_Atom_List(Ac%nat,Ap,"Atm_Type",0)       !allocate space for Ap
    !call Atoms_Cell_to_List(Ac,Ap)
-   
+
    call Extend_Atom_List(A, Ap, Spg, "Atm_Type",.false.,lun)
    Call Allocate_Atoms_Cell(Ap%natoms,1,dmax,Ac) !Mult=1 because Ap contains already all atoms in the unit cell
    call Allocate_Coordination_Type(Ac%nat,1,dmax,max_coord)
    call AtList_To_Atm_Cell(Ap,Ac)
    call Allocate_atom_list(0,A,"Atm_Type",0)
-   
+
    !call Write_Atom_List(Ap, 1)  !Debugging
-   
+
    sp1=SpG%SPG_Symb(1:1)//" 1"
    call Set_SpaceGroup(sp1,gP1)     !construct space group P1/A1/B1/C1/I1/R1/F1
    !call write_SpaceGroup_Info(gP1)
@@ -1126,7 +1126,7 @@
 
    close(unit=3)
 
-   call Allocate_Atoms_Cell(0,0,0.0,Acm) 
+   call Allocate_Atoms_Cell(0,0,0.0,Acm)
 
    if(allocated(file_dat)) deallocate(file_dat)
 

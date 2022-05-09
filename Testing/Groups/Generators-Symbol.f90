@@ -1412,8 +1412,8 @@
       use CFML_Rational
       use getting_ssg_generators
       use CFML_Symmetry_Tables
-
-      integer                                    :: i,n,k,iout,ierror
+      implicit none
+      integer                                    :: i,n,k,iout,ngen,ierror
       character(len=40)                          :: str
       type(SpG_Type)                             :: SpG
       integer,           dimension(:),allocatable:: point_op

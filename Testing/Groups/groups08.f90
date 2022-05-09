@@ -445,7 +445,7 @@
     use CFML_Symmetry_Tables
     use CFML_gSpaceGroups
     use Get_gSpG
-
+    implicit none
     character(len=256)                  :: generatorList
     character(len=180)                  :: setting
     character(len=25)                   :: forma="(i5,tr2,a,   i4,a,i8)"
@@ -457,7 +457,7 @@
     !integer, dimension(:,:),allocatable :: G
     !integer, dimension(:),  allocatable :: ord
     integer, dimension(:), allocatable  :: cosets
-    integer :: i, j, L, nsg, indexg, num_group, ier,minu !lun !, ind
+    integer :: i, j, L, nsg, indexg, num_group, ier,minu, nc !lun !, ind
     real(kind=cp) :: start, fin,tini,tfin, secnd
     logical :: set_given, sup_given, datb_given, full, shub_given, set_inv=.true.
 

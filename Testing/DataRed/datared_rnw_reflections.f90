@@ -26,7 +26,7 @@
       type(Reflection_List),                   intent(out)    :: Ref
       type(Group_k_Type),optional,dimension(:),intent(in out) :: Gk
       !local variables
-      integer                                :: i,j,nr,inp,ier,nkv,ivk,a,b,i_rem,irm !,numor
+      integer                                :: i,j,nr,inp,ier,nkv,ivk,i_rem,irm !,numor
       real(kind=cp)                          :: wavel
       character(len=132)                     :: line
       character(len=6)                       :: keyw

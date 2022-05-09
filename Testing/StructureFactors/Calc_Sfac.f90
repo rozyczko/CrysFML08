@@ -32,7 +32,7 @@ Program Calc_Structure_Factors
    character(len=15)           :: sinthlamb  ! String with stlmax (2nd cmdline argument)
    real                        :: stlmax     ! Maximum Sin(Theta)/Lambda
    real                        :: sn, sf2, Lambda
-   integer                     :: MaxNumRef, lun, ier, i, Nref
+   integer                     :: MaxNumRef, lun, ier, i
    complex                     :: fc
 
    integer                     :: narg

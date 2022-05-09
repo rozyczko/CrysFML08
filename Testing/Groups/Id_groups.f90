@@ -3,11 +3,10 @@
     use CFML_Globaldeps, only: cp, err_cfml,Set_CFML_DEBUG
     use CFML_Symmetry_Tables
     use CFML_gSpaceGroups
+    implicit none
 
     character(len=256)                  :: generatorList
-    character(len=25)                   :: forma="(i5,tr2,a,   i4,a,i8)"
     type(Spg_Type)                      :: Grp
-    integer :: i, j, ier
     real(kind=cp) :: start, fin
 
     !> Init

@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_Cartesian_To
 
    implicit none
- 
+
  Contains
    !!----
    !!---- SUBROUTINE CARTESIAN_TO_FRACTIONAL
@@ -13,7 +13,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
    !!----    molecule (copy of the old one) with fractional coordinates,
    !!----    preserving the input molecule in Cartesian Coordinates. Otherwise
    !!----    the input molecule is changed on output.
-   !!----    
+   !!----
    !!--..       Xc= Euler.Xic  (Cartesian in the crystal frame)
    !!--..       xf= Orth_Cr_cel Xc (fractional before translating to the centre)
    !!--..       Xf = Orth_Cr_cel (Euler.Xic) + Xo (final fractional coordinates)
@@ -87,7 +87,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       end if
 
    End Subroutine Cartesian_to_Fractional
-   
+
    !!----
    !!---- Subroutine Cartesian_to_Spherical
    !!----
@@ -108,11 +108,9 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
 
       !---- Local variables -----!
       integer                     :: i,na
-      real(kind=cp)               :: r, theta, phi
-      real(kind=cp), dimension(3) :: ri
       type (Molecule_type)        :: Imol
 
-      !> Controls 
+      !> Controls
       if (mol%coor_type /= "C") then
          call set_error(1, "Cartesian_to_Spherical: the input molecule is not in Cartesian coordinates")
          return
@@ -145,7 +143,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       end if
 
    End Subroutine Cartesian_to_Spherical
-   
+
    !!----
    !!---- Subroutine Cartesian_to_Zmatrix
    !!----
@@ -219,15 +217,15 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
          mol%is_connect=.true.
       end if
 
-      !> Start calculations for each atom of the mol 
+      !> Start calculations for each atom of the mol
       call init_molecule(Imol,na)
       Imol=mol
 
-      !> First atom is always at origin (Z-matrix) 
+      !> First atom is always at origin (Z-matrix)
       Imol%I_Coor(:,1) = 0.0_cp
       Imol%conn(:,1)   = 0
 
-      !> Second atom is always along "x" 
+      !> Second atom is always along "x"
       ri=mol%I_coor(:,2)-mol%I_coor(:,1)
       dist=sqrt(dot_product(ri,ri))
       Imol%I_Coor(1,2)   = dist
@@ -235,7 +233,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       Imol%conn(2:3,2)   = 0
       Imol%conn(1,2)     = 1
 
-      !> Third atom is always in the "xy" plane 
+      !> Third atom is always in the "xy" plane
       !> A(i) d_ij  ang_ijk   dang_ijkl  j k l
       if (Imol%conn(1,3) == 1) then
          Imol%conn(2,3) = 2
@@ -247,7 +245,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
          Imol%I_coor(1,3) = dist
          Imol%I_coor(2,3) = ang
          Imol%I_coor(3,3) = 0.0_cp
-      
+
       else
          Imol%conn(1,3) = 2
          Imol%conn(2,3) = 1
@@ -295,7 +293,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
          if (present(Cell)) then
             rj=Matmul(Mat,ri)
             Imol%xcentre=matmul(Cell%Orth_Cr_cel,rj)+mol%xcentre
-         
+
          else
             if (dot_product(ri,ri) > EPS) then
                call set_error (1, "Cartesian_to_Zmatrix: First atom not at the origin => a cell has to be provided ")
@@ -333,7 +331,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       end if
 
    End Subroutine Cartesian_to_Zmatrix
-   
+
    !!--++
    !!--++ SUBROUTINE GET_Z_FROM_CARTESIAN
    !!--++
@@ -362,11 +360,11 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       if (abs(ci(3)+180.00) <= 0.001) ci(3)=180.0
 
    End Function Get_Z_from_Cartesian
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_CONNECTIVITY_CARTESIAN
    !!--++    Subroutine that create the connectivity for the molecule.
-   !!--++    The coordinates must be in Cartesian system. 
+   !!--++    The coordinates must be in Cartesian system.
    !!--++
    !!--++ Update: April - 2022
    !!
@@ -384,7 +382,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
       integer, dimension(mol%natoms)                  :: T_Ind
       real(kind=cp), dimension(mol%natoms,mol%natoms) :: T_Dist
       real(kind=cp)                                   :: d_min, d_max
-      real(kind=cp)                                   :: dist 
+      real(kind=cp)                                   :: dist
       type (Molecule_type)                            :: Nmol
 
 
@@ -418,7 +416,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
          end do
       end do
 
-      !> Test for reorder atoms 
+      !> Test for reorder atoms
       re_order=.false.
 
       do i=2,Mol%natoms
@@ -513,7 +511,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
                      exit
                   end if
                end do
-            
+
             elseif (nc2 > 0) then
                do
                   k=minloc(T_Dist(i,1:i-1),dim=1, mask=(T_Dist(i,1:i-1) > 0.0))
@@ -526,7 +524,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
                end do
             end if
             if (k == 0) then
-               ! Elegir uno cualquiera 
+               ! Elegir uno cualquiera
                do l=1,i-1
                   if (l == j) cycle
                   k=l
@@ -554,7 +552,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
                      exit
                   end if
                end do
-            
+
             elseif (nc2 > 0) then
                do
                   l=minloc(T_Dist(j,1:i-1),dim=1, mask=(T_Dist(j,1:i-1) > 0.0))
@@ -565,7 +563,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
                      exit
                   end if
                end do
-            
+
             elseif (nc3 > 0) then
                do
                   l=minloc(T_Dist(i,1:i-1),dim=1, mask=(T_Dist(i,1:i-1) > 0.0))
@@ -591,7 +589,7 @@ Submodule (CFML_Molecules) Mol_Cartesian_To
 
       end do
 
-      !> Final Part 
+      !> Final Part
       do i=1, Mol%natoms
          Mol%Conn(:,i)=T_N(:,i)
          select case (i)

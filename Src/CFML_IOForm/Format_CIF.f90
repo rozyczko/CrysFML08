@@ -34,6 +34,7 @@ SubModule (CFML_IOForm) Format_CIF
       write(unit=ipr,fmt="(a)") "_audit_creation_method  'CrysFML' "
       write(unit=Ipr,fmt="(a)") " "
       write(unit=ipr,fmt="(a)") " "
+      if(present(Str)) write(unit=ipr,fmt="(a)") "#  "//trim(Str)
       write(unit=ipr,fmt="(a)") "#============================================================================="
       write(unit=ipr,fmt="(a)") "data_global"
       write(unit=ipr,fmt="(a)") "#============================================================================="
@@ -1161,6 +1162,10 @@ SubModule (CFML_IOForm) Format_CIF
          err_CFML%Msg="Read_CIF_Wave: 0 lines "
          return
       end if
+
+      j_ini=1; j_end=cif%nlines
+      if (present(i_ini)) j_ini=i_ini
+      if (present(i_end)) j_end=i_end
 
       str="_diffrn_radiation_wavelength"
       nl=len_trim(str)

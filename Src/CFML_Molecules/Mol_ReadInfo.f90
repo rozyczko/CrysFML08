@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_ReadInfo
 
    implicit none
- 
+
  Contains
    !!----
    !!---- SUBROUTINE READINFO_FREE_ATOMS
@@ -21,7 +21,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
    !!
    Module Subroutine ReadInfo_Free_Atoms(FileType, AtmF, N, Nl_ini, Nl_end)
       !---- Arguments ----!
-      type(File_type),               intent(in)      :: FileType               
+      type(File_type),               intent(in)      :: FileType
       class(Atm_Type), dimension(:), intent(in out)  :: AtmF       ! Free atoms
       integer,                       intent(out)     :: N          ! Free atoms read
       integer, optional,             intent(in)      :: Nl_ini
@@ -31,34 +31,34 @@ Submodule (CFML_Molecules) Mol_ReadInfo
       character(len=132)           :: line
       character(len=6)            :: label
       character(len=4)            :: var,symb
-      integer                     :: i,k,ier,nlong,iv, n_end
+      integer                     :: i,k,nlong,iv, n_end
       integer,       dimension(5) :: ivet
       real(kind=cp), dimension(5) :: vet
 
       !> Init
       call clear_error()
-      
+
       N=0
-      
+
       if (FileType%nlines ==0) then
          call set_error(1, " The number of lines is zero reading for Free Atoms!")
          return
       end if
 
-      !> Number of FREE atoms 
-      i=0   
+      !> Number of FREE atoms
+      i=0
       if (present(Nl_ini)) i=nl_ini-1
       n_end=filetype%nlines
       if (present(nl_end)) n_end=nl_end
-      
-      do 
+
+      do
          i=i+1
          if (i > n_end) exit
-         
+
          line=adjustl(filetype%line(i)%str)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          if (u_case(line(1:4)) /= "ATOM") cycle
-         
+
          call get_num(line(5:),vet,ivet,iv)
          if (iv /= 1) then
             call set_error(1," The number of FREE atoms not found in the directive ATOM!")
@@ -70,19 +70,19 @@ Submodule (CFML_Molecules) Mol_ReadInfo
       if (N == 0) return
 
       k=0
-      do 
-         i=i+1 
+      do
+         i=i+1
          if (i > n_end) exit
-         
+
          line=adjustl(filetype%line(i)%str)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
-         
+
          !> Atom label
          call cut_string(line,nlong,label)
-         
+
          !> Chemical symbol
          call cut_string(line,nlong,symb)
-         
+
          !> VARY
          line=u_case(line)
          var=" "
@@ -105,36 +105,36 @@ Submodule (CFML_Molecules) Mol_ReadInfo
 
             case (4)
                vet(5)=1.0_cp
-            
+
             case (6:)
                call set_error(1," Wrong numbers to describe the coordinates, Uiso and Occ for the atom!")
                return
          end select
-         
+
          k=k+1
          AtmF(k)%Lab =label
          AtmF(k)%ChemSymb=symb
          AtmF(k)%x=vet(1:3)
          AtmF(k)%u_iso=vet(4)
          AtmF(k)%occ =vet(5)
-         
+
          if (var == "VARY") then
             select type (AtmF)
                type is (Atm_Ref_Type)
-                  
-               type is (MAtm_Ref_Type)   
-               
+
+               type is (MAtm_Ref_Type)
+
                class default
                   call set_error(1,"Defined wrong type for Atom parameters!")
-                  return  
+                  return
             end select
-         end if         
+         end if
 
          if (var == "VARY") then
             do
-               i=i+1 
+               i=i+1
                if (i > n_end) exit
-         
+
                line=adjustl(filetype%line(i)%str)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
 
@@ -143,19 +143,19 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                   case (:2)
                      call set_error(1, 'Wrong numbers for describe the codes of the atom!')
                      return
-                      
+
                   case (3)
                      select type (AtmF)
                         type is (Atm_Ref_Type)
                            AtmF(k)%m_x =vet(1:3)
                            AtmF(k)%m_U_iso =1.0_cp
                            AtmF(k)%m_occ =1.0_cp
-                           
+
                         type is (MAtm_Ref_Type)
                            AtmF(k)%m_x =vet(1:3)
                            AtmF(k)%m_U_iso =1.0_cp
                            AtmF(k)%m_occ =1.0_cp
-                     end select 
+                     end select
 
                   case (4)
                      select type (AtmF)
@@ -163,25 +163,25 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ =1.0_cp
-                           
-                        type is (MAtm_Ref_Type) 
+
+                        type is (MAtm_Ref_Type)
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ =1.0_cp
-                     end select        
-                     
+                     end select
+
                   case (5)
                      select type (AtmF)
                         type is (Atm_Ref_Type)
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ  =vet(5)
-                           
-                        type is (MAtm_Ref_Type)   
+
+                        type is (MAtm_Ref_Type)
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ  =vet(5)
-                     end select      
+                     end select
 
                   case (6:)
                      call set_error(1, 'Wrong numbers for describe the codes of the atom!')
@@ -193,13 +193,13 @@ Submodule (CFML_Molecules) Mol_ReadInfo
 
          if (k == N) exit
       end do
-      
+
       if (k /= N) then
          call set_error(1, 'The number of FREE atoms readed was not the same that ATOMS directive!')
-      end if   
+      end if
 
    End Subroutine ReadInfo_Free_Atoms
-   
+
    !!----
    !!---- SUBROUTINE READINFO_MOLECULE
    !!----
@@ -268,67 +268,67 @@ Submodule (CFML_Molecules) Mol_ReadInfo
       integer,dimension(10)           :: ivet
       real(kind=cp), dimension(10)    :: vet
       real(kind=cp),dimension(3,3)    :: Eu
-      
+
       logical                         :: in_xtal,err_flag
 
       !> Init
       call clear_error()
-      
+
       if (FileType%nlines ==0) then
          call set_error(1, " The number of lines is zero reading for Free Atoms!")
          return
       end if
-      
+
       in_xtal=.false.
-      
-      !> Molecule 
-      i=0  
+
+      !> Molecule
+      i=0
       if (present(nl_ini)) i=nl_ini-1
-      
+
       n_end=filetype%nlines
       if (present(nl_end)) n_end=nl_end
-      
-      do 
+
+      do
          i=i+1
          if (i > n_end) exit
-         
+
          line=adjustl(filetype%line(i)%str)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
          if (u_case(line(1:4)) /= "MOLE") cycle
          ini=5
-         
+
          !> Crystal
          if (u_case(line(5:5)) == 'X') then
             in_xtal=.true.
             ini=6
-         end if   
-         
+         end if
+
          !> Format
          call get_words(line(ini:),dire,ic)
          if (ic /= 3) then
             call set_error(1, "Instruction: MOLE[X] N_Atoms Molecule_Name Coordinates_Type, not found! " )
             return
-         end if 
-         
+         end if
+
          !> N. Atoms in the Molecule
          call get_num(dire(1), vet, ivet, iv)
          if (iv /= 1) then
             call set_error(1, "The number of atoms in the Molecule: "//trim(dire(1)) )
             return
-         end if 
+         end if
          Na=ivet(1)
          if (Na <=0) then
             call set_error(1, "The number of atoms in the Molecule was zero!" )
             return
-         end if   
-         
+         end if
+
          !> Name of the Molecule
          Molname='---XXX---'
          Molname=trim(dire(2))
-           
-         !> Format of Coordinates  
+
+         !> Format of Coordinates
          ct='-'
          ct=adjustl(dire(3))
          ct=u_case(ct)
@@ -337,52 +337,52 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             case default
                call set_error(1," The type of the coordinates us unknown: "//ct )
                return
-         end select         
-         
+         end select
+
          exit
       end do
-      
+
       !> Initialize the Molecule_Type
       call Init_Molecule(Mol, Na)
       Mol%Name_Mol=trim(Molname)
       Mol%coor_type=ct
-      
+
       if (in_xtal) then
          !> Centre / Orientation,....
          do
             i=i+1
             if (i > n_end) exit
-         
+
             line=adjustl(filetype%line(i)%str)
-            if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+            if (line(1:1) == '!' .or. line(1:1) == '#') cycle
             npos=index(line,'!')
             if (npos > 0) line=line(:npos-1)
-            
+
             !> Format
             call get_words(line, dire, ic)
             if (ic /= 8) then
                call set_error(1, "Molecule_Centre(3R), Molecule_Orient(3R), Rotational_Angle Type(1C), Thermal_Factor Type(1C)" )
                return
-            end if 
-            
+            end if
+
             !> Centre of Molecule
             line=trim(dire(1))//'  '//trim(dire(2))//'  '//trim(dire(3))
             call get_num(line,vet,ivet,iv)
             if (iv /=3) then
                call set_error(1, "Wrong number of parameters describing the Centre position of the molecule!")
                return
-            end if  
-            Mol%xcentre=vet(1:3) 
-            
+            end if
+            Mol%xcentre=vet(1:3)
+
             !> Orientation
             line=trim(dire(4))//'  '//trim(dire(5))//'  '//trim(dire(6))
             call get_num(line,vet,ivet,iv)
             if (iv /=3) then
                call set_error(1, "Wrong number of parameters describing the Orientation of the molecule!")
                return
-            end if  
+            end if
             Mol%orient=vet(1:3)
-            
+
             !> Rotation type
             ct=adjustl(u_case(dire(7)))
             select case (ct)
@@ -390,19 +390,19 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                case default
                   call set_error(1, "Wrong description for angle rotation type: "//ct)
                   return
-            end select 
+            end select
             Mol%rot_type=ct
-            
+
             !> Thermal type
-            var=adjustl(u_case(dire(8))) 
+            var=adjustl(u_case(dire(8)))
             select case (trim(var))
-               case ('ISO') 
+               case ('ISO')
                case ('TLS')
                case ('TL')
                case ('T')
                case default
-                  call set_error(1, "Wrong description for Thermal type: "//trim(var))   
-                  return                
+                  call set_error(1, "Wrong description for Thermal type: "//trim(var))
+                  return
             end select
             Mol%therm_type=trim(var)
             exit
@@ -410,17 +410,17 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          Eu=Set_Euler_Matrix(Mol%rot_type, Mol%orient(1), Mol%orient(2), Mol%orient(3))
          Mol%Euler=Eu
          Mol%is_EulerMat=.true.
-         
+
          !> Codes for Orientation...
          do
             i=i+1
             if (i > n_end) exit
-         
+
             line=adjustl(filetype%line(i)%str)
             if (line(1:1) == '!' .or. line(1:1) == '#') cycle
             npos=index(line,'!')
             if (npos > 0) line=line(:npos-1)
-            
+
             call get_num(line,vet,ivet,iv)
             if (iv /= 6) then
                call set_error(1, "Wrong number of parameters for Codes values for Centre and Orientation")
@@ -429,8 +429,8 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             Mol%mxcentre=vet(1:3)
             Mol%mOrient =vet(4:6)
             exit
-         end do      
-            
+         end do
+
          !> Thermal factors
          if (var(1:1) == 'T)') then
             !> Read 6 Themal parameters
@@ -438,10 +438,10 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
                   call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
@@ -450,16 +450,16 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                Mol%T_TLS=vet(1:6)
                exit
             end do
-            
+
             !> ... for codes
             do
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
                   call set_error(1, "Wrong number of parameters for Code Thermal values for Molecule")
@@ -469,17 +469,17 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                exit
             end do
          end if
-         
-         if (var(2:2) == 'L') then   
+
+         if (var(2:2) == 'L') then
             !> Read 6 Themal parameters
             do
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
                   call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
@@ -488,16 +488,16 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                Mol%L_TLS=vet(1:6)
                exit
             end do
-            
+
             !> ... for codes
             do
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 6) then
                   call set_error(1, "Wrong number of parameters for Code Thermal values for Molecule")
@@ -506,18 +506,18 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                Mol%mL_TLS=vet(1:6)
                exit
             end do
-         end if   
+         end if
 
-         if (var(3:3) == 'S') then  
+         if (var(3:3) == 'S') then
             !> Read 9 Themal parameters
             do
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 9) then
                   call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
@@ -528,16 +528,16 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                Mol%S_TLS(3,:)=vet(7:9)
                exit
             end do
-            
+
             !> ... for codes
             do
                i=i+1
                if (i > n_end) exit
                line=adjustl(filetype%line(i)%str)
-               if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+               if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
-   
+
                call get_num(line,vet,ivet,iv)
                if (iv /= 9) then
                   call set_error(1, "Wrong number of parameters for Code Thermal values for Molecule")
@@ -549,37 +549,37 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                exit
             end do
          end if
-                         
+
          Mol%in_xtal = .true.
-            
-      end if ! xtAL  
-      
+
+      end if ! xtAL
+
       !> Read the internal coordinates of the atoms in the Mol
       !> Read the Z-matrix/Cartesian/spherical/Fractional coordinates of the Mol
-      
+
       k=0
       do
          i=i+1
          if (i > n_end) exit
          line=adjustl(filetype%line(i)%str)
-         if (line(1:1) == '!' .or. line(1:1) == '#') cycle 
+         if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
-         
-         !> Atom Name 
+
+         !> Atom Name
          call Cut_string(line, ic, Atname)
-         
+
          !> Chemical symbol
          call Cut_string(line, ic, AtSymb)
-         
+
          !> Vary?
          var=' '
          npos=index(u_case(line),'VARY')
          if (npos > 0) then
             var='VARY'
             line=line(:npos-1)
-         end if   
-         
+         end if
+
          !> Get Numbers
          k=k+1
          call get_num(line,vet,ivet,iv)
@@ -595,16 +595,16 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                         Mol%I_Coor(:,k)  =vet(1:3)
                         Mol%U_iso(k)     =vet(4)
                         Mol%Occ(k)       =1.0_cp
-                     case (5)     
+                     case (5)
                         Mol%I_Coor(:,k)  =vet(1:3)
                         Mol%U_iso(k)     =vet(4)
-                        Mol%Occ(k)       =vet(5) 
-                  end select   
+                        Mol%Occ(k)       =vet(5)
+                  end select
                else
                   call set_error(1," Wrong number of parameters for Atoms information into Molecule! " //trim(Atname))
                   return
-               end if   
-               
+               end if
+
             case ('Z')
                if (iv >= 6 .and. iv <=8) then
                   select case (iv)
@@ -618,25 +618,25 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                         Mol%U_iso(k)     =vet(7)
                         Mol%Occ(k)       =1.0_cp
                         Mol%conn(1:3,k)  =ivet(4:6)
-                     case (8)     
+                     case (8)
                         Mol%I_Coor(:,k)  =vet(1:3)
                         Mol%U_iso(k)     =vet(7)
-                        Mol%Occ(k)       =vet(8) 
+                        Mol%Occ(k)       =vet(8)
                         Mol%conn(1:3,k)  =ivet(4:6)
                   end select
                else
                   call set_error(1," Wrong number of parameters for Atoms information into Molecule! " //trim(Atname))
                   return
-               end if 
+               end if
          end select
-         
+
          mol%Atname(k)=trim(atname)
          mol%AtSymb(k)=trim(atsymb)
-         
+
          !> Codes?
          if (var=='VARY') then
             do
-               i=i+1 
+               i=i+1
                if (i > n_end) then
                   call set_error(1," Trying to read a Code line for Atom "//trim(AtName))
                   return
@@ -658,26 +658,26 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                      Mol%mI_Coor(:,k)=vet(1:3)
                      Mol%mU_iso(k)  =vet(4)
                      Mol%mocc(k)   =0.0
-                  case (5)     
+                  case (5)
                      Mol%mI_Coor(:,k)=vet(1:3)
                      Mol%mU_iso(k)  =vet(4)
                      Mol%mocc(k)   =vet(5)
-               end select   
+               end select
             else
                call set_error(1," Wrong number of parameters for Code Atoms information into Molecule! " //trim(Atname))
                return
             end if
-                     
+
          end if  ! Enf Vary
-         
+
          if (k == Na) exit
       end do
-      
+
       !> Check
       if (k /= Na) then
          call set_error(1," The number of Atoms readen in the file is different from asked! ")
          return
-      end if   
+      end if
 
       !> Check connectivity if ZMatrix coordinates
       Mol%is_connect=.false.
@@ -698,14 +698,14 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                   err_flag=.true.
                   exit
                end if
-            end if   
+            end if
          end do
          if (err_flag) then
-            call set_error(1,"The Z-matrix connectivity is wrong!" ) 
+            call set_error(1,"The Z-matrix connectivity is wrong!" )
             return
-         end if     
-      end if   
-      
+         end if
+      end if
+
    End Subroutine ReadInfo_Molecule
- 
-End SubModule Mol_ReadInfo 
+
+End SubModule Mol_ReadInfo
