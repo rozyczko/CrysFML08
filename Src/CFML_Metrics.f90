@@ -547,34 +547,34 @@
           class(Cell_Type),  intent(in) :: Cell         ! Cell object
           integer, optional, intent(in) :: Iunit
        End Subroutine Write_Crystal_Cell
-       
+
        Module Subroutine Fix_Tensor(A,Sys_In)
           !---- Arguments ----!
           real(kind=cp), dimension(3,3), intent(in out) :: A
           character(len=*),              intent(in)     :: Sys_in
        End Subroutine Fix_Tensor
-       
+
        Module Subroutine Init_Strain_Tensor(T)
           !---- Argument ----!
           type(Strain_Tensor_Type), intent(in out) :: T
        End Subroutine Init_Strain_Tensor
-       
+
        Module Subroutine Find_Lowindex_Dir(Cvec,Cell,Space,Irange,Ind,Ang)
           !---- Arguments ----!
-          real(kind=cp), dimension(3), intent(in)  :: Cvec    
-          type(cell_G_type),           intent(in)  :: Cell    
-          character(len=*),            intent(in)  :: Space   
-          integer,                     intent(in)  :: Irange  
-          real(kind=cp),dimension(3),  intent(out) :: Ind     
-          real(kind=cp),               intent(out) :: Ang     
+          real(kind=cp), dimension(3), intent(in)  :: Cvec
+          type(cell_G_type),           intent(in)  :: Cell
+          character(len=*),            intent(in)  :: Space
+          integer,                     intent(in)  :: Irange
+          real(kind=cp),dimension(3),  intent(out) :: Ind
+          real(kind=cp),               intent(out) :: Ang
        End Subroutine Find_Lowindex_Dir
-       
+
        Module Subroutine Calc_Paxes_Angles(x,c,index_range)
           !---- Arguments ----!
           type(Strain_Tensor_Type), intent(inout) :: X
-          type(cell_G_type),        intent(in)    :: c            
-          integer,                  intent(in)    :: index_range  
-       End Subroutine Calc_Paxes_Angles   
+          type(cell_G_type),        intent(in)    :: c
+          integer,                  intent(in)    :: index_range
+       End Subroutine Calc_Paxes_Angles
 
 
     End Interface

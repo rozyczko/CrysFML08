@@ -4,7 +4,7 @@ Submodule (CFML_Metrics) Metrics_Tensor
    !!----
    !!---- Subroutine Init_Strain_Tensor
    !!----
-   !!---- Update: 19/01/2021 
+   !!---- Update: 19/01/2021
    !!
    Module Subroutine Init_Strain_Tensor(T)
       !---- Argument ----!
@@ -23,7 +23,7 @@ Submodule (CFML_Metrics) Metrics_Tensor
       t%property=''
 
    End Subroutine Init_Strain_Tensor
-   
+
    !!----
    !!---- Subroutine Fix_Tensor
    !!----
@@ -77,5 +77,5 @@ Submodule (CFML_Metrics) Metrics_Tensor
       a(3,2)=a(2,3)
 
    End Subroutine Fix_Tensor
-     
-End Submodule Metrics_Tensor 
+
+End Submodule Metrics_Tensor

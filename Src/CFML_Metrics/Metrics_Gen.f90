@@ -1956,7 +1956,7 @@ Submodule (CFML_Metrics) Metrics_Gen
        end select
 
     End Function Strain_from_Cell
-    
+
     !!----
     !!---- Subroutine Find_Lowindex_Dir
     !!----
@@ -2008,7 +2008,7 @@ Submodule (CFML_Metrics) Metrics_Gen
        end do
 
     End Subroutine Find_Lowindex_Dir
-    
+
     !!----
     !!---- Subroutine  Calc_Paxes_Angles
     !!----

@@ -535,9 +535,9 @@ SubModule (CFML_EoS) EoS_Read
          else if(index(text,'COMMENT') /= 0)then
             idoc=idoc+1
             if(idoc <= size(eos%doc))eos%doc(idoc)=trim(text(c:))
-            
+
          else if(index(text,'SYSTEM') /= 0)then
-            eos%system=trim(adjustl(text(c:)))  
+            eos%system=trim(adjustl(text(c:)))
 
          else if(index(text,'MODEL') /= 0)then
             read(text(c:),'(i5)',iostat=ierr)eos%imodel
@@ -581,10 +581,10 @@ SubModule (CFML_EoS) EoS_Read
 
          else if(index(text,'TYPE') /= 0)then
             if(index(U_case(text),'LINEAR') /= 0) eos%linear=.true.
-            
+
          else if(index(text,'DIRECTION') /= 0)then
             read(text(c:),'(a)',iostat=ierr) eos%LinearDir
-            if (ierr /=0) call set_error(1,"Error reading the direction info")   
+            if (ierr /=0) call set_error(1,"Error reading the direction info")
 
          else if(index(text,'PREF') /= 0)then
             read(text(c:),'(f10.0)',iostat=ierr)eos%pref

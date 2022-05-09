@@ -201,7 +201,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
       !---- Arguments ----!
       real(kind=cp),      intent(in) :: p,T
       type(eos_cell_type),intent(in) :: e
-      real(kind=cp)                  :: vf 
+      real(kind=cp)                  :: vf
 
       !---- Local Variables ----!
       real(kind=cp)   :: aprod, cosang
