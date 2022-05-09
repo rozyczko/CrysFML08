@@ -57,7 +57,8 @@
     !---- List of public procedures ----!
     public :: Allocate_Atom_List, Extend_Atom_List, Init_Atom_Type, Read_Bin_Atom_List, &
               Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell, Index_AtLab_on_AtList
-    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints, Change_AtomList_Type
+    public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints, Change_AtomList_Type, &
+              AtList_To_Atm_Cell
 
 
     !---- Parameters ----!
@@ -265,6 +266,10 @@
       Module Procedure Set_Atom_Equiv_List      !Creating a an Atom_Equiv_List_Type from AtList_Type in asymmetric unit
     End Interface Extend_Atom_List
 
+    Interface Write_Bin_Atom_List
+      Module Procedure Write_Bin_Atom_file
+      Module Procedure Write_Bin_Atom_raw
+    End Interface Write_Bin_Atom_List
 
     !---- Interface Zone ----!
     Interface
@@ -312,6 +317,12 @@
           integer,             intent(in)       :: d
        End Subroutine Allocate_Atom_List
 
+       Module Subroutine AtList_To_Atm_Cell(A,Ac)
+          !---- Arguments ----!
+          type(Atlist_type),   intent(in)        :: A
+          type(Atm_Cell_Type), intent(in out)    :: Ac
+       End Subroutine AtList_To_Atm_Cell
+
        Module Subroutine Change_AtomList_Type(AtList, TypeAtm, Nv)
           !---- Arguments ----!
           type(AtList_Type), intent(in out) :: AtList
@@ -349,11 +360,17 @@
           character(len=*),   intent(in)     :: Type_Atm
        End Subroutine Read_Bin_Atom_List
 
-       Module Subroutine Write_Bin_Atom_List(filename, A)
+       Module Subroutine Write_Bin_Atom_file(filename, A)
           !---- Arguments ----!
           character(len=*),   intent(in) :: filename
           type(atlist_type),  intent(in) :: A
-       End Subroutine Write_Bin_Atom_List
+       End Subroutine Write_Bin_Atom_file
+
+       Module Subroutine Write_Bin_Atom_raw(Ats,Lun)
+          !---- Arguments ----!
+          type (atlist_type),            intent(in) :: Ats
+          integer,                       intent(in) :: Lun
+       End Subroutine Write_Bin_Atom_raw
 
        Module Subroutine Write_Atom_List(A, Iphas, Iunit, SpG)
           !---- Arguments ----!
@@ -363,13 +380,14 @@
           type(SuperSpaceGroup_type),optional, intent(in) :: SpG
        End Subroutine Write_Atom_List
 
-       Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven)
+       Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven,lun)
           !---- Arguments ----!
           type(atlist_type),    intent(in)     :: A
           type(atlist_type),    intent(in out) :: B
           class(SpG_Type),      intent(in)     :: SpG
           character(len=*),     intent(in)     :: Type_Atm
           logical, optional,    intent(in)     :: Conven
+          integer, optional,    intent(in)     :: lun
        End Subroutine Extend_List
 
        Module Subroutine Set_Atom_Equiv_List(SpG,cell,A,Ate,lun)

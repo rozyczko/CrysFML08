@@ -115,6 +115,7 @@ Module CFML_Export_VTK
            iostat=ier)
     if (ier/=0) then
       Err_CFML%Ierr=1
+      Err_CFML%flag=.true.
       Err_CFML%Msg="Error opening the file: "//trim(filename)//'.vts'
       return
     end if
@@ -215,6 +216,7 @@ Module CFML_Export_VTK
     open(newunit=pdb_id,file=trim(filename)//'.pdb', status='REPLACE',  iostat=ier)
     if(ier /= 0) then
       Err_CFML%Ierr=1
+      Err_CFML%flag=.true.
       Err_CFML%Msg="Error opening the file: "//trim(filename)//'.pdb'
       return
     end if
@@ -310,6 +312,7 @@ Module CFML_Export_VTK
            iostat=ier)
     if (ier/=0) then
       Err_CFML%Ierr=1
+      Err_CFML%flag=.true.
       Err_CFML%Msg="Error opening the file: "//trim(filegrid)
       return
     end if
@@ -367,6 +370,7 @@ Module CFML_Export_VTK
            iostat=ier)
     if (ier/=0) then
       Err_CFML%Ierr=1
+      Err_CFML%flag=.true.
       Err_CFML%Msg="Error opening the file: "//trim(filegrid)
       return
     end if

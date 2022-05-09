@@ -1,3 +1,4 @@
 options install --prefix ifort_debug
 options --profile debug
+options --flag "/static /heap-arrays /check:noarg_temp_created /traceback /nologo /CB"
 options --compiler ifort

@@ -2,7 +2,7 @@
 # It is better to comment the part corresponding to executables in order to construct
 # the library totally independent of the programs using it.
 #
-name = "CrysFML2008"
+name = "CrysFML08"
 version = "0.1.0"
 license = "LGPL"
 author = "Juan Rodriguez-Carvajal, Javier Gonzalez-Platas, Nebil A. Katcho"
@@ -23,100 +23,72 @@ library = true
 
 
 
+#
 # The lines above are enough for building the library using the scripts make_CrysFML_fpm.bat/make_CrysFML_fpm.sh
 #
 #==============================================================================================
 # WARNING! For building the executables uncomment the lines below once the library is installed
 #==============================================================================================
 #
-# Some executables from Testing directory
+# Some executables from Testing
 #
-[[executable]]
-name="Bond_StrN"
-source-dir="Testing/Bond_Str"
-main="Bond_StrN.f90"
 
-[[executable]]
-name="io_files"
-source-dir="Testing/CIFs"
-main="io_files.f90"
-
-[[executable]]
-name="io_files_ssg"
-source-dir="Testing/CIFs"
-main="io_files_ssg.f90"
-
-[[executable]]
-name="nDataRed"
-source-dir="Testing/DataRed"
-main="datared.f90"
-
-[[executable]]
-name="Get_Generators_SPG_Symbol"
-source-dir="Testing/Groups"
-main="Generators-Symbol.f90"
-
-[[executable]]
-name="groups08"
-source-dir="Testing/Groups"
-main="groups08.f90"
-
-[[executable]]
-name="Id_groups"
-source-dir="Testing/Groups"
-main="Id_groups.f90"
-
-[[executable]]
-name="read_ssg_database"
-source-dir="Testing/Groups"
-main="read_SSG_database.f90"
-
-[[executable]]
-name="Test_SSG_Genk"
-source-dir="Testing/Groups"
-main="Test_SSG_Genk.f90"
-
-[[executable]]
-name="Grp230"
-source-dir="Testing/Grp_230"
-main="groups_230.f90"
-
-[[executable]]
-name="MHall"
-source-dir="Testing/Hall_Symbols"
-main="MHall.f90"
-
-[[executable]]
-name="GetHall"
-source-dir="Testing/Hall_Symbols"
-main="GetHall_from_Gener.f90"
-
-[[executable]]
-name="mol2pcr"
-source-dir="Testing/Molecules"
-main="mol_tpcr.f90"
-
-[[executable]]
-name="cfl2cif"
-source-dir="Testing/Similar"
-main="cfl2cif.f90"
-
-[[executable]]
-name="Similar"
-source-dir="Testing/Similar"
-main="Similar.f90"
-
-[[executable]]
-name="read_difPat"
-source-dir="Testing/test_diffpatt"
-main="test_read.f90"
-
-
-[[executable]]
-name="Calc_Sfac"
-source-dir="Testing/StructureFactors"
-main="Calc_Sfac.f90"
-
+#[[executable]]
+#executable = [
+#  { name = "cryscalcon",     source-dir = "Testing/Cryst_calculator_console", main = "cryscalc_con.f90"},
+#  { name = "hkl_gen",        source-dir = "Testing/hkl_gen",                  main = "hkl_gen.f90"},
+#  { name = "Formal_Charges", source-dir = "Testing/BondStr/FormalCharges",    main = "Formal_Charges.f90"},
+#  { name = "Bond_Str",       source-dir = "Testing/BondStr/Src",              main = "Bond_Str.f90"}
+#]
+#[[executable]]
+#name="cryscalcon"
+#source-dir="Testing/Cryst_calculator_console"
+#main="cryscalc_con.f90"
+#
+#[[executable]]
+#name="hkl_gen"
+#source-dir="Testing/hkl_gen"
+#main="hkl_gen.f90"
+#
+#[[executable]]
+#name="Formal_Charges"
+#source-dir="Testing/BondStr/FormalCharges"
+#main="Formal_Charges.f90"
+#
+#[[executable]]
+#name="Bond_Str"
+#source-dir="Testing/BondStr/Src"
+#main="Bond_Str.f90"
+#
+#[[executable]]
+#name="Similar"
+#source-dir="Testing/SimilarityTransformations"
+#main="Similar.f90"
+#
+#[[executable]]
+#name="space_group_info"
+#source-dir="Testing/SpaceGroups"
+#main="space_group_info.f90"
+#
+#[[executable]]
+#name="subgroups"
+#source-dir="Testing/SpaceGroups"
+#main="subgroups.f90"
+#
+##
+## Structure factors
+##
+#
+#[[executable]]
+#name="Calc_mSfac"
+#source-dir="Testing/StructureFactors"
+#main="Calc_mSfac.f90"
+#
+#[[executable]]
+#name="Calc_Sfac"
+#source-dir="Testing/StructureFactors"
+#main="Calc_Sfac.f90"
+#
 ##
 ## Structures_GlobalOptimization
 ##
@@ -207,7 +179,7 @@ main="Calc_Sfac.f90"
 ## Powder Patterns
 ##
 #[[executable]]
-#name="Simple_Calc_Mag_Powder"
+#name="Simple_calc_Mag_powder"
 #source-dir="Testing/PowderPattern"
 #main="Simple_calc_Mag_powder.f90"
 #

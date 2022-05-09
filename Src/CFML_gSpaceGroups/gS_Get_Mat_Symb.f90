@@ -67,6 +67,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
          i=index(Symb,";")
          if (i == 0) then
             Err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: Error in a,b,c,..;0,0,... notation: "//trim(Symb)
             return
          end if
@@ -75,6 +76,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
          call Get_Separator_Pos(translation,",",pos,np)
          if (np /= d) then
             Err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: Error transformation symbol: "//trim(Symb)
             return
          end if
@@ -110,12 +112,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
 
       if (index(pSymb,";") /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: Error in the symbol of the operator: symbol ';' is forbidden!"
          return
       end if
 
       if (index(pSymb,".") /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: "// &
                       "Error in the symbol of the operator: symbol '.' is forbidden!"
          return
@@ -130,6 +134,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
                j=index(pSymb,trim(x_typ(i)))
                if (j == 0) then !error in the symbol
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: "// &
                                "Error in the symbol of the operator: Missing ( " // &
                                trim(x_typ(i))//" ) => Symbol:"//trim(pSymb)
@@ -141,6 +146,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
             pos(np)=len_trim(pSymb)-1
          else
             Err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             write(unit=Err_CFML%Msg, fmt="(a,2i3,a)") "Get_Mat_From_Symb@SPACEG: "// &
                  "Error in the dimension of the symbol operator: "//trim(pSymb), np, d, &
                  " for n_commas and dimension"
@@ -152,6 +158,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
             j=index(pSymb(1:pos(np)),trim(x_typ(i)))
             if (j == 0) then !error in the symbol
                Err_CFML%Ierr=1
+               Err_CFML%flag=.true.
                Err_CFML%Msg="Get_Mat_From_Symb_Op@SPACEG: "// &
                             "Error in the symbol of the operator: Missing ( "//trim(x_typ(i))// &
                             " ) => Symbol:"//trim(pSymb)
@@ -271,6 +278,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Mat_Symb
 
       if (det%numerator == 0) then
          Err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="Get_Mat_From_Symb@SPACEG: "// &
                       "The matrix of the operator is singular! -> det="//Rational_String(det)
          matrix=Rational_String(Mat)

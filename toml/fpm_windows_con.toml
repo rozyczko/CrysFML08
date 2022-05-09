@@ -115,6 +115,40 @@ name="Calc_Sfac"
 source-dir="Testing/StructureFactors"
 main="Calc_Sfac.f90"
 
+#
+# Magnetic package Simbo, EnerMag, Phase_Diagram and MC_Mag
+#
+[[executable]]
+name="Simbo"
+source-dir="Testing/Simbo-Enermag"
+main="Simbo.f90"
+
+[[executable]]
+name="EnerMag"
+source-dir="Testing/Simbo-Enermag"
+main="EnerMag.f90"
+
+[[executable]]
+name="Phase_Diagram"
+source-dir="Testing/Simbo-Enermag"
+main="Phase_Diagram.f90"
+
+[[executable]]
+name="MC_Mag"
+source-dir="Testing/Simbo-Enermag/MC_Mag"
+main="mc_mag.f90"
+#
+# Metric
+#
+[[executable]]
+name="Get_Conv_Cell"
+source-dir="Testing/Metrics"
+main="Get_Conv_Cell.f90"
+
+#[[executable]]
+#name="search_cellrelations"
+#source-dir="Testing/Metrics"
+#main="search_cellrelations.f90"
 ##
 ## Structures_GlobalOptimization
 ##
@@ -123,18 +157,6 @@ main="Calc_Sfac.f90"
 #source-dir="Testing/Structures_GlobalOptimization/Src"
 #main="GLOpSAnn.f90"
 #
-##
-## Metric
-##
-#[[executable]]
-#name="Get_Conv_Cell"
-#source-dir="Testing/Metrics"
-#main="Get_Conv_Cell.f90"
-#
-#[[executable]]
-#name="search_cellrelations"
-#source-dir="Testing/Metrics"
-#main="search_cellrelations.f90"
 #
 ##
 ## Magnetic examples, polarimetry
@@ -165,28 +187,6 @@ main="Calc_Sfac.f90"
 #source-dir="Testing/Magnetism/MagOptim_v4"
 #main="MagOptim.f90"
 #
-##
-## Magnetic package Simbo, EnerMag, Phase_Diagram and MC_Mag
-##
-#[[executable]]
-#name="Simbo"
-#source-dir="Testing/Simbo-Enermag"
-#main="Simbo.f90"
-#
-#[[executable]]
-#name="EnerMag"
-#source-dir="Testing/Simbo-Enermag"
-#main="EnerMag.f90"
-#
-#[[executable]]
-#name="Phase_Diagram"
-#source-dir="Testing/Simbo-Enermag"
-#main="Phase_Diagram.f90"
-#
-#[[executable]]
-#name="MC_Mag"
-#source-dir="Testing/Simbo-Enermag/MC_Mag"
-#main="mc_mag.f90"
 #
 ##
 ## Faults Program

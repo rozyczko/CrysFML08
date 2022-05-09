@@ -224,6 +224,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       allocate (A%active(n), A%IPh(n), stat=ier)
       if (ier /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          write(unit=Err_CFML%Msg,fmt="(a,i6,a)") "Error allocating atom List for N =",N," atoms"
          return
       end if
@@ -250,7 +251,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
    !!----          natcel=nasu*mul       and      id=idp=nint(0.74048*(dmax/r_atom)**3)
    !!-->>
    !!----    This subroutine should be called before using the subroutines of this module with
-   !!----    dummy arguments of type Atm_Cell.
+   !!----    dummy arguments of type Atm_Cell. For deallocating just put Nasu=0
    !!----
    !!---- Update: February - 2005
    !!
@@ -276,6 +277,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
          if (allocated(Ac%trans       ))   deallocate (Ac%trans      )
          if (allocated(Ac%ddist       ))   deallocate (Ac%ddist      )
          if (allocated(Ac%ddlab       ))   deallocate (Ac%ddlab      )
+         return
       end if
 
       natcel=nasu*mul
@@ -286,7 +288,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       if (.not. allocated(Ac%xyz         ))   allocate (Ac%xyz         (3,natcel))
       if (.not. allocated(Ac%charge      ))   allocate (Ac%charge        (natcel))
       if (.not. allocated(Ac%moment      ))   allocate (Ac%moment        (natcel))
-      if (.not. allocated(Ac%var_free    ))   allocate (Ac%var_free   (10,natcel))
+      if (.not. allocated(Ac%var_free    ))   allocate (Ac%var_free    (5,natcel))
       if (.not. allocated(Ac%neighb      ))   allocate (Ac%neighb        (natcel))
       if (.not. allocated(Ac%neighb_atom ))   allocate (Ac%neighb_atom(id,natcel))
       if (.not. allocated(Ac%distance    ))   allocate (Ac%distance   (id,natcel))

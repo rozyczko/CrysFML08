@@ -3,7 +3,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
    implicit none
 
  Contains
- 
+
    !!----
    !!---- SUBROUTINE INIT_STRUCTURE_FACTORS
    !!----
@@ -27,7 +27,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       !> Init
       call clear_error()
-      
+
       Natm = Atm%natoms
       Multr= Grp%Numops
 
@@ -36,6 +36,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(AF0(Natm,Reflex%Nref),stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for AF0 allocating!"
          return
       end if
@@ -46,6 +47,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(AFP(Natm),stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for AFP allocating!"
          return
       end if
@@ -55,16 +57,18 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(AFPP(Natm),stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for AFPP allocating!"
          return
       end if
       AFPP=0.0_cp
 
-      !> HR Table 
+      !> HR Table
       if (allocated(HR)) deallocate(HR)
       allocate(HR(Multr,Reflex%Nref),stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for HR allocating!"
          return
       end if
@@ -75,6 +79,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(HT(Multr,Reflex%Nref),stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for HTR allocating!"
          return
       end if
@@ -93,6 +98,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(Ajh(Natm,Reflex%Nref), stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for Aj(h) allocating!"
          return
       end if
@@ -102,6 +108,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(Bjh(Natm,Reflex%Nref), stat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for Bj(h) allocating!"
          return
       end if
@@ -139,8 +146,8 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       if (err_CFML%IErr ==0) SF_Initialized=.true.
 
-   End Subroutine Init_Structure_Factors 
-   
+   End Subroutine Init_Structure_Factors
+
    !!----
    !!---- subroutine init_calc_strfactors
    !!----
@@ -162,11 +169,11 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       call Init_Structure_Factors(Reflex,Atm,Grp,Mode,lambda,lun)
       if (err_CFML%Ierr /=0) return
-      
+
       call Calc_Table_TH(Reflex,Atm)
 
    End Subroutine Init_Calc_StrFactors
-   
+
    !!----
    !!---- SUBROUTINE INIT_CALC_HKL_STRFACTORS
    !!----
@@ -190,7 +197,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       !> Init
       call clear_error()
-      
+
       tipo="XRA"
       if (present(mode)) tipo=adjustl(mode)
 
@@ -202,6 +209,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(AFP(Natm),stat=ierr)
       if (ierr /=0) then
          err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for AFP allocating!"
          return
       end if
@@ -211,12 +219,13 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       allocate(AFPP(Natm),stat=ierr)
       if (ierr /=0) then
          err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Error on memory for AFPP allocating!"
          return
       end if
       AFPP=0.0_cp
 
-      !> Table Fabc 
+      !> Table Fabc
       select case (tipo)
          case ("XRA")
             if (present(lambda)) then
@@ -253,7 +262,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       if (err_CFML%IErr ==0) SF_Initialized=.true.
 
    End Subroutine Init_Calc_hkl_StrFactors
-   
+
    !!--++
    !!--++ SUBROUTINE SET_FIXED_TABLES
    !!--++    Calculates arrays that are fixed during all further
@@ -280,7 +289,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       !> Table HR - HT
       call Create_Table_HR_HT(Reflex,Grp)
 
-      !>Table AF0 
+      !>Table AF0
       select case (tipo)
          case ("XRA")
             if (present(lambda)) then
@@ -339,12 +348,12 @@ Submodule (CFML_Structure_Factors) SF_Initialize
                call Create_Table_AFP_NeutNuc(Atm)
             end if
             if (err_CFML%Ierr /=0) return
-            
+
             if (Grp%Centred == 2) afp=2.0_cp*afp
             if (Grp%Num_Lat  > 1) afp=Grp%Num_Lat*afp
 
       end select
 
    End Subroutine Set_Fixed_Tables
- 
-End SubModule SF_Initialize 
+
+End SubModule SF_Initialize

@@ -158,10 +158,11 @@
        character(len= 90)                 :: form2= "(a,3I4,a,a,a,a,a,f9.4,a,3F8.4,a,t85,a)"  !  JRC feb 2014 &   ! TR 4 fev. 2013
                                            !  "("" "",3I4,""  ("",a,"")-("",a,""):"",f9.4,""   "",3F8.4,""  "",a,""  "",a)"
        integer,          dimension(3)     :: ic1,ic2
-       real(kind=cp),    dimension(3)     :: xx,x1,xo,Tn,xr, QD,tr
+       real(kind=cp),    dimension(3)     :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                      :: T,dd, da1,da2,da12,cang12,ang12,cang1,ang2,ang1
 
        real(kind=cp), allocatable,dimension(:,:) :: uu
+       real(kind=cp), dimension(3,0:Spg%Num_lat) :: ltr
        real(kind=cp), allocatable,dimension(:,:) :: bcoo
        real(kind=cp), dimension(3,SpG%Multip)    :: trr
        integer,       dimension(3,3,SpG%Multip)  :: Mat
@@ -171,7 +172,10 @@
          Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
          trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
        End do
-
+       ltr=0.0
+       if(Spg%Num_lat > 0) then
+          ltr(:,1:Spg%Num_lat)=Spg%Lat_tr(1:3,1:Spg%Num_lat)
+       end if
        iprin=.false.
        if (present(lun)) then
           if (lun > 0) iprin=.true.
@@ -180,6 +184,7 @@
        call clear_error()
 
        call allocate_coordination_type(A%natoms,Spg%multip,Dmax,Max_coor)
+       !write(*,"(a,3i6,f12.4)") " Max_coor,A%natoms,Spg%multip ",Max_coor, A%natoms,Spg%multip,dmax
        if(allocated(uu)) deallocate(uu)
        allocate(uu(3,Max_coor))
        if(allocated(bcoo)) deallocate(bcoo)
@@ -240,9 +245,8 @@
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)
-                         do_jl:do jl=1,Spg%Num_Lat
-                            tr=Spg%Lat_tr(1:3,jl)
-                            Tn(:)=real([i1,i2,i3])+tr
+                         do_jl:do jl=0,Spg%Num_Lat
+                            Tn(:)=real([i1,i2,i3])+Ltr(:,jl)
                             x1(:)=xx(:)+tn(:)
                             do l=1,3
                                t=abs(x1(l)-xo(l))*qd(l)
@@ -258,6 +262,7 @@
 
                             if (Coord_Info%Coord_Num(i) > Coord_Info%Max_Coor) then
                                Err_CFML%Ierr=1
+                               Err_CFML%flag=.true.
                                Err_CFML%Msg=" => Too many distances around atom: "//nam
                                return
                             end if
@@ -571,6 +576,7 @@
                             ico=ico+1
                             if (Coord_Info%Coord_Num(i) > Coord_Info%Max_Coor) then
                                Err_CFML%Ierr=1
+                               Err_CFML%flag=.true.
                                Err_CFML%Msg=" => Too many distances around atom: "//nam
                                return
                             end if
@@ -1099,6 +1105,7 @@
        integer, dimension(Ac%nat,Ac%nat)      :: mn  !neighbouring matrix
        real(kind=cp)                          :: T,dd
        real(kind=cp), dimension(3)            :: xx,x1,xo,Tn,xr, QD
+       real(kind=cp), dimension(3,0:SpG%Num_Lat)            :: Ltr
        real(kind=cp), dimension(3,Ac%nat*Ac%nat*spg%multip) :: u
 
        iprint=.false.
@@ -1107,6 +1114,10 @@
        end if
        call clear_error()
        id=3*nint(0.74048*(dmax/1.1)**3)
+       ltr=0.0
+       if(Spg%Num_lat > 0) then
+          ltr(:,1:Spg%Num_lat)=Spg%Lat_tr(1:3,1:Spg%Num_lat)
+       end if
 
        qd(:)=1.0/cell%rcell(:)
        ic2(:)= nint(dmax/cell%cell(:)+3.0)
@@ -1133,8 +1144,8 @@
              do i1=ic1(1),ic2(1)
                 do i2=ic1(2),ic2(2)
                    do i3=ic1(3),ic2(3)
-                      do_jl:do jl=1,Spg%Num_Lat
-                         Tn(:)=real([i1,i2,i3])+real(Spg%Lat_tr(1:3,jl))
+                      do_jl:do jl=0,Spg%Num_Lat
+                         Tn(:)=real([i1,i2,i3])+Ltr(:,jl)
                          x1(:)=xx(:)+tn(:)
                          do l=1,3
                             t=abs(x1(l)-xo(l))*qd(l)
@@ -1154,6 +1165,7 @@
                          ne=ne+1
                          IF (ne > id) THEN
                             Err_CFML%Ierr=1
+                            Err_CFML%flag=.true.
                             Err_CFML%Msg="Too many connected atoms! in sub. P1_dist"
                             return
                          END IF

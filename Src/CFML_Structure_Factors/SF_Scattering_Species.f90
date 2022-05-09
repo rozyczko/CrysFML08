@@ -14,20 +14,20 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
       !---- Arguments ----!
       integer,                       intent(in)  :: n
       type(Scattering_Species_Type), intent(out) :: Scf
-     
+
       !---- Local variables ----!
       integer :: i
 
       Scf%Num_Species=n
       Scf%Num_magspc=0
-     
+
       allocate(Scf%br(n),Scf%bi(n),Scf%delta_fp(n),Scf%delta_fpp(n),Scf%symb(n))
       Scf%br=0.0
       Scf%bi=0.0
       Scf%delta_fp=0.0
       Scf%delta_fpp=0.0
       Scf%symb= " "
-     
+
       allocate(Scf%Xcoef(n))
       do i=1,Scf%Num_Species
          Scf%Xcoef(i)%Z=0
@@ -37,7 +37,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
       end do
 
    End Subroutine Allocate_Scattering_Species
-   
+
    !!----
    !!----  SUBROUTINE ADDITIONAL_SCATTERING_FACTORS
    !!----
@@ -50,10 +50,10 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: fil
       Type(Scattering_Species_Type), intent(out) :: add_Scatt
-      
+
       !---- Local variables ----!
       integer, parameter :: N_ADD = 20
-      
+
       integer            :: i,nsp,j,ier
       character(len=132)                   :: line
       character(len=4), dimension(N_add)   :: names
@@ -63,11 +63,11 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
 
       !> Init
       call clear_error()
-      
+
       b_real=0.0; b_imag=0.0; d_fp=0.0; d_fpp=0.0; cc=0.0
       ac=0.0; bc=0.0
       nsp=0
-      
+
       do i=1,fil%nlines
          line=adjustl(fil%line(i)%str)
          if (U_case(line(1:2)) == "B_") then
@@ -77,11 +77,12 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
             read(unit=line(j:), fmt=*, iostat=ier) b_real(nsp),b_imag(nsp)
             if (ier /= 0) then
                err_CFML%IErr=1
+               Err_CFML%flag=.true.
                err_CFML%Msg="Error reading scattering length on line containing: "//trim(line)
                return
             end if
          end if
-        
+
          if (U_case(line(1:5)) == "DELT_") then
             nsp=nsp+1
             j=index(line," ")
@@ -93,7 +94,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
                return
             end if
          end if
-        
+
          if (U_case(line(1:7)) == "XCOEFF_") then
             nsp=nsp+1
             j=index(line," ")
@@ -101,18 +102,20 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
             read(unit=line(j:), fmt=*, iostat=ier) ac(:,nsp),bc(:,nsp),cc(nsp)
             if (ier /= 0) then
                err_CFML%IErr=1
+               Err_CFML%flag=.true.
                err_CFML%Msg="Error reading X-ray scattering coefficients on line containing: "//trim(line)
                return
             end if
          end if
       end do
-      
+
       if (nsp > N_ADD) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          write(unit=err_CFML%Msg,fmt="(a,i3,a)") "The number of additional scattering factors is limited to ",N_add," !!!"
          return
       end if
-      
+
       if (nsp > 0) then
          call Allocate_Scattering_Species(nsp,add_Scatt)
          do i=1,nsp
@@ -126,17 +129,17 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
             add_Scatt%Xcoef(i)%b   = bc(:,i)
             add_Scatt%Xcoef(i)%c   = cc(i)
          end do
-      
+
       else
          add_Scatt%Num_species=0
       end if
 
    End Subroutine Additional_Scattering_Factors
-   
+
    !!----
    !!---- SUBROUTINE SET_FORM_FACTORS
    !!----
-   !!----  Constructor subroutine of object Scf of Scattering_Species_Type, 
+   !!----  Constructor subroutine of object Scf of Scattering_Species_Type,
    !!----  by reading the database contained in module CFML_Scattering_Chemical_Tables
    !!----  and, in the appropriate case, the object Add_Scatt.
    !!----
@@ -152,7 +155,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
 
      !---- Local variables ----!
      character(len=12), parameter            :: DIGPM="0123456789+-"
-     
+
      character(len=4)                        :: symbcar
      character(len=4), dimension(atm%natoms) :: symb
      character(len=4), dimension(atm%natoms) :: elem
@@ -165,7 +168,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
 
      call clear_error()
      call set_chem_info()
-      
+
      !> Getting Fermi Lengths of atoms
      symb="    "
      Elem="    "
@@ -174,12 +177,13 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      do i=1,atm%natoms
         symbcar=u_case(atm%atom(i)%chemsymb)
         b=Get_Fermi_Length(symbcar)      ! equal to the charge of the nuclei
-        
+
         if (abs(b) < 0.0001) then
            err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_CFML%Msg="The Fermi Length of Species "//trim(symbcar)//" was not found"
            return
-         
+
         else
            if(any(Elem == symbcar)) cycle
            n=n+1
@@ -205,7 +209,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            end if
         end do
 
-        !> Found Species on Anomalous_ScFac 
+        !> Found Species on Anomalous_ScFac
         do i=1,Scf%Num_species
            symbcar=l_case(Elem(i))
            do j=1,NUM_DELTA_FP
@@ -232,16 +236,17 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            end if
         end if
         found=.false.
-        
+
         do j=1,NUM_XRAY_FORM
            if (symbcar /= Xray_form(j)%Symb) cycle
            Scf%xcoef(i)=Xray_form(j)
            found=.true.
            exit
         end do
-        
+
         if (.not. found) then
            err_CFML%IErr=1
+           Err_CFML%flag=.true.
            err_CFML%Msg="Error: X-ray scattering form factor coefficients not found for "//symbcar
            return
         end if
@@ -283,9 +288,9 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      end if
 
      if (present(mag)) then
-        !> Load form factor values for Magnetic Scattering 
+        !> Load form factor values for Magnetic Scattering
         call Set_Magnetic_Form()
-        
+
         !> Find Species in Magnetic_Form
         ix=0
         jx=0
@@ -336,7 +341,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         do k=1,Scf%Num_species
            write(unit=lun,fmt="(a,2F10.6,tr20,i8)")  "     "//Scf%Symb(k), Scf%br(k), Scf%bi(k), Scf%Xcoef(k)%Z
         end do
-        
+
         if (.not. present(mag)) then
            write(unit=lun,fmt="(/,/)")
            write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED X-RAY SCATTERING FACTORS"
@@ -370,5 +375,5 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      end if
 
    End Subroutine Set_Form_Factors
- 
-End Submodule SF_Scattering_Species 
+
+End Submodule SF_Scattering_Species

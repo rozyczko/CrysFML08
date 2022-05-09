@@ -14,20 +14,21 @@ SubModule (CFML_Atoms) Atm_ExtendList
    !!----
    !!---- Update: February - 2005
    !!
-   Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven)
+   Module Subroutine Extend_List(A, B, Spg, Type_Atm,Conven,lun)
       !---- Arguments ----!
       type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
       type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
       class(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
       character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
       logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
-
+      integer, optional,    intent(in)     :: lun       ! Outputs the content of a primitive/conventional cell
       !---- Local Variables ----!
       character(len=4)                         :: fmm
       integer                                  :: i,k,j,l,nt,npeq,n,d
+      real(kind=cp)                            :: qc
       real(kind=cp),dimension(3)               :: xo,xx
       real(kind=cp),dimension(3,Spg%multip)    :: u
-      logical                                  :: ccell
+      logical                                  :: ccell,iprin
       type(atlist_type)                        :: c_atm
       real(kind=cp), dimension(3,SpG%Multip)   :: tr
       integer,       dimension(3,3,SpG%Multip) :: Mat
@@ -35,9 +36,9 @@ SubModule (CFML_Atoms) Atm_ExtendList
 
       !> Init
       call clear_error()
-      ccell=.false.
+      ccell=.false.; iprin=.false.
       if (present(conven)) ccell=conven
-
+      if (present(lun)) iprin=.true.
       !> Check arguments
       if (.not. extends_type_of(B,A) .or. (.not. same_type_as(B,A)) ) then
          err_CFML%IErr=1
@@ -55,10 +56,21 @@ SubModule (CFML_Atoms) Atm_ExtendList
       if (SpG%centred == 2) npeq=npeq*2
       if (ccell) npeq=SpG%multip
       call allocate_atom_list(npeq*A%natoms,c_atm,Type_Atm,0)
+
+      if (iprin)  then
+         if (ccell) then
+            write(unit=lun,fmt="(/,a)") "     LIST OF ATOMS INSIDE THE CONVENTIONAL UNIT CELL "
+            write(unit=lun,fmt="(a,/)") "     =============================================== "
+         else
+            write(unit=lun,fmt="(/,a)") "     LIST OF ATOMS CONTAINED IN A PRIMITIVE CELL "
+            write(unit=lun,fmt="(a,/)") "     =========================================== "
+         end if
+      end if
+
       n=0
       do k=1,A%natoms
          if (.not. A%atom(k)%active) cycle
-         l=1       ! Number of representant atom i asymmetric unit
+         l=1       ! Number of representant atom in asymmetric unit
          n=n+1     ! Number of atom in the list
 
          c_atm%Active(n) =A%Active(k)
@@ -72,7 +84,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
          c_atm%Atom(n)%ChemSymb= A%atom(k)%ChemSymb
          c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
          c_atm%Atom(n)%Z       = A%atom(k)%Z
-         c_atm%Atom(n)%Mult    = real(l)/SpG%multip
+         c_atm%Atom(n)%Mult    = 1 !real(l)/SpG%multip
          c_atm%Atom(n)%Charge  = A%atom(k)%Charge
          c_atm%Atom(n)%x       = xo
          c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
@@ -88,7 +100,12 @@ SubModule (CFML_Atoms) Atm_ExtendList
          c_atm%Atom(n)%wyck    = A%atom(k)%wyck
          c_atm%Atom(n)%VarF    = A%atom(k)%VarF
          c_atm%Atom(n)%active  = A%atom(k)%active
-
+         if (iprin) then
+            qc=c_atm%Atom(n)%Charge
+            write(unit=lun,fmt="(/,a,a)") " => Equivalent positions of atom: ",trim(A%atom(k)%lab)
+            write(unit=lun,fmt="(2a,3f10.5,2(a,f6.3))")"       ",   &
+             c_atm%Atom(n)%lab, xo(:), "   M = ", c_atm%Atom(n)%Mom ," Q = ", qc
+         end if
          loop:do j=2,npeq
             !xx=Apply_OP(SpG%Op(j),xo)
             xx=Matmul(Mat(:,:,j),xo) + tr(:,j)
@@ -123,7 +140,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
             c_atm%Atom(n)%ChemSymb= A%atom(k)%ChemSymb
             c_atm%Atom(n)%SfacSymb= A%atom(k)%SfacSymb
             c_atm%Atom(n)%Z       = A%atom(k)%Z
-            c_atm%Atom(n)%Mult    = real(l)/SpG%multip
+            c_atm%Atom(n)%Mult    = 1 !real(l)/SpG%multip
             c_atm%Atom(n)%Charge  = A%atom(k)%Charge
             c_atm%Atom(n)%x       = xx
             c_atm%Atom(n)%U_iso   = A%atom(k)%U_iso
@@ -139,6 +156,11 @@ SubModule (CFML_Atoms) Atm_ExtendList
             c_atm%Atom(n)%wyck    = A%atom(k)%wyck
             c_atm%Atom(n)%VarF    = A%atom(k)%VarF
             c_atm%Atom(n)%active  = A%atom(k)%active
+            if (iprin) then
+               qc=c_atm%Atom(n)%Charge
+               write(unit=lun,fmt="(2a,3f10.5,2(a,f6.3))")"       ",   &
+               c_atm%Atom(n)%lab, xx(:), "   M = ", c_atm%Atom(n)%Mom ," Q = ", qc
+            end if
 
             !select type(atm => A%atom(k))
             !   class is (Atm_Std_Type)
@@ -158,12 +180,12 @@ SubModule (CFML_Atoms) Atm_ExtendList
             !      !c_atm%Atom(n)%dcs_std= A%atom(k)%dcs_std
             !end select
 
-
          end do loop
       end do
 
       if (n == 0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Extend_List@CFML_Atoms: Number of extended atoms is zero!"
          call allocate_atom_list(0,c_atm,Type_Atm,0)
          return
@@ -178,6 +200,36 @@ SubModule (CFML_Atoms) Atm_ExtendList
       call allocate_atom_list(0,c_atm,Type_Atm,0)
 
    End Subroutine Extend_List
+
+   !!----
+   !!---- Subroutine AtList_To_Atm_Cell(A,Ac)
+   !!----    type(Atlist_type),  intent(in)        :: A    !  In -> instance of Atlist_type
+   !!----    type(Atm_Cell_Type),intent(in out)    :: Ac   !  In -> instance of Atm_Cell_Type
+   !!----                                                    Out -> Initialize some Atm_Cell_Type components
+   !!----
+   !!----    Subroutine to construct an Atom Cell object "Ac" from an atom_list
+   !!----    object "A". It is supposed that both objects have been previouly
+   !!----    allocated using the appropriate procedures. It is supposed that the atoms
+   !!----    in the input A list constitute all the atoms in the conventional/primitive cell.
+   !!----
+   !!---- Update: February - 2005, updated May-2022
+   !!
+   Module Subroutine AtList_To_Atm_Cell(A,Ac)
+      !---- Arguments ----!
+      type(Atlist_type),   intent(in)        :: A
+      type(Atm_Cell_Type), intent(in out)    :: Ac
+
+      !---- Local Variables ----!
+      integer :: i
+
+      Ac%nat=A%natoms
+      do i=1,Ac%nat
+         Ac%Lab(i)         = A%atom(i)%lab
+         Ac%xyz(:,i)       = A%Atom(i)%x
+         Ac%var_free(:,i)  = A%Atom(i)%varf
+         Ac%moment(i)      = A%Atom(i)%mom
+      end do
+   End Subroutine AtList_To_Atm_Cell
 
    !!----
    !!---- SET_ATOM_EQUIV_LIST

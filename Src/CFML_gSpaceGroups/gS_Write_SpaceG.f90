@@ -183,5 +183,89 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
       end if
    End Subroutine Write_SpaceGroup_Info
 
+   Module Subroutine Write_SpaceGroup_bin(Grp,Lun)
+      !---- Arguments ----!
+      class(Spg_Type),    intent(in)   :: Grp
+      integer, optional,  intent(in)   :: lun
+      integer :: i
+      if(Grp%d-1 > 3) then !Superspace group
+
+            write(unit=lun) Grp%d
+            write(unit=lun) Grp%d-1
+            write(unit=lun) Grp%multip
+            write(unit=lun) Grp%mag_type
+            write(unit=lun) Grp%numops
+            write(unit=lun) Grp%centred
+            write(unit=lun) Grp%num_lat
+            write(unit=lun) Grp%num_alat
+            write(unit=lun) Grp%init_label
+            write(unit=lun) Grp%Crystalsys
+            write(unit=lun) Grp%centre
+            write(unit=lun) Grp%pg
+            write(unit=lun) Grp%laue
+            write(unit=lun) Grp%setting
+            write(unit=lun) Grp%mat2std
+            write(unit=lun) Grp%mag_pg
+            write(unit=lun) Grp%Parent_num
+            write(unit=lun) Grp%Parent_spg
+            write(unit=lun) Grp%tfrom_parent
+            write(unit=lun) Grp%Bravais_num
+            write(unit=lun) Grp%SSG_Bravais
+            write(unit=lun) Grp%numspg
+            write(unit=lun) Grp%SSG_nlabel
+            write(unit=lun) Grp%SSG_symb
+            Select Type (Grp)
+              class is(SuperSpaceGroup_Type)
+                write(unit=lun)   Grp%nk
+                do i=1,Grp%nk
+                   write(unit=lun)Grp%kv(:,i),Grp%nharm(i), Grp%sintlim(i)
+                end do
+                write(unit=lun) Grp%nq
+                do i=1,Grp%nq
+                   write(unit=lun) Grp%q_coeff(:,i)
+                end do
+            End Select
+      else
+            write(unit=lun)  Grp%d
+            write(unit=lun)  Grp%d-1
+            write(unit=lun)  Grp%multip
+            write(unit=lun)  Grp%mag_type
+            write(unit=lun)  Grp%numops
+            write(unit=lun)  Grp%centred
+            write(unit=lun)  Grp%num_lat
+            write(unit=lun)  Grp%num_alat
+            write(unit=lun)  Grp%centre
+            write(unit=lun)  Grp%Crystalsys
+            write(unit=lun)  Grp%pg
+            write(unit=lun)  Grp%laue
+            write(unit=lun)  Grp%numspg
+            write(unit=lun)  Grp%init_label
+            write(unit=lun)  Grp%spg_symb
+            write(unit=lun)  Grp%Hall
+
+         if(Grp%magnetic) then
+            write(unit=lun)  Grp%numshu
+            write(unit=lun)  Grp%bns_symb
+            write(unit=lun)  Grp%bns_num
+            write(unit=lun)  Grp%og_symb
+            write(unit=lun)  Grp%UNI
+            write(unit=lun)  Grp%UNI_num
+            write(unit=lun)  Grp%mag_pg
+            write(unit=lun)  Grp%Mat2Std_Shu
+         else
+            write(unit=lun)  Grp%setting
+            write(unit=lun)  Grp%Mat2Std_Shu
+            write(unit=lun)  Grp%Parent_spg
+            write(unit=lun)  Grp%tfrom_parent
+         end if
+
+      end if
+
+      do i=1,Grp%Multip
+         write(unit=lun) Grp%Symb_Op(i)
+      end do
+
+   End Subroutine Write_SpaceGroup_bin
+
 End SubModule gS_Write_SpaceG
 

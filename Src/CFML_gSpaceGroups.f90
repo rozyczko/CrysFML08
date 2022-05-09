@@ -80,7 +80,8 @@ Module CFML_gSpaceGroups
               Identify_Group, Init_SpaceGroup,  Is_OP_Inversion_Centre, Get_Inv_OP,      &
               Set_Conditions_NumOP_EPS, Set_SpaceGroup,Is_OP_Lattice_Centring,           &
               Write_SpaceGroup_Info, Get_Multip_Pos, Is_Lattice_Vec,Is_OP_Anti_Lattice,  &
-              Get_SubGroups_full, SearchOp, Write_SymTrans_Code, Read_SymTrans_Code
+              Get_SubGroups_full, SearchOp, Write_SymTrans_Code, Read_SymTrans_Code,     &
+              Write_SpaceGroup_bin
 
     !---- Types ----!
 
@@ -973,6 +974,12 @@ Module CFML_gSpaceGroups
           class(Spg_Type),    intent(in)   :: Grp
           integer, optional,  intent(in)   :: lun
        End Subroutine Write_SpaceGroup_Info
+
+       Module Subroutine Write_SpaceGroup_bin(Grp,Lun)
+          !---- Arguments ----!
+          class(Spg_Type),    intent(in)   :: Grp
+          integer, optional,  intent(in)   :: lun
+       End Subroutine Write_SpaceGroup_bin
 
     End Interface
 

@@ -461,6 +461,7 @@
        inquire (file=trim(filename),exist=info)
        if (.not. info) then
           err_cfml%ierr=1
+          Err_CFML%flag=.true.
           err_cfml%msg="The file"//trim(filename)//" does not exist "
           return
        end if
@@ -483,6 +484,7 @@
        end do
        if(nlines == 0) then
           err_cfml%ierr=1
+          Err_CFML%flag=.true.
           err_cfml%msg="The file"//trim(filename)//" contains no lines ! "
           return
        end if
@@ -522,6 +524,7 @@
        inquire (file=trim(filename),exist=info)
        if (.not. info) then
           err_cfml%ierr=1
+          Err_CFML%flag=.true.
           err_cfml%msg="The file"//trim(filename)//" does not exist "
           return
        end if
@@ -578,6 +581,7 @@
        inquire (file=trim(filename),exist=info)
        if (.not. info) then
           err_cfml%ierr=1
+          Err_CFML%flag=.true.
           err_cfml%msg="Number_lines@STRINGS: The file"//trim(filename)//" does not exist "
           return
        end if

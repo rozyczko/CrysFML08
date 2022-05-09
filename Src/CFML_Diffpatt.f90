@@ -370,6 +370,7 @@
 
        if (n <= 0) then
           err_CFML%IErr=1
+          Err_CFML%flag=.true.
           err_CFML%Msg="Allocate_Pattern@DIFFPATT: Failed the attempt to allocate a DiffPat_Type!"
           return
        end if

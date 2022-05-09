@@ -1309,8 +1309,6 @@ Submodule (CFML_Metrics) Metrics_Gen
 
                 Case(3:)
                    message="Error in monoclinic cell"
-                   ok=.false.
-
                    err_CFML%IErr=1
                    err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: Error for monoclinic cell!"
                    return
@@ -1414,9 +1412,8 @@ Submodule (CFML_Metrics) Metrics_Gen
 
                 if ( j == 0) then
                    message="Trigonal/Rhombohedral test failed! Supply only one two-fold axis"
-                   ok=.false.
-
                    err_CFML%IErr=1
+                   err_CFML%flag=.true.
                    err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                    return
                 else
@@ -1491,9 +1488,8 @@ Submodule (CFML_Metrics) Metrics_Gen
 
                    Else
                       message="Trigonal/Rhombohedral test failed! Supply only one two-fold axis"
-                      ok=.false.
-
                       err_CFML%IErr=1
+                      err_CFML%flag=.true.
                       err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                       return
                    End if
@@ -1535,10 +1531,9 @@ Submodule (CFML_Metrics) Metrics_Gen
              namina=ab(1)
              naminb=ab(2)
              if (namina == 0 .or. naminb == 0) then
-                ok=.false.
                 message="Basis vectors a-b not found!"
-
                 err_CFML%IErr=1
+                err_CFML%flag=.true.
                 err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                 return
              else
@@ -1565,9 +1560,8 @@ Submodule (CFML_Metrics) Metrics_Gen
                       message="Tetragonal, I-centred cell"
                    Case(3:)
                       message="Error in tetragonal cell"
-                      ok=.false.
-
                       err_CFML%IErr=1
+                      err_CFML%flag=.true.
                       err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                       return
                 End Select
@@ -1615,9 +1609,8 @@ Submodule (CFML_Metrics) Metrics_Gen
                    end if
                 end do
              else
-                ok=.false.
-
                 err_CFML%IErr=1
+                err_CFML%flag=.true.
                 err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: Error in Hexagonal n-2fold axes=7"
                 return
              end if
@@ -1643,10 +1636,9 @@ Submodule (CFML_Metrics) Metrics_Gen
                 End Select
 
              else
-                ok=.false.
                 message="The c-axis of a hexagonal cell was not found!"
-
                 err_CFML%IErr=1
+                err_CFML%flag=.true.
                 err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                 return
              end if
@@ -1692,9 +1684,8 @@ Submodule (CFML_Metrics) Metrics_Gen
              Select Case (namina)
                 Case(0)
                   message="Pseudo-cubic but tolerance too small ... "
-                  ok=.false.
-
                   err_CFML%IErr=1
+                  err_CFML%flag=.true.
                   err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
                   return
                 Case(1)
@@ -1726,9 +1717,8 @@ Submodule (CFML_Metrics) Metrics_Gen
 
           case default
              write(unit=message,fmt="(a,i3)") "Wrong number of two-fold axes! ",twofold%ntwo
-             ok=.false.
-
              err_CFML%IErr=1
+             err_CFML%flag=.true.
              err_CFML%Msg="GET_CONVENTIONAL_CELL@METRICS: "//trim(message)
              return
 
@@ -1739,7 +1729,6 @@ Submodule (CFML_Metrics) Metrics_Gen
       ang(2)=acosd(dot_product(v1/mv(1),v3/mv(3)))
       ang(3)=acosd(dot_product(v1/mv(1),v2/mv(2)))
       Call Set_Crystal_Cell(mv(1:3),ang(1:3),Cell)
-      ok=.true.
 
     End Subroutine Get_Conventional_Cell
 

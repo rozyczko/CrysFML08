@@ -3,7 +3,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
    implicit none
 
  Contains
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_TABLE_HR_HT
    !!--++
@@ -33,7 +33,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       end do
 
    End Subroutine Create_Table_HR_HT
-   
+
    !!--++
    !!--++ SUBROUTINE Calc_Table_AB
    !!--++
@@ -56,12 +56,12 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       !> Init
       Ajh=0.0_cp
       Bjh=0.0_cp
-      
+
       if (Grp%Centred == 2) then
          do j=1,Nref
             do i=1,Atm%natoms
                arg=0.0_cp
-              
+
                do k=1,grp%NumOps
                   h=hr(k,j)%h
                   arg=tpi*(dot_product(h,Atm%atom(i)%x)+ht(k,j))
@@ -76,12 +76,12 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
                end do ! symmetry
             end do ! Atoms
          end do ! Reflections
-      
+
       else
          do j=1,Nref
             do i=1,Atm%natoms
                arg=0.0_cp
-               
+
                do k=1,grp%NumOps
                   h=hr(k,j)%h
                   arg=tpi*(dot_product(h,Atm%atom(i)%x)+ht(k,j))
@@ -100,7 +100,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       end if
 
    End Subroutine Calc_Table_AB
-   
+
    !!--++
    !!--++ SUBROUTINE CALC_TABLE_TH
    !!--++    Calculate a Table of Isotropinc Thermal contribution and occupation
@@ -127,11 +127,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       end do
 
    End Subroutine Calc_Table_TH
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_TABLE_AF0_ELECTRONS
    !!--++    Calculate a Table of Atomic Factors for Electrons applying the Mott-Bethe formula:
-   !!--++    
+   !!--++
    !!--++          fe=me^2/(8pi Eps0 h^2) (Z-fx(s))/s^2
    !!--++
    !!--++ Update: April - 2022
@@ -150,7 +150,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
       !>Init
       call clear_error()
-      
+
 
       !> Load form factor values for XRay
       call Set_Xray_Form()
@@ -179,14 +179,15 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
       if (any(ix==0)) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
-      
+
       else
-         !> Fill AF Table 
+         !> Fill AF Table
          do j=1,reflex%nref
             do i=1,atm%natoms
                fx=fj(reflex%ref(j)%s,xray_form(ix(i))%a,xray_form(ix(i))%b,xray_form(ix(i))%c)+afp(i)
-               
+
                !>Mott-Bethe formula fe=me^2/(8pi Eps0 h^2) (Z-fx(s))/s^2
                af0(i,j)=0.023934*(xray_form(ix(i))%Z-fx)/(reflex%ref(j)%s*reflex%ref(j)%s)
             end do
@@ -213,7 +214,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       call Remove_Xray_Form()
 
    End Subroutine Create_Table_AF0_Electrons
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_TABLE_AF0_XRAY
    !!--++    Calculate a Table of Atomic Factors for X-Ray
@@ -235,7 +236,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       integer, dimension(atm%natoms) :: ix,jx,ia
       real(kind=cp)                  :: dmin,d
 
-      !> Init 
+      !> Init
       call clear_error()
 
       !> Load form factor values for XRay
@@ -262,9 +263,9 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          write(unit=lun,fmt="(/,a)") "  INFORMATION FROM TABULATED X-RAY SCATTERING FACTORS"
          write(unit=lun,fmt="(a,/)") "  ==================================================="
       End if
-      
+
       if (present(lambda)) then
-         !> Load anomalous scattering form factor values for XRays 
+         !> Load anomalous scattering form factor values for XRays
          call Set_Delta_Fp_Fpp()
 
          !> Select wavelength (by default is CuKalpha1: k=5 in the list)
@@ -288,7 +289,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             end do
          end do
          call Remove_Delta_Fp_Fpp()
-         
+
       else
          if (present(lun)) then
             write(unit=lun,fmt="(a)")    "  Missed lambda, anomalous dipersion corrections not applied   "
@@ -298,10 +299,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
       if (any(ix==0)) then
          err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
-      
+
       else
-         !> Fill AF Table 
+         !> Fill AF Table
          do j=1,reflex%nref
             do i=1,atm%natoms
                af0(i,j)=fj(reflex%ref(j)%s,xray_form(ix(i))%a,xray_form(ix(i))%b,xray_form(ix(i))%c)+afp(i)
@@ -329,7 +331,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       call Remove_Xray_Form()
 
    End Subroutine Create_Table_AF0_Xray
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_TABLE_AFP_NEUTNUC
    !!--++
@@ -351,7 +353,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       real(kind=cp)                           :: b
 
       !> Init
-      call clear_error() 
+      call clear_error()
 
       !> Load chemical information
       call set_chem_info()
@@ -365,6 +367,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          b=Get_Fermi_Length(symbcar)
          if (abs(b) < 0.0001) then
             err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             err_CFML%Msg="The Fermi Length of Species "//trim(symbcar)//" was not found!"
             return
          else
@@ -392,7 +395,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       call Remove_chem_info()
 
    End Subroutine Create_Table_AFP_NeutNuc
-   
+
    !!--++
    !!--++ SUBROUTINE CREATE_TABLE_FABC_XRAY
    !!--++
@@ -417,7 +420,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       real(kind=cp)                  :: dmin,d
 
       !>Init
-      call clear_error() 
+      call clear_error()
 
       !> Load form factor values for XRay
       call Set_Xray_Form()
@@ -443,6 +446,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
       if (any(ix==0)) then
          err_CFML%Ierr=1
+         Err_CFML%flag=.true.
          Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
          return
       end if
@@ -456,14 +460,14 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             end if
          end do
       end do
-      
+
       Nspecies=n ! Global private variable (Total number of chemical species)
       if (allocated(FF_a)) deallocate (FF_a)
       if (allocated(FF_b)) deallocate (FF_b)
       if (allocated(FF_c)) deallocate (FF_c)
       if (allocated(FF_z)) deallocate (FF_z)
       allocate(FF_a(4,n),FF_b(4,n),FF_c(n),FF_z(n))
-      
+
       do k=1,n
          j = jx(k)
          i = ia(k)
@@ -482,10 +486,10 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             write(unit=lun,fmt="(a,/)") "  ==================================================="
          end if
       end if
-      
+
       if (.not. present(elect)) then
          if (present(lambda)) then
-            !> Load anomalous scattering form factor values for XRays 
+            !> Load anomalous scattering form factor values for XRays
             call Set_Delta_Fp_Fpp()
 
             !> Select wavelength (by default is CuKalpha1: k=5 in the list)
@@ -509,7 +513,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
                end do
             end do
             call Remove_Delta_Fp_Fpp()
-       
+
          else
             if (present(lun)) then
                write(unit=lun,fmt="(a)")    "  Missed lambda, anomalous dipersion corrections not applied   "
@@ -525,7 +529,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             write(unit=lun,fmt="(a,i3)")     "   Number of chemically different species: ",n
             write(unit=lun,fmt="(/,a)") &
               "   Atom     a1       b1       a2       b2       a3       b3       a4       b4        c       Z"
-         
+
             do k=1,n
                j = jx(k)
                i = ia(k)
@@ -554,5 +558,5 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       call Remove_Xray_Form()
 
    End Subroutine Create_Table_fabc_Xray
-   
+
 End Submodule SF_Create_Tables

@@ -1134,6 +1134,7 @@ Module CFML_ILL_Instrm_Data
 
         if (N <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_illdata_mess=' Number of Numors in the List was zero!'
           return
         end if
@@ -1141,6 +1142,7 @@ Module CFML_ILL_Instrm_Data
         num=count(actlist .eqv. .true.)
         if (num <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_illdata_mess=' Number of active Numors in the List was zero!'
           return
         end if
@@ -1375,6 +1377,7 @@ Module CFML_ILL_Instrm_Data
 
         if (.not. adding) then
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_illdata_mess='Impossible to add the numors selected. Not all Numors have the same Wavelength!'
            return
         end if
@@ -1398,6 +1401,7 @@ Module CFML_ILL_Instrm_Data
 
         if (.not. adding) then
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_illdata_mess='Impossible to add the numors selected. Not all Numors have the same initial Angle!'
            return
         end if
@@ -1473,6 +1477,7 @@ Module CFML_ILL_Instrm_Data
 
         if (N <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            err_illdata_mess=' Number of Numors in the List was zero!'
           return
         end if
@@ -2050,6 +2055,7 @@ Module CFML_ILL_Instrm_Data
             case('d19_vb')
                 ERR_ILLData_Mess= 'Can''t read D19 Vertical Banana Detector data!'
                 Err_CFML%Ierr=1
+                Err_CFML%flag=.true.
                 return
             case ('d19_hb','d19','db21','d16','1')
                 !do ix=1,xsize
@@ -2062,6 +2068,7 @@ Module CFML_ILL_Instrm_Data
             case default
                 ERR_ILLData_Mess= 'Error in Get_Counts: Unknown machine!'
                 Err_CFML%Ierr=1
+                Err_CFML%flag=.true.
                 return
         end select
 
@@ -2133,6 +2140,7 @@ Module CFML_ILL_Instrm_Data
             case default
                 ERR_ILLData_Mess= 'Error in Get_Counts: Unknown machine!'
                 Err_CFML%Ierr=1
+                Err_CFML%flag=.true.
                 return
         end select
 
@@ -2804,6 +2812,7 @@ Module CFML_ILL_Instrm_Data
        !> Init
        if (N <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           err_illdata_mess=' Number of Numors in the List was zero!'
           return
        end if
@@ -2811,6 +2820,7 @@ Module CFML_ILL_Instrm_Data
        num=count(actlist .eqv. .true.)
        if (num <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           err_illdata_mess=' Number of active Numors in the List was zero!'
           return
        end if
@@ -2826,6 +2836,7 @@ Module CFML_ILL_Instrm_Data
        inst=u_case(adjustl(inst))
        if (len_trim(inst) <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           err_illdata_mess=' The Instrument name for the first active numor was empty!'
           return
        end if
@@ -2957,6 +2968,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'AAAAAAAAAA') then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           err_illdata_mess=' A bad Block A-Type has been found'
           return
        end if
@@ -2973,6 +2985,7 @@ Module CFML_ILL_Instrm_Data
              j=(n_ini+2)+i
              if (j > n_end) then
                 Err_CFML%Ierr=1
+                Err_CFML%flag=.true.
                 err_illdata_mess=' Impossible to read a line for this block!'
                 exit
              end if
@@ -3023,6 +3036,7 @@ Module CFML_ILL_Instrm_Data
        open(newunit=lun,file=trim(filenam),status="old", action="read", position="rewind",iostat=ier)
        if (ier /= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           ERR_ILLData_Mess="Error opening the file: "//trim(filenam)
           return
        end if
@@ -3079,6 +3093,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=Current_Instrm%detector_type(j+4:),fmt=*,iostat=ier) Current_Instrm%ipsd
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the type of detector (ipsd)"
                   return
                 end if
@@ -3087,6 +3102,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%dist_samp_detector
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the distance sample-detector"
                   return
                 end if
@@ -3095,6 +3111,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%wave
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the wavelength"
                   return
                 else
@@ -3107,6 +3124,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%wave_min, Current_Instrm%wave_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the wavelength limits"
                   return
                 end if
@@ -3117,6 +3135,7 @@ Module CFML_ILL_Instrm_Data
                                                        Current_Instrm%np_horiz, Current_Instrm%np_vert  !number of  cathodes and anodes
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the dimensions of the detector"
                   return
                 end if
@@ -3127,6 +3146,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%cgap, Current_Instrm%agap  !Gaps between cathodes and between anodes
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess=&
                   "Error in file: "//trim(filenam)//", reading the gaps between anodes and between cathodes"
                   return
@@ -3136,6 +3156,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%ga_d, Current_Instrm%nu_d
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading Gamma and Nu of detector centre"
                   return
                 end if
@@ -3147,6 +3168,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%Tiltx_d, Current_Instrm%Tilty_d, Current_Instrm%Tiltz_d
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the Tilt Angles"
                   return
                 end if
@@ -3158,6 +3180,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%d_min
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the resolution d_min value"
                   return
                 end if
@@ -3166,6 +3189,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%gap_min, Current_Instrm%gap_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(positive) limits"
                   return
                 end if
@@ -3176,6 +3200,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%gan_min, Current_Instrm%gan_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(negative) limits"
                   return
                 end if
@@ -3185,6 +3210,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%nu_min, Current_Instrm%nu_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Nu limits"
                   return
                 end if
@@ -3194,6 +3220,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%x_min, Current_Instrm%x_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the X limits"
                   return
                 end if
@@ -3203,6 +3230,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%z_min, Current_Instrm%z_max
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the Z limits"
                   return
                 end if
@@ -3213,6 +3241,7 @@ Module CFML_ILL_Instrm_Data
                   read(unit=lun,fmt=*,iostat=ier) ub(j,:)
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the UB-matrix"
                     return
                   end if
@@ -3223,6 +3252,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%e1, Current_Instrm%e2, Current_Instrm%e3
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the setting vectors"
                   return
                 end if
@@ -3242,6 +3272,7 @@ Module CFML_ILL_Instrm_Data
             Case("ANG_LIMITS")
                 if(n1 == 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", Number of angular motors missing!"
                   return
                 end if
@@ -3250,6 +3281,7 @@ Module CFML_ILL_Instrm_Data
                                                   Current_Instrm%ang_offsets(j),Current_Instrm%ang_velocity(j)
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the angular names, limits, offsets and velocities"
                     return
                   end if
@@ -3258,6 +3290,7 @@ Module CFML_ILL_Instrm_Data
             Case("DISP_LIMITS")
                 if(n2 == 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", Number of displacement motors missing!"
                   return
                 end if
@@ -3266,6 +3299,7 @@ Module CFML_ILL_Instrm_Data
                                                   Current_Instrm%disp_offsets(1:n2)
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the displacement limits"
                     return
                   end if
@@ -3275,6 +3309,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%det_offsets
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the detector offsets"
                   return
                 end if
@@ -3282,6 +3317,7 @@ Module CFML_ILL_Instrm_Data
             Case("RANGE_TIME")
                 if(n1 == 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error in file: "//trim(filenam)// &
                       ", the number of angular motors is needed before giving range_time values"
                   return
@@ -3295,6 +3331,7 @@ Module CFML_ILL_Instrm_Data
                     read(unit=lun,fmt="(a)",iostat=ier) line ! Name of the motor and number of pairs range - time
                     if(ier /= 0) then
                       Err_CFML%Ierr=1
+                      Err_CFML%flag=.true.
                       ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading section of pairs range - time"
                       return
                     end if
@@ -3306,6 +3343,7 @@ Module CFML_ILL_Instrm_Data
                   read(unit=line(i:),fmt=*,iostat=ier) n3
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading name of motor and number of pairs range - time"
                     return
                   end if
@@ -3313,6 +3351,7 @@ Module CFML_ILL_Instrm_Data
                      read(unit=lun,fmt=*,iostat=ier) Current_Instrm%range_time(:,i,j)
                      if(ier /= 0) then
                       Err_CFML%Ierr=1
+                      Err_CFML%flag=.true.
                       ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading pairs range - time for motor: "//trim(line)
                       return
                      end if
@@ -3328,6 +3367,7 @@ Module CFML_ILL_Instrm_Data
                   open(newunit=ial,file=trim(alpha_file),status="old", action="read", position="rewind",iostat=ier)
                   if (ier /= 0) then
                      Err_CFML%Ierr=1
+                     Err_CFML%flag=.true.
                      ERR_ILLData_Mess="Error opening the file: "//trim(alpha_file)
                      return
                   end if
@@ -3337,12 +3377,14 @@ Module CFML_ILL_Instrm_Data
                     read(unit=ial,fmt=*,iostat=ier) Current_Instrm%alphas(j,1:npx)
                     if(ier /= 0) then
                       Err_CFML%Ierr=1
+                      Err_CFML%flag=.true.
                       ERR_ILLData_Mess="Error in file: "//trim(alpha_file)//", reading the efficiency of 2D-detector"
                       return
                     end if
                   end do
                 else
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   ERR_ILLData_Mess="Error the alpha file: "//trim(alpha_file)//", does not exist!"
                   return
                 end if
@@ -3358,6 +3400,7 @@ Module CFML_ILL_Instrm_Data
                   read(unit=lun,fmt=*,iostat=ier) Current_Instrm%alphas(j,1:npx)
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the efficiency of 2D-detector"
                    return
                   end if
@@ -3368,6 +3411,7 @@ Module CFML_ILL_Instrm_Data
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%nNu, Current_Instrm%nGa
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
+                  Err_CFML%flag=.true.
                   Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the dimension of resolution surface of the 2D-detector"
                  return
                 end if
@@ -3377,6 +3421,7 @@ Module CFML_ILL_Instrm_Data
                   read(unit=lun,fmt=*,iostat=ier) Current_Instrm%ReSurf(j,1:Current_Instrm%nGa)
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
                     Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the resolution surface of 2D-detector"
                    return
                   end if
@@ -3431,6 +3476,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'FFFFFFFFFF') then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' A bad Block F-Type has been found'
           return
        end if
@@ -3501,6 +3547,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'IIIIIIIIII') then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' A bad Block I-Type has been found'
           return
        end if
@@ -3571,6 +3618,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'JJJJJJJJJJ') then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' A bad Block J-Type has been found'
           return
        end if
@@ -3638,6 +3686,7 @@ Module CFML_ILL_Instrm_Data
        nlines=Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D1A Instrument in file '//trim(fileinfo)
           return
        end if
@@ -3651,6 +3700,7 @@ Module CFML_ILL_Instrm_Data
        call Number_KeyTypes_on_File(filevar,nlines)
        if (.not. equal_vector(n_keytypes,(/1,2,1,1,2,0,0/),7)) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D1A Format'
           return
        end if
@@ -3670,6 +3720,7 @@ Module CFML_ILL_Instrm_Data
        end if
        if (index(u_case(n%instrm),'D1A') <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D1A Format'
           return
        end if
@@ -3713,6 +3764,7 @@ Module CFML_ILL_Instrm_Data
        if (nval_i > 0) then
           if (nval_i /= (n%nbdata+n%nbang+2)*n%nframes) then
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='Counts problems in Numor format for D1A Instrument'
              return
           end if
@@ -3760,6 +3812,7 @@ Module CFML_ILL_Instrm_Data
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D1B Instrument in file '//trim(fileinfo)
           return
        end if
@@ -3783,6 +3836,7 @@ Module CFML_ILL_Instrm_Data
            very_old=.true.
        else
            Err_CFML%Ierr=1
+           Err_CFML%flag=.true.
            Err_CFML%Msg='This numor does not correspond with D1B Format'
            return
        end if
@@ -3881,6 +3935,7 @@ Module CFML_ILL_Instrm_Data
             n%monitor=n%tmc_ang(2,1)
          else
             Err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             write(unit=Err_CFML%Msg,fmt="(a,i6.6)") 'Problem reading Time, Monitor, Counts, Angles' &
                               //' parameters in Numor:',n%numor
             return
@@ -3892,6 +3947,7 @@ Module CFML_ILL_Instrm_Data
          call read_I_keyType(filevar,nl_keytypes(5,2,1),nl_keytypes(5,2,2))
          if (nval_i /= n%nbdata) then
             Err_CFML%Ierr=1
+            Err_CFML%flag=.true.
             write(unit=Err_CFML%Msg,fmt="(a,i6.6)") 'Problem reading Counts in Numor:',n%numor
             return
          end if
@@ -3964,6 +4020,7 @@ Module CFML_ILL_Instrm_Data
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D2B Instrument in file '//trim(fileinfo)
           return
        end if
@@ -3981,6 +4038,7 @@ Module CFML_ILL_Instrm_Data
        call read_A_keyType(filevar,nl_keytypes(2,1,1),nl_keytypes(2,1,2),idum,line)
        if (index(u_case(line(1:4)),'D2B') <= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond to D2B Format'
           return
        end if
@@ -4048,6 +4106,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              write(unit=Err_CFML%Msg,fmt="(a,i6.6)") 'Problem reading Time, Monitor, Counts, Angles' &
                                //' parameters in Frame: '//trim(car)//" Numor:",n%numor
              return
@@ -4061,6 +4120,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='Problem reading Counts in Frame: '//trim(car)
              return
           end if
@@ -4104,6 +4164,7 @@ Module CFML_ILL_Instrm_Data
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D4 Instrument in file '//trim(fileinfo)
           return
        end if
@@ -4121,6 +4182,7 @@ Module CFML_ILL_Instrm_Data
        call read_A_keyType(filevar,nl_keytypes(2,1,1),nl_keytypes(2,1,2),idum,line)
        if (index(u_case(line(1:4)),'D4') <= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D4 Format'
           return
        end if
@@ -4191,6 +4253,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i3)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='Problem reading Counts for Detector '//trim(car)//' for D4 Instrument'
              return
           end if
@@ -4229,6 +4292,7 @@ Module CFML_ILL_Instrm_Data
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D9 Instrument in file '//trim(fileinfo)
           return
        end if
@@ -4246,6 +4310,7 @@ Module CFML_ILL_Instrm_Data
        call read_A_keyType(filevar,nl_keytypes(2,1,1),nl_keytypes(2,1,2),idum,line)
        if (index(line(1:4),'D9') <= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D9 Format'
           return
        end if
@@ -4337,6 +4402,7 @@ Module CFML_ILL_Instrm_Data
                    write(unit=car,fmt='(i5)') i
                    car=adjustl(car)
                    Err_CFML%Ierr=1
+                   Err_CFML%flag=.true.
                    write(unit=Err_CFML%Msg,fmt="(a,i6.6)")'Problem reading Time, Monitor, Counts, Angles' &
                                     //' parameters in the Frame: '//trim(car)//", Numor:",n%numor
                    return
@@ -4349,6 +4415,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='Problem reading Counts in the Frame: '//trim(car)
              return
           end if
@@ -4439,6 +4506,7 @@ Module CFML_ILL_Instrm_Data
        if (nval_i > 0) then
           if (ivalues(2) /= 2) then
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='This numor was made using Point detector in the D10 Instrument'
              return
           end if
@@ -4560,6 +4628,7 @@ Module CFML_ILL_Instrm_Data
        nlines=Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg=' Problems trying to read the Numor for D16 Instrument in file '//trim(fileinfo)
           return
        end if
@@ -4577,6 +4646,7 @@ Module CFML_ILL_Instrm_Data
        call read_A_keyType(filevar,nl_keytypes(2,1,1),nl_keytypes(2,1,2),idum,line)
        if (index(line(1:4),'D16') <= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D16 Format'
           return
        end if
@@ -4605,6 +4675,7 @@ Module CFML_ILL_Instrm_Data
        if (nval_i > 0) then
           if (ivalues(2) /= 2) then
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='This numor was made using Point detector in the D16 Instrument'
              return
           end if
@@ -4658,6 +4729,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              write(unit=Err_CFML%Msg,fmt="(a,i6.6)")'Problem reading Time, Monitor, Counts, Angles' &
                                     //' parameters in the Frame: '//trim(car)//", Numor:",n%numor
              return
@@ -4669,6 +4741,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='Problem reading Counts in the Frame: '//trim(car)
              return
           end if
@@ -4768,6 +4841,7 @@ Module CFML_ILL_Instrm_Data
           ! If the numor is not a D19 numor, stop here.
           if (index(u_case(line(1:4)),'D19') <= 0) then
              Err_CFML%Ierr=1
+             Err_CFML%flag=.true.
              Err_CFML%Msg='This numor does not match with D19 Format'
              return
           end if

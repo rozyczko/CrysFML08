@@ -40,6 +40,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       open(newunit=lun,file=trim(filename), access="stream", status="old", iostat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Read_Bin_Atom_List@CFML_ATOMS: Error opening the binary file "//trim(filename)
          return
       end if
@@ -52,6 +53,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       read(unit=lun,iostat=ierr) n
       if (ierr /= 0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Read_Bin_Atom_List@CFML_ATOMS: Error reading number of atoms in the binary file "//trim(filename)
          close(unit=lun)
          return
@@ -66,6 +68,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       read(unit=lun,iostat=ierr)  A%active
       if (ierr /= 0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Read_Bin_Atoms_List@CFML_ATOMS: Error reading active atoms!"
          close(unit=lun)
          return
@@ -75,6 +78,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       read(unit=lun,iostat=ierr)  A%IPh
       if (ierr /= 0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Read_Bin_Atoms_List@CFML_ATOMS: Error reading IPh atoms!"
          close(unit=lun)
          return
@@ -87,6 +91,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                read(unit=lun,iostat=ierr) Atm
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -98,6 +103,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                read(unit=lun,iostat=ierr) Atms
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -120,6 +126,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                write(unit=lun,iostat=ierr) atr
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -131,14 +138,14 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
    End Subroutine Read_Bin_atom_list
 
    !!----
-   !!---- WRITE_BIN_ATOM_LIST
+   !!---- WRITE_BIN_ATOM_FILE
    !!----
    !!----    Write the atoms in the asymmetric unit in a binary file.
    !!----    The file should have been opened with the access="stream" attribute.
    !!----
    !!---- 12/06/2019
    !!
-   Module Subroutine Write_Bin_Atom_List(filename, A)
+   Module Subroutine Write_Bin_Atom_file(filename, A)
       !---- Arguments ----!
       character(len=*),   intent(in) :: filename
       type(atlist_type), intent(in) :: A
@@ -158,6 +165,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       open(newunit=lun,file=trim(filename), access="stream", status="replace", iostat=ierr)
       if (ierr /=0) then
          err_CFML%IErr=1
+         Err_CFML%flag=.true.
          err_CFML%Msg="Write_Bin_Atoms_List@CFML_ATOMS: Error opening the binary file "//trim(filename)
          return
       end if
@@ -179,6 +187,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                write(unit=lun,iostat=ierr) Atm
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -190,6 +199,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                write(unit=lun,iostat=ierr) Atms
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -201,6 +211,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
          !      write(unit=lun,iostat=ierr) matm
          !      if (ierr /=0) then
          !         err_CFML%IErr=1
+         !         Err_CFML%flag=.true.
          !         err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
          !         exit
          !      end if
@@ -212,6 +223,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                write(unit=lun,iostat=ierr) atr
                if (ierr /=0) then
                   err_CFML%IErr=1
+                  Err_CFML%flag=.true.
                   err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
                   exit
                end if
@@ -220,6 +232,60 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
 
       !> Close file
       close(unit=lun)
-   End Subroutine Write_Bin_atom_list
+   End Subroutine Write_Bin_atom_file
+
+   Module Subroutine Write_Bin_Atom_raw(Ats,Lun)
+      !---- Arguments ----!
+      type (atlist_type),            intent(in) :: Ats
+      integer,                       intent(in) :: Lun
+      !---- Local Variables ----!
+      integer              :: i,n,ierr
+      type (atm_type)      :: atm
+      type (atm_std_type)  :: atms
+      type (atm_ref_type)  :: atr
+
+      n=ats%natoms
+      write(unit=lun) ats%natoms    !Number of atoms in the list
+
+      select type (aat => Ats%Atom)
+
+         type is (atm_type)
+            do i=1,n
+               atm=aat(i)
+               write(unit=lun,iostat=ierr) Atm
+               if (ierr /=0) then
+                  err_CFML%IErr=1
+                  Err_CFML%flag=.true.
+                  err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
+                  exit
+               end if
+            end do
+
+         type is (atm_std_type)
+            do i=1,n
+               atms=aat(i)
+               write(unit=lun,iostat=ierr) Atms
+               if (ierr /=0) then
+                  err_CFML%IErr=1
+                  Err_CFML%flag=.true.
+                  err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
+                  exit
+               end if
+            end do
+
+         type is (atm_ref_type)
+            do i=1,n
+               atr=aat(i)
+               write(unit=lun,iostat=ierr) atr
+               if (ierr /=0) then
+                  err_CFML%IErr=1
+                  Err_CFML%flag=.true.
+                  err_CFML%Msg="Write_Bin_Atom_List@CFML_ATOMS: Error writting atoms information!"
+                  exit
+               end if
+            end do
+      end select
+
+   End Subroutine Write_Bin_atom_raw
 
 End SubModule Atm_RW_Bin_AtmList
