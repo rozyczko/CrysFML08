@@ -658,7 +658,11 @@ SubModule (CFML_EoS) Eos_Get_Volume
       if (U_case(cell_eos%system(1:4)) == 'TRIG' .or. U_case(cell_eos%system(1:3)) == 'HEX ') &
          vfactor=sqrt(3.0_cp)/2.0_cp
 
+<<<<<<< HEAD
       !call init_err_eos() <-- This is not used
+=======
+      call clear_error()
+>>>>>>> KeyCodes
 
       select case(U_case(cell_eos%system(1:4)))
          case('ORTH','MONO','TRIC')
