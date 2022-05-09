@@ -249,7 +249,8 @@ Module CFML_gSpaceGroups
     End Interface Get_Symb_from_OP
 
     Interface Get_Symb_from_Mat
-       module procedure Get_Symb_from_Mat_Tr
+       module procedure Get_Symb_from_Mat_Tr_R
+       module procedure Get_Symb_from_Mat_Tr_I
        module procedure Get_Symb_from_Rational_Mat
     end Interface Get_Symb_from_Mat
 
@@ -649,13 +650,21 @@ Module CFML_gSpaceGroups
           logical,                  optional,intent(in)  :: printd
        End Subroutine Get_SubGroups_full
 
-       Module Function Get_Symb_from_Mat_Tr(Mat, tr, oposite) Result(Str)
+       Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str)
           !---- Arguments ----!
           integer,       dimension(3,3), intent(in) :: Mat
           real(kind=cp), dimension(3),   intent(in) :: tr
-          logical, optional,             intent(in) :: oposite
+          logical, optional,             intent(in) :: opposite
           character(len=:), allocatable             :: Str
-       End Function Get_Symb_from_Mat_Tr
+       End Function Get_Symb_from_Mat_Tr_R
+
+       Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str)
+          !---- Arguments ----!
+          real(kind=cp), dimension(3,3), intent(in) :: Mat
+          real(kind=cp), dimension(3),   intent(in) :: tr
+          logical, optional,             intent(in) :: opposite
+          character(len=:), allocatable             :: Str
+       End Function Get_Symb_from_Mat_Tr_I
 
        Module Function Get_Symb_from_Rational_Mat(Matt, Strcode, Invt) Result(Symb)
           !---- Arguments ----!

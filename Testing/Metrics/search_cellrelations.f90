@@ -1,12 +1,12 @@
   Program Cell_Relations
-    use CFML_GlobaDeps         only: err_CFML
+    use CFML_GlobalDeps,       only: err_CFML
     use CFML_Metrics,          only: Cell_G_Type,   &
                                      Change_Setting_Cell,Set_Crystal_Cell, Write_Crystal_Cell,   &
                                      get_primitive_cell
-    use CFML_gSpaceGroups,     only: SPG_type, Set_SpaceGroup
-    use CFML_Strings,          only: l_case, Get_Symb_From_Mat, Get_Separator_Pos
+    use CFML_gSpaceGroups,     only: SPG_type, Set_SpaceGroup, Get_Symb_From_Mat
+    use CFML_Strings,          only: l_case, Get_Separator_Pos
     use CFML_Maths,            only: Inverse_Matrix,determ3D
-    use CFML_Reflections,      only: Reflect_Type,Hkl_Gen_Sxtal
+    use CFML_Reflections,      only: Refl_Type,Gener_Reflections !Hkl_Gen_Sxtal
     implicit none
     integer, parameter          :: n_ref=300, nk=24
     integer, dimension(2)       :: pos
@@ -16,7 +16,7 @@
     real,    dimension(3,nk)    :: k_ind
     real,    dimension(3,3)     :: base,trans,newc,gn,tp,stp,itp,istp,trans_inv,ttrans,ttrans_inv
     real,    dimension(3)       :: hkl_bas,k_bas,hkl
-    type(Reflect_Type),dimension(n_ref) :: hkl_sup
+    type(Refl_Type),dimension(n_ref) :: hkl_sup
     type(SPG_type)              :: SpGr
     character(len=1)            :: lat_type,slat_type
     character(len=50)           :: abc_symb,iabc_symb
@@ -130,7 +130,7 @@
     call Set_SpaceGroup(slat_type//" 1",SpGr)
     pcel2=pSuperCell%cell
     pang2=pSuperCell%ang
-    rvol=pSuperCell%CellVol/pcell%CellVol
+    rvol=pSuperCell%Vol/pcell%Vol
     irvol=nint(rvol)
     iratio= (ia2-ia1+1)*(ia2-ia1+1)*(ia2-ia1+1)*(ib2-ib1+1)*(ib2-ib1+1)*(ib2-ib1+1)*(ic2-ic1+1)*(ic2-ic1+1)*(ic2-ic1+1)
     write(unit=*,fmt="(a,i3)")  " => The volume  ratio between cells is ",irvol
@@ -272,10 +272,12 @@
 
       trans=matmul(istp,matmul(real(bestmat),tp))
       trans_inv=Inverse_Matrix(trans)
-      call Get_Symb_From_Mat(trans,abc_symb,(/"a","b","c"/))
+      !call Get_Symb_From_Mat(trans,abc_symb,(/"a","b","c"/))
+      abc_symb=Get_Symb_From_Mat(trans,[0.0,0.0,0.0])
       call Get_Separator_Pos(abc_symb,",",pos,ncar)
       abc_symb=" A="//abc_symb(1:pos(1)-1)//"  B="//abc_symb(pos(1)+1:pos(2)-1)//"  C="//abc_symb(pos(2)+1:)
-      call Get_Symb_From_Mat(trans_inv,iabc_symb,(/"A","B","C"/))
+      !call Get_Symb_From_Mat(trans_inv,iabc_symb,(/"A","B","C"/))
+      iabc_symb=Get_Symb_From_Mat(trans_inv,[0.0,0.0,0.0])
       call Get_Separator_Pos(iabc_symb,",",pos,ncar)
       iabc_symb=" a="//iabc_symb(1:pos(1)-1)//"  b="//iabc_symb(pos(1)+1:pos(2)-1)//"  c="//iabc_symb(pos(2)+1:)
 
@@ -298,7 +300,9 @@
 
       !Search propagation vectors relating the two unit cells
       !Generate allowed reflections in the superstructure cell up to s=0.5
-      call Hkl_Gen_Sxtal(supercell,SpGr,0.0,0.25,Num_Ref,hkl_sup)
+      !call Hkl_Gen_Sxtal(supercell,SpGr,0.0,0.25,Num_Ref,hkl_sup)
+      !call Gener_Reflections(supercell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+      call Gener_Reflections(supercell,0.25,.false.,hkl_sup,SpGr)
       write(unit=lout,fmt="(/,a)") " ==============================================================="
       write(unit=lout,fmt="(a)")   " Indexing of superstructure reflection in the substructure basis"
       write(unit=lout,fmt="(a,/)") " ==============================================================="

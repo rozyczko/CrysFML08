@@ -7,7 +7,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
    Contains
 
    !!----
-   !!---- GET_SYMB_FROM_MAT
+   !!---- GET_SYMB_FROM_RATIONAL_MAT
    !!---- 19/04/2019
    !!---- 05/02/2020 (Take the transpose of the input submatrix to get the proper
    !!---              symbol for transformation matrices of the crystal basis)
@@ -140,15 +140,15 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
    !!----     1  0  1                      c'=a+c
    !!----     And the change of origin given by (0.5,0.0,0.5)
    !!----     The subroutine provide the symbol: (1/2,0,1/2; a-c,2b,a+c)
-   !!----     If "oposite" is provided then the output is the symbol: (a-c,2b,a+c; 1/2,0,1/2)
+   !!----     If "opposite" is provided then the output is the symbol: (a-c,2b,a+c; 1/2,0,1/2)
    !!----
    !!---- 15/05/2019
    !!
-   Module Function Get_Symb_from_Mat_Tr(Mat, tr, oposite) Result(Str)
+   Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str)
       !---- Arguments ----!
       integer,       dimension(3,3), intent(in) :: Mat
       real(kind=cp), dimension(3),   intent(in) :: tr
-      logical, optional,             intent(in) :: oposite
+      logical, optional,             intent(in) :: opposite
       character(len=:), allocatable             :: Str
 
       !---- Local variables ----!
@@ -177,12 +177,51 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
       end do
       transl=Pack_string(transl)
       str="("//trim(transl)//" "//trim(xyz_op)//")"
-      if (present(oposite)) then
+      if (present(opposite)) then
          i=len_trim(transl)
          str="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
       end if
-   End Function Get_Symb_from_Mat_Tr
+   End Function Get_Symb_from_Mat_Tr_I
 
+   !Version for real matrices
+   Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str)
+      !---- Arguments ----!
+      real(kind=cp), dimension(3,3), intent(in) :: Mat
+      real(kind=cp), dimension(3),   intent(in) :: tr
+      logical, optional,             intent(in) :: opposite
+      character(len=:), allocatable             :: Str
+
+      !---- Local variables ----!
+      integer           :: i
+      character(len=40) :: xyz_op, transl
+      character(len=12) :: Fracc
+
+      !> Init
+      xyz_op=Get_Symb_from_OP(Mat,[0.0_cp,0.0_cp,0.0_cp])
+
+      do i=1,len_trim(xyz_op)
+         if (xyz_op(i:i) == "x")  xyz_op(i:i)="a"
+         if (xyz_op(i:i) == "y")  xyz_op(i:i)="b"
+         if (xyz_op(i:i) == "z")  xyz_op(i:i)="c"
+      end do
+
+      transl=" "
+      do i=1,3
+         Fracc=String_Fraction_2Dig(tr(i))
+         transl=trim(transl)//trim(Fracc)//","
+      end do
+      i=len_trim(transl)
+      transl(i:i)=";"
+      do i=1,len_trim(transl)-2
+         if (transl(i:i) == "+") transl(i:i)=" "
+      end do
+      transl=Pack_string(transl)
+      str="("//trim(transl)//" "//trim(xyz_op)//")"
+      if (present(opposite)) then
+         i=len_trim(transl)
+         str="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
+      end if
+   End Function Get_Symb_from_Mat_Tr_R
 
 End SubModule gS_Get_Symb_Mat
 

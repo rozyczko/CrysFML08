@@ -145,10 +145,10 @@ name="Get_Conv_Cell"
 source-dir="Testing/Metrics"
 main="Get_Conv_Cell.f90"
 
-#[[executable]]
-#name="search_cellrelations"
-#source-dir="Testing/Metrics"
-#main="search_cellrelations.f90"
+[[executable]]
+name="search_cellrelations"
+source-dir="Testing/Metrics"
+main="search_cellrelations.f90"
 ##
 ## Structures_GlobalOptimization
 ##
