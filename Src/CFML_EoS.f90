@@ -54,10 +54,10 @@
 Module CFML_EoS
    !---- Use Modules ----!
    Use CFML_GlobalDeps,only: CP, PI, TO_RAD, err_cfml, clear_error, set_error
-   Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH, &  
+   Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH, &
                              Orient_Eigenvectors
    Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell, Cell_Type, &
-                             Volume_from_Cell,SigmaV_From_Cell
+                             Volume_from_Cell,SigmaV_From_Cell,Calc_Paxes_Angles,fix_tensor
    Use CFML_Strings,   only: u_case, string_real, string_numstd, number_lines, get_words, get_numstd, &
                              get_separator_pos, get_num, string_numstd, reading_lines, read_key_str
 
