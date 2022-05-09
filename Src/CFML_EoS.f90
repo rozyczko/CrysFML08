@@ -57,11 +57,7 @@ Module CFML_EoS
    Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH, &
                              Orient_Eigenvectors
    Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell, Cell_Type, &
-<<<<<<< HEAD
-                             Volume_from_Cell,SigmaV_From_Cell,Calc_Paxes_Angles,fix_tensor
-=======
                              Volume_from_Cell,SigmaV_From_Cell, Fix_Tensor, Calc_Paxes_Angles
->>>>>>> KeyCodes
    Use CFML_Strings,   only: u_case, string_real, string_numstd, number_lines, get_words, get_numstd, &
                              get_separator_pos, get_num, reading_lines, read_key_str
 
