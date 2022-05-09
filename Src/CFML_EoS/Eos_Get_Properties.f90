@@ -43,7 +43,7 @@ SubModule (CFML_EoS) EoS_Get_Property
             val=(1.0_cp+agt)*K_Cal(Vol,T,Eos,p=p)
 
          case default
-            val=0.0
+            val=0.0_cp
       end select
 
    End Function Get_Property_X

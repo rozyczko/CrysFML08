@@ -102,7 +102,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
       !d2y= Second_Derivative(x, y, nstep)
       dy= First_Derivative(x, y, nstep)
 
-      d=dy(imid)*to_rad
+      d=dy(imid)*TO_RAD
 
    End Function Get_Angle_Eos_Deriv
 
@@ -187,7 +187,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
             d=d+eos%angpoly(ia,3,3)*2.0_cp*p*dt
 
       end select
-      d=d*to_rad
+      d=d*TO_RAD
 
    End Function Get_Angle_Poly_Deriv
 
@@ -201,7 +201,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
       !---- Arguments ----!
       real(kind=cp),      intent(in) :: p,T
       type(eos_cell_type),intent(in) :: e
-      real(kind=cp)                  :: vf !returned volume  factor
+      real(kind=cp)                  :: vf 
 
       !---- Local Variables ----!
       real(kind=cp)   :: aprod, cosang
@@ -320,7 +320,7 @@ SubModule (CFML_EoS) EoS_Get_Angle
       real(kind=cp)                  :: d !returned volume  factor 2nd derivative
 
       !---- Local Variables ----!
-      real(kind=cp)                 :: pi,ti,del
+      real(kind=cp)                 :: pii,ti,del
       real(kind=cp),dimension(-2:2) :: a
       integer                       :: j
 
@@ -341,16 +341,16 @@ SubModule (CFML_EoS) EoS_Get_Angle
          Ti=T
          del=0.4
          do j=-2,2,1
-            pi=p+real(j)*del
-            a(j)=get_angle_volfactor_deriv(Pi,Ti,e,'P')
+            pii=p+real(j)*del
+            a(j)=get_angle_volfactor_deriv(Pii,Ti,e,'P')
          end do
 
       else
-         Pi=P
+         Pii=P
          del=40._cp
          do j=-2,2,1
             Ti=T+real(j)*del
-            a(j)=get_angle_volfactor_deriv(Pi,Ti,e,'T')
+            a(j)=get_angle_volfactor_deriv(Pii,Ti,e,'T')
          end do
       end if
 
