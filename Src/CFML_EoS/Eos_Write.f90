@@ -375,7 +375,7 @@ SubModule (CFML_EoS) EoS_Write_Info
                   eoscal_err=.true.
 
                else
-                  call eoscal_text(p,t,Tscale_In,Eos,text)
+                  text=eos_cal_text(p,t,Tscale_In,Eos)
                   write(lun,'(a)')trim(text)      ! This way we get to see the calculated values even if error in calcs with valid eos
                   if (err_CFML%Flag)then
                      write(lun,'(a)')'   *****WARNING:   '//trim(err_CFML%Msg)
@@ -702,7 +702,7 @@ SubModule (CFML_EoS) EoS_Write_Info
 
             do i=1,5
                if (EoS%iuse(i) /= 0) then
-                  call setnum_std(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i),line)     ! include scaling
+                  line=string_numstd(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i))
                   string=' '
                   select case(EoS%iuse(i))
                      case (2)
@@ -922,7 +922,7 @@ SubModule (CFML_EoS) EoS_Write_Info
 
       do i=51,59
          if (EoS%iuse(i) /= 0) then
-            call setnum_std(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i),line)     ! include scaling
+            line=string_numstd(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i))
             string=' '
             select case(EoS%iuse(i))
                case(2)
@@ -970,7 +970,7 @@ SubModule (CFML_EoS) EoS_Write_Info
 
          do i=35+5*j,39+5*j
             if (EoS%iuse(i) /= 0) then
-               call setnum_std(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i),line)     ! include scaling
+               line=string_numstd(EoS%params(i)*EoS%factor(i),EoS%esd(i)*EoS%factor(i))
                string=' '
                select case(EoS%iuse(i))
                   case(2)
