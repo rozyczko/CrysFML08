@@ -159,12 +159,12 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      character(len=4)                        :: symbcar
      character(len=4), dimension(atm%natoms) :: symb
      character(len=4), dimension(atm%natoms) :: elem
+     logical,          dimension(atm%natoms) :: magAtm
      integer                                 :: i,j,k,n,m,L
      integer,          dimension(atm%natoms) :: ix,jx
      real(kind=cp)                           :: b,dmin,d
      real(kind=cp),    dimension(atm%natoms) :: bs
      logical                                 :: found
-
 
      call clear_error()
      call set_chem_info()
@@ -172,6 +172,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      !> Getting Fermi Lengths of atoms
      symb="    "
      Elem="    "
+     magAtm=.false.
      bs=0.0
      n=0
      do i=1,atm%natoms
@@ -190,6 +191,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            bs(n) = b
            Elem(n)=u_case(atm%atom(i)%chemsymb)
            symb(n)=atm%atom(i)%SfacSymb
+           magAtm(n)=atm%atom(i)%Magnetic
         end if
      end do
      call Remove_chem_info()
@@ -227,13 +229,9 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      ix=0
      do i=1,Scf%Num_species
         symbcar=l_case(symb(i)) !Scattering factors
-        k=index(symbcar,"+")
-        j=index(symbcar,"-")
-        if (k == 0 .and. j == 0) then     !> Simple element or magnetic form Factor
-           if (len_trim(symbcar) > 2) then !> Magnetic form Factor -> use the chemical symbol
-              symbcar=l_case(Elem(i))
-              ix(i) = i  !> Magnetic atom
-           end if
+        if(magAtm(i)) then
+           symbcar=l_case(Elem(i))
+           ix(i) = i  !> Magnetic atom
         end if
         found=.false.
 
@@ -287,7 +285,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         end if
      end if
 
-     if (present(mag)) then
+     if (present(mag) .or. any(magAtm == .true.)) then
         !> Load form factor values for Magnetic Scattering
         call Set_Magnetic_Form()
 
@@ -296,8 +294,8 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         jx=0
         n=0
         do i=1,atm%natoms
+           if(.not. atm%atom(i)%magnetic) cycle
            symbcar=atm%atom(i)%SfacSymb
-           if (symbcar(1:1) /= "M" .and. symbcar(1:1) /= "J") cycle
            do j=1,NUM_MAG_FORM
               if (symbcar /= Magnetic_Form(j)%Symb) cycle
               if (any(jx == j) ) exit
@@ -316,6 +314,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            Scf%Symb_mag(k)= atm%atom(i)%SfacSymb
         end do
         do i=1,atm%natoms
+           if(.not. atm%atom(i)%magnetic) cycle
            symbcar=u_case(atm%atom(i)%SfacSymb)
            do j=1,Scf%Num_magspc
               if (symbcar == Scf%Symb_mag(j)) then
@@ -333,8 +332,8 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         else
            write(unit=lun,fmt="(/,a)")  "  WAVELENGTH NOT PROVIDED! "
         end if
-        write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED NEUTRON SCATTERING FACTORS"
-        write(unit=lun,fmt="(a,/)")  "  ==================================================="
+        write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED NEUTRON SCATTERING LENGTHS"
+        write(unit=lun,fmt="(a,/)")  "  ====================================================="
         write(unit=lun,fmt="(a)")    "  FERMI LENGTHS "
         write(unit=lun,fmt="(a,i3)") "   Number of chemically different species: ",Scf%Num_Species
         write(unit=lun,fmt="(/,a)")  "   Atom     Fermi Length (Br,Bi)[10^(-12) cm]      Atomic Number"
@@ -342,7 +341,8 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            write(unit=lun,fmt="(a,2F10.6,tr20,i8)")  "     "//Scf%Symb(k), Scf%br(k), Scf%bi(k), Scf%Xcoef(k)%Z
         end do
 
-        if (.not. present(mag)) then
+
+        if(.not. present(mag) .and. .not. any(magAtm == .true.)) then
            write(unit=lun,fmt="(/,/)")
            write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED X-RAY SCATTERING FACTORS"
            write(unit=lun,fmt="(a,/)")  "  ==================================================="
@@ -359,6 +359,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            write(unit=lun,fmt="(/,/)")
 
         else
+
            write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED MAGNETIC FORM FACTORS"
            write(unit=lun,fmt="(a,/)")  "  ================================================"
            write(unit=lun,fmt="(/,a,/)")    "   MAGNETIC FORM FACTOR COEFFICIENTS: {A(i),B(i),I=1,3},C  "

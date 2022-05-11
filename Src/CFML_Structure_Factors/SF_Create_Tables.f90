@@ -160,7 +160,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       jx=0
       n=0
       do i=1,atm%natoms
-         symbcar=l_case(atm%atom(i)%SfacSymb)
+         if(atm%atom(i)%magnetic) then
+            symbcar=l_case(atm%atom(i)%ChemSymb)
+         else
+            symbcar=l_case(atm%atom(i)%SfacSymb)
+         end if
          do j=1, NUM_XRAY_FORM
             if (symbcar /= Xray_form(j)%Symb) cycle
             ix(i)=j
@@ -247,7 +251,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       jx=0
       n=0
       do i=1,atm%natoms
-         symbcar=l_case(atm%atom(i)%SfacSymb)
+         if(atm%atom(i)%magnetic) then
+            symbcar=l_case(atm%atom(i)%ChemSymb)
+         else
+            symbcar=l_case(atm%atom(i)%SfacSymb)
+         end if
          do j=1,NUM_XRAY_FORM
             if (symbcar /= Xray_form(j)%Symb) cycle
             ix(i)=j
@@ -363,7 +371,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       bs=0.0
       n=0
       do i=1,atm%natoms
-         symbcar=u_case(atm%atom(i)%chemsymb)
+         if(atm%atom(i)%magnetic) then
+            symbcar=u_case(atm%atom(i)%ChemSymb)
+         else
+            symbcar=u_case(atm%atom(i)%SfacSymb)
+         end if
          b=Get_Fermi_Length(symbcar)
          if (abs(b) < 0.0001) then
             err_CFML%Ierr=1
@@ -432,7 +444,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       allocate(P_a(atm%natoms))
 
       do i=1,atm%natoms
-         symbcar=l_case(atm%atom(i)%SfacSymb)
+         if(atm%atom(i)%magnetic) then
+           symbcar=l_case(atm%atom(i)%ChemSymb)
+         else
+           symbcar=l_case(atm%atom(i)%SfacSymb)
+         end if
          do j=1,NUM_XRAY_FORM
             if (symbcar /= Xray_form(j)%Symb) cycle
             ix(i)=j
@@ -447,7 +463,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       if (any(ix==0)) then
          err_CFML%Ierr=1
          Err_CFML%flag=.true.
-         Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
+         Err_CFML%Msg="The Species "//trim(symbcar)//" was not found in X-ray form-factor tables!"
          return
       end if
 

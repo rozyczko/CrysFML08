@@ -285,8 +285,8 @@ SubModule (CFML_Reflections) Refl_Generate
       integer,       dimension(:,:), allocatable :: hkl,hklm
       integer,       dimension(:),   allocatable :: indx,ini,fin,itreat
       real(kind=cp), dimension(:),   allocatable :: sv,sm
-      logical :: Frd
-      Frd=.true.
+      logical :: Frd,Lcentred
+      Frd=.true.; Lcentred=.false.
       if(present(Friedel)) Frd=Friedel
       !> Init
       nulo=0
@@ -297,7 +297,7 @@ SubModule (CFML_Reflections) Refl_Generate
       maxref= (2*hmax+1)*(2*kmax+1)*(lmax+1) !(2*lmax+1)
       allocate(hkl(3,maxref),indx(maxref),sv(maxref))
 
-
+      if(Spg%num_lat > 0) Lcentred=.true.
       num_ref=0
       ext_do: do h=hmin,hmax
          do k=kmin,kmax
@@ -307,9 +307,9 @@ SubModule (CFML_Reflections) Refl_Generate
                if (h_equal(hh,nulo)) cycle
                sval=h_s(hh,cell)
                if (sval > smax) cycle
-
-               if (H_Latt_Absent(hh,Spg%Lat_tr,Spg%Num_Lat)) cycle
-
+               if(Lcentred) then
+                  if (H_Latt_Absent(hh,Spg%Lat_tr,Spg%Num_Lat)) cycle
+               end if
                num_ref=num_ref+1
                if (num_ref > maxref) then
                   num_ref=maxref

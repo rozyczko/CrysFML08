@@ -1,7 +1,7 @@
 Submodule (CFML_Reflections) Refl_H_Uni
    !---- Variables ----!
    implicit none
-   
+
  Contains
    !!--++
    !!--++ SUBROUTINE  HKL_UNI
@@ -42,7 +42,7 @@ Submodule (CFML_Reflections) Refl_H_Uni
          v1=1.0/(2.0*max(vmin,vmax))
          v2=1.0/(2.0*min(vmin,vmax))
       end if
-      
+
       if (present(check_ok)) check_ok=.true.
       hmax=nint(Cell%cell(1)*2.0*v2+1.0)
       kmax=nint(Cell%cell(2)*2.0*v2+1.0)
@@ -134,7 +134,7 @@ Submodule (CFML_Reflections) Refl_H_Uni
          if (lmin < hlim(3,1)) lmin=hlim(3,1)
          if (lmax > hlim(3,2)) lmax=hlim(3,2)
       end if
-      
+
       num_ref=0
       hkl=0
       ext_do: do h=hmin,hmax
@@ -173,22 +173,22 @@ Submodule (CFML_Reflections) Refl_H_Uni
          else
             ind = sort(sv,num_ref)
          end if
-      
+
       else
-         ind = sort(sv,num_ref)
+         ind(1:num_ref) = sort(sv,num_ref)
       end if
 
       select type (r => Reflex%ref)
          type is (refl_type)
             call Initialize_RefList(Num_Ref, Reflex, 'Refl', Spg%d-1)
-               
+
          type is (srefl_type)
             call Initialize_RefList(Num_Ref, Reflex, 'SRefl', Spg%d-1)
 
          type is (mrefl_type)
             call Initialize_RefList(Num_Ref, Reflex, 'MRefl', Spg%d-1)
-      end select            
-      
+      end select
+
       do i=1,num_ref
          reflex%Ref(i)%h    = hkl(:,ind(i))
          reflex%Ref(i)%mult = mul(ind(i))
@@ -196,5 +196,5 @@ Submodule (CFML_Reflections) Refl_H_Uni
       end do
 
    End Subroutine H_Uni
- 
-End Submodule Refl_H_Uni 
+
+End Submodule Refl_H_Uni
