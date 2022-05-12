@@ -60,7 +60,7 @@ Module CFML_KeyCodes
    public :: Allocate_VecRef, Allocate_Restraints_Vec,    &
              Del_RefCode_ATM, &
              Fill_RefCodes_Atm, &
-             Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, &
+             Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
@@ -385,6 +385,23 @@ Module CFML_KeyCodes
          type(AtList_Type),  intent(in out) :: AtList
          class (SpG_type),   intent(in)     :: Spg
       End Subroutine ReadCode_VARY_ATM
+
+      Module Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
+         !---- Arguments ----!
+         Type(file_type),    intent(in)  :: ffile
+         integer,            intent(out) :: n_ini
+         integer,            intent(out) :: n_end
+      End Subroutine Get_ZoneCommands
+
+      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nkey, Ind)
+         !---- Arguments ----!
+         character(len=*),        intent(in)  :: Key
+         Type(file_type),         intent(in)  :: ffile
+         integer,                 intent(in)  :: n_ini
+         integer,                 intent(in)  :: n_end
+         integer,                 intent(out) :: Nkey
+         integer, dimension(:,:), intent(out) :: Ind
+      End Subroutine Get_Block_KEY
 
    End Interface
 
