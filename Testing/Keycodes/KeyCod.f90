@@ -27,6 +27,7 @@ Program KeyCodes
    character(len=256)              :: filcod
    character(len=150)              :: line
    character(len=2)                :: ans
+   character(len=3)                :: ktype
    character(len=40), dimension(10):: dire
    integer                         :: i, j,narg, lun
    integer                         :: nc_i,nc_f
@@ -34,6 +35,9 @@ Program KeyCodes
    logical                         :: esta, arg_given=.false.
    real(kind=cp)                   :: tini,tfin, total_time
    real(kind=cp), dimension(10)    :: vet
+
+   integer                         :: NB_Patt, NB_Phas, NB_Mol, NB_RGB
+   integer, dimension(2,30)        :: IB_Patt, IB_PHas, IB_MOL, IB_RGB
 
 
    !> Arguments on the command line
@@ -99,45 +103,25 @@ Program KeyCodes
       !> -------------
       !> Testing Zone
       !> -------------
-      nc_i=0; nc_f=0
+      call get_zonecommands(ffile,nc_i,nc_f)
+      if (nc_i > 0 .and. nc_i < nc_f) then
 
-      !> Determine the zone of commands in the file
-      do i=1,ffile%nlines
-         line=adjustl(ffile%line(i)%str)
-         if (line(1:1) =='!') cycle
-         if (line(1:1) ==' ') cycle
+         !> ==== Blocks ====
+         call Get_Block_Key('Pattern', ffile, nc_i, nc_f, NB_Patt, IB_Patt)
+         call Get_Block_Key('Phases',  ffile, nc_i, nc_f, NB_Phas, IB_Phas)
+         call Get_Block_Key('Molec',   ffile, nc_i, nc_f, NB_Mol, IB_Mol)
+         call Get_Block_Key('RGB',     ffile, nc_i, nc_f, NB_RGB, IB_RGB)
 
-         if (nc_i == 0) then
-            j=index(u_case(line),'COMMA')
-            if (j > 0) then
-               nc_i=i+1
-               cycle
-            end if
-         end if
+         !> ==== Check Keycodes for Atoms ====
+         !call Read_RefCodes_ATM(ffile, nc_i, nc_f, Spgr, At)
 
-         if (nc_i > 0 .and. i > nc_i) then
-            j=index(u_case(line),'END')
-            if (j > 0) then
-               nc_f=i-1
-               exit
-            end if
-         end if
-      end do
+         !> Print info
+         call WriteInfo_RefParams()
+         call WriteInfo_RefParams(lun)
 
-      if (nc_i ==0 .or. nc_f ==0) then
-         write(unit=*,fmt="(/,a)") " => Don't found the zone for COMMANDS!"
-         stop
+         call WriteInfo_Restraints(At)
+         call WriteInfo_Restraints(At, Iunit=lun)
       end if
-
-      !> ==== Check Keycodes for Atoms ====
-      call Read_RefCodes_ATM(ffile, nc_i, nc_f, Spgr, At)
-
-      !> Print info
-      call WriteInfo_RefParams()
-      call WriteInfo_RefParams(lun)
-
-      call WriteInfo_Restraints(At)
-      call WriteInfo_Restraints(At, Iunit=lun)
 
       !> ----------------
       !> End Testing Zone
@@ -162,6 +146,323 @@ Program KeyCodes
    write(unit=*,fmt="(a,i3,a,f8.4,a)")     " => TOTAL CPU-time: ",nint(tfin)," minutes",tini," seconds"
 
    Contains
+   !!----
+   !!----
+   !!----
+   !!----
+   !!
+   Function Get_Keycode_Type(String) Result(KType)
+      !---- Arguments ----!
+      character(len=*), intent(in) :: String
+      character(len=3)             :: KType
+
+      !---- Local Arguments ----!
+      logical            :: debug=.true.
+      character(len=132) :: line
+      character(len=3)   :: car
+      integer            :: i,j
+
+      !> Init
+      KType=" "
+
+      line=trim(u_case(string))
+      call cut_string(line)
+
+      !> PAT
+      car=" "
+      do i=1,7 !NKEY_PATT
+         j=index(line,trim(adjustl(KEY_PATT(i))))
+         if (j > 0) then
+            car='PAT'
+            exit
+         end if
+      end do
+      kType=car
+      if (debug) print*, 'PAT? '//ktype
+
+      !> PHA
+      car=" "
+      do i=1,7 !NKEY_PHAS
+         j=index(line,trim(adjustl(KEY_PHAS(i))))
+         if (j > 0) then
+            car='PHA'
+            exit
+         end if
+      end do
+      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
+         ktype=" "
+         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
+         if (debug) then
+            print*, " Incompatible set of directives in the comand line: "//trim(string)
+            stop
+         end if
+         return
+      end if
+      kType=car
+      if (debug) print*, 'PHAS? '//ktype
+
+
+      !> RGB
+      car=" "
+      do i=1,5 !NKEY_RGB
+         j=index(line,trim(adjustl(KEY_RGB(i))))
+         if (j > 0) then
+            car='RGB'
+            exit
+         end if
+      end do
+      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
+         ktype=" "
+         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
+         if (debug) then
+            print*, " Incompatible set of directives in the comand line: "//trim(string)
+            stop
+         end if
+         return
+      end if
+      kType=car
+      if (debug) print*, 'RGB? '//ktype
+
+      !> MOL
+      car=" "
+      do i=1,8 !NKEY_MOL
+         j=index(line,trim(adjustl(KEY_MOL(i))))
+         if (j > 0) then
+            car='MOL'
+            exit
+         end if
+      end do
+      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
+         ktype=" "
+         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
+         if (debug) then
+            print*, " Incompatible set of directives in the comand line: "//trim(string)
+            stop
+         end if
+         return
+      end if
+      kType=car
+      if (debug) print*, 'MOL? '//ktype
+
+      !> MATM
+      car=" "
+      do i=1,25 !NKEY_MATM
+         j=index(line,trim(adjustl(KEY_MATM(i))))
+         if (j > 0) then
+            car='MAT'
+            exit
+         end if
+      end do
+      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
+         ktype=" "
+         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
+         if (debug) then
+            print*, " Incompatible set of directives in the comand line: "//trim(string)
+            stop
+         end if
+         return
+      end if
+      kType=car
+      if (debug) print*, 'MATM? '//ktype
+
+      !> ATM
+      car=" "
+      do i=1,14 !NKEY_ATM
+         j=index(line,trim(adjustl(KEY_ATM(i))))
+         if (j > 0) then
+            car='ATM'
+            exit
+         end if
+      end do
+      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
+         ktype=" "
+         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
+         if (debug) then
+            print*, " Incompatible set of directives in the comand line: "//trim(string)
+            stop
+         end if
+         return
+      end if
+      kType=car
+      if (debug) print*, 'ATM? '//ktype
+
+   End Function Get_Keycode_Type
+
+   !!----
+   !!---- SUBROUTINE GET_ZONECOMMANDS
+   !!----
+   !!---- Date: 11/05/2022
+   !!
+   Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
+      !---- Arguments ----!
+      Type(file_type),    intent(in)  :: ffile
+      integer,            intent(out) :: n_ini
+      integer,            intent(out) :: n_end
+
+      !---- Local Variables ----!
+      logical            :: Debug =.false.
+      character(len=180) :: line
+      integer            :: i,j
+
+      !> Init
+      n_Ini=0; n_End=0
+
+      !> Determine the zone of commands in the file
+      do i=1,ffile%nlines
+         line=adjustl(ffile%line(i)%str)
+         if (line(1:1) =='!') cycle
+         if (line(1:1) ==' ') cycle
+
+         j=index(line,'!')
+         if (j > 0) line=line(:j-1)
+
+         j=index(line,'#')
+         if (j > 0) line=line(:j-1)
+
+         if (n_Ini == 0) then
+            j=index(u_case(line),'COMMA')
+            if (j > 0) then
+               n_ini=i+1
+               cycle
+            end if
+         end if
+
+         if (n_ini > 0 .and. i >= n_ini) then
+            j=index(u_case(line),'END CO')
+            if (j > 0) then
+               n_End=i-1
+               exit
+            end if
+         end if
+      end do
+
+      !> Debug Info
+      if (debug) then
+         if (n_ini ==0 .or. n_end ==0) then
+            write(unit=*,fmt="(/,a)") " => Don't found the zone for COMMANDS!"
+         end if
+      end if
+
+   End Subroutine Get_ZoneCommands
+
+  !!----
+  !!---- SUBROUTINE GET_BLOCK_KEY
+  !!----
+  !!----
+  !!---- Update: 12/05/2022
+  !!
+  Subroutine Get_Block_KEY(Key,ffile, N_Ini, N_End, Nkey, IndLines)
+     !---- Arguments ----!
+     character(len=*),        intent(in)  :: Key
+     Type(file_type),         intent(in)  :: ffile
+     integer,                 intent(in)  :: n_ini
+     integer,                 intent(in)  :: n_end
+     integer,                 intent(out) :: Nkey
+     integer, dimension(:,:), intent(out) :: IndLines   ! dim(2,Npatt)
+
+     !---- Local Arguments ----!
+     logical                          :: Debug=.true.
+     integer                          :: i,j,k,n,nc,iv,kmax
+     character(len=3)                 :: car
+     character(len=132)               :: line
+     character(len=60), dimension(5)  :: dire
+     real, dimension(5)               :: vet
+     integer, dimension(5)            :: ivet
+
+     !> Init
+     car=u_case(key)
+
+     NKey=0
+     IndLines=0
+     kmax=0
+
+     i=N_ini
+     do while(i <=N_end)
+        line=adjustl(ffile%line(i)%str)
+
+        if (line(1:1) =='!') then
+           i=i+1
+           cycle
+        end if
+        if (line(1:1) ==' ') then
+           i=i+1
+           cycle
+        end if
+        j=index(line,'!')
+        if (j > 0) line=line(:j-1)
+        j=index(line,'#')
+        if (j > 0) line=line(:j-1)
+
+        j=index(u_case(line),'%'//car)
+        if (j <=0) then
+           i=i+1
+           cycle
+        end if
+
+        call cut_string(line)  ! Cut %PAT..
+
+        k=0
+        if (len_trim(line) ==0) then
+           k=1
+        else
+           call get_words(line, dire, nc)
+           call get_num(dire(1), vet, ivet, iv)
+           if (iv < 1) then
+              call set_error(-1, " You have to give the number indentification in Block definition")
+              return
+           end if
+           k=ivet(1)
+        end if
+        kmax=max(kmax,k)
+
+        do n=i+1,n_end
+           line=adjustl(ffile%line(n)%str)
+           if (line(1:1) =='!') cycle
+           if (line(1:1) ==' ') cycle
+
+           j=index(u_case(line),'%END'//car)
+           if (j <= 0) cycle
+
+           IndLines(1,k)=i+1
+           IndLines(2,k)=n-1
+
+           i=n
+           exit
+        end do
+        i=i+1
+     end do
+
+     do i=1, kmax
+        if (IndLines(1,i) == 0) cycle
+
+        if (IndLines(1,i) > 0 .and. Indlines(2,i) ==0) then
+           call set_error(1,"Error in Block definition!")
+           NKey=0
+           return
+
+        else if (IndLines(1,i) > IndLines(2,i) ) then
+           !> Empty block
+           IndLines(1,i) =0
+           IndLines(2,i) =0
+
+        else
+           NKey=NKey+1
+        end if
+     end do
+
+     !> Debug
+     if (debug .and. nkey > 0) then
+        print*,'Number of Blocks readed: ',NKey
+        do i=1,kmax
+           if (IndLines(1,i)==0) cycle
+           print*,'Key: '//car, i, 'Ini: ',IndLines(1,i), 'End: ',IndLines(2,i)
+        end do
+        print*,' '
+     end if
+
+  End Subroutine Get_Block_Key
+
+
 
    !!--++
    !!--++ SUBROUTINE READ_REFCODES_ATM
@@ -214,7 +515,6 @@ Program KeyCodes
       !> Restrains Information?
       call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dfix, n_afix, n_tfix)
 
-      print*,' ==> Directives KeyCODE Information Procedure <=='
       do i=n_ini,n_end
          !> load information on line variable
          line=adjustl(ffile%line(i)%str)

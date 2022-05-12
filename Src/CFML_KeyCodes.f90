@@ -136,8 +136,8 @@ Module CFML_KeyCodes
    integer, private, parameter :: NKEY_MATM=25      ! Number of Keywords for Magnetic atoms
    integer, private, parameter :: NKEY_MOL =8       ! Number of Keywords for Molecule
    integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
-   integer, private, parameter :: NKEY_PHAS=8       ! Number of Keywords for Phases
-   integer, private, parameter :: NKEY_PATT=8       ! Number of Keywords for Patterns
+   integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
+   integer, private, parameter :: NKEY_PATT=7       ! Number of Keywords for Patterns
 
 
    character(len=*), dimension(NKEY_ATM), public, parameter :: KEY_ATM=[                      &
@@ -160,12 +160,10 @@ Module CFML_KeyCodes
                      "T    ", "L    ", "S    ", "TL   ", "TLS  "]
 
    character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[          &
-                     "A    ", "B    ", "C    ", "ALP  ", "BET  ", "GAM  ", "CELL ", &
-                     "PH   "]
+                     "A    ", "B    ", "C    ", "ALP  ", "BET  ", "GAM  ", "CELL "]
 
    character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
-                     "U    ", "V    ", "W    ", "UVW  ",                   &
-                     "BKG  ", "SC   ", "EXTI ", "PAT  "]
+                     "U    ", "V    ", "W    ", "UVW  ","BKG  ", "SC   ", "EXTI "]
 
    !-------------------!
    !---- Variables ----!
