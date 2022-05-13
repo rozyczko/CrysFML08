@@ -43,8 +43,9 @@
 !!
 Module CFML_KeyCodes
    !---- Use Modules ----!
-   Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error
-   Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Ref_Type, MAtm_Ref_Type, Index_AtLab_on_AtList
+   Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error, Err_CFML
+   Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, Matm_Std_Type, &
+                                Atm_Ref_Type, MAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
    Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
                                 Get_OP_from_Symb, Symmetry_symbol
@@ -61,7 +62,7 @@ Module CFML_KeyCodes
              Del_RefCode_ATM, &
              Fill_RefCodes_Atm, &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
-             ReadCode_FIX_ATM, ReadCode_VARY_ATM, &
+             ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
 
@@ -377,6 +378,15 @@ Module CFML_KeyCodes
          type(AtList_Type), intent(in) :: AtList
          integer, optional, intent(in) :: Iunit
       End Subroutine WriteInfo_Constraints
+
+      Module Subroutine Read_RefCodes_ATM(ffile, n_ini, n_end, Spg, Atlist)
+         !---- Arguments ----!
+         Type(file_type),    intent(in)     :: ffile
+         integer,            intent(in)     :: n_ini
+         integer,            intent(in)     :: n_end
+         class (SpG_type),   intent(in)     :: Spg
+         type(AtList_Type),  intent(in out) :: AtList
+      End Subroutine Read_RefCodes_ATM
 
       Module Subroutine ReadCode_FIX_ATM(String, AtList, Spg)
          !---- Arguments ----!

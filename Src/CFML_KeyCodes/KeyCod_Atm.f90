@@ -2,6 +2,105 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
    implicit none
 
    Contains
+   !!--++
+   !!--++ SUBROUTINE READ_REFCODES_ATM
+   !!--++
+   !!
+   Module Subroutine Read_RefCodes_ATM(ffile, n_ini, n_end, Spg, Atlist)
+      !---- Arguments ----!
+      Type(file_type),    intent(in)     :: ffile
+      integer,            intent(in)     :: n_ini
+      integer,            intent(in)     :: n_end
+      class (SpG_type),   intent(in)     :: Spg
+      type(AtList_Type),  intent(in out) :: AtList
+
+      !---- Local variables ----!
+      integer :: i, k, nt, nlong
+      integer :: n_dfix,n_afix,n_tfix
+
+
+      !> Init
+      call clear_error()
+
+      nt=n_end-n_ini +1
+      if (nt <=0) return
+
+      !> Allocating vector for Refinement parameters
+      call Allocate_VecRef(AtList%natoms * 15)
+
+      !> Check the Atom type in the list
+      select type (A => Atlist%atom)
+         type is (Atm_Type)
+            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
+
+         type is (Atm_Std_Type)
+            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
+
+         type is (Atm_Ref_Type)
+            ! Change no necessary
+
+         type is (Matm_Std_Type)
+            call Change_AtomList_Type(AtList, 'MAtm_Ref_Type', 0)
+
+         type is (Matm_Ref_Type)
+            ! Change no necessary
+      end select
+      if (err_CFML%Flag) then
+         print*, trim(err_CFML%Msg)
+         return
+      end if
+
+      !> Restrains Information?
+      call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dfix, n_afix, n_tfix)
+
+      do i=n_ini,n_end
+         !> load information on line variable
+         line=adjustl(ffile%line(i)%str)
+         if (line(1:1) ==" ") cycle
+         if (line(1:1) =="!") cycle
+         k=index(line,"!")
+         if( k /= 0) line=line(:k-1)
+
+         !> Directives
+         select case (u_case(line(1:4)))
+            case ("FIX ", "FIXE")   ! FIX
+               print*,' ==> FIX Directive: '//trim(line)
+               call ReadCode_FIX_ATM(line, AtList, Spg)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+               end if
+
+            case ("VARY")    ! VARY
+               print*,' ==> VARY Directive: '//trim(line)
+               call ReadCode_VARY_ATM(line, AtList, Spg)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+               end if
+
+            case ("EQUA") ! Equal (Constraints)
+               print*,' ==> EQUA Directive: '//trim(line)
+               call ReadCode_EQUAL_ATM(line, AtList, Spg)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+               end if
+
+            case ("AFIX") ! AFIX ang sigma    (Angles restraints)
+               call cut_string(line,nlong)
+               call Get_AFIX_Line(line, AtList)
+
+            case ("DFIX") ! DFIX d sigma      (Distance restraints)
+               call cut_string(line,nlong)
+               call Get_DFIX_Line(line, AtList)
+
+            case ("TFIX") ! TFIX ang sigma    (Torsion angle restraints)
+               call cut_string(line,nlong)
+               call Get_TFIX_Line(line, AtList)
+
+         end select
+      end do
+
+   End Subroutine Read_RefCodes_ATM
+
    !!----
    !!---- ReadCode_FIX_ATM
    !!----

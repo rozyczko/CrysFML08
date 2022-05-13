@@ -20,21 +20,21 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
       if (Npar ==0) then
          R%NPar=0
-         if allocated(R%Par) deallocate(R%Par)
+         if (allocated(R%Par)) deallocate(R%Par)
          return
       end if
 
       R%Npar=NPar
-      if allocated(R%Par) deallocate(R%Par)
+      if (allocated(R%Par)) deallocate(R%Par)
       allocate(R%Par(NPar))
 
       !> Initialize
       do i=1,NPar
-         Par(i)%Nam=" "
-         Par(i)%L=0
-         Par(i)%M=0.0_cp
-         Par(i)%Val=0.0_cp
-         Par(i)%Sig=0.0_cp
+         R%Par(i)%Nam=" "
+         R%Par(i)%L=0
+         R%Par(i)%M=0.0_cp
+         R%Par(i)%Val=0.0_cp
+         R%Par(i)%Sig=0.0_cp
       end do
 
    End Subroutine Allocate_RelationList

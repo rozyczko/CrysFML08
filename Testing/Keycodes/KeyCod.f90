@@ -184,41 +184,6 @@ Program KeyCodes
    !!============================================================================================================!!
    !!============================================================================================================!!
 
-   !!--++
-   !!--++ Subroutine Fix_UVW_Patt
-   !!--++
-   !!--++    Fix Caglioti parameters
-   !!--++
-   !!--++ Update: May - 2022
-   !!
-   Subroutine Fix_UVW_Patt(Pat, NPat, Ind)
-      !---- Arguments ----!
-      type(RelationList_Type), intent(in out) :: Pat
-      integer,                 intent(in)     :: NAtm
-      integer,                 intent(in)     :: Ind ! 1:U, 2:V, 3:W, 0:UVW
-
-      !---- Local Variables ----!
-      integer :: i,nc
-
-      select case (Ind)
-         case (1:3)
-            if (Pat(Npat)A%l_x(Ind) /=0) then
-                nc=A%l_x(Ind)
-                call Del_RefCode_Atm(Atlist,nc)
-            end if
-
-         case (0)
-            do i=1,3
-               if (A%l_x(i) /=0) then
-                  nc=A%l_x(i)
-                  call Del_RefCode_Atm(Atlist,nc)
-               end if
-            end do
-      end select
-
-   End Subroutine Fix_UVW_Patt
-
-
 
    !!----
    !!---- SUBROUTINE Set_Model_Pattern
@@ -357,11 +322,10 @@ Program KeyCodes
       integer, parameter :: NMAX_GEN = 20
 
       character(len=3)                      :: car
-      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
-      integer                               :: npos, nlong, n_dir, n_loc, nc
+      character(len=40),dimension(NMAX_GEN) :: dir_gen
+      integer                               :: npos, nlong, n_dir,  nc
       integer                               :: ii,j,k,na,iv, iphas
-      integer, dimension(NMAX_GEN)          :: Ind_dir, Ind_dir2, IPh_dir, Iph_loc
-      real, dimension(3)                    :: Bounds
+      integer, dimension(NMAX_GEN)          :: Ind_dir, Ind_dir2, IPat_dir, Ipat_loc
       logical                               :: done
 
       character(len=132) :: line
@@ -383,81 +347,40 @@ Program KeyCodes
       call cut_string(line,nlong)
 
       !> general directives
-      call split_genrefcod_Patt(line,n_dir, ind_dir, Iph_dir)
-
-      !> Locals  directives
-      call Split_LocRefCod_Patt(line, n_loc, dir_loc, Ind_dir2, Iph_loc, dir_lab)
-
-      if (n_dir > 0 .and. n_loc > 0) then
-         call set_error(1,'Wrong form for FIX: '//trim(line))
-         return
-      end if
-
-      bounds = [0.0, 1.0, 0.1]
+      call split_refcod_Patt(line, n_dir, ind_dir, Ipat_dir, dir_gen)
 
       if (n_dir > 0) then
          call get_words(line, dire, nc)
          do j=1,n_dir
             do k=n_dir+1,nc
 
-               !> Atom label
-               na=Index_AtLab_on_AtList(dire(k), Iph_dir(j), Atlist)
-               if (na > 0) then
-                  call Fill_RefCodes_Atm('FIX', Ind_dir(j), Bounds, 1, Na, Spg, Atlist)
-               else
-                  !> Species
-                  done=.false.
-                  do ii=1,AtList%Natoms
-                     if (iph_dir(j) > 0) then
-                        if (atList%iph(ii) /= iph_dir(j)) cycle
-                     end if
-                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
-                     call Fill_RefCodes_Atm('FIX', Ind_dir(j), Bounds, 1, ii, Spg, Atlist)
-                     done=.true.
-                  end do
-
-                  if (.not. done) then
-                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
-                     return
-                  end if
-               end if
 
             end do ! Objects
          end do ! n_dir
       end if
 
-      if (n_loc > 0) then
-         do j=1,n_loc
-            na=Index_AtLab_on_AtList(dir_lab(j), iph_loc(j), AtList)
-            if (na==0) then
-               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
-               return
-            end if
-            call Fill_RefCodes_Atm('FIX', Ind_dir2(j), Bounds, 1, Na, Spg, Atlist)
-         end do
-      end if
-
    End Subroutine ReadCode_FIX_PATT
 
    !!--++
-   !!--++ SUBROUTINE SPLIT_GENREFCOD_PATT
+   !!--++ SUBROUTINE SPLIT_REFCOD_PATT
    !!--++
    !!--++ Update: April - 2022
    !!
-   Subroutine Split_GenRefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
+   Subroutine Split_RefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
       !---- Arguments ----!
-      character(len=*),                         intent(in)  :: String
-      integer,                                  intent(out) :: Nc
-      integer, dimension(:),                    intent(out) :: IKeys
-      integer, dimension(:),                    intent(out) :: IPatt
-      character(len=*), dimension(:), optional, intent(out) :: Keys
+      character(len=*),               intent(in)  :: String
+      integer,                        intent(out) :: Nc
+      integer, dimension(:),          intent(out) :: IKeys
+      integer, dimension(:),          intent(out) :: IPatt
+      character(len=*), dimension(:), intent(out) :: Keys
 
       !---- Local Variables ----!
-      integer :: i,j,n,iv,npos
+      integer          :: i,j,n,iv,npos
+      character(len=2) :: car
+      character(Len=30):: ccc
 
       !> Init
-      Nc=0; Ikeys=0; IPatt=0
-      if (present(keys)) Keys=" "
+      Nc=0; Ikeys=0; IPatt=0: Keys=" "
       if (len_trim(string) == 0) return
 
       call get_words(string, dire, n)
@@ -476,17 +399,39 @@ Program KeyCodes
          end if
 
          do j=1,7 !NKEY_PATT
+            ccc=trim(dire(i))
+            car=u_case(dire(i)(1:2))
+            select case (car)
+               case ('BK')
+                  call get_num(dire(i)(4:),vet,ivet,iv)
+                  if (iv == 1) then
+                     dire(i)=dire((i)(:3)
+                  end if
+
+               case ('SC')
+                  call get_num(dire(i)(3:),vet,ivet,iv)
+                  if (iv == 1) then
+                     dire(i)=dire(i)(:2)
+                  end if
+
+               case ('EX')
+                  call get_num(dire(i)(5:),vet,ivet,iv)
+                  if (iv == 1) then
+                     dire(i)=dire(i)(:4)
+                  end if
+            end select
+
             if (trim(KEY_PATT(j)) == trim(u_case(dire(i)))) then
                nc=nc+1
                ikeys(nc)=j
-               if (present(keys)) keys(nc)=trim(key_patt(j))
+               keys(nc)=trim(ccc)
                cycle loop1
             end if
-         end do ! Key_atm
+         end do ! Key_Patt
 
       end do loop1 ! General
 
-   End Subroutine Split_GenRefCod_Patt
+   End Subroutine Split_RefCod_Patt
 
    !!--++
    !!--++ SUBROUTINE SPLIT_LOCREFCOD_PATT
@@ -555,7 +500,7 @@ Program KeyCodes
    !!----
    !!---- Update: April - 2022
    !!
-   Subroutine ReadCode_VARY_PAT(String, AtList, Spg)
+   Subroutine ReadCode_VARY_PATT(String, AtList, Spg)
       !---- Arguments ----!
       character(len=*),   intent(in)     :: String
       type(AtList_Type),  intent(in out) :: AtList
@@ -642,106 +587,6 @@ Program KeyCodes
 
    End Subroutine ReadCode_VARY_PATT
 
-
-
-   !!--++
-   !!--++ SUBROUTINE READ_REFCODES_ATM
-   !!--++
-   !!
-   Subroutine Read_RefCodes_ATM(ffile, n_ini, n_end, Spg, Atlist)
-      !---- Arguments ----!
-      Type(file_type),    intent(in)     :: ffile
-      integer,            intent(in)     :: n_ini
-      integer,            intent(in)     :: n_end
-      class (SpG_type),   intent(in)     :: Spg
-      type(AtList_Type),  intent(in out) :: AtList
-
-      !---- Local variables ----!
-      integer :: i, k, nt, nlong
-      integer :: n_dfix,n_afix,n_tfix
-
-
-      !> Init
-      call clear_error()
-
-      nt=n_end-n_ini +1
-      if (nt <=0) return
-
-      !> Allocating vector for Refinement parameters
-      call Allocate_VecRef(AtList%natoms * 15)
-
-      !> Check the Atom type in the list
-      select type (A => Atlist%atom)
-         type is (Atm_Type)
-            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
-
-         type is (Atm_Std_Type)
-            call Change_AtomList_Type(AtList, 'Atm_Ref_Type', 0)
-
-         type is (Atm_Ref_Type)
-            ! Change no necessary
-
-         type is (Matm_Std_Type)
-            call Change_AtomList_Type(AtList, 'MAtm_Ref_Type', 0)
-
-         type is (Matm_Ref_Type)
-            ! Change no necessary
-      end select
-      if (err_CFML%Ierr /= 0) then
-         print*, trim(err_CFML%Msg)
-         return
-      end if
-
-      !> Restrains Information?
-      call Allocate_Restraints_Vec(Ffile, n_ini, n_end, n_dfix, n_afix, n_tfix)
-
-      do i=n_ini,n_end
-         !> load information on line variable
-         line=adjustl(ffile%line(i)%str)
-         if (line(1:1) ==" ") cycle
-         if (line(1:1) =="!") cycle
-         k=index(line,"!")
-         if( k /= 0) line=line(:k-1)
-
-         !> Directives
-         select case (u_case(line(1:4)))
-            case ("FIX ", "FIXE")   ! FIX
-               print*,' ==> FIX Directive: '//trim(line)
-               call ReadCode_FIX_ATM(line, AtList, Spg)
-               if (err_CFML%IErr /=0) then
-                  print*,err_CFML%Msg
-               end if
-
-            case ("VARY")    ! VARY
-               print*,' ==> VARY Directive: '//trim(line)
-               call ReadCode_VARY_ATM(line, AtList, Spg)
-               if (err_CFML%IErr /=0) then
-                  print*,err_CFML%Msg
-               end if
-
-            case ("EQUA") ! Equal (Constraints)
-               print*,' ==> EQUA Directive: '//trim(line)
-               call ReadCode_EQUAL_ATM(line, AtList, Spg)
-               if (err_CFML%IErr /=0) then
-                  print*,err_CFML%Msg
-               end if
-
-            case ("AFIX") ! AFIX ang sigma    (Angles restraints)
-               call cut_string(line,nlong)
-               call Get_AFIX_Line(line, AtList)
-
-            case ("DFIX") ! DFIX d sigma      (Distance restraints)
-               call cut_string(line,nlong)
-               call Get_DFIX_Line(line, AtList)
-
-            case ("TFIX") ! TFIX ang sigma    (Torsion angle restraints)
-               call cut_string(line,nlong)
-               call Get_TFIX_Line(line, AtList)
-
-         end select
-      end do
-
-   End Subroutine Read_RefCodes_ATM
 
    !!----
    !!---- ReadCode_EQUAL_ATM
