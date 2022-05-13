@@ -149,7 +149,6 @@ Program Calc_Structure_Factors
    !> Creating a list of reflections
    MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
    call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
-   !call H_Uni(Cell,Spg,.true.,0.0,stlmax,'s',MaxNumRef,hkl)
    !call Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
    call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG,powder=.true.)
 
