@@ -57,7 +57,7 @@ Module CFML_KeyCodes
    !---- List of public Functions ----!
 
    !---- List of public Subroutines ----!
-   public :: Allocate_VecRef, Allocate_Restraints_Vec,    &
+   public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_RelationList,   &
              Del_RefCode_ATM, &
              Fill_RefCodes_Atm, &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
@@ -212,6 +212,12 @@ Module CFML_KeyCodes
          integer, optional,intent(out) :: NAfix
          integer, optional,intent(out) :: NTfix
       End Subroutine Allocate_Restraints_Vec
+
+      Module Subroutine Allocate_RelationList(Npar, R)
+         !---- Arguments ----!
+         integer,                 intent(in)     :: NPar
+         type(RelationList_Type), intent(in out) :: R
+      End Subroutine Allocate_RelationList
 
       Module Subroutine Allocate_VecRef(N)
          !---- Arguments ----!

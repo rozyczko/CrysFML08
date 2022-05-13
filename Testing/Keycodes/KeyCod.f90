@@ -19,10 +19,13 @@ Program KeyCodes
    !---- Variables ----!
    Implicit None
 
-   type (File_type)                :: ffile
-   class (SPG_Type), allocatable   :: SpGr
-   type (Cell_G_Type)              :: Cell
-   type (AtList_Type)              :: At
+   class(SPG_Type), allocatable   :: SpGr
+   type(File_type)                :: ffile
+   type(Cell_G_Type)              :: Cell    ! Only 1 Phase
+   type(AtList_Type)              :: At
+   type(RelationList_Type)        :: Pat     ! Only 1 Pattern
+   type(RelationList_Type)        :: Phas    ! Only 1 Phase
+
 
    character(len=256)              :: filcod
    character(len=150)              :: line
@@ -36,8 +39,12 @@ Program KeyCodes
    real(kind=cp)                   :: tini,tfin, total_time
    real(kind=cp), dimension(10)    :: vet
 
-   integer                         :: NB_Patt, NB_Phas, NB_Mol, NB_RGB
-   integer, dimension(2,30)        :: IB_Patt, IB_PHas, IB_MOL, IB_RGB
+   integer, parameter              :: NB_Max=10
+
+   integer                         :: NB_Atm, NB_Patt, NB_Phas, NB_Mol, NB_RGB
+   integer, dimension(2,NB_Max)    :: IB_Atm, IB_Patt, IB_PHas, IB_MOL, IB_RGB
+
+   integer                         :: Npar,ip
 
 
    !> Arguments on the command line
@@ -103,14 +110,37 @@ Program KeyCodes
       !> -------------
       !> Testing Zone
       !> -------------
+
+      !> Allocating Relation List for Non atomic parameters
+      call Allocate_RelationList(18,Pat)  ! 18 Parameters for Pattern
+      call Allocate_RelationList(6,Phas)  ! 6  Parameters for Phase
+
+      call set_model_Pattern(Pat)
+      call set_model_Phase(Phas)
+
+      !> Doind space for Refinement vectors
+      !> add parameters according to the number of atoms in each phase
+      Npar=18+ 6+ 11*AtList%natoms   ! At the moment only 1 Phase
+      call Allocate_VecRef(Npar)
+
+      !> Determine the command zone
       call get_zonecommands(ffile,nc_i,nc_f)
+
       if (nc_i > 0 .and. nc_i < nc_f) then
 
          !> ==== Blocks ====
          call Get_Block_Key('Pattern', ffile, nc_i, nc_f, NB_Patt, IB_Patt)
-         call Get_Block_Key('Phases',  ffile, nc_i, nc_f, NB_Phas, IB_Phas)
+         call Get_Block_Key('Phase',   ffile, nc_i, nc_f, NB_Phas, IB_Phas)
+         call Get_Block_Key('Atoms',   ffile, nc_i, nc_f, NB_Atm,  IB_Atm)
          call Get_Block_Key('Molec',   ffile, nc_i, nc_f, NB_Mol, IB_Mol)
          call Get_Block_Key('RGB',     ffile, nc_i, nc_f, NB_RGB, IB_RGB)
+
+         !> Patterns
+         if (NB_Patt > 0) then
+            ip=1
+            if (IB_Patt(1,ip) > 0) call Read_RefCodes_PATT(ffile, IB_Patt(1,ip),IB_Patt(2,ip), Pat)
+         end if
+
 
          !> ==== Check Keycodes for Atoms ====
          !call Read_RefCodes_ATM(ffile, nc_i, nc_f, Spgr, At)
@@ -146,147 +176,473 @@ Program KeyCodes
    write(unit=*,fmt="(a,i3,a,f8.4,a)")     " => TOTAL CPU-time: ",nint(tfin)," minutes",tini," seconds"
 
    Contains
-   !!----
-   !!----
-   !!----
-   !!----
+
+   !!============================================================================================================!!
+   !!============================================================================================================!!
+   !!============================================================================================================!!
+   !!============================================================================================================!!
+   !!============================================================================================================!!
+   !!============================================================================================================!!
+
+   !!--++
+   !!--++ Subroutine Fix_UVW_Patt
+   !!--++
+   !!--++    Fix Caglioti parameters
+   !!--++
+   !!--++ Update: May - 2022
    !!
-   Function Get_Keycode_Type(String) Result(KType)
+   Subroutine Fix_UVW_Patt(Pat, NPat, Ind)
       !---- Arguments ----!
-      character(len=*), intent(in) :: String
-      character(len=3)             :: KType
+      type(RelationList_Type), intent(in out) :: Pat
+      integer,                 intent(in)     :: NAtm
+      integer,                 intent(in)     :: Ind ! 1:U, 2:V, 3:W, 0:UVW
+
+      !---- Local Variables ----!
+      integer :: i,nc
+
+      select case (Ind)
+         case (1:3)
+            if (Pat(Npat)A%l_x(Ind) /=0) then
+                nc=A%l_x(Ind)
+                call Del_RefCode_Atm(Atlist,nc)
+            end if
+
+         case (0)
+            do i=1,3
+               if (A%l_x(i) /=0) then
+                  nc=A%l_x(i)
+                  call Del_RefCode_Atm(Atlist,nc)
+               end if
+            end do
+      end select
+
+   End Subroutine Fix_UVW_Patt
+
+
+
+   !!----
+   !!---- SUBROUTINE Set_Model_Pattern
+   !!----
+   !!----
+   !!---- Update: 13/05/2022
+   !!
+   Subroutine Set_Model_Pattern(Pat)
+      !---- Arguments ----!
+      type(RelationList_Type), intent(in out) :: Pat
 
       !---- Local Arguments ----!
-      logical            :: debug=.true.
-      character(len=132) :: line
-      character(len=3)   :: car
-      integer            :: i,j
+
+      !> Caglioti Parameters
+      Pat(1)%Nam="U"
+      Pat(2)%Nam="V"
+      Pat(3)%Nam="W"
+
+      !> Background Parameters
+      Pat(4)%Nam="BKG01"
+      Pat(5)%Nam="BKG02"
+      Pat(6)%Nam="BKG03"
+      Pat(7)%Nam="BKG04"
+      Pat(8)%Nam="BKG05"
+      Pat(9)%Nam="BKG06"
+
+      !> Scale Factors
+      Pat(10)%Nam="SC01"
+      Pat(11)%Nam="SC02"
+      Pat(12)%Nam="SC03"
+
+      !> Extintion Parameters
+      Pat(13)%Nam="EXT01"
+      Pat(14)%Nam="EXT02"
+      Pat(15)%Nam="EXT03"
+      Pat(16)%Nam="EXT04"
+      Pat(17)%Nam="EXT05"
+      Pat(18)%Nam="EXT06"
+
+   End Subroutine Set_Model_Pattern
+
+   !!----
+   !!---- SUBROUTINE Set_Model_Pattern
+   !!----
+   !!----
+   !!---- Update: 13/05/2022
+   !!
+   Subroutine Set_Model_Phase(Phas)
+      !---- Arguments ----!
+      type(RelationList_Type), intent(in out) :: Phas
+
+      !---- Local Arguments ----!
+
+      !> Cell Parameters
+      Phas(1)%Nam="A"
+      Phas(2)%Nam="B"
+      Phas(3)%Nam="C"
+      Phas(4)%Nam="ALP"
+      Phas(5)%Nam="BET"
+      Phas(6)%Nam="GAM"
+
+   End Subroutine Set_Model_Phase
+
+   !!----
+   !!---- SUBROUTINE Read_RefCodes_PATT
+   !!----
+   !!----
+   !!---- Update: 12/05/2022
+   !!
+   Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Pat)
+      !---- Arguments ----!
+      Type(file_type),         intent(in)     :: ffile
+      integer,                 intent(in)     :: n_ini
+      integer,                 intent(in)     :: n_end
+      type(RelationList_Type), intent(in out) :: Pat
+
+      !---- Local Variables ----!
+      logical           :: Debug=.true.
+      character(len=80) :: line
 
       !> Init
-      KType=" "
+      call clear_error()
 
-      line=trim(u_case(string))
-      call cut_string(line)
+      if (debug) print*,'READ_ReFCODES_PATT'
 
-      !> PAT
-      car=" "
-      do i=1,7 !NKEY_PATT
-         j=index(line,trim(adjustl(KEY_PATT(i))))
-         if (j > 0) then
-            car='PAT'
-            exit
-         end if
+      do i=n_ini,n_end
+         !> load information on line variable
+         line=adjustl(ffile%line(i)%str)
+         if (line(1:1) ==" ") cycle
+         if (line(1:1) =="!") cycle
+         k=index(line,"!")
+         if( k /= 0) line=line(:k-1)
+
+         !> Directives
+         select case (u_case(line(1:4)))
+            case ("FIX ", "FIXE")   ! FIX
+               if (debug) print*,' ==> FIX Directive: '//trim(line)
+               call ReadCode_FIX_PATT(line, Pat)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+                  stop
+               end if
+
+            case ("VARY")    ! VARY
+               if (debug) print*,' ==> VARY Directive: '//trim(line)
+               call ReadCode_VARY_PATT(line, Pat)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+                  stop
+               end if
+
+            case ("EQUA") ! Equal (Constraints)
+               if (debug) print*,' ==> EQUA Directive: '//trim(line)
+               !call ReadCode_EQUAL_PATT(line, AtList, Spg)
+               if (err_CFML%Flag) then
+                  print*,err_CFML%Msg
+                  stop
+               end if
+
+         end select
       end do
-      kType=car
-      if (debug) print*, 'PAT? '//ktype
 
-      !> PHA
-      car=" "
-      do i=1,7 !NKEY_PHAS
-         j=index(line,trim(adjustl(KEY_PHAS(i))))
-         if (j > 0) then
-            car='PHA'
-            exit
-         end if
-      end do
-      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
-         ktype=" "
-         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
-         if (debug) then
-            print*, " Incompatible set of directives in the comand line: "//trim(string)
-            stop
-         end if
+   End Subroutine Read_RefCodes_PATT
+
+   !!----
+   !!---- ReadCode_FIX_ATM
+   !!----
+   !!---- Update: April - 2022
+   !!
+   Subroutine ReadCode_FIX_PATT(String, Pat)
+      !---- Arguments ----!
+      character(len=*),        intent(in)     :: String
+      type(RelationList_Type), intent(in out) :: Pat
+
+      !---- Local Variables ----!
+      integer, parameter :: NMAX_GEN = 20
+
+      character(len=3)                      :: car
+      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
+      integer                               :: npos, nlong, n_dir, n_loc, nc
+      integer                               :: ii,j,k,na,iv, iphas
+      integer, dimension(NMAX_GEN)          :: Ind_dir, Ind_dir2, IPh_dir, Iph_loc
+      real, dimension(3)                    :: Bounds
+      logical                               :: done
+
+      character(len=132) :: line
+
+
+      !> Init
+      call clear_error()
+
+      !> copy
+      line=trim(adjustl(string))
+
+      car=u_case(line(1:3))
+      if (car /= 'FIX') then
+         call set_error(1,'Wrong Directive for FIX instruction: '//trim(line))
          return
       end if
-      kType=car
-      if (debug) print*, 'PHAS? '//ktype
 
+      !> Cut FIX word
+      call cut_string(line,nlong)
 
-      !> RGB
-      car=" "
-      do i=1,5 !NKEY_RGB
-         j=index(line,trim(adjustl(KEY_RGB(i))))
-         if (j > 0) then
-            car='RGB'
-            exit
-         end if
-      end do
-      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
-         ktype=" "
-         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
-         if (debug) then
-            print*, " Incompatible set of directives in the comand line: "//trim(string)
-            stop
-         end if
+      !> general directives
+      call split_genrefcod_Patt(line,n_dir, ind_dir, Iph_dir)
+
+      !> Locals  directives
+      call Split_LocRefCod_Patt(line, n_loc, dir_loc, Ind_dir2, Iph_loc, dir_lab)
+
+      if (n_dir > 0 .and. n_loc > 0) then
+         call set_error(1,'Wrong form for FIX: '//trim(line))
          return
       end if
-      kType=car
-      if (debug) print*, 'RGB? '//ktype
 
-      !> MOL
-      car=" "
-      do i=1,8 !NKEY_MOL
-         j=index(line,trim(adjustl(KEY_MOL(i))))
-         if (j > 0) then
-            car='MOL'
-            exit
+      bounds = [0.0, 1.0, 0.1]
+
+      if (n_dir > 0) then
+         call get_words(line, dire, nc)
+         do j=1,n_dir
+            do k=n_dir+1,nc
+
+               !> Atom label
+               na=Index_AtLab_on_AtList(dire(k), Iph_dir(j), Atlist)
+               if (na > 0) then
+                  call Fill_RefCodes_Atm('FIX', Ind_dir(j), Bounds, 1, Na, Spg, Atlist)
+               else
+                  !> Species
+                  done=.false.
+                  do ii=1,AtList%Natoms
+                     if (iph_dir(j) > 0) then
+                        if (atList%iph(ii) /= iph_dir(j)) cycle
+                     end if
+                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                     call Fill_RefCodes_Atm('FIX', Ind_dir(j), Bounds, 1, ii, Spg, Atlist)
+                     done=.true.
+                  end do
+
+                  if (.not. done) then
+                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
+                     return
+                  end if
+               end if
+
+            end do ! Objects
+         end do ! n_dir
+      end if
+
+      if (n_loc > 0) then
+         do j=1,n_loc
+            na=Index_AtLab_on_AtList(dir_lab(j), iph_loc(j), AtList)
+            if (na==0) then
+               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
+               return
+            end if
+            call Fill_RefCodes_Atm('FIX', Ind_dir2(j), Bounds, 1, Na, Spg, Atlist)
+         end do
+      end if
+
+   End Subroutine ReadCode_FIX_PATT
+
+   !!--++
+   !!--++ SUBROUTINE SPLIT_GENREFCOD_PATT
+   !!--++
+   !!--++ Update: April - 2022
+   !!
+   Subroutine Split_GenRefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
+      !---- Arguments ----!
+      character(len=*),                         intent(in)  :: String
+      integer,                                  intent(out) :: Nc
+      integer, dimension(:),                    intent(out) :: IKeys
+      integer, dimension(:),                    intent(out) :: IPatt
+      character(len=*), dimension(:), optional, intent(out) :: Keys
+
+      !---- Local Variables ----!
+      integer :: i,j,n,iv,npos
+
+      !> Init
+      Nc=0; Ikeys=0; IPatt=0
+      if (present(keys)) Keys=" "
+      if (len_trim(string) == 0) return
+
+      call get_words(string, dire, n)
+      loop1: do i=1,n
+
+         !> Patterns
+         npos=index(u_case(dire(i)),'_PAT')
+         if (npos > 0) then
+            call get_num(dire(i)(npos+3:),vet,ivet,iv)
+            if (iv /= 1) then
+               call set_error(1,'Bad format to include Phase information!')
+               return
+            end if
+            IPatt(i)=ivet(1)    ! Positive values for Patterns references
+            dire(i)=dire(i)(:npos-1)
+         end if
+
+         do j=1,7 !NKEY_PATT
+            if (trim(KEY_PATT(j)) == trim(u_case(dire(i)))) then
+               nc=nc+1
+               ikeys(nc)=j
+               if (present(keys)) keys(nc)=trim(key_patt(j))
+               cycle loop1
+            end if
+         end do ! Key_atm
+
+      end do loop1 ! General
+
+   End Subroutine Split_GenRefCod_Patt
+
+   !!--++
+   !!--++ SUBROUTINE SPLIT_LOCREFCOD_PATT
+   !!--++
+   !!--++ Update: May - 2022
+   !!
+   Subroutine Split_LocRefCod_PATT(String, Nc, Keys, Ikeys, IPatt, Lab)
+      !---- Arguments ----!
+      character(len=*),               intent(in)  :: String
+      integer,                        intent(out) :: Nc
+      character(len=*), dimension(:), intent(out) :: Keys
+      integer,          dimension(:), intent(out) :: Ikeys
+      integer,          dimension(:), intent(out) :: IPatt
+      character(len=*), dimension(:), intent(out) :: Lab
+
+      !---- Local Variables ----!
+      integer           :: i,j,n,iv
+      character(len=40) :: str
+
+      !> Init
+      Nc=0
+      Keys=" "
+      Ikeys=0
+      Lab=" "
+      IPatt=0
+
+      if (len_trim(string) == 0) return
+
+      call get_words(string, dire, n)
+
+      do i=1,n
+         str=adjustl(dire(i))
+         j=index(str,'_')
+         if (j == 0) cycle
+
+         nc=nc+1
+         keys(nc)=trim(str(:j-1))
+
+         !> Look for Pattern
+         str=str(j+1:)
+         j=index(str,'_')
+         if ( j > 0) then
+            if (str(j+1:j+3)=='PAT') then
+               call get_num(str(j+4:),vet,ivet,iv)
+               if (iv ==1) ipatt(nc)=ivet(1) ! Positive values for patterns
+            end if
+            lab(nc)=trim(str(:j-1))
+         else
+            lab(nc)=trim(str)
          end if
       end do
-      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
-         ktype=" "
-         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
-         if (debug) then
-            print*, " Incompatible set of directives in the comand line: "//trim(string)
-            stop
-         end if
-         return
-      end if
-      kType=car
-      if (debug) print*, 'MOL? '//ktype
 
-      !> MATM
-      car=" "
-      do i=1,25 !NKEY_MATM
-         j=index(line,trim(adjustl(KEY_MATM(i))))
-         if (j > 0) then
-            car='MAT'
-            exit
-         end if
+      do i=1,nc
+         do j=1,7!NKEY_PATT
+            if (trim(KEY_PATT(j)) == trim(u_case(keys(i)))) then
+               ikeys(i)=j
+               exit
+            end if
+         end do
       end do
-      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
-         ktype=" "
-         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
-         if (debug) then
-            print*, " Incompatible set of directives in the comand line: "//trim(string)
-            stop
-         end if
+
+   End Subroutine Split_LocRefCod_PATT
+
+   !!----
+   !!---- ReadCode_VARY_ATM
+   !!----
+   !!---- Update: April - 2022
+   !!
+   Subroutine ReadCode_VARY_PAT(String, AtList, Spg)
+      !---- Arguments ----!
+      character(len=*),   intent(in)     :: String
+      type(AtList_Type),  intent(in out) :: AtList
+      class (SpG_type),   intent(in)     :: Spg
+
+      !---- Local Variables ----!
+      integer, parameter :: NMAX_GEN = 20
+
+      character(len=3)                      :: car
+      character(len=40),dimension(NMAX_GEN) :: dir_gen, dir_loc, dir_lab
+      integer                               :: npos, nlong, n_dir, n_loc, nc
+      integer                               :: ii,j,k,na
+      integer, dimension(NMAX_GEN)          :: Ind_dir, Ind_dir2, IPh_dir, Iph_loc
+      real, dimension(3)                    :: Bounds
+      logical                               :: done
+
+      !> Init
+      call clear_error()
+
+      !> copy
+      line=trim(adjustl(string))
+
+      car=u_case(line(1:3))
+      if (car /= 'VAR') then
+         call set_error(1,'Wrong Directive for VARY instruction: '//trim(line))
          return
       end if
-      kType=car
-      if (debug) print*, 'MATM? '//ktype
 
-      !> ATM
-      car=" "
-      do i=1,14 !NKEY_ATM
-         j=index(line,trim(adjustl(KEY_ATM(i))))
-         if (j > 0) then
-            car='ATM'
-            exit
-         end if
-      end do
-      if (len_trim(ktype) > 0 .and. len_trim(car) > 0) then
-         ktype=" "
-         call set_error(1," Incompatible set of directives in the comand line: "//trim(string))
-         if (debug) then
-            print*, " Incompatible set of directives in the comand line: "//trim(string)
-            stop
-         end if
+      !> Cut VARY word
+      call cut_string(line,nlong)
+
+      !> general directives
+      call split_genrefcod_atm(line, n_dir, Ind_dir, IPh_dir, dir_gen)
+
+      !> Locals  directives
+      call Split_LocRefCod_ATM(line, n_loc, dir_loc, Ind_dir2, Iph_loc, dir_lab)
+
+      if (n_dir > 0 .and. n_loc > 0) then
+         call set_error(1,'Wrong form for VARY: '//trim(line))
          return
       end if
-      kType=car
-      if (debug) print*, 'ATM? '//ktype
 
-   End Function Get_Keycode_Type
+      bounds = [0.0, 1.0, 0.1]
+      if (n_dir > 0) then
+         call get_words(line,dire,nc)
+
+         do j=1,n_dir
+            do k=n_dir+1,nc
+               na=Index_AtLab_on_AtList(dire(k),iph_dir(j),Atlist)
+               if (na > 0) then
+                  call Fill_RefCodes_Atm('VARY', Ind_dir(j), Bounds, 1, Na, Spg, Atlist)
+
+               else
+                  !> Species
+                  done=.false.
+                  do ii=1,AtList%Natoms
+                     if (iph_dir(j) > 0) then
+                        if (atList%iph(ii) /= iph_dir(j)) cycle
+                     end if
+                     if (trim(u_case(dire(k))) /= trim(u_case(AtList%atom(ii)%ChemSymb))) cycle
+                     call Fill_RefCodes_Atm('VARY', Ind_dir(j), Bounds, 1, ii, Spg, Atlist)
+                     done=.true.
+                  end do
+                  if (.not. done) then
+                     call set_error(1,'Not found the Atom label: '//trim(dire(k)))
+                     return
+                  end if
+               end if
+            end do !k
+         end do ! ndir
+      end if
+
+      if (n_loc > 0) then
+         do j=1,n_loc
+
+            na=Index_AtLab_on_AtList(dir_lab(j), iph_loc(j), AtList)
+            if (na==0) then
+               call set_error(1,'Not found the Atom given in the list! -> '//trim(dir_lab(j)))
+               return
+            end if
+            call Fill_RefCodes_Atm('VARY', Ind_dir2(j), Bounds, 1, Na, Spg, Atlist)
+         end do
+      end if
+
+   End Subroutine ReadCode_VARY_PATT
+
+
 
    !!--++
    !!--++ SUBROUTINE READ_REFCODES_ATM
