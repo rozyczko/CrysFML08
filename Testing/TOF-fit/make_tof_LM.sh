@@ -34,9 +34,9 @@ if [ $ARCH == "m32" ]; then
    LIBSTATIC="-lcrysfml"
    VERS="Linux"
 else
-   INC="-I$CRYSFML/ifort64/LibC"
-   LIB="-L$CRYSFML/ifort64/LibC"
-   LIBSTATIC="-lcrysfml"
+   INC="-I$CRYSFML/ifort64/LibC -I$CRYSFML/ifort64/ODR "
+   LIB="-L$CRYSFML/ifort64/LibC -L$CRYSFML/ifort64/ODR"
+   LIBSTATIC="-lcrysfml -lodr_sp"
    VERS="Linux64"
 fi
 if [ $DEBUG == "Y" ]; then

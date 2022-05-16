@@ -78,7 +78,7 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
 
             End Select
       else
-                                               write(unit=iout,fmt="(a)")        "    General Space Group"
+                                               write(unit=iout,fmt="(/,a)")      "    General Space Group"
                                                write(unit=iout,fmt="(a)")        "    -------------------"
                                                write(unit=iout,fmt="(a,i4)")     "                  Op-Dimension: ",Grp%d
                                                write(unit=iout,fmt="(a,i4)")     "               Space-Dimension: ",Grp%d-1

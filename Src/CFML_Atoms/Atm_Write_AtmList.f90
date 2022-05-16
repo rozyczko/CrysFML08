@@ -129,22 +129,22 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
          if (any(A%Atom(:)%Thtype == "ANI") .or. any(A%Atom(:)%Thtype == "ani") ) car2="ANI"
 
          if (car2 == "ISO") then
-            line="  Atom    Scatt/Chem    Mult     x/a       y/b       z/c      B[iso]    Occ"
+            line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
 
          else
             car2=trim(u_case(A%Atom(1)%Utype))
             select case (trim(car2))
                case ("BETA")
-                  line="  Atom    Scatt/Chem    Mult     x/a       y/b       z/c     B[iso]      Occ  "
+                  line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
                   line=line//"   beta_11   beta_22   beta_33   beta_12   beta_13   beta_23"
                case ("U")
-                  line="  Atom    Scatt/Chem    Mult     x/a       y/b       z/c    U[iso/eq]    Occ  "
+                  line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     U[iso/eq]     Occ"
                   line=line//"      U_11      U_22      U_33      U_12      U_13      U_23"
                case ("B")
-                  line="  Atom    Scatt/Chem    Mult     x/a       y/b       z/c     B[iso]      Occ"
+                  line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
                   line=line//"      B_11      B_22      B_33      B_12      B_13      B_23"
                case default
-                  line="  Atom    Scatt/Chem    Mult     x/a       y/b       z/c     B[iso]      Occ"
+                  line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
             end select
          end if
          write(unit=lun,fmt="(T3,a)") trim(line)
@@ -152,8 +152,8 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
          line=repeat("=", len_trim(line))
          write(unit=lun,fmt="(T3,a)") trim(line)
 
-         fmt1="(T3,a,T6,a,T18,a,T28,i3,5f10.5)"     ! Iso
-         fmt2="(T3,a,T6,a,T18,a,T28,i3,11f10.5)"    ! Aniso
+         fmt1="(T3,a,T6,a,T18,a,T32,i4,5f10.5)"     ! Iso
+         fmt2="(T3,a,T6,a,T18,a,T32,i4,11f10.5)"    ! Aniso
 
          select type (Atm => A%atom)
             type is (atm_type)
@@ -166,20 +166,20 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   if (.not. A%active(n)) car='-'
                   select case (trim(car2))
                      case ('ISO')
-                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb), &
+                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab),  Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb , &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
                      case ('ANI')
-                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb), &
+                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
                          Case ("CRYSTAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
                          Case ("SPHERICAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
                          Case ("CARTESIAN")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
                        End Select
                   end if
                end do
@@ -194,20 +194,20 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   car2=u_case(car2)
                   select case (trim(car2))
                      case ('ISO')
-                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
                      case ('ANI')
-                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
                          Case ("CRYSTAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
                          Case ("SPHERICAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
                          Case ("CARTESIAN")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
                        End Select
                   end if
                end do
@@ -222,20 +222,20 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   car2=u_case(car2)
                   select case (trim(car2))
                      case ('ISO')
-                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
                      case ('ANI')
-                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
                          Case ("CRYSTAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
                          Case ("SPHERICAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
                          Case ("CARTESIAN")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
                        End Select
                   end if
                end do
@@ -338,20 +338,20 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   car2=u_case(car2)
                   select case (trim(car2))
                      case ('ISO')
-                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb)//" / "//trim(Atm(n)%chemSymb), &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
                      case ('ANI')
-                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%chemSymb), &
+                        write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb)//" / "//trim(Atm(n)%chemSymb), &
                              Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
                          Case ("CRYSTAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Crystal Components:   Mx(a)  My(b)  Mz(b)"
                          Case ("SPHERICAL")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Spherical Components:  Moment  Phi  Theta"
                          Case ("CARTESIAN")
-                            write(unit=lun,fmt="(T20,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
+                            write(unit=lun,fmt="(T25,a,3f10.5,a)")  "Moment(uB):", Atm(n)%moment, "  Cartesian Components:  MxC  MyC  MzC"
                        End Select
                   end if
                end do

@@ -20,7 +20,7 @@ SubModule (CFML_IOForm) Format_GEN
        Class(Atm_Type),  intent(out)   :: Atm   ! Parameters on variable At
 
        !---- Local variables -----!
-       integer                           :: iv, nlong1,n !,ier,q
+       integer                           :: iv,i, nlong1,n !,ier,q
 
        real(kind=cp), dimension (10)     :: vet1
        real(kind=cp), dimension (10)     :: vet2
@@ -81,8 +81,10 @@ SubModule (CFML_IOForm) Format_GEN
        call cut_string(line,nlong1,label)
 
        !> Magnetic?
+       i=index(DIGCAR(1:10),label(4:4))
+       if(i == 0) i=index(DIGCAR(1:10),label(3:3)) !This is the case of MV3
        if ((u_case(label(1:1)) == "M" .or. u_case(label(1:1)) == "J" ) &
-          .and. index(DIGCAR(1:10),label(4:4)) /= 0 .and. index(label,"+") == 0) then
+          .and. i /= 0 .and. index(label,"+") == 0) then
           atm%ChemSymb=u_case(label(2:2))//l_case(label(3:3))
           atm%magnetic=.true.
        else

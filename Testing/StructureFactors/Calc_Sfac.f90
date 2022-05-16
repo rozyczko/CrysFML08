@@ -7,7 +7,7 @@
 !!
 Program Calc_Structure_Factors
    !---- Use Modules ----!
-   use CFML_GlobalDeps,                only: Err_CFML, clear_error
+   use CFML_GlobalDeps,                only: cp,Err_CFML, clear_error
    use CFML_Strings,                   only: U_Case, File_Type
    use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_Info, get_moment_ctr
    use CFML_Atoms,                     only: AtList_Type, Write_Atom_List
@@ -30,19 +30,18 @@ Program Calc_Structure_Factors
    character(len=132)          :: line
    character(len=256)          :: filcod     ! Name of the input file
    character(len=15)           :: sinthlamb  ! String with stlmax (2nd cmdline argument)
-   real                        :: stlmax     ! Maximum Sin(Theta)/Lambda
-   real                        :: sn, sf2, Lambda
+   real(kind=cp)               :: stlmax     ! Maximum Sin(Theta)/Lambda
+   real(kind=cp)               :: sn, sf2, Lambda
    integer                     :: MaxNumRef, lun, ier, i
    complex                     :: fc
-
    integer                     :: narg
    logical                     :: arggiven=.false.,sthlgiven=.false.
    logical                     :: lfil1,lfil2,lfil3
 
    !> Parte Magnetica
-   integer                     :: codini=0
-   real, dimension(3)          :: codes=(/11.0,21.0,31.0/)
-   type (StrfList_Type)        :: Stf
+   integer                    :: codini=0
+   real(kind=cp), dimension(3):: codes=[11.0,21.0,31.0]
+   type (StrfList_Type)       :: Stf
 
    !> Arguments on the command line
    narg=command_argument_count()
@@ -132,7 +131,8 @@ Program Calc_Structure_Factors
          call Get_Moment_CTR(A%Atom(i)%x,A%Atom(i)%moment,SpG,codini,codes)
       end do
    end if
-   call Write_Atom_List(A,lun)
+
+   call Write_Atom_List(A,1,lun)
 
    !> Wavelength in a CFL file
    lambda=0.70926 !Mo kalpha (used only for x-rays)
@@ -149,8 +149,8 @@ Program Calc_Structure_Factors
    !> Creating a list of reflections
    MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
    call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
-   call H_Uni(Cell,Spg,.true.,0.0,stlmax,'s',MaxNumRef,hkl)
-   !call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG)
+   !call Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+   call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG,powder=.true.)
 
    if (hkl%Nref <=0 ) then
       print*, " Problems generating a list of reflections!"
@@ -165,6 +165,7 @@ Program Calc_Structure_Factors
    if (err_CFML%Ierr /= 0) write(unit=*,fmt="(a)") trim(err_CFML%Msg)
 
    !> Test of another structure factor subroutine
+   write(unit=lun,fmt="(/,a,/)") " => Calculation using subroutine: Calc_StrFactor"
    write(unit=lun,fmt="(/,a,/)") "   H   K   L   Mult  SinTh/Lda    |Fc|       Phase        F-Real      F-Imag      Num"
    select type (rr => hkl%ref)
       type is (srefl_type)

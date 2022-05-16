@@ -2,6 +2,7 @@
    ifort sp_precision.f    /c 
    ifort lpkbls.f          /c /O2 /nologo 
    ifort odr.f             /c /O2 /nologo 
+   ifort ODR_wrapper.f90   /c /O2 /nologo /I%CRYSFML%\ifort64\LibC
 rem
 rem Library
 rem

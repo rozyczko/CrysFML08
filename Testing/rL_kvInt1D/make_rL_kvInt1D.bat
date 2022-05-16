@@ -52,14 +52,12 @@ rem
 rem
 rem > Compilation
    if [%_COMP%]==[ifort] (
-      ifort /c ODR_wrapper.f90     /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /c rL_kvInt_Mod.f90      /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /c rL_kvInt1D.f90        /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /exe:rL_kvInt1D *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib  %CRYSFML%\%DIRECTORY%\ODR_sp\odr_sp.lib   /link /stack:300000000
    )
 rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c ODR_wrapper.f90       %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
       gfortran -c rL_kvInt_Mod.f90        %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
       gfortran -c rL_kvInt1D.f90          %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC  -I%CRYSFML%\%DIRECTORY%\ODR_sp
       gfortran -o rL_kvInt1D_gf.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml -L%CRYSFML%\%DIRECTORY%\ODR_sp -lodr_sp

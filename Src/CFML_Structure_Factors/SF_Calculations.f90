@@ -1,9 +1,9 @@
 Submodule (CFML_Structure_Factors) SF_Calculations
    !---- Variables ----!
    implicit none
-   
+
  Contains
- 
+
    !!----
    !!---- SUBROUTINE MODIFY_SF
    !!----
@@ -79,7 +79,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       if (present(mode)) then
          if (mode == "XRA" .or. mode == "ELE") then
             call Sum_AB(Reflex,Atm%Natoms,Grp%Centred)
-        
+
          else if (mode == "NUC") then
             call Sum_AB_NeutNuc(Reflex,Atm%Natoms,Grp%Centred)
          end if
@@ -88,7 +88,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       end if
 
    End Subroutine Modify_SF
-   
+
    !!--++
    !!--++ SUBROUTINE SUM_AB
    !!--++    Calculate the Final Sum for Structure Factors calculations
@@ -116,7 +116,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       !> Fj(h)*Aj(h)
       aa=af0*th*ajh
 
-      if (icent == 2) then    
+      if (icent == 2) then
          !> Calculation for centrosymmetric structures
          do j=1,reflex%nref
             cc(:,j)= afpp(:)*th(:,j)*ajh(:,j)
@@ -135,14 +135,14 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                   ref(i)%A=a
                   ref(i)%B=b
                end do
-               
+
             class default
                err_CFML%Ierr=1
                err_CFML%Msg="You have to use SRef_Type class as minimum for this calculation!"
-               return   
-         end select      
+               return
+         end select
 
-      else       
+      else
          !> Calculation for non-centrosymmetric structures
          !> Fj(h)*Bj(h)
          bb=af0*th*bjh
@@ -165,16 +165,16 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                   ref(i)%A=a
                   ref(i)%B=b
                end do
-               
+
             class default
                err_CFML%Ierr=1
                err_CFML%Msg="You have to use SRef_Type class as minimum for this calculation!"
-               return   
-         end select 
+               return
+         end select
       end if
 
    End Subroutine Sum_AB
-   
+
    !!--++
    !!--++ SUBROUTINE SUM_AB_NEUTNUC
    !!--++    Calculate the Final Sum for Structure Factors calculations
@@ -193,7 +193,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp)                               :: a,b, ph
       real(kind=cp), dimension(natm,reflex%nref)  :: aa,bb
 
-      if (icent == 2) then    
+      if (icent == 2) then
          !> Calculation for centrosymmetric structures
 
          !> Fj(h)*Aj(h)
@@ -201,7 +201,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             aa(:,j)= afp(:)*th(:,j)*ajh(:,j)
          end do
 
-         !> Final Sum 
+         !> Final Sum
          select type (Ref => reflex%ref)
             class is (Srefl_Type)
                do i=1,reflex%Nref
@@ -210,15 +210,15 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                   ref(i)%Phase = 90.0_cp - 90.0_cp * sign(1.0_cp,a)
                   ref(i)%A=a
                   ref(i)%B=0.0
-               end do     
-               
+               end do
+
             class default
                err_CFML%Ierr=1
                err_CFML%Msg="You have to use SRef_Type class as minimum for this calculation!"
-               return   
-         end select     
+               return
+         end select
 
-      else       
+      else
          !> Calculation for non-centrosymmetric structures
          !> Fj(h)*Aj(h) / Fj(h)*Bj(h)
          do j=1,reflex%nref
@@ -239,16 +239,16 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                   ref(i)%A=a
                   ref(i)%B=b
                end do
-               
+
             class default
                err_CFML%Ierr=1
                err_CFML%Msg="You have to use SRef_Type class as minimum for this calculation!"
-               return   
-         end select    
+               return
+         end select
       end if
 
    End Subroutine Sum_AB_NeutNuc
-   
+
    !!----
    !!---- Subroutine Structure_Factors(Atm,Grp,Reflex,Mode,lambda)
    !!----    type(atom_list_type),               intent(in)     :: Atm    !List of atoms
@@ -281,8 +281,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       else
          if (present(lambda)) then
             if (.not. SF_Initialized) call Init_Structure_Factors(Reflex,Atm,Grp,Lambda=lambda)
-         else          
-            if (.not. SF_Initialized) call Init_Structure_Factors(Reflex,Atm,Grp)           
+         else
+            if (.not. SF_Initialized) call Init_Structure_Factors(Reflex,Atm,Grp)
          end if
       end if
       if (err_CFML%Ierr /= 0) return
@@ -298,15 +298,15 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          select case (u_case(mode(1:3)))
             case ('XRA','ELE')
                call Sum_AB(Reflex,Atm%Natoms,Grp%Centred)
-            case ('NUC')   
+            case ('NUC')
                call Sum_AB_NeutNuc(Reflex,Atm%Natoms,Grp%Centred)
-         end select      
-      
+         end select
+
       else
          call Sum_AB(Reflex,Atm%Natoms,Grp%Centred)
       end if
    End Subroutine Structure_Factors
-   
+
    !!----
    !!---- SUBROUTINE CALC_GENERAL_STRFACTOR
    !!----
@@ -325,8 +325,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       complex, optional,             intent(out):: fn,fx,fe
 
       !---- Local Variables ----!
-      integer                               :: i,j,k 
-      real(kind=cp)                         :: arg,anis,scosr,ssinr,b 
+      integer                               :: i,j,k
+      real(kind=cp)                         :: arg,anis,scosr,ssinr,b
       real(kind=cp)                         :: a1,a3,b1,b3,av,bv,nffr,nffi        !fn
       real(kind=cp)                         :: xa1,xa3,xb1,xb3,xav,xbv,xffr,xffi  !fx
       real(kind=cp)                         :: ea1,ea3,eb1,eb3,effr               !fe
@@ -363,7 +363,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          end do ! symmetry
 
          b= atm%atom(i)%occ * exp(-atm%atom(i)%u_iso*sn)
-         
+
          !> Calculation of scattering factors
          j=atm%atom(i)%ind_ff(1)  ! pointer to the form factor coefficients
 
@@ -398,20 +398,20 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          av = a1-a3    ! real part of the Nuclear structure factor
          bv = b1+b3    ! imaginary part of the Nuclear structure factor
          fn=cmplx(av,bv) * Grp%Centred * Grp%Num_Lat
-      end if   
+      end if
 
       if (present(fx)) then
          xav = xa1-xa3    ! real part of the X-rays structure factor
          xbv = xb1+xb3    ! imaginary part of the X-rays structure factor
          fx=cmplx(xav,xbv) * Grp%Centred * Grp%Num_Lat
       end if
-      
+
       if (present(fe)) then
          fe=cmplx(ea1,eb3) * Grp%Centred * Grp%Num_Lat
       end if
-       
+
    End Subroutine Calc_General_StrFactor
-   
+
    !!----
    !!---- SUBROUTINE CALC_HKL_STRFACTOR
    !!----
@@ -429,7 +429,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp),                         intent(in) :: Sn    ! (sinTheta/Lambda)**2
       type(AtList_type),                     intent(in) :: Atm
       type(SpG_type),                        intent(in) :: Grp
-      character(len=*),                      intent(in) :: Mode  ! S-XTAL (S) or Powder (P) 
+      character(len=*),                      intent(in) :: Mode  ! S-XTAL (S) or Powder (P)
       character(len=*),                      intent(in) :: Rad   ! Radiation: X-rays, Neutrons
       real(kind=cp),                         intent(out):: sf2
       real(kind=cp), dimension(:), optional, intent(out):: deriv
@@ -444,7 +444,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp),dimension(6)            :: beta
       real(kind=cp),dimension(Atm%natoms)   :: frc,frs,otr,oti,afpxn,ff
       real(kind=cp),dimension(9,Atm%natoms) :: drs,drc
-      real(kind=cp), dimension(3,3)         :: mat 
+      real(kind=cp), dimension(3,3)         :: mat
 
 
       !> Init
@@ -455,7 +455,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       av=0.0_cp; bv=0.0_cp
       frc=0.0_cp; frs=0.0_cp
       otr=0.0_cp; oti=0.0_cp
-      
+
       !> Setting up the scattering form factors and multiply by group specific
       !> coefficients for calculating structure factors per conventional cell
       !> Modify the scattering factors to include the multipliers factors
@@ -466,7 +466,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       select Case (crad)
          case("N")
              afpxn(:)=fr*fi*afp(:)
-             
+
          case("X","E")
              do i=1, Nspecies
                 ff(i)=FF_c(i)
@@ -475,7 +475,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                 end do
                 if (crad == "E") ff(i)=0.023934*(FF_Z(i)-ff(i))/sn !Mott-Bethe formula fe=me^2/(8pi Eps0 h^2) (Z-fx(s))/s^2
              end do
-             
+
              do i=1,Atm%natoms
                 j=P_a(i)                ! pointer has been set up in Initialization subroutine
                 afpxn(i)= fr*fi*ff(j)
@@ -495,9 +495,9 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                Mat=grp%op(k)%Mat(1:3,1:3)
                t=grp%op(k)%Mat(1:3,4)
                h=matmul(real(hn),Mat)
-               hnt=dot_product(real(hn),t)  
+               hnt=dot_product(real(hn),t)
                arg=TPI*(dot_product(h,Atm%atom(i)%x)+hnt)
-                 
+
                anis=1.0_cp
                if (Atm%atom(i)%thtype == "ani") then
                   beta=Atm%atom(i)%u(1:6)
@@ -519,7 +519,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                   drc(9,i)=drc(9,i)+h(2)*h(3)*cosr
                end if
             end do ! symmetry
-            
+
             occ= atm%atom(i)%occ
             b=atm%atom(i)%u_iso
             Tob= occ * exp(-b*sn)
@@ -543,10 +543,10 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             do k=1,grp%NumOps
                Mat=grp%op(k)%Mat(1:3,1:3)
                t=grp%op(k)%Mat(1:3,4)
-               h=matmul(real(hn),Mat) 
+               h=matmul(real(hn),Mat)
                hnt=dot_product(real(hn),t)
                arg=TPI*(dot_product(h,Atm%atom(i)%x)+hnt)
-               
+
                anis=1.0_cp
                if (Atm%atom(i)%thtype == "ani") then
                    beta=Atm%atom(i)%u(1:6)
@@ -609,7 +609,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
 
       if (present(deriv)) then
          select type (At => Atm%atom)
-            type is (Atm_Ref_Type) 
+            type is (Atm_Ref_Type)
                if (modi == "P") then
                   do i=1,Atm%natoms
                      !> derivatives with respect to coordinates  POWDER
@@ -699,11 +699,11 @@ Submodule (CFML_Structure_Factors) SF_Calculations
 
                   end do ! Natoms
                end if ! modi
-         end select      
+         end select
       end if  ! derivatives
 
    End Subroutine Calc_hkl_StrFactor
-   
+
    !!----
    !!---- SUBROUTINE CALC_STRFACTOR
    !!----
@@ -718,7 +718,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp),                      intent(in) :: sn    !(sinTheta/Lambda)**2
       type(AtList_type),                  intent(in) :: Atm
       type(SpG_type),                     intent(in) :: Grp
-      character(len=*),                   intent(in) :: mode  ! S-XTAL (S) or Powder (P) 
+      character(len=*),                   intent(in) :: mode  ! S-XTAL (S) or Powder (P)
       character(len=*),                   intent(in) :: rad   ! Xray or Neutrons
       real(kind=cp),                      intent(out):: sf2
       real(kind=cp),dimension(:),optional,intent(out):: deriv
@@ -861,7 +861,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       if (present(deriv)) then
          select type (At => Atm%atom)
             type is (Atm_Ref_Type)
-     
+
                if (modi == "P") then
                   do i=1,Atm%natoms
                      !> derivatives with respect to coordinates  POWDER
@@ -882,7 +882,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                         der=-2.0_cp*der*sn
                         deriv(k) = sign(1.0_cp,f)*der+deriv(k)
                      end if
-                     
+
                      k=At(i)%l_occ    !Derivatives w.r.t. occupation factor   POWDER
                      if (k /= 0) then
                         f=At(i)%m_occ
@@ -927,7 +927,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                          der=2.0_cp*der*sn
                          deriv(k) = sign(1.0_cp,f)*der+deriv(k)
                       end if
-                      
+
                       k=At(i)%l_occ    !Derivatives w.r.t. occupation factor  S-XTAL
                       if (k /= 0) then
                          f=At(i)%m_occ
@@ -952,11 +952,11 @@ Submodule (CFML_Structure_Factors) SF_Calculations
 
                   end do ! Natoms
                end if !modi
-         end select      
+         end select
       end if  !derivatives
 
    End Subroutine Calc_StrFactor
-   
+
    !!----
    !!---- SUBROUTINE MAGNETIC_STRUCTURE_FACTORS
    !!----
@@ -975,22 +975,22 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp),         intent(in)     :: Smax ! maximum sinTheta/Lambda)
       type(StrfList_Type),   intent(out)    :: Stf
       integer, optional,     intent(in)     :: lun
-   
+
       !---- Local variables ----!
       integer                                   :: i
       Type(Scattering_Species_Type)             :: Scf
-   
-   
+
       call Gener_Reflections_Shub(Cell, Grp, Smax, Reflex)
-      
+
       Stf%Nref=Reflex%NRef
-      allocate(Stf%Strf(Stf%Nref),Reflex%Ref(Reflex%NRef))
+      allocate(Stf%Strf(Stf%Nref))
+
       if (present(lun)) then
          call Set_Form_Factors(Atm, Scf, Mag=.true., Lun=lun)
       else
          call Set_Form_Factors(Atm, Scf, Mag=.true.)
       end if
-      
+
       if (err_CFML%Ierr /= 0) then
          write(unit=*,fmt='(a)') trim(err_CFML%Msg)
          return
@@ -999,7 +999,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          call Calc_Mag_Structure_Factor(Reflex%Ref(i),Cell,Grp,Atm,Scf,"P",Stf%Strf(i))
       end do
    End Subroutine Magnetic_Structure_Factors
-   
+
    !!----
    !!---- SUBROUTINE CALC_MAG_STRUCTURE_FACTOR
    !!---
@@ -1011,7 +1011,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
    !!----
    Module Subroutine Calc_Mag_Structure_Factor(Hm, Cell, Grp, Atm, Scf, Mode, Strf, Magonly, Mdom, Tdom, Twin)
       !---- Arguments ----!
-      class (Refl_Type),                     intent(in)  :: Hm       ! Contains hkl,s,mult and imag 
+      class(Refl_Type),                      intent(in)  :: Hm       ! Contains hkl,s,mult and imag
       type(Cell_G_type),                     intent(in)  :: Cell
       type(SpG_type),                        intent(in)  :: Grp
       type(AtList_type),                     intent(in)  :: Atm
@@ -1030,13 +1030,13 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       real(kind=cp), dimension(6)              :: betas
       real(Kind=Cp), Dimension(3,3)            :: sm,SMcos,SMsin
       complex(kind=cp),dimension(3)            :: Mc
-      logical                                  :: mag,nuc,mag_only
+      logical                                  :: mag,nuc,mag_only, magAtm
       character(len=1)                         :: tw
       real(kind=cp) :: ffr, ffi, ffx, cosr, sinr, scosr, ssinr, temp,snexi !,x1, yy, z
       real(kind=cp) :: x, arg, arg2, exparg,ssnn
       real(kind=dp) :: a1, a3, b1, b3, av,bv
       real(kind=dp), parameter  :: pn=0.2695420113693928312
-     
+
       !> Init
       tw="N"
       if (present(mdom)) then
@@ -1062,10 +1062,11 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       mag= hm%imag /= 0
       if (mag_only) nuc=.false.
 
-      do i=1,Atm%natoms     !Loop over Atoms      
+      do i=1,Atm%natoms     !Loop over Atoms
          xi=Atm%atom(i)%x
          betas=Atm%atom(i)%U
-         
+         magAtm=Atm%atom(i)%magnetic
+
          !> Modify the first atom position according to the interpretation of domains with translations
          if (present(tdom)) xi(1:3) = matmul(real(mdom),xi(1:3))+tdom(1:3)
          temp=EXP(-Atm%atom(i)%u_iso*ssnn)   !exp{-Bi (sintheta/Lambda)^2}
@@ -1078,8 +1079,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             ffi=0.0
          end if
          ffx=0.0
-
-         if (mag) then
+         snexi=0.0
+         if (mag .and. magAtm) then
             ni=Atm%atom(i)%ind_ff(2)
             ffx=Scf%Mcoef(ni)%SctM(7)
             do ii=1,5,2
@@ -1087,7 +1088,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             end do
             snexi=pn*ffx*temp*Atm%atom(i)%occ     ! 0.26954.f(Q).Temp(i).Occ
          end if
-       
+
          scosr=0.0
          ssinr=0.0
          !> Nuclear and Magnetic Structure Factor calculations
@@ -1097,7 +1098,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          do ir=1,Grp%Multip   ! Loop over symmetry operators
             sm=grp%op(ir)%Mat(1:3,1:3)
             t=grp%op(ir)%Mat(1:3,4)
-   
+
             x=dot_product(t,hnn)
             h=matmul(hnn,sm)
             arg=x+dot_product(h,xi(1:3))
@@ -1112,12 +1113,12 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             if (Grp%centred == 1) then
                ssinr=ssinr+sinr          !FRS= SIG fr(j,s)sin{2pi(hT Rs rj+ts)}*Ta(s)
             end if
-         
-            if (mag) then
+
+            if (mag .and. magAtm) then
                SMcos(:,:)=SMcos(:,:)+cosr*sm
                SMsin(:,:)=SMsin(:,:)+sinr*sm
             end if
-         end do     ! End over symmetry operators 
+         end do     ! End over symmetry operators
 
          if (nuc) then
             frc(i)=scosr    !Components of geometrical struture factor of atom i
@@ -1134,9 +1135,9 @@ Submodule (CFML_Structure_Factors) SF_Calculations
                b3 = b3 + otr(i)*frs(i)
             end if
          end if
-       
+
          !> Magnetic structure factor components
-         if (mag) then
+         if (mag .and. magAtm) then
             ar = matmul(SMcos,Atm%atom(i)%Moment(:)/side)*side  !The introduction of Cell%cell
             br = matmul(SMsin,Atm%atom(i)%Moment(:)/side)*side  !of using non conventional settings for
             aa(:)= aa(:) + snexi*ar(:)
@@ -1149,7 +1150,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          av = a1-a3   !real part of the structure factor
          bv = b1+b3   !imaginary part of the structure factor
          Strf%NsF=cmplx(av,bv)
-      
+
          ! For a powder h and -h cannot be measured independently, both kind
          ! of reflections contribute simultaneously to a peak, so the intensity
          ! is proportional to F^2(h)+ F^2(-h), the binary terms of the form:
@@ -1163,7 +1164,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          else
             Strf%sqNuc = a1*a1 + a3*a3 + b1*b1 + b3*b3
          end if
-     
+
       else
          Strf%sqNuc = 0.0
          Strf%NsF=cmplx(0.0,0.0)
@@ -1204,7 +1205,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          Strf%MiVC = Mc - dot_product(ec,Mc) * ec      !Magnetic interaction vector in Cartesian components
          Strf%MiV = matmul(Cell%Orth_Cr_cel,Strf%MiVC)* Cell%cell       !Magnetic interaction vector in basis  {e1,e2,e3}
          Strf%sqMiV= dot_product(Strf%MiVC, Strf%MiVC)
-     
+
       else
          Strf%sqMiV=0.0      ! Halpern & Johnson F2= Fm.Fm* - (e.Fm)*(e.Fm)
          Strf%MsF=cmplx(0.0,0.0)
@@ -1213,6 +1214,6 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       end if
 
    End Subroutine Calc_Mag_Structure_Factor
- 
-   
-End SubModule SF_Calculations   
+
+
+End SubModule SF_Calculations

@@ -29,53 +29,55 @@ Submodule (CFML_Metrics) Metrics_IO
        Write(unit=lun,fmt="(3(a,f12.3))")"     alpha = ", Cell%ang(1) ,"   beta = ", Cell%ang(2) , "  gamma = ", Cell%ang(3)
        Write(unit=lun,fmt="(a,f12.4)")   "                        Direct Cell Volume = ",Cell%Vol
 
-       select type (cell)
+       select type (C => cell)
           class is (cell_g_type)
              Write(unit=lun,fmt="(/,a,/)")     " => Reciprocal cell parameters:"
-             Write(unit=lun,fmt="(3(a,f12.6))")"         a*= ", Cell%rcell(1),"      b*= ",Cell%rcell(2),"      c*= ", Cell%rcell(3)
-             Write(unit=lun,fmt="(3(a,f12.3))")"     alpha*= ", Cell%rang(1) ,"   beta*= ",Cell%rang(2) ,"  gamma*= ", Cell%rang(3)
-             Write(unit=lun,fmt="(a,f12.8)")   "                    Reciprocal Cell Volume = ",1.0_cp/cell%vol
+             Write(unit=lun,fmt="(3(a,f12.6))")"         a*= ", C%rcell(1),"      b*= ",C%rcell(2),"      c*= ", C%rcell(3)
+             Write(unit=lun,fmt="(3(a,f12.3))")"     alpha*= ", C%rang(1) ,"   beta*= ",C%rang(2) ,"  gamma*= ", C%rang(3)
+             Write(unit=lun,fmt="(a,f12.8)")   "                    Reciprocal Cell Volume = ",1.0_cp/c%vol
              Write(unit=lun,fmt="(/,a,/)")     " => Direct and Reciprocal Metric Tensors:"
              Write(unit=lun,fmt="(a)")         "                   GD                                       GR"
 
              do i=1,3
-                Write(unit=lun,fmt="(3f12.4,a,3f12.6)") (Cell%GD(i,j),j=1,3),"      ", (Cell%GR(i,j),j=1,3)
+                Write(unit=lun,fmt="(3f12.4,a,3f12.6)") (C%GD(i,j),j=1,3),"      ", (C%GR(i,j),j=1,3)
              end do
 
-             select case(Cell%CartType)
+             select case(C%CartType)
                  case('BA')     ! Angel & Brown setting
-                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: y // b; z is in the bc-plane; x is y ^ z = a*   "
+                     Write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: y // b; z is in the bc-plane; x is y ^ z = a*   "
 
                  case('BC')     ! Carpenter setting
-                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: y // b; x is in the ab-plane; z is x ^ y = c*   "
+                     Write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: y // b; x is in the ab-plane; z is x ^ y = c*   "
 
                  case('AC')     ! previous alternate setting
-                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: x // a; z is along c*; y is within the ab-plane   "
+                     Write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: x // a; z is along c*; y is within the ab-plane   "
 
                  case default   ! 'CA'
-                     Write(unit=iunit,fmt="(/,a,/)") " =>  Cartesian frame: z // c; y is in the bc-plane; x is along y ^ z = a*  "
+                     Write(unit=lun,fmt="(/,a,/)") " =>  Cartesian frame: z // c; y is in the bc-plane; x is along y ^ z = a*  "
+
              end select
 
              Write(unit=lun,fmt="(a)")       "     Crystal_to_Orthonormal_Matrix              Orthonormal_to_Crystal Matrix"
              Write(unit=lun,fmt="(a)")       "              Cr_Orth_cel                               Orth_Cr_cel  "
 
              do i=1,3
-                Write(unit=lun,fmt="(3f12.4,a,3f12.6)") (Cell%Cr_Orth_cel(i,j),j=1,3),"      ", (Cell%Orth_Cr_cel(i,j),j=1,3)
+                Write(unit=lun,fmt="(3f12.4,a,3f12.6)") (C%Cr_Orth_cel(i,j),j=1,3),"      ", (C%Orth_Cr_cel(i,j),j=1,3)
              end do
 
              Write(unit=lun,fmt="(/,a)")     "     Busing-Levy B-matrix: Hc=B.H            Inverse of the Busing-Levy B-matrix"
              Write(unit=lun,fmt="(a)")       "                BL_M                                      BL_Minv  "
 
              do i=1,3
-                Write(unit=lun,fmt="(3f12.6,a,3f12.4)") (Cell%BL_M(i,j),j=1,3),"      ", (Cell%Inv_BL_M(i,j),j=1,3)
+                Write(unit=lun,fmt="(3f12.6,a,3f12.4)") (C%BL_M(i,j),j=1,3),"      ", (C%Inv_BL_M(i,j),j=1,3)
              end do
+       end select
 
+       Select Type (C => cell)
           class is (cell_ls_type)
              Write(unit=lun,fmt="(/,a,/)")     " => Refinement codes for cell parameters:"
-             Write(unit=lun,fmt="(3(a,i12))")"         a = ", Cell%lcell(1),"      b = ", Cell%lcell(2), "      c = ", Cell%lcell(3)
-             Write(unit=lun,fmt="(3(a,i12))")"     alpha = ", Cell%lang(1) ,"   beta = ", Cell%lang(2) , "  gamma = ", Cell%lang(3)
-
-       end select
+             Write(unit=lun,fmt="(3(a,i12))")"         a = ", C%lcell(1),"      b = ", C%lcell(2), "      c = ", C%lcell(3)
+             Write(unit=lun,fmt="(3(a,i12))")"     alpha = ", C%lang(1) ,"   beta = ", C%lang(2) , "  gamma = ", C%lang(3)
+       End Select
 
     End Subroutine Write_Crystal_Cell
 

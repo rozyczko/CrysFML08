@@ -10,13 +10,16 @@ maintainer = "jrc@ill.eu"
 copyright = "Copyright 2022, Juan Rodriguez-Carvajal, Javier Gonzalez-Platas, Nebil A. Katcho"
 
 [library]
-source-dir = "Src"
-include-dir = "Src"
+source-dir = "Src"   
+#include-dir = "ifort64/ODR_sp" 
 
 [build]
 auto-executables = false
 auto-tests = false
 auto-examples = false
+#external-modules = ["real_precision","odrpack95","odr_wrapper"] 
+# In link it is important to put not only the directory but the name of the library without extension
+#link = ["ifort64/ODR_sp/odr_sp"]
 
 [install]
 library = true
@@ -109,12 +112,6 @@ name="read_difPat"
 source-dir="Testing/test_diffpatt"
 main="test_read.f90"
 
-
-[[executable]]
-name="Calc_Sfac"
-source-dir="Testing/StructureFactors"
-main="Calc_Sfac.f90"
-
 #
 # Magnetic package Simbo, EnerMag, Phase_Diagram and MC_Mag
 #
@@ -137,6 +134,11 @@ main="Phase_Diagram.f90"
 name="MC_Mag"
 source-dir="Testing/Simbo-Enermag/MC_Mag"
 main="mc_mag.f90"
+
+#[[executable]]
+#name="TOF_fit_LMODR"
+#source-dir="Testing/TOF-fit"
+#main="TOF_fitting_LM.f90"
 #
 # Metric
 #
@@ -149,6 +151,34 @@ main="Get_Conv_Cell.f90"
 name="search_cellrelations"
 source-dir="Testing/Metrics"
 main="search_cellrelations.f90"
+
+#
+# Structure Factors
+#
+[[executable]]
+name="Calc_Sfac"
+source-dir="Testing/StructureFactors"
+main="Calc_Sfac.f90"
+
+#
+##
+## Powder Patterns
+##
+#[[executable]]
+#name="Simple_Calc_Mag_Powder"
+#source-dir="Testing/PowderPattern"
+#main="Simple_calc_Mag_powder.f90"
+#
+#[[executable]]
+#name="Calc_Powder"
+#source-dir="Testing/PowderPattern"
+#main="calc_powder.f90"
+#
+#[[executable]]
+#name="Simple_Calc_Powder"
+#source-dir="Testing/PowderPattern"
+#main="Simple_calc_powder.f90"
+#
 ##
 ## Structures_GlobalOptimization
 ##
@@ -200,24 +230,6 @@ main="search_cellrelations.f90"
 #name="Faults"
 #source-dir="Testing/Faults/Src"
 #main="Faults.f90"
-#
-##
-## Powder Patterns
-##
-#[[executable]]
-#name="Simple_Calc_Mag_Powder"
-#source-dir="Testing/PowderPattern"
-#main="Simple_calc_Mag_powder.f90"
-#
-#[[executable]]
-#name="Calc_Powder"
-#source-dir="Testing/PowderPattern"
-#main="calc_powder.f90"
-#
-#[[executable]]
-#name="Simple_Calc_Powder"
-#source-dir="Testing/PowderPattern"
-#main="Simple_calc_powder.f90"
 #
 #[[executable]]
 #name="Correct_Cells"
