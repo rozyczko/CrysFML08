@@ -79,7 +79,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
 
             case ("EQUA") ! Equal (Constraints)
                print*,' ==> EQUA Directive: '//trim(line)
-               call ReadCode_EQUAL_ATM(line, AtList, Spg)
+               !call ReadCode_EQUAL_ATM(line, AtList, Spg)
                if (err_CFML%Flag) then
                   print*,err_CFML%Msg
                end if

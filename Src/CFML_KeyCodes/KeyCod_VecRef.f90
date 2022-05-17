@@ -64,7 +64,7 @@ Submodule (CFML_KeyCodes) KeyCod_VecRef
             Vec_RefShift(i-1)  = Vec_RefShift(i)
             Vec_LimPar(:,i-1)  = Vec_LimPar(:,i)
             Vec_BCond(i-1)     = Vec_BCond(i)
-            Vec_PointPar(i-1)  = Vec_PointPar(i)
+            Vec_PointPar(i-1)  = Vec_PointPar(i)-1
          end do
       end if
 

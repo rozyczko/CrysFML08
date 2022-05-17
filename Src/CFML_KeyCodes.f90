@@ -59,12 +59,13 @@ Module CFML_KeyCodes
 
    !---- List of public Subroutines ----!
    public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_RelationList,   &
-             Del_RefCode_ATM, &
+             Del_RefCode_ATM, Del_RefCode_RelationList, &
              Fill_RefCodes_Atm, &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
-             ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, &
+             ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
+
 
    !---- Definitions ----!
 
@@ -114,7 +115,8 @@ Module CFML_KeyCodes
    !!----
    !!---- Update: April - 2022
    Type, public :: Relation_Type
-      character(len=30) :: Nam=" "
+      character(len=40) :: Name=" "
+      character(len=30) :: Ext=" "
       integer           :: L=0            ! Code number
       real(kind=cp)     :: M=0.0_cp       ! Multiplicator
       real(kind=cp)     :: Val=0.0_cp
@@ -127,7 +129,8 @@ Module CFML_KeyCodes
    !!----
    !!---- Update: April - 2022
    Type, public :: RelationList_Type
-      integer                                        :: Npar=0
+      integer                                        :: ND_MAX=0 ! Number of Dimension of Par when it was created
+      integer                                        :: NPar=0   ! Current number of Parameters
       type(Relation_Type), allocatable, dimension(:) :: Par
    End Type RelationList_Type
 
@@ -138,7 +141,7 @@ Module CFML_KeyCodes
    integer, private, parameter :: NKEY_MOL =8       ! Number of Keywords for Molecule
    integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
    integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
-   integer, private, parameter :: NKEY_PATT=7       ! Number of Keywords for Patterns
+   integer, private, parameter :: NKEY_PATT=25      ! Number of Keywords for Patterns
 
 
    character(len=*), dimension(NKEY_ATM), public, parameter :: KEY_ATM=[                      &
@@ -164,7 +167,11 @@ Module CFML_KeyCodes
                      "A    ", "B    ", "C    ", "ALP  ", "BET  ", "GAM  ", "CELL "]
 
    character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
-                     "U    ", "V    ", "W    ", "UVW  ","BKG  ", "SC   ", "EXTI "]
+                     "U    ", "V    ", "W    ", "UVW  ",                            &
+                     "BKG1 ", "BKG2 ", "BKG3 ", "BKG4 ", "BKG5 ", "BKG6 ", "BKG7 ", &
+                     "BKG8 ", "BKG9 ", "BKG10", "BKG11", "BKG12", "BKG  ",          &
+                     "SC1  ", "SC2  ", "SC3  ", "SC   ",                            &
+                     "EXTI1", "EXTI2", "EXTI3", "EXTI "]
 
    !-------------------!
    !---- Variables ----!
@@ -214,9 +221,9 @@ Module CFML_KeyCodes
          integer, optional,intent(out) :: NTfix
       End Subroutine Allocate_Restraints_Vec
 
-      Module Subroutine Allocate_RelationList(Npar, R)
+      Module Subroutine Allocate_RelationList(NDMax, R)
          !---- Arguments ----!
-         integer,                 intent(in)     :: NPar
+         integer,                 intent(in)     :: NDMax
          type(RelationList_Type), intent(in out) :: R
       End Subroutine Allocate_RelationList
 
@@ -235,6 +242,12 @@ Module CFML_KeyCodes
          type(AtList_Type), intent(in out) :: AtList
          integer,           intent(in)     :: NPar
       End Subroutine Del_RefCode_Atm
+
+      Module Subroutine Del_RefCode_RelationList(R, NPar)
+         !---- Arguments ----!
+         type(RelationList_Type), intent(in out) :: R
+         integer,                 intent(in)     :: NPar
+      End Subroutine Del_RefCode_RelationList
 
       Module Subroutine Fill_RefCodes_Atm(Keyword, Npar, Bounds, Ic, Natm, Spg, AtList)
          !---- Arguments ----!
@@ -418,6 +431,61 @@ Module CFML_KeyCodes
          integer,                 intent(out) :: Nkey
          integer, dimension(:,:), intent(out) :: Ind
       End Subroutine Get_Block_KEY
+
+      Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)     :: ffile
+         integer,                 intent(in)     :: n_ini
+         integer,                 intent(in)     :: n_end
+         integer,                 intent(in)     :: Ip
+         type(RelationList_Type), intent(in out) :: Pat
+      End Subroutine Read_RefCodes_PATT
+
+      Module Subroutine Split_RefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
+         !---- Arguments ----!
+         character(len=*),               intent(in)  :: String
+         integer,                        intent(out) :: Nc
+         integer, dimension(:),          intent(out) :: IKeys
+         integer, dimension(:),          intent(out) :: IPatt
+         character(len=*), dimension(:), intent(out) :: Keys
+      End Subroutine Split_RefCod_Patt
+
+      Module Subroutine ReadCode_FIX_PATT(String, Ip, Pat)
+         !---- Arguments ----!
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Ip
+         type(RelationList_Type), intent(in out) :: Pat
+      End Subroutine ReadCode_FIX_PATT
+
+      Module Subroutine ReadCode_VARY_PATT(String, Ip, Pat)
+         !---- Arguments ----!
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Ip
+         type(RelationList_Type), intent(in out) :: Pat
+      End Subroutine ReadCode_VARY_PATT
+
+      Module Subroutine FIX_RelationList_Par(R, CodeNam)
+         !---- Arguments ----!
+         type(RelationList_Type), intent(in out) :: R
+         character(len=*),        intent(in)     :: CodeNam
+      End Subroutine FIX_RelationList_Par
+
+      Module Subroutine VARY_RelationList_Par(R, CodeNam, Value, Sig, Mult)
+         !---- Arguments ----!
+         type(RelationList_Type), intent(in out) :: R
+         character(len=*),        intent(in)     :: CodeNam
+         real(kind=cp), optional, intent(in)     :: Value
+         real(kind=cp), optional, intent(in)     :: Sig
+         real(kind=cp), optional, intent(in)     :: Mult
+      End Subroutine VARY_RelationList_Par
+
+      Module Subroutine Set_RefCodes_PATT(Keyword, Npar,  IP, Pat)
+         !---- Arguments ----!
+         character(len=*),              intent(in)     :: Keyword
+         integer,                       intent(in)     :: NPar
+         integer,                       intent(in)     :: IP
+         type(RelationList_Type),       intent(in out) :: Pat
+      End Subroutine Set_RefCodes_PATT
 
    End Interface
 
