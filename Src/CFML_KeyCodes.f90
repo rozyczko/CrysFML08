@@ -49,6 +49,7 @@ Module CFML_KeyCodes
    Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
                                 Get_OP_from_Symb, Symmetry_symbol
+   use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
    Use CFML_Rational
 
    Implicit none
@@ -60,9 +61,10 @@ Module CFML_KeyCodes
    !---- List of public Subroutines ----!
    public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_RelationList,   &
              Del_RefCode_ATM, Del_RefCode_RelationList, &
-             Fill_RefCodes_Atm, &
+             Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
+             Read_RefCodes_PHAS, RList_to_Cell, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
 
@@ -486,6 +488,53 @@ Module CFML_KeyCodes
          integer,                       intent(in)     :: IP
          type(RelationList_Type),       intent(in out) :: Pat
       End Subroutine Set_RefCodes_PATT
+
+      Module Subroutine Read_RefCodes_PHAS(ffile, n_ini, n_end, Ip, Ph)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)     :: ffile
+         integer,                 intent(in)     :: n_ini
+         integer,                 intent(in)     :: n_end
+         integer,                 intent(in)     :: Ip
+         type(RelationList_Type), intent(inout)  :: Ph
+      End Subroutine Read_RefCodes_PHAS
+
+      Module Subroutine RList_to_Cell(Ph, Ip, Cell)
+         !---- Arguments ----!
+         type(RelationList_Type), intent(in)   :: Ph
+         integer,                 intent(in)   :: Ip
+         class(cell_Type),        intent(inout):: Cell
+      End Subroutine RList_to_Cell
+
+      Module Subroutine ReadCode_FIX_PHAS(String, Ip, Ph)
+         !---- Arguments ----!
+         character(len=*),        intent(in)    :: String
+         integer,                 intent(in)    :: Ip
+         type(RelationList_Type), intent(inout) :: Ph
+      End Subroutine ReadCode_FIX_PHAS
+
+      Module Subroutine ReadCode_VARY_PHAS(String, Ip, Ph)
+         !---- Arguments ----!
+         character(len=*),        intent(in)    :: String
+         integer,                 intent(in)    :: Ip
+         type(RelationList_Type), intent(inout) :: Ph
+      End Subroutine ReadCode_VARY_PHAS
+
+      Module Subroutine Split_RefCod_PHAS(String, Nc, Ikeys, IPhas, Keys)
+         !---- Arguments ----!
+         character(len=*),               intent(in)  :: String
+         integer,                        intent(out) :: Nc
+         integer, dimension(:),          intent(out) :: IKeys
+         integer, dimension(:),          intent(out) :: IPhas
+         character(len=*), dimension(:), intent(out) :: Keys
+      End Subroutine Split_RefCod_PHAS
+
+      Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IP, Ph)
+         !---- Arguments ----!
+         character(len=*),              intent(in)     :: Keyword
+         integer,                       intent(in)     :: NPar
+         integer,                       intent(in)     :: IP
+         type(RelationList_Type),       intent(in out) :: Ph
+      End Subroutine Set_RefCodes_PHAS
 
    End Interface
 
