@@ -13,6 +13,7 @@ Program KeyCodes
    use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
                                 Matm_Std_Type, Matm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
+   use CFML_Molecules,    only: Molecule_type
 
    use CFML_KeyCodes
 
@@ -23,8 +24,11 @@ Program KeyCodes
    type(File_type)                  :: ffile
    type(Cell_GLS_Type),dimension(2) :: Cell    ! 2 Phase
    type(AtList_Type)                :: At
-   type(RelationList_Type)          :: Pat     ! Only 1 Pattern
-   type(RelationList_Type)          :: Phas    ! Only 1 Phase
+   type(molecule_type)              :: Mol
+
+   type(RelationList_Type)          :: RPat     ! Only 1 Pattern
+   type(RelationList_Type)          :: RPhas    ! Only 1 Phase
+   type(RelationList_Type)          :: RMol     ! Only 1 Molec
 
 
    character(len=256)              :: filcod
@@ -41,10 +45,10 @@ Program KeyCodes
 
    integer, parameter              :: NB_Max=10
 
-   integer                         :: NB_Atm, NB_Patt, NB_Phas, NB_Mol, NB_RGB
-   integer, dimension(2,NB_Max)    :: IB_Atm, IB_Patt, IB_PHas, IB_MOL, IB_RGB
+   integer                         :: NB_Atm, NB_Patt, NB_Phas, NB_Mol
+   integer, dimension(2,NB_Max)    :: IB_Atm, IB_Patt, IB_PHas, IB_MOL
 
-   integer                         :: Npar,ip,icyc
+   integer                         :: Npar,ip,im,icyc
 
 
    !> Arguments on the command line
@@ -112,8 +116,9 @@ Program KeyCodes
       !> -------------
 
       !> Allocating Relation List for Non atomic parameters
-      call Allocate_RelationList(50,Pat)  ! 18 Parameters for Pattern
-      call Allocate_RelationList(50,Phas)  ! 6  Parameters for Phase
+      call Allocate_RelationList(50,RPat)   ! 18 Parameters for Pattern
+      call Allocate_RelationList(50,RPhas)  ! 6  Parameters for Phase
+      call Allocate_RelationList(50,RMol)   ! 6  Parameters for Phase
 
       !> Doing space for Refinement vectors
       !> add parameters according to the number of atoms in each phase
@@ -132,7 +137,6 @@ Program KeyCodes
          call Get_Block_Key('Phase',   ffile, nc_i, nc_f, NB_Phas, IB_Phas)
          call Get_Block_Key('Atoms',   ffile, nc_i, nc_f, NB_Atm,  IB_Atm)
          call Get_Block_Key('Molec',   ffile, nc_i, nc_f, NB_Mol, IB_Mol)
-         call Get_Block_Key('RGB',     ffile, nc_i, nc_f, NB_RGB, IB_RGB)
 
          !> Patterns
          if (NB_Patt > 0) then
@@ -141,7 +145,7 @@ Program KeyCodes
                if (IB_Patt(1,ip) ==0) cycle
 
                icyc=icyc+1
-               call Read_RefCodes_PATT(ffile, IB_Patt(1,ip),IB_Patt(2,ip), Ip, Pat)
+               call Read_RefCodes_PATT(ffile, IB_Patt(1,ip),IB_Patt(2,ip), Ip, RPat)
                if (icyc == NB_Patt) exit
             end do
          end if
@@ -157,10 +161,24 @@ Program KeyCodes
                call Write_Crystal_Cell(Cell(icyc),lun)
                write(unit=lun,fmt="(a,/)") " "
 
-               call Read_RefCodes_PHAS(ffile, IB_Phas(1,ip),IB_Phas(2,ip), Ip, Phas)
-               call RList_to_Cell(Phas, ip, Cell(icyc))
+               call Read_RefCodes_PHAS(ffile, IB_Phas(1,ip),IB_Phas(2,ip), Ip, RPhas)
+               call RList_to_Cell(RPhas, ip, Cell(icyc))
 
                if (icyc == NB_Phas) exit
+            end do
+         end if
+
+         !> Molec
+         if (NB_Mol > 0) then
+            icyc=0
+            do im=1,size(IB_Mol,dim=2)
+               if (IB_Mol(1,im) ==0) cycle
+
+               icyc=icyc+1
+               call Read_RefCodes_MOL(ffile, IB_Mol(1,im),IB_Mol(2,im), Im, RMol)
+               call RList_to_Molec(RMol, im, Mol)
+
+               if (icyc == NB_Mol) exit
             end do
          end if
 
@@ -202,6 +220,8 @@ Program KeyCodes
    !!============================================================================================================!!
    !!============================================================================================================!!
    !!============================================================================================================!!
+
+
 
 End Program KeyCodes
 

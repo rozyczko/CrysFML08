@@ -27,10 +27,10 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
       write(unit=lun, fmt="(a)") " "
       write(unit=lun, fmt="(a,i5)") " Number of Refinable Parameters: ",NP_Ref
       write(unit=lun, fmt="(a)") " "
-      write(unit=lun, fmt="(a,a)")" N.Par             Name             Value         Sigma     ",&
-                                  "   L.Bound       U.Bound       Step       BCon  Par "
+      write(unit=lun, fmt="(a,a)")" N.Par             Name                 Value     Sigma    ",&
+                                  "L.Bound    U.Bound   Step    BCon   Par "
       do i=1,NP_Ref
-         write(unit=lun,fmt="(i6,tr5,a20,5f14.5, i4, i6)") i, Vec_NamePar(i), Vec_RefPar(i), Vec_RefParSTD(i), &
+         write(unit=lun,fmt="(i4,tr12,a20,5f10.5, i5, i6)") i, Vec_NamePar(i), Vec_RefPar(i), Vec_RefParSTD(i), &
                                                               Vec_LimPar(:,i), Vec_BCond(i), Vec_PointPar(i)
       end do
 

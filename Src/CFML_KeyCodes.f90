@@ -50,6 +50,7 @@ Module CFML_KeyCodes
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
                                 Get_OP_from_Symb, Symmetry_symbol
    use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
+   use CFML_Molecules,    only: Molecule_type
    Use CFML_Rational
 
    Implicit none
@@ -64,7 +65,7 @@ Module CFML_KeyCodes
              Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
-             Read_RefCodes_PHAS, RList_to_Cell, &
+             Read_RefCodes_PHAS, RList_to_Cell, Read_RefCodes_MOL, RList_to_Molec, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
 
@@ -140,7 +141,7 @@ Module CFML_KeyCodes
    !---- Parameters ----!
    integer, private, parameter :: NKEY_ATM =14      ! Number of Keywords for Atoms
    integer, private, parameter :: NKEY_MATM=25      ! Number of Keywords for Magnetic atoms
-   integer, private, parameter :: NKEY_MOL =8       ! Number of Keywords for Molecule
+   integer, private, parameter :: NKEY_MOL =15       ! Number of Keywords for Molecule
    integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
    integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
    integer, private, parameter :: NKEY_PATT=25      ! Number of Keywords for Patterns
@@ -159,11 +160,9 @@ Module CFML_KeyCodes
                      "C7   ", "C8   ", "C9   ", "C10  ", "C11  ", "C12  "]
 
    character(len=*), dimension(NKEY_MOL), public, parameter :: KEY_MOL=[ &
-                     "XC   ", "YC   ", "ZC   ", "CENTE",                 &
-                     "THE  ", "PHI  ", "CHI  ", "ORIEN"]
-
-   character(len=*), dimension(NKEY_RGB), public, parameter :: KEY_RGB=[ &
-                     "T    ", "L    ", "S    ", "TL   ", "TLS  "]
+                     "XC    ", "YC    ", "ZC    ", "CENTRE",             &
+                     "THE   ", "PHI   ", "CHI   ", "ORIENT",             &
+                     "T     ", "L     ", "S     ", "TL    ", "LS    ", "TS    ", "TLS   "]
 
    character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[          &
                      "A    ", "B    ", "C    ", "ALP  ", "BET  ", "GAM  ", "CELL "]
@@ -535,6 +534,53 @@ Module CFML_KeyCodes
          integer,                       intent(in)     :: IP
          type(RelationList_Type),       intent(in out) :: Ph
       End Subroutine Set_RefCodes_PHAS
+
+      Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)     :: ffile
+         integer,                 intent(in)     :: n_ini
+         integer,                 intent(in)     :: n_end
+         integer,                 intent(in)     :: Im
+         type(RelationList_Type), intent(inout)  :: M
+      End Subroutine Read_RefCodes_MOL
+
+      Module Subroutine ReadCode_FIX_MOL(String, Im, M)
+         !---- Arguments ----!
+         character(len=*),        intent(in)    :: String
+         integer,                 intent(in)    :: Im
+         type(RelationList_Type), intent(inout) :: M
+      End Subroutine ReadCode_FIX_MOL
+
+      Module Subroutine ReadCode_VARY_MOL(String, Im, M)
+         !---- Arguments ----!
+         character(len=*),        intent(in)    :: String
+         integer,                 intent(in)    :: Im
+         type(RelationList_Type), intent(inout) :: M
+      End Subroutine ReadCode_VARY_MOL
+
+      Module Subroutine Split_RefCod_MOL(String, Nc, Ikeys, IMol, Keys)
+         !---- Arguments ----!
+         character(len=*),               intent(in)  :: String
+         integer,                        intent(out) :: Nc
+         integer, dimension(:),          intent(out) :: IKeys
+         integer, dimension(:),          intent(out) :: IMol
+         character(len=*), dimension(:), intent(out) :: Keys
+      End Subroutine Split_RefCod_MOL
+
+      Module Subroutine Set_RefCodes_MOL(Keyword, Npar,  Im, M)
+         !---- Arguments ----!
+         character(len=*),              intent(in)     :: Keyword
+         integer,                       intent(in)     :: NPar
+         integer,                       intent(in)     :: Im
+         type(RelationList_Type),       intent(in out) :: M
+      End Subroutine Set_RefCodes_MOL
+
+      Module Subroutine RList_to_Molec(M, Im, Mol)
+         !---- Arguments ----!
+         type(RelationList_Type), intent(in)   :: M
+         integer,                 intent(in)   :: Im
+         type(Molecule_type),     intent(inout):: Mol
+      End Subroutine RList_to_Molec
 
    End Interface
 
