@@ -310,4 +310,102 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       Ac%ddlab       = " "
    End Subroutine Allocate_Atoms_Cell
 
+    !!----
+    !!---- Module Subroutine Init_mAtom_Type(A)
+    !!----    type (mAtom_Type),  intent(in out) :: A   ! In / Out -> mAtom type
+    !!----
+    !!----    Initialize mAtom_Type
+    !!----
+    !!---- Updated: November 3 - 2013
+    !!
+    Module Subroutine Init_mAtom_Type(A)
+       !---- Arguments ----!
+       type (mAtom_Type), intent(in out)   :: A
+
+       A%Lab      =" "
+       A%ChemSymb =" "
+       A%SfacSymb =" "
+       A%Wyck     ="."
+       A%Active   =.true.
+       A%Z =0; A%Mult=1
+       A%X=0.0; A%X_Std=0.0; A%MX=0.0; A%LX=0
+       A%Occ=0.0; A%Occ_Std=0.0; A%MOcc=0.0; A%LOcc=0
+       A%Biso=0.0; A%Biso_std=0.0; A%MBiso=0.0; A%LBiso=0
+       A%Utype    ="none"
+       A%ThType   ="isotr"
+       A%U=0.0; A%U_std=0.0; A%Ueq=0.0; A%MU=0.0; A%LU=0
+       A%Charge=0.0; A%Moment=0.0
+       A%Ind=0
+       A%NVar=0; A%VarF=0.0
+       A%AtmInfo  =" "
+       !Magnetic parameters
+       A%nvk =0
+       A%imat=0
+       A%SkR=0.0; A%SkR_std=0.0; A%Spher_SkR=0.0; A%Spher_SkR_std=0.0; A%mSkR=0.0; A%lSkR=0
+       A%SkI=0.0; A%SkI_std=0.0; A%Spher_SkI=0.0; A%Spher_SkI_std=0.0; A%mSkI=0.0; A%lSkI=0
+       A%mphas=0.0; A%mphas_std=0.0; A%mmphas=0.0; A%lmphas=0
+       A%cbas=0.0; A%cbas_std=0.0; A%mbas=0.0; A%lbas=0
+       A%chitype="none"
+       A%chi=0.0; A%chi_std=0.0; A%mchi=0.0; A%lchi=0; A%Chieq=0.0
+
+    End Subroutine Init_mAtom_Type
+
+    !!----
+    !!---- Module Subroutine Allocate_Matom_List(N,A)
+    !!----    integer,                              intent(in)     :: n    !  In -> Number of elements of A
+    !!----    type (mAtom_list_type),               intent(in out) :: A    !  In -> Objet to be allocated
+    !!----    real(kind=cp), optional,              intent(in)     :: MField
+    !!----    real(kind=cp), optional,dimension(3), intent(in)     :: dirF
+    !!----
+    !!----    Allocation of objet A of type mAtom_list. This subroutine
+    !!----    should be called before using an object of type mAtom_list.
+    !!----
+    !!---- Updated: April - 2005, June -2014
+    !!
+    Module Subroutine Allocate_Matom_List(N,A,MField,dirF)
+       !---- Arguments ----!
+       integer,                              intent(in)     :: n  !# atoms in asymmetric magnetic unit
+       type (mAtom_list_type),               intent(in out) :: A  !Objet to be allocated
+       real(kind=cp), optional,              intent(in)     :: MField
+       real(kind=cp), optional,dimension(3), intent(in)     :: dirF
+
+       !---- Local Variables ----!
+       integer :: i
+
+       A%natoms = n
+       A%suscept=.false.
+       A%MagField=0.0
+       A%dir_MField=[0.0,0.0,1.0]
+       if (allocated(A%Atom)) deallocate(A%Atom)
+       allocate (A%Atom(n))
+       if(present(MField)) then
+          A%suscept=.true.
+          A%MagField=MField
+       end if
+       if(present(dirF))   A%dir_MField=dirF
+
+       do i=1,n
+          call init_mAtom_type(A%Atom(i))
+       end do
+
+    End Subroutine Allocate_mAtom_list
+
+    !!----
+    !!---- Module Subroutine Deallocate_mAtom_list(A)
+    !!----    type (mAtom_list_type), intent(in out)   :: A  ! In/ Out -> Objet to be deallocated
+    !!----
+    !!----    De-allocation of objet A of type atom_list. This subroutine
+    !!----    should be invoked after using an object of type mAtom_list
+    !!----    that is no more needed.
+    !!----
+    !!---- Update: April - 2005
+    !!
+    Module Subroutine Deallocate_mAtom_list(A)
+       !---- Arguments ----!
+       type (mAtom_list_type), intent(in out)   :: A  !Objet to be deallocated
+
+       if (allocated(A%Atom)) deallocate (A%Atom)
+
+    End Subroutine Deallocate_mAtom_list
+
 End SubModule Atm_Allocating_Atoms
