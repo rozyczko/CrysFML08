@@ -4,7 +4,7 @@
 !!----
  Module Atoms_in_BOX
    use CFML_Globaldeps
-   use CFML_Atoms,        only: AtList_Type, MAtm_Std_Type
+   use CFML_Atoms,        only: AtList_Type, ModAtm_Std_Type
    use CFML_gSpaceGroups, only: Spg_Type, SuperSpaceGroup_Type, Point_Orbit, get_Orbit, Is_Lattice_Vec
    use CFML_Strings,      only: pack_string
    use CFML_rational
@@ -251,7 +251,7 @@
 
 
     Function modulation_function(At,SpG,s,Lat,time_v,tshift) result(v)
-      type(MAtm_Std_Type),          intent(in) :: At     !Modulated atom type
+      type(ModAtm_Std_Type),          intent(in) :: At     !Modulated atom type
       type(SuperSpaceGroup_type),   intent(in) :: SpG
       integer,                      intent(in) :: s      !Pointer to the symmetry operator relating x and x0: x= g(s) x0 + t(s) + Lat
       integer,       dimension(:),  intent(in) :: Lat    !Additional lattice translation
@@ -385,7 +385,7 @@
         pt=1
         Select Type(at => A%Atom(i))
 
-          class is (MAtm_Std_Type)
+          class is (ModAtm_Std_Type)
 
             Select type(SpG)
 
@@ -479,7 +479,7 @@
     use CFML_Metrics,      only: Cell_G_Type, Write_Crystal_Cell, Change_Setting_Cell
     use CFML_gSpaceGroups, only: Spg_Type, SuperSpaceGroup_Type, Write_SpaceGroup_Info, &
                                  Get_moment_ctr, Get_TFourier_Ctr, Get_Orbit, point_orbit,Get_Inv_OP
-    use CFML_Atoms,        only: AtList_Type, Write_Atom_List, MAtm_Std_Type
+    use CFML_Atoms,        only: AtList_Type, Write_Atom_List, ModAtm_Std_Type
     use CFML_IOForm
     use Atoms_in_BOX
 
@@ -608,7 +608,7 @@
 
                  Select Type(at => Atm%Atom(i))
 
-                   type is (MAtm_Std_Type)
+                   type is (ModAtm_Std_Type)
 
                       do j=1,orb%Mult
                           !Calculate modulation functions to write properly the superspace coordinates
@@ -654,7 +654,7 @@
             !
            Select Type(at => Atm%Atom(i))
 
-             class is (MAtm_Std_Type)
+             class is (ModAtm_Std_Type)
                write(*,"(a)") " => Modulation amplitudes of atom: "//trim(Atm%Atom(i)%Lab)
                if(allocated(CodeT)) deallocate(CodeT)
                allocate(CodeT(6,at%n_mc))

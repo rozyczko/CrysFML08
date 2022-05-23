@@ -253,7 +253,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
                   end if
                end do
 
-            Type is (MAtm_Ref_Type)
+            Type is (ModAtm_Ref_Type)
                do i=1,NP_Ref
                   n=0
                   do j=1,AtList%natoms

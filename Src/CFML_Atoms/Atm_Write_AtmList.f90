@@ -212,7 +212,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   end if
                end do
 
-            class is (MAtm_std_Type)
+            class is (ModAtm_std_Type)
                do n=1,A%natoms
                   if (A%Iph(n) /= iph) cycle
 

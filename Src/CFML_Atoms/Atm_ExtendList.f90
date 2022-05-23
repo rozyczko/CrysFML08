@@ -19,7 +19,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
       type(atlist_type),    intent(in)     :: A         ! Atom list (asymmetric unit)
       type(atlist_type),    intent(in out) :: B         ! Atom list into the unit cell
       class(SpG_Type),      intent(in)     :: SpG       ! SpaceGroup
-      character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, MAtm_Std, Atm_Ref, MAtm_Ref
+      character(len=*),     intent(in)     :: Type_Atm  ! !Atomic type: Atm, Atm_Std, ModAtm_Std, Atm_Ref, ModAtm_Ref
       logical, optional,    intent(in)     :: Conven    ! If present and .true. using the whole conventional unit cell
       integer, optional,    intent(in)     :: lun       ! Outputs the content of a primitive/conventional cell
       !---- Local Variables ----!
@@ -170,7 +170,7 @@ SubModule (CFML_Atoms) Atm_ExtendList
             !end select
 
             !select type(atm => A%atom(k))
-            !   type is (MAtm_Std_Type)
+            !   type is (ModAtm_Std_Type)
             !      c_atm%Atom(n)%wyck   = atm%wyck
             !      c_atm%Atom(n)%n_mc   = atm%n_mc
             !      c_atm%Atom(n)%n_dc   = atm%n_dc

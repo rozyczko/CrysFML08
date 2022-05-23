@@ -54,7 +54,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
             Atm%U_Std     = 0.0_cp
             Atm%Moment_Std= 0.0_cp
 
-         type is (matm_std_type)
+         type is (ModAtm_std_type)
             Atm%X_Std     = 0.0_cp
             Atm%Occ_Std   = 0.0_cp
             Atm%U_iso_Std = 0.0_cp
@@ -105,7 +105,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
             Atm%M_U       =0.0_cp
             Atm%M_moment  =0
 
-         type is (Matm_ref_type)
+         type is (ModAtm_ref_type)
             Atm%X_Std     = 0.0_cp
             Atm%Occ_Std   = 0.0_cp
             Atm%U_iso_Std = 0.0_cp
@@ -177,12 +177,12 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
 
       !---- Local Variables ----!
       integer                            :: i,ier
-      ! Types :: Atm_Type, Atm_Std_Type, MAtm_Std_Type, Atm_Ref_Type, MAtm_Ref_Type
+      ! Types :: Atm_Type, Atm_Std_Type, ModAtm_Std_Type, Atm_Ref_Type, ModAtm_Ref_Type
       type(Atm_Type)       :: Atm
       type(Atm_Std_Type)   :: Atm_Std
-      type(MAtm_Std_Type)  :: MAtm_Std
+      type(ModAtm_Std_Type)  :: ModAtm_Std
       type(Atm_Ref_Type)   :: Atm_Ref
-      type(MAtm_Ref_Type)  :: MAtm_Ref
+      type(ModAtm_Ref_Type)  :: ModAtm_Ref
 
       !> Init
       if (n <= 0) then
@@ -203,14 +203,14 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
          case("atm_std_type")
             allocate(A%atom(n),source=Atm_Std,stat=ier)
 
-         case("matm_std_type")
-            allocate(A%atom(n),source=MAtm_Std,stat=ier)
+         case("ModAtm_std_type")
+            allocate(A%atom(n),source=ModAtm_Std,stat=ier)
 
          case("atm_ref_type")
             allocate(A%atom(n),source=Atm_Ref,stat=ier)
 
-         case("matm_ref_type")
-            allocate(A%atom(n),source=MAtm_Ref,stat=ier)
+         case("ModAtm_ref_type")
+            allocate(A%atom(n),source=ModAtm_Ref,stat=ier)
 
          case default
             call set_error(1," The argument on Type_Atm is unknown for Allocate_Atom_List procedure")

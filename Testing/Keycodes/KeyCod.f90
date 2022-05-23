@@ -11,7 +11,7 @@ Program KeyCodes
    use CFML_IOForm,       only: Read_Xtal_Structure, Read_CFL_Cell
    use CFML_Metrics,      only: Cell_GLS_Type, Write_Crystal_Cell
    use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
-                                Matm_Std_Type, Matm_Ref_type, Write_Atom_List, &
+                                ModAtm_Std_Type, ModAtm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
 
    use CFML_KeyCodes
@@ -79,6 +79,8 @@ Program KeyCodes
             read(unit=*,fmt="(a)") ans
             stop
          end if
+         i=index(filcod,".cfl")
+         if(i /= 0) filcod=filcod(1:i-1)
       end if
 
       inquire(file=trim(filcod)//'.cfl',exist=esta)

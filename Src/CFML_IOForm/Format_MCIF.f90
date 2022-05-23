@@ -1264,7 +1264,7 @@ SubModule (CFML_IOForm) Format_MCIF
             end if
 
             select type(At => Atmlist%atom)
-               class is (MAtm_Std_Type)
+               class is (ModAtm_Std_Type)
                   At(k)%Mcs(i1,nq)=xv(1)
                   At(k)%Mcs(i2,nq)=xv(2)
                   At(k)%Mcs_std(i1,nq)=xv_std(1)
@@ -2115,7 +2115,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Init
 
       select type(At => Atmlist%atom)
-         class is (MAtm_Std_Type)
+         class is (ModAtm_Std_Type)
             write(unit=Ipr,fmt="(a)") "loop_"
             write(unit=Ipr,fmt="(a)") "    _atom_site_moment_Fourier.id"
             write(unit=Ipr,fmt="(a)") "    _atom_site_moment_Fourier.atom_site_label"

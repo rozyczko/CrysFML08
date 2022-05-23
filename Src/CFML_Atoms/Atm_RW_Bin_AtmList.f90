@@ -30,7 +30,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       integer                            :: i,n,ierr,lun
       type (atm_type)      :: atm
       type (atm_std_type)  :: atms
-      !type (matm_std_type) :: matm
+      !type (ModAtm_std_type) :: matm
       type (atm_ref_type)  :: atr
 
       !> Init
@@ -110,7 +110,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                aat(i)=atms
             end do
 
-         !type is (matm_std_type)
+         !type is (ModAtm_std_type)
          !   do i=1,n
          !      read(unit=lun,iostat=ierr) matm
          !      if (ierr /=0) then
@@ -154,7 +154,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
       integer                        :: i,n,lun,ierr
       type (atm_type)      :: atm
       type (atm_std_type)  :: atms
-      !type (matm_std_type) :: matm
+      !type (ModAtm_std_type) :: matm
       type (atm_ref_type)  :: atr
 
       !> Init
@@ -205,7 +205,7 @@ SubModule (CFML_Atoms) Atm_RW_Bin_AtmList
                end if
             end do
 
-         !type is (matm_std_type)
+         !type is (ModAtm_std_type)
          !   do i=1,n
          !      matm=aat(i)
          !      write(unit=lun,iostat=ierr) matm

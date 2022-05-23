@@ -116,16 +116,16 @@
     End Type Atm_Std_Type
 
     !!----
-    !!---- TYPE :: MATM_STD_TYPE
+    !!---- TYPE :: ModAtm_STD_TYPE
     !!----
     !!---- This type Modulated Atom type extends Atm_Std_Type by adding modulation
     !!---- Cosine(c) and Sine amplitudes(s) to each model parameter characterizing
     !!---- normal atoms. Up to max_mod harmonic numbers (Q_coeffs) are allowed
     !!---- Still to implement special modulation functions (crenel-type)
-    !!---- Probably extending MAtm_Std_Type or its descendents
+    !!---- Probably extending ModAtm_Std_Type or its descendents
 
     !!----
-    Type, Public, Extends(Atm_Std_Type)    :: MAtm_Std_Type
+    Type, Public, Extends(Atm_Std_Type)    :: ModAtm_Std_Type
        integer                             :: n_oc   = 0       ! Number of occupation amplitudes
        integer                             :: n_bc   = 0       ! Number of B_iso amplitudes
        integer                             :: n_mc   = 0       ! Number of moment amplitudes
@@ -150,7 +150,7 @@
        real(kind=cp),dimension(:),   allocatable :: Xs         ! Position in superspace
        real(kind=cp),dimension(:),   allocatable :: Moms       ! Moment in superspace
        real(kind=cp),dimension(:,:), allocatable :: Us         ! Thermal factors in superspace
-    End Type MAtm_Std_Type
+    End Type ModAtm_Std_Type
 
     !!----
     !!---- TYPE :: ATM_REF_TYPE
@@ -173,13 +173,13 @@
     End Type Atm_Ref_Type
 
     !!----
-    !!---- TYPE :: MATM_REF_TYPE
+    !!---- TYPE :: ModAtm_REF_TYPE
     !!----
-    !!----   Refinement Atom type: This type extends MAtm_Std_Type with the numbers
+    !!----   Refinement Atom type: This type extends ModAtm_Std_Type with the numbers
     !!----   of each model paramenter within the list of LSQ free parameters, as well
     !!----   as the corresponding multipliers for constraints.
     !!----
-    Type, Public, Extends(MAtm_Std_Type) :: MAtm_Ref_Type
+    Type, Public, Extends(ModAtm_Std_Type) :: ModAtm_Ref_Type
        integer,      dimension(3)               :: L_X       =0       ! Code Numbers of parameter
        integer                                  :: L_Occ     =0
        integer                                  :: L_U_iso   =0
@@ -198,7 +198,7 @@
        real(kind=cp),dimension(6, max_mod)      :: M_Mcs    = 0.0_cp  !
        real(kind=cp),dimension(6, max_mod)      :: M_Dcs    = 0.0_cp  !
        real(kind=cp),dimension(12,max_mod)      :: M_Ucs    = 0.0_cp  !
-    End Type MAtm_Ref_Type
+    End Type ModAtm_Ref_Type
 
 
     !!----
@@ -543,8 +543,8 @@
 
        Module Subroutine CopyInfo_MStd_Type(At1, At2)
           !---- Arguments ----T
-          class(MAtm_Std_Type), intent(in out):: At1
-          class(MAtm_Std_Type), intent(in)    :: At2
+          class(ModAtm_Std_Type), intent(in out):: At1
+          class(ModAtm_Std_Type), intent(in)    :: At2
        End Subroutine CopyInfo_MStd_Type
 
        Module Subroutine Read_Bin_Atom_List(filename, A, Type_Atm)

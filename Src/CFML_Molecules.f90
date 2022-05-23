@@ -297,7 +297,7 @@
     use CFML_GlobalDeps,    only: CP, EPS, TO_RAD, err_cfml, clear_error, set_error
     use CFML_gSpacegroups,  only: SpG_type, Write_SpaceGroup_Info
     Use CFML_Atoms,         only: AtList_Type, Init_Atom_Type, Allocate_Atom_List, &
-                                  Atm_Type, Atm_Std_Type, Atm_Ref_Type, MAtm_Std_Type, MAtm_Ref_Type
+                                  Atm_Type, Atm_Std_Type, Atm_Ref_Type, ModAtm_Std_Type, ModAtm_Ref_Type
     Use CFML_Metrics,       only: Cell_G_Type, Write_Crystal_Cell
     Use CFML_Strings,       only: L_Case, U_Case, File_Type, Get_Num, Cut_String, Get_words
     Use CFML_Maths,         only: Cross_Product, Get_Spher_from_Cart

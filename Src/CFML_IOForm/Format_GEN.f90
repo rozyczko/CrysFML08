@@ -341,7 +341,7 @@ SubModule (CFML_IOForm) Format_GEN
     Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
        !---- Arguments ----!
        character(len=*),    intent(in )     :: str
-       class(MAtm_Std_Type),intent(in out)  :: Atm
+       class(ModAtm_Std_Type),intent(in out)  :: Atm
        character(len=*),    intent(in)      :: ulabel
        integer,             intent(in)      :: nt  !number of the amplitude
 

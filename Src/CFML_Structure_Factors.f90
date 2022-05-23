@@ -44,7 +44,7 @@ Module CFML_Structure_Factors
     !---- Use Modules ----!
     Use CFML_GlobalDeps,                  only: CP, DP, TPI, err_cfml, clear_error
     Use CFML_Strings,                     only: L_Case, U_Case, File_Type
-    Use CFML_Atoms,                       only: AtList_type, Atm_Ref_Type, MAtm_Ref_Type
+    Use CFML_Atoms,                       only: AtList_type, Atm_Ref_Type, ModAtm_Ref_Type
     Use CFML_gSpaceGroups,                only: Spg_Type
     Use CFML_Metrics,                     only: Cell_G_Type
     Use CFML_Reflections,                 only: RefList_Type, Refl_Type, SRefl_Type, MRefl_Type, &

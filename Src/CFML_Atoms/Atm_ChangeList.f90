@@ -63,8 +63,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                      call copyinfo_atm_type(at%atom(i),A(i))
                   end do
 
-               type is (Matm_Std_Type)
-                  !> MAtm_Std_Type -> Atm_Type
+               type is (ModAtm_Std_Type)
+                  !> ModAtm_Std_Type -> Atm_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -74,8 +74,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                      call copyinfo_atm_type(at%atom(i),A(i))
                   end do
 
-               type is (Matm_Ref_Type)
-                  !> MAtm_Ref_Type -> Atm_Type
+               type is (ModAtm_Ref_Type)
+                  !> ModAtm_Ref_Type -> Atm_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -123,8 +123,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Std_Type)
-                  !> MAtm_Std_Type -> Atm_Std_Type
+               type is (ModAtm_Std_Type)
+                  !> ModAtm_Std_Type -> Atm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -138,8 +138,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Ref_Type)
-                  !> MAtm_Ref_Type -> Atm_Std_Type
+               type is (ModAtm_Ref_Type)
+                  !> ModAtm_Ref_Type -> Atm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -155,13 +155,13 @@ SubModule (CFML_Atoms) Atm_ChangeList
 
             end select
 
-         case ('MATM_STD_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Std_Type', Iv)
+         case ('ModAtm_STD_TYPE')
+            call Allocate_Atom_List(AtList%Natoms, At,'ModAtm_Std_Type', Iv)
             if (err_CFML%IErr /=0) return
 
             select type (A => AtList%Atom)
                type is (Atm_Type)
-                  !> Atm_Type -> MAtm_Std_Type
+                  !> Atm_Type -> ModAtm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -172,7 +172,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   end do
 
                type is (Atm_std_Type)
-                  !> Atm_Std_Type -> Matm_Std_Type
+                  !> Atm_Std_Type -> ModAtm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -187,7 +187,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   end select
 
                type is (Atm_Ref_Type)
-                  !> Atm_Ref_Type -> Matm_Std_Type
+                  !> Atm_Ref_Type -> ModAtm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -201,21 +201,21 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Std_Type)
-                  !> Matm_STD_Type -> Matm_Std_Type
+               type is (ModAtm_Std_Type)
+                  !> ModAtm_STD_Type -> ModAtm_Std_Type
                   !> Do nothing
                   call Allocate_Atom_List(0, At,' ', 0)
                   return
 
-               type is (Matm_Ref_Type)
-                  !> Matm_Ref_Type -> Matm_Std_Type
+               type is (ModAtm_Ref_Type)
+                  !> ModAtm_Ref_Type -> ModAtm_Std_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
                   At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
-                     class is (MAtm_Std_Type)
+                     class is (ModAtm_Std_Type)
                         do i=1,AtList%Natoms
                            call copyinfo_atm_type(B(i),A(i))
                            call copyinfo_std_type(B(i),A(i))
@@ -262,8 +262,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   call Allocate_Atom_List(0, At,' ', 0) ! Nothing to do
                   return
 
-               type is (Matm_Std_Type)
-                  !> Matm_Std_Type -> Atm_Ref_Type
+               type is (ModAtm_Std_Type)
+                  !> ModAtm_Std_Type -> Atm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -277,8 +277,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Ref_Type)
-                  !> Matm_Ref_Type -> Atm_Ref_Type
+               type is (ModAtm_Ref_Type)
+                  !> ModAtm_Ref_Type -> Atm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -294,13 +294,13 @@ SubModule (CFML_Atoms) Atm_ChangeList
 
             end select
 
-         case ('MATM_REF_TYPE')
-            call Allocate_Atom_List(AtList%Natoms, At,'MAtm_Ref_Type', Iv)
+         case ('ModAtm_REF_TYPE')
+            call Allocate_Atom_List(AtList%Natoms, At,'ModAtm_Ref_Type', Iv)
             if (err_CFML%IErr /=0) return
 
             select type (A => AtList%Atom)
                type is (Atm_Type)
-                  !> Atm_Type -> Matm_Ref_Type
+                  !> Atm_Type -> ModAtm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -311,7 +311,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   end do
 
                type is (Atm_std_Type)
-                  !> Atm_Std_Type -> Matm_Ref_Type
+                  !> Atm_Std_Type -> ModAtm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -326,7 +326,7 @@ SubModule (CFML_Atoms) Atm_ChangeList
                   end select
 
                type is (Atm_Ref_Type)
-                  !> Atm_Ref_Type -> Matm_Ref_Type
+                  !> Atm_Ref_Type -> ModAtm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
@@ -340,15 +340,15 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Std_Type)
-                  !> MAtm_Std_Type -> Matm_Ref_Type
+               type is (ModAtm_Std_Type)
+                  !> ModAtm_Std_Type -> ModAtm_Ref_Type
                   At%mcomp         = atList%mcomp
                   At%symm_checked  = atlist%symm_checked
                   At%active        = atlist%active
                   At%IPh           = atlist%IPh
 
                   select type (B=> At%atom)
-                     class is (MAtm_Std_Type)
+                     class is (ModAtm_Std_Type)
                         do i=1,AtList%Natoms
                            call copyinfo_atm_type(B(i),A(i))
                            call copyinfo_std_type(B(i),A(i))
@@ -356,8 +356,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
                         end do
                   end select
 
-               type is (Matm_Ref_Type)
-                  !> Matm_Ref_Type -> Matm_Ref_Type
+               type is (ModAtm_Ref_Type)
+                  !> ModAtm_Ref_Type -> ModAtm_Ref_Type
                   !> Do nothing
                   call Allocate_Atom_List(0, At,' ', 0)
                   return
@@ -379,14 +379,14 @@ SubModule (CFML_Atoms) Atm_ChangeList
          case ('ATM_STD_TYPE')
             call Allocate_Atom_List(At%Natoms, AtList,'Atm_Std_Type', 0)
 
-         case ('MATM_STD_TYPE')
-            call Allocate_Atom_List(At%Natoms, AtList,'MAtm_Std_Type', Iv)
+         case ('ModAtm_STD_TYPE')
+            call Allocate_Atom_List(At%Natoms, AtList,'ModAtm_Std_Type', Iv)
 
          case ('ATM_REF_TYPE')
             call Allocate_Atom_List(At%Natoms, AtList,'Atm_Ref_Type', 0)
 
-         case ('MATM_REF_TYPE')
-            call Allocate_Atom_List(At%Natoms, AtList,'MAtm_Ref_Type', Iv)
+         case ('ModAtm_REF_TYPE')
+            call Allocate_Atom_List(At%Natoms, AtList,'ModAtm_Ref_Type', Iv)
       end select
       if (err_CFML%IErr /=0) return
 
@@ -486,8 +486,8 @@ SubModule (CFML_Atoms) Atm_ChangeList
    !!
    Module Subroutine CopyInfo_MStd_Type(At1, At2)
       !---- Arguments ----T
-      class(MAtm_Std_Type), intent(in out):: At1
-      class(MAtm_Std_Type), intent(in)    :: At2
+      class(ModAtm_Std_Type), intent(in out):: At1
+      class(ModAtm_Std_Type), intent(in)    :: At2
 
       !---- Local Variables ----!
       integer :: i,j

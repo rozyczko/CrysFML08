@@ -127,7 +127,7 @@ Submodule (CFML_Molecules) Mol_Initialize
       !---- Local Variables ----!  
       integer :: i
       type(Atm_Ref_Type)  :: at1
-      type(MAtm_Ref_Type) :: at2
+      type(ModAtm_Ref_Type) :: at2
 
       molx%N_Free    = 0
       molx%N_Mol     = 0

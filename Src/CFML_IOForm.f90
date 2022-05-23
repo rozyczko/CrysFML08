@@ -51,7 +51,7 @@ Module CFML_IOForm
                                      Get_Extension, Get_Datetime,Read_Fract,         &
                                      Frac_Trans_2Dig, Pack_String
 
-   Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, Matm_std_type, Atm_Ref_Type, &
+   Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type
 
    Use CFML_Metrics,           only: Cell_Type, Cell_G_Type, Set_Crystal_Cell, U_equiv, &
@@ -169,7 +169,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
          character(len=*),    intent(in )     :: str
-         class(MAtm_Std_Type),intent(in out)  :: Atm
+         class(ModAtm_Std_Type),intent(in out)  :: Atm
          character(len=*),    intent(in)      :: ulabel
          integer,             intent(in)      :: nt
       End Subroutine Read_Modulation_Amplitudes

@@ -29,7 +29,7 @@ Submodule (CFML_Atoms) Atm_SymmetryConstraints
           type is (SuperSpaceGroup_Type)
              do i=1,Atm%natoms
                 Select Type(at => Atm%Atom(i))
-                   class is (MAtm_Std_Type)
+                   class is (ModAtm_Std_Type)
                        if (at%n_mc > 0) then
                           codeT=1.0
                           call Get_TFourier_ctr(at%x,at%Mcs(:,1:at%n_mc),codeT(:,1:at%n_mc),SpG,codini,"M")
