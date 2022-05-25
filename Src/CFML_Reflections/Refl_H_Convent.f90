@@ -1,4 +1,4 @@
-Submodule (CFML_Reflections) Refl_H_Uni
+Submodule (CFML_Reflections) Refl_H_Convent
    !---- Variables ----!
    implicit none
 
@@ -197,4 +197,113 @@ Submodule (CFML_Reflections) Refl_H_Uni
 
    End Subroutine H_Uni
 
-End Submodule Refl_H_Uni
+   !!----
+   !!---- Module Subroutine Hkl_Gen_Sxtal(Crystalcell,Spacegroup,stlmin,stlmax,Reflex,ord,hlim)
+   !!----    Type (Cell_G_Type),                intent(in) :: CrystalCell     !Unit cell object
+   !!----    Type (SPG_Type) ,                  intent(in) :: SpaceGroup      !Space Group object
+   !!----    real(kind=cp),                     intent(in) :: stlmin,stlmax   !Minimum and Maximum SinTheta/Lambda
+   !!----    class(ReflList_Type),              intent(out):: reflex          !Generated set of reflections
+   !!----    Integer, dimension(3),   optional, intent(in) :: ord             !Order for loop of hkl-indices
+   !!----    Integer, dimension(3,2), optional, intent(in) :: hlim            !hkl-limits
+   !!----
+   !!----
+   !!----    Calculate all allowed reflections between a minimum and a maximum value of sin_theta/lambda.
+   !!----    If the limits of indices are provided in hlim, only the reflections verifying the prescription
+   !!----    are finally kept. hlim(:,1) and hlim(:,2) contain the minimum and maximum values respectively.
+   !!----    The reflections are stored in the scalar object Reflex of type: Reflection_List_Type
+   !!----    The output is not ordered but the user can obtain the reflections generated
+   !!----    in a particular way by providing the integer vector "ord", containing a permutation
+   !!----    of the three numbers 1,2,3. By default the loop generating the hkl-indices uses
+   !!----    the vector ord=(/3,2,1/), this means that the inner loop (more rapidly changing index)
+   !!----    is the l-index, then the k-index and finally the h-index.
+   !!----
+   !!---- Update: May - 2022
+   !!
+   Module Subroutine Hkl_Gen_Sxtal(Crystalcell,Spacegroup,stlmin,stlmax,Reflex,ord,hlim)
+      !---- Arguments ----!
+      Type (Cell_G_Type),                intent(in)  :: crystalcell
+      type (SPG_Type),                   intent(in)  :: spacegroup
+      real(kind=cp),                     intent(in)  :: stlmin,stlmax
+      class(RefList_Type),               intent(out) :: reflex
+      Integer, dimension(3),   optional, intent(in)  :: ord
+      Integer, dimension(3,2), optional, intent(in)  :: hlim
+
+      !---- Local variables ----!
+      real(kind=cp)         :: sval
+      integer               :: h,k,l,hmax,kmax,lmax, maxref,i, num_ref
+      integer, dimension(3) :: hh,nulo,od,imin,imax
+
+      integer,       dimension(:,:), allocatable :: hkl
+      real(kind=cp), dimension(:),   allocatable :: sv
+      logical :: Lcentred
+
+      Lcentred=.false.
+      nulo=0
+      if(Spacegroup%num_lat > 0) Lcentred=.true.
+      hmax=nint(CrystalCell%cell(1)*2.0*stlmax+1.0)
+      kmax=nint(CrystalCell%cell(2)*2.0*stlmax+1.0)
+      lmax=nint(CrystalCell%cell(3)*2.0*stlmax+1.0)
+      if(present(hlim)) then
+        imin=hlim(:,1)
+        imax=hlim(:,2)
+      else
+        imin=(/-hmax,-kmax,-lmax/)
+        imax=(/ hmax, kmax, lmax/)
+      end if
+      od=(/3,2,1/)
+      if(present(ord)) od=ord
+
+      maxref=(2*hmax+1)*(2*kmax+1)*(2*lmax+1)
+      allocate(hkl(3,maxref),sv(maxref))
+
+      num_ref=0
+      ext_do: do h=imin(od(3)),imax(od(3))
+         do k=imin(od(2)),imax(od(2))
+            do l=imin(od(1)),imax(od(1))
+               hh(od(3))=h
+               hh(od(2))=k
+               hh(od(1))=l
+               if (h_equal(hh,nulo)) cycle
+               sval=h_s(hh,crystalcell)
+               if (sval > stlmax .or. sval < stlmin) cycle
+               if (h_absent(hh,Spacegroup)) cycle
+               num_ref=num_ref+1
+               if(num_ref > maxref) then
+                  num_ref=maxref
+                  exit ext_do
+               end if
+               hkl(:,num_ref) = hh
+               sv(num_ref)    = sval
+            end do
+         end do
+      end do ext_do
+
+      call Initialize_RefList(Num_ref, reflex, 'SRefl', Spacegroup%d-1)
+
+      associate (r => reflex%ref)
+         select type (r)
+           class is (Refl_Type)
+             do i=1,num_ref
+                r(i)%h    = hkl(:,i)
+                r(i)%s    = sv(i)
+                r(i)%mult = h_mult(hh,Spacegroup,.false.)
+                r(i)%imag = 0
+                r(i)%Pcoeff=0
+             end do
+         end select
+         select type (r)
+           class is (SRefl_Type)
+             do i=1,num_ref
+                r(i)%Fo    =0.0_cp  ! Observed Structure Factor
+                r(i)%sFo   =0.0_cp  ! Sigma of  Fo
+                r(i)%Fc    =0.0_cp  ! Calculated Structure Factor
+                r(i)%w     =1.0_cp  ! weight factor
+                r(i)%phase =0.0_cp  ! Phase in degrees
+                r(i)%a     =0.0_cp  ! real part of the Structure Factor
+                r(i)%b     =0.0_cp  ! Imaginary part of the Structure Factor
+             end do
+         end select
+      end associate
+   End Subroutine Hkl_Gen_Sxtal
+
+End Submodule Refl_H_Convent

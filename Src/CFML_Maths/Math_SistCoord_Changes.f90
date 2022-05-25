@@ -15,7 +15,7 @@ Submodule (CFML_Maths) Maths_SistCoord_Changes
     !!
     Pure Module Function Get_Cart_from_Spher(SphCoord,Mode) Result(CarCoord)
        !---- Arguments ----!
-       real(kind=cp), dimension(3), intent( in) :: SphCoord ! Coordinates (R,Theta;Phi)
+       real(kind=cp), dimension(3), intent( in) :: SphCoord ! Coordinates (R,Theta,Phi)
        character(len=*), optional,  intent( in) :: mode     ! If "D" the angles are in degrees, otherwise radians is considered
        real(kind=cp), dimension(3)              :: CarCoord ! Cartesian coordinates
 

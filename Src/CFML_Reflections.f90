@@ -54,12 +54,12 @@ Module CFML_Reflections
    private
 
    !---- List of public functions ----!
-   public :: H_Absent, mH_Absent , H_Equal, H_Latt_Absent , H_Equiv, H_Mult, H_S, &
+   public :: H_Absent, mH_Absent, H_Equal, H_Latt_Absent, H_Equiv, H_Mult, H_S, &
              Get_MaxNumRef, Get_Asymm_Unit_H, Get_h_info
 
    !---- List of public subroutines ----!
    public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Gener_Reflections_Shub, &
-             Search_Extinctions, &
+             Search_Extinctions, Hkl_Gen_Sxtal, &
              Write_Info_RefList, Init_Refl_Conditions
 
    !---- Parameters ----!
@@ -370,6 +370,16 @@ Module CFML_Reflections
          logical,                optional, intent(out)    :: check_ok
          integer, dimension(3,2),optional, intent(in)     :: hlim
       End Subroutine H_Uni
+
+      Module Subroutine Hkl_Gen_Sxtal(Crystalcell,Spacegroup,stlmin,stlmax,Reflex,ord,hlim)
+         !---- Arguments ----!
+         type(Cell_G_Type),                 intent(in)  :: crystalcell
+         type (SPG_Type) ,                  intent(in)  :: spacegroup
+         real(kind=cp),                     intent(in)  :: stlmin,stlmax
+         class(RefList_Type),               intent(out) :: reflex
+         Integer, dimension(3),   optional, intent(in)  :: ord
+         Integer, dimension(3,2), optional, intent(in)  :: hlim
+      End Subroutine Hkl_Gen_Sxtal
 
       Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex,Friedel)
          !---- Arguments ----!
