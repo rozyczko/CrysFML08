@@ -95,6 +95,8 @@ SubModule (CFML_IOForm) Format_GEN
             atm%ChemSymb=u_case(label(1:1))//l_case(label(2:2))
           end if
        end if
+
+       atm%Z=Get_Z_Symb(atm%ChemSymb)
        atm%SfacSymb=label(1:4)
 
        !> Parameters

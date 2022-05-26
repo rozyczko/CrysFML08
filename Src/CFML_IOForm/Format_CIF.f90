@@ -630,6 +630,9 @@ SubModule (CFML_IOForm) Format_CIF
             end if
             atm%atom(n)%SfacSymb=atm%atom(n)%chemSymb
          end if
+         !Get the Atomic number from the chemical symbol
+
+         atm%atom(n)%Z=Get_Z_Symb(atm%atom(n)%chemSymb)
          !Check if the charge/valence is provided ins the SfacSymb item
          atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
 

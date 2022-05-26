@@ -119,7 +119,7 @@
   private
 
   !---- List of public functions ----!
-  public :: ApplyMSO
+  public :: ApplyMSO, veclength
 
   !---- List of public subroutines ----!
   public :: Readn_Set_Magnetic_Kv_Structure, Write_Magnetic_Structure, &

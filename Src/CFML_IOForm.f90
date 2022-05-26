@@ -65,6 +65,8 @@ Module CFML_IOForm
    Use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type
 
    Use CFML_Messages
+   Use CFML_Messages
+   Use CFML_Scattering_Tables, only: Get_Z_Symb
 
    !---- Variables ----!
    implicit none

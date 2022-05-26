@@ -64,6 +64,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
        do i=n_ini,n_end
           ! Read comment
+          if(len_trim(file_cfl%line(i)%str) == 0) cycle
           if (index(file_cfl%line(i)%str(1:1),"!")/=0 .or. index(file_cfl%line(i)%str(1:1),"#")/=0) cycle
           lowline=adjustl(l_case(file_cfl%line(i)%str))
 

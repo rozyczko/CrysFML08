@@ -206,6 +206,45 @@ SubModule (CFML_kvec_Structure_Factors) kStrf_Init_FxTables
     End Subroutine Create_Table_mFR
 
     !!--++
+    !!--++ Subroutine Set_Fixed_Tables(Reflex,Atm,Grp,lun)
+    !!--++    type(MagH_List_Type),         intent(in) :: Reflex
+    !!--++    type(Matom_list_type),        intent(in) :: Atm
+    !!--++    type(MagSymm_k_Type),         intent(in) :: Grp
+    !!--++    integer, optional,            intent(in) :: lun
+    !!--++
+    !!--++    (Private)
+    !!--++    Calculates arrays that are fixed during all further
+    !!--++    calculations
+    !!--++
+    !!--++ Update: April - 2005
+    !!
+    Module Subroutine Set_Fixed_Tables(Reflex,Atm,Grp,lun)
+       !---- Arguments ----!
+       type(MagH_List_Type),         intent(in) :: Reflex
+       type(Matom_list_type),        intent(in) :: Atm
+       type(MagSymm_k_Type),         intent(in) :: Grp
+       integer, optional,            intent(in) :: lun
+
+       !---- Local variables ----!
+
+       !---- Table HR - HT ----!
+       call Create_Table_HR_HT(Reflex,Grp)
+
+       !---- Table mFR ----!
+       if (present(lun)) then
+          call Create_Table_mFR(Reflex,Atm,lun=lun)
+       else
+          call Create_Table_mFR(Reflex,Atm)
+       end if
+
+       !---- Modify the scattering factor tables to include the
+       !---- multipliers factors concerning centre of symmetry and
+       !---- centred translations
+       if (Grp%mCentred == 2) mFR=2.0*mFR
+       if (Grp%Num_Lat  > 1)  mFR=Grp%Num_Lat*mFR
+    End Subroutine Set_Fixed_Tables
+
+    !!--++
     !!--++ Module Subroutine Calc_Table_MAB(Cell,Mlist,Atm,Mgp)
     !!--++    type(Cell_G_Type),intent(in) :: Cell
     !!--++    type(MagH_List_Type),   intent(in) :: MList
@@ -412,6 +451,53 @@ SubModule (CFML_kvec_Structure_Factors) kStrf_Init_FxTables
        end do
 
     End Subroutine Create_Table_HR_HT
+
+    !!--++
+    !!--++ Module Subroutine Sum_MAB(Reflex,Natm,icent)
+    !!--++    type(MagH_List_Type),   intent(in out) :: Reflex
+    !!--++    integer,                intent(in)     :: Natm
+    !!--++    integer,                intent(in)     :: icent
+    !!--++
+    !!--++    (Private)
+    !!--++    Calculate the Final Sum for Structure Factors calculations
+    !!--++
+    !!--++ Update: April - 2005
+    !!
+    Module Subroutine Sum_MAB(Reflex,Natm,icent)
+       !---- Arguments ----!
+       type(MagH_List_Type), intent(in out)  :: Reflex
+       integer,              intent(in)      :: Natm
+       integer,              intent(in)      :: icent
+
+       !---- Local Variables ----!
+       integer                      :: i,j
+       real(kind=cp), dimension(3)  :: aa,bb
+
+
+       !---- Fj(h)*Aj(h) ----!
+       if (icent == 2) then    !Calculation for centrosymmetric structures
+          do j=1,reflex%nref
+             aa=0.0
+             do i=1,Natm
+                aa(:)= aa(:) + mFR(i,j)*th(i,j)*ajh(:,i,j)
+             end do
+             Reflex%Mh(j)%MsF(:)=cmplx(aa(:))
+          end do
+
+       else       !Calculation for non-centrosymmetric structures
+          !---- Final Sum ----!
+          do j=1,reflex%Nref
+             aa=0.0
+             bb=0.0
+             do i=1,Natm
+                aa(:)= aa(:) + mFR(i,j)*th(i,j)*ajh(:,i,j)
+                bb(:)= bb(:) + mFR(i,j)*th(i,j)*bjh(:,i,j)
+             end do
+             Reflex%Mh(j)%MsF(:)=cmplx(aa(:),bb(:))
+          end do
+       end if
+    End Subroutine Sum_MAB
+
     !!----
     !!---- Module Subroutine Mag_Structure_Factors(Cell,Atm,Grp,Reflex)
     !!----    !---- Arguments ----!
