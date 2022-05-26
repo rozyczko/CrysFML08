@@ -105,7 +105,7 @@
     Use CFML_kvec_Symmetry,               only: ApplyMSO, MagSymm_k_type, Write_Magnetic_Structure, &
                                                 Magnetic_Domain_type
     Use CFML_Reflections,                 only: Hkl_Gen_Sxtal,Gener_Reflections_Shub, Get_MaxNumRef,&
-                                                Refl_Type, RefList_Type, h_s
+                                                Refl_Type, RefList_Type, h_s, Initialize_RefList
     Use CFML_Atoms,                       only: Matom_list_type, Allocate_mAtom_list
     Use CFML_Propagation_Vectors,         only: K_Equiv_Minus_K
     Use CFML_Rational
