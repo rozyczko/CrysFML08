@@ -1,10 +1,10 @@
    Module Moment_Mod
      use CFML_GlobalDeps
-     use CFML_Math_3D,                   only : Get_Spheric_Coord
-     use CFML_Crystallographic_Symmetry, only : latsym, ltr,nlat,inlat
+     use CFML_Maths,                     only : Get_Spher_from_Cart
+     use CFML_kvec_Symmetry,             only : latsym, ltr,nlat,inlat
      use CFML_Symmetry_Tables,           only : latt
-     use CFML_String_Utilities,          only : pack_string
-     use CFML_Crystal_Metrics,           only : Crystal_Cell_Type,ERR_Crys,ERR_Crys_Mess,Set_Crystal_Cell
+     use CFML_Strings,                   only : pack_string
+     use CFML_Metrics,                   only : Cell_G_Type,Set_Crystal_Cell
 
      implicit none
 
@@ -32,15 +32,9 @@
       character(len=20)                  ::  symb
       character(len=80)                  ::  title
 
-      real                               :: a,b,c,ca,cb,cc
-      type(Crystal_Cell_Type)            :: cell
-
-      !real :: asq,bsq,csq,ab,ac,bc, astar,bstar,cstar,castar, &
-      !        cbstar,ccstar,sastar, sbstar,scstar,
-
-      !real, dimension(3,3) :: ortd, orti
-
-      logical              ::  phasgiven,momencal
+      real               :: a,b,c,ca,cb,cc
+      type(Cell_G_Type)  :: cell
+      logical            :: phasgiven,momencal
 
 
    contains
@@ -62,7 +56,6 @@
            xo = matmul (Cell%Cr_Orth_cel,xc) !Convert to cartesian
            xcar(:,i,n)=xo(:)
          end do
-         return
       End Subroutine Coordinates
 
       Subroutine  Momento(t,n,ia,cm,r)
@@ -81,7 +74,6 @@
          xc(3)=rmo(3,ia,n)/c
          cm = matmul (Cell%Cr_Orth_cel,xc) !Convert to cartesian
          r=sqrt(dot_product(cm,cm))
-         return
       End Subroutine Momento
 
       Subroutine Magmom_Calc(t,n,ia)
@@ -117,7 +109,6 @@
              end do                        ! End loop over propagation vectors
            end do                          ! End loop over components x,y,z
          end do                            ! End loop over atoms
-         return
       End Subroutine Magmom_Calc
 
       Subroutine Phase_Give(ival)
@@ -139,7 +130,6 @@
            end do
            phasgiven=.TRUE.
          end if
-         return
       End Subroutine Phase_Give
 
       Subroutine Phase_Search()
@@ -230,7 +220,7 @@
              do i2=0,ic(2)
                do i3=0,ic(3)
                  do jl=1,nlat
-                   t(:)=real((/i1,i2,i3/))+ ltr(:,jl)
+                   t(:)=real([i1,i2,i3])+ ltr(:,jl)
                    do i=1,natin
                      iato=inda(i)
                       call momento(t,n,iato,cm,rm)
@@ -275,7 +265,6 @@
            write(unit=*,fmt="(a,2f8.4,a)")  &
                "    (Search within the range: ",(pin(iv,j),j=1,2)," ) "
          end do
-         return
       End Subroutine Phase_Search
 
    End Module Moment_Mod
@@ -285,7 +274,7 @@
    Module Moment_Inout
 
       Use Moment_Mod
-      use CFML_String_Utilities, only: FindFmt,  Init_FindFmt, ierr_fmt, mess_findfmt,U_case
+      use CFML_Strings, only: FindFmt,  Init_FindFmt, U_case
 
       implicit none
 
@@ -341,7 +330,6 @@
          end if
          call latsym(symb)
          write(unit=iou,fmt="(/,a,a,/)")  " => Lattice type:",latt(inlat)
-         return
       End Subroutine Input_Data
 
       Subroutine Interactive_Input()
@@ -362,7 +350,7 @@
            if(ier == 0) exit
          end do
          write(unit=iou,fmt="(a,6f10.4)")" => Unit cell :",a,b,c,ca,cb,cc
-         call Set_Crystal_Cell((/a,b,c/),(/ca,cb,cc/),Cell,Cartype="A")
+         call Set_Crystal_Cell([a,b,c],[ca,cb,cc],Cell,Cartype="A")
          !call build_orth()
          !-------------------------------------------
          !        Enter the space group symbol
@@ -470,7 +458,6 @@
                  "          ",rr(:,iv,i),ri(:,iv,i),ph(iv,i)
            end do
          end do
-         return
       End Subroutine Interactive_Input
 
       Subroutine Cells_Enter()
@@ -492,7 +479,6 @@
             if(ans == "y" .or. ans == "Y") cycle
             exit
          end do
-         return
       End Subroutine Cells_Enter
 
       Subroutine Angle_Calc()
@@ -534,7 +520,6 @@
            if(ans == "y" .or. ans == "Y") cycle
            exit
          end do
-         return
       End Subroutine Angle_Calc
 
       Subroutine Phase_Bidon()
@@ -587,7 +572,6 @@
            write(unit=*,fmt="(a,a,4f10.5)") " -> Atom: ",nam(i),(phko(iv,i),iv=2,nvk)
            write(unit=*,fmt="(a,4f10.5)") "              ",(phko(iv,i)*to_deg*tpi,iv=2,nvk)
          end do
-         return
       End Subroutine Phase_Bidon
 
       !-------------------------------------------------------------------------
@@ -608,17 +592,17 @@
          do
            fmtfields = "9ffffff"
            call findfmt(inp,aline,fmtfields,fmtformat)
-           if(ierr_fmt == 13)  cycle
+           if(err_CFML%ierr == 13)  cycle
            exit
          end do
-         if (ierr_fmt /= 0)  call finalize()
+         if (err_CFML%ierr /= 0)  call finalize()
          read(unit=aline,fmt=fmtformat)  key,a,b,c,ca,cb,cc
          if(key(1:4) /= "CELL") then
            write(unit=*,fmt="(a)") " => Warning!, the CELL card could be in error."
          end if
          write(unit=*  ,fmt="(a,6f10.4)")" => Unit cell :",a,b,c,ca,cb,cc
          write(unit=iou,fmt="(a,6f10.4)")" => Unit cell :",a,b,c,ca,cb,cc
-         call Set_Crystal_Cell((/a,b,c/),(/ca,cb,cc/),Cell,Cartype="A")
+         call Set_Crystal_Cell([a,b,c],[ca,cb,cc],Cell,Cartype="A")
          !call build_orth()
          !-------------------------------------
          !        Read the space group symbol
@@ -638,10 +622,10 @@
          do
            fmtfields = "9i"
            call findfmt(inp,aline,fmtfields,fmtformat)
-           if(ierr_fmt == 13)  cycle
+           if(err_CFML%ierr == 13)  cycle
            exit
          end do
-         if (ierr_fmt /= 0)  call finalize()
+         if (err_CFML%ierr /= 0)  call finalize()
          read(unit=aline,fmt=fmtformat) key,ifou
          if(abs(ifou) == 1) ifou=1
          if(abs(ifou) == 5) ifou=2
@@ -677,10 +661,10 @@
          do
            fmtfields = "9i"
            call findfmt(inp,aline,fmtfields,fmtformat)
-           if(ierr_fmt == 13)  cycle
+           if(err_CFML%ierr == 13)  cycle
            exit
          end do
-         if (ierr_fmt /= 0)   call finalize()
+         if (err_CFML%ierr /= 0)   call finalize()
          read(unit=aline,fmt=fmtformat)  key,nvk
          write(unit=*  ,fmt="(a,i5)")" => Number of propagation vectors: ",nvk
          write(unit=iou,fmt="(a,i5)")" => Number of propagation vectors: ",nvk
@@ -691,10 +675,10 @@
            do
              fmtfields = "9fff"
              call findfmt(inp,aline,fmtfields,fmtformat)
-             if(ierr_fmt == 13)  cycle
+             if(err_CFML%ierr == 13)  cycle
              exit
            end do
-           if (ierr_fmt /= 0)   call finalize()
+           if (err_CFML%ierr /= 0)   call finalize()
            read(unit=aline,fmt=fmtformat)  key,pvk(:,i)
            if(key(1:3) /= "Vk_") then
              write(unit=*,fmt="(a)") " => Warning!, the number of vectors k could be in error: "//trim(aline)
@@ -711,11 +695,11 @@
            do
              fmtfields = "94fffff4"
              call findfmt(inp,aline,fmtfields,fmtformat)
-             if(ierr_fmt == 13)  cycle
+             if(err_CFML%ierr == 13)  cycle
              exit
            end do
-           if(ierr_fmt == -1) exit
-           if (ierr_fmt /= 0)  call finalize()
+           if(err_CFML%ierr == -1) exit
+           if (err_CFML%ierr /= 0)  call finalize()
            nat=nat+1
            read(unit=aline,fmt=fmtformat) key,nam(nat),x(:,nat),lab
            if(key(1:4) /= "ATOM") then
@@ -725,10 +709,10 @@
              do
                fmtfields = "4ifffffff"
                call findfmt(inp,aline,fmtfields,fmtformat)
-               if(ierr_fmt == 13)  cycle
+               if(err_CFML%ierr == 13)  cycle
                exit
              end do
-             if (ierr_fmt /= 0)   call finalize()
+             if (err_CFML%ierr /= 0)   call finalize()
              read(unit=aline,fmt=fmtformat)key,ive, rr(:,iv,nat),ri(:,iv,nat), ph(iv,nat)
              if(key(1:4) /= "MK_P") then
                write(unit=*,fmt="(a)") " => Warning!, the MK_P card could be in error "//trim(aline)
@@ -751,7 +735,6 @@
              write(unit=iou,fmt="(a,6f8.3,f8.5)")  "          ",rr(:,iv,i),ri(:,iv,i),ph(iv,i)
            end do
          end do
-         return
       End Subroutine Readfile
 
       Subroutine Readfile_fst()
@@ -781,7 +764,7 @@
              end if
              write(unit=*  ,fmt="(a,6f10.4)")" => Unit cell :",a,b,c,ca,cb,cc
              write(unit=iou,fmt="(a,6f10.4)")" => Unit cell :",a,b,c,ca,cb,cc
-             call Set_Crystal_Cell((/a,b,c/),(/ca,cb,cc/),Cell,Cartype="A")
+             call Set_Crystal_Cell([a,b,c],[ca,cb,cc],Cell,Cartype="A")
            else
              cycle
            end if
@@ -848,12 +831,12 @@
            do
              fmtfields = "944fff"
              call findfmt(inp,aline,fmtfields,fmtformat)
-             if(ierr_fmt == 13)  cycle
+             if(err_CFML%ierr == 13)  cycle
              exit
            end do
            if(aline(1:1) == "}") exit
-           if(ierr_fmt == -1) exit
-           if (ierr_fmt /= 0)  call finalize()
+           if(err_CFML%ierr == -1) exit
+           if (err_CFML%ierr /= 0)  call finalize()
            nat=nat+1
            read(unit=aline,fmt=fmtformat) key,nam(nat),lab,x(1:3,nat)
            if(key(1:5) /= "MATOM") then
@@ -863,10 +846,10 @@
              do
                fmtfields = "4iifffffff"
                call findfmt(inp,aline,fmtfields,fmtformat)
-               if(ierr_fmt == 13)  cycle
+               if(err_CFML%ierr == 13)  cycle
                exit
              end do
-             if (ierr_fmt /= 0)   call finalize()
+             if (err_CFML%ierr /= 0)   call finalize()
              read(unit=aline,fmt=fmtformat)key,ive,i, rr(:,iv,nat),ri(:,iv,nat), ph(iv,nat)
              if(key(1:3) /= "SKP") then
                write(unit=*,fmt="(a)") " => Warning!, the SKP card could be in error "//trim(aline)
@@ -889,18 +872,17 @@
              write(unit=iou,fmt="(a,6f8.3,f8.5)")  "          ",rr(:,iv,i),ri(:,iv,i),ph(iv,i)
            end do
          end do
-         return
       End Subroutine Readfile_fst
 
 
 
       Subroutine Finalize()
          integer :: i
-         if(ierr_fmt == -1) then
+         if(err_CFML%ierr == -1) then
             write(unit=*,fmt="(a)")  " => End of input file "
          else
-            do i=1,mess_findfmt%nlines
-             write(unit=*,fmt="(a)")  mess_findfmt%txt(i)
+            do i=1,Err_CFML%nl
+             write(unit=*,fmt="(a)")  Err_CFML%txt(i)
             end do
          end if
          stop
@@ -911,6 +893,7 @@
          real, dimension(3) :: xc,xo
          integer :: i,j,iv
          real    :: phi,theta,ss
+         real, dimension(3) :: spher
 
          write(unit=*,fmt="(/a,3(f5.1,a)/)")  &
              "   ATOMS and MAGNETIC MOMENTS in cell: ( ",t(1), "," , t(2), "," ,t(3), " )"
@@ -947,7 +930,9 @@
            xc(2)=rmo(2,i,nce)/b
            xc(3)=rmo(3,i,nce)/c
            xo = matmul(Cell%Cr_Orth_cel,xc) !Convert to cartesian
-           call Get_Spheric_Coord(xo,ss,theta,phi)
+           !call Get_Spheric_Coord(xo,ss,theta,phi)
+           spher=Get_Spher_from_Cart(xo,"D")
+           ss=spher(1); theta=spher(2); phi=spher(3)
            rmc(:,i,nce)=xo(:)
            rmod(i,nce)=ss
            write(unit=*,fmt="(a,a4,a,9f9.3)")  &
@@ -955,7 +940,6 @@
            write(unit=iou,fmt="(a,a4,a,9f9.3)")  &
                " ",nam(i),": ",rmo(:,i,nce),xo(:),rmod(i,nce) ,phi,theta
          end do
-         return
       End Subroutine Write_Mom
       !-------------------------------------------------------------------------
 
@@ -1001,7 +985,6 @@
            write(unit=ilo,fmt="(a,i2,a,f8.4,a,f10.4,a)")  "     Vector(",iv,") -> Phase: ",phk(iv),"(modulo 2pi)",  &
                                                           phk(iv)*to_deg*tpi," degrees"
          end do
-         return
       End Subroutine Show_Input
 
       Subroutine Write_File()
@@ -1035,7 +1018,7 @@
            do i2=ic1(2),ic2(2)
              do i3=ic1(3),ic2(3)
                do jl=1,nlat
-                 t(:)=real((/i1,i2,i3/))+ ltr(:,jl)
+                 t(:)=real([i1,i2,i3])+ ltr(:,jl)
                  n =n +1
                  call coordinates(t,n)
                  do ia=1,nat
@@ -1054,7 +1037,6 @@
          end do
          write(unit=iom,fmt="(/,a,i5)")" => Total number of cells: ",n
          close(unit=iom)
-         return
       End Subroutine Write_File
 
       Subroutine Write_mCIF_File()
@@ -1162,7 +1144,7 @@
            do i2=0,nint(mlt(2))-1
              do i3=0,nint(mlt(3))-1
                do jl=1,nlat
-                 t(:)=real((/i1,i2,i3/))+ ltr(:,jl)
+                 t(:)=real([i1,i2,i3])+ ltr(:,jl)
                  n =n +1
                  call coordinates(t,n)
                  do ia=1,nat
@@ -1193,12 +1175,11 @@
          end do
          write(unit=*,fmt="(/,a,i5)")" => Total number of crystal cells within the magnetic cell: ",n
          close(unit=Ipr)
-         return
       End Subroutine Write_mCIF_File
 !----------------------------------------------------------------
       Subroutine Write_Mag3D()
          character (len=2),dimension(10)    :: spec
-         real,    dimension(3) :: t(3),cm(3)
+         real,    dimension(3) :: t, cm, spher
          integer :: i,jl,ia,n,nspec,ns
          real    :: phi,theta,ss
 
@@ -1249,7 +1230,9 @@
 !            Q Fe1 SDIR  50 -30   (theta,phi in degrees)
          do ia=1,nat
            call momento(t,n,ia,cm,ss)
-           call Get_Spheric_Coord(cm,ss,theta,phi)
+           !call Get_Spheric_Coord(cm,ss,theta,phi)
+           spher=Get_Spher_from_Cart(cm,"D")
+           ss=spher(1); theta=spher(2); phi=spher(3)
            write(unit=iom,fmt="(a,a4,a,f5.2)")  "Q ",nam(ia)," MU  ", ss
            write(unit=iom,fmt="(a,a4,a,2f8.2)") "Q ",nam(ia)," SDIR  ", theta,phi
          end do
@@ -1268,7 +1251,6 @@
            write(unit=iom,fmt="(a,a,a)")"X SYMB ",nam(ia), " 0.25  0.25"
          end do
          close(unit=iom)
-         return
       End Subroutine Write_Mag3D
 
    End Module Moment_Inout

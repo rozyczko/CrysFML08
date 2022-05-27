@@ -718,9 +718,9 @@
           integer             :: mcd   ! Maximum common divisor
        End Function Gcd
 
-       Pure Module Function Get_Cart_from_Cylin(CilCoord,Mode) Result(CarCoord)
+       Pure Module Function Get_Cart_from_Cylin(CylCoord,Mode) Result(CarCoord)
           !---- Arguments ----!
-          real(kind=cp), dimension(3), intent( in) ::  CilCoord ! Coordinates rho,phi,zeta
+          real(kind=cp), dimension(3), intent( in) ::  CylCoord ! Coordinates rho,phi,zeta
           character(len=*), optional,  intent( in) ::  mode     ! "D" angles in degrees, otherwise in radians
           real(kind=cp), dimension(3)              ::  CarCoord ! Cartesian coordinates
        End Function Get_Cart_from_Cylin
@@ -732,18 +732,18 @@
           real(kind=cp), dimension(3)              :: CarCoord ! Cartesian coordinates
        End Function Get_Cart_from_Spher
 
-       Pure Module Function Get_Cylin_from_Cart(CarCoord, Mode) Result(CilCoord)
+       Pure Module Function Get_Cylin_from_Cart(CarCoord, Mode) Result(CylCoord)
           !---- Arguments ----!
           real(kind=cp), dimension(3),intent(in) ::  CarCoord   ! Cartesian coordinatates
           character(len=*), optional, intent(in) ::  mode
-          real(kind=cp), dimension(3)            ::  CilCoord   ! Cylindrical coordinates
+          real(kind=cp), dimension(3)            ::  CylCoord   ! Cylindrical coordinates
        End Function Get_Cylin_from_Cart
 
-       Pure Module Function Get_Cylin_from_Spher(SphCoord,mode) Result(CilCoord)
+       Pure Module Function Get_Cylin_from_Spher(SphCoord,mode) Result(CylCoord)
           !---- Arguments ----!
           real(kind=cp), dimension(3), intent(in) :: SphCoord ! Cylinder
           character(len=*), optional,  intent(in) :: mode
-          real(kind=cp), dimension(3)             :: CilCoord ! Spherical
+          real(kind=cp), dimension(3)             :: CylCoord ! Spherical
        End Function Get_Cylin_from_Spher
 
        Pure Module Function Get_Spher_from_Cart(CarCoord,mode) Result(SphCoord)
@@ -753,9 +753,9 @@
           real(kind=cp), dimension(3)             :: SphCoord ! Spherical
        End Function Get_Spher_from_Cart
 
-       Pure Module Function Get_Spher_from_Cylin(CilCoord,mode) Result(SphCoord)
+       Pure Module Function Get_Spher_from_Cylin(CylCoord,mode) Result(SphCoord)
           !---- Arguments ----!
-          real(kind=cp), dimension(3), intent(in) :: CilCoord ! Cylinder
+          real(kind=cp), dimension(3), intent(in) :: CylCoord ! Cylinder
           character(len=*), optional,  intent(in) :: mode
           real(kind=cp), dimension(3)             :: SphCoord ! Spherical
        End Function Get_Spher_from_Cylin

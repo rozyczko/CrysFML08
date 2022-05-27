@@ -124,7 +124,7 @@ Program MagRef
          Mh%signp=real(-j)  ! sign "+" for H-k and "-" for H+k
          iv=abs(m)
          Mh%num_k=iv
-         Mh%h= real((/ih,ik,iil/)) - Mh%signp*MGp%kvec(:,iv)
+         Mh%h= real([ih,ik,iil]) - Mh%signp*MGp%kvec(:,iv)
          Mh%s = h_s(Mh%h,Cell)
          Mh%keqv_minus=K_Equiv_Minus_K(MGp%kvec(:,iv),MGp%latt)
 

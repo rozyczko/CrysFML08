@@ -42,17 +42,20 @@
 !!----
 !!----
 !!---- DEPENDENCIES
-!!--++     Use CFML_GlobalDeps,                  only: sp, tpi
-!!--++     Use CFML_Math_General,                only: atan2d, sort
-!!--++     Use CFML_String_Utilities,            only: L_Case,U_Case
-!!--++     Use CFML_Scattering_Chemical_Tables,  only: Set_Magnetic_Form, Remove_Magnetic_Form, num_mag_form, &
-!!--++                                                 Magnetic_Form
-!!--++     Use CFML_Crystal_Metrics,             only: Cell_G_Type
-!!--++     Use CFML_Crystallographic_Symmetry,   only: SPG_Type, Set_spaceGroup
-!!--++     Use CFML_Magnetic_Symmetry,           only: ApplyMSO, MagSymm_k_type, Magnetic_Group_Type, Magnetic_Domain_type
-!!--++     Use CFML_Reflections_Utilities,       only: HKL_R, HKL_Gen, Get_MaxNumRef, Reflect_Type, Reflection_List_Type, hkl_s
-!!--++     Use CFML_Atom_TypeDef,                only: Matom_list_type
-!!--++     Use CFML_Propagation_Vectors,         only: K_Equiv_Minus_K
+!!--++    Use CFML_GlobalDeps,                  only: cp, sp, dp, tpi, Err_CFML, Clear_Error
+!!--++    Use CFML_Maths,                       only: sort
+!!--++    Use CFML_Strings,                     only: L_Case,U_Case
+!!--++    Use CFML_Scattering_Tables,           only: Set_Magnetic_Form, Remove_Magnetic_Form, num_mag_form, &
+!!--++                                                Magnetic_Form
+!!--++    Use CFML_Metrics,                     only: Cell_G_Type
+!!--++    Use CFML_gSpaceGroups,                only: SPG_Type, Set_SpaceGroup
+!!--++    Use CFML_kvec_Symmetry,               only: ApplyMSO, MagSymm_k_type, Write_Magnetic_Structure, &
+!!--++                                                Magnetic_Domain_type
+!!--++    Use CFML_Reflections,                 only: Hkl_Gen_Sxtal,Gener_Reflections_Shub, Get_MaxNumRef,&
+!!--++                                                Refl_Type, RefList_Type, h_s, Initialize_RefList
+!!--++    Use CFML_Atoms,                       only: Matom_list_type, Allocate_mAtom_list
+!!--++    Use CFML_Propagation_Vectors,         only: K_Equiv_Minus_K
+!!--++    Use CFML_Rational
 !!----
 !!---- VARIABLES
 !!--..    Types

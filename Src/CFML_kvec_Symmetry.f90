@@ -123,7 +123,7 @@
 
   !---- List of public subroutines ----!
   public :: Readn_Set_Magnetic_Kv_Structure, Write_Magnetic_Structure, &
-            Init_MagSymm_k_Type,Calc_Induced_Sk
+            Init_MagSymm_k_Type,Calc_Induced_Sk,Latsym
 
   !---- Definitions ----!
 
@@ -290,8 +290,8 @@
      type(MSym_Oper_Type),dimension(:,:), allocatable :: MSymOp     ! Magnetic symmetry operators (48,8)
   End Type MagSymm_k_Type
 
-  integer, private :: nlat,inlat
-  real(kind=cp), dimension(3,24), private  :: Ltr    ! Centering Lattice Translations set with LatSym
+  integer, public :: nlat,inlat
+  real(kind=cp), dimension(3,24), public  :: Ltr    ! Centering Lattice Translations set with LatSym
   real(kind=cp), private, parameter :: eps_symm=0.001
 
   Interface Get_SymSymb
