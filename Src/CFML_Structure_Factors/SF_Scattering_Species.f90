@@ -285,7 +285,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         end if
      end if
 
-     if (present(mag) .or. any(magAtm == .true.)) then
+     if (present(mag) .or. any(magAtm .eqv. .true.)) then
         !> Load form factor values for Magnetic Scattering
         call Set_Magnetic_Form()
 
@@ -342,7 +342,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
         end do
 
 
-        if(.not. present(mag) .and. .not. any(magAtm == .true.)) then
+        if(.not. present(mag) .and. .not. any(magAtm .eqv. .true.)) then
            write(unit=lun,fmt="(/,/)")
            write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED X-RAY SCATTERING FACTORS"
            write(unit=lun,fmt="(a,/)")  "  ==================================================="

@@ -62,7 +62,7 @@ SubModule (CFML_gSpaceGroups) gS_Init_Procedures
             mGrp%UNI         = "       "
             mGrp%UNI_num     = "       "
             mGrp%Centre      = "       " ! Alphanumeric information about the center of symmetry
-            mGrp%crystalsys  = "       "
+            mGrp%crystalsys  = "Triclinic"
             mGrp%pg          = "       " !Point Group
             mGrp%mag_pg      = "       " !Magnetic Point Group
             mGrp%laue        = "       " !laue Group

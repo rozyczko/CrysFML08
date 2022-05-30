@@ -30,7 +30,6 @@
          Case default
            call Set_SpaceGroup(Str,SpG)
            if(present(setting)) then
-             !call Change_Setting_SpaceG(setting,SpG)
              call Change_Set_SpaceG(setting,SpG)
              if(err_CFML%Ierr /= 0) then
                write(*,"(a)") " => "//trim(err_CFML%Msg)
@@ -571,7 +570,6 @@
        else
           if(set_inv) Grp%inv=get_Inv_OP(Grp%Op)
           call Write_SpaceGroup_Info(Grp)
-          !call Write_SpaceGroup_Info(Grp,lun)
        end if
 
        full=.false.

@@ -42,7 +42,7 @@
 Module CFML_Reflections
    !---- Use Modules ----!
    Use CFML_GlobalDeps,                only: CP, PI, TPI, Err_CFML, Clear_Error
-   Use CFML_gSpaceGroups,              only: Spg_Type,kvect_info_type
+   Use CFML_gSpaceGroups,              only: Spg_Type,kvect_info_type, SuperSpaceGroup_type
    Use CFML_Maths,                     only: Trace, Sort, Equal_vector
    Use CFML_Metrics,                   only: Cell_G_Type
    Use CFML_Strings,                   only: l_case
@@ -286,7 +286,7 @@ Module CFML_Reflections
          integer, dimension(3)               :: k
       End Function Get_Asymm_Unit_H
 
-      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
          !---- Arguments ----!
          class(Cell_G_Type),                          intent(in)     :: Cell
          real(kind=cp),                               intent(in)     :: Sintlmax
@@ -298,6 +298,7 @@ Module CFML_Reflections
          logical,                       optional,     intent(in)     :: Powder
          logical,                       optional,     intent(in)     :: Mag_only
          logical,                       optional,     intent(in)     :: Friedel
+         character(len=*),              optional,     intent(in)     :: Ref_typ
       End Subroutine Gener_Reflections
 
       Module Function Get_h_info(h,SpG,mag)  Result(info)

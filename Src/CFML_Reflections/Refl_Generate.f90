@@ -5,13 +5,13 @@ SubModule (CFML_Reflections) Refl_Generate
    implicit none
    Contains
    !!----
-   !!---- Gener_Reflections
-   !!----    Calculate unique reflections between two values of
-   !!----    sin_theta/lambda.  The output is not ordered.
+   !!---- Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+   !!----    Calculate unique reflections up to a maximum of
+   !!----    sin_theta/lambda.  The output is not ordered if order or powder is not present.
    !!----
    !!---- 21/06/2019
    !!
-   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
       !---- Arguments ----!
       class(Cell_G_Type),                          intent(in)     :: Cell
       real(kind=cp),                               intent(in)     :: Sintlmax
@@ -23,6 +23,7 @@ SubModule (CFML_Reflections) Refl_Generate
       logical,                       optional,     intent(in)     :: Powder
       logical,                       optional,     intent(in)     :: Mag_only
       logical,                       optional,     intent(in)     :: Friedel
+      character(len=*),              optional,     intent(in)     :: Ref_typ
 
       !---- Local variables ----!
       real(kind=cp)         :: epsr=0.00001, delt=0.0001
@@ -35,6 +36,7 @@ SubModule (CFML_Reflections) Refl_Generate
 
       real(kind=cp),dimension(:),   allocatable :: sv,sm
       logical                                   :: kvect,ordering,magg,Frd
+      type(kvect_info_type)                     :: kinf
 
       !> Init
       Dd=3
@@ -49,6 +51,21 @@ SubModule (CFML_Reflections) Refl_Generate
          nk=kinfo%nk
          nharm=kinfo%nq
          kvect=.true.
+         kinf=kinfo
+      else
+         if(present(SpG)) then
+            Select Type(SpG)
+               class is (SuperSpaceGroup_Type)
+                  kvect=.true.
+                  nk=Spg%nk
+                  nharm=Spg%nq
+                  kinf%nk=nk
+                  kinf%nq=nharm
+                  allocate(kinf%kv(3,nk),kinf%q_coeff(nk,nharm))
+                  kinf%kv=Spg%kv
+                  kinf%q_coeff=Spg%q_coeff
+            End Select
+         end if
       end if
       if (kvect) Dd=3+nk ! total dimension of the reciprocal space
 
@@ -59,7 +76,7 @@ SubModule (CFML_Reflections) Refl_Generate
       maxref= (2*hmax+1)*(2*kmax+1)*(2*lmax+1)
       if (kvect) then
          do k=1,nk
-            maxref=maxref*2*nharm
+            maxref=maxref*(1+2*nharm)
          end do
          if (present(kinfo)) then
             max_s=maxval(kinfo%sintlim)
@@ -102,12 +119,12 @@ SubModule (CFML_Reflections) Refl_Generate
       !> of +/-kinfo%q_qcoeff
       nf=num_ref
       if (kvect) then
-         do_ex: do n=1,kinfo%nq
+         do_ex: do n=1,kinf%nq
             do i=1,nf
                hh=hkl(:,i)
                do ia=-1,1,2
-                  hh(4:3+nk)=ia*kinfo%q_coeff(1:nk,n)
-                  sval=H_S(hh, Cell, nk, kinfo%kv)
+                  hh(4:3+nk)=ia*kinf%q_coeff(1:nk,n)
+                  sval=H_S(hh, Cell, nk, kinf%kv)
                   if (sval > max_s) cycle
 
                   num_ref=num_ref+1
@@ -228,13 +245,29 @@ SubModule (CFML_Reflections) Refl_Generate
             num_ref=indp
          end if  !SpG and Powder
 
-      end if !present "order"
+      end if !ordering
 
       !> Final assignments
       if (kvect .or. magg) then
          call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
       else
-         call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
+         if(present(Ref_Typ)) then
+
+           select case (l_case(Ref_Typ))
+
+               case ('srefl')
+                  call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
+
+               case ('mrefl')
+                  call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
+
+               case default
+                  call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
+
+           end select
+         else
+           call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
+         end if
       end if
 
       do i=1,num_ref
@@ -242,9 +275,9 @@ SubModule (CFML_Reflections) Refl_Generate
          if(dd > 3) then
            kk               = abs(hkl(4:3+nk,i))
            reflex%ref(i)%pcoeff = 0 !Fundamental reflections point to the Fourier coefficient [00...]
-           do_n: do n=1,kinfo%nq
+           do_n: do n=1,kinf%nq
               do k=1,nk
-                 if (equal_vector(kk(1:nk),abs(kinfo%q_coeff(1:nk,n))))  then
+                 if (equal_vector(kk(1:nk),abs(kinf%q_coeff(1:nk,n))))  then
                     reflex%ref(i)%pcoeff=n
                     exit do_n
                  end if
