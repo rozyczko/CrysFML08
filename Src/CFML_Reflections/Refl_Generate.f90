@@ -248,26 +248,23 @@ SubModule (CFML_Reflections) Refl_Generate
       end if !ordering
 
       !> Final assignments
-      if (kvect .or. magg) then
-         call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
+      if(present(Ref_Typ)) then
+
+        select case (l_case(Ref_Typ))
+
+            case ('srefl')
+               call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
+
+            case ('mrefl')
+               call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
+
+            case default
+               call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
+
+        end select
+        
       else
-         if(present(Ref_Typ)) then
-
-           select case (l_case(Ref_Typ))
-
-               case ('srefl')
-                  call Initialize_RefList(Num_ref, reflex, 'SRefl', Dd)
-
-               case ('mrefl')
-                  call Initialize_RefList(Num_ref, reflex, 'MRefl', Dd)
-
-               case default
-                  call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
-
-           end select
-         else
-           call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
-         end if
+        call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
       end if
 
       do i=1,num_ref

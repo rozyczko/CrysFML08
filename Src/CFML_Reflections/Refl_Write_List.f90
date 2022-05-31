@@ -72,7 +72,11 @@ SubModule (CFML_Reflections) Refl_Write_List
             end if
 
 
-            forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a)"
+            if(d == 3) then
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a)"
+            else
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,i8)"
+            end if
             write(unit=forma(10:10),fmt="(i1)") d
 
             Select Case(d)
@@ -81,18 +85,24 @@ SubModule (CFML_Reflections) Refl_Write_List
                 '     NumRef    h   k   l   Mult   sinTheta/Lambda   Character'
               Case(4)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   Mult   sinTheta/Lambda   Character'
+                '     NumRef    h   k   l   m   Mult   sinTheta/Lambda   Character   Q_coeff'
               Case(5)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   n   Mult   sinTheta/Lambda   Character'
+                '     NumRef    h   k   l   m   n   Mult   sinTheta/Lambda   Character   Q_coeff'
               Case(6)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   n   p   Mult   sinTheta/Lambda   Character'
+                '     NumRef    h   k   l   m   n   p   Mult   sinTheta/Lambda   Character   Q_coeff'
             End Select
 
-            do i=1,n
-               write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag)
-            end do
+            if(d == 3) then
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag)
+               end do
+            else
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag),r(i)%Pcoeff
+               end do
+            end if
 
          type is (SRefl_Type)
             if (present(mode)) then
@@ -113,8 +123,11 @@ SubModule (CFML_Reflections) Refl_Write_List
                write(unit=lun,fmt="(a)")   "    ========================================="
             end if
 
-
-            forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4)"
+            if(d == 3) then
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4)"
+            else
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4,i8)"
+            end if
             write(unit=forma(10:10),fmt="(i1)") d
 
             Select Case(d)
@@ -124,25 +137,36 @@ SubModule (CFML_Reflections) Refl_Write_List
                                                                              !123456789012123456789012123456789012123456789012
               Case(4)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'
+                '     NumRef    h   k   l   m   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase   Q_coeff'
               Case(5)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   n   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'
+                '     NumRef    h   k   l   m   n   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase   Q_coeff'
               Case(6)
                 write(lun,'(a)')  &
-                '     NumRef    h   k   l   m   n   p   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'
+                '     NumRef    h   k   l   m   n   p   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase   Q_coeff'
             End Select
 
-            do i=1,n
-               write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
+            if(d == 3) then
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
                                             r(i)%Fo,r(i)%SFo, r(i)%Fc, r(i)%Phase
-            end do
+               end do
+            else
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
+                                            r(i)%Fo,r(i)%SFo, r(i)%Fc, r(i)%Phase,r(i)%Pcoeff
+               end do
+            end if
 
          type is (MRefl_Type)
             write(unit=lun,fmt="(/,/,a)") "    LIST OF REFLECTIONS AND STRUCTURE FACTORS(Nucler & Magnetic)"
             write(unit=lun,fmt="(a)")     "    ============================================================"
 
-            forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4,tr3,14f12.4)"
+            if(d == 3) then
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4,tr3,14f12.4)"
+            else
+               forma="(i11,tr1, i4,i7,tr3,f15.5,tr3,a,4f12.4,tr3,14f12.4,i8)"
+            end if
             write(unit=forma(10:10),fmt="(i1)") d
 
             Select Case(d)
@@ -153,24 +177,32 @@ SubModule (CFML_Reflections) Refl_Write_List
               Case(4)
                 write(lun,'(a)')  &
                 '     NumRef    h   k   l   m   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'// &
-                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)'
+                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)   Q_coeff'
               Case(5)
                 write(lun,'(a)')  &
                 '     NumRef    h   k   l   m   n   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'// &
-                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)'
+                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)   Q_coeff'
               Case(6)
                 write(lun,'(a)')  &
                 '     NumRef    h   k   l   m   n   p   Mult   sinTheta/Lambda   Character     |Fobs|    sig(Fobs)       |Fc|      Phase'// &
-                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)'
+                '   |oMagIntVector|     sigma  Real(MsFx)  Real(MsFy)  Real(MsFz)  Imag(MsFx)  Imag(MsFy)  Imag(MsFz)  Real(MiVx)  Real(MiVy)  Real(MiVz)  Imag(MiVx)  Imag(MiVy)  Imag(MiVz)   Q_coeff'
             End Select
 
-            do i=1,n
-               write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
-                                            r(i)%Fo,r(i)%SFo, r(i)%Fc, r(i)%Phase, &
-                                            r(i)%mIvo,r(i)%smIvo,real(r(i)%msF(:)),aimag(r(i)%msF(:)),&
-                                            real(r(i)%mIv(:)),aimag(r(i)%mIv(:))
-            end do
-
+            if(d == 3) then
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
+                                               r(i)%Fo,r(i)%SFo, r(i)%Fc, r(i)%Phase, &
+                                               r(i)%mIvo,r(i)%smIvo,real(r(i)%msF(:)),aimag(r(i)%msF(:)),&
+                                               real(r(i)%mIv(:)),aimag(r(i)%mIv(:))
+               end do
+            else
+               do i=1,n
+                  write(unit=lun,fmt=forma) i, r(i)%h, r(i)%mult, r(i)%S, charRef(r(i)%imag), &
+                                               r(i)%Fo,r(i)%SFo, r(i)%Fc, r(i)%Phase, &
+                                               r(i)%mIvo,r(i)%smIvo,real(r(i)%msF(:)),aimag(r(i)%msF(:)),&
+                                               real(r(i)%mIv(:)),aimag(r(i)%mIv(:)), r(i)%Pcoeff
+               end do
+            end if
       End Select
 
    End Subroutine Write_Info_RefList

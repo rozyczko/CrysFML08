@@ -822,6 +822,10 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%Centre="Acentric"                    ! Alphanumeric information about the center of symmetry
           SpaceG%Parent_num=igroup_spacegroup(num)    ! Number of the parent Group
 
+
+          SpaceG%Num_Lat=iclass_ncentering(iclass)-1  ! Number of centring points in a cell (notice that in the data base what is stored is the number of lattice points per cell: Num_lat+1)
+          SpaceG%SPG_Lat="P"                          ! Assume initially that the cell is primitive
+          SpaceG%CrystalSys=" "                       ! Crystal System
           Select Case(igroup_spacegroup(num))
             case(1:2)
               SpaceG%CrystalSys="Triclinic"
@@ -840,10 +844,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
             case default
               SpaceG%CrystalSys="Unknown"
           End Select
-
-          SpaceG%Num_Lat=iclass_ncentering(iclass)-1  ! Number of centring points in a cell (notice that in the data base what is stored is the number of lattice points per cell: Num_lat+1)
-          SpaceG%SPG_Lat="P"                          ! Assume initially that the cell is primitive
-          SpaceG%CrystalSys=" "                       ! Crystal System
           SpaceG%Pg=" "                               ! Point group
           SpaceG%init_label=Str
           SpaceG%Mag_Pg=" "                           ! Magnetic Point group

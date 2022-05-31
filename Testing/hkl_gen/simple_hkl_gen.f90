@@ -159,6 +159,11 @@ Program Test_HKL_GEN
             if (allocated(grp_espacial%nharm))   deallocate (grp_espacial%nharm)
             if (allocated(grp_espacial%sintlim)) deallocate (grp_espacial%sintlim)
             if (allocated(grp_espacial%q_coeff)) deallocate (grp_espacial%q_coeff)
+            if (allocated(grp_espacial%Rot))     deallocate (grp_espacial%Rot)
+            if (allocated(grp_espacial%t))       deallocate (grp_espacial%t)
+            if (allocated(grp_espacial%M))       deallocate (grp_espacial%M)
+            if (allocated(grp_espacial%tI))      deallocate (grp_espacial%tI)
+            if (allocated(grp_espacial%Ep))      deallocate (grp_espacial%Ep)
 
             allocate(grp_espacial%Rot(3,3,Mult),grp_espacial%t(3,Mult),grp_espacial%tI(nk,Mult), &
                      grp_espacial%M(nk,3,Mult),grp_espacial%Ep(nk,nk,Mult))
