@@ -11,7 +11,7 @@ SubModule (CFML_Reflections) Refl_Generate
    !!----
    !!---- 21/06/2019
    !!
-   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
+   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ,kout)
       !---- Arguments ----!
       class(Cell_G_Type),                          intent(in)     :: Cell
       real(kind=cp),                               intent(in)     :: Sintlmax
@@ -24,6 +24,7 @@ SubModule (CFML_Reflections) Refl_Generate
       logical,                       optional,     intent(in)     :: Mag_only
       logical,                       optional,     intent(in)     :: Friedel
       character(len=*),              optional,     intent(in)     :: Ref_typ
+      type(kvect_info_type),         optional,     intent(out)    :: kout
 
       !---- Local variables ----!
       real(kind=cp)         :: epsr=0.00001, delt=0.0001
@@ -67,8 +68,10 @@ SubModule (CFML_Reflections) Refl_Generate
             End Select
          end if
       end if
-      if (kvect) Dd=3+nk ! total dimension of the reciprocal space
-
+      if (kvect) then
+        Dd=3+nk ! total dimension of the reciprocal space
+        if(present(kout)) kout=kinf
+      end if
       hmax=nint(Cell%cell(1)*2.0*sintlmax+1.0)
       kmax=nint(Cell%cell(2)*2.0*sintlmax+1.0)
       lmax=nint(Cell%cell(3)*2.0*sintlmax+1.0)
@@ -262,7 +265,7 @@ SubModule (CFML_Reflections) Refl_Generate
                call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
 
         end select
-        
+
       else
         call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
       end if

@@ -286,7 +286,7 @@ Module CFML_Reflections
          integer, dimension(3)               :: k
       End Function Get_Asymm_Unit_H
 
-      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
+      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ,kout)
          !---- Arguments ----!
          class(Cell_G_Type),                          intent(in)     :: Cell
          real(kind=cp),                               intent(in)     :: Sintlmax
@@ -299,6 +299,7 @@ Module CFML_Reflections
          logical,                       optional,     intent(in)     :: Mag_only
          logical,                       optional,     intent(in)     :: Friedel
          character(len=*),              optional,     intent(in)     :: Ref_typ
+         type(kvect_info_type),         optional,     intent(out)    :: kout
       End Subroutine Gener_Reflections
 
       Module Function Get_h_info(h,SpG,mag)  Result(info)
@@ -351,11 +352,12 @@ Module CFML_Reflections
          integer, optional,   intent(in)     :: D
       End Subroutine Initialize_RefList
 
-      Module Subroutine Write_Info_RefList(Reflex, Iunit, Mode)
+      Module Subroutine Write_Info_RefList(Reflex, Iunit, Mode,kinfo)
          !---- Arguments ----!
-         type(RefList_Type),         intent(in) :: Reflex
-         integer,          optional, intent(in) :: Iunit
-         character(len=*), optional, intent(in) :: Mode
+         type(RefList_Type),              intent(in) :: Reflex
+         integer,               optional, intent(in) :: Iunit
+         character(len=*),      optional, intent(in) :: Mode
+         type(kvect_info_type), optional, intent(in) :: kinfo
       End Subroutine Write_Info_RefList
 
       Module Subroutine H_Uni(Cell, Spg, Friedel, Vmin, Vmax, Code, MaxRef, Reflex, No_order, Check_ok, Hlim)
