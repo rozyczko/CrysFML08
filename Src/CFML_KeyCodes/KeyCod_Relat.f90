@@ -210,7 +210,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
                npos=index(ccc,'_')
                ccc=ccc(:npos-1)
-               do j=1, 7 !NKEY_PHAS
+               do j=1, NKEY_PHAS
                   if (trim(ccc) /= trim(KEY_PHAS(j))) cycle
                   select case (j)
                      case (1:3)
@@ -231,19 +231,59 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
                npos=index(ccc,'_')
                ccc=ccc(:npos-1)
-               do j=1, 7 !NKEY_PHAS
+               do j=1, NKEY_PHAS
                   if (trim(ccc) /= trim(KEY_PHAS(j))) cycle
                   select case (j)
                      case (1:3)
                         cell%lcell(j)=ph%Par(i)%L
 
                      case (4:6)
-                        cell%lang(j-3)=ph%Par(j)%L
+                        cell%lang(j-3)=ph%Par(i)%L
                   end select
                end do
             end do
       end select
 
    End Subroutine RList_to_Cell
+
+   !!----
+   !!---- SUBROUTINE RList_to_Molec
+   !!----
+   !!----
+   !!---- Update: may - 2022
+   !!
+   Module Subroutine RList_to_Molec(M, Im, Mol)
+      !---- Arguments ----!
+      type(RelationList_Type), intent(in)   :: M
+      integer,                 intent(in)   :: Im
+      type(Molecule_type),     intent(inout):: Mol
+
+      !---- Local Arguments ----!
+      character(len=30) :: ccc
+      integer           :: i,j,npos,iv
+
+      do i=1,M%Npar
+         ccc=trim(M%Par(i)%Name)
+         npos=index(ccc,'MOL')
+         call get_num(ccc(npos+3:),vet,ivet,iv)
+         if (ivet(1) /= im) cycle
+
+         npos=index(ccc,'_')
+         ccc=ccc(:npos-1)
+         do j=1, NKEY_MOL
+            if (trim(ccc) /= trim(KEY_MOL(j))) cycle
+
+            select case (j)
+               case (1:3)
+                  mol%lxcentre(j)=M%Par(i)%L
+
+               case (5:7)
+                  mol%lorient(j-4)=M%Par(i)%L
+            end select
+         end do
+
+      end do
+
+   End Subroutine RList_to_Molec
 
 End SubModule KeyCod_Relat

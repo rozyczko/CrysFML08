@@ -1,0 +1,13 @@
+!---------------------------!
+!---- Checking KeyCodes ----!
+!---------------------------!
+!   Commands
+COMMANDS
+
+  %Phase
+     cell  7.1882(2)   6.3924(2)   7.4847(3)  90.000  90.000  90.000
+     vary cell_phas1
+  %EndPhase
+
+END COMMANDS
+

@@ -18,8 +18,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       type(RelationList_Type), intent(inout)  :: Ph
 
       !---- Local Variables ----!
-      integer                 :: i, j,k, iv, n,npos
-      character(len=30)       :: ccc
+      integer                 :: i, k
 
       !> Init
       call clear_error()
@@ -69,7 +68,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       integer, dimension(NMAX_GEN)          :: Ind_dir, IPHas_dir
       integer                               :: npos, nlong, n_dir,  nc
-      integer                               :: ii,j,k,na,iv
+      integer                               :: j, k, iv
 
       !> Init
       call clear_error()
@@ -134,7 +133,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       integer, dimension(NMAX_GEN)          :: Ind_dir, IPhas_dir
       integer                               :: npos, nlong, n_dir,  nc
-      integer                               :: ii,j,k,na,iv
+      integer                               :: j, k, iv
 
       !> Init
       call clear_error()
@@ -191,7 +190,6 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       !---- Local Variables ----!
       integer          :: i,j,n,iv,npos
-      character(len=2) :: car
 
       !> Init
       Nc=0; Ikeys=0; IPhas=0; Keys=" "
@@ -208,7 +206,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                call set_error(1,'Bad format to include the Phases!')
                return
             end if
-            IPhas(i)=ivet(1)    ! Positive values for Patterns references
+            IPhas(i)=ivet(1)    ! Positive values for Phases references
             dire(i)=dire(i)(:npos-1)
          end if
 
@@ -219,7 +217,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                keys(nc)=trim(dire(i))
                cycle loop1
             end if
-         end do ! Key_Patt
+         end do ! Key_Phas
 
       end do loop1 ! General
 
@@ -240,7 +238,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       !---- Local variables ----!
       integer          :: i
-      character(len=4) :: cdire, car, car_n
+      character(len=4) :: cdire, car
 
       !> Init
       call clear_error()

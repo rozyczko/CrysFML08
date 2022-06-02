@@ -1,0 +1,15 @@
+!---------------------------!
+!---- Checking KeyCodes ----!
+!---------------------------!
+!   Commands
+COMMANDS
+
+  %Molec
+     vary orient
+     vary centre
+     fix yc
+     vary tls
+  %EndMolec
+
+END COMMANDS
+
