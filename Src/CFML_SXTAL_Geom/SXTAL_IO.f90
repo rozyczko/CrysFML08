@@ -1,4 +1,4 @@
- SubModule (CFML_Geometry_SXTAL) SXTAL_IO
+ SubModule (CFML_SXTAL_Geom) SXTAL_IO
 
   implicit none
 

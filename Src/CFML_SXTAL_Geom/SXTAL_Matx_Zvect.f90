@@ -1,4 +1,4 @@
- SubModule (CFML_Geometry_SXTAL) SXTAL_Matx_Zvect
+ SubModule (CFML_SXTAL_Geom) SXTAL_Matx_Zvect
 
   implicit none
 

@@ -1,7 +1,7 @@
- SubModule (CFML_Geometry_SXTAL) SXTAL_UB
+ SubModule (CFML_SXTAL_Geom) SXTAL_UB
 
   implicit none
-  
+
   Contains
 
     !!----

@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
- SubModule (CFML_Geometry_SXTAL) SXTAL_Angles
+ SubModule (CFML_SXTAL_Geom) SXTAL_Angles
 
   implicit none
 

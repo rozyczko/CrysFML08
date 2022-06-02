@@ -1,16 +1,16 @@
 Program MagPolar3D
  use CFML_GlobalDeps
- use CFML_gSpaceGroups,             only: SPG_type, Write_SpaceGroup_info
- use CFML_Atoms,                    only: Atlist_type, Write_Atom_List, MAtom_list_Type
- use CFML_metrics,                  only: Cell_G_Type, Write_Crystal_Cell, Get_basis_from_uvw,Zone_Axis_Type
- use CFML_Reflections,              only: H_s
- use CFML_Strings,                  only: l_case,file_type
- use CFML_IOForm,                   only: Read_Xtal_Structure
- use CFML_Propagation_vectors,      only: K_Equiv_Minus_K
- use CFML_Geometry_SXTAL,           only: GenUB, Phi_mat, Get_UB_from_uvw_hkl_omega, &
-                                          Get_UB_from_hkl_hkl_omega
- use CFML_Structure_Factors,        only: Calc_hkl_StrFactor, Init_Calc_hkl_StrFactors
- use CFML_Maths,                    only: co_linear
+ use CFML_gSpaceGroups,       only: SPG_type, Write_SpaceGroup_info
+ use CFML_Atoms,              only: Atlist_type, Write_Atom_List, MAtom_list_Type
+ use CFML_metrics,            only: Cell_G_Type, Write_Crystal_Cell, Get_basis_from_uvw,Zone_Axis_Type
+ use CFML_Reflections,        only: H_s
+ use CFML_Strings,            only: l_case,file_type
+ use CFML_IOForm,             only: Read_Xtal_Structure
+ use CFML_Propagation_vectors,only: K_Equiv_Minus_K
+ use CFML_SXTAL_Geom,         only: GenUB, Phi_mat, Get_UB_from_uvw_hkl_omega, &
+                                    Get_UB_from_hkl_hkl_omega
+ use CFML_Structure_Factors,  only: Calc_hkl_StrFactor, Init_Calc_hkl_StrFactors
+ use CFML_Maths,              only: co_linear
  use CFML_kvec_Symmetry
  use CFML_kvec_Structure_Factors
  use CFML_kvec_Polarimetry

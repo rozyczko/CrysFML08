@@ -107,7 +107,7 @@
     Use CFML_Maths,                      only: Cross_Product,Tensor_Product,Mat_Cross,Inverse_Matrix
     use CFML_kvec_Structure_Factors,     only: MagHD_Type
     use CFML_kvec_Symmetry,              only: Magnetic_domain_type
-    use CFML_Geometry_SXTAL,             only: Phi_mat,Chi_mat, Psi_mat,Get_Angs_NB
+    use CFML_SXTAL_Geom,                 only: Phi_mat,Chi_mat, Psi_mat,Get_Angs_NB
 
     !---- Variables ----!
     implicit none

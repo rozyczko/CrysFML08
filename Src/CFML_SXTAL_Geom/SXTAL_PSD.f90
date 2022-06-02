@@ -1,4 +1,4 @@
- SubModule (CFML_Geometry_SXTAL) SXTAL_PSD
+ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
 
   implicit none
 

@@ -14,7 +14,7 @@ Module Flipping_Ratios
  use CFML_Propagation_vectors,      only: K_Equiv_Minus_K
  use CFML_Magnetic_Symmetry
  use CFML_Magnetic_Structure_Factors
- use CFML_Geometry_SXTAL,           only: z1frnb
+ use CFML_SXTAL_Geom,               only: z1frnb
  use CFML_String_Utilities,         only: U_case
  use CFML_Structure_Factors,        only: Calc_hkl_StrFactor
  use CFML_Extinction_Correction,    only: Correct_FlippingRatios

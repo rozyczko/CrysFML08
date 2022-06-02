@@ -223,7 +223,7 @@
 !!----       Z4FRZ1
 !!----
 !!
- Module CFML_Geometry_SXTAL
+ Module CFML_SXTAL_Geom
     !---- Use Modules ----!
     Use CFML_GlobalDeps,        Only: Cp,Dp,To_Deg,To_Rad, clear_error, Err_CFML
     Use CFML_Maths,             Only: Cross_Product, invert => Inverse_Matrix,co_linear,in_limits
@@ -741,4 +741,4 @@
 
     End Interface
 
- End Module CFML_Geometry_SXTAL
+ End Module CFML_SXTAL_Geom
