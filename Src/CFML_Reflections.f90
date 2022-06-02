@@ -5,12 +5,13 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2019  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
 !!---- Authors: Juan Rodriguez-Carvajal (ILL)
 !!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
 !!---- Contributors: Laurent Chapon     (ILL)
 !!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
@@ -41,7 +42,7 @@
 Module CFML_Reflections
    !---- Use Modules ----!
    Use CFML_GlobalDeps,                only: CP, PI, TPI, Err_CFML, Clear_Error
-   Use CFML_gSpaceGroups,              only: Spg_Type,kvect_info_type
+   Use CFML_gSpaceGroups,              only: Spg_Type,kvect_info_type, SuperSpaceGroup_type
    Use CFML_Maths,                     only: Trace, Sort, Equal_vector
    Use CFML_Metrics,                   only: Cell_G_Type
    Use CFML_Strings,                   only: l_case
@@ -53,12 +54,12 @@ Module CFML_Reflections
    private
 
    !---- List of public functions ----!
-   public :: H_Absent, mH_Absent , H_Equal, H_Latt_Absent , H_Equiv, H_Mult, H_S, &
+   public :: H_Absent, mH_Absent, H_Equal, H_Latt_Absent, H_Equiv, H_Mult, H_S, &
              Get_MaxNumRef, Get_Asymm_Unit_H, Get_h_info
 
    !---- List of public subroutines ----!
    public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Gener_Reflections_Shub, &
-             Search_Extinctions, &
+             Search_Extinctions, Hkl_Gen_Sxtal, &
              Write_Info_RefList, Init_Refl_Conditions
 
    !---- Parameters ----!
@@ -285,7 +286,7 @@ Module CFML_Reflections
          integer, dimension(3)               :: k
       End Function Get_Asymm_Unit_H
 
-      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
+      Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
          !---- Arguments ----!
          class(Cell_G_Type),                          intent(in)     :: Cell
          real(kind=cp),                               intent(in)     :: Sintlmax
@@ -297,6 +298,7 @@ Module CFML_Reflections
          logical,                       optional,     intent(in)     :: Powder
          logical,                       optional,     intent(in)     :: Mag_only
          logical,                       optional,     intent(in)     :: Friedel
+         character(len=*),              optional,     intent(in)     :: Ref_typ
       End Subroutine Gener_Reflections
 
       Module Function Get_h_info(h,SpG,mag)  Result(info)
@@ -369,6 +371,16 @@ Module CFML_Reflections
          logical,                optional, intent(out)    :: check_ok
          integer, dimension(3,2),optional, intent(in)     :: hlim
       End Subroutine H_Uni
+
+      Module Subroutine Hkl_Gen_Sxtal(Crystalcell,Spacegroup,stlmin,stlmax,Reflex,ord,hlim)
+         !---- Arguments ----!
+         type(Cell_G_Type),                 intent(in)  :: crystalcell
+         type (SPG_Type) ,                  intent(in)  :: spacegroup
+         real(kind=cp),                     intent(in)  :: stlmin,stlmax
+         class(RefList_Type),               intent(out) :: reflex
+         Integer, dimension(3),   optional, intent(in)  :: ord
+         Integer, dimension(3,2), optional, intent(in)  :: hlim
+      End Subroutine Hkl_Gen_Sxtal
 
       Module Subroutine Gener_Reflections_Shub(Cell,SpG, Smax, Reflex,Friedel)
          !---- Arguments ----!

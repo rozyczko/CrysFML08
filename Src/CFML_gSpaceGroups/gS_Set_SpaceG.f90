@@ -5,6 +5,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    implicit none
    Contains
 
+
    !!---- Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
    !!----   character(len=*), intent(in) :: BNS_Symb
    !!----   integer,          intent(in) :: mag_type
@@ -820,9 +821,29 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%magnetic=.false.
           SpaceG%Centre="Acentric"                    ! Alphanumeric information about the center of symmetry
           SpaceG%Parent_num=igroup_spacegroup(num)    ! Number of the parent Group
+
+
           SpaceG%Num_Lat=iclass_ncentering(iclass)-1  ! Number of centring points in a cell (notice that in the data base what is stored is the number of lattice points per cell: Num_lat+1)
           SpaceG%SPG_Lat="P"                          ! Assume initially that the cell is primitive
           SpaceG%CrystalSys=" "                       ! Crystal System
+          Select Case(igroup_spacegroup(num))
+            case(1:2)
+              SpaceG%CrystalSys="Triclinic"
+            case(3:15)
+              SpaceG%CrystalSys="Monoclinic"
+            case(16:74)
+              SpaceG%CrystalSys="Orthorhombic"
+            case(75:142)
+              SpaceG%CrystalSys="Tetragonal"
+            case(143:167)
+              SpaceG%CrystalSys="Trigonal"
+            case(168:194)
+              SpaceG%CrystalSys="Hexagonal"
+            case(195:230)
+              SpaceG%CrystalSys="Cubic"
+            case default
+              SpaceG%CrystalSys="Unknown"
+          End Select
           SpaceG%Pg=" "                               ! Point group
           SpaceG%init_label=Str
           SpaceG%Mag_Pg=" "                           ! Magnetic Point group
@@ -1278,5 +1299,146 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       end if
 
    End Subroutine Set_SpaceGroup_gen
+
+   !!---- Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
+   !!----   character(len=*), intent(in) :: str
+   !!----   Class(SpG_Type),  intent(out):: SpG
+   !!----   logical,optional, intent(in) :: Setting_Search
+   !!----
+   !!----   Subroutine for selecting the proper interface for constructing
+   !!----   a general Space Group (including superspace group)
+   !!----   The string str may contain the setting an other instructions
+   !!----   for selecting the proper interface to generate the general
+   !!----   space group. The string may have whatever of the following forms:
+   !!----
+   !!----   1236   :: a,b,c;0,0,0      shub        <-- Shubnikov group type 1236 in standard setting"
+   !!----   123    :: a,-c,b;1/2,0,0               <-- Space group type 123 in non-standard setting"
+   !!----   Pn'ma                                  <-- Shubnikov group type Pn'ma in standard setting"
+   !!----   UNI Pnna.1'_a[Pncm]                    <-- Shubnikov group given in unified notation"
+   !!----   UNI Pnna.1'_a[Pncm] :: -c,b,a;0,0,0    <-- Shubnikov group given in unified notation in non-stardard setting"
+   !!----   Pn'ma  :: -c,b,a;0,0,0     shub        <-- Shubnikov group type Pn'ma in the non-standard setting Pcmn'"
+   !!----   B 2 C B                                <-- space #41 of standard symbol Aba2"
+   !!----   13232  :: sup                          <-- SuperSpace group 13232 in standard setting"
+   !!----   221    :: a2,-a1,a3,a4;0,0,1/2,0  sup  <-- SuperSpace group #221 in non-standard setting"
+   !!----   Pnma(0,0,g)0s0  :: sup                 <-- SuperSpace group of standard symbol"
+   !!----   x,-y,z,t,1;x,y,z,t+1/2,-1              <-- The generators of a Magnetic SuperSpace group"
+   !!----   x1,-x2,x3,x4,1;x1,x2,x3,x4+1/2,-1      <-- The generators of a Magnetic SuperSpace group"
+   !!----
+   !!----
+   !!----
+   !!----
+   Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
+      !---- Arguments ----!
+      character(len=*),          intent(in) :: str
+      Class(SpG_Type),           intent(out):: SpG
+      logical, optional,         intent(in) :: Setting_Search
+      !--- Local Variables ---!
+      !character(len=:),allocatable :: sett, strs,aux
+      character(len=len(str)) :: sett, strs,aux
+      character(len=5) :: Mode
+      integer :: ier, num_group, i, j
+      logical :: set_given, setting
+
+       setting=.false.
+       if(present(Setting_Search)) setting=.true.
+       Mode=" "
+       strs=trim(str)
+       set_given=.false.
+       !Strip the input string to remove eventual SPGR, SSPG, SPG, GEN, Generators, etc
+       i=index(strs," ")
+       call Init_SpaceGroup(SpG)
+       if(i /= 0) then
+         aux=u_case(strs(1:i-1))
+         Select Case(aux)
+            Case("SHUB")
+                if(index(strs(i:),"shub") == 0) then
+                    strs=adjustl(strs(i:))//"  shub"
+                else
+                    strs=adjustl(strs(i:))
+                end if
+            Case("SSG","SUPER","SSPG")
+                if(index(strs(i:),"sup") == 0) then
+                    strs=adjustl(strs(i:))//"  sup"
+                else
+                    strs=adjustl(strs(i:))
+                end if
+            Case("HALL","SPGR","SPACEG", &
+                 "GEN","GENR","SYMM","GENLIST","GENERATORS","LIST")
+                  strs=adjustl(strs(i:))
+          End Select
+       end if
+       read(unit=strs,fmt=*,iostat=ier) num_group
+       if (ier == 0) then
+          !Now determine if setting is appearing in which case it uses data bases
+          i=index(strs,"::")
+          if(i /= 0) then
+             j=index(str,"sup")  !Superspace
+             if(j /= 0) then
+               Mode="SUPER"
+               if((index(strs,"a1") /= 0 .or. index(strs,"d") /= 0) .and. setting) then
+                 sett= adjustl(strs(i+2:j-1))
+                 set_given=.true.
+               end if
+             else
+               j=index(strs,"shub")  !Shubnikov group
+               if(j /= 0) then
+                 Mode="SHUBN"
+                 if(setting) then
+                   sett= adjustl(strs(i+2:j-1))
+                   if(len_trim(sett) /= 0) set_given=.true.
+                 end if
+               else
+                 if(setting) then
+                   sett= adjustl(strs(i+2:))
+                   if(len_trim(sett) /= 0) set_given=.true.
+                 end if
+               end if
+             end if
+             strs=strs(1:i-1)
+          end if
+       else
+          i=index(strs,"::")
+          if(i /= 0) then
+             j=index(str,"sup")  !Superspace
+             if(j /= 0) then
+               Mode="SUPER"
+               if(index(strs,"a1") /= 0  .or. index(strs,"d") /= 0 .and. setting) then
+                 sett= adjustl(str(i+2:j-1))
+                 set_given=.true.
+               end if
+             else
+               j=index(strs,"shub")  !Shubnikov group
+               if(j /= 0) then
+                 Mode="SHUBN"
+                 if(setting) then
+                   sett= adjustl(str(i+2:j-1))
+                   if(len_trim(sett) /= 0) set_given=.true.
+                 end if
+               else
+                 if(setting) then
+                   sett= adjustl(str(i+2:))
+                   if(len_trim(sett) /= 0) set_given=.true.
+                 end if
+               end if
+             end if
+             strs=strs(1:i-1)
+          end if
+       end if
+
+       Select Case (trim(Mode))
+         Case("SHUBN","SUPER")
+           if(set_given) then
+             call Set_SpaceGroup(Strs,Mode,SpG,Setting=Sett)
+           else
+             call Set_SpaceGroup(Strs,Mode,SpG)
+           end if
+         Case default
+           call Set_SpaceGroup(Strs,SpG)
+           if(set_given) then
+             call Change_Setting_SpaceG(sett,SpG)
+           end if
+       End Select
+
+   End Subroutine Set_gSpG_from_string
 
 End SubModule gS_Set_SpaceG

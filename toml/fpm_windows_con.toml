@@ -112,6 +112,11 @@ name="read_difPat"
 source-dir="Testing/test_diffpatt"
 main="test_read.f90"
 
+[[executable]]
+name="keycod"
+source-dir="Testing/Keycodes"
+main="KeyCod.f90"
+
 #
 # Magnetic package Simbo, EnerMag, Phase_Diagram and MC_Mag
 #

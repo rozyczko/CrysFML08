@@ -6,8 +6,13 @@ SubModule (CFML_Reflections) Refl_Init_Reflist
    Contains
 
    !!----
-   !!---- INITIALIZE_REFLIST()
+   !!---- INITIALIZE_REFLIST(N, Reflex, Ctype, D)
    !!----    Initialize the Reflection List Variable
+   !!----
+   !!----   Ctype: Refl, SRefl, MRefl
+   !!----
+   !!----
+   !!----
    !!----
    !!---- 24/06/2019
    !!
@@ -16,7 +21,7 @@ SubModule (CFML_Reflections) Refl_Init_Reflist
       integer,             intent(in)     :: N
       type(RefList_Type),  intent(in out) :: Reflex
       character(len=*),    intent(in)     :: Ctype   ! Refl, SRefl, MRefl
-      integer, optional,   intent(in)     :: D       ! Dimension of the magnetic hkl     
+      integer, optional,   intent(in)     :: D       ! Dimension of the magnetic hkl
 
       !---- Local Variables ----!
       integer          :: i, Dd
@@ -30,7 +35,7 @@ SubModule (CFML_Reflections) Refl_Init_Reflist
              reflex%Nref=0
 
          case (1:)
-            
+
             reflex%Nref=n
             select case (l_case(ctype))
                case ('srefl')
@@ -39,17 +44,17 @@ SubModule (CFML_Reflections) Refl_Init_Reflist
                case ('mrefl')
                   allocate(reflex%ref(n), source=ref3)
 
-               case default      
+               case default
                   allocate(reflex%ref(n), source=ref1)
-            end select  
-            
+            end select
+
             Dd=3
             if (present(D)) Dd=d
 
             associate (r => reflex%ref)
                do i=1,n
                   allocate(reflex%ref(i)%h(dd))
-               end do 
+               end do
                select type (r)
                  class is (Refl_Type)
                     do i=1,n

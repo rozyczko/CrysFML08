@@ -397,17 +397,17 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       if (present(fn)) then
          av = a1-a3    ! real part of the Nuclear structure factor
          bv = b1+b3    ! imaginary part of the Nuclear structure factor
-         fn=cmplx(av,bv) * Grp%Centred * Grp%Num_Lat
+         fn=cmplx(av,bv) * Grp%Centred * (Grp%Num_Lat+1)
       end if
 
       if (present(fx)) then
          xav = xa1-xa3    ! real part of the X-rays structure factor
          xbv = xb1+xb3    ! imaginary part of the X-rays structure factor
-         fx=cmplx(xav,xbv) * Grp%Centred * Grp%Num_Lat
+         fx=cmplx(xav,xbv) * Grp%Centred * (Grp%Num_Lat+1)
       end if
 
       if (present(fe)) then
-         fe=cmplx(ea1,eb3) * Grp%Centred * Grp%Num_Lat
+         fe=cmplx(ea1,eb3) * Grp%Centred * (Grp%Num_Lat+1)
       end if
 
    End Subroutine Calc_General_StrFactor

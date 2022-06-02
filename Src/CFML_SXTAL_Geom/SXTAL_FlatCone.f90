@@ -1,7 +1,7 @@
 !!----
 !!----
 !!----
-SubModule (CFML_Geometry_SXTAL) SXTAL_FlatCone
+SubModule (CFML_SXTAL_Geom) SXTAL_FlatCone
 
   implicit none
 

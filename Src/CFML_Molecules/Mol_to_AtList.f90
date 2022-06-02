@@ -261,12 +261,12 @@ Submodule (CFML_Molecules) Mol_to_AtList
                A(i)%l_U=0
             end do
 
-         class is (MAtm_Std_Type)
+         class is (ModAtm_Std_Type)
       end select
 
-      !> Type MAtm_Ref_Type
+      !> Type ModAtm_Ref_Type
       select type (A => AtList%Atom)
-         type is (MAtm_Ref_Type)
+         type is (ModAtm_Ref_Type)
             A(1:Nat)%M_Occ     =IMol%mOcc(1:Nat)
             A(1:Nat)%L_Occ     =IMol%lOcc(1:Nat)
             A(1:Nat)%M_U_iso  =IMol%mU_iso(1:Nat)
@@ -326,10 +326,10 @@ Submodule (CFML_Molecules) Mol_to_AtList
             call Allocate_Atom_List(Nat, AtList, 'Atm_Std_Type', d)
          type is (Atm_Ref_Type)
             call Allocate_Atom_List(Nat, AtList, 'Atm_Ref_Type', d)
-         type is (MAtm_Std_Type)
-            call Allocate_Atom_List(Nat, AtList, 'MAtm_Std_Type', d)
-         type is (MAtm_Ref_Type)
-            call Allocate_Atom_List(Nat, AtList, 'MAtm_Ref_Type', d)
+         type is (ModAtm_Std_Type)
+            call Allocate_Atom_List(Nat, AtList, 'ModAtm_Std_Type', d)
+         type is (ModAtm_Ref_Type)
+            call Allocate_Atom_List(Nat, AtList, 'ModAtm_Ref_Type', d)
       end select
 
       !> Fill information from Molecules Part

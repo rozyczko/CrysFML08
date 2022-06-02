@@ -468,7 +468,7 @@ SubModule (CFML_IOForm) Format_CIF
 
       type (atm_type)                 :: atm1
       type (atm_std_type)             :: atm2
-      !type (matm_std_type)            :: atm3
+      !type (ModAtm_std_type)            :: atm3
       type (atm_ref_type)             :: atm4
 
       !class(atm_type), allocatable    :: atm5
@@ -490,7 +490,7 @@ SubModule (CFML_IOForm) Format_CIF
       if (.not. ssg) then
          if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'Atm_std_type',0)
       else
-         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'MAtm_Std_type',0)
+         if (AtmList%natoms > 0) call allocate_atom_list(0, AtmList,'ModAtm_Std_type',0)
       end if
 
       !> Search loop for atoms
@@ -588,7 +588,7 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       if (ssg) then
-         call allocate_atom_list(n,Atm,'MAtm_std_type',0)
+         call allocate_atom_list(n,Atm,'ModAtm_std_type',0)
       else
          call allocate_atom_list(n,Atm,'Atm_std_type',0)
       end if
@@ -630,6 +630,9 @@ SubModule (CFML_IOForm) Format_CIF
             end if
             atm%atom(n)%SfacSymb=atm%atom(n)%chemSymb
          end if
+         !Get the Atomic number from the chemical symbol
+
+         atm%atom(n)%Z=Get_Z_Symb(atm%atom(n)%chemSymb)
          !Check if the charge/valence is provided ins the SfacSymb item
          atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
 
@@ -670,7 +673,7 @@ SubModule (CFML_IOForm) Format_CIF
                at(n)%occ=vet1(1)
                at(n)%occ_std=vet2(1)
 
-            class is (matm_std_type)
+            class is (ModAtm_std_type)
                at(n)%occ=vet1(1)
                at(n)%occ_std=vet2(1)
          end select
@@ -906,7 +909,7 @@ SubModule (CFML_IOForm) Format_CIF
                at(1)=at(first)
                at(first)=atm4
 
-            !type is (matm_std_type)
+            !type is (ModAtm_std_type)
             !   atm3=at(1)
             !   at(1)=at(first)
             !   at(first)=atm3

@@ -39,10 +39,10 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
          type is (Atm_Ref_Type)
             ! Change no necessary
 
-         type is (Matm_Std_Type)
-            call Change_AtomList_Type(AtList, 'MAtm_Ref_Type', 0)
+         type is (ModAtm_Std_Type)
+            call Change_AtomList_Type(AtList, 'ModAtm_Ref_Type', 0)
 
-         type is (Matm_Ref_Type)
+         type is (ModAtm_Ref_Type)
             ! Change no necessary
       end select
       if (err_CFML%Flag) then
@@ -323,7 +323,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
                      end do
                end select
 
-            type is (MAtm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                select case (Ind)
                   case (1:3)
                      if (A%l_x(Ind) /=0) then
@@ -367,7 +367,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
                   call Del_RefCode_Atm(Atlist, nc)
                end if
 
-            type is (MAtm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                if (A%l_occ /=0) then
                   nc=A%l_occ
                   call Del_RefCode_Atm(Atlist, nc)
@@ -419,7 +419,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
                      end do
                end select
 
-            type is (Matm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                select case (Ind)
                   case (0)
                      if (A%l_u_iso /=0) then
@@ -506,7 +506,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
 
                end select  ! Ind
 
-            type is (Matm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                select case (Ind)
                   case (1:3)
                      if (A%l_x(Ind) ==0) then
@@ -580,7 +580,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
                   Vec_PointPar(NP_Ref)=Natm
                end if
 
-            type is (Matm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                if (A%l_occ ==0) then
                   NP_Ref=NP_Ref+1
 
@@ -668,7 +668,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
 
                end select  ! Ind
 
-            type is (Matm_Ref_Type)
+            type is (ModAtm_Ref_Type)
                select case (Ind)
                   case (0)
                      if (A%l_U_iso ==0) then
@@ -924,7 +924,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
                end do
             end do
 
-         type is (MAtm_Ref_Type)
+         type is (ModAtm_Ref_Type)
             !! Faltan todavia partes magnéticas...
             !> Delete the NPar Parameter
             do i=1,AtList%natoms

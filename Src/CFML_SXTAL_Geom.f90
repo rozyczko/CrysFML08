@@ -5,7 +5,7 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2012  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
@@ -18,6 +18,7 @@
 !!----               Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
 !!----               Tierry Roisnel     (CDIFX,Rennes France)
 !!----               Eric Pellegrini    (ILL)
+!!----               Ross Angel         (University of Pavia)
 !!----
 !!---- This library is free software; you can redistribute it and/or
 !!---- modify it under the terms of the GNU Lesser General Public
@@ -222,7 +223,7 @@
 !!----       Z4FRZ1
 !!----
 !!
- Module CFML_Geometry_SXTAL
+ Module CFML_SXTAL_Geom
     !---- Use Modules ----!
     Use CFML_GlobalDeps,        Only: Cp,Dp,To_Deg,To_Rad, clear_error, Err_CFML
     Use CFML_Maths,             Only: Cross_Product, invert => Inverse_Matrix,co_linear,in_limits
@@ -740,4 +741,4 @@
 
     End Interface
 
- End Module CFML_Geometry_SXTAL
+ End Module CFML_SXTAL_Geom

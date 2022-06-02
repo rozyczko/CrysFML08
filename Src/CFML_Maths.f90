@@ -1,28 +1,24 @@
-!!--------------------------------------------------------------------------
-!!----           Crystallographic Fortran Modules Library (CrysFML)
-!!--------------------------------------------------------------------------
-!!---- The CrysFML project is  distributed under LGPL. In agreement with the
+!!-------------------------------------------------------
+!!---- Crystallographic Fortran Modules Library (CrysFML)
+!!-------------------------------------------------------
+!!---- The CrysFML project is distributed under LGPL. In agreement with the
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2020
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
+!!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
-!!---- Institutions:
-!!----    Institut Laue-Langevin (ILL), Grenoble, FRANCE
-!!----    Universidad de La Laguna (ULL), Tenerife, SPAIN
-!!----    Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
+!!---- Authors: Juan Rodriguez-Carvajal (ILL)
+!!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
-!!---- Authors:
-!!----    Juan Rodriguez-Carvajal (ILL)
-!!----    Javier Gonzalez-Platas  (ULL)
-!!----
-!!---- Contributors:
-!!----    Laurent Chapon     (ILL)
-!!----    Marc Janoschek     (Los Alamos National Laboratory, USA)
-!!----    Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
-!!----    Thierry Roisnel    (CDIFX,Rennes France)
-!!----    Eric Pellegrini    (ILL)
-!!----    Ross J. Angel      (University of Pavia)
+!!---- Contributors: Laurent Chapon     (ILL)
+!!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
+!!----               Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
+!!----               Tierry Roisnel     (CDIFX,Rennes France)
+!!----               Eric Pellegrini    (ILL)
+!!----               Ross Angel         (University of Pavia)
 !!----
 !!---- This library is free software; you can redistribute it and/or  modify
 !!---- it  under  the  terms  of  the  GNU  Lesser General Public License as
@@ -722,9 +718,9 @@
           integer             :: mcd   ! Maximum common divisor
        End Function Gcd
 
-       Pure Module Function Get_Cart_from_Cylin(CilCoord,Mode) Result(CarCoord)
+       Pure Module Function Get_Cart_from_Cylin(CylCoord,Mode) Result(CarCoord)
           !---- Arguments ----!
-          real(kind=cp), dimension(3), intent( in) ::  CilCoord ! Coordinates rho,phi,zeta
+          real(kind=cp), dimension(3), intent( in) ::  CylCoord ! Coordinates rho,phi,zeta
           character(len=*), optional,  intent( in) ::  mode     ! "D" angles in degrees, otherwise in radians
           real(kind=cp), dimension(3)              ::  CarCoord ! Cartesian coordinates
        End Function Get_Cart_from_Cylin
@@ -736,18 +732,18 @@
           real(kind=cp), dimension(3)              :: CarCoord ! Cartesian coordinates
        End Function Get_Cart_from_Spher
 
-       Pure Module Function Get_Cylin_from_Cart(CarCoord, Mode) Result(CilCoord)
+       Pure Module Function Get_Cylin_from_Cart(CarCoord, Mode) Result(CylCoord)
           !---- Arguments ----!
           real(kind=cp), dimension(3),intent(in) ::  CarCoord   ! Cartesian coordinatates
           character(len=*), optional, intent(in) ::  mode
-          real(kind=cp), dimension(3)            ::  CilCoord   ! Cylindrical coordinates
+          real(kind=cp), dimension(3)            ::  CylCoord   ! Cylindrical coordinates
        End Function Get_Cylin_from_Cart
 
-       Pure Module Function Get_Cylin_from_Spher(SphCoord,mode) Result(CilCoord)
+       Pure Module Function Get_Cylin_from_Spher(SphCoord,mode) Result(CylCoord)
           !---- Arguments ----!
           real(kind=cp), dimension(3), intent(in) :: SphCoord ! Cylinder
           character(len=*), optional,  intent(in) :: mode
-          real(kind=cp), dimension(3)             :: CilCoord ! Spherical
+          real(kind=cp), dimension(3)             :: CylCoord ! Spherical
        End Function Get_Cylin_from_Spher
 
        Pure Module Function Get_Spher_from_Cart(CarCoord,mode) Result(SphCoord)
@@ -757,9 +753,9 @@
           real(kind=cp), dimension(3)             :: SphCoord ! Spherical
        End Function Get_Spher_from_Cart
 
-       Pure Module Function Get_Spher_from_Cylin(CilCoord,mode) Result(SphCoord)
+       Pure Module Function Get_Spher_from_Cylin(CylCoord,mode) Result(SphCoord)
           !---- Arguments ----!
-          real(kind=cp), dimension(3), intent(in) :: CilCoord ! Cylinder
+          real(kind=cp), dimension(3), intent(in) :: CylCoord ! Cylinder
           character(len=*), optional,  intent(in) :: mode
           real(kind=cp), dimension(3)             :: SphCoord ! Spherical
        End Function Get_Spher_from_Cylin

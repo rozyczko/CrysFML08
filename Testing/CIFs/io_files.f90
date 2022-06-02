@@ -66,7 +66,7 @@
     !!!! TEST JRC
     !call Set_Eps_Math(0.0002_cp)
     !
-    !call Readn_Set_Xtal_Structure(fname,Cell,Grp,Atm,"MAtm_std","CFL")!,file_list=flist) !,Iphase,Job_Info,file_list,CFrame)
+    !call Readn_Set_Xtal_Structure(fname,Cell,Grp,Atm,"ModAtm_std","CFL")!,file_list=flist) !,Iphase,Job_Info,file_list,CFrame)
     !if(Err_CFML%Ierr == 0) then
     !   !write(*,"(/,a,/)")  " => Content of the CFL-file: "//flist%Fname
     !   !do i=1,flist%nlines
@@ -127,7 +127,7 @@
     !            write(*,forma) j,orb(:,j),morb(:,j),ptr(j)
     !        end do
     !       Select Type(at => Atm%Atom(i))
-    !         class is (MAtm_Std_Type)
+    !         class is (ModAtm_Std_Type)
     !           write(*,"(a)") " => Modulation amplitudes of atom: "//trim(Atm%Atom(i)%Lab)
     !           if(allocated(CodeT)) deallocate(CodeT)
     !           allocate(CodeT(6,at%n_mc))

@@ -5,12 +5,13 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2019  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
 !!---- Authors: Juan Rodriguez-Carvajal (ILL)
 !!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
 !!---- Contributors: Laurent Chapon     (ILL)
 !!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
@@ -296,12 +297,12 @@
     use CFML_GlobalDeps,    only: CP, EPS, TO_RAD, err_cfml, clear_error, set_error
     use CFML_gSpacegroups,  only: SpG_type, Write_SpaceGroup_Info
     Use CFML_Atoms,         only: AtList_Type, Init_Atom_Type, Allocate_Atom_List, &
-                                  Atm_Type, Atm_Std_Type, Atm_Ref_Type, MAtm_Std_Type, MAtm_Ref_Type
+                                  Atm_Type, Atm_Std_Type, Atm_Ref_Type, ModAtm_Std_Type, ModAtm_Ref_Type
     Use CFML_Metrics,       only: Cell_G_Type, Write_Crystal_Cell
     Use CFML_Strings,       only: L_Case, U_Case, File_Type, Get_Num, Cut_String, Get_words
     Use CFML_Maths,         only: Cross_Product, Get_Spher_from_Cart
     Use CFML_Geom,          only: Angle_Dihedral, Distance, Get_PhiTheChi
-    
+
     Use CFML_Scattering_Tables, only: NUM_CHEM_INFO, Set_Chem_Info, Remove_Chem_Info, Get_Chem_Symb, Chem_Info
 
     implicit none
@@ -382,8 +383,8 @@
        integer,           allocatable, dimension(:,:)  :: INb                  !Index of neighbours
        integer,           allocatable, dimension(:,:)  :: Tb                   !Type of Bonds
        integer,           allocatable, dimension(:,:)  :: Conn                 !Conectivity (N1,N2,N3)
-    End Type Molecule_type 
-    
+    End Type Molecule_type
+
     !!----
     !!----  TYPE :: MOLECULAR_CRYSTAL_TYPE
     !!--..
@@ -396,7 +397,7 @@
        integer                                              :: NPat=0
        type(Cell_G_type)                                    :: Cell
        type(SpG_type)                                       :: SpG
-       class(Atm_Std_Type),     allocatable, dimension(  :) :: Atm              ! Free atoms 
+       class(Atm_Std_Type),     allocatable, dimension(  :) :: Atm              ! Free atoms
        type(Molecule_type ),    allocatable, dimension(  :) :: Mol              ! Molecule
     End type MolCrystal_Type
 
@@ -416,38 +417,38 @@
           real(kind=cp),                 intent ( in) :: Phi,Theta,Chi
           real(kind=cp), dimension(3,3)               :: Eu
        End Function Set_Euler_Matrix
-       
+
        Module Function Get_Z_from_Cartesian(ri,rj,rk,rn) Result(ci)
           !---- Arguments ----!
           real(kind=cp), dimension(3), intent ( in) :: ri,rj,rk,rn
           real(kind=cp), dimension(3)               :: ci
        End Function Get_Z_from_Cartesian
-       
+
        Module Function Get_Cartesian_from_Z(ci,rj,rk,rn) Result(ri)
           !---- Arguments ----!
           real(kind=cp), dimension(3), intent ( in) :: ci,rj,rk,rn
           real(kind=cp), dimension(3)               :: ri
        End Function Get_Cartesian_from_Z
-       
+
        Module Subroutine Cartesian_to_Fractional(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),  intent(in out)           :: Mol
           type (Cell_G_Type),    intent(in)               :: Cell
           type (Molecule_type),  optional, intent(   out) :: NMol
-       End Subroutine Cartesian_to_Fractional  
-       
+       End Subroutine Cartesian_to_Fractional
+
        Module Subroutine Cartesian_to_Spherical(Mol, NMol)
           !---- Arguments ----!
           type (Molecule_type), intent(in out)           :: Mol
           type (Molecule_type), intent(   out), optional :: NMol
-       End Subroutine Cartesian_to_Spherical 
-      
+       End Subroutine Cartesian_to_Spherical
+
        Module Subroutine Init_Molecule(Mol, Natm)
           !---- Argument ----!
           type(Molecule_Type), intent(in out) :: Mol
           integer, optional,   intent(in)  :: Natm
-       End Subroutine Init_Molecule   
-       
+       End Subroutine Init_Molecule
+
        Module Subroutine Cartesian_to_Zmatrix(Mol, NMol, Cell, Dmin, Dmax)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
@@ -456,14 +457,14 @@
           real(kind=cp),        optional, intent(in)     :: Dmin
           real(kind=cp),        optional, intent(in)     :: Dmax
        End Subroutine Cartesian_to_Zmatrix
-       
+
        Module Subroutine Create_Connectivity_Cartesian(Mol, Dmin, Dmax)
           !---- Arguments ----!
           type (Molecule_type),          intent(in out):: Mol
           real(kind=cp), optional,       intent(in)    :: Dmin
           real(kind=cp), optional,       intent(in)    :: Dmax
        End Subroutine Create_Connectivity_Cartesian
-       
+
        Module Subroutine Fix_Orient_Cartesian(Mol, NMol, NAtom_O, NAtom_X, NAtom_XY,Mat)
           !---- Arguments ----!
           type (Molecule_type),                    intent(in out) :: Mol
@@ -473,95 +474,95 @@
           integer,                       optional, intent(in)     :: NAtom_XY
           real(kind=cp), dimension(3,3), optional, intent(out)    :: Mat
        End Subroutine Fix_Orient_Cartesian
-       
+
        Module Subroutine Fractional_to_Cartesian(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Cell_G_Type),             intent(in    ) :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Fractional_to_Cartesian
-       
+
        Module Subroutine Fractional_to_Spherical(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Cell_G_Type),             intent(in)     :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Fractional_to_Spherical
-       
+
        Module Subroutine Fractional_to_Zmatrix(Mol,Cell,NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Cell_G_Type),             intent(in)     :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Fractional_to_Zmatrix
-       
+
        Module Subroutine Spherical_to_Cartesian(Mol, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Spherical_to_Cartesian
-       
+
        Module Subroutine Spherical_to_Fractional(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Cell_G_Type),             intent(in)     :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Spherical_to_Fractional
-       
+
        Module Subroutine Spherical_to_Zmatrix(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           Type (Cell_G_Type),   optional, intent(in)     :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Spherical_to_Zmatrix
-       
+
        Module Subroutine Zmatrix_to_Cartesian(Mol, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Zmatrix_to_Cartesian
-       
+
        Module Subroutine Zmatrix_to_Fractional(Mol, Cell, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Cell_G_Type),             intent(in    ) :: Cell
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Zmatrix_to_Fractional
-       
+
        Module Subroutine Zmatrix_to_Spherical(Mol, NMol)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
           type (Molecule_type), optional, intent(   out) :: NMol
        End Subroutine Zmatrix_to_Spherical
-       
+
        Module Subroutine WriteInfo_Free_Atoms(AtmF, N, Lun)
           !---- Arguments ----!
           class(Atm_type), dimension(:), intent(in) :: AtmF
           integer,                        intent(in) :: N
           integer, optional,              intent(in) :: Lun
-       End Subroutine WriteInfo_Free_Atoms  
-       
+       End Subroutine WriteInfo_Free_Atoms
+
        Module Subroutine WriteInfo_Molecule(Mol, Lun)
           !---- Arguments ----!
           type (Molecule_type), intent(in):: Mol
-          integer,optional,     intent(in):: Lun 
+          integer,optional,     intent(in):: Lun
        End Subroutine WriteInfo_Molecule
-       
+
        Module Subroutine WriteInfo_Molecular_Crystal(MolCrys, Lun)
           !---- Arguments ----!
           type(MolCrystal_Type), intent(in) :: MolCrys
           integer, optional,     intent(in) :: Lun
        End Subroutine WriteInfo_Molecular_Crystal
-       
+
        Module Subroutine ReadInfo_Free_Atoms(FileType, AtmF, N, Nl_ini, Nl_end)
           !---- Arguments ----!
-          type(File_type),               intent(in)      :: FileType               
-          class(Atm_Type), dimension(:), intent(in out)  :: AtmF       
-          integer,                       intent(out)     :: N          
+          type(File_type),               intent(in)      :: FileType
+          class(Atm_Type), dimension(:), intent(in out)  :: AtmF
+          integer,                       intent(out)     :: N
           integer, optional,             intent(in)      :: Nl_ini
           integer, optional,             intent(in)      :: Nl_end
        End Subroutine ReadInfo_Free_Atoms
-       
+
        Module Subroutine ReadInfo_Molecule(FileType, Mol, Nl_ini, Nl_end)
          !---- Arguments ----!
          type(File_type),        intent(in)   :: Filetype
@@ -569,36 +570,36 @@
          integer, optional,      intent(in)   :: Nl_Ini
          integer, optional,      intent(in)   :: Nl_End
        End Subroutine ReadInfo_Molecule
-       
+
        Module Subroutine Empiric_Formula_AtList(Atm, Formula, Form_Weight)
           !---- Arguments ----!
           type(AtList_Type),       intent(in)  :: Atm
           character(len=*),        intent(out) :: Formula
           real(kind=cp), optional, intent(out) :: Form_Weight
        End Subroutine Empiric_Formula_AtList
-       
+
        Module Subroutine Empiric_Formula_Molec(Mol, Formula, Form_Weight)
           !---- Arguments ----!
           type(molecule_type),      intent(in)  :: Mol
           character(len=*),         intent(out) :: Formula
           real(kind=cp), optional,  intent(out) :: Form_Weight
        End Subroutine Empiric_Formula_Molec
-       
+
        Module Subroutine Empiric_Formula_Molcrys(Molcrys, Formula, Form_Weight)
           !---- Arguments ----!
           type(MolCrystal_type),   intent(in)  :: Molcrys
           character(len=*),        intent(out) :: Formula
           real(kind=cp), optional, intent(out) :: Form_Weight
        End Subroutine Empiric_Formula_Molcrys
-       
+
        Module Subroutine Init_MolCrystal(MolX, NMol, NAtm, AtmType)
           !---- Argument ----!
           type(MolCrystal_Type),  intent(out) :: MolX
           integer,          optional, intent(in)  :: Nmol       !Molucule object
-          integer,          optional, intent(in)  :: NAtm       !Free atoms 
-          character(len=*), optional, intent(in)  :: Atmtype 
+          integer,          optional, intent(in)  :: NAtm       !Free atoms
+          character(len=*), optional, intent(in)  :: Atmtype
        End Subroutine Init_MolCrystal
-       
+
        Module Subroutine Set_MolReference(Mol, NMol, NAtom_O, NAtom_X, NAtom_XY)
           !---- Arguments ----!
           type (Molecule_type),           intent(in out) :: Mol
@@ -607,7 +608,7 @@
           integer,              optional, intent(in)     :: NAtom_X
           integer,              optional, intent(in)     :: NAtom_XY
        End Subroutine Set_MolReference
-       
+
        Module Subroutine Molec_to_AtList(Mol, Type_Atm, AtList, Coor_Type, Cell)
           !---- Arguments ----!
           type (Molecule_Type),         intent(in)   :: Mol
@@ -616,18 +617,18 @@
           character(len=*),   optional, intent(in)   :: Coor_type
           type (Cell_G_type), optional, intent(in)   :: Cell
        End Subroutine Molec_to_AtList
-       
+
        Module Subroutine MolCrystal_to_AtList(Molcrys, AtList)
           !---- Arguments ----!
           type (MolCrystal_Type), intent(in)  :: Molcrys
           type (AtList_Type),     intent(out) :: AtList
        End Subroutine MolCrystal_to_AtList
-          
+
     End Interface
 
 
  Contains
-    
+
 
 
 

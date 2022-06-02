@@ -5,12 +5,13 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2019  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
 !!---- Authors: Juan Rodriguez-Carvajal (ILL)
 !!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
 !!---- Contributors: Laurent Chapon     (ILL)
 !!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
@@ -48,14 +49,14 @@ Module CFML_SuperSpace_Database
    !---- Use Modules ----!
    Use CFML_GlobalDeps
    Use CFML_Rational
-   
+
    implicit none
-   
+
    private
 
    public :: Read_SSG_DBase, Read_single_SSG, Allocate_SSG_DBase, Deallocate_SSG_DBase
 
-   !> Parameters 
+   !> Parameters
    integer, parameter, public :: M_CEN =    16    !
    integer, parameter, public :: M_NCL =   322    !
    integer, parameter, public :: M_NGS = 16697    !
@@ -63,10 +64,10 @@ Module CFML_SuperSpace_Database
    integer, parameter, public :: M_DIM =     6    !
    integer, parameter, public :: M_COND=    50    !
    integer, parameter, public :: M_QV  =     3    !
-                
-   !> Variables                                
+
+   !> Variables
    logical, public :: SSG_DBase_allocated=.false.
-    
+
    integer,                              public :: nclasses=0          ! number of Bravais classes
    integer,   dimension(:), allocatable, public :: iclass_nmod         ! for each Bravais class: number of modulation q vectors
    integer,   dimension(:), allocatable, public :: iclass_number       ! class number
@@ -86,7 +87,7 @@ Module CFML_SuperSpace_Database
    character(len=13), dimension(:)       , allocatable, public :: group_nlabel       !   group number label: 1.1.1.1, 2,1,1,1, etc.
    character(len=60), dimension(:)       , allocatable, public :: group_label        !   group label
    integer,           dimension(:)       , allocatable, public :: igroup_nops        !   number of operators
-   
+
    !> (D+1)x(D+1) augmented matrix for each operator in supercentered setting
    !> common denominator in element (D+1,D+1)
    integer, dimension(:,:,:,:), allocatable, public :: igroup_ops

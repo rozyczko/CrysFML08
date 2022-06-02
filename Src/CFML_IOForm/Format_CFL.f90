@@ -154,7 +154,7 @@ SubModule (CFML_IOForm) Format_CFL
          end do
 
          select type(at => Atmlist%atom)
-            class is(MAtm_Std_Type)
+            class is(ModAtm_Std_Type)
                n_oc=0; n_mc=0; n_dc=0; n_uc=0
                j=i
                do
@@ -819,7 +819,7 @@ SubModule (CFML_IOForm) Format_CFL
       Type(Job_Info_type), optional, intent(out) :: Job_Info
 
       !---- Local variables ----!
-      logical                          :: set_moment, set_matm_std
+      logical                          :: set_moment, set_ModAtm_std
       character(len=132)               :: line
       integer, dimension(MAX_PHASES)   :: ip
       integer                          :: i, j,nt_phases, iph, n_ini, n_end
@@ -876,7 +876,7 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Read Atoms information
       set_moment=.false.
-      set_matm_std=.false.
+      set_ModAtm_std=.false.
       do i=n_ini,n_end
          line=adjustl(cfl%line(i)%str)
 
@@ -892,25 +892,25 @@ SubModule (CFML_IOForm) Format_CFL
 
             if (l_case(line(1:4)) == 'atom') exit
             if (l_case(line(1:6)) == 'moment') set_moment=.true.
-            if (l_case(line(2:4)) == '_cs')    set_matm_std=.true.
+            if (l_case(line(2:4)) == '_cs')    set_ModAtm_std=.true.
          end do
       end do
 
-      if(SpG%d == 4) set_matm_std=.false.
+      if(SpG%d == 4) set_ModAtm_std=.false.
 
-      if ((.not. set_moment) .and. (.not. set_matm_std)) then
+      if ((.not. set_moment) .and. (.not. set_ModAtm_std)) then
          !> Type of Atoms: Atm_std
          call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
 
-      else if (set_moment .and. (.not. set_matm_std)) then
+      else if (set_moment .and. (.not. set_ModAtm_std)) then
          !> Type of Atoms: Atm_std
          call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
 
-      else if (set_moment .and. set_matm_std) then
-         !> Type of Atoms: Matm_std
+      else if (set_moment .and. set_ModAtm_std) then
+         !> Type of Atoms: ModAtm_std
          call read_cfl_kvectors(cfl,kvec,n_ini,n_end)
          if (err_CFML%Ierr ==1) return
-         call read_cfl_Atoms(cfl,AtmList,'Matm_std_type',Kvec%nk,n_ini,n_end)
+         call read_cfl_Atoms(cfl,AtmList,'ModAtm_std_type',Kvec%nk,n_ini,n_end)
 
       else
          !> Type of atoms not defined
@@ -931,7 +931,7 @@ SubModule (CFML_IOForm) Format_CFL
                 Atmlist%atom(i)%Mult=Get_Multip_Pos(xvet,SpG)
                 if (Atmlist%atom(i)%occ < EPSV) Atmlist%atom(i)%occ=real(Atmlist%atom(i)%Mult)/real(SpG%Multip)
                 select type (at => Atmlist%atom(i))
-                   class is (MAtm_Std_Type)
+                   class is (ModAtm_Std_Type)
                       At%Xs=xvet
                 end select
              end do

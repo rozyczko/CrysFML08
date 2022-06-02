@@ -5,12 +5,13 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2019  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
 !!---- Authors: Juan Rodriguez-Carvajal (ILL)
 !!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
 !!---- Contributors: Laurent Chapon     (ILL)
 !!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
@@ -81,7 +82,7 @@ Module CFML_gSpaceGroups
               Set_Conditions_NumOP_EPS, Set_SpaceGroup,Is_OP_Lattice_Centring,           &
               Write_SpaceGroup_Info, Get_Multip_Pos, Is_Lattice_Vec,Is_OP_Anti_Lattice,  &
               Get_SubGroups_full, SearchOp, Write_SymTrans_Code, Read_SymTrans_Code,     &
-              Write_SpaceGroup_bin
+              Write_SpaceGroup_bin, Set_gSpG_from_string
 
     !---- Types ----!
 
@@ -268,7 +269,6 @@ Module CFML_gSpaceGroups
     Interface Set_SpaceGroup
        module procedure Set_SpaceGroup_DBase
        module procedure Set_SpaceGroup_gen
-       !module procedure Set_SpaceGroup_symb
     End Interface Set_SpaceGroup
 
     !------------------------!
@@ -957,6 +957,13 @@ Module CFML_gSpaceGroups
           logical,                         optional, intent(in ) :: debug
           logical,                         optional, intent(in ) :: set_inv
        End Subroutine Set_SpaceGroup_gen
+
+       Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
+          !---- Arguments ----!
+          character(len=*),          intent(in) :: str
+          Class(SpG_Type),           intent(out):: SpG
+          logical, optional,         intent(in) :: Setting_Search
+       End Subroutine Set_gSpG_from_string
 
        !Module Subroutine Set_SpaceGroup_symb(Str, SpaceG, NGen, Gen)
        !   !---- Arguments ----!

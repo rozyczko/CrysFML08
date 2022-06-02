@@ -5,7 +5,7 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2012  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
@@ -18,6 +18,7 @@
 !!----               Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
 !!----               Tierry Roisnel     (CDIFX,Rennes France)
 !!----               Eric Pellegrini    (ILL)
+!!----               Ross Angel         (University of Pavia)
 !!----
 !!---- This library is free software; you can redistribute it and/or
 !!---- modify it under the terms of the GNU Lesser General Public
@@ -44,8 +45,8 @@
 Module CFML_KeyCodes
    !---- Use Modules ----!
    Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error, Err_CFML
-   Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, Matm_Std_Type, &
-                                Atm_Ref_Type, MAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
+   Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, ModAtm_Std_Type, &
+                                Atm_Ref_Type, ModAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
    Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
                                 Get_OP_from_Symb, Symmetry_symbol
@@ -199,8 +200,8 @@ Module CFML_KeyCodes
    real(kind=cp),     public, dimension(:,:), allocatable :: Vec_LimPar   ! Vector of Lower, Upper limits and Step for Parameters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefPar   ! Vector of refined parameters (values)
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STF refined paramaters
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (save values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifted paramaters
+   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
+   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
 
    type(Angle_Restraint_Type),    public, dimension(:), allocatable :: Ang_Rest     ! Relations for Angle restraints

@@ -5,12 +5,13 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2019  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
 !!---- Authors: Juan Rodriguez-Carvajal (ILL)
 !!----          Javier Gonzalez-Platas  (ULL)
+!!----          Nebil Ayape Katcho      (ILL)
 !!----
 !!---- Contributors: Laurent Chapon     (ILL)
 !!----               Marc Janoschek     (Los Alamos National Laboratory, USA)
@@ -50,7 +51,7 @@ Module CFML_IOForm
                                      Get_Extension, Get_Datetime,Read_Fract,         &
                                      Frac_Trans_2Dig, Pack_String
 
-   Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, Matm_std_type, Atm_Ref_Type, &
+   Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type
 
    Use CFML_Metrics,           only: Cell_Type, Cell_G_Type, Set_Crystal_Cell, U_equiv, &
@@ -64,6 +65,8 @@ Module CFML_IOForm
    Use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type
 
    Use CFML_Messages
+   Use CFML_Messages
+   Use CFML_Scattering_Tables, only: Get_Z_Symb
 
    !---- Variables ----!
    implicit none
@@ -168,7 +171,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
          character(len=*),    intent(in )     :: str
-         class(MAtm_Std_Type),intent(in out)  :: Atm
+         class(ModAtm_Std_Type),intent(in out)  :: Atm
          character(len=*),    intent(in)      :: ulabel
          integer,             intent(in)      :: nt
       End Subroutine Read_Modulation_Amplitudes

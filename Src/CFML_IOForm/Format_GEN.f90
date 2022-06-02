@@ -95,6 +95,8 @@ SubModule (CFML_IOForm) Format_GEN
             atm%ChemSymb=u_case(label(1:1))//l_case(label(2:2))
           end if
        end if
+
+       atm%Z=Get_Z_Symb(atm%ChemSymb)
        atm%SfacSymb=label(1:4)
 
        !> Parameters
@@ -341,7 +343,7 @@ SubModule (CFML_IOForm) Format_GEN
     Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
        !---- Arguments ----!
        character(len=*),    intent(in )     :: str
-       class(MAtm_Std_Type),intent(in out)  :: Atm
+       class(ModAtm_Std_Type),intent(in out)  :: Atm
        character(len=*),    intent(in)      :: ulabel
        integer,             intent(in)      :: nt  !number of the amplitude
 

@@ -122,7 +122,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             select type (AtmF)
                type is (Atm_Ref_Type)
 
-               type is (MAtm_Ref_Type)
+               type is (ModAtm_Ref_Type)
 
                class default
                   call set_error(1,"Defined wrong type for Atom parameters!")
@@ -151,7 +151,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                            AtmF(k)%m_U_iso =1.0_cp
                            AtmF(k)%m_occ =1.0_cp
 
-                        type is (MAtm_Ref_Type)
+                        type is (ModAtm_Ref_Type)
                            AtmF(k)%m_x =vet(1:3)
                            AtmF(k)%m_U_iso =1.0_cp
                            AtmF(k)%m_occ =1.0_cp
@@ -164,7 +164,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ =1.0_cp
 
-                        type is (MAtm_Ref_Type)
+                        type is (ModAtm_Ref_Type)
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ =1.0_cp
@@ -177,7 +177,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ  =vet(5)
 
-                        type is (MAtm_Ref_Type)
+                        type is (ModAtm_Ref_Type)
                            AtmF(k)%m_x    =vet(1:3)
                            AtmF(k)%m_U_iso =vet(4)
                            AtmF(k)%m_occ  =vet(5)

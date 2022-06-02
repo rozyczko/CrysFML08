@@ -5,7 +5,7 @@
 !!---- Intergovernmental Convention of the ILL, this software cannot be used
 !!---- in military applications.
 !!----
-!!---- Copyright (C) 1999-2012  Institut Laue-Langevin (ILL), Grenoble, FRANCE
+!!---- Copyright (C) 1999-2022  Institut Laue-Langevin (ILL), Grenoble, FRANCE
 !!----                          Universidad de La Laguna (ULL), Tenerife, SPAIN
 !!----                          Laboratoire Leon Brillouin(LLB), Saclay, FRANCE
 !!----
@@ -18,6 +18,7 @@
 !!----               Oksana Zaharko     (Paul Scherrer Institute, Switzerland)
 !!----               Tierry Roisnel     (CDIFX,Rennes France)
 !!----               Eric Pellegrini    (ILL)
+!!----               Ross Angel         (University of Pavia)
 !!----
 !!---- This library is free software; you can redistribute it and/or
 !!---- modify it under the terms of the GNU Lesser General Public
@@ -120,9 +121,11 @@
 !!----
 !!---- DEPENDENCIES
 !!--++   Use CFML_GlobalDeps
-!!--++   use CFML_String_Utilities, only: u_case, lcase, Number_Lines
-!!--++   use CFML_Math_3D,          only: Cross_Product, Determ_A, Determ_V, &
-!!--++                                    invert => Invert_A
+!!--++   Use CFML_Maths,    only: equal_vector, locate, second_derivative, Spline_Interpol, sort, invert => Inverse_Matrix, &
+!!--++                            Cross_Product
+!!--++   use CFML_Strings,  only: u_case, l_case, Number_Lines, Reading_Lines, Get_Num
+!!--++
+!!--++   use CFML_DiffPatt, only: DiffPat_E_Type, Allocate_Pattern
 !!----
 !!----
 !!---- VARIABLES
