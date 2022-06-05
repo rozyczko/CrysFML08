@@ -157,6 +157,16 @@ name="search_cellrelations"
 source-dir="Testing/Metrics"
 main="search_cellrelations.f90"
 
+[[executable]]
+name="simple_hkl_gen"
+source-dir="Testing/hkl_gen"
+main="simple_hkl_gen.f90"
+
+[[executable]]
+name="hkl_gen"
+source-dir="Testing/hkl_gen"
+main="hkl_gen.f90"
+
 #
 # Structure Factors
 #
@@ -193,30 +203,30 @@ main="Calc_Sfac.f90"
 #main="GLOpSAnn.f90"
 #
 #
-##
-## Magnetic examples, polarimetry
-##
-#[[executable]]
-#name="MagPolar3D"
-#source-dir="Testing/Magnetism"
-#main="MagPolar3D.f90"
 #
-#[[executable]]
-#name="magref"
-#source-dir="Testing/Magnetism"
-#main="magref.f90"
+# Magnetic examples, polarimetry
 #
+[[executable]]
+name="MagPolar3D"
+source-dir="Testing/Magnetism"
+main="MagPolar3D.f90"
+
+[[executable]]
+name="magref"
+source-dir="Testing/Magnetism"
+main="magref.f90"
+
 #################### Warning! ifx in mode release is unable to compile Schwinger: hn = real(hkl%ref(i)%h,kind=cp)
-##[[executable]]
-##name="Schwinger"
-##source-dir="Testing/Magnetism"
-##main="Schwinger.f90"
-#
-#[[executable]]
-#name="Moment"
-#source-dir="Testing/Magnetism/Moment"
-#main="moment.f90"
-#
+[[executable]]
+name="Schwinger"
+source-dir="Testing/Magnetism"
+main="Schwinger.f90"
+
+[[executable]]
+name="Moment"
+source-dir="Testing/Magnetism/Moment"
+main="moment.f90"
+
 #[[executable]]
 #name="MagOptim"
 #source-dir="Testing/Magnetism/MagOptim_v4"

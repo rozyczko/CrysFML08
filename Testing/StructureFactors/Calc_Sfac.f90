@@ -149,8 +149,8 @@ Program Calc_Structure_Factors
    !> Creating a list of reflections
    MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=SpG%NumOps)
    call Initialize_RefList(MaxNumRef, hkl, 'SRefl', SpG%d-1)
-   !call Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
-   call Gener_Reflections(Cell,stlmax,.false.,hkl,SpG,powder=.true.)
+   !call Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
+   call Gener_Reflections(Cell,0.0,stlmax,hkl,SpG,.false.,Unique=.true.,Friedel=.true.)
 
    if (hkl%Nref <=0 ) then
       print*, " Problems generating a list of reflections!"

@@ -61,8 +61,10 @@ SubModule (CFML_Reflections) Refl_Write_List
           hext=reflex%Ref(i)%h(1:3)
           hint=0.0
           do j=1,kinfo%nk
-            hint=hint+ reflex%Ref(i)%h(j+3)*kinfo%kv(:,j)
+            hint=hint + reflex%Ref(i)%h(j+3)*kinfo%kv(:,j)
           end do
+          !write(*,"(6i4,i10)") reflex%Ref(i)%h, reflex%Ref(i)%pcoeff
+          !write(*,"(6f8.4)") hext,hint
           hr(:,i)=hext+hint
         end do
       end if

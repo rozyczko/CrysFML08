@@ -5,66 +5,86 @@ SubModule (CFML_Reflections) Refl_Generate
    implicit none
    Contains
    !!----
-   !!---- Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
-   !!----    Calculate unique reflections up to a maximum of
-   !!----    sin_theta/lambda.  The output is not ordered if order or powder is not present.
-   !!----
-   !!---- 21/06/2019
    !!
-   Module Subroutine Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ,kout)
+   !!---- Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,order,Unique,seqindx,mag_only,Friedel,Ref_typ,kout)
+   !!----    !---- Arguments ----!
+   !!----    class(Cell_G_Type),                intent(in)     :: Cell     !Unit ceUniquel object
+   !!----    real(kind=cp),                     intent(in)     :: Slmin    !Minimum SinTheta/Lambda
+   !!----    real(kind=cp),                     intent(in)     :: Slmax    !Maximum SinTheta/Lambda
+   !!----    type(RefList_Type),                intent(in out) :: Reflex   !Reflection List
+   !!----    class(Spg_Type) ,        optional, intent(in)     :: SpG      !General Space Group
+   !!----    logical,                 optional, intent(in)     :: MagExt   !Magnetic extinctions taken into account if true
+   !!----    type(kvect_info_type),   optional, intent(in)     :: Kinfo    !Modulation vector information
+   !!----    logical,                 optional, intent(in)     :: Order    !If true the reflections are ordered by increasing sinTheta/Lambda
+   !!----    logical,                 optional, intent(in)     :: Unique   !Ordered unique reflections are gnerated
+   !!----    integer, dimension(3),   optional, intent(in)     :: seqindx  !Sequence of indices change
+   !!----    integer, dimension(3,2), optional, intent(in)     :: hlim     !Index limits
+   !!----    logical,                 optional, intent(in)     :: Mag_only !Only magnetic reflections are generated
+   !!----    logical,                 optional, intent(in)     :: Friedel
+   !!----    character(len=*),        optional, intent(in)     :: Ref_typ  !Refl, SRefl, or MRefl
+   !!----    type(kvect_info_type),   optional, intent(out)    :: kout     !Info on k-vectors extracted from SpG
+   !!----
+   !!----    Calculate reflections between the sin_theta/lambda shells defined by (Slmin,Slmax)
+   !!----    The output is not ordered if order or Unique is not present. Valid for all type of space groups.
+   !!----
+   !!----  21/06/2019, Updated 03/06/2022
+   !!----
+   Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
       !---- Arguments ----!
-      class(Cell_G_Type),                          intent(in)     :: Cell
-      real(kind=cp),                               intent(in)     :: Sintlmax
-      logical,                                     intent(in)     :: Mag
-      type(RefList_Type),                          intent(in out) :: Reflex
-      class(Spg_Type) ,              optional,     intent(in)     :: SpG
-      type(kvect_info_type),         optional,     intent(in)     :: Kinfo
-      character(len=*),              optional,     intent(in)     :: Order
-      logical,                       optional,     intent(in)     :: Powder
-      logical,                       optional,     intent(in)     :: Mag_only
-      logical,                       optional,     intent(in)     :: Friedel
-      character(len=*),              optional,     intent(in)     :: Ref_typ
-      type(kvect_info_type),         optional,     intent(out)    :: kout
+      class(Cell_G_Type),                intent(in)     :: Cell
+      real(kind=cp),                     intent(in)     :: Slmin
+      real(kind=cp),                     intent(in)     :: Slmax
+      type(RefList_Type),                intent(in out) :: Reflex
+      class(Spg_Type) ,        optional, intent(in)     :: SpG
+      logical,                 optional, intent(in)     :: MagExt
+      type(kvect_info_type),   optional, intent(in)     :: Kinfo
+      logical,                 optional, intent(in)     :: Order
+      logical,                 optional, intent(in)     :: Unique
+      integer, dimension(3),   optional, intent(in)     :: seqindx
+      integer, dimension(3,2), optional, intent(in)     :: hlim
+      logical,                 optional, intent(in)     :: Mag_only
+      logical,                 optional, intent(in)     :: Friedel
+      character(len=*),        optional, intent(in)     :: Ref_typ
+      type(kvect_info_type),   optional, intent(out)    :: kout
 
       !---- Local variables ----!
       real(kind=cp)         :: epsr=0.00001, delt=0.0001
       real(kind=cp)         :: sval,max_s !,vmin,vmax
       integer               :: h,k,l,hmin,kmin,lmin,hmax,kmax,lmax, maxref,i,j,indp,indj, &
-                               maxpos, mp, iprev,Dd, nf, ia, i0, nk, nharm,n,num_ref
+                               maxpos, mp, iprev,Dd, ia, i0, nk, nharm,n,num_ref, nrf
       integer,      dimension(:),   allocatable :: hh,kk,nulo
       integer,      dimension(:,:), allocatable :: hkl,hklm
       integer,      dimension(:),   allocatable :: indx,indtyp,ind,ini,fin,itreat
 
       real(kind=cp),dimension(:),   allocatable :: sv,sm
-      logical                                   :: kvect,ordering,magg,Frd
+      logical                                   :: kvect,ordering,magg,Frd,Mag
       type(kvect_info_type)                     :: kinf
+      integer, dimension(3)                     :: od,imin,imax
 
       !> Init
       Dd=3
-      ordering=.false.
-      kvect=.false.
-      magg=.false.
-      Frd=.true.
+      ordering=.false.; Frd=.true.
+      magg=.false.; mag=.false.; kvect=.false.
+      if (present(MagExt)) Mag=MagExt
       if (present(Friedel)) Frd=Friedel
       if (present(mag_only)) magg=mag_only
-      if (present(order) .or. present(powder)) ordering=.true.
+      if (present(order)) ordering=order
+      if (present(unique)) ordering=unique
       if (present(kinfo)) then
          nk=kinfo%nk
          nharm=kinfo%nq
          kvect=.true.
-         kinf=kinfo
+         kinf=kinfo !automatic allocation
       else
          if(present(SpG)) then
             Select Type(SpG)
                class is (SuperSpaceGroup_Type)
                   kvect=.true.
-                  nk=Spg%nk
-                  nharm=Spg%nq
-                  kinf%nk=nk
-                  kinf%nq=nharm
-                  allocate(kinf%kv(3,nk),kinf%q_coeff(nk,nharm))
+                  call Allocate_kvector(Spg%nk,Spg%nq,kinf)
                   kinf%kv=Spg%kv
                   kinf%q_coeff=Spg%q_coeff
+                  nk=Spg%nk
+                  nharm=Spg%nq
             End Select
          end if
       end if
@@ -72,11 +92,24 @@ SubModule (CFML_Reflections) Refl_Generate
         Dd=3+nk ! total dimension of the reciprocal space
         if(present(kout)) kout=kinf
       end if
-      hmax=nint(Cell%cell(1)*2.0*sintlmax+1.0)
-      kmax=nint(Cell%cell(2)*2.0*sintlmax+1.0)
-      lmax=nint(Cell%cell(3)*2.0*sintlmax+1.0)
+      hmax=nint(Cell%cell(1)*2.0*slmax+1.0)
+      kmax=nint(Cell%cell(2)*2.0*slmax+1.0)
+      lmax=nint(Cell%cell(3)*2.0*slmax+1.0)
       hmin=-hmax; kmin=-kmax; lmin= -lmax
       maxref= (2*hmax+1)*(2*kmax+1)*(2*lmax+1)
+      if(present(hlim)) then
+        imin=hlim(:,1)
+        imax=hlim(:,2)
+      else
+        imin=(/-hmax,-kmax,-lmax/)
+        imax=(/ hmax, kmax, lmax/)
+      end if
+      od=[1,2,3]
+      if(present(seqindx)) then
+        od=seqindx
+        ordering=.false.
+      end if
+
       if (kvect) then
          do k=1,nk
             maxref=maxref*(1+2*nharm)
@@ -84,7 +117,7 @@ SubModule (CFML_Reflections) Refl_Generate
          if (present(kinfo)) then
             max_s=maxval(kinfo%sintlim)
          else
-            max_s=sintlmax
+            max_s=slmax
          end if
       end if
 
@@ -96,20 +129,20 @@ SubModule (CFML_Reflections) Refl_Generate
 
       !> Generation of fundamental reflections
       i0=0
-      ext_do: do h=hmin,hmax
-         do k=kmin,kmax
-            do l=lmin,lmax
+      ext_do: do h=imin(od(1)),imax(od(1))
+         do k=imin(od(2)),imax(od(2))
+            do l=imin(od(3)),imax(od(3))
                hh=0
-               hh(1:3)=[h,k,l]
+               hh(od(1))=h
+               hh(od(2))=k
+               hh(od(3))=l
                sval=H_S(hh,Cell)
-               if (sval > sintlmax) cycle
-
+               if (sval > slmax .or. sval < slmin) cycle
                num_ref=num_ref+1
                if (num_ref > maxref) then
                   num_ref=maxref
                   exit ext_do
                end if
-
                if (sval < epsr) i0=num_ref !localization of 0 0 0  reflection
                sv(num_ref)=sval
                hkl(:,num_ref)=hh
@@ -120,35 +153,35 @@ SubModule (CFML_Reflections) Refl_Generate
       !> Generation of satellites
       !> The generated satellites corresponds to those obtained from the list
       !> of +/-kinfo%q_qcoeff
-      nf=num_ref
+      nrf=num_ref
       if (kvect) then
-         do_ex: do n=1,kinf%nq
-            do i=1,nf
-               hh=hkl(:,i)
+         do_ex: do i=1,nrf
+            hh=hkl(:,i)
+            do n=1,kinf%nq
                do ia=-1,1,2
                   hh(4:3+nk)=ia*kinf%q_coeff(1:nk,n)
                   sval=H_S(hh, Cell, nk, kinf%kv)
-                  if (sval > max_s) cycle
-
+                  if (sval > max_s .or. sval < slmin) cycle
                   num_ref=num_ref+1
                   if (num_ref > maxref) then
                      num_ref=maxref
                      exit do_ex
                   end if
-
                   sv(num_ref)=sval
                   hkl(:,num_ref)=hh
                end do !ia
-            end do  !i
+            end do  !kinf%nq
          end do do_ex
       end if
 
-      !> elimination of the reflection (0000..)
-      do i=i0+1,num_ref
-         sv(i-1)=sv(i)
-         hkl(:,i-1)=hkl(:,i)
-      end do
-      num_ref=num_ref-1
+      !> elimination of the reflection (0000..) if it is present in the list (i0 >=1)
+      if(i0 >= 1) then
+         do i=i0+1,num_ref
+            sv(i-1)=sv(i)
+            hkl(:,i-1)=hkl(:,i)
+         end do
+         num_ref=num_ref-1
+      end if
 
       !> Determination of reflection character and extinctions (Lattice + others)
       n=0
@@ -157,16 +190,21 @@ SubModule (CFML_Reflections) Refl_Generate
          mp=0
          if (present(SpG)) then
             if (SpG%Num_Lat /= 0) then
-               if (H_Latt_Absent(hh,SpG%Lat_tr,SpG%Num_Lat)) cycle
+               if (H_Latt_Absent(hh,SpG%Lat_tr,SpG%Num_Lat)) then
+                  !write(*,"(a,6i4)")    "   Lattice absence: ", hh
+                  cycle
+               end if
             end if
             if (H_Absent(hh,SpG)) then
                if (SpG%Mag_type /= 2 .and. Mag) then
                   if (mH_Absent(hh,SpG)) then
+                     !write(*,"(a,6i4)") "  Magnetic absence: ", hh
                      cycle
                   else
                      mp=1   !pure magnetic
                   end if
                else
+                  !write(*,"(a,6i4)")   "           Absence: ", hh
                   cycle
                end if
             else
@@ -181,9 +219,9 @@ SubModule (CFML_Reflections) Refl_Generate
          end if
 
          n=n+1
+         indtyp(n)=mp
          hkl(:,n)=hkl(:,i)
          sv(n)=sv(i)
-         indtyp(n)=mp
       end do
       num_ref=n
 
@@ -201,7 +239,7 @@ SubModule (CFML_Reflections) Refl_Generate
          indtyp(1:num_ref)=ind(1:num_ref)
          hkl(:,1:num_ref)=hklm(:,1:num_ref)
          sv(1:num_ref)=sm(1:num_ref)
-         if (present(SpG) .and. present(powder)) then
+         if (present(SpG) .and. present(Unique)) then
             deallocate(hkl,sv,indx,ind)
             allocate(ini(num_ref),fin(num_ref),itreat(num_ref))
             itreat=0; ini=0; fin=0
@@ -246,7 +284,7 @@ SubModule (CFML_Reflections) Refl_Generate
             end do
             indtyp(1:indp)=ind(1:indp)
             num_ref=indp
-         end if  !SpG and Powder
+         end if  !SpG and Unique
 
       end if !ordering
 
@@ -274,15 +312,13 @@ SubModule (CFML_Reflections) Refl_Generate
          reflex%ref(i)%h = hkl(:,i)
          if(dd > 3) then
            kk               = abs(hkl(4:3+nk,i))
-           reflex%ref(i)%pcoeff = 0 !Fundamental reflections point to the Fourier coefficient [00...]
-           do_n: do n=1,kinf%nq
-              do k=1,nk
-                 if (equal_vector(kk(1:nk),abs(kinf%q_coeff(1:nk,n))))  then
-                    reflex%ref(i)%pcoeff=n
-                    exit do_n
-                 end if
-              end do
-           end do do_n
+           reflex%ref(i)%pcoeff = 0
+           do n=1,kinf%nq
+              if (equal_vector(kk(1:nk),abs(kinf%q_coeff(1:nk,n))))  then
+                 reflex%ref(i)%pcoeff=n
+                 exit
+              end if
+           end do
          end if
          reflex%ref(i)%s      = sv(i)
          if (present(SpG)) then

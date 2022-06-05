@@ -250,7 +250,7 @@ Submodule (CFML_Reflections) Refl_H_Convent
         imin=(/-hmax,-kmax,-lmax/)
         imax=(/ hmax, kmax, lmax/)
       end if
-      od=(/3,2,1/)
+      od=[3,2,1]
       if(present(ord)) od=ord
 
       maxref=(2*hmax+1)*(2*kmax+1)*(2*lmax+1)

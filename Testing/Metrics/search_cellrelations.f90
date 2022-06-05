@@ -302,7 +302,7 @@
       !Generate allowed reflections in the superstructure cell up to s=0.5
       !call Hkl_Gen_Sxtal(supercell,SpGr,0.0,0.25,Num_Ref,hkl_sup)
       !call Gener_Reflections(supercell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel)
-      call Gener_Reflections(supercell,0.25,.false.,hkl_sup,SpGr)
+      call Gener_Reflections(supercell,0.0,0.25,hkl_sup,SpGr)
       Num_ref=hkl_sup%Nref
       write(unit=lout,fmt="(/,a)") " ==============================================================="
       write(unit=lout,fmt="(a)")   " Indexing of superstructure reflection in the substructure basis"

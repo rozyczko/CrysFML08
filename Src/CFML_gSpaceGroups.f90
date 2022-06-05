@@ -277,9 +277,9 @@ Module CFML_gSpaceGroups
     Interface
        Module Subroutine Allocate_KVector(nk, nq, Kvec)
           !---- Arguments ----!
-          integer,               intent(in)    :: nk
-          integer,               intent(in)    :: nq
-          type(Kvect_Info_Type), intent(inout) :: Kvec
+          integer,               intent(in)     :: nk
+          integer,               intent(in)     :: nq
+          type(Kvect_Info_Type), intent(in out) :: Kvec
        End Subroutine Allocate_KVector
 
        Pure Module Function Apply_OP_rat(Op, V) Result(S)
