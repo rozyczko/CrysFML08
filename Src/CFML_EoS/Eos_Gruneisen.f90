@@ -84,7 +84,12 @@ SubModule (CFML_EoS) EoS_GPT_Crun
       real(kind=cp),dimension(0:2) :: Tc,Cvi
 
       !> init
-      G=0._cp
+      G=0.0_cp
+
+      if (eos%imodel == -1) then !ptv table does not support Grueneisen
+         call set_error(-1,'EoS from PTV table does not support Grueneisen parameters')
+         return
+      end if
 
       v=get_volume(P,T,eos)
 
@@ -178,7 +183,12 @@ SubModule (CFML_EoS) EoS_GPT_Crun
       end if
 
       !Init
-      grun=0._cp
+      grun=0.0_cp
+
+      if (eos%imodel == -1)then !ptv table does not support Grueneisen
+         call set_error(-1,'EoS from PTV table does not support Grueneisen parameters')
+         return
+      end if
 
       !> Must be careful with transitions because eospar%params(1) is the high phase V0
       !> V0=get_volume(eospar%pref,eospar%tref,eospar) (Nov 2016)

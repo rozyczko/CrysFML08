@@ -86,7 +86,7 @@ SubModule (CFML_EoS) EoS_Checks
       end if
 
       !> If MGD or q-compromise type thermal EoS, must have eos%pscale_name and eos%_Vscale_name
-      if (eos%itherm == 7 .or. eos%itherm == 8)then
+      if (eos%itherm == 7 .or. eos%itherm == 8 .or. eos%itherm == 9)then
          if ( .not. pscaleMGD(Eos))then
             call set_error(-1,'EoS must have a Pscale in kbar or GPa')
          end if
@@ -272,7 +272,7 @@ SubModule (CFML_EoS) EoS_Checks
       ! because  checks  above are for the PV part and the TV part, without transitions.
       ! all must be valid for the Eos to be valid
 
-      if (e%itherm /=7 .and. e%itherm /=8 .and. .not. vpresent )then        !only done if V not provided at start
+      if (e%itherm /=7 .and. e%itherm /=8 .and. e%itherm /=9 .and. .not. vpresent )then        !only done if V not provided at start
          v=get_volume(p,t,e)
          if (err_CFML%Flag) then         ! added 22/05/2017
             write(unit=car, fmt='(2f10.1)') p, t
@@ -515,7 +515,7 @@ SubModule (CFML_EoS) EoS_Checks
 
       !> Thermal cases
       select case(EoS%itherm)  ! for specific thermal parameters
-         case (4,6,7,8)    !>Kroll orPthermal must have characteristic T > 0.
+         case (4,6,7,8)    !>Kroll or Pthermal must have characteristic T > 0.
             if (EoS%params(11) < 0.1) then
                EoS%params(11)=EoS%Tref
                if (EoS%Tref < 0.1) EoS%params=0.1

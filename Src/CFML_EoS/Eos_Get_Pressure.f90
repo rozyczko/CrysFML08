@@ -226,8 +226,6 @@ SubModule (CFML_EoS) EoS_Get_Pressure
          return
       end if
 
-
-
       !> copy Eos parameters to local
       ev= EoS_to_Vec(EoS)         ! Volume or linear case is covered
 
@@ -244,7 +242,7 @@ SubModule (CFML_EoS) EoS_Get_Pressure
       do
          !> Thermal case
          select case (EoS%itherm)
-            case (0,6,7,8) ! No thermal case, or  thermal pressure which uses params at Tref
+            case (0,6,7,8,9) ! No thermal case, or  thermal pressure which uses params at Tref
                vv0=vol/EoS%params(1)      !vv0 is now V/V0 or a/a0
 
             case (1:5)

@@ -266,6 +266,14 @@ SubModule (CFML_EoS) EoS_Write_Info
       write(unit=lun,fmt='(a)',iostat=ierr) ' '
       write(unit=lun,fmt='(a)',iostat=ierr) ' '
 
+      !>Cv table
+      if (eos%itherm == 9)then
+         write(unit=lun,fmt='(a)',iostat=ierr)'  Heat Capacity='
+         do j=1,size(eos%cv_table,dim=1)
+            write(unit=lun,fmt='(2f10.5)',iostat=ierr)eos%cv_table(j,1:2)
+         end do
+      end if
+
    End Subroutine Write_Eos_File
 
    !!----
@@ -299,7 +307,7 @@ SubModule (CFML_EoS) EoS_Write_Info
       type(axis_type),     optional, intent(in out) :: axis
 
       !---- Local variable ----!
-      real(kind=cp)           :: p,t      ! The p and T of each calculation
+      real(kind=cp)           :: p,t,tout      ! The p and T of each calculation
       real(kind=cp)           :: pst,tst  ! local copy of tstep and pstep
       character(len=255)      :: text     ! local text variable
       character(len=1)        :: tscale   ! local name of tscale
@@ -370,6 +378,8 @@ SubModule (CFML_EoS) EoS_Write_Info
                call clear_error()
                call physical_check(eos,Pin=p,Tin=T)
                if (err_CFML%Flag) then
+                  tout=t
+                  if (tscale =='C')tout=tout-273.16
                   text=trim(string_real(p,6))//'  '//trim(string_real(t,6))//' :   '//trim(err_CFML%Msg)
                   write(lun,'(a)')trim(text)
                   eoscal_err=.true.
@@ -467,11 +477,12 @@ SubModule (CFML_EoS) EoS_Write_Info
    !!----
    !!---- Date: 17/07/2015
    !!
-   Module Subroutine Write_Eoscal_Header(Eos, Lun, Tscale_In)
+   Module Subroutine Write_Eoscal_Header(Eos, Lun, Tscale_In, Headout)
       !---- Arguments ----!
-      type(EoS_Type),   intent(in) :: eos         ! Eos information
-      integer,          intent(in) :: lun         ! logical unit for printing
-      character(len=*), intent(in) :: tscale_in   ! Scale for Temp
+      type(EoS_Type),            intent(in)  :: eos         ! Eos information
+      integer,                   intent(in)  :: lun         ! logical unit for printing
+      character(len=*),          intent(in)  :: tscale_in   ! Scale for Temp
+      character(len=*),optional, intent(out) :: Headout
 
       !---- Local Variables ----!
       character(len=1)     :: tscale
@@ -543,7 +554,12 @@ SubModule (CFML_EoS) EoS_Write_Info
 
 
       !> Write header
-      write(lun,'(/a)')trim(head)
+      if (present(headout))then
+         headout=trim(head)
+
+      else
+         write(lun,'(/a)')trim(head)
+      end if
 
    End Subroutine Write_Eoscal_Header
 

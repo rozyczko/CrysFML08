@@ -27,7 +27,7 @@ SubModule (CFML_EoS) EoS_Linear_Allowed
 
       !> Thermal model
       select case (eos%itherm)
-         case (6:8)
+         case (6:9)
             allowed=.false.
       end select
 
@@ -57,7 +57,7 @@ SubModule (CFML_EoS) EoS_Linear_Allowed
 
       !> Thermal model
       if (present(itherm)) then
-         if (itherm == 6 .or. itherm == 7 .or. itherm == 8) allowed=.false.  !MGD & Einstein
+         if (itherm == 6 .or. itherm == 7 .or. itherm == 8 .or. itherm == 9) allowed=.false.  !MGD & Einstein
       end if
 
    End Function Linear_EoS_Allowed_I

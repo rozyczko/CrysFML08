@@ -45,7 +45,7 @@ SubModule (CFML_EoS) EoS_Init
 
       !>reset to default orthorhombic
       cell_eos%n=3
-      cell_eos%system='ORTHORHOMBIC'
+      cell_eos%system='TRICLINIC'
       cell_eos%obtuse = .true.
       cell_eos%unique_label=' '
       cell_eos%unique=0
@@ -105,6 +105,7 @@ SubModule (CFML_EoS) EoS_Init
       E%SigV = 0.0_cp
       E%sigc = 0.0_cp
       E%siga = 0.0_cp
+
    End Subroutine Init_EoS_Data_Type
 
    !!----
@@ -133,7 +134,7 @@ SubModule (CFML_EoS) EoS_Init
       do i=1,9
         write(EoS%ParName(50+i),'(''Sca '',i1)')i
         write(EoS%comment(50+i),'(''Scale factor for data group '',i1)')i
-      enddo
+      end do
 
       !>Use flags default to 0. The values depend on the groups of data present
       ! and therefore cannot be set in cfml_eos_mod but must be reset by main programs
@@ -257,6 +258,7 @@ SubModule (CFML_EoS) EoS_Init
       select case(EoS%itherm)
          case (-1)           ! PTV table
             EoS%factor(10)   = 1.0E5_cp            ! factor to multiply alpha values on printing
+            EoS%params(10:n) = 0.0_cp              ! all thermal parameters set zero, not used
             EoS%pthermaleos  =.false.
             EoS%Osc_allowed  =.false.
 
@@ -334,11 +336,20 @@ SubModule (CFML_EoS) EoS_Init
             EoS%pthermaleos    =.true.
             EoS%Osc_allowed    =.true.
 
+         case(9)                                   ! molar Cv for Pthermal from table
+            EoS%TRef           = 298.0_cp
+            EoS%TRef_fixed     = .false.
+            EoS%params(10:17)  = 0.0_cp            ! includes param(14) set to use full q
+            EoS%pthermaleos    =.true.
+            EoS%Osc_allowed    =.false.
+
       end select
 
       !> Set the common terms for Ks to Kt conversion: also used in  thermal pressure with oscillator
-      EoS%params(18)=1.0_cp      ! gamma0
-      EoS%params(19)=0.0_cp      ! q
+      if (eos%itherm /= -1) then
+         EoS%params(18)=1.0_cp      ! gamma0
+         EoS%params(19)=0.0_cp      ! q
+      end if
 
       call Init_EoS_Cross(EoS)                             ! init the cross-terms
       if (.not. EoS%osc_allowed) call Init_EoS_Osc(EoS,3)  ! clear extra oscillators
@@ -476,8 +487,6 @@ SubModule (CFML_EoS) EoS_Init
       EoS%params(3)= 4.0_cp
       EoS%params(5)= 1.0_cp          ! Z for APL, set non-zero for safety. params(5) not used by any other EoS
 
-
-
       EoS%X        = 0.0_cp
       EoS%stoich   = 1.0_cp
 
@@ -493,6 +502,10 @@ SubModule (CFML_EoS) EoS_Init
       !> Test for optional argument for thermal
       EoS%ITherm  = 0
       EoS%Tref    = 298.0_cp         ! Sensible default
+
+      Eos%Cv_table= 0.0_cp
+      Eos%cv_external=.false.
+
       if (present(ithermal) .and. ithermal > -2 )then
          EoS%Itherm = ithermal
          call Init_Eos_Thermal(EoS)              ! set up default values, names for specific thermal eqn

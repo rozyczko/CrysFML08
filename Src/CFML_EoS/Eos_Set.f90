@@ -331,6 +331,16 @@ SubModule (CFML_Eos) EoS_Set
             EoS%pthermaleos  = .true.
             EoS%osc_allowed  = .true.
 
+         case(9)
+            if (EoS%imodel==0) EoS%iuse(2:4)=2   ! K, Kp refinement is not stable without a pressure model
+            EoS%iuse(8:9)=0     ! No dK/dT parameter
+            EoS%iuse(10:17)=0   ! No other paramters except gamma0 and q
+            EoS%iuse(18)=1      ! Grunesien parameter at Pref,Tref
+            EoS%iuse(19)=1      ! Grunesien q power law parameter
+            EoS%TRef_fixed   = .false.
+            EoS%pthermaleos  = .true.
+            EoS%osc_allowed  = .false.
+
       end select
 
       !> Phase transition model
@@ -706,6 +716,10 @@ SubModule (CFML_Eos) EoS_Set
             EoS%comment(13) = 'Number of atoms per formula unit'
             EoS%parname(14) = 'qcomp'
             EoS%comment(14) = 'Switch for q-compromise model, +1 for compromise'
+
+         case (9)
+            EoS%parname(10:17) = ''
+            EoS%comment(10:17) = ''
       end select
 
       !> Common terms for all thermal

@@ -70,7 +70,7 @@ SubModule (CFML_EoS) EoS_K_Cal
       end if
 
       select case (EoS%itherm)
-         case (0,6,7,8)                      ! No thermal model, or we have pthermal, so need params at Tref
+         case (0,6,7,8,9)                      ! No thermal model, or we have pthermal, so need params at Tref
             vv0=vol/EoS%params(1)           ! vv0 or aa0
             k0=EoS%params(2)
             kp=EoS%params(3)
@@ -170,7 +170,7 @@ SubModule (CFML_EoS) EoS_K_Cal
       !> Now correct thermal-pressure EoS for d(Pth)/dV contribution to bulk modulus
       if (EoS%Pthermaleos) then
          select case(EoS%itherm)
-            case(7,8)           !MGD or Einstein EoS: Do this numerically,
+            case(7,8,9)           !MGD or Einstein EoS: Do this numerically,
                eost=EoS
                eost%itran=0    ! clear any transition terms
                delv=0.01_cp*vol
@@ -304,7 +304,7 @@ SubModule (CFML_EoS) EoS_K_Cal
       end if
 
       select case (EoS%itherm)
-         case (0,6,7,8)                           ! No thermal model, or we have pthermal, so need params at Tref
+         case (0,6,7,8,9)                           ! No thermal model, or we have pthermal, so need params at Tref
             vv0=vol/EoS%params(1)            ! vv0 or aa0
             k0=EoS%params(2)
             kp=EoS%params(3)
@@ -399,7 +399,7 @@ SubModule (CFML_EoS) EoS_K_Cal
       !> Now correct thermal-pressure EoS for d(Pth)/dV contribution to bulk modulus, when possible
       if (EoS%Pthermaleos) then
          select case(EoS%itherm)
-            case(7,8)           !MGD EoS: Do this numerically on complete EoS without transition
+            case(7,8,9)           !MGD EoS: Do this numerically on complete EoS without transition
                eosbare=EoS
                eosbare%itran=0    ! clear any transition terms
                delv=0.01_cp*vol
@@ -535,7 +535,7 @@ SubModule (CFML_EoS) EoS_K_Cal
       end if
 
       !> Code to stop MGD EoS going into illegal large volume at negative delp
-      if (EoS%itherm == 7 .or. EoS%itherm == 8)then
+      if (EoS%itherm == 7 .or. EoS%itherm == 8 .or. EoS%itherm == 9)then
          vlimitk=get_volume_K(0._cp,t,EoS)
          vlimit=get_volume_K(EoS%params(2)/2.0_cp,EoS%tref,EoS)
          if (vlimitk > tiny(0.0_cp) .and. vlimitk < vlimit)vlimit=vlimitk

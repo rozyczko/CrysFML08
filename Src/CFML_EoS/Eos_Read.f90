@@ -643,6 +643,38 @@ SubModule (CFML_EoS) EoS_Read
                call set_error(1,"Error reading the EoS Variance information")
                exit
             end if
+
+         else if(index(text,'CAPACITY') /= 0)then
+            !>New section to read heat capcity data
+            ierr=0
+            do i=nl+1,nlines
+               if (len_trim(flines(i)) == 0)exit
+            end do
+
+            imax=i-nl-1
+            if (allocated(eos%cv_table))deallocate(eos%cv_table)
+            allocate(eos%cv_table(imax,3))
+
+            if (imax > 1) eos%cv_external=.true.
+
+            do i=1,imax
+               read(unit=flines(nl+i),fmt='(2f10.0)',iostat=ierr)eos%cv_table(i,1:2)
+               if (ierr /= 0)then
+                  eos%cv_external=.false.
+                  call set_error(1,"Error reading the Heat Capacity information from eos file")
+                  exit
+
+               else
+                  if (i == 1)then
+                     eos%cv_table(i,3)=eos%cv_table(i,2)
+
+                  else
+                     eos%cv_table(i,3)=eos%cv_table(i-1,3)+(eos%cv_table(i,1)-eos%cv_table(i-1,1))*(eos%cv_table(i,2)+eos%cv_table(i-1,2))/2.0
+                  end if
+               end if
+            end do
+            nl=nl+i
+
          end if
       end do
 

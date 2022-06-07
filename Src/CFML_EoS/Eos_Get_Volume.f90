@@ -165,7 +165,7 @@ SubModule (CFML_EoS) Eos_Get_Volume
                V=(ev(1)**(1.0_cp/3.0_cp) + ev(10)*ev(11)*(A-1.0_cp))**3.0_cp
             end if
 
-         case(6,7,8)
+         case(6:9)
             v=ev(1)         ! Pthermal needs V0 at Tref
       end select
 
@@ -236,7 +236,7 @@ SubModule (CFML_EoS) Eos_Get_Volume
             v0=ev(1)
             pa=p-pthermal(0.0,t,EoS)               ! adjust pressure to isothermal pressure for murn and tait estimates
 
-         case(7,8)                                    ! MGD - do a guess on basis parallel isochors of pa
+         case(7:9)                                    ! MGD - do a guess on basis parallel isochors of pa
             v0=ev(1)
             pa=p - EoS%params(2)*(t-EoS%tref)/100000.         ! have to guess an alpha because that requires V !!!
       end select
@@ -269,7 +269,7 @@ SubModule (CFML_EoS) Eos_Get_Volume
       end if
 
       !> Cannot do the following if MGD pthermal
-      if (EoS%itherm /=7  .and. EoS%itherm /=8) then
+      if (EoS%itherm /=7  .and. EoS%itherm /=8 .and. EoS%itherm /=9) then
          if (EoS%imodel ==1) then
             !> Exact solution for Murnaghan
             if (EoS%linear) v=v**(1.0_cp/3.0_cp)

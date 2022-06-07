@@ -32,6 +32,12 @@ SubModule (CFML_EoS) Eos_Get_Temperature
       !> Check
       if (EoS%itherm == 0) return          ! no calcs possible without thermal model
 
+      !> If PTV table, go directly
+      if (EoS%imodel == -1) then
+         t=get_props_ptvtable(p,0.0,v,EoS,'T')     ! get_props_ptvtable works in length if linear
+         return
+      end if
+
       !> First estimate at P=0
       t=Get_Temperature_P0(va,EoS)
       if (EoS%imodel ==0) return

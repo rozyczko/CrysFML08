@@ -19,7 +19,6 @@ SubModule (CFML_EoS) EoS_Get_APL
    !!--++ not just on the PV model parameters
    !!--++
    !!--++ Date: 20/11/2019 RJA
-   !!--++ Revision: OK
    !!
    Module Function Get_APL(VV0, V0, K0, Kp, Kpp, Z, Iorder) Result(A)
       !---- Arguments ----!

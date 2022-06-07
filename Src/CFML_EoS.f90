@@ -51,12 +51,20 @@
 !!----    ...   2016: Modifications to add PVT table to EoS structure as alternative to EoS parameters (RJA)
 !!----    ...   2017: Split write_eoscal to improve error handling, new thermalP eos (RJA)
 !!----    ...   2018: New routines: physical_check, get_kp, added pscale,vscale,lscale to data_list_type (RJA)
+!!----    ...   2019: Bug fixes, addition of new thermal-pressure EoS types (RJA)
+!!----    ...   2020: Jan: E%LinearDir to label linear EoS (RJA)
+!!----    ...   2020: March: Addition of extra oscillators for thermal pressure, addition of scales block to eos%params (RJA)
+!!----    ...   2020: Sept: Moved enquiry routines for groups into this module (RJA)
+!!----    ...   2020: Sept: Moved calculation and management routines for eos of cells into this module (RJA)
+!!----    ...   2021: Introduction of Kumar PV EoS, Einstein oscillator, multi oscillator and q-compromise thermal-pressure EoS (RJA)
+!!----    ...   2021: Thermal pressure from Cv table in EoS file (RJA)
+!!----    ...   2021: Improvements to handle EoS from PTVtables (RJA)
 !!
 Module CFML_EoS
    !---- Use Modules ----!
    Use CFML_GlobalDeps,only: CP, PI, TO_RAD, err_cfml, clear_error, set_error
    Use CFML_Maths,     only: Debye, First_Derivative, Second_Derivative, Spline_interpol, Diagonalize_SH, &
-                             Orient_Eigenvectors
+                             Orient_Eigenvectors, Locate
    Use CFML_Metrics,   only: Cell_G_Type, Strain_Tensor_Type, Get_Cryst_Family, Set_Crystal_Cell, Cell_Type, &
                              Volume_from_Cell,SigmaV_From_Cell, Fix_Tensor, Calc_Paxes_Angles
    Use CFML_Strings,   only: u_case, string_real, string_numstd, number_lines, get_words, get_numstd, &
@@ -73,7 +81,7 @@ Module CFML_EoS
              EoS_Cal, EoS_Cal_Esd, Eos_Cal_Text, &
              Get_Alpha_Cell, Get_Angle_Deriv, Get_Cp, Get_Cv, Get_DebyeT, Get_GPT, Get_Grun_PT, Get_Grun_Th, &
              Get_Grun_V, Get_K, Get_Kp, Get_Mod_Axis, Get_Mod_Cell, Get_Modp_Axis, Get_Modp_Cell, Get_Params_Cell, &
-             Get_Press_Axis, Get_Press_Cell, Get_Pressure, Get_Pressure_Esd, Get_Pressure_X, Get_Property_X, &
+             Get_Pressure, Get_Pressure_Esd, Get_Pressure_X, Get_Property_X, &
              Get_Props_General, Get_Props_Third, Get_Temperature, Get_Temperature_P0, Get_Transition_Pressure, &
              Get_Transition_Strain, Get_Transition_Temperature, Get_Volume, Get_Volume_Axis, Get_Volume_Cell, &
              Get_Volume_S, &
@@ -110,7 +118,7 @@ Module CFML_EoS
    integer, public, parameter :: N_ANGPOLY=3        ! Dimension of polynomial for angles
 
    integer, public, parameter :: N_PRESS_MODELS=7   ! Number of possible pressure models
-   integer, public, parameter :: N_THERM_MODELS=8   ! Number of possible Thermal models
+   integer, public, parameter :: N_THERM_MODELS=9   ! Number of possible Thermal models
    integer, public, parameter :: N_TRANS_MODELS=3   ! Number of possible Transition models
    integer, public, parameter :: N_SHEAR_MODELS=1   ! Number of possible Shear models
    integer, public, parameter :: N_CROSS_MODELS=2   ! Number of possible Cross-term models
@@ -140,7 +148,8 @@ Module CFML_EoS
                                                                         'Salje low-T        ', &
                                                                         'HP Thermal Pressure', &
                                                                         'Mie-Gruneisen-Debye', &
-                                                                        'Einstein Oscillator']
+                                                                        'Einstein Oscillator', &
+                                                                        'ThermalP Cv Table  ']
 
    character(len=*), public, parameter, dimension(-1:N_TRANS_MODELS) :: TRANMODEL_NAMES=[  &      ! Name of Transition models
                                                                         'PTV Table      ', &
@@ -279,6 +288,8 @@ Module CFML_EoS
       real(kind=cp),dimension(N_EOSPAR,N_EOSPAR):: VCV=0.0               ! Var-Covar matrix from refinement
       real(kind=cp),dimension(3,0:3,N_ANGPOLY)  :: angpoly=0.0           ! Polynomial coefficients for unit-cell angles
       Type(PVT_Table)                           :: Table                 ! A pvt table, used instead of eos parameters when imodel=-1
+      real(kind=cp),allocatable, dimension(:,:) :: cv_table              ! A table for externally-provided Cv values
+      logical                                   :: cv_external=.false.   ! True if cv_table contains valid data
    End Type EoS_Type
 
    !!----
@@ -418,10 +429,10 @@ Module CFML_EoS
          real(kind=cp)                                  :: Td
       End Function Deriv_Partial_P_Scales
 
-      Module Function dKdT_Cal(P, T, EoS, DeltaT) Result(dKdT)
+      Module Function dKdT_Cal(Pin, Tin, EoS, DeltaT) Result(dKdT)
          !---- Arguments ----!
-         real(kind=cp),            intent(in) :: P
-         real(kind=cp),            intent(in) :: T
+         real(kind=cp),            intent(in) :: Pin
+         real(kind=cp),            intent(in) :: Tin
          type(Eos_Type),           intent(in) :: EoS
          real(kind=cp),  optional, intent(in) :: DeltaT
          real(kind=cp)                        :: dKdT
@@ -1455,11 +1466,12 @@ Module CFML_EoS
          character(len=*), intent(in) :: Tscale_in
       End Subroutine Write_Eoscal_Cell_Header
 
-      Module Subroutine Write_Eoscal_Header(Eos,Lun,Tscale_In)
+      Module Subroutine Write_Eoscal_Header(Eos,Lun,Tscale_In,Headout)
          !---- Arguments ----!
-         type(EoS_Type),intent(in)   :: EoS
-         integer,       intent(in)   :: Lun
-         character(len=*),intent(in) :: Tscale_in
+         type(EoS_Type),            intent(in)  :: EoS
+         integer,                   intent(in)  :: Lun
+         character(len=*),          intent(in)  :: Tscale_in
+         character(len=*),optional, intent(out) :: Headout
       End Subroutine Write_Eoscal_Header
 
       Module Subroutine Write_Info_Angle_Poly(EoS, Iang, Iout)
@@ -1525,6 +1537,13 @@ Module CFML_EoS
          type(Eos_Type),    intent(in) :: EoS
          integer, optional, intent(in) :: Iout
       End Subroutine Write_Info_Eos_Transition
+
+      Module Function EthTable(T, EoS) Result(Eth)
+         !---- Arguments ----!
+         real(kind=cp),  intent(in) :: T    ! Temperature
+         type(Eos_Type), intent(in) :: EoS  ! Eos Parameters
+          real(kind=cp)              :: Eth
+      End Function EthTable
 
    End Interface
 

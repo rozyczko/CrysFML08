@@ -108,6 +108,12 @@ SubModule (CFML_EoS) EoS_Pthermal
             eth0=EthEinstein(EoS%tref,thetaE,EoS%params(13))
             pthp(0)=gammaV/v*(eth-eth0)
 
+         case(9)   !Cv table
+            gammaV=get_grun_V(V,EoS)
+            eth=EthTable(T,EoS)
+            eth0=EthTable(EoS%tref,EoS)
+            pthp(0)=gammaV/v*(eth-eth0)
+
          case default
             pthp(0)=0.0_cp
       end select
@@ -139,7 +145,7 @@ SubModule (CFML_EoS) EoS_Pthermal
       !> if the thermal energy was from EthDebye or EthEinstein, it is in J/mol pth
       !> Then if V in m3/mol  Eth/V is in J/m3=Pa
       select case(EoS%itherm)
-         case(7,8)
+         case(7,8,9)
             pthp=pthp*EPthermal_factor(EoS)
       end select
 
@@ -243,6 +249,46 @@ SubModule (CFML_EoS) EoS_Pthermal
 
       return
    End Function EthEinstein
+
+   !!--++
+   !!--++ FUNCTION ETHTABLE
+   !!--++
+   !!--++  Extracts the thermal Energy in Jmol(-1) from cv_table(:,3)
+   !!--++  values in table are Jmol(-1)K(-1)
+   !!--++  Cv for this model is independent of P
+   !!--++
+   !!--++ Date: 9/2021
+   !!
+   Module Function EthTable(T, EoS) Result(Eth)
+      !---- Arguments ----!
+      real(kind=cp),  intent(in) :: T    ! Temperature
+      type(Eos_Type), intent(in) :: EoS  ! Eos Parameters
+      real(kind=cp)              :: Eth
+
+      !---- Local Variables ----!
+      integer  :: i
+
+      if (T < 1.0) then
+          Eth=0.0_cp
+
+      else
+         i=locate(eos%cv_table(1:,1),T,size(eos%cv_table,dim=1))     ! i is the index to the entry with biggest T < Trequest
+         if (i > Ubound(eos%cv_table,dim=1)-1)then
+            call set_error(-1,'Request to Ethtable with T > Tmax')
+            i=Ubound(eos%cv_table,dim=1)
+            Eth=(nint(T)-eos%cv_table(i,1))*eos%cv_table(i,2) +eos%cv_table(i,3)
+
+         elseif (i < 1) then
+            call set_error(-1, 'Request to Ethtable with T < Tmin')
+            Eth=eos%cv_table(1,3)
+
+         else
+            Eth=eos%cv_table(i,3) + (eos%cv_table(i+1,3) - eos%cv_table(i,3))/(eos%cv_table(i+1,1) - eos%cv_table(i,1))*(T - eos%cv_table(i,1))
+
+         end if
+      end if
+
+   End Function EthTable
 
    !!----
    !!---- VSCALEMGD
