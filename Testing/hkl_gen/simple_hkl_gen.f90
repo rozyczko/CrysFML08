@@ -10,7 +10,7 @@ Program Test_HKL_GEN
    use CFML_GlobalDeps
    use CFML_gSpaceGroups,  only: SpG_Type, set_SpaceGroup, Set_Gspg_From_String, &
                                  Write_SpaceGroup_info, SuperSpaceGroup_Type,    &
-                                 Set_Conditions_NumOp_EPS
+                                 Set_Conditions_NumOp_EPS,kvect_info_type
    use CFML_Metrics,       only: Cell_G_Type,set_crystal_cell,Write_Crystal_Cell
    use CFML_Reflections,   only: Refl_Type, get_maxnumref, Write_Info_RefList, Reflist_type, Gener_Reflections
    use CFML_Rational
@@ -27,13 +27,18 @@ Program Test_HKL_GEN
    type (Cell_G_Type)           :: cell
    integer                      :: i,j,k,num,nk, ier, MaxNumRef, dr, i_out, Mult
    real(kind=cp),dimension(3)   :: celda, angulo
+   integer, dimension(3,2)      :: hlim
    real(kind=cp)                :: sintlmax,lambda,angle_2theta
    logical                      :: info, mag
-   type (RefList_Type)          :: reflections
+   type(RefList_Type)           :: reflections
+   type(kvect_info_type)        :: kinfo
 
    !---- Initializing ----!
    info=.true.
    num=0
+
+   hlim(:,1)=[-2,-1,-6]
+   hlim(:,2)=[8,8,8]
 
    !---- Procedure ----!
    call Set_Conditions_NumOp_EPS(1024) !Maximum admissible multiplicity
@@ -130,7 +135,6 @@ Program Test_HKL_GEN
       end if
 
       !> Set the range for HKL calculation
-      write(unit=*,fmt=*) " "
       write(unit=*,fmt="(a)",advance="no") " => Maximum Sin_Theta/Lambda (1 reals, if val < 0 => stops): "
       read(unit=*,fmt=*,iostat=ier) sintlmax
       if(ier /= 0) cycle
@@ -143,6 +147,7 @@ Program Test_HKL_GEN
 
       texto = "  1/Angtroms (Sin_Theta/Lambda)"
       dr=3
+      nk=0
       !In case of SuperSpace Group ask for modulation vectors and q-coefficients
       write(unit=*,fmt="(a)",advance="no") " => Consider absences for magnetic reflections? "
       read(unit=*,fmt=*,iostat=ier) car
@@ -197,10 +202,6 @@ Program Test_HKL_GEN
       End select
 
 
-      !> Procedure to calculation all reflections
-      !call Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
-      call Gener_Reflections(Cell,sintlmax,Mag,reflections,grp_espacial, &
-                 order="y",Powder=.true.,Friedel=.true.,Ref_typ=Ref_typ)
 
       !> Output Information
       write(unit=*,fmt="(a)",advance="no") " => Name of the output file: "
@@ -219,7 +220,74 @@ Program Test_HKL_GEN
 
       !> Write the Reflections
 
-      call Write_Info_RefList(reflections, i_out)
+      !> Procedure to calculation all reflections
+      !call Gener_Reflections(Cell,Sintlmax,Mag,Reflex,SpG,kinfo,order,powder,mag_only,Friedel,Ref_typ)
+
+      write(unit=i_out,fmt="(/,a)") " ==========================================================================="
+      write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag)"
+      write(unit=i_out,fmt="(a,/)") " ==========================================================================="
+      if(nk /= 0) then
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,Ref_typ=Ref_typ,kout=kinfo)
+        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+      else
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,Ref_typ=Ref_typ)
+        call Write_Info_RefList(reflections, i_out)
+      end if
+
+     write(unit=i_out,fmt="(/,a)") " ========================================================================================"
+     write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag,order=.true.)"
+     write(unit=i_out,fmt="(a,/)") " ========================================================================================"
+     if(nk /= 0) then
+       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,order=.true.,Ref_typ=Ref_typ,kout=kinfo)
+       call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+     else
+       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,order=.true.,Ref_typ=Ref_typ)
+       call Write_Info_RefList(reflections, i_out)
+     end if
+
+     write(unit=i_out,fmt="(/,a)") " ========================================================================================="
+     write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag,Unique=.true.)"
+     write(unit=i_out,fmt="(a,/)") " ========================================================================================="
+     if(nk /= 0) then
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Unique=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+     else
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Unique=.true.,Ref_typ=Ref_typ)
+        call Write_Info_RefList(reflections, i_out)
+     end if
+
+     write(unit=i_out,fmt="(/,a)") " ==========================================================================================="
+     write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag, Friedel=.true.)"
+     write(unit=i_out,fmt="(a,/)") " ==========================================================================================="
+     if(nk /= 0) then
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+     else
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Friedel=.true.,Ref_typ=Ref_typ)
+        call Write_Info_RefList(reflections, i_out)
+     end if
+
+     write(unit=i_out,fmt="(/,a)") " ===================================================================================================="
+     write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Sintlmax,Mag,Reflex,SpG,order=.true.,Friedel=.true.)"
+     write(unit=i_out,fmt="(a,/)") " ===================================================================================================="
+     if(nk /= 0) then
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+     else
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ)
+        call Write_Info_RefList(reflections, i_out)
+     end if
+
+     write(unit=i_out,fmt="(/,a)") " =============================================================================================="
+     write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Sintlmax,Mag,Reflex,SpG,seqindx=[2,1,3], hlim)"
+     write(unit=i_out,fmt="(a,/)") " =============================================================================================="
+     if(nk /= 0) then
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,seqindx=[2,1,3],Ref_typ=Ref_typ,kout=kinfo,hlim=hlim)
+        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
+     else
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,seqindx=[2,1,3],Ref_typ=Ref_typ,hlim=hlim)
+        call Write_Info_RefList(reflections, i_out)
+     end if
       close(unit=i_out)
    end do
 

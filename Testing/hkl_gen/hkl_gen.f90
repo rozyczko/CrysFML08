@@ -724,6 +724,7 @@ Program Sxtal_Ref_Gen
         call Readn_Set_Magnetic_Kv_Structure(fich_cfl,n_ini,n_end,MGp,Am)
         if(err_CFML%Ierr /= 0 .or. err_CFML%flag) then
             write(unit=*,fmt="(a)") " =>"//err_CFML%Msg
+            write(unit=lun,fmt="(/a/)") " =>"//err_CFML%Msg
             mag_structure=.false.
         else
             mag_structure=.true.
@@ -796,9 +797,8 @@ Program Sxtal_Ref_Gen
                 call Hkl_gen_sxtal(cell,SpG,stlmin,stlmax,hkl,ord)
             end if
         else
-            !call Hkl_Uni(cell,SpG,.true.,stlmin,stlmax,"s",hkl, no_order=.true.)
-            !call Gener_Reflections(Cell,stlmax,Mag,hkl,SpG,Powder=.true.,Ref_typ="SRefl")
-            call Gener_Reflections(Cell,stlmax,.true.,hkl,SpG,Powder=.false.,Ref_typ="SRefl")
+            !call Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
+            call Gener_Reflections(Cell,stlmin,stlmax,hkl,SpG,.true.,Ref_typ="SRefl")
         end if
         nr_resol=hkl%nref
         !Calculation of Structure factors for neutron scattering
