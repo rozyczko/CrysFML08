@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 !!
 Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    implicit none
@@ -786,4 +785,3 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    End Subroutine WriteInfo_Constraints
 
 End SubModule KeyCod_WriteInfo
->>>>>>> ac2a81207cfaec1eea60045e447218d0095d2860
