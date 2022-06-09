@@ -115,9 +115,17 @@
         open(newunit=ideb,file="generated_reflections.txt",status="replace",action="write")
         Select Case (mode)
           Case("SUPER")
-            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Reflex,SpG,kinfo,"order",.true.,cond%mag_only)
+            call Gener_Reflections(Cell,0.0,Sintlmax,Reflex,SpG, &
+                                            cond%magnetic,kinfo, &
+                                            order=.true.,        &
+                                            Unique=.true.,       &
+                                            mag_only=cond%mag_only)
           Case("SHUB")
-            call Gener_Reflections(Cell,Sintlmax,cond%magnetic,Reflex,SpG,order="order",powder=.true.,mag_only=cond%mag_only)
+            call Gener_Reflections(Cell,0.0,Sintlmax,Reflex,SpG, &
+                                            cond%magnetic,       &
+                                            order=.true.,        &
+                                            Unique=.true.,       &
+                                            mag_only=cond%mag_only)
         End Select
         Num_Ref=Reflex%Nref
         Refl%Nref=Num_Ref

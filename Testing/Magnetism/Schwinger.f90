@@ -19,18 +19,17 @@ Program Schwinger
  type (Cell_G_Type)           :: Cell
  type (RefList_Type)          :: hkl
 
- character(len=256)           :: line,filcod,mess
+ character(len=256)           :: line,filcod
  character(len=1)             :: indv
  real(kind=cp)                :: sn,s2,theta,lambda,flip_right,flip_left,up,down,stlmax,Nuc
  real(kind=cp), dimension(3)  :: hn
  integer                      :: lun=1, ier,i,j,ih,ik,iil, MaxNumRef
  complex(kind=cp)             :: fn,fx,fe,fsru,fsrd,fslu,fsld
  real(kind=cp), dimension(6)  :: extc
- !real(kind=cp), dimension(3,3):: ub
  integer,  dimension(:), allocatable :: ind
 
  integer                     :: narg,iext
- Logical                     :: esta, arggiven=.false.,ext=.false.,ok !,ubgiven=.false.,left=.false.
+ Logical                     :: esta, arggiven=.false.,ext=.false. !,ubgiven=.false.,left=.false.
 
  Type(Scattering_Species_Type) :: Scattf, add_Scat
 
