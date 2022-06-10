@@ -1016,11 +1016,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       character(len=256)                           :: gList,loc_str
       type(rational), dimension(3)                 :: ta,tb,tc,ti,tr1,tr2
 
-      logical :: by_Gen=.false., by_Hall=.false., ok1=.false., ok2=.false., ok3=.false., &
-                 magnetic=.true.
-
+      logical :: by_Gen, by_Hall, ok1, ok2, ok3, magnetic
       !> Init
-
+      by_Gen=.false.; by_Hall=.false.
+      ok1=.false.; ok2=.false.; ok3=.false.
+      magnetic=.true.
       n_gen=0
       gList=" "
       n_it=0
