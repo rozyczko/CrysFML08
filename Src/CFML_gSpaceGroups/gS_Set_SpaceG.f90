@@ -999,13 +999,13 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen,debug, set_inv)
+   Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, set_inv)
       !---- Arguments ----!
       character(len=*),                          intent(in ) :: Str
       class(spg_type),                           intent(out) :: SpaceG
       integer,                         optional, intent(in ) :: NGen
       character(len=*),  dimension(:), optional, intent(in ) :: Gen
-      logical,                         optional, intent(in ) :: debug, set_inv
+      logical,                         optional, intent(in ) :: set_inv
 
       !---- Local Variables ----!
       integer                                      :: i,n_gen, n_it, d, ier !,j
@@ -1084,11 +1084,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               call Group_Constructor(loc_Str,SpaceG)
             end if
             if (SpaceG%D == 4) then
-               if (present(debug)) then
-                  call Identify_Group(SpaceG)
-               else
-                  call Identify_Group(SpaceG)
-               end if
+               call Identify_Group(SpaceG)
                if (Err_CFML%Ierr == 1) then
                   write(unit=*,fmt="(a)") "  WARNING: "//Err_CFML%Msg
                   call clear_error()
