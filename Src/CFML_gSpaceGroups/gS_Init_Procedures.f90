@@ -37,7 +37,6 @@ SubModule (CFML_gSpaceGroups) gS_Init_Procedures
       Select Type(mGrp => Grp)
 
          class is (Spg_Type)
-            mGrp%magnetic        =.true.
             mGrp%standard_setting=.false.
             mGrp%numspg      = 0
             mGrp%numshu      = 0
