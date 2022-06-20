@@ -1,4 +1,3 @@
-!!
 Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    implicit none
 
@@ -253,6 +252,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
                   end if
                end do
 
+<<<<<<< .mine
             Type is (ModAtm_Ref_Type)
                do i=1,NP_Ref
                   n=0
@@ -392,3 +392,144 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
 
 End SubModule KeyCod_WriteInfo
 
+=======
+            Type is (ModAtm_Ref_Type)
+               do i=1,NP_Ref
+                  n=0
+                  do j=1,AtList%natoms
+                     n=n+count(A(j)%L_X == i)
+                     n=n+count(A(j)%L_u ==i)
+                     if (A(j)%L_occ==i)   n=n+1
+                     if (A(j)%L_U_iso==i) n=n+1
+
+                     n=n+count(A(j)%L_Ocs ==i)
+                     n=n+count(A(j)%L_Bcs ==i)
+                     n=n+count(A(j)%L_Mcs ==i)
+                     n=n+count(A(j)%L_Dcs ==i)
+                     n=n+count(A(j)%L_Ucs ==i)
+                  end do
+
+                  if (n > 1) then
+                     do j=1,AtList%natoms
+                        !> X's
+                        do k=1,3
+                           if (A(j)%l_x(k) == i) then
+                              car=trim(key_atm(k))//trim(A(j)%lab)
+                              if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                              np=np+1
+                              write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)), A(j)%m_x(k)
+                           end if
+                        end do
+
+                        !> Occ
+                        if (A(j)%l_occ == i) then
+                           car=trim(key_atm(5))//trim(A(j)%lab)
+                           if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                           np=np+1
+                           write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)), A(j)%m_occ
+                        end if
+
+                        !> U_iso
+                        if (A(j)%l_U_iso == i) then
+                           car=trim(key_atm(6))//trim(A(j)%lab)
+                           if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                           np=np+1
+                           write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_U_iso
+                        end if
+
+                        !> U's
+                        do k=1,6
+                           if (A(j)%l_u(k) == i) then
+                              car=trim(key_atm(7+k))//trim(A(j)%lab)
+                              if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                              np=np+1
+                              write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_u(k)
+                           end if
+                        end do
+
+                        !> Ocs
+                        nmax=2
+                        do k=1,MAX_MOD
+                           do m=1,nmax
+                              if (A(j)%l_Ocs(m,k) == i) then
+                                 car='XXX'//'_'//trim(A(j)%lab)
+                                 if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                                 np=np+1
+                                 write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_Ocs(m,k)
+                              end if
+                           end do
+                        end do
+
+                        !> Bcs
+                        nmax=2
+                        do k=1,MAX_MOD
+                           do m=1,nmax
+                              if (A(j)%l_Bcs(m,k) == i) then
+                                 car='XXX'//'_'//trim(A(j)%lab)
+                                 if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                                 np=np+1
+                                 write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_Bcs(m,k)
+                              end if
+                           end do
+                        end do
+
+                        !> Mcs
+                        nmax=6
+                        do k=1,MAX_MOD
+                           do m=1,nmax
+                              if (A(j)%l_Mcs(m,k) == i) then
+                                 car='XXX'//'_'//trim(A(j)%lab)
+                                 if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                                 np=np+1
+                                 write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_Mcs(m,k)
+                              end if
+                           end do
+                        end do
+
+                        !> Dcs
+                        nmax=6
+                        do k=1,MAX_MOD
+                           do m=1,nmax
+                              if (A(j)%l_Dcs(m,k) == i) then
+                                 car='XXX'//'_'//trim(A(j)%lab)
+                                 if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                                 np=np+1
+                                 write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_Dcs(m,k)
+                              end if
+                           end do
+                        end do
+
+                        !> Ucs
+                        nmax=12
+                        do k=1,MAX_MOD
+                           do m=1,nmax
+                              if (A(j)%l_Ucs(m,k) == i) then
+                                 car='XXX'//'_'//trim(A(j)%lab)
+                                 if (trim(car)==trim(Vec_NamePar(i))) cycle
+
+                                 np=np+1
+                                 write(unit=lun,fmt=fmt1)  np, trim(car), trim(Vec_NamePar(i)),A(j)%m_Ucs(m,k)
+                              end if
+                           end do
+                        end do
+
+                     end do ! Natoms
+                  end if
+               end do
+
+         end select
+      end associate
+
+   End Subroutine WriteInfo_Constraints
+
+End SubModule KeyCod_WriteInfo
+
+>>>>>>> .theirs
