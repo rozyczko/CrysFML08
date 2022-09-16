@@ -7,37 +7,40 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
    !!----
    !!---- SUBROUTINE GET_BLOCK_KEY
    !!----
-   !!----      %Pattern N
+   !!----      %Pattern ID_String
    !!----      .....
    !!----      %EndPattern
    !!----
    !!---- Update: 12/05/2022
    !!
-   Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nkey, Ind)
+   Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nb, Ind, ID_Str)
       !---- Arguments ----!
-      character(len=*),        intent(in)  :: Key         ! 'Pattern','Molec',....
-      Type(file_type),         intent(in)  :: ffile
-      integer,                 intent(in)  :: n_ini
-      integer,                 intent(in)  :: n_end
-      integer,                 intent(out) :: Nkey
-      integer, dimension(:,:), intent(out) :: Ind    ! (1,-):Start; (2,-): End
+      character(len=*),              intent(in)  :: Key         ! 'Pattern','Molec',....
+      Type(file_type),               intent(in)  :: ffile
+      integer,                       intent(in)  :: n_ini
+      integer,                       intent(in)  :: n_end
+      integer,                       intent(out) :: Nb          ! Number of blocks
+      integer, dimension(:,:),       intent(out) :: Ind         ! 1:Start; 2: End
+      character(len=*),dimension(:), intent(out) :: ID_Str      ! String identification
 
      !---- Local Arguments ----!
      logical                          :: Debug=.false.
-     integer                          :: i,j,k,n,nc,iv,kmax
-     character(len=3)                 :: car
+
+     integer                          :: i,j,k,n,nc,iv
+     character(len=40)                :: car,str
 
      !> Init
-     car=u_case(key)
-
-     NKey=0
      Ind=0
-     kmax=0
+     ID_Str=' '
+
+     car=u_case(trim(key))
+     k=0
 
      i=N_ini
      do while(i <= N_end)
         line=adjustl(ffile%line(i)%str)
 
+        !> No comments, No blank lines
         if (line(1:1) =='!') then
            i=i+1
            cycle
@@ -47,12 +50,14 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
            cycle
         end if
 
+        !> Purge comments
         j=index(line,'!')
         if (j > 0) line=line(:j-1)
         j=index(line,'#')
         if (j > 0) line=line(:j-1)
 
-        j=index(u_case(line),'%'//car)
+        !> Block type
+        j=index(u_case(line),'%'//trim(car))
         if (j <=0) then
            i=i+1
            cycle
@@ -60,36 +65,28 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
         call cut_string(line)
 
-        k=0
-        if (len_trim(line) ==0) then
-           k=1
-        else
-           call get_words(line, dire, nc)
-           call get_num(dire(1), vet, ivet, iv)
-           if (iv < 1) then
-              call set_error(-1, " You have to give the number indentification in Block definition")
-              return
-           end if
-           k=ivet(1)
-
-           !> Check if k > Dim_MAX
-           if (size(ind,dim=2) < k) then
-              call set_error(1, " You are given an outrange for number indentification in Block definition")
-              return
-           end if
+        !> Identification String
+        call get_words(line, dire, nc)
+        if ( nc /= 1) then
+           call set_error(-1, " You have to give an identification name in Block definition")
+           return
         end if
-        kmax=max(kmax,k)
+
+        str=adjustl(dire(1))
 
         do n=i+1,n_end
            line=adjustl(ffile%line(n)%str)
            if (line(1:1) =='!') cycle
            if (line(1:1) ==' ') cycle
 
-           j=index(u_case(line),'%END'//car)
+           j=index(u_case(line),'%END_'//trim(car))
            if (j <= 0) cycle
 
+           !> Max dimension for Ind and ID_Str. Pay attention
+           k=k+1
            Ind(1,k)=i+1
            Ind(2,k)=n-1
+           ID_Str(k)=adjustl(str)
 
            i=n
            exit
@@ -97,33 +94,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
         i=i+1
      end do
 
-     do i=1, kmax
-        if (Ind(1,i) == 0) cycle
-
-        if (Ind(1,i) > 0 .and. Ind(2,i) ==0) then
-           call set_error(1,"Error in Block definition! Please, check it")
-           NKey=0
-           return
-
-        else if (Ind(1,i) > Ind(2,i) ) then
-           !> Empty block
-           Ind(1,i) =0
-           Ind(2,i) =0
-
-        else
-           NKey=NKey+1
-        end if
-     end do
-
-     !> Debug
-     if (debug .and. nKey > 0) then
-        write(unit=*,fmt='(a,i3)') 'Number of Blocks readed: ',NKey
-        do i=1,kmax
-           if (Ind(1,i)==0) cycle
-           write(unit=*,fmt='(a,i3,2x,a,i5,2x,a,i5)') 'Key: '//car, i, 'Ini: ',Ind(1,i), 'End: ',Ind(2,i)
-        end do
-        write(unit=*,fmt='(a)') ' '
-     end if
+     Nb = k
 
   End Subroutine Get_Block_Key
 
@@ -159,7 +130,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
          !> N_ini point the next line into Command zone
          if (n_Ini == 0) then
-            j=index(u_case(line),'COMMA')
+            j=index(u_case(line),'COMMAND')
             if (j > 0) then
                n_ini=i+1
                cycle
@@ -168,7 +139,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
          !> N_end point the previous line from end Command zone
          if (n_ini > 0 .and. i >= n_ini) then
-            j=index(u_case(line),'END COM')
+            j=index(u_case(line),'END_COMM')
             if (j > 0) then
                n_End=i-1
                exit
