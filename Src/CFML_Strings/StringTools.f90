@@ -294,7 +294,7 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!----    A call like:  call Get_Separator_Pos(line,',',pos,ncar) provides
    !!----    ncar= 3
-   !!----    pos= (/ 4, 25, 36, 0, ..../)
+   !!----    pos= [ 4, 25, 36, 0, ....]
    !!----
    !!---- 05/04/2019
    !!

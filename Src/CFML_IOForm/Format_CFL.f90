@@ -102,6 +102,7 @@ SubModule (CFML_IOForm) Format_CFL
          na=na+1
          call read_atom(line, Atmlist%atom(na))  ! Utype is read now in the line
          Atmlist%atom(na)%ThType="iso"
+         if(len_trim(Atmlist%atom(na)%SfacSymb) == 0) Atmlist%atom(na)%SfacSymb=Atmlist%atom(na)%chemSymb
 
          !Debugging
          !associate (Atm => Atmlist%atom)
