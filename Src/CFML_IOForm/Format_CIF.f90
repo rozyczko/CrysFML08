@@ -2979,8 +2979,11 @@ SubModule (CFML_IOForm) Format_CIF
       class (Spg_type), intent(in) :: Spg
 
       !---- Local Variables ----!
-      integer :: i
+      integer :: i,pos
+      logical :: cryst_group
 
+      cryst_group=.true.
+      if(any(Spg%Op(:)%Time_Inv == -1)) cryst_group=.false.
       write(unit=ipr,fmt="(a)") " "
 
       line=adjustl(Spg%crystalsys)
@@ -3013,10 +3016,18 @@ SubModule (CFML_IOForm) Format_CIF
 
       write(unit=ipr,fmt="(a)") "loop_"
       write(unit=ipr,fmt="(a)") "    _space_group_symop_operation_xyz"
-      do i=1,SpG%multip
-         line="'"//trim(l_case(SpG%Symb_Op(i)))//"'"
-         write(unit=ipr,fmt="(a)") trim(line)
-      end do
+      if(cryst_group)  then
+        do i=1,SpG%multip
+           pos=index(SpG%Symb_Op(i),",",back=.true.)-1
+           line="'"//l_case(SpG%Symb_Op(i)(1:pos))//"'"
+           write(unit=ipr,fmt="(a)") trim(line)
+        end do
+      else
+        do i=1,SpG%multip
+           line="'"//trim(l_case(SpG%Symb_Op(i)))//"'"
+           write(unit=ipr,fmt="(a)") trim(line)
+        end do
+      end if
       write(unit=ipr,fmt="(a)") " "
 
    End Subroutine Write_CIF_Spg

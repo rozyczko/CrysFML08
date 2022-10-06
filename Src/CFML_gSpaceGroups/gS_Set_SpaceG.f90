@@ -255,7 +255,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
         SpG%Op(i)%time_inv=SpaceG%Op(i)%time_inv
         SpG%Op(i)%dt=SpaceG%Op(i)%dt
         SpG%Symb_Op(i)=Get_Symb_from_Mat(SpG%Op(i)%Mat, Strcode,SpG%Op(i)%time_inv)
-        if(i > 1 .and. i < SpaceG%Numops) then
+        if(i > 1 .and. i <= SpaceG%Numops) then
           k=k+1
           gen_new(k)=SpG%Symb_Op(i)
         end if

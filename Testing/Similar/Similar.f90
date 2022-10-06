@@ -441,14 +441,12 @@
 
           call get_transf_list(trans,orig,pl,pl_n)  !Transform the list in SpaceGroup to the list in SPGn
           if(Err_CFML%Ierr == 0) then
-             !k=0
-             !do j=1,pl_n%np
              !CALL CPU_TIME(seconds)
              call set_orbits_inlist(SubGroup(i),pl_n)     !Determines the decomposition of orbits w.r.t. SubGroup(i)
+             norbi=maxval(pl_n%p(1:pl_n%np))
              !CALL CPU_TIME(end_time)
              !write(unit=*,fmt="(a,f9.3,a)") " =>set_orbits_inlist calculated !, CPU-time: ",end_time-seconds, " seconds"
              if(full_given) then
-               norbi=maxval(pl_n%p(1:pl_n%np))
                write(unit=lun,fmt="(a,i3,a)")     " => Atom number: ",n," of label: "//trim(A%atom(n)%lab)
                write(unit=lun,fmt="(a,2(i3,a))")  "    List of equivalent atoms in the subgroup: ",pl_n%np,&
                                                   " atoms in " ,norbi, " orbits"

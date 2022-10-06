@@ -40,7 +40,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
       integer  :: i,L,j,k,d, nc, mp,ngen,nla,n,nop,ng,i1,i2,nalloc !,idx
       character (len=40), dimension(:),allocatable :: gen,gen_min
       character (len=40), dimension(Spg%Num_Lat)   :: gen_lat
-      character (len=256),dimension(:),allocatable :: list_gen
+      character (len=512),dimension(:),allocatable :: list_gen
       character (len=40)                           :: gen_cent, gen_aux
 
       type(Symm_Oper_Type)                         :: Op_cent, Op_aux
@@ -93,6 +93,12 @@ SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
       !> Formation of the list of possible generators extracted from list of generators of
       !> the input Group
       call Get_Generators(SpG%generators_list,d,gen_min, ngen)
+      
+      !write(*,"(a)")  "  Input generator list: "//trim(SpG%generators_list)
+      !write(*,"(a,i5)")  "  Number of generators: ",ngen
+      !do i=1,ngen
+      !  write(*,"(i5,a)") i, "  "//trim(gen_min(i))
+      !end do
 
       !>Purge the list of operators eliminating centre of symmetry and Lattice Translations
       n=0
@@ -157,6 +163,13 @@ SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
       end if
 
       mp=L
+
+      !do i=1,L
+      !  write(*,"(i5,a)") i, "  "//list_gen(i)
+      !end do
+      !do i=1,SpG%num_lat
+      !  write(*,"(i5,a)") i, "  Latt: "//gen_lat(i)
+      !end do
 
       if (SpG%num_lat > 0)  then
          do_jl: do j=1,SpG%num_lat
@@ -348,7 +361,6 @@ SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
             end do
          end do do_3g
       end if
-
       mp=L
 
       if (SpG%num_lat > 0)  then
