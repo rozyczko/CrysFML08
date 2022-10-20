@@ -240,9 +240,9 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   end if
                end do
 
-               fmt3="(T7,a,t15,a, i3,a,t47,6f10.5)"
-               fmt4="(T7,a,t15,a, i3,a,t47,f10.5,tr20,f10.5)"
-               fmt5="(T7,a,t15,a, i3,a,t45,12f10.5)"
+               fmt3="(T7,a,t15,a, i3,a,t47,6f10.5,a)"
+               fmt4="(T7,a,t15,a, i3,a,t47,f10.5,tr20,f10.5,a)"
+               fmt5="(T7,a,t15,a, i3,a,t45,12f10.5,a)"
                Aux_st="Harmonic"
                if(present(SpG)) then
                  write(unit=fmt3(13:13),fmt="(i1)") SpG%nk
@@ -269,7 +269,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
 
                        do j=1,atm(n)%n_mc
                          k=atm(n)%pmc_q(j)
-                         write(unit=lun,fmt=fmt3)   trim(Atm(n)%Lab),           "        Moment    [",SpG%Q_coeff(:,k),"]", Atm(n)%Mcs(:,j)
+                         write(unit=lun,fmt=fmt3)   trim(Atm(n)%Lab),           "        Moment    [",SpG%Q_coeff(:,k),"]", Atm(n)%Mcs(:,j),"  Constraints: "//trim(Atm(n)%AtmInfo)
                        end do
                        do j=1,atm(n)%n_dc
                          k=atm(n)%pdc_q(j)
@@ -279,6 +279,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                          k=atm(n)%poc_q(j)
                          write(unit=lun,fmt=fmt4)   trim(Atm(n)%Lab), "     Occupancy    [",SpG%Q_coeff(:,k),"]", Atm(n)%Ocs(:,j)
                        end do
+
                     end do
 
                   else

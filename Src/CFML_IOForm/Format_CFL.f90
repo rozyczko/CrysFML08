@@ -532,13 +532,14 @@ SubModule (CFML_IOForm) Format_CFL
       Select Type (SpG)
          Class is (SuperSpaceGroup_Type)
             dr=d-1
+            nk=dr-3
             Mult=SpG%Multip
             if (allocated(SpG%kv))      deallocate (SpG%kv)
             if (allocated(SpG%nharm))   deallocate (SpG%nharm)
             if (allocated(SpG%sintlim)) deallocate (SpG%sintlim)
             if (allocated(SpG%q_coeff)) deallocate (SpG%q_coeff)
 
-            allocate(SpG%Rot(3,3,Mult),SpG%t(3,Mult),SpG%tI(dr,Mult),SpG%M(dr,3,Mult),SpG%Ep(dr,dr,Mult))
+            allocate(SpG%Rot(3,3,Mult),SpG%t(3,Mult),SpG%tI(nk,Mult),SpG%M(nk,3,Mult),SpG%Ep(nk,nk,Mult))
 
             do i=1,Mult
                 SpG%Rot(:,:,i)=SpG%Op(i)%Mat(1:3,1:3)
