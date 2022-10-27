@@ -903,8 +903,8 @@
           np2=index(dire,")")
 
           if ( (np2 < np1) .or.               &  ! ")" before than "("
-               (np1==0 .and. np2 >0) .or.     &  ! "(" doesn"t exists
-               (np2==0 .and. np1 >0) ) then      ! ")" doesn"t exists
+               (np1 == 0 .and. np2 > 0) .or.     &  ! "(" doesn"t exists
+               (np2 == 0 .and. np1 > 0) ) then      ! ")" doesn"t exists
              err_cfml%ierr=1
              err_cfml%msg="Wrong format using Standard values"
              return
@@ -914,7 +914,7 @@
              call get_num(dire,vet,ivet,iv)
              if (iv /= 1 .or. Err_CFML%ierr /=0) then
                 err_cfml%ierr=1
-                err_cfml%msg="Bad format in Get_NumStd procedure"
+                err_cfml%msg="Bad format in Get_NumStd procedure, directive -> "//trim(dire)//"  Input string:"//trim(Str)
                 return
              end if
              ic=ic+1
@@ -926,7 +926,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1 .or. Err_CFML%ierr /=0) then
                    err_cfml%Ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure"
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm1 -> "//trim(numm)//"  Input string:"//trim(Str)
                    return
                 end if
                 ic=ic+1
@@ -935,7 +935,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure"
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm2 -> "//trim(numm)//"  Input string:"//trim(Str)
                    return
                 end if
                 std(ic)=vet(1)
@@ -944,16 +944,16 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1 .or. Err_CFML%ierr /=0) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure"
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm3 -> "//trim(numm)//"  Input string:"//trim(Str)
                    return
                 end if
                 ic=ic+1
                 value(ic)=vet(1)
                 numm=dire(np1+1:np2-1)
                 call get_num(numm,vet,ivet,iv)
-                if (iv /= 1 .or. Err_CFML%ierr /=0) then
+                if (iv /= 1 .or. Err_CFML%ierr /= 0) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure"
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm4 -> "//trim(numm)//"  Input string:"//trim(Str)
                    return
                 end if
                 std(ic)=vet(1)/(10.0_cp**np)

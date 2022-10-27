@@ -89,9 +89,11 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
       character(len=:),allocatable :: fmt1,fmt2,fmt3,fmt4,fmt5,Aux_st
       character(len=:),allocatable :: line
       integer                      :: n, lun, k, j, iph, iph_min, iph_max
+      logical                      :: Wyck
 
       !> Init
       lun=6
+      Wyck=.false.
       if (present(iunit)) lun=iunit
 
       !> Header
@@ -130,7 +132,6 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
 
          if (car2 == "ISO") then
             line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
-
          else
             car2=trim(u_case(A%Atom(1)%Utype))
             select case (trim(car2))
@@ -146,14 +147,22 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                case default
                   line="  Atom        Scatt / Chem     Mult   x/a       y/b       z/c     B[iso]        Occ"
             end select
+
          end if
+         do j=1,A%natoms
+           if(len_trim(A%atom(j)%Wyck) /= 0) then
+             Wyck=.true.
+             exit
+           end if
+         end do
+         if(Wyck) line=trim(line)//"  Wyckoff"
          write(unit=lun,fmt="(T3,a)") trim(line)
 
          line=repeat("=", len_trim(line))
          write(unit=lun,fmt="(T3,a)") trim(line)
 
-         fmt1="(T3,a,T6,a,T18,a,T32,i4,5f10.5)"     ! Iso
-         fmt2="(T3,a,T6,a,T18,a,T32,i4,11f10.5)"    ! Aniso
+         fmt1="(T3,a,T6,a,T18,a,T32,i4,5f10.5,tr6,a)"     ! Iso
+         fmt2="(T3,a,T6,a,T18,a,T32,i4,11f10.5,tr6,a)"    ! Aniso
 
          select type (Atm => A%atom)
             type is (atm_type)
@@ -167,10 +176,10 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   select case (trim(car2))
                      case ('ISO')
                         write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab),  Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb , &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%Wyck
                      case ('ANI')
                         write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U, Atm(n)%Wyck
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
@@ -195,10 +204,10 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   select case (trim(car2))
                      case ('ISO')
                         write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%Wyck
                      case ('ANI')
                         write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U, Atm(n)%Wyck
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
@@ -223,10 +232,10 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   select case (trim(car2))
                      case ('ISO')
                         write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%Wyck
                      case ('ANI')
                         write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), Atm(n)%SfacSymb//" / "// Atm(n)%chemSymb, &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U, Atm(n)%Wyck
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))
@@ -240,9 +249,9 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   end if
                end do
 
-               fmt3="(T7,a,t15,a, i3,a,t47,6f10.5)"
-               fmt4="(T7,a,t15,a, i3,a,t47,f10.5,tr20,f10.5)"
-               fmt5="(T7,a,t15,a, i3,a,t45,12f10.5)"
+               fmt3="(T7,a,t15,a, i3,a,t47,6f10.5,a)"
+               fmt4="(T7,a,t15,a, i3,a,t47,f10.5,tr20,f10.5,a)"
+               fmt5="(T7,a,t15,a, i3,a,t45,12f10.5,a)"
                Aux_st="Harmonic"
                if(present(SpG)) then
                  write(unit=fmt3(13:13),fmt="(i1)") SpG%nk
@@ -269,7 +278,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
 
                        do j=1,atm(n)%n_mc
                          k=atm(n)%pmc_q(j)
-                         write(unit=lun,fmt=fmt3)   trim(Atm(n)%Lab),           "        Moment    [",SpG%Q_coeff(:,k),"]", Atm(n)%Mcs(:,j)
+                         write(unit=lun,fmt=fmt3)   trim(Atm(n)%Lab),           "        Moment    [",SpG%Q_coeff(:,k),"]", Atm(n)%Mcs(:,j),"  Constraints: "//trim(Atm(n)%AtmInfo)
                        end do
                        do j=1,atm(n)%n_dc
                          k=atm(n)%pdc_q(j)
@@ -279,6 +288,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                          k=atm(n)%poc_q(j)
                          write(unit=lun,fmt=fmt4)   trim(Atm(n)%Lab), "     Occupancy    [",SpG%Q_coeff(:,k),"]", Atm(n)%Ocs(:,j)
                        end do
+
                     end do
 
                   else
@@ -339,10 +349,10 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
                   select case (trim(car2))
                      case ('ISO')
                         write(unit=lun,fmt=fmt1)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb)//" / "//trim(Atm(n)%chemSymb), &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%Wyck
                      case ('ANI')
                         write(unit=lun,fmt=fmt2)  car, trim(Atm(n)%Lab), trim(Atm(n)%SfacSymb)//" / "//trim(Atm(n)%chemSymb), &
-                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U
+                             Atm(n)%mult,  Atm(n)%X, Atm(n)%U_iso, Atm(n)%Occ, Atm(n)%U, Atm(n)%Wyck
                   end select
                   if(Atm(n)%magnetic)  then
                        Select Case (trim(u_case(a%mcomp)))

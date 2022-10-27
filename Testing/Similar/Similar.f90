@@ -146,7 +146,7 @@
 
     call Write_SpaceGroup_Info(SpaceGroup,lun)
     call Write_Crystal_Cell(Cell,lun)
-    call Write_Atom_List(A,lun)
+    call Write_Atom_List(A,Iunit=lun)
     call Extend_Atom_List(SpaceGroup,cell,A,Ate,lun)
     n_ini=1
     n_end=file_dat%nlines
@@ -160,8 +160,8 @@
     none_given=.false.
     call clear_error()
     do i=4,n_end
+      write(*,"(a)") " -> "//file_dat%line(i)%str
       line=l_case(adjustl(file_dat%line(i)%str))
-      write(*,"(a)") " -> "//line
       if(line(1:1) == "!") cycle
       if(line(1:4) == "none") none_given=.true.
       j=index(line," ")
@@ -251,7 +251,7 @@
         write(unit=*,fmt="(a)") trim(err_CFML%Msg)
       end if
       ! Write the atoms the in new asymmetric unit
-      call Write_Atom_List(A_n,lun)
+      call Write_Atom_List(A_n,Iunit=lun)
 
       if(full_given) then
         write(unit=lun,fmt="(/,a,/,a,/)")" => List of all atoms in the new cell", &

@@ -452,15 +452,19 @@ SubModule (CFML_IOForm) Format_CIF
       integer, optional,  intent(in)  :: i_ini, i_end
 
       !---- Local Variables ----!
-      logical                             :: ssg, aniso_found
+      logical                             :: ssg, aniso_found, atom_type_found
       character(len=20),dimension(15)     :: label
-      integer                             :: i, j, n, nc, iv, First, nl,npos
-      integer, dimension( 8)              :: lugar   !   1 -> label
+      character(len=:),allocatable        :: aux_label
+      integer                             :: i, j, n, nc, iv, First, nl,npos,ja_ini
+      integer, dimension(11)              :: lugar   !   1 -> label
                                                      !   2 -> Symbol
                                                      ! 3-5 -> coordinates
                                                      !   6 -> occupancy
                                                      !   7 -> Uequi
                                                      !   8 -> Biso
+                                                     !   9 -> Multiplicity of the site
+                                                     !  10 -> Wyckoff label letter
+                                                     !  11 -> Oxidation number
       real(kind=cp), dimension(1)     :: vet1,vet2
       !integer,       dimension(1)     :: ivet
 
@@ -481,6 +485,7 @@ SubModule (CFML_IOForm) Format_CIF
          return
       end if
       aniso_found=.false.
+      atom_type_found=.false.
       j_ini=1; j_end=cif%nlines
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
@@ -502,7 +507,7 @@ SubModule (CFML_IOForm) Format_CIF
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         !> eliminar tabs
+         !> elimination of tabs
          do
             iv=index(line,TAB)
             if (iv == 0) exit
@@ -560,12 +565,21 @@ SubModule (CFML_IOForm) Format_CIF
             case ('_atom_site_adp_type')
                j=j+1
                lugar(8)=j
+            case ('_atom_site_symmetry_multiplicity')
+               j=j+1
+               lugar(9)=j
+            case ('_atom_site_Wyckoff_symbol')
+               j=j+1
+               lugar(10)=j
+            case ('_atom_site_oxidation_number')
+               j=j+1
+               lugar(11)=j
          end select
       end do
 
       if (any(lugar(3:5) == 0)) then
          err_CFML%Ierr=1
-         err_CFML%Msg="Read_Cif_Atom: Error reading atoms in CIF format!"
+         err_CFML%Msg="Read_Cif_Atom: Error reading atom positions in CIF format!"
          return
       end if
 
@@ -576,14 +590,14 @@ SubModule (CFML_IOForm) Format_CIF
          line=adjustl(cif%line(i)%str)
 
          if (line(1:1) == '#') cycle
-         if (len_trim(line) <=0) exit
+         if (len_trim(line) <= 0) exit
          if (line(1:1) == "_" .or. line(1:5) == "loop_") exit
          n=n+1
          cycle
       end do
-      if (n <=0) then
+      if (n <= 0) then
          err_CFML%Ierr=1
-         err_CFML%Msg="Read_Cif_Atom: Error reading atoms in CIF format!"
+         err_CFML%Msg="Read_Cif_Atom: Error determining the number of atoms in CIF format!"
          return
       end if
 
@@ -603,7 +617,7 @@ SubModule (CFML_IOForm) Format_CIF
          if (line(1:1) == "_" .or. line(1:5) == "loop_") exit
 
          call get_words(line, label, nc)
-         if (nc <=0) then
+         if (nc <= 0) then
             err_CFML%Ierr=1
             err_CFML%Msg="Read_CIF_Atom: Something is wrong in "//trim(line)
             return
@@ -630,11 +644,17 @@ SubModule (CFML_IOForm) Format_CIF
             end if
             atm%atom(n)%SfacSymb=atm%atom(n)%chemSymb
          end if
+
          !Get the Atomic number from the chemical symbol
 
          atm%atom(n)%Z=Get_Z_Symb(atm%atom(n)%chemSymb)
-         !Check if the charge/valence is provided ins the SfacSymb item
-         atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
+         if(lugar(11) /= 0) then
+           call get_numstd(label(lugar(11)),vet1,vet2,iv)
+           atm%atom(n)%charge=vet1(1)
+         else
+           !Check if the charge/valence is provided ins the SfacSymb item
+           atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
+         end if
 
          !> Coordinates
          select type (at => atm%atom)
@@ -665,17 +685,29 @@ SubModule (CFML_IOForm) Format_CIF
             vet1=1.0
             vet2=0.0_cp
          end if
+
+         !> _Wyckof info
+         if (lugar(9) /= 0 .and. lugar(10) /= 0) then
+            aux_label=trim(label(lugar(9)))//trim(label(lugar(10)))
+         else
+            aux_label=" "
+         end if
+
          select type (at => atm%atom)
             type is (atm_type)
                at(n)%occ=vet1(1)
+               at(n)%Wyck=aux_label
 
             type is (atm_std_type)
                at(n)%occ=vet1(1)
                at(n)%occ_std=vet2(1)
+               at(n)%Wyck=aux_label
 
             class is (ModAtm_std_type)
                at(n)%occ=vet1(1)
                at(n)%occ_std=vet2(1)
+               at(n)%Wyck=aux_label
+
          end select
 
          !> U_iso
@@ -718,16 +750,89 @@ SubModule (CFML_IOForm) Format_CIF
          end if
       end do
 
+      j_ini=i  !This is kept fixed for anisotropic search, below we use ja_ini
+      !> Search for _atom_type_symbol and _atom_type_oxidation_number
+      str="_atom_type_symbol"
+      nl=len_trim(str)
+
+      do i=j_ini,j_end
+         line=adjustl(cif%line(i)%str)
+         if (len_trim(line) <= 0) cycle
+         if (line(1:1) == '#') cycle
+         !> elimination of tabs
+         do
+            iv=index(line,TAB)
+            if (iv == 0) exit
+            line(iv:iv)=' '
+         end do
+         npos=index(line,str)
+         if (npos == 0) cycle
+         !> search the loop
+         do j=i-1,j_ini,-1
+            line=adjustl(cif%line(j)%str)
+            if (len_trim(line) <= 0) cycle
+            if (line(1:1) == '#') cycle
+            npos=index(line,'loop_')
+            if (npos == 0) cycle
+            ja_ini=j+1
+            atom_type_found=.true.
+            exit
+         end do
+         exit
+      end do
+
+      if(atom_type_found) then
+        lugar=0
+        j=0
+        do i=ja_ini,j_end
+            line=adjustl(cif%line(i)%str)
+            if (len_trim(line) <= 0) cycle
+            if (line(1:1) == '#') cycle
+            if (line(1:5) /='_atom') exit
+            select case (trim(line))
+               case ('_atom_type_symbol')
+                  j=j+1
+                  lugar(1)=j
+               case ('_atom_type_oxidation_number')
+                  j=j+1
+                  lugar(2)=j
+            End Select
+        end do
+        ja_ini=i
+        j=0
+        !> reading atom type symbols
+        do i=ja_ini, j_end
+           line=adjustl(cif%line(i)%str)
+           if (line(1:1) == '#') cycle
+           if (len_trim(line) <= 0) exit
+           if (line(1:1) == "_" .or. line(1:5) == "loop_") exit
+
+           call get_words(line, label, nc)
+
+           if (nc <= 0) then
+              err_CFML%Ierr=1
+              err_CFML%Msg="Read_CIF_Atom: Something is wrong in _atom_type_symbol "//trim(line)
+              return
+           end if
+           j=j+1
+           if(lugar(1) /= 0)  atm%atom(j)%SfacSymb = label(lugar(1))
+           if(lugar(2) /= 0)  then
+             call get_numstd(label(lugar(2)),vet1,vet2,iv)
+             atm%atom(j)%charge=vet1(1)
+           end if
+        end do
+      end if
+
       !> Search loop for atoms in aniso
       str="_atom_site_aniso_label"
       nl=len_trim(str)
-      do i=j_ini,j_end
+      do i=j_ini,j_end  !Here we re-take the initial position after reading atoms
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
-         !> eliminar tabs
+         !> elimination of tabs
          do
             iv=index(line,TAB)
             if (iv == 0) exit
@@ -740,7 +845,7 @@ SubModule (CFML_IOForm) Format_CIF
          !> search the loop
          do j=i-1,j_ini,-1
             line=adjustl(cif%line(j)%str)
-            if (len_trim(line) <=0) cycle
+            if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
 
             npos=index(line,'loop_')
@@ -758,7 +863,7 @@ SubModule (CFML_IOForm) Format_CIF
         do i=j_ini,j_end
            line=adjustl(cif%line(i)%str)
 
-           if (len_trim(line) <=0) cycle
+           if (len_trim(line) <= 0) cycle
            if (line(1:1) == '#') cycle
            if (line(1:5) /='_atom') exit
 
@@ -798,7 +903,7 @@ SubModule (CFML_IOForm) Format_CIF
 
            call get_words(line, label, nc)
 
-           if (nc <=0) then
+           if (nc <= 0) then
               err_CFML%Ierr=1
               err_CFML%Msg="Read_CIF_Atom: Something is wrong in "//trim(line)
               return
@@ -918,7 +1023,7 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       !> Put the first atom the first having a full occupation factor 1.0
-      if (n <=0) return
+      if (n <= 0) return
 
       call allocate_atom_list(n, AtmList,'atm_std_type',0)
       AtmList%atom=atm%atom(1:n)
