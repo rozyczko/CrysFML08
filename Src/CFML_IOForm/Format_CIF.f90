@@ -649,9 +649,8 @@ SubModule (CFML_IOForm) Format_CIF
 
          atm%atom(n)%Z=Get_Z_Symb(atm%atom(n)%chemSymb)
          if(lugar(11) /= 0) then
-           call get_numstd(label(lugar(11)),vet1,vet2,iv)
-           atm%atom(n)%charge=vet1(1)
-         else
+           read(unit=label(lugar(11)),fmt=*) atm%atom(n)%charge
+          else
            !Check if the charge/valence is provided ins the SfacSymb item
            atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
          end if
@@ -817,8 +816,7 @@ SubModule (CFML_IOForm) Format_CIF
            j=j+1
            if(lugar(1) /= 0)  atm%atom(j)%SfacSymb = label(lugar(1))
            if(lugar(2) /= 0)  then
-             call get_numstd(label(lugar(2)),vet1,vet2,iv)
-             atm%atom(j)%charge=vet1(1)
+             read(unit=label(lugar(2)),fmt=*) atm%atom(j)%charge
            end if
         end do
       end if
