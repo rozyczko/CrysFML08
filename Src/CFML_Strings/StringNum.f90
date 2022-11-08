@@ -910,7 +910,7 @@
              return
           end if
 
-          if (np1 == 0 .and. np2 ==0) then
+          if (np1 == 0 .and. np2 == 0) then
              call get_num(dire,vet,ivet,iv)
              if (iv /= 1 .or. Err_CFML%ierr /=0) then
                 err_cfml%ierr=1

@@ -52,7 +52,9 @@ Module CFML_IOForm
                                      Frac_Trans_2Dig, Pack_String
 
    Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
-                                     AtList_Type, Allocate_Atom_List, Init_Atom_Type
+                                     AtList_Type, Allocate_Atom_List, Init_Atom_Type, mAtom_Type, &
+                                     mAtom_List_Type, Allocate_mAtom_list, deAllocate_mAtom_list
+
 
    Use CFML_Metrics,           only: Cell_Type, Cell_G_Type, Set_Crystal_Cell, U_equiv, &
                                      get_U_from_Betas, get_Betas_from_U, get_Betas_from_B
@@ -61,6 +63,8 @@ Module CFML_IOForm
                                      Change_Setting_SpaceG, Set_SpaceGroup, Get_Multip_Pos,&
                                      Get_Orbit, Allocate_Kvector, Write_SpaceGroup_Info, &
                                      Get_Mat_from_Symb, Get_Symb_From_Mat, Get_Dimension_SymmOp
+
+   Use CFML_kvec_Symmetry,     only: MagSymm_k_Type, Readn_Set_Magnetic_Kv_Structure, Magnetic_Domain_type
 
    Use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type
 
@@ -454,6 +458,16 @@ Module CFML_IOForm
          Integer,             optional, intent(in)  :: Nphase
       End Subroutine Read_XTal_CIF
 
+      Module Subroutine Read_XTal_FST(fst, Cell, Spg, Atm, MGp, mAtm, Mag_dom)
+         Type(File_Type),                     intent(in)     :: FST
+         Class(Cell_Type),                    intent(out)    :: Cell
+         Class(SpG_Type),        allocatable, intent(out)    :: SpG
+         Type(AtList_Type),                   intent(out)    :: Atm
+         Type(MagSymm_k_Type),      optional, intent(out)    :: MGp
+         Type(mAtom_List_Type),     optional, intent(out)    :: mAtm
+         Type(Magnetic_Domain_type),optional, intent(out)    :: Mag_dom
+      End Subroutine Read_XTal_FST
+
       Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
          type(File_Type),                 intent(in)  :: cif
          class(Cell_Type),                intent(out) :: Cell
@@ -654,14 +668,17 @@ Module CFML_IOForm
     !!----
     !!---- 09/05/2020
     !!
-    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, IPhase, FType)
+    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, MGp, mAtm, Mag_dom, IPhase, FType)
        !---- Arguments ----!
-       character(len=*),              intent( in)     :: filenam    ! Name of the file
-       class (Cell_G_Type),           intent(out)     :: Cell       ! Cell object
-       class (SpG_Type), allocatable, intent(out)     :: SpG        ! Space Group object
-       type (Atlist_type),            intent(out)     :: Atm        ! Atom List object
-       integer,         optional,     intent(in)      :: IPhase     ! Number of phase
-       type(File_Type), optional,     intent(out)     :: FType      ! File type
+       character(len=*),                    intent( in)     :: filenam    ! Name of the file
+       class(Cell_G_Type),                  intent(out)     :: Cell       ! Cell object
+       class(SpG_Type),        allocatable, intent(out)     :: SpG        ! Space Group object
+       type(Atlist_type),                   intent(out)     :: Atm        ! Atom List object
+       type(MagSymm_k_Type),      optional, intent (out)    :: MGp
+       type(mAtom_List_Type),     optional, intent (out)    :: mAtm
+       type(Magnetic_Domain_type),optional, intent (out)    :: Mag_dom
+       integer,                   optional, intent(in)      :: IPhase     ! Number of phase
+       type(File_Type),           optional, intent(out)     :: FType      ! File type
 
        !---- Local Variables ----!
        character(len=6):: Ext
@@ -696,6 +713,16 @@ Module CFML_IOForm
           case ('INS','RES')
              allocate(SpG_Type :: SpG)
              call Read_XTal_SHX(f, Cell, SpG, Atm)
+          case ('FST')
+             if(present(mAtm) .and. present(MGp)) then
+                if(present(Mag_Dom)) then
+                   call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm, Mag_dom)
+                else
+                   call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm)
+                end if
+             else
+                call Read_XTal_FST(f, Cell, SpG, Atm)
+             end if
           case ('PCR')
           case ('MCIF')
              call Read_XTal_MCIF(f, Cell, Spg, ATM)

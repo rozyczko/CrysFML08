@@ -362,7 +362,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
     !!----
     !!---- Updated: April - 2005, June -2014
     !!
-    Module Subroutine Allocate_Matom_List(N,A,MField,dirF)
+    Module Subroutine Allocate_mAtom_List(N,A,MField,dirF)
        !---- Arguments ----!
        integer,                              intent(in)     :: n  !# atoms in asymmetric magnetic unit
        type (mAtom_list_type),               intent(in out) :: A  !Objet to be allocated
@@ -388,7 +388,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
           call init_mAtom_type(A%Atom(i))
        end do
 
-    End Subroutine Allocate_mAtom_list
+    End Subroutine Allocate_mAtom_List
 
     !!----
     !!---- Module Subroutine Deallocate_mAtom_list(A)

@@ -240,7 +240,7 @@
           line=line(np:)
           call cut_string(line)
           call get_numstd(line,vet1,vet2,iv)
-          if (Err_CFML%ierr /=0) exit
+          if (Err_CFML%ierr /= 0) exit
           nline_ini=i
           exit
        end do
