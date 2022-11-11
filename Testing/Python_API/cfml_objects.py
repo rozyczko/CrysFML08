@@ -2,11 +2,11 @@ class Type_Component():
 
     def __init__(self,name='',xtype='',dim='',value=None,info=''):
 
-        self.name  = name
-        self.xtype = xtype
-        self.dim   = dim
-        self.value = value
-        self.info  = info
+        self.name   = name
+        self.xtype  = xtype
+        self.dim    = dim
+        self.value  = value
+        self.info   = info
 
 class Argument(Type_Component):
 
@@ -39,9 +39,10 @@ class Interface():
 
 class XType():
 
-    def __init__(self,name='',components={}):
+    def __init__(self,name='',parent='',components={}):
 
-        self.name = name
+        self.name       = name
+        self.parent     = parent
         self.components = components.copy()
 
 class Module():
