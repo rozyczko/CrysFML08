@@ -60,11 +60,15 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
         if parser_utils.is_procedure('function',line):
             f_name = parser_utils.get_function_name(line)
             print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
+            modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
+            parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
         elif parser_utils.is_procedure('subroutine',line):
             s_name = parser_utils.get_subroutine_name(line)
             print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
+            modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
+            parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
         n += 1
-
+    return n
 
     # Get functions and subroutines in interfaces
     #n = 0

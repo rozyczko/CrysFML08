@@ -11,6 +11,8 @@ get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
 get_overload_procedures(n : int, lines: list, t : cfml_objects.Interface) -> int
 get_procedure(line : str) -> str
+get_subroutine_arguments(line: str, s : cfml_objects.Subroutine) -> None
+get_subroutine_name(lines : list) -> str
 get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
@@ -19,6 +21,18 @@ is_procedure(procedure : str,line : str) -> bool
 
 """
 import cfml_objects
+
+def get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
+
+    line = line.lower()
+    i = line.find('(')
+    j = line.find(')')
+    l = line[i+1:j].split(',')
+    for arg in l:
+        name = arg.strip()
+        s.arguments[name] = cfml_objects.Argument(name=name)
+
+    return None
 
 def get_component(line : str) -> tuple:
 
