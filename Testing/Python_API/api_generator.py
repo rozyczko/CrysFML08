@@ -7,6 +7,8 @@ November 2022
 Functions
 ---------
 get_cfml_modules_filenames() -> list
+get_overloads(m_name : str,lines : list,n : int =0) -> int
+get_procedures(m_name : str,lines : list,n : int =0) -> int
 get_types(m_name : str,lines : list,n : int =0) -> int
 move_to_source() -> None
 read_cfml_module(file_name : str) -> None
@@ -63,126 +65,17 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
             modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
             parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
             parser_utils.get_function_result(line,modules[m_name].procedures[f_name])
+            n = parser_utils.get_function_types(n+1,lines,modules[m_name].procedures[f_name])
         elif parser_utils.is_procedure('subroutine',line):
             s_name = parser_utils.get_subroutine_name(line)
             print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
             modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
             parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
-        n += 1
+            n += 1
+            #n = parser_utils.get_subroutine_types(n,lines,modules[m_name].procedures[s_name])
+        else:
+            n += 1
     return n
-
-    # Get functions and subroutines in interfaces
-    #n = 0
-    #for line in lines:
-    #    if parser_utils.is_procedure('function',line):
-    #        pass
-    #        #print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.#Style.#RESET_ALL}")
-    #        #parser_utils.get_function(n,lines)
-    #n = 0
-    #for line in lines:
-    #    line = line.lower()
-    #    l = line.split()
-    #    if len(l) == 1 and l[0] == 'interface':
-    #        break
-    #    n += 1
-    #while n < len(lines):
-    #    line = lines[n].lower()
-    #    ii = line.find('module')
-    #    jj = line.find('function')
-    #    kk = line.find('subroutine')
-    #    if ii > -1:
-    #        if jj > -1 and line.strip()[0] != '!':
-    #            in_function = True
-    #            # Get function name
-    #            ll = line[jj:].find('(')
-    #            f_name = line[jj+8:jj+ll].strip()
-    #            modules[m_name].procs[f_name] = cfml_objects.Function()
-    #            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.#Style.RESET_ALL}")
-    #            # Get arguments
-    #            mm = line[jj:].find(')')
-    #            for a in line[jj+ll+1:jj+mm].split(','):
-    #                modules[m_name].procs[f_name].arguments[a.strip()] = cfml_objects.Argument(name=a.strip())
-    #            # Get result
-#
-    #            while in_function:
-    #                in_interface = False
-    #                line = lines[n].lower()
-    #                ii = line.find('interface')
-    #                if ii > 1:
-    #                    in_interface = True
-    #                    while (in_interface):
-    #                        n += 1
-    #                        l = lines[n].lower()
-    #                        jj = l.find('end')
-    #                        if jj > -1:
-    #                            jj = l.find('interface')
-    #                            if jj > -1:
-    #                                in_interface = False
-    #                else:
-    #                    l = line.split()
-    #                    if len(l) > 0:
-    #                        if l[0] == 'end' or  l[0] == 'endfunction':
-    #                            in_function = False
-    #                        else:
-    #                            c = get_component(line)
-    #                            if c is not None:
-    #                                for nam in c[0]:
-    #                                    try:
-    #                                        modules[m_name].procs[f_name].arguments[nam].xtype = c[1]
-    #                                        modules[m_name].procs[f_name].arguments[nam].value = c[2]
-    #                                        modules[m_name].procs[f_name].arguments[nam].info  = c[3]
-    #                                        modules[m_name].procs[f_name].arguments[nam].dim   = c[4]
-    #                                    except KeyError:
-    #                                        pass
-    #                n += 1
-    #        elif kk > -1 and line.strip()[0] != '!':
-    #            in_subroutine = True
-    #            # Get subroutine name
-    #            ll = line[kk:].find('(')
-    #            s_name = line[kk+10:kk+ll].strip()
-    #            modules[m_name].procs[s_name] = cfml_objects.Subroutine()
-    #            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}#{colorama.Style.RESET_ALL}")
-    #            # Get arguments
-    #            mm = line.find('&')
-    #            while mm > -1:
-    #                n += 1
-    #                line = line + lines[n].lower()
-    #                mm = lines[n].find('&')
-    #            line = line.replace('\n',' ')
-    #            line = line.replace('&',' ')
-    #            mm = line[kk:].find(')')
-    #            for a in line[kk+ll+1:kk+mm].split(','):
-    #                modules[m_name].procs[s_name].arguments[a.strip()] = cfml_objects.Argument(name=a.strip())
-    #            n += 1
-    #            while in_subroutine:
-    #                in_interface = False
-    #                line = lines[n].lower()
-    #                ii = line.find('interface')
-    #                if ii > -1:
-    #                    in_interface = True
-    #                    while (in_interface):
-    #                        n += 1
-    #                        l = lines[n].lower()
-    #                        jj = l.find('end')
-    #                        if jj > -1:
-    #                            jj = l.find('interface')
-    #                            if jj > -1:
-    #                                in_interface = False
-    #                else:
-    #                    l = line.split()
-    #                    if len(l) > 0:
-    #                        if l[0] == 'end' or  l[0] == 'endsubroutine':
-    #                            in_subroutine = False
-    #                        else:
-    #                            c = get_component(line)
-    #                            if c is not None:
-    #                                for nam in c[0]:
-    #                                    modules[m_name].procs[s_name].arguments[nam].xtype = c[1]
-    #                                    modules[m_name].procs[s_name].arguments[nam].value = c[2]
-    #                                    modules[m_name].procs[s_name].arguments[nam].info  = c[3]
-    #                                    modules[m_name].procs[s_name].arguments[nam].dim   = c[4]
-    #                n += 1
-    #    n += 1
 
 def get_types(m_name : str,lines : list,n : int =0) -> int:
 

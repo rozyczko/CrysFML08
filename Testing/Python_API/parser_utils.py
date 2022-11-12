@@ -100,6 +100,32 @@ def get_function_result(line: str, f : cfml_objects.Function) -> None:
 
     return None
 
+def get_function_types(n : int, lines: list, f : cfml_objects.Function) -> int:
+
+    in_function = True
+    while in_function:
+        n,line = get_line(n,lines)
+        if is_empty(line) or line.strip().startswith('!'):
+            n += 1
+            continue
+        line = line.lower()
+        i = line.find('intent')
+        j = line.find('::')
+        if i > -1:
+            c = get_component(line)
+            for nam in c[0]:
+                f.arguments[nam] = cfml_objects.Type_Component(name=nam,xtype=c[1],value=c[2],info=c[3],dim=c[4])
+        elif j > -1:
+            c = get_component(line)
+            f.xreturn.xtype = c[1]
+            f.xreturn.value = c[2]
+            f.xreturn.info  = c[3]
+            f.xreturn.dim   = c[4]
+        else:
+            in_function = False
+        n += 1
+    return n
+
 def get_interface_name(line : str) -> str:
 
     line = line.lower()
@@ -175,6 +201,54 @@ def get_subroutine_name(line : str) -> str:
     else:
         j = line.find('(')
         return line[i+10:j].strip()
+
+def get_subroutine_types(n : int, lines: list, t : cfml_objects.XType) -> int:
+    in_subroutine = True
+    #            # Get subroutine name
+    #            ll = line[kk:].find('(')
+    #            s_name = line[kk+10:kk+ll].strip()
+    #            modules[m_name].procs[s_name] = cfml_objects.Subroutine()
+    #            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}#{colorama.Style.RESET_ALL}")
+    #            # Get arguments
+    #            mm = line.find('&')
+    #            while mm > -1:
+    #                n += 1
+    #                line = line + lines[n].lower()
+    #                mm = lines[n].find('&')
+    #            line = line.replace('\n',' ')
+    #            line = line.replace('&',' ')
+    #            mm = line[kk:].find(')')
+    #            for a in line[kk+ll+1:kk+mm].split(','):
+    #                modules[m_name].procs[s_name].arguments[a.strip()] = cfml_objects.Argument(name=a.strip())
+    #            n += 1
+    #            while in_subroutine:
+    #                in_interface = False
+    #                line = lines[n].lower()
+    #                ii = line.find('interface')
+    #                if ii > -1:
+    #                    in_interface = True
+    #                    while (in_interface):
+    #                        n += 1
+    #                        l = lines[n].lower()
+    #                        jj = l.find('end')
+    #                        if jj > -1:
+    #                            jj = l.find('interface')
+    #                            if jj > -1:
+    #                                in_interface = False
+    #                else:
+    #                    l = line.split()
+    #                    if len(l) > 0:
+    #                        if l[0] == 'end' or  l[0] == 'endsubroutine':
+    #                            in_subroutine = False
+    #                        else:
+    #                            c = get_component(line)
+    #                            if c is not None:
+    #                                for nam in c[0]:
+    #                                    modules[m_name].procs[s_name].arguments[nam].xtype = c[1]
+    #                                    modules[m_name].procs[s_name].arguments[nam].value = c[2]
+    #                                    modules[m_name].procs[s_name].arguments[nam].info  = c[3]
+    #                                    modules[m_name].procs[s_name].arguments[nam].dim   = c[4]
+    return n
 
 def get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int:
 
