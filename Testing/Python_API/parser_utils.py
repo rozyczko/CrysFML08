@@ -4,8 +4,10 @@ Utilities for parsing CrysFML08
 ---------
 Functions
 ---------
+get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
 get_component(line : str) -> tuple
 get_function_name(lines : list) -> str
+get_function_result(line: str, s : cfml_objects.Function) -> None:
 get_interface_name(line : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
@@ -87,6 +89,16 @@ def get_function_name(line : str) -> str:
     else:
         j = line.find('(')
         return line[i+8:j].strip()
+
+def get_function_result(line: str, f : cfml_objects.Function) -> None:
+
+    line = line.lower()
+    i = line.find('result')
+    j = line[i:].find('(')
+    k = line[i:].find(')')
+    f.xreturn = cfml_objects.Type_Component(name=line[i+j+1:i+k].strip())
+
+    return None
 
 def get_interface_name(line : str) -> str:
 
