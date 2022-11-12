@@ -5,13 +5,12 @@ Utilities for parsing CrysFML08
 Functions
 ---------
 get_component(line : str) -> tuple
-get_function(n,lines)
+get_function_name(lines : list) -> str
 get_interface_name(line : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
 get_overload_procedures(n : int, lines: list, t : cfml_objects.Interface) -> int
 get_procedure(line : str) -> str
-get_subroutine(n,lines)
 get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
@@ -65,9 +64,15 @@ def get_component(line : str) -> tuple:
         names.append(n.strip())
     return (names,c_type,c_value,c_info,c_dim)
 
-def get_function(n,lines):
+def get_function_name(line : str) -> str:
 
-    pass
+    line = line.lower()
+    i = line.find('function')
+    if i < 0:
+        return ''
+    else:
+        j = line.find('(')
+        return line[i+8:j].strip()
 
 def get_interface_name(line : str) -> str:
 
@@ -127,6 +132,7 @@ def get_overload_procedures(n : int, lines: list, i : cfml_objects.Interface) ->
 
 def get_procedure(line : str) -> str:
 
+    line = line.lower()
     j = line.find('!')
     if j > -1:
         p = line[:j-1].split()[-1]
@@ -134,9 +140,15 @@ def get_procedure(line : str) -> str:
         p = line.split()[-1]
     return p
 
-def get_subroutine(n,lines):
+def get_subroutine_name(line : str) -> str:
 
-    pass
+    line = line.lower()
+    i = line.find('subroutine')
+    if i < 0:
+        return ''
+    else:
+        j = line.find('(')
+        return line[i+10:j].strip()
 
 def get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int:
 
@@ -187,13 +199,13 @@ def is_procedure(procedure : str,line : str) -> bool:
     i = line.find(procedure)
     if i < 0:
         return False
-    l = line.split()
-    if l[0] == procedure or \
-        l[0] == 'elemental' and l[1] == procedure or \
-        l[0] == 'module' and l[1] == procedure or \
-        l[0] == 'pure' and l[1] == procedure or \
-        l[0] == 'elemental' and l[1] == 'module' and l[2] == procedure or \
-        l[0] == 'pure' and l[1] == 'module' and l[2] == procedure:
+    line = ' '.join(line.split())
+    if line.startswith(procedure) or \
+       line.startswith('elemental '+ procedure) or \
+       line.startswith('module '+ procedure) or \
+       line.startswith('pure '+ procedure) or \
+       line.startswith('elemental module '+ procedure) or \
+       line.startswith('pure module '+ procedure):
         return True
     else:
         return False

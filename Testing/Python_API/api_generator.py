@@ -52,67 +52,18 @@ def get_overloads(m_name : str,lines : list,n : int =0) -> int:
         n += 1
     return n
 
-def get_types(m_name : str,lines : list,n : int =0) -> int:
+def get_procedures(m_name : str,lines : list,n : int =0) -> int:
 
     while n < len(lines):
-        line = lines[n].lower().strip()
-        if line.startswith('interface') or line.startswith('contains'):
-            return n-1
-        if not line.startswith('type'):
-            n += 1
-            continue
-        if line[4:].strip().startswith('('):
-            n += 1
-            continue
+
         n,line = parser_utils.get_line(n,lines)
-        t_name = parser_utils.get_type_name(line)
-        p_name = parser_utils.get_type_parent(line)
-        print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
-        modules[m_name].types[t_name] = cfml_objects.XType(name=t_name,parent=p_name)
-        n = parser_utils.get_type_components(n+1,lines,modules[m_name].types[t_name])
-    return n
-
-def move_to_source() -> None:
-
-    # Move to Crysfml08
-    if not DIR_CRYSFML08:
-        print(f"{colorama.Fore.RED}{'Error: variable DIR_CRYSFML08 must be set at the beginning of this script.'}")
-        raise SystemExit
-    if not os.path.isdir(DIR_CRYSFML08):
-        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
-        raise SystemExit
-    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
-    os.chdir(DIR_CRYSFML08)
-
-    # Move to Src\
-    if not os.path.isdir('Src'):
-        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
-        raise SystemExit
-    print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
-    os.chdir('Src')
-    return None
-
-def read_cfml_module(file_name : str) -> None:
-
-    print('')
-    print(f"{colorama.Fore.GREEN}{'Reading file '}{colorama.Fore.CYAN}{file_name}{colorama.Style.RESET_ALL}")
-    with open(file_name,'r') as f:
-        lines = f.readlines()
-
-    # Get module name
-    try:
-        m_name = parser_utils.get_module_name(lines)
-    except Exception as e:
-        print(f"{colorama.Fore.RED}{'Error: '}{e}{colorama.Style.RESET_ALL}")
-        raise SystemExit
-    modules[m_name] = cfml_objects.Module(name=m_name)
-    print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
-
-    # Get types
-    n = get_types(m_name,lines)
-
-    # Get overloads
-    n = get_overloads(m_name,lines,n)
+        if parser_utils.is_procedure('function',line):
+            f_name = parser_utils.get_function_name(line)
+            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
+        elif parser_utils.is_procedure('subroutine',line):
+            s_name = parser_utils.get_subroutine_name(line)
+            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
+        n += 1
 
 
     # Get functions and subroutines in interfaces
@@ -228,6 +179,70 @@ def read_cfml_module(file_name : str) -> None:
     #                n += 1
     #    n += 1
 
+def get_types(m_name : str,lines : list,n : int =0) -> int:
+
+    while n < len(lines):
+        line = lines[n].lower().strip()
+        if line.startswith('interface') or line.startswith('contains'):
+            return n-1
+        if not line.startswith('type'):
+            n += 1
+            continue
+        if line[4:].strip().startswith('('):
+            n += 1
+            continue
+        n,line = parser_utils.get_line(n,lines)
+        t_name = parser_utils.get_type_name(line)
+        p_name = parser_utils.get_type_parent(line)
+        print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
+        modules[m_name].types[t_name] = cfml_objects.XType(name=t_name,parent=p_name)
+        n = parser_utils.get_type_components(n+1,lines,modules[m_name].types[t_name])
+    return n
+
+def move_to_source() -> None:
+
+    # Move to Crysfml08
+    if not DIR_CRYSFML08:
+        print(f"{colorama.Fore.RED}{'Error: variable DIR_CRYSFML08 must be set at the beginning of this script.'}")
+        raise SystemExit
+    if not os.path.isdir(DIR_CRYSFML08):
+        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
+        raise SystemExit
+    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
+    os.chdir(DIR_CRYSFML08)
+
+    # Move to Src\
+    if not os.path.isdir('Src'):
+        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
+        raise SystemExit
+    print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
+    os.chdir('Src')
+    return None
+
+def read_cfml_module(file_name : str) -> None:
+
+    print('')
+    print(f"{colorama.Fore.GREEN}{'Reading file '}{colorama.Fore.CYAN}{file_name}{colorama.Style.RESET_ALL}")
+    with open(file_name,'r') as f:
+        lines = f.readlines()
+
+    # Get module name
+    try:
+        m_name = parser_utils.get_module_name(lines)
+    except Exception as e:
+        print(f"{colorama.Fore.RED}{'Error: '}{e}{colorama.Style.RESET_ALL}")
+        raise SystemExit
+    modules[m_name] = cfml_objects.Module(name=m_name)
+    print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
+
+    # Get types
+    n = get_types(m_name,lines)
+
+    # Get overloads
+    n = get_overloads(m_name,lines,n)
+
+    # Get procedures
+    n = get_procedures(m_name,lines,n)
 
 def read_crysfml08() -> None:
 
@@ -235,7 +250,7 @@ def read_crysfml08() -> None:
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name)
-        break
+        #break
     return None
 
 def run() -> None:
