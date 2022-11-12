@@ -32,10 +32,10 @@ class Function(Subroutine):
 
 class Interface():
 
-    def __init__(self,name='',procs=[]):
+    def __init__(self,name='',procedures=[]):
 
-        self.name  = name
-        self.procs = procs.copy()
+        self.name       = name
+        self.procedures = procedures.copy()
 
 class XType():
 
@@ -47,9 +47,9 @@ class XType():
 
 class Module():
 
-    def __init__(self,name='',types={},procs={},inter={}):
+    def __init__(self,name='',types={},procedures={},interface={}):
 
-        self.name  = name
-        self.types = types.copy()
-        self.procs = procs.copy()
-        self.inter = inter.copy()
+        self.name       = name
+        self.types      = types.copy()
+        self.procedures = procedures.copy()
+        self.interface  = interface.copy()

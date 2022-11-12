@@ -6,9 +6,11 @@ November 2022
 ---------
 Functions
 ---------
-get_component(line)
-get_procedure(line)
-read()
+get_cfml_modules_filenames() -> list
+get_types(m_name : str,lines : list,n : int =0) -> int
+move_to_source() -> None
+read_cfml_module(file_name : str) -> None
+read_crysfml08() -> None
 run()
 """
 import colorama
@@ -22,7 +24,7 @@ colorama.init()
 
 modules = {}
 
-def get_cfml_modules_filenames():
+def get_cfml_modules_filenames() -> list:
 
     cfml_modules_names = glob.glob('CFML*.f90')
     if len(cfml_modules_names) == 0:
@@ -30,13 +32,32 @@ def get_cfml_modules_filenames():
         raise SystemExit
     return cfml_modules_names
 
-def get_types(m_name,lines):
+def get_overloads(m_name : str,lines : list,n : int =0) -> int:
 
-    n = 0
+    while n < len(lines):
+
+        line = lines[n].lower()
+        if line.startswith('contains'):
+            return n-1
+        if not line.strip().startswith('interface'):
+            n += 1
+            continue
+        n,line = parser_utils.get_line(n,lines)
+        i_name = parser_utils.get_interface_name(line)
+        if i_name == '': # Starting the interface zone
+            return n-1
+        print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'interface' : <11}{colorama.Fore.CYAN}{i_name}{colorama.Style.RESET_ALL}")
+        modules[m_name].interface[i_name] = cfml_objects.Interface(name=i_name)
+        n = parser_utils.get_overload_procedures(n+1,lines,modules[m_name].interface[i_name])
+        n += 1
+    return n
+
+def get_types(m_name : str,lines : list,n : int =0) -> int:
+
     while n < len(lines):
         line = lines[n].lower().strip()
         if line.startswith('interface') or line.startswith('contains'):
-            break
+            return n-1
         if not line.startswith('type'):
             n += 1
             continue
@@ -46,11 +67,12 @@ def get_types(m_name,lines):
         n,line = parser_utils.get_line(n,lines)
         t_name = parser_utils.get_type_name(line)
         p_name = parser_utils.get_type_parent(line)
-        modules[m_name].types[t_name] = cfml_objects.XType(name=t_name,parent=p_name)
         print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
+        modules[m_name].types[t_name] = cfml_objects.XType(name=t_name,parent=p_name)
         n = parser_utils.get_type_components(n+1,lines,modules[m_name].types[t_name])
+    return n
 
-def move_to_source():
+def move_to_source() -> None:
 
     # Move to Crysfml08
     if not DIR_CRYSFML08:
@@ -68,8 +90,9 @@ def move_to_source():
         raise SystemExit
     print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
     os.chdir('Src')
+    return None
 
-def read_cfml_module(file_name):
+def read_cfml_module(file_name : str) -> None:
 
     print('')
     print(f"{colorama.Fore.GREEN}{'Reading file '}{colorama.Fore.CYAN}{file_name}{colorama.Style.RESET_ALL}")
@@ -83,41 +106,14 @@ def read_cfml_module(file_name):
         print(f"{colorama.Fore.RED}{'Error: '}{e}{colorama.Style.RESET_ALL}")
         raise SystemExit
     modules[m_name] = cfml_objects.Module(name=m_name)
-    print(f"{colorama.Fore.GREEN}{'  Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
+    print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
 
     # Get types
-    get_types(m_name,lines)
+    n = get_types(m_name,lines)
 
-    # Get interfaces
-    #n = 0
-    #for line in lines:
-    #    line = line.lower()
-    #    l = line.split()
-    #    if len(l) == 1 and l[0] == 'interface':
-    #        break
-    #    if len(l) == 2:
-    #        if l[0] == 'interface':
-    #            i_name = l[1]
-    #            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'interface' : <11}{colorama.Fore.CYAN}{i_name}{colorama.#Style.RESET_ALL}")
-    #            modules[m_name].inter[i_name] = cfml_objects.Interface(name=i_name)
-    #            # Get the procedures
-    #            in_interface = True
-    #            i = n + 1
-    #            while in_interface:
-    #                line = lines[i].lower()
-    #                l = line.split()
-    #                if len(l) > 0:
-    #                    if l[0] == 'end' or  l[0] == 'endinterface':
-    #                        in_interface = False
-    #                        break
-    #                    else:
-    #                        p = get_procedure(line)
-    #                        if p is not None:
-    #                            modules[m_name].inter[i_name].procs.append(p)
-    #                i += 1
-    #                line = lines[i].lower()
-    #                l = line.split()
-    #    n += 1
+    # Get overloads
+    n = get_overloads(m_name,lines,n)
+
 
     # Get functions and subroutines in interfaces
     #n = 0
@@ -233,20 +229,23 @@ def read_cfml_module(file_name):
     #    n += 1
 
 
-def read_crysfml08():
+def read_crysfml08() -> None:
 
     move_to_source()
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name)
+        break
+    return None
 
-def run():
+def run() -> None:
 
     print(f"{' ' :>20}{colorama.Fore.GREEN}{'==========================='}{colorama.Style.RESET_ALL}")
     print(f"{' ' :>20}{colorama.Back.GREEN}{'API Generator for CRYSFML08'}{colorama.Style.RESET_ALL}")
     print(f"{' ' :>20}{colorama.Fore.GREEN}{'==========================='}{colorama.Style.RESET_ALL}")
 
     read_crysfml08()
+    return None
 
 if __name__ == '__main__':
 
