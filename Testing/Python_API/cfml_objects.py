@@ -17,11 +17,12 @@ class Argument(Type_Component):
 
 class Subroutine():
 
-    def __init__(self,name='',module='',arguments={}):
+    def __init__(self,name='',module='',arguments={},has_interface=False):
 
-        self.name      = name
-        self.module    = module
-        self.arguments = arguments.copy()
+        self.name          = name
+        self.module        = module
+        self.arguments     = arguments.copy()
+        self.has_interface = has_interface
 
 class Function(Subroutine):
 

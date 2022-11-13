@@ -13,7 +13,7 @@ get_types(m_name : str,lines : list,n : int =0) -> int
 move_to_source() -> None
 read_cfml_module(file_name : str) -> None
 read_crysfml08() -> None
-run()
+run() -> None
 """
 import colorama
 import cfml_objects
@@ -71,8 +71,7 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
             print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
             modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
             parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
-            n += 1
-            #n = parser_utils.get_subroutine_types(n,lines,modules[m_name].procedures[s_name])
+            n = parser_utils.get_subroutine_types(n+1,lines,modules[m_name].procedures[s_name])
         else:
             n += 1
     return n
@@ -148,7 +147,6 @@ def read_crysfml08() -> None:
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name)
-        #break
     return None
 
 def run() -> None:

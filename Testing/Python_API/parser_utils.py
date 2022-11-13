@@ -4,18 +4,20 @@ Utilities for parsing CrysFML08
 ---------
 Functions
 ---------
-get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
+get_arguments(line : str, s : cfml_objects.Subroutine) -> None:
 get_component(line : str) -> tuple
 get_function_name(lines : list) -> str
-get_function_result(line: str, s : cfml_objects.Function) -> None:
+get_function_result(line : str, s : cfml_objects.Function) -> None:
+get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int
 get_interface_name(line : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
-get_overload_procedures(n : int, lines: list, t : cfml_objects.Interface) -> int
+get_overload_procedures(n : int, lines : list, t : cfml_objects.Interface) -> int
 get_procedure(line : str) -> str
-get_subroutine_arguments(line: str, s : cfml_objects.Subroutine) -> None
+get_subroutine_arguments(line : str, s : cfml_objects.Subroutine) -> None
 get_subroutine_name(lines : list) -> str
-get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int
+get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int
+get_type_components(n : int, lines : list, t : cfml_objects.XType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
 is_empty(line : str) -> bool
@@ -36,7 +38,7 @@ def get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
 
     return None
 
-def get_component(line : str) -> tuple:
+def get_component(line : str) -> list:
 
     # Defaults
     c_value = None
@@ -78,7 +80,7 @@ def get_component(line : str) -> tuple:
     names = []
     for n in c_name.split(','):
         names.append(n.strip())
-    return (names,c_type,c_value,c_info,c_dim)
+    return [names,c_type,c_value,c_info,c_dim]
 
 def get_function_name(line : str) -> str:
 
@@ -100,7 +102,7 @@ def get_function_result(line: str, f : cfml_objects.Function) -> None:
 
     return None
 
-def get_function_types(n : int, lines: list, f : cfml_objects.Function) -> int:
+def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
 
     in_function = True
     while in_function:
@@ -164,7 +166,7 @@ def get_module_name(lines : list) -> str:
             return l[1]
     raise Exception('Module name not found')
 
-def get_overload_procedures(n : int, lines: list, i : cfml_objects.Interface) -> int:
+def get_overload_procedures(n : int, lines : list, i : cfml_objects.Interface) -> int:
 
     in_interface = True
     while in_interface:
@@ -202,52 +204,39 @@ def get_subroutine_name(line : str) -> str:
         j = line.find('(')
         return line[i+10:j].strip()
 
-def get_subroutine_types(n : int, lines: list, t : cfml_objects.XType) -> int:
+def get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int:
+
     in_subroutine = True
-    #            # Get subroutine name
-    #            ll = line[kk:].find('(')
-    #            s_name = line[kk+10:kk+ll].strip()
-    #            modules[m_name].procs[s_name] = cfml_objects.Subroutine()
-    #            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}#{colorama.Style.RESET_ALL}")
-    #            # Get arguments
-    #            mm = line.find('&')
-    #            while mm > -1:
-    #                n += 1
-    #                line = line + lines[n].lower()
-    #                mm = lines[n].find('&')
-    #            line = line.replace('\n',' ')
-    #            line = line.replace('&',' ')
-    #            mm = line[kk:].find(')')
-    #            for a in line[kk+ll+1:kk+mm].split(','):
-    #                modules[m_name].procs[s_name].arguments[a.strip()] = cfml_objects.Argument(name=a.strip())
-    #            n += 1
-    #            while in_subroutine:
-    #                in_interface = False
-    #                line = lines[n].lower()
-    #                ii = line.find('interface')
-    #                if ii > -1:
-    #                    in_interface = True
-    #                    while (in_interface):
-    #                        n += 1
-    #                        l = lines[n].lower()
-    #                        jj = l.find('end')
-    #                        if jj > -1:
-    #                            jj = l.find('interface')
-    #                            if jj > -1:
-    #                                in_interface = False
-    #                else:
-    #                    l = line.split()
-    #                    if len(l) > 0:
-    #                        if l[0] == 'end' or  l[0] == 'endsubroutine':
-    #                            in_subroutine = False
-    #                        else:
-    #                            c = get_component(line)
-    #                            if c is not None:
-    #                                for nam in c[0]:
-    #                                    modules[m_name].procs[s_name].arguments[nam].xtype = c[1]
-    #                                    modules[m_name].procs[s_name].arguments[nam].value = c[2]
-    #                                    modules[m_name].procs[s_name].arguments[nam].info  = c[3]
-    #                                    modules[m_name].procs[s_name].arguments[nam].dim   = c[4]
+    while in_subroutine:
+        n,line = get_line(n,lines)
+        if is_empty(line) or line.strip().startswith('!'):
+            n += 1
+            continue
+        line = line.lower()
+        if line.strip().startswith('interface'):
+            s.has_interface = True
+            in_interface = True
+            while in_interface:
+                n,line = get_line(n,lines)
+                if is_empty(line) or line.strip().startswith('!'):
+                    n += 1
+                    continue
+                line = line.lower()
+                line = ' '.join(line.split())
+                if line.startswith('end interface'):
+                    in_interface = False
+                n += 1
+        n,line = get_line(n,lines)
+        line = line.lower()
+        i = line.find('intent')
+        j = line.find('::')
+        if i > -1 and j > -1:
+            c = get_component(line)
+            for nam in c[0]:
+                s.arguments[nam] = cfml_objects.Type_Component(name=nam,xtype=c[1],value=c[2],info=c[3],dim=c[4])
+            n += 1
+        else:
+            in_subroutine = False
     return n
 
 def get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int:
