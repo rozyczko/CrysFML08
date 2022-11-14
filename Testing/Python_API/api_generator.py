@@ -10,6 +10,7 @@ fortran_types_to_python_dicts() -> None
 get_cfml_modules_filenames() -> list
 get_overloads(m_name : str,lines : list,n : int =0) -> int
 get_procedures(m_name : str,lines : list,n : int =0) -> int
+get_publics(m_name : str,lines : list,n : int =0) -> int)
 get_types(m_name : str,lines : list,n : int =0) -> int
 move_to_install() -> None
 move_to_source() -> None
@@ -56,15 +57,13 @@ def fortran_types_to_python_dicts() -> None:
                     left = "d['"+c+"']"
                     right = '= '+t.components[c].value
                     f.write(f"{' ':>4}{left:<35}{right}\n")
-                f.write('\n')
                 for c in t.components.keys():
-                    left = "d['tipos']['"+c+"']"
+                    left = "d['ftype']['"+c+"']"
                     right = "= '"+t.components[c].fortran_type+"'"
                     f.write(f"{' ':>4}{left:<35}{right}\n")
                 f.write('\n')
                 f.write(f"{' ':>4}{'return d'}\n")
                 f.write('\n')
-
 
 def get_cfml_modules_filenames() -> list:
 
@@ -101,20 +100,42 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
         n,line = parser_utils.get_line(n,lines)
         if parser_utils.is_procedure('function',line):
             f_name = parser_utils.get_function_name(line)
-            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
-            modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
-            parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
-            parser_utils.get_function_result(line,modules[m_name].procedures[f_name])
-            n = parser_utils.get_function_types(n+1,lines,modules[m_name].procedures[f_name])
+            if f_name in modules[m_name].publics:
+                print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
+                modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
+                parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
+                parser_utils.get_function_result(line,modules[m_name].procedures[f_name])
+                n = parser_utils.get_function_types(n+1,lines,modules[m_name].procedures[f_name])
+            else:
+                n += 1
         elif parser_utils.is_procedure('subroutine',line):
             s_name = parser_utils.get_subroutine_name(line)
-            print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
-            modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
-            parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
-            n = parser_utils.get_subroutine_types(n+1,lines,modules[m_name].procedures[s_name])
+            if s_name in modules[m_name].publics:
+                print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
+                modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
+                parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
+                n = parser_utils.get_subroutine_types(n+1,lines,modules[m_name].procedures[s_name])
+            else:
+                n += 1
         else:
             n += 1
     return n
+
+def get_publics(m_name : str,lines : list,n : int =0) -> int:
+
+    while n < len(lines):
+        line = lines[n].lower().strip()
+        if line.startswith('type') or line.startswith('interface') or \
+            line.startswith('contains') or line.startswith('end'):
+            break
+        if line.strip().startswith('public'):
+            n,line = parser_utils.get_line(n,lines)
+            line = line.lower().strip()
+            i = line.find('::')
+            for p in line[i+2:].split(','):
+                modules[m_name].publics.append(p.strip())
+        n += 1
+    return n-1
 
 def get_types(m_name : str,lines : list,n : int =0) -> int:
 
@@ -182,8 +203,11 @@ def read_cfml_module(file_name : str) -> None:
     modules[m_name] = cfml_objects.Module(name=m_name)
     print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
 
+    # Get public objects
+    n = get_publics(m_name,lines)
+
     # Get types
-    n = get_types(m_name,lines)
+    n = get_types(m_name,lines,n)
 
     # Get overloads
     n = get_overloads(m_name,lines,n)
