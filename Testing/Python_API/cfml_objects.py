@@ -1,18 +1,18 @@
 class Type_Component():
 
-    def __init__(self,name : str ='',xtype : str ='',dim : str ='',value=None,info : str =''):
+    def __init__(self,name : str ='',fortran_type : str ='',dim : str ='',value : str ='None',info : str =''):
 
-        self.name   = name
-        self.xtype  = xtype
-        self.dim    = dim
-        self.value  = value
-        self.info   = info
+        self.name          = name
+        self.fortran_type  = fortran_type
+        self.dim           = dim
+        self.value         = value
+        self.info          = info
 
 class Argument(Type_Component):
 
-    def __init__(self,name : str ='',xtype : str ='',dim : str ='',value=None,info : str ='',intent : str =''):
+    def __init__(self,name : str ='',fortran_type : str ='',dim : str ='',value : str ='None',info : str ='',intent : str =''):
 
-        super().__init__(name=name,xtype=xtype,dim=dim,value=value,info=info)
+        super().__init__(name=name,fortran_type=fortran_type,dim=dim,value=value,info=info)
         self.intent = intent
 
 class Subroutine():
@@ -38,7 +38,7 @@ class Interface():
         self.name       = name
         self.procedures = procedures.copy()
 
-class XType():
+class FortranType():
 
     def __init__(self,name : str ='',parent : str ='',components : dict ={}):
 

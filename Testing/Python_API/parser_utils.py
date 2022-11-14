@@ -4,11 +4,13 @@ Utilities for parsing CrysFML08
 ---------
 Functions
 ---------
+cast_python(val : str) -> str
 get_arguments(line : str, s : cfml_objects.Subroutine) -> None:
 get_component(line : str) -> tuple
 get_function_name(lines : list) -> str
 get_function_result(line : str, s : cfml_objects.Function) -> None:
 get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int
+get_intent(line : str) -> str
 get_interface_name(line : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
@@ -17,7 +19,7 @@ get_procedure(line : str) -> str
 get_subroutine_arguments(line : str, s : cfml_objects.Subroutine) -> None
 get_subroutine_name(lines : list) -> str
 get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int
-get_type_components(n : int, lines : list, t : cfml_objects.XType) -> int
+get_type_components(n : int, lines : list, t : cfml_objects.FortranType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
 is_empty(line : str) -> bool
@@ -25,6 +27,18 @@ is_procedure(procedure : str,line : str) -> bool
 
 """
 import cfml_objects
+
+def cast_python(val : str) -> str:
+
+    if val == '.false.':
+        v = 'False'
+    elif val == '.true.':
+        v = 'True'
+    elif val.find('_cp') > -1:
+        v = val.replace('_cp','')
+    else:
+        v = val
+    return v
 
 def get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
 
@@ -41,7 +55,7 @@ def get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
 def get_component(line : str) -> list:
 
     # Defaults
-    c_value = None
+    c_value = 'None'
     c_info = ''
     c_dim = '(0)'
 
@@ -75,6 +89,8 @@ def get_component(line : str) -> list:
         c_dim = c_type[i+j:i+k+1]
     else:
         c_dim = '(0)'
+
+    c_value = cast_python(c_value)
 
     # More than one variable can be given in the same line
     names = []
@@ -115,11 +131,12 @@ def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
         j = line.find('::')
         if i > -1:
             c = get_component(line)
+            intent = get_intent(line)
             for nam in c[0]:
-                f.arguments[nam] = cfml_objects.Type_Component(name=nam,xtype=c[1],value=c[2],info=c[3],dim=c[4])
+                f.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4],intent=intent)
         elif j > -1:
             c = get_component(line)
-            f.xreturn.xtype = c[1]
+            f.xreturn.fortran_type = c[1]
             f.xreturn.value = c[2]
             f.xreturn.info  = c[3]
             f.xreturn.dim   = c[4]
@@ -127,6 +144,26 @@ def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
             in_function = False
         n += 1
     return n
+
+def get_intent(line : str) -> str:
+
+    line = line.lower()
+    i = line.find('intent')
+    if i < 0:
+        intent = 'inout'
+    else:
+        i = i+6
+        j = line[i:].find('(')
+        k = line[i:].find(')')
+        m = line[i+j+1:i+k].find('in')
+        n = line[i+j+1:i+k].find('out')
+        if m > -1 and n > -1:
+            intent = 'inout'
+        elif m > -1:
+            intent = 'in'
+        else:
+            intent = 'out'
+    return intent
 
 def get_interface_name(line : str) -> str:
 
@@ -232,14 +269,15 @@ def get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> 
         j = line.find('::')
         if i > -1 and j > -1:
             c = get_component(line)
+            intent = get_intent(line)
             for nam in c[0]:
-                s.arguments[nam] = cfml_objects.Type_Component(name=nam,xtype=c[1],value=c[2],info=c[3],dim=c[4])
+                s.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4],intent=intent)
             n += 1
         else:
             in_subroutine = False
     return n
 
-def get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int:
+def get_type_components(n : int, lines: list, t : cfml_objects.FortranType) -> int:
 
     in_type = True
     while in_type:
@@ -254,7 +292,7 @@ def get_type_components(n : int, lines: list, t : cfml_objects.XType) -> int:
         else:
             c = get_component(line)
             for nam in c[0]:
-                t.components[nam] = cfml_objects.Type_Component(name=nam,xtype=c[1],value=c[2],info=c[3],dim=c[4])
+                t.components[nam] = cfml_objects.Type_Component(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4])
         n += 1
     return n
 
