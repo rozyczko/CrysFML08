@@ -48,9 +48,10 @@ class FortranType():
 
 class Module():
 
-    def __init__(self,name : str ='',types : dict ={},procedures : dict ={},interface : dict ={}):
+    def __init__(self,name : str ='',types : dict ={},procedures : dict ={},publics : list =[],interface : dict ={}):
 
         self.name       = name
         self.types      = types.copy()
         self.procedures = procedures.copy()
+        self.publics    = publics.copy()
         self.interface  = interface.copy()
