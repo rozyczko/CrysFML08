@@ -266,12 +266,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       end if
       ng=k
 
-      do i=1,Npos !Looking for anticentring
-        if(rational_equal(SpG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv == -1) then
-          SpG%AntiCentre_coord=rational(1_LI,2_LI) * SpG%Op(i)%Mat(1:d,Dd)
-          exit
-        end if
-      end do
 
       if(centring) then
         n=Npos
@@ -298,6 +292,40 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       SpaceG%Symb_Op=SpG%Symb_Op
       SpaceG%Num_Lat=Spg%Num_lat
       SpaceG%Num_aLat=SpaceG%Num_aLat*(1+SpG%Num_Lat)
+
+      SpaceG%centred = 1
+      do i=1,SpaceG%Multip !Looking for -1
+        if(rational_equal(SpaceG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv ==  1) then
+          SpaceG%Centre_coord=rational(1_LI,2_LI) * SpaceG%Op(i)%Mat(1:d,Dd)
+          if(sum(abs(SpaceG%Centre_coord)) > 0_LI) then
+            SpaceG%centred = 0
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Centrosymmetric with centre at: [ ",(trim(Rational_String(SpaceG%Centre_coord(j)))//" ",j=1,d),"]"
+          else
+            SpaceG%centred = 2
+            SpaceG%Centre_coord=0_LI//1_LI
+            SpaceG%Centre="Centrosymmetric with centre at origin"
+          end if
+          exit
+        end if
+      end do
+
+      SpaceG%anticentred=1
+      do i=1,Npos !Looking for anticentring
+        if(rational_equal(SpaceG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv == -1) then
+          SpaceG%AntiCentre_coord=rational(1_LI,2_LI) * SpaceG%Op(i)%Mat(1:d,Dd)
+          if(sum(abs(SpaceG%AntiCentre_coord)) > 0_LI) then
+            SpaceG%anticentred = 0
+            SpaceG%Centre="                                                                                                   "
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Non-centrosymmetric, Anti-centric with -1' @ : [ ",(trim(Rational_String(SpaceG%AntiCentre_coord(j)))//" ",j=1,d),"]"
+          else
+            SpaceG%anticentred = 2
+            SpaceG%AntiCentre_coord=0_LI//1_LI
+            SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' @ origin"
+          end if
+          exit
+        end if
+      end do
+
 
       if(SpaceG%Num_Lat > 0) then
          if(allocated(SpaceG%Lat_tr)) deallocate(SpaceG%Lat_tr)
@@ -746,19 +774,21 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           end do
           SpaceG%Centre="Non-Centrosymmetric"                          ! Alphanumeric information about the center of symmetry
           if(SpaceG%Centred == 0) then
-            SpaceG%Centre="Centrosymmetric, -1 not @the origin "       ! Alphanumeric information about the center of symmetry
             SpaceG%Centre_coord=rational(1_LI,2_LI) * SpaceG%Op(m)%Mat(1:d,Dd)
+            SpaceG%Centre="                                                                                                              "
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Centrosymmetric (-1 not @the origin), centre at: [ ",(trim(Rational_String(SpaceG%Centre_coord(j)))//" ",j=1,d),"]"
             SpaceG%NumOps=SpaceG%NumOps/2
           else if(SpaceG%Centred == 2) then
-            SpaceG%Centre="Centrosymmetric, -1 @the origin "           ! Alphanumeric information about the center of symmetry
+            SpaceG%Centre="Centrosymmetric with centre at origin"           ! Alphanumeric information about the center of symmetry
             SpaceG%NumOps=SpaceG%NumOps/2
           end if
 
           if(SpaceG%Centred == 1 .and. SpaceG%anticentred /= 1) then
              if(SpaceG%anticentred == 0) then
-                SpaceG%Centre=trim(SpaceG%Centre)//": -1' not @the origin"
+               SpaceG%Centre="                                                                                               "
+               write(unit=SpaceG%Centre,fmt="(a,10a)") "Non-centrosymmetric, Anti-centric with -1' @ : [ ",(trim(Rational_String(SpaceG%AntiCentre_coord(j)))//" ",j=1,d),"]"
              else
-                SpaceG%Centre=trim(SpaceG%Centre)//": -1' @the origin"
+                SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' at origin "
                 SpaceG%AntiCentre_coord=0_LI//1_LI
              end if
           end if
@@ -932,11 +962,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                 if(sum(abs(SpaceG%Op(i)%Mat(1:D,Dd))) == 0_LI) then
                   SpaceG%AntiCentred=2
                   SpaceG%AntiCentre_coord=0//1
-                  SpaceG%Centre="Anti-centric with -1' @ origin"
+                  SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' @ origin"
                 else
                   SpaceG%AntiCentred=0
                   SpaceG%AntiCentre_coord=SpaceG%Op(i)%Mat(1:D,Dd)/2_LI
-                  write(unit=SpaceG%Centre,fmt="(a)") "Anti-centric with -1' @ : "//Rational_String(SpaceG%AntiCentre_coord)
+                  SpaceG%Centre="                                                                                                 "
+                  write(unit=SpaceG%Centre,fmt="(a)") "Non-centrosymmetric, Anti-centric with -1' @ : "//Rational_String(SpaceG%AntiCentre_coord)
                 end if
                 exit
               end if

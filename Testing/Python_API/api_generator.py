@@ -23,7 +23,7 @@ import glob
 import os
 import parser_utils
 
-DIR_CRYSFML08 = 'C:\\Users\\katcho\\git\\CrysFML2008\\'
+DIR_CRYSFML08 = 'C:\\ILL_Git\\CrysFML08\\'
 colorama.init()
 
 modules = {}

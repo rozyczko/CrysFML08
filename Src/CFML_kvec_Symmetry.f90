@@ -224,7 +224,7 @@
   !!----    integer                                  :: nirreps    ! Number of irreducible representations (max=4, if nirreps /= 0 => nmsym=0)
   !!----    Integer,             dimension(4)        :: irrep_dim       !Dimension of the irreps
   !!----    Integer,             dimension(4)        :: small_irrep_dim !Dimension of the small irrep
-  !!----    Integer,             dimension(4)        :: irrep_modes_number !Number of the mode of the irrep
+  !!----    Integer,             dimension(4)        :: irrep_modes_number !Number of the modes of the irrep
   !!----    Character(len=15),   dimension(4)        :: irrep_id        !Labels for the irreps
   !!----    Character(len=20),   dimension(4)        :: irrep_direction !Irrep direction in representation space
   !!----    Character(len=20),   dimension(4)        :: irrep_action    !Irrep character primary or secondary
@@ -255,7 +255,7 @@
   !!---- Updated: January - 2014
   !!
   Type, Public :: MagSymm_k_Type
-     character(len=31)                        :: MagModel
+     character(len=31)                        :: MagModel   ! Name to characterize the magnetic symmetry
      character(len=15)                        :: Sk_type
      character(len=15)                        :: BNS_number ! Added for keeping the same information
      character(len=15)                        :: OG_number  ! as in Magnetic_SPG_Type
