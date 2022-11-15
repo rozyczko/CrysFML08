@@ -6,35 +6,43 @@ November 2022
 ---------
 Functions
 ---------
-fortran_types_to_python_dicts() -> None
+check_reading() -> None
+fortran_types_in_dicts() -> None
 get_cfml_modules_filenames() -> list
 get_overloads(m_name : str,lines : list,n : int =0) -> int
 get_procedures(m_name : str,lines : list,n : int =0) -> int
 get_publics(m_name : str,lines : list,n : int =0) -> int)
 get_types(m_name : str,lines : list,n : int =0) -> int
+is_overload(m_name : str,p_name : str) -> str
 move_to_install() -> None
 move_to_source() -> None
 read_cfml_module(file_name : str) -> None
 read_crysfml08() -> None
 run() -> None
+wrap_procedures() -> None
 """
 import colorama
 import cfml_objects
 import glob
 import os
 import parser_utils
+import wraper_utils
 
-DIR_CRYSFML08 = 'C:\\ILL_Git\\CrysFML08\\'
 colorama.init()
 
 modules = {}
 is_read = False
+CRYSFML08_DIR = ''
 
-def fortran_types_to_python_dicts() -> None:
+def check_reading() -> None:
 
     if not is_read:
         print(f"{colorama.Fore.RED}{'Error: CrysFML08 library must be read before writing the API.'}{colorama.Style.RESET_ALL}")
         raise IOError
+
+def fortran_types_in_dicts() -> None:
+
+    check_reading()
     print('')
     move_to_install()
     print(f"{colorama.Fore.GREEN}{'Converting Fortran types in Python dictionaries'}{colorama.Style.RESET_ALL}")
@@ -105,6 +113,10 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
                 modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
                 parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
                 parser_utils.get_function_result(line,modules[m_name].procedures[f_name])
+                ov = is_overload(m_name,f_name)
+                if ov:
+                    modules[m_name].procedures[f_name].is_overload = True
+                    modules[m_name].procedures[f_name].overload = ov
                 n = parser_utils.get_function_types(n+1,lines,modules[m_name].procedures[f_name])
             else:
                 n += 1
@@ -114,6 +126,10 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
                 print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
                 modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
                 parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
+                ov = is_overload(m_name,s_name)
+                if ov:
+                    modules[m_name].procedures[s_name].is_overload = True
+                    modules[m_name].procedures[s_name].overload = ov
                 n = parser_utils.get_subroutine_types(n+1,lines,modules[m_name].procedures[s_name])
             else:
                 n += 1
@@ -157,31 +173,48 @@ def get_types(m_name : str,lines : list,n : int =0) -> int:
         n = parser_utils.get_type_components(n+1,lines,modules[m_name].types[t_name])
     return n
 
-def move_to_install() -> None:
+def is_overload(m_name : str,p_name : str) -> str:
+
+    ov = ''
+    for iface in modules[m_name].interface.keys():
+        for p in modules[m_name].interface[iface].procedures:
+            if p.strip() == p_name.strip():
+                return iface
+    return ov
+
+def move_to_install(fortran=False) -> None:
 
     # Create install directory if it doesn't exist
-    os.chdir(DIR_CRYSFML08)
+    os.chdir(CRYSFML08_DIR)
     if not os.path.isdir('API'):
         os.makedirs('API')
-    print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{os.path.join(DIR_CRYSFML08,'API')}{colorama.Style.RESET_ALL}")
-    os.chdir('API')
+    if not os.path.isdir('API/Fortran'):
+        os.makedirs('API/Fortran')
+    if not fortran:
+        print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API')}{colorama.Style.RESET_ALL}")
+        os.chdir('API')
+    else:
+        print(f"{colorama.Fore.GREEN}{'Entering in API/Fortran directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API','Fortran')}{colorama.Style.RESET_ALL}")
+        os.chdir('API/Fortran')
     return None
 
 def move_to_source() -> None:
 
     # Move to Crysfml08
-    if not DIR_CRYSFML08:
-        print(f"{colorama.Fore.RED}{'Error: variable DIR_CRYSFML08 must be set at the beginning of this script.'}{colorama.Style.RESET_ALL}")
+    global CRYSFML08_DIR
+    CRYSFML08_DIR = os.getenv('CRYSFML08')
+    if CRYSFML08_DIR is None:
+        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
         raise IOError
-    if not os.path.isdir(DIR_CRYSFML08):
-        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
+    if not os.path.isdir(CRYSFML08_DIR):
+        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
         raise IOError
-    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
-    os.chdir(DIR_CRYSFML08)
+    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
+    os.chdir(CRYSFML08_DIR)
 
     # Move to Src\
     if not os.path.isdir('Src'):
-        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
         raise IOError
     print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
     os.chdir('Src')
@@ -232,8 +265,54 @@ def run() -> None:
     print(f"{' ' :>20}{colorama.Fore.GREEN}{'==========================='}{colorama.Style.RESET_ALL}")
 
     read_crysfml08()
-    fortran_types_to_python_dicts()
+    fortran_types_in_dicts()
+    #fortran_python_interconversion()
+    wrap_procedures()
     return None
+
+def wrap_procedures() -> None:
+
+    nprocs = 0
+    procs = {}
+    check_reading()
+    move_to_install(fortran=True)
+    print(f"{colorama.Fore.GREEN}{'Wrapping Fortran procedures'}{colorama.Style.RESET_ALL}")
+    for m_name in modules.keys():
+        nwraps = 0
+        print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
+        if len(modules[m_name].procedures.keys()) == 0:
+            continue
+        for p_name in modules[m_name].procedures.keys():
+            wrappea = True
+            for arg in modules[m_name].procedures[p_name].arguments.keys():
+                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
+                    parser_utils.is_optional(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
+                    parser_utils.is_array(modules[m_name].procedures[p_name].arguments[arg].dim) or \
+                    modules[m_name].procedures[p_name].is_overload:
+                    wrappea = False
+                    break
+            if type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
+                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
+                    parser_utils.is_optional(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
+                    parser_utils.is_array(modules[m_name].procedures[p_name].xreturn.dim) or \
+                    modules[m_name].procedures[p_name].is_overload:
+                    wrappea = False
+            if wrappea:
+                if type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
+                    print(f"{' ':>4}{colorama.Fore.GREEN}{'Wrapping '}{colorama.Fore.YELLOW}{'function' :<12}{colorama.Fore.CYAN}{p_name}{colorama.Style.RESET_ALL}")
+                else:
+                    print(f"{' ':>4}{colorama.Fore.GREEN}{'Wrapping '}{colorama.Fore.YELLOW}{'subroutine':<12}{colorama.Fore.CYAN}{p_name}{colorama.Style.RESET_ALL}")
+                if nwraps == 0:
+                    wraper_utils.init_module(modules[m_name])
+                    nwraps = 1
+                wraper_utils.wrap(modules[m_name].procedures[p_name])
+                if m_name in procs.keys():
+                    procs[m_name].append(p_name)
+                else:
+                    procs[m_name] = [p_name]
+                nprocs += 1
+    print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
+    wraper_utils.write_api_init(procs,nprocs)
 
 if __name__ == '__main__':
 
