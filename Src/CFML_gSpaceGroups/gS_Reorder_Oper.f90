@@ -25,6 +25,7 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
 
       !--- Local variables ---!
       integer                          :: i,j,L,n,m,Ng,invt,i_centre,d
+      integer,       dimension(multip) :: perm
       real(kind=cp), dimension(multip) :: tr   !Sum of absolute values of Translations components associated to the array of operators
       logical,       dimension(multip) :: nul  !Logical to control the exclusion of an operator from the independet list
       type(rational), dimension(:,:),allocatable:: identity,invers,imat !(d,d)
@@ -65,6 +66,7 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
 
       !> Insertion sort putting the negative determinants at the bottom
       call Sort_Oper(multip,Op(1:multip),"det")
+
       do i=1,Multip
          tr(i)=sum(abs(Op(i)%Mat(1:d,n)))
          call allocate_op(n,Opr(i))
@@ -117,6 +119,7 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
             centred = 0
          end if
       end if
+
       !> Nullify operators deduced by lattice translations and centre of symmetry
       do j=2,Multip-1
          if (nul(j)) cycle
@@ -187,80 +190,88 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
          end if
       end if
 
-      !> Determine the reduced set of symmetry operators"
-      j=0
-      do i=1,Multip
-         if (nul(i)) cycle
-         j=j+1
-         Opr(j) = Op(i)
-      end do
-      Numops=j
-
-      !> Promote the reduced set of symmetry operators to the top of the list
-      Op(1:j)=Opr(1:j)
-
       !> Reorder the reduced set putting primed elements at the bottom
-      call Sort_oper(Numops,Op(1:Numops),"tim")
+      if(mag_type == 4) then
+         call Sort_oper(Multip,Op(1:Multip),"tim")
+         !write(*,"(/a/)") " TOTAL LIST OF OPERATORS in Reorder"
+         !do i=1,Multip
+         !   write(*,"(i6,a)") i, " -> "//trim(Get_Symb_from_Op(Op(i)))
+         !end do
+      else
+        !> Determine the reduced set of symmetry operators"
+        j=0
+        do i=1,Multip
+           if (nul(i)) cycle
+           j=j+1
+           Opr(j) = Op(i)
+        end do
+        Numops=j
 
-      m=Numops*(num_lat+1)*cent(centred)
-      if (mag_type == 2) m=m*2
-      if ( m /= Multip ) then !Check that it is OK
-         Err_CFML%Ierr = 1
-         write(unit=Err_CFML%Msg,fmt="(2(a,i4))") "Reorder_Operators@SPACEG: Warning in Multip=",Multip, " Calculated Multip: ",m
-         return
+        !> Promote the reduced set of symmetry operators to the top of the list
+        Op(1:j)=Opr(1:j)
+
+        m=Numops*(num_lat+1)*cent(centred)
+        if (mag_type == 2) m=m*2
+        if ( m /= Multip ) then !Check that it is OK
+           Err_CFML%Ierr = 1
+           write(unit=Err_CFML%Msg,fmt="(2(a,i4))") "Reorder_Operators@SPACEG: Warning in Multip=",Multip, " Calculated Multip: ",m
+           return
+        end if
+
+        !> Re-Construct, in an ordered way, all the symmetry operators
+        !> starting with the reduced set
+        m=Numops
+        ng=m
+        if (i_centre /= 0) then   !First apply the centre of symmetry
+           do i=1,Numops
+              m=m+1
+              Op(m) = Op_centre * Op(i)
+           end do
+        end if
+
+        ng=m  ! Number or symmetry operators including centre of symmetry
+        if (Num_Lat > 0) then  !Fourth apply the lattice centring translations
+           do L=1,Num_Lat
+              do i=1,ng
+                 m=m+1
+                 Op(m)=Op_Lat(L)*Op(i)
+              end do
+           end do
+        end if
+
+        if (mag_type == 2) then
+           ng=m
+           do i=1,ng
+              m=m+1
+              Op(m)=Op_identp*Op(i)
+           end do
+        end if
+
+        !> Normally here the number of operators should be equal to multiplicity
+        !> Test that everything is OK
+        ng=m
+        if (ng /= Multip) then
+           Err_CFML%Ierr = 1
+           write(unit=Err_CFML%Msg,fmt="(2(a,i3))") "Reorder_Operators@SPACEG: Error in the multiplicity ",&
+                                                    Multip," has not been recovered, value of ng=",ng
+           return
+        end if
+
+        !> Determine if the group contain the primed inversion
+        do i = 1 , ng
+           if (rational_equal(Op(i)%Mat(1:d,1:d),invers) .and. Op(i)%time_inv == -1 ) then
+              anticentre_coord(1:d)=ONE_HALF*Op(i)%Mat(1:d,n)
+              if (tr(i) < loc_eps) then
+                 anticentred = 2
+              else
+                 anticentred = 0
+              end if
+              exit
+           end if
+        end do
+
       end if
 
-      !> Re-Construct, in an ordered way, all the symmetry operators
-      !> starting with the reduced set
-      m=Numops
-      ng=m
-      if (i_centre /= 0) then   !First apply the centre of symmetry
-         do i=1,Numops
-            m=m+1
-            Op(m) = Op_centre * Op(i)
-         end do
-      end if
-
-      ng=m  ! Number or symmetry operators including centre of symmetry
-      if (Num_Lat > 0) then  !Fourth apply the lattice centring translations
-         do L=1,Num_Lat
-            do i=1,ng
-               m=m+1
-               Op(m)=Op_Lat(L)*Op(i)
-            end do
-         end do
-      end if
-
-      if (mag_type == 2) then
-         ng=m
-         do i=1,ng
-            m=m+1
-            Op(m)=Op_identp*Op(i)
-         end do
-      end if
-
-      !> Normally here the number of operators should be equal to multiplicity
-      !> Test that everything is OK
-      ng=m
-      if (ng /= Multip) then
-         Err_CFML%Ierr = 1
-         write(unit=Err_CFML%Msg,fmt="(2(a,i3))") "Reorder_Operators@SPACEG: Error in the multiplicity ",&
-                                                  Multip," has not been recovered, value of ng=",ng
-         return
-      end if
-
-      !> Determine if the group contain the primed inversion
-      do i = 1 , ng
-         if (rational_equal(Op(i)%Mat(1:d,1:d),invers) .and. Op(i)%time_inv == -1 ) then
-            anticentre_coord(1:d)=ONE_HALF*Op(i)%Mat(1:d,n)
-            if (tr(i) < loc_eps) then
-               anticentred = 2
-            else
-               anticentred = 0
-            end if
-            exit
-         end if
-      end do
    End Subroutine Reorder_Operators
 
 End SubModule gS_Reorder_Oper

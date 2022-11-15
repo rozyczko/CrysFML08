@@ -575,11 +575,12 @@ Module CFML_IOForm
          integer, optional,              intent(in)    :: i_ini,i_end
       End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation
 
-      Module Subroutine Write_MCIF_Template(filename,Cell,SpG,AtmList)
-         character(len=*),        intent(in) :: filename
-         class(Cell_G_Type),      intent(in) :: Cell
-         class(SpG_Type),         intent(in) :: SpG
-         Type(AtList_Type),       intent(in) :: AtmList
+      Module Subroutine Write_MCIF_Template(filename,Cell,SpG,AtmList,Code)
+         character(len=*),           intent(in) :: filename
+         class(Cell_G_Type),         intent(in) :: Cell
+         class(SpG_Type),            intent(in) :: SpG
+         Type(AtList_Type),          intent(in) :: AtmList
+         character(len=*), optional, intent(in) :: Code
       End Subroutine Write_MCIF_Template
 
       Module Subroutine Write_MCIF_SpaceG_SymOP_Magn_Operation(Ipr, Spg)
