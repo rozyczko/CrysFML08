@@ -201,12 +201,11 @@ def move_to_install(fortran=False) -> None:
 def move_to_source() -> None:
 
     # Move to Crysfml08
-    if not os.getenv('CRYSFML08'):
-        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
-        raise IOError
-
     global CRYSFML08_DIR
     CRYSFML08_DIR = os.getenv('CRYSFML08')
+    if CRYSFML08_DIR is None:
+        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
+        raise IOError
     if not os.path.isdir(CRYSFML08_DIR):
         print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
         raise IOError
@@ -273,6 +272,8 @@ def run() -> None:
 
 def wrap_procedures() -> None:
 
+    nprocs = 0
+    procs = {}
     check_reading()
     move_to_install(fortran=True)
     print(f"{colorama.Fore.GREEN}{'Wrapping Fortran procedures'}{colorama.Style.RESET_ALL}")
@@ -305,6 +306,13 @@ def wrap_procedures() -> None:
                     wraper_utils.init_module(modules[m_name])
                     nwraps = 1
                 wraper_utils.wrap(modules[m_name].procedures[p_name])
+                if m_name in procs.keys():
+                    procs[m_name].append(p_name)
+                else:
+                    procs[m_name] = [p_name]
+                nprocs += 1
+    print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
+    wraper_utils.write_api_init(procs,nprocs)
 
 if __name__ == '__main__':
 
