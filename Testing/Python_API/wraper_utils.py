@@ -25,9 +25,9 @@ def fortran_proc(p) -> None:
             arguments = arguments + arg + ','
         arguments = arguments[:-1] + ')'
         if type(p) == cfml_objects.Subroutine:
-            f.write(f"{' ':>8}{'call '}{p.name}{arguments}\n")
+            f.write(f"{' ':>8}{'if (ierror == 0) call '}{p.name}{arguments}\n")
         else:
-            f.write(f"{' ':>8}{p.xreturn.name}{' = '}{p.name}{arguments}\n")
+            f.write(f"{' ':>8}{'if (ierror == 0) '}{p.xreturn.name}{' = '}{p.name}{arguments}\n")
 
 def get_fortran_type(line : str) -> str:
 
@@ -52,6 +52,7 @@ def init_module(m : cfml_objects.Module) -> None:
         f.write(f"\n{' ':>4}{'use forpy_mod '}\n")
         f.write(f"{' ':>4}{'use iso_c_binding '}\n")
         f.write(f"\n{' ':>4}{'use cfml_globaldeps '}\n")
+        f.write(f"{' ':>4}{'use '}{m.name}\n")
         f.write(f"\n{' ':>4}{'implicit none'}\n")
         f.write(f"\n{' ':>4}{'contains'}\n")
 

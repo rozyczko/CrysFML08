@@ -28,11 +28,11 @@ import os
 import parser_utils
 import wraper_utils
 
-DIR_CRYSFML08 = 'C:\\ILL_Git\\CrysFML08\\'
 colorama.init()
 
 modules = {}
 is_read = False
+CRYSFML08_DIR = ''
 
 def check_reading() -> None:
 
@@ -185,34 +185,37 @@ def is_overload(m_name : str,p_name : str) -> str:
 def move_to_install(fortran=False) -> None:
 
     # Create install directory if it doesn't exist
-    os.chdir(DIR_CRYSFML08)
+    os.chdir(CRYSFML08_DIR)
     if not os.path.isdir('API'):
         os.makedirs('API')
     if not os.path.isdir('API/Fortran'):
         os.makedirs('API/Fortran')
     if not fortran:
-        print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{os.path.join(DIR_CRYSFML08,'API')}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API')}{colorama.Style.RESET_ALL}")
         os.chdir('API')
     else:
-        print(f"{colorama.Fore.GREEN}{'Entering in API/Fortran directory: '}{colorama.Fore.YELLOW}{os.path.join(DIR_CRYSFML08,'API','Fortran')}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.GREEN}{'Entering in API/Fortran directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API','Fortran')}{colorama.Style.RESET_ALL}")
         os.chdir('API/Fortran')
     return None
 
 def move_to_source() -> None:
 
     # Move to Crysfml08
-    if not DIR_CRYSFML08:
-        print(f"{colorama.Fore.RED}{'Error: variable DIR_CRYSFML08 must be set at the beginning of this script.'}{colorama.Style.RESET_ALL}")
+    if not os.getenv('CRYSFML08'):
+        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
         raise IOError
-    if not os.path.isdir(DIR_CRYSFML08):
-        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
+
+    global CRYSFML08_DIR
+    CRYSFML08_DIR = os.getenv('CRYSFML08')
+    if not os.path.isdir(CRYSFML08_DIR):
+        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
         raise IOError
-    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
-    os.chdir(DIR_CRYSFML08)
+    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
+    os.chdir(CRYSFML08_DIR)
 
     # Move to Src\
     if not os.path.isdir('Src'):
-        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{DIR_CRYSFML08}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
         raise IOError
     print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
     os.chdir('Src')
