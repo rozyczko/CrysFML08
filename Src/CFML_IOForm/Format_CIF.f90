@@ -222,6 +222,8 @@ SubModule (CFML_IOForm) Format_CIF
             select type (at=>atmlist%atom)
                class is (Atm_Std_Type)
                   soccup(i)=At(i)%occ_std/(real(At(i)%mult)/real(SpG%multip))
+               class is (ModAtm_Std_Type)
+                  soccup(i)=At(i)%occ_std/(real(At(i)%mult)/real(SpG%multip))
             end select
          end do
          ocf=sum(abs(Atmlist%atom(1)%x-Atmlist%atom(2)%x))
@@ -456,7 +458,7 @@ SubModule (CFML_IOForm) Format_CIF
       character(len=20),dimension(15)     :: label
       character(len=:),allocatable        :: aux_label
       integer                             :: i, j, n, nc, iv, First, nl,npos,ja_ini
-      integer, dimension(11)              :: lugar   !   1 -> label
+      integer, dimension(12)              :: lugar   !   1 -> label
                                                      !   2 -> Symbol
                                                      ! 3-5 -> coordinates
                                                      !   6 -> occupancy
@@ -465,6 +467,7 @@ SubModule (CFML_IOForm) Format_CIF
                                                      !   9 -> Multiplicity of the site
                                                      !  10 -> Wyckoff label letter
                                                      !  11 -> Oxidation number
+                                                     !  12 -> SymmForm
       real(kind=cp), dimension(1)     :: vet1,vet2
       !integer,       dimension(1)     :: ivet
 
@@ -472,7 +475,7 @@ SubModule (CFML_IOForm) Format_CIF
 
       type (atm_type)                 :: atm1
       type (atm_std_type)             :: atm2
-      !type (ModAtm_std_type)            :: atm3
+      type (ModAtm_std_type)          :: atm3
       type (atm_ref_type)             :: atm4
 
       !class(atm_type), allocatable    :: atm5
@@ -568,12 +571,15 @@ SubModule (CFML_IOForm) Format_CIF
             case ('_atom_site_symmetry_multiplicity')
                j=j+1
                lugar(9)=j
-            case ('_atom_site_Wyckoff_symbol')
+            case ('_atom_site_Wyckoff_symbol','_atom_site_Wyckoff_label')
                j=j+1
                lugar(10)=j
             case ('_atom_site_oxidation_number')
                j=j+1
                lugar(11)=j
+            case ('_atom_site_fract_symmform')
+               j=j+1
+               lugar(12)=j
          end select
       end do
 
@@ -655,6 +661,10 @@ SubModule (CFML_IOForm) Format_CIF
            atm%atom(n)%charge=charge(atm%atom(n)%SfacSymb)
          end if
 
+         if(lugar(12) /= 0) then
+           atm%atom(n)%AtmInfo = "Symmetry code: "//trim(label(lugar(12)))
+         end if
+
          !> Coordinates
          select type (at => atm%atom)
             type is (atm_type)
@@ -666,6 +676,17 @@ SubModule (CFML_IOForm) Format_CIF
                at(n)%x(3)=vet1(1)
 
             class is (atm_std_type)
+               call get_numstd(label(lugar(3)),vet1,vet2,iv)
+               at(n)%x(1)=vet1(1)
+               at(n)%x_std(1)=vet2(1)
+               call get_numstd(label(lugar(4)),vet1,vet2,iv)
+               at(n)%x(2)=vet1(1)
+               at(n)%x_std(2)=vet2(1)
+               call get_numstd(label(lugar(5)),vet1,vet2,iv)
+               at(n)%x(3)=vet1(1)
+               at(n)%x_std(3)=vet2(1)
+
+            class is (ModAtm_std_type)
                call get_numstd(label(lugar(3)),vet1,vet2,iv)
                at(n)%x(1)=vet1(1)
                at(n)%x_std(1)=vet2(1)
@@ -1012,20 +1033,38 @@ SubModule (CFML_IOForm) Format_CIF
                at(1)=at(first)
                at(first)=atm4
 
-            !type is (ModAtm_std_type)
-            !   atm3=at(1)
-            !   at(1)=at(first)
-            !   at(first)=atm3
+            type is (ModAtm_std_type)
+               atm3=at(1)
+               at(1)=at(first)
+               at(first)=atm3
 
          end select
       end if
 
       !> Put the first atom the first having a full occupation factor 1.0
       if (n <= 0) return
+      select type (at => atm%atom)
+         type is (atm_type)
+           call allocate_atom_list(n, AtmList,'atm_type',0)
+           AtmList%atom=at(1:n)
+           call allocate_atom_list(0,Atm,'atm_type',0)
 
-      call allocate_atom_list(n, AtmList,'atm_std_type',0)
-      AtmList%atom=atm%atom(1:n)
-      call allocate_atom_list(0,Atm,'atm_std_type',0)
+         type is (atm_std_type)
+           call allocate_atom_list(n, AtmList,'atm_std_type',0)
+           AtmList%atom=at(1:n)
+           call allocate_atom_list(0,Atm,'atm_std_type',0)
+
+         type is (atm_ref_type)
+           call allocate_atom_list(n, AtmList,'atm_ref_type',0)
+           AtmList%atom=at(1:n)
+           call allocate_atom_list(0,Atm,'atm_ref_type',0)
+
+         type is (ModAtm_std_type)
+           call allocate_atom_list(n, AtmList,'ModAtm_std_type',0)
+           AtmList%atom=at(1:n)
+           call allocate_atom_list(0,Atm,'ModAtm_std_type',0)
+
+      end select
 
    End Subroutine Read_CIF_Atoms
 

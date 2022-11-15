@@ -543,24 +543,24 @@
           if(ier /= 0) tbox=[1,1,1]
        end if
        call Write_Crystal_Cell(Cell)
-       if(len_trim(Grp%setting) /= 0) then
-         write(*,"(/,a)") " => Transformed Cell"
-         if(Grp%D > 4) then
-           i=index(Grp%setting,"d")
-           setting=Grp%setting(1:d-2)//";0,0,0"
-         else
-           setting=Grp%setting
-         end if
-         call Change_Setting_Cell(Cell,setting,Celln)
-         call Write_Crystal_Cell(Celln)
-       end if
+
+       !if(len_trim(Grp%setting) /= 0) then  !This has been suppressed because the change of setting is done in Read_Xtal_structure
+       !  write(*,"(/,a)") " => Transformed Cell"
+       !  if(Grp%D > 4) then
+       !    i=index(Grp%setting,"d")
+       !    setting=Grp%setting(1:d-2)//";0,0,0"
+       !  else
+       !    setting=Grp%setting
+       !  end if
+       !  call Change_Setting_Cell(Cell,setting,Celln)
+       !  call Write_Crystal_Cell(Celln)
+       !end if
+
        !Determine the inverse operators
        Grp%Inv= Get_Inv_OP(Grp%Op)
 
        call Write_SpaceGroup_Info(Grp)
 
-       i=index(fname,".")
-       call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
 
        call Set_Eps_Math(0.0002_cp)
        if(Atm%natoms > 0) then
@@ -707,6 +707,10 @@
                 end do
                 call Write_CIF_P1()
           End Select
+
+          i=index(fname,".")
+          call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
+
        end if
     else
       write(*,"(a)") " => Error found!"

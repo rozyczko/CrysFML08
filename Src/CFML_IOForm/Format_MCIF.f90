@@ -1150,7 +1150,7 @@ SubModule (CFML_IOForm) Format_MCIF
       end if
 
       if (allocated(dire)) deallocate(dire)
-      allocate(dire(np))
+      allocate(dire(2*np))
       dire=" "
 
       !> Read vales

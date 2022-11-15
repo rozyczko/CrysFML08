@@ -22,7 +22,7 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local Variables ----!
       logical                         :: flag_atm
-      character(len=30),dimension(15) :: label
+      character(len=30),dimension(20) :: label
       character(len=80)               :: line
       character(len=2)                :: el
       integer                         :: i, j, n, nc, iv
