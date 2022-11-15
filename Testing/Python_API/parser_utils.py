@@ -22,9 +22,11 @@ get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int
 get_type_components(n : int, lines : list, t : cfml_objects.FortranType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
+is_array(dim : str) -> bool
 is_empty(line : str) -> bool
+is_optional(line : str) -> bool
+is_primitive(line : str) -> bool
 is_procedure(procedure : str,line : str) -> bool
-
 """
 import cfml_objects
 
@@ -313,9 +315,36 @@ def get_type_parent(line : str) -> str:
     else:
         return('')
 
+def is_array(dim : str) -> bool:
+
+    if dim.strip() == '(0)':
+        return False
+    else:
+        return True
+
 def is_empty(line : str) -> bool:
 
     if len(line) == 0 or line.isspace():
+        return True
+    else:
+        return False
+
+def is_optional(line : str) -> bool:
+
+    optional = False
+    line = line.strip().lower()
+    i = line.find('optional')
+    if i > -1:
+        optional = True
+    return optional
+
+def is_primitive(line : str) -> bool:
+
+    line = line.strip().lower()
+    if line.startswith('integer') or \
+        line.startswith('real') or \
+        line.startswith('character') or \
+        line.startswith('logical'):
         return True
     else:
         return False

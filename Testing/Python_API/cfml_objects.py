@@ -17,18 +17,20 @@ class Argument(Type_Component):
 
 class Subroutine():
 
-    def __init__(self,name : str ='',module : str ='',arguments : dict ={},has_interface : bool =False):
+    def __init__(self,name : str ='',module : str ='',arguments : dict ={},is_overload : bool = False,overload : str = '',has_interface : bool =False):
 
         self.name          = name
         self.module        = module
         self.arguments     = arguments.copy()
+        self.is_overload   = is_overload
+        self.overload      = overload
         self.has_interface = has_interface
 
 class Function(Subroutine):
 
     def __init__(self,name : str ='',module : str ='',arguments : dict ={},xreturn : Type_Component =Type_Component()):
 
-        super().__init__(name='',module='',arguments={})
+        super().__init__(name=name,module=module,arguments=arguments)
         self.xreturn = xreturn
 
 class Interface():
