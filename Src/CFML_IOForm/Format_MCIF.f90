@@ -561,11 +561,12 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       integer                        :: i,j,ds
       type(rational), dimension(Spg%d-1,Spg%d-1) :: unidad
+      character(len=6) :: xyz_typ
 
       !> Init
       call Rational_Identity_Matrix(unidad)
       ds=Spg%d-1
-
+      xyz_typ="xyz"
       !> Centering
       Select Type(Spg)
          type is(Spg_type)
@@ -573,6 +574,7 @@ SubModule (CFML_IOForm) Format_MCIF
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.id"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.xyz"
          class is (SuperSpaceGroup_Type)
+           xyz_typ="x1x2x3"
            write(unit=ipr,fmt="(a)")  "loop_"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_centering.id"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_centering.algebraic"
@@ -581,8 +583,7 @@ SubModule (CFML_IOForm) Format_MCIF
       do i=1,SpG%Multip
          if (rational_equal(SpG%Op(i)%Mat(1:ds,1:ds),unidad)) then
             j=j+1
-            line=trim(l_case(SpG%Symb_Op(i)))
-            line="'"//trim(line)//"'"
+            line= Get_Symb_from_Rational_Mat(SpG%Op(i)%Mat,StrCode=xyz_typ,invt=SpG%Op(i)%time_inv)
             write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
          end if
       end do
@@ -605,9 +606,11 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       integer                        :: i,j,nop,ds
       type(rational), dimension(Spg%d-1,Spg%d-1) :: unidad
+      character(len=6) :: xyz_typ
 
       !> Init
       call Rational_Identity_Matrix(unidad)
+      xyz_typ="xyz"
 
       !> Operations
       Select Type(Spg)
@@ -616,22 +619,21 @@ SubModule (CFML_IOForm) Format_MCIF
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.id"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.xyz"
          class is (SuperSpaceGroup_Type)
+           xyz_typ="x1x2x3"
            write(unit=ipr,fmt="(a)")  "loop_"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_operation.id"
            write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_operation.algebraic"
       End Select
       ds=Spg%d-1
       j=1
-      line=trim(l_case(SpG%Symb_Op(j)))
-      line="'"//trim(line)//"'"
+      line=Get_Symb_from_Rational_Mat(SpG%Op(j)%Mat,StrCode=xyz_typ,invt=SpG%Op(j)%time_inv)
       write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
       nop=SpG%Multip
       if(SpG%Mag_type == 4) nop=nop/2
       do i=2,nop
          if (rational_equal(SpG%Op(i)%Mat(1:ds,1:ds),unidad) ) cycle
          j=j+1
-         line=trim(l_case(SpG%Symb_Op(i)))
-         line="'"//trim(line)//"'"
+         line= Get_Symb_from_Rational_Mat(SpG%Op(i)%Mat,StrCode=xyz_typ,invt=SpG%Op(i)%time_inv)
          write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
       end do
       write(unit=Ipr,fmt="(a)") " "

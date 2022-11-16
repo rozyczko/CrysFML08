@@ -251,7 +251,7 @@
 
 
     Function modulation_function(At,SpG,s,Lat,time_v,tshift) result(v)
-      type(ModAtm_Std_Type),          intent(in) :: At     !Modulated atom type
+      type(ModAtm_Std_Type),        intent(in) :: At     !Modulated atom type
       type(SuperSpaceGroup_type),   intent(in) :: SpG
       integer,                      intent(in) :: s      !Pointer to the symmetry operator relating x and x0: x= g(s) x0 + t(s) + Lat
       integer,       dimension(:),  intent(in) :: Lat    !Additional lattice translation

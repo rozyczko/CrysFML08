@@ -494,7 +494,7 @@
 
  Program enermag
    !use Mod_fun
-   use CFML_Maths, only: diagonalize_sh 
+   use CFML_Maths, only: diagonalize_sh
    use j_k_exchange
    use Super_Exchange
    Implicit none
