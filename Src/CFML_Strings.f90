@@ -253,8 +253,8 @@
 
        Pure Module Function L_Case(Str) Result (LStr)
           !---- Argument ----!
-          character (len=*), intent(in) :: Str    ! Input String
-          character (len=len(str))      :: LStr   ! lower case of Text
+          character (len=*), intent(in)   :: Str    ! Input String
+          character (len=:), allocatable  :: LStr   ! lower case of Text
        End Function L_Case
 
        Pure Module Function NumCol_from_NumFmt(Str) Result(n_col)
@@ -265,8 +265,8 @@
 
        Pure Module Function Pack_String(Str) Result (Strp)
           !---- Argument ----!
-          character(len=*), intent(in)  :: str    ! Input String
-          character(len=len_trim(str))  :: strp   ! Output string
+          character(len=*), intent(in) :: str    ! Input String
+          character(len=len_trim(str)) :: strp   ! Output string
        End Function Pack_String
 
        Module Function Read_Fract(str) Result(value)
@@ -388,9 +388,9 @@
 
        Pure Module Function Strip_String(str, to_strip) Result(sstr)
           !---- Arguments----!
-          character(len=*), intent(in) :: str            ! Input string
-          character(len=*), intent(in) :: to_strip       ! Pattern
-          character(len=len_trim(str)) :: sstr
+          character(len=*), intent(in)  :: str            ! Input string
+          character(len=*), intent(in)  :: to_strip       ! Pattern
+          character(len=len_trim(str))  :: sstr
        End Function Strip_String
 
        Pure Module Subroutine SubString_Replace(string, substr, repstr, warning)
@@ -421,8 +421,8 @@
 
        Pure Module Function U_Case(Str) Result (UStr)
           !---- Argument ----!
-          character(len=*), intent(in) :: Str   ! Input string
-          character(len=len(Str))      :: UStr  ! Upper conversion
+          character(len=*), intent(in)  :: Str   ! Input string
+          character(len=:), allocatable :: UStr  ! Upper conversion
        End Function U_Case
 
     End Interface
