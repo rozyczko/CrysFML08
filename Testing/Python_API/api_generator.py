@@ -22,6 +22,7 @@ run() -> None
 wrap_procedures() -> None
 """
 import colorama
+import compilation
 import cfml_objects
 import glob
 import os
@@ -188,23 +189,27 @@ def move_to_install(fortran=False) -> None:
     os.chdir(CRYSFML08_DIR)
     if not os.path.isdir('API'):
         os.makedirs('API')
-    if not os.path.isdir('API/Fortran'):
-        os.makedirs('API/Fortran')
+    if not os.path.isdir('API/src'):
+        os.makedirs('API/src')
+    if not os.path.isdir('API/src/fortran'):
+        os.makedirs('API/src/fortran')
+    if not os.path.isdir('API/src/python'):
+        os.makedirs('API/src/python')
     if not fortran:
-        print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API')}{colorama.Style.RESET_ALL}")
-        os.chdir('API')
+        wdir = os.path.join(CRYSFML08_DIR,'API','src','python')
     else:
-        print(f"{colorama.Fore.GREEN}{'Entering in API/Fortran directory: '}{colorama.Fore.YELLOW}{os.path.join(CRYSFML08_DIR,'API','Fortran')}{colorama.Style.RESET_ALL}")
-        os.chdir('API/Fortran')
+        wdir = os.path.join(CRYSFML08_DIR,'API','src','fortran')
+    print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{wdir}{colorama.Style.RESET_ALL}")
+    os.chdir(wdir)
     return None
 
 def move_to_source() -> None:
 
     # Move to Crysfml08
     global CRYSFML08_DIR
-    CRYSFML08_DIR = os.getenv('CRYSFML08')
+    CRYSFML08_DIR = os.getenv('CRYSFML08_DIR')
     if CRYSFML08_DIR is None:
-        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08_DIR does not exist.'}{colorama.Style.RESET_ALL}")
         raise IOError
     if not os.path.isdir(CRYSFML08_DIR):
         print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
@@ -254,7 +259,10 @@ def read_crysfml08() -> None:
     move_to_source()
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
+        if file_name.lower() == 'cfml_strings.f90':
+            continue
         read_cfml_module(file_name)
+        #break
     is_read = True
     return None
 
@@ -268,6 +276,8 @@ def run() -> None:
     fortran_types_in_dicts()
     #fortran_python_interconversion()
     wrap_procedures()
+    compilation.create_scripts(os.path.join(CRYSFML08_DIR,'API'))
+
     return None
 
 def wrap_procedures() -> None:
@@ -311,6 +321,8 @@ def wrap_procedures() -> None:
                 else:
                     procs[m_name] = [p_name]
                 nprocs += 1
+        if nwraps > 0:
+            wraper_utils.end_module(modules[m_name])
     print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
     wraper_utils.write_api_init(procs,nprocs)
 
