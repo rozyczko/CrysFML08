@@ -45,7 +45,7 @@ SubModule (CFML_IOForm) Format_MCIF
          if (line(1:1) == '#') cycle
 
          npos=index(line,'_ssg_')
-         if (npos ==0) cycle
+         if (npos == 0) cycle
 
          ok=.true.
          exit
@@ -75,7 +75,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Init
       N=0
       if (cif%nlines <=0) return
-      if (len_trim(keyword) <=0) return
+      if (len_trim(keyword) <= 0) return
 
       j_ini=1; j_end=cif%nlines
       if (present(i_ini)) j_ini=i_ini
@@ -88,7 +88,7 @@ SubModule (CFML_IOForm) Format_MCIF
       do i=j_ini,j_end
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
          npos=index(line,str)
@@ -97,11 +97,11 @@ SubModule (CFML_IOForm) Format_MCIF
          !> search the loop
          do j=i-1,j_ini,-1
             line=adjustl(cif%line(j)%str)
-            if (len_trim(line) <=0) cycle
+            if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
 
             npos=index(line,'loop_')
-            if (npos ==0) cycle
+            if (npos == 0) cycle
             j_ini=j+1
             found=.true.
             exit
@@ -116,7 +116,7 @@ SubModule (CFML_IOForm) Format_MCIF
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /=str) exit
+         if (line(1:nl) /= str) exit
 
          j=j+1
       end do
@@ -126,7 +126,7 @@ SubModule (CFML_IOForm) Format_MCIF
          line=adjustl(cif%line(i)%str)
 
          if (line(1:1) == '#') cycle
-         if (len_trim(line) <=0) exit
+         if (len_trim(line) <= 0) exit
          n=n+1
       end do
 
@@ -205,20 +205,32 @@ SubModule (CFML_IOForm) Format_MCIF
          nsym=get_Nelem_Loop(cif,'_space_group_symop_magn_ssg_operation.')
       end if
 
-      if (ncen+nsym > 0) then
+      if (ncen+nsym-2 > 0) then
          !> Allocating generators
          if (allocated(symop)) deallocate(symop)
-         allocate(symop(ncen+nsym))
+         allocate(symop(ncen+nsym-2))
          symop=" "
 
          if (.not. ssg) then
-            call Read_MCIF_SpaceG_SymOP_Magn_Centering(cif, ncen, symop,n_ini,n_end)
-            call Read_MCIF_SpaceG_SymOP_Magn_Operation(cif, nsym, symop(ncen+1:),n_ini,n_end)
+            call Read_MCIF_SpaceG_SymOP_Magn_Operation(cif, nsym, symop,n_ini,n_end)
+            call Read_MCIF_SpaceG_SymOP_Magn_Centering(cif, ncen, symop(nsym+1:),n_ini,n_end)
          else
-            call Read_MCIF_SpaceG_SymOP_Magn_Ssg_Centering(cif, ncen, symop,n_ini,n_end)
-            call Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation(cif, nsym, symop(ncen+1:),n_ini,n_end)
+            call Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation(cif, nsym, symop,n_ini,n_end)
+            call Read_MCIF_SpaceG_SymOP_Magn_Ssg_Centering(cif, ncen, symop(nsym+1:),n_ini,n_end)
          end if
+
+         !write(*,"(/a/)") " GENERATORS"
+         !do i=1,ncen+nsym
+         !   write(*,"(i6,a)") i, " -> "//trim(symop(i))
+         !end do
+
          call Set_SpaceGroup("  ",SpG,ncen+nsym,symop)
+
+         !write(*,"(/a/)") " TOTAL LIST OF OPERATORS"
+         !do i=1,SpG%Multip
+         !   write(*,"(i6,a)") i, " -> "//trim(SpG%Symb_Op(i))
+         !end do
+
       end if
       if (Err_CFML%IErr==1) then
          call error_message(err_CFML%Msg)
@@ -270,12 +282,13 @@ SubModule (CFML_IOForm) Format_MCIF
    !!----
    !!---- 14/05/2020
    !!
-   Module Subroutine Write_MCIF_Template(filename,Cell,SpG,AtmList)
+   Module Subroutine Write_MCIF_Template(filename,Cell,SpG,AtmList,Code)
       !---- Arguments ----!
-      character(len=*),        intent(in) :: filename     ! Filename
-      class(Cell_G_Type),      intent(in) :: Cell         ! Cell parameters
-      class(SpG_Type),         intent(in) :: SpG          ! Space group information
-      Type(AtList_Type),       intent(in) :: AtmList      ! Atoms
+      character(len=*),           intent(in) :: filename     ! Filename
+      class(Cell_G_Type),         intent(in) :: Cell         ! Cell parameters
+      class(SpG_Type),            intent(in) :: SpG          ! Space group information
+      Type(AtList_Type),          intent(in) :: AtmList      ! Atoms
+      character(len=*), optional, intent(in) :: Code         ! Name of the structure
 
       !---- Local Variables ----!
       logical                        :: info
@@ -298,6 +311,15 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Heading Information
       call write_cif_header(ipr)
 
+      if(present(code)) then
+        if (len_trim(code) == 0) then
+           write(unit=ipr,fmt="(a)") "data_?"
+        else
+           write(unit=ipr,fmt="(a)") "data_"//code(1:len_trim(code))
+        end if
+      end if
+
+      write(unit=ipr,fmt="(a)") " "
       !> Extra items
       write(unit=ipr,fmt="(a)") " "
       write(unit=ipr,fmt="(a)") "_Neel_temperature  ?"
@@ -334,14 +356,19 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Atoms
       select case (l_case(Atmlist%atom(1)%UType))
          case ('beta')
-            call write_cif_atoms(ipr,atmlist,spG,cell)
+            call write_cif_atoms(ipr,Atmlist,spG,cell)
          case default
-            call write_cif_atoms(ipr,atmlist,SpG)
+            call write_cif_atoms(ipr,Atmlist,SpG)
       end select
 
       !> Moment
       call write_mcif_atomsite_moment(Ipr, Atmlist)
 
+      Select Type(SpG)
+        class is (SuperSpaceGroup_Type)
+           call Write_MCIF_AtomSite_Fourier_Wave_Vector(Ipr,SpG)
+           call Write_MCIF_AtomSite_Moment_Fourier(Ipr,Atmlist)
+      End Select
       !> close
       call write_cif_end(ipr)
 
@@ -453,38 +480,64 @@ SubModule (CFML_IOForm) Format_MCIF
          write(unit=ipr,fmt="(a,i6)")    "_parent_space_group.IT_number            ",Spg%Parent_num
       end if
 
-      !> Space_group_Magn
-      line=adjustl(SpG%BNS_symb)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a)") "_space_group_magn.name_BNS         "//trim(line)
+      Select Type(Spg)
+        Type is (Spg_type)
+           !> Space_group_Magn
+           line=adjustl(SpG%BNS_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a)") "_space_group_magn.name_BNS         "//trim(line)
 
-      line=adjustl(SpG%BNS_num)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a)") "_space_group_magn.number_BNS       "//trim(line)
+           line=adjustl(SpG%BNS_num)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a)") "_space_group_magn.number_BNS       "//trim(line)
 
-      line=adjustl(SpG%OG_symb)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a)") "_space_group_magn.name_OG          "//trim(line)
+           line=adjustl(SpG%OG_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a)") "_space_group_magn.name_OG          "//trim(line)
 
-      line=adjustl(SpG%OG_num)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a)") "_space_group_magn.number_OG        "//trim(line)
+           line=adjustl(SpG%OG_num)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a)") "_space_group_magn.number_OG        "//trim(line)
+
+        class is (SuperSpaceGroup_Type)
+
+           !> --------
+           !> SSG Zone
+           !> --------
+           call Write_MCIF_Cell_Modulation_Dimension(Ipr,SpG)
+
+           call Write_MCIF_Cell_Wave_Vector(Ipr,SpG)
+
+           !> SSG_Name
+           line=adjustl(SpG%SSG_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_name",trim(line)
+
+           !> SSG_Number
+           line=adjustl(SpG%SSG_Nlabel)
+           if (len_trim(line) ==0) line="?"
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_number",trim(line)
+      End Select
 
       !> Space group SymOp Operation
       call write_mcif_spaceg_symop_magn_operation(Ipr,SpG)
@@ -495,7 +548,7 @@ SubModule (CFML_IOForm) Format_MCIF
    End Subroutine Write_MCIF_Spg
 
    !!----
-   !!---- WRITE_MCIF_SPACEG_SYMOP_MAGN_CENTERING
+   !!---- WRITE_MCIF_SPACEG_SYMOP_MAGN(_ssg)_CENTERING
    !!----
    !!----
    !!---- 18/05/2020
@@ -506,33 +559,41 @@ SubModule (CFML_IOForm) Format_MCIF
       class (Spg_type), intent(in) :: Spg
 
       !---- Local Variables ----!
-      integer                        :: i,j
-      type(rational), dimension(3,3) :: unidad
+      integer                        :: i,j,ds
+      type(rational), dimension(Spg%d-1,Spg%d-1) :: unidad
+      character(len=6) :: xyz_typ
 
       !> Init
       call Rational_Identity_Matrix(unidad)
-
+      ds=Spg%d-1
+      xyz_typ="xyz"
       !> Centering
-      if (SpG%Num_Lat > 1 .or. SpG%Num_aLat > 0) then
-         write(unit=ipr,fmt="(a)")  "loop_"
-         write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.id"
-         write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.xyz"
-
-         do i=1,SpG%Multip
-            if (rational_equal(SpG%Op(i)%Mat(1:3,1:3),unidad)) then
-               j=j+1
-               line=trim(l_case(SpG%Symb_Op(i)))
-               line="'"//trim(line)//"'"
-               write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
-            end if
-         end do
-         write(unit=Ipr,fmt="(a)") " "
-      end if
+      Select Type(Spg)
+         type is(Spg_type)
+           write(unit=ipr,fmt="(a)")  "loop_"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.id"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_centering.xyz"
+         class is (SuperSpaceGroup_Type)
+           xyz_typ="x1x2x3"
+           write(unit=ipr,fmt="(a)")  "loop_"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_centering.id"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_centering.algebraic"
+      End Select
+      j=0
+      do i=1,SpG%Multip
+         if (rational_equal(SpG%Op(i)%Mat(1:ds,1:ds),unidad)) then
+            j=j+1
+            line= Get_Symb_from_Rational_Mat(SpG%Op(i)%Mat,StrCode=xyz_typ,invt=SpG%Op(i)%time_inv)
+            write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
+         end if
+      end do
+      write(unit=Ipr,fmt="(a)") " "
 
    End Subroutine Write_MCIF_SpaceG_SymOP_Magn_Centering
 
+
    !!----
-   !!---- WRITE_MCIF_SPACEG_SYMOP_MAGN_OPERATION
+   !!---- WRITE_MCIF_SPACEG_SYMOP_MAGN(_ssg)_OPERATION
    !!----
    !!----
    !!---- 19/05/2020
@@ -543,21 +604,37 @@ SubModule (CFML_IOForm) Format_MCIF
       class (Spg_type), intent(in) :: Spg
 
       !---- Local Variables ----!
-      integer                        :: i
-      type(rational), dimension(3,3) :: unidad
+      integer                        :: i,j,nop,ds
+      type(rational), dimension(Spg%d-1,Spg%d-1) :: unidad
+      character(len=6) :: xyz_typ
 
       !> Init
       call Rational_Identity_Matrix(unidad)
+      xyz_typ="xyz"
 
       !> Operations
-      write(unit=ipr,fmt="(a)")  "loop_"
-      write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.id"
-      write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.xyz"
-
-      do i=1,SpG%Numops
-         line=trim(l_case(SpG%Symb_Op(i)))
-         line="'"//trim(line)//"'"
-         write(unit=ipr,fmt="(i4,5x,a)") i,trim(line)
+      Select Type(Spg)
+         type is(Spg_type)
+           write(unit=ipr,fmt="(a)")  "loop_"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.id"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_operation.xyz"
+         class is (SuperSpaceGroup_Type)
+           xyz_typ="x1x2x3"
+           write(unit=ipr,fmt="(a)")  "loop_"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_operation.id"
+           write(unit=ipr,fmt="(a)")  "    _space_group_symop_magn_ssg_operation.algebraic"
+      End Select
+      ds=Spg%d-1
+      j=1
+      line=Get_Symb_from_Rational_Mat(SpG%Op(j)%Mat,StrCode=xyz_typ,invt=SpG%Op(j)%time_inv)
+      write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
+      nop=SpG%Multip
+      if(SpG%Mag_type == 4) nop=nop/2
+      do i=2,nop
+         if (rational_equal(SpG%Op(i)%Mat(1:ds,1:ds),unidad) ) cycle
+         j=j+1
+         line= Get_Symb_from_Rational_Mat(SpG%Op(i)%Mat,StrCode=xyz_typ,invt=SpG%Op(i)%time_inv)
+         write(unit=ipr,fmt="(i4,5x,a)") j,trim(line)
       end do
       write(unit=Ipr,fmt="(a)") " "
 
@@ -577,81 +654,87 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       integer :: np1,np2
 
-      !> Name_BNS
-      line=adjustl(SpG%BNS_symb)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.name_BNS",trim(line)
+      Select Type(Spg)
+        Type is (Spg_type)
+           !> Name_BNS
+           line=adjustl(SpG%BNS_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.name_BNS",trim(line)
 
-      !> Name_OG
-      line=adjustl(SpG%OG_symb)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.name_OG",trim(line)
+           !> Name_OG
+           line=adjustl(SpG%OG_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.name_OG",trim(line)
 
-      !> number_BNS
-      line=adjustl(SpG%BNS_num)
-      if (len_trim(line) ==0) line="?"
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.number_BNS",trim(line)
+           !> number_BNS
+           line=adjustl(SpG%BNS_num)
+           if (len_trim(line) ==0) line="?"
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.number_BNS",trim(line)
 
-      !> number_OG
-      line=adjustl(SpG%OG_num)
-      if (len_trim(line) ==0) line="?"
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.number_OG",trim(line)
+           !> number_OG
+           line=adjustl(SpG%OG_num)
+           if (len_trim(line) ==0) line="?"
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.number_OG",trim(line)
 
-      !> OG_wavevector_kxkykz (not implemented)
+           !> OG_wavevector_kxkykz (not implemented)
 
-      !> point_group_name
-      line=adjustl(SpG%mag_pg)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         np1=index(line,'"')
-         np2=index(line,"'")
-         if (np1 > 0 .and. np2==0) then
-            line="'"//trim(line)//"'"
-         else if (np1 == 0 .and. np2 > 0) then
-            line='"'//trim(line)//'"'
-         end if
-      end if
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.point_group_name",trim(line)
+           !> point_group_name
+           line=adjustl(SpG%mag_pg)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              np1=index(line,'"')
+              np2=index(line,"'")
+              if (np1 > 0 .and. np2==0) then
+                 line="'"//trim(line)//"'"
+              else if (np1 == 0 .and. np2 > 0) then
+                 line='"'//trim(line)//'"'
+              end if
+           end if
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.point_group_name",trim(line)
 
-      !> point_group_number (not implemented)
+           !> point_group_number (not implemented)
 
-      !> transform_BNS_Pp (not implemented)
+           !> transform_BNS_Pp (not implemented)
 
-      !> transform_BNS_Pp_abc
+           !> transform_BNS_Pp_abc
 
-      !> transform_OG_Pp (not implemented)
+           !> transform_OG_Pp (not implemented)
 
-      !> transform_OG_Pp_abc
+           !> transform_OG_Pp_abc
 
-      !> --------
-      !> SGG Zone
-      !> --------
+        class is (SuperSpaceGroup_Type)
 
-      !> SSG_Name
-      line=adjustl(SpG%SSG_symb)
-      if (len_trim(line) ==0) then
-         line="?"
-      else
-         line="'"//trim(line)//"'"
-      end if
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_name",trim(line)
+           !> --------
+           !> SSG Zone
+           !> --------
 
-      !> SSG_Number
-      line=adjustl(SpG%SSG_Nlabel)
-      if (len_trim(line) ==0) line="?"
-      write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_number",trim(line)
+           !> SSG_Name
+           line=adjustl(SpG%SSG_symb)
+           if (len_trim(line) ==0) then
+              line="?"
+           else
+              line="'"//trim(line)//"'"
+           end if
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_name",trim(line)
+
+           !> SSG_Number
+           line=adjustl(SpG%SSG_Nlabel)
+           if (len_trim(line) ==0) line="?"
+           write(unit=ipr,fmt="(a,t50,a)") "_space_group_magn.ssg_number",trim(line)
 
 
-      write(unit=Ipr,fmt="(a)") " "
+           write(unit=Ipr,fmt="(a)") " "
+
+      End Select
 
    End Subroutine Write_MCIF_SpaceG_Magn
 
@@ -2016,7 +2099,7 @@ SubModule (CFML_IOForm) Format_MCIF
       Type(Kvect_Info_Type) :: K
 
       !> K-vectors
-      if (present(Spg).and. (.not. present(Kvec))) then
+      if (present(Spg) .and. (.not. present(Kvec))) then
          select type (SpG)
             type is (SuperSpaceGroup_Type)
                call allocate_Kvector(SpG%nk,0,k)
@@ -2209,7 +2292,7 @@ SubModule (CFML_IOForm) Format_MCIF
                      end select
 
                      j=j+1
-                     write(unit=Ipr,fmt="(2x,i4,2x,a,t12,i4,t22,a,t30,a)") j, At(i)%Lab, m, axis, trim(line)
+                     write(unit=Ipr,fmt="(2x,i4,2x,a,t16,i4,t22,a,t30,a)") j, trim(At(i)%Lab), m, axis, trim(line)
                   end do
                end do
             end do
@@ -2683,7 +2766,7 @@ SubModule (CFML_IOForm) Format_MCIF
    Module Subroutine Read_MCIF_SpaceG_SymOP_Magn_Centering(cif, nsym, symop,i_ini,i_end)
       !---- Arguments ----!
       Type(File_Type),                intent(in)    :: cif
-      integer,                        intent(out)   :: nsym
+      integer,                        intent(out)   :: nsym !Number of operators different from the identity
       character(len=*), dimension(:), intent(out)   :: symop
       integer, optional,              intent(in)    :: i_ini,i_end
 
@@ -2769,7 +2852,6 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> How many operators
       j_ini=j_ini+j
-
       do i=j_ini, j_end
          line=adjustl(cif%line(i)%str)
 
@@ -2800,8 +2882,11 @@ SubModule (CFML_IOForm) Format_MCIF
          end if
 
          nsym=nsym+1
-         symop(nsym)=trim(adjustl(line))
+         if(nsym > 1) then  !Avoid the identity
+           symop(nsym-1)=trim(adjustl(line))
+         end if
       end do
+      nsym=nsym-1
 
    End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Centering
 
@@ -2926,8 +3011,11 @@ SubModule (CFML_IOForm) Format_MCIF
          end if
 
          nsym=nsym+1
-         symop(nsym)=trim(adjustl(line))
+         if(nsym > 1) then
+           symop(nsym-1)=trim(adjustl(line))
+         end if
       end do
+      nsym=nsym-1
 
    End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Centering
 
@@ -2975,7 +3063,7 @@ SubModule (CFML_IOForm) Format_MCIF
          if (line(1:1) == '#') cycle
 
          npos=index(line,str)
-         if (npos ==0) cycle
+         if (npos == 0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
@@ -3054,8 +3142,11 @@ SubModule (CFML_IOForm) Format_MCIF
          end if
 
          nsym=nsym+1
-         symop(nsym)=trim(adjustl(line))
+         if(nsym > 1) then
+            symop(nsym-1)=trim(adjustl(line))
+         end if
       end do
+      nsym=nsym-1
 
    End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Operation
 
@@ -3179,9 +3270,11 @@ SubModule (CFML_IOForm) Format_MCIF
          end if
 
          nsym=nsym+1
-         symop(nsym)=trim(adjustl(line))
+         if(nsym > 1) then
+           symop(nsym-1)=trim(adjustl(line))
+         end if
       end do
-
+      nsym=nsym-1
    End Subroutine Read_MCIF_SpaceG_SymOP_Magn_Ssg_Operation
    !!----
    !!---- READ_MCIF_SPACEG_MAGN_TRANSFORMS

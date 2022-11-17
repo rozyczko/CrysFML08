@@ -251,7 +251,7 @@
 
 
     Function modulation_function(At,SpG,s,Lat,time_v,tshift) result(v)
-      type(ModAtm_Std_Type),          intent(in) :: At     !Modulated atom type
+      type(ModAtm_Std_Type),        intent(in) :: At     !Modulated atom type
       type(SuperSpaceGroup_type),   intent(in) :: SpG
       integer,                      intent(in) :: s      !Pointer to the symmetry operator relating x and x0: x= g(s) x0 + t(s) + Lat
       integer,       dimension(:),  intent(in) :: Lat    !Additional lattice translation
@@ -303,7 +303,7 @@
       end if
     End Function modulation_function
 
-    Subroutine Get_MAtoms_inBOX(A,SpG,TBOX,Ol)
+    Subroutine Get_ModAtoms_inBOX(A,SpG,TBOX,Ol)
       !---- Arguments ----!
       type(AtList_Type),       intent(in)  :: A
       class(SpG_Type),         intent(in)  :: spg
@@ -465,7 +465,7 @@
 
       end do !Atoms
 
-    End Subroutine Get_MAtoms_inBOX
+    End Subroutine Get_ModAtoms_inBOX
 
  End Module Atoms_in_BOX
 
@@ -694,9 +694,10 @@
           end do
 
           Select Type (Grp)
+
               Type is (SuperSpaceGroup_Type)
                 ! Testing atoms in BOX
-                !call Get_MAtoms_inBOX(Atm,Grp,TBOX,Ol)
+                call Get_ModAtoms_inBOX(Atm,Grp,TBOX,Ol)
                 formb="(a15,tr5,a, 3f14.6,2i4,a,3i4,a)"
                 do i=1,Ol%num_orbs
                   write(*,"(/,a,i4)") " Orbit of atom: ",i
@@ -706,11 +707,15 @@
                   end do
                 end do
                 call Write_CIF_P1()
+                i=index(fname,".")
+                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_ssg_MCIF")
+
+              Type is (SPG_Type)
+                i=index(fname,".")
+                call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
+                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_MCIF")
+
           End Select
-
-          i=index(fname,".")
-          call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
-
        end if
     else
       write(*,"(a)") " => Error found!"

@@ -162,8 +162,8 @@ Module CFML_gSpaceGroups
        integer,       allocatable,dimension(:,:,:):: Rot       ! Rotational Operator matrices (3,3,Multip) in integer form to accelerate calculations
        integer,       allocatable,dimension(:,:,:):: M         ! Reciprocal Operator matrices (d,3,Multip) in integer form to accelerate calculations
        integer,       allocatable,dimension(:,:,:):: Ep        ! Modulation vector transform matrices (d,d,Multip) in integer form to accelerate calculations
-       real(kind=cp), allocatable,dimension(:,:)  :: t      ! Translation in external (physical) space (3,Multip)
-       real(kind=cp), allocatable,dimension(:,:)  :: tI     ! Translation in internal space (d,Multip)
+       real(kind=cp), allocatable,dimension(:,:)  :: t         ! Translation in external (physical) space (3,Multip)
+       real(kind=cp), allocatable,dimension(:,:)  :: tI        ! Translation in internal space (d,Multip)
     End Type SuperSpaceGroup_Type
 
     !!----
@@ -977,11 +977,12 @@ Module CFML_gSpaceGroups
           type(rational), dimension(:), intent(inout) :: v
        End Subroutine Smallest_Integral_Vector
 
-       Module Subroutine Sort_Oper(N, Op, Cod)
+       Module Subroutine Sort_Oper(N, Op, Cod, perm)
           !---- Arguments ----!
-          integer,                            intent(in)    :: n
-          type(Symm_Oper_Type) ,dimension(n), intent(inout) :: Op
-          character(len=*),                   intent(in)    :: cod
+          integer,                           intent(in)     :: n
+          type(Symm_Oper_Type),dimension(n), intent(in out) :: Op
+          character(len=*),                  intent(in)     :: cod
+          integer, optional,   dimension(n), intent(out)    :: perm
        End Subroutine Sort_Oper
 
        Module Subroutine Write_SpaceGroup_Info(Grp,Lun)

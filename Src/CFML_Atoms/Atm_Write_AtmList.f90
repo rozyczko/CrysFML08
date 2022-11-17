@@ -11,12 +11,12 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
    !!----    Determine whether the atoms of names "nam1" and "nam2" are included in
    !!----    the longer string "name" (constructed by function "wrt_lab").
    !!----
-   !!---- Update: February - 2005
+   !!---- Updated: November - 2022
    !!
    Pure Module Function Equiv_Atm(Nam1,Nam2,NameAt) Result(Equiv_Atom)
       !---- Arguments ----!
       character (len=*), intent (in) :: nam1,nam2   ! Atom names
-      character (len=*), intent (in) :: NameAt      ! String containing atom names
+      character (len=*), intent (in) :: NameAt      ! String containing atom names separated by "--"
       logical                        :: equiv_atom
 
       !---- Local variables ----!
@@ -26,12 +26,9 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
 
       i1=index(nam1,"_")-1
       i2=index(nam2,"_")-1
-      if (i1 < 0 .or. i2 < 0 ) return
-      if (nam1(1:i1) == nameat(1:i1) .and. nam2(1:i2) == nameat(5:4+i2) ) then
-         equiv_atom = .true.
-      else if(nam1(1:i1) == nameat(5:4+i1) .and. nam2(1:i2) == nameat(1:i2) ) then
-         equiv_atom = .true.
-      end if
+      if (i1 < 0) i1=len_trim(nam1)
+      if (i2 < 0) i2=len_trim(nam2)
+      if(index(NameAt,nam1(1:i1)) /= 0  .and.  index(NameAt,nam2(1:i2)) /= 0)  equiv_atom = .true.
 
    End Function Equiv_Atm
 
@@ -40,33 +37,24 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
    !!----
    !!----    Character function merging the main part of the labels
    !!----    (before underscore "_") of the atoms "nam1" and "nam2" into
-   !!----    the string "bilabel"
+   !!----    the string "bilabel" that is of the form: nam1--nam2
    !!----
-   !!---- Update: February - 2005
+   !!----    Updated: November 2022
    !!
    Pure Module Function Wrt_Lab(Nam1,Nam2) Result(Bilabel)
       !---- Arguments ----!
       character (len=*), intent (in) :: nam1,nam2   ! Atoms name
-      character (len=8)              :: bilabel     ! Composed string with underscores
+      character (len=20)             :: bilabel     ! Composed string without underscores
 
       !---- Local variables ----!
       integer :: i1,i2
 
       bilabel=" "
-
       i1=index(nam1,"_")-1
       i2=index(nam2,"_")-1
-      if (i1 < 0 ) then
-         bilabel(1:4) = nam1(1:4)
-      else
-         bilabel(1:i1) = nam1(1:i1)
-      end if
-
-      if (i2 < 0 ) then
-         bilabel(5:8) = nam2(1:4)
-      else
-         bilabel(5:4+i2) = nam2(1:i2)
-      end if
+      if (i1 < 0) i1=len_trim(nam1)
+      if (i2 < 0) i2=len_trim(nam2)
+      bilabel = nam1(1:i1)//"--"//nam2(1:i2)
 
    End Function Wrt_Lab
 

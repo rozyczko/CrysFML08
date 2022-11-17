@@ -123,7 +123,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
       else
          if (present(invt)) then
             write(unit=car,fmt="(i2)") invt !Rational_String(Mat(Dd,Dd))
-            car=adjustl(car)
+            if(invt > 0) car(1:1)="+"
             symb=trim(symb)//","//trim(car)
          end if
       end if
