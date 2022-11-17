@@ -33,7 +33,8 @@ colorama.init()
 
 modules = {}
 is_read = False
-CRYSFML08_DIR = ''
+CRYSFML08 = ''
+CWD = os.getcwd()
 
 def check_reading() -> None:
 
@@ -73,6 +74,44 @@ def fortran_types_in_dicts() -> None:
                 f.write('\n')
                 f.write(f"{' ':>4}{'return d'}\n")
                 f.write('\n')
+
+def get_argument_types() -> None:
+    """
+    Function for testing, it writes all the different primitive types used as arguments
+    for crysfml subroutines and functions
+    """
+    d = {'integer':{'in':[],'inout':[],'out':[]},'real':{'in':[],'inout':[],'out':[]},'character':{'in':[],'inout':[],'out':[]},'logical':{'in':[],'inout':[],'out':[]}}
+    info = {'integer':{'in':[],'inout':[],'out':[]},'real':{'in':[],'inout':[],'out':[]},'character':{'in':[],'inout':[],'out':[]},'logical':{'in':[],'inout':[],'out':[]}}
+    for m_name in modules.keys():
+        for p_name in modules[m_name].procedures.keys():
+            for arg in modules[m_name].procedures[p_name].arguments.keys():
+                ftype = modules[m_name].procedures[p_name].arguments[arg].fortran_type
+                if parser_utils.is_primitive(ftype):
+                    intent = parser_utils.get_intent(ftype)
+                    if ftype.startswith('integer'):
+                        if ftype not in d['integer'][intent]:
+                            d['integer'][intent].append(ftype)
+                            info['integer'][intent].append([p_name,m_name])
+                    elif ftype.startswith('real'):
+                        if ftype not in d['real'][intent]:
+                            d['real'][intent].append(ftype)
+                            info['real'][intent].append([p_name,m_name])
+                    elif ftype.startswith('character'):
+                        if ftype not in d['character'][intent]:
+                            d['character'][intent].append(ftype)
+                            info['character'][intent].append([p_name,m_name])
+                    elif ftype.startswith('logical'):
+                        if ftype not in d['logical'][intent]:
+                            d['logical'][intent].append(ftype)
+                            info['logical'][intent].append([p_name,m_name])
+    os.chdir(CWD)
+    with open('types.txt', 'w') as f:
+        for k1 in d.keys():
+            f.write(f"{k1.upper()}:\n")
+            for k2 in d[k1].keys():
+                f.write(f"{' ':>2}{k2.upper()}:\n")
+                for t,i in zip(d[k1][k2],info[k1][k2]):
+                    f.write(f"{' ':>4}{t:<60}{i[0]:<30}{i[1]:<30}\n")
 
 def get_cfml_modules_filenames() -> list:
 
@@ -186,7 +225,7 @@ def is_overload(m_name : str,p_name : str) -> str:
 def move_to_install(fortran=False) -> None:
 
     # Create install directory if it doesn't exist
-    os.chdir(CRYSFML08_DIR)
+    os.chdir(CRYSFML08)
     if not os.path.isdir('API'):
         os.makedirs('API')
     if not os.path.isdir('API/src'):
@@ -196,9 +235,9 @@ def move_to_install(fortran=False) -> None:
     if not os.path.isdir('API/src/python'):
         os.makedirs('API/src/python')
     if not fortran:
-        wdir = os.path.join(CRYSFML08_DIR,'API','src','python')
+        wdir = os.path.join(CRYSFML08,'API','src','python')
     else:
-        wdir = os.path.join(CRYSFML08_DIR,'API','src','fortran')
+        wdir = os.path.join(CRYSFML08,'API','src','fortran')
     print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{wdir}{colorama.Style.RESET_ALL}")
     os.chdir(wdir)
     return None
@@ -206,20 +245,20 @@ def move_to_install(fortran=False) -> None:
 def move_to_source() -> None:
 
     # Move to Crysfml08
-    global CRYSFML08_DIR
-    CRYSFML08_DIR = os.getenv('CRYSFML08_DIR')
-    if CRYSFML08_DIR is None:
-        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08_DIR does not exist.'}{colorama.Style.RESET_ALL}")
+    global CRYSFML08
+    CRYSFML08 = os.getenv('CRYSFML08')
+    if CRYSFML08 is None:
+        print(f"{colorama.Fore.RED}{'Error: environment variable CRYSFML08 does not exist.'}{colorama.Style.RESET_ALL}")
         raise IOError
-    if not os.path.isdir(CRYSFML08_DIR):
-        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
+    if not os.path.isdir(CRYSFML08):
+        print(f"{colorama.Fore.RED}{'Error: '}{colorama.Fore.YELLOW}{CRYSFML08}{colorama.Fore.RED}{' does not exist'}{colorama.Style.RESET_ALL}")
         raise IOError
-    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
-    os.chdir(CRYSFML08_DIR)
+    print(f"{colorama.Fore.GREEN}{'Entering in CrysFML08 directory: '}{colorama.Fore.YELLOW}{CRYSFML08}{colorama.Style.RESET_ALL}")
+    os.chdir(CRYSFML08)
 
     # Move to Src\
     if not os.path.isdir('Src'):
-        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{CRYSFML08_DIR}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.RED}{'Error: Src directory not found in '}{CRYSFML08}{colorama.Style.RESET_ALL}")
         raise IOError
     print(f"{colorama.Fore.GREEN}{'Entering '}{colorama.Fore.YELLOW}{'Src'}{colorama.Fore.GREEN}{' directory'}{colorama.Style.RESET_ALL}")
     os.chdir('Src')
@@ -275,8 +314,9 @@ def run() -> None:
     read_crysfml08()
     fortran_types_in_dicts()
     #fortran_python_interconversion()
+    get_argument_types()
     wrap_procedures()
-    compilation.create_scripts(os.path.join(CRYSFML08_DIR,'API'))
+    compilation.create_scripts(os.path.join(CRYSFML08,'API'))
 
     return None
 

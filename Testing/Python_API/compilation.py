@@ -21,7 +21,7 @@ def create_scripts(directory : str) -> None:
 
 def create_script_windows() -> None:
 
-    opt="/I%CRYSFML08%\\include /fpp /libs:dll /threads /c"
+    opt="/I%CRYSFML08_INSTALL%\\include /fpp /libs:dll /threads /c"
     with open('scripts/windows/make_ifort_crysfml08api.bat','w') as f:
         f.write(f"{'@echo off'}\n")
         f.write(f"\nifort %FORPY%\\forpy_mod.f90 /fpp /libs:dll /threads /c\n")
@@ -40,6 +40,6 @@ def create_script_windows() -> None:
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_sxtal_geom.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_symmetry_tables.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\API_init.f90 {opt}\n")
-        f.write(f"\nlink *.obj /out:\"crysfml08_api.dll\" /libpath:%CRYSFML08%\\lib /dll libCrysFML08.a %LIBPYTHON% /NODEFAULTLIB:libcmt.lib\n")
+        f.write(f"\nlink *.obj /out:\"crysfml08_api.dll\" /libpath:%CRYSFML08_INSTALL%\\lib /dll libCrysFML08.a %LIBPYTHON% /NODEFAULTLIB:libcmt.lib\n")
         f.write(f"\nmove crysfml08_api.dll ..\\..\\src\\python\\crysfml08_api.pyd\n")
         f.write(f"del *.obj *.mod *.exp *.lib")
