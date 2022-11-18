@@ -34,7 +34,7 @@ SubModule (CFML_kvec_Symmetry) ksym_auxsub
 
        !---- Local variables ----!
        character(len=1)                        :: LAT
-       character(len=len(symb))                :: SYMBB
+       character(len=:), allocatable           :: SYMBB
        integer                                 :: i
 
        call Clear_Error()
@@ -277,7 +277,7 @@ SubModule (CFML_kvec_Symmetry) ksym_auxsub
 
        !---- Local variables ----!
        integer ::  i,imax,nop,s,ifound,j,ioerr,istart,mod_istart
-       character(len=len(info)) :: aux
+       character(len=:), allocatable :: aux
        logical :: control
 
        control=.false.

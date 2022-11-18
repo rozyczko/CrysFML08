@@ -682,7 +682,7 @@ Module CFML_IOForm
        type(File_Type),           optional, intent(out)     :: FType      ! File type
 
        !---- Local Variables ----!
-       character(len=6):: Ext
+       character(len=:), allocatable:: Ext
        type(File_Type) :: F
 
        !> Init
