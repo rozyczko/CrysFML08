@@ -1,18 +1,19 @@
 class Type_Component():
 
-    def __init__(self,name : str ='',fortran_type : str ='',dim : str ='',value : str ='None',info : str =''):
+    def __init__(self,name : str ='',fortran_type : str ='',fortran_type_short : str ='',dim : str ='',value : str ='None',info : str =''):
 
-        self.name          = name
-        self.fortran_type  = fortran_type
-        self.dim           = dim
-        self.value         = value
-        self.info          = info
+        self.name               = name
+        self.fortran_type       = fortran_type
+        self.fortran_type_short = fortran_type_short
+        self.dim                = dim
+        self.value              = value
+        self.info               = info
 
 class Argument(Type_Component):
 
-    def __init__(self,name : str ='',fortran_type : str ='',dim : str ='',value : str ='None',info : str ='',intent : str =''):
+    def __init__(self,name : str ='',fortran_type : str ='',fortran_type_short : str ='',dim : str ='',value : str ='None',info : str ='',intent : str =''):
 
-        super().__init__(name=name,fortran_type=fortran_type,dim=dim,value=value,info=info)
+        super().__init__(name=name,fortran_type=fortran_type,fortran_type_short=fortran_type_short,dim=dim,value=value,info=info)
         self.intent = intent
 
 class Subroutine():

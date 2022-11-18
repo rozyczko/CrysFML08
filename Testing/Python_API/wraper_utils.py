@@ -3,20 +3,24 @@
 Functions
 ---------
 end_module(m : cfml_objects.Module) -> None
-fortran_proc(f,p) -> None
+fortran_procedure(f,p) -> None
 get_fortran_type(line : str) -> str
 init_module(m : cfml_objects.Module) -> None
-init_proc(f,p_name : str) -> None
+init_procedure(f,p_name : str) -> None
 return_tuple(f,p,rets : list) -> None
-set_fortran_arguments(f,p) -> None
+set_fortran_procedures_args(f,p) -> None
 set_local_variables(f,p,rets : list) -> None
+set_local_variables_charray(f,var : str,ftype : str, dim : str) -> None
+set_local_variables_primitive(f,var : str,ftype_s : str,dimen : str) -> None
 set_rets(p) -> list
-unwrap(f,p) -> None
-wrap(p) -> None
+unwrap_arguments(f,p) -> None
+wrap_procedure(p) -> None
 write_api_init(procs : dict,nprocs : int) -> None
+write_charlist() -> None
 write_license(f) -> None
 """
 import cfml_objects
+import parser_utils
 
 w_name = ''
 w_file = ''
@@ -26,7 +30,7 @@ def end_module(m : cfml_objects.Module) -> None:
     with open(w_file,'a') as f:
         f.write(f"\nend module {w_name}\n")
 
-def fortran_proc(f,p) -> None:
+def fortran_procedure(f,p) -> None:
 
     f.write(f"\n{' ':>8}! Call CrysFML procedure\n")
     f.write(f"{' ':>8}if (ierror == 0) then\n")
@@ -54,7 +58,7 @@ def get_fortran_type(line : str) -> str:
     else:
         i = line[:i].rfind(',')
         ftype = line[:i].strip()
-    if ftype == 'character(len=*)':
+    if ftype == 'character(len=*)' or ftype.startswith('character(len=len'):
         ftype = 'character(len=:), allocatable'
     return ftype
 
@@ -75,7 +79,7 @@ def init_module(m : cfml_objects.Module) -> None:
         f.write(f"\n{' ':>4}implicit none\n")
         f.write(f"\n{' ':>4}contains\n")
 
-def init_proc(f,p_name : str) -> None:
+def init_procedure(f,p_name : str) -> None:
 
     f.write(f"\n{' ':>4}function py_{p_name}(self_ptr,args_ptr) result(resul) bind(c)\n")
     f.write(f"\n{' ':>8}! Arguments\n")
@@ -90,7 +94,16 @@ def return_tuple(f,p,rets : list) -> None:
     f.write(f"{' ':>8}if (ierror == 0) ierror = tuple_create(ret,{n})\n")
     i = 0
     for r in rets:
-        f.write(f"{' ':>8}if (ierror == 0) ierror = ret%setitem({i},{r})\n")
+        ftype = get_fortran_type(r.fortran_type)
+        ftype_s = r.fortran_type_short
+        if ftype.find('dimension') > -1:
+            if ftype_s == 'character':
+                f.write(f"{' ':>8}if (ierror == 0) ierror = ret%setitem({i},li_{r.name})\n")
+            else:
+                f.write(f"{' ':>8}if (ierror == 0) ierror = ndarray_create(nd_{r.name},{r.name})\n")
+                f.write(f"{' ':>8}if (ierror == 0) ierror = ret%setitem({i},nd_{r.name})\n")
+        else:
+            f.write(f"{' ':>8}if (ierror == 0) ierror = ret%setitem({i},{r.name})\n")
         i += 1
     f.write(f"{' ':>8}if (ierror == 0) then \n")
     f.write(f"{' ':>12}resul = ret%get_c_ptr()\n")
@@ -100,58 +113,147 @@ def return_tuple(f,p,rets : list) -> None:
     f.write(f"{' ':>8}end if\n")
     f.write(f"\n{' ':>4}end function py_{p.name}\n")
 
-def set_fortran_arguments(f,p) -> None:
+def set_fortran_procedures_args(f,p) -> None:
 
-    f.write(f"\n{' ':>8}! Fortran arguments\n")
+    f.write(f"\n{' ':>8}! Arguments for the Fortran procedure\n")
     for arg in p.arguments.keys():
         ftype = get_fortran_type(p.arguments[arg].fortran_type)
-        var = ftype + ' :: ' + p.arguments[arg].name
-        f.write(f"{' ':>8}{var :<60} !{p.arguments[arg].fortran_type}\n")
+        f.write(f"{' ':>8}{ftype} :: {p.arguments[arg].name}\n")
     if type(p) == cfml_objects.Function:
         ftype = get_fortran_type(p.xreturn.fortran_type)
-        var = ftype + ' :: ' + p.xreturn.name
-        f.write(f"{' ':>8}{var :<60} !{p.xreturn.fortran_type}\n")
+        f.write(f"{' ':>8}{ftype} :: {p.xreturn.name}\n")
 
-def set_local_variables(f) -> None:
-
+def set_local_variables(f,p,rets) -> None:
+    """
+    Local variables are needed for fortran arrays and derived types
+    """
     f.write(f"\n{' ':>8}! Local variables\n")
     f.write(f"{' ':>8}integer :: ierror\n")
     f.write(f"{' ':>8}type(object) :: item\n")
     f.write(f"{' ':>8}type(tuple) :: args,ret\n")
     f.write(f"{' ':>8}type(nonetype) :: nret\n")
+    for arg in p.arguments.keys():
+        if p.arguments[arg].intent == 'in':
+            dim = p.arguments[arg].dim
+            ftype = p.arguments[arg].fortran_type
+            ftype_s = p.arguments[arg].fortran_type_short
+            if parser_utils.is_primitive(ftype) and parser_utils.is_array(dim):
+                if ftype_s == 'character':
+                    set_local_variables_charray(f,arg,ftype,dim)
+                else:
+                    set_local_variables_primitive(f,arg,ftype_s,dim)
+    for r in rets: # arguments with intent = 'inout' or 'out' and, if p is a function, the result
+        ftype = get_fortran_type(r.fortran_type)
+        ftype_s = r.fortran_type_short
+        if parser_utils.is_primitive(ftype):
+            if parser_utils.is_array(r.dim):
+                if ftype_s == 'character':
+                    set_local_variables_charray(f,r.name,ftype,r.dim)
+                else:
+                    set_local_variables_primitive(f,r.name,ftype_s,r.dim)
+
+def set_local_variables_charray(f,var : str,ftype : str, dim : str) -> None:
+
+    f.write(f"{' ':>8}type(list) :: li_{var}\n")
+    l = parser_utils.get_len(ftype)
+    if l == '*':
+        f.write(f"{' ':>8}integer :: maxlen_{var}\n")
+    else:
+        f.write(f"{' ':>8}integer :: maxlen_{var} = {l}\n")
+    if dim.find(':') > -1:
+        f.write(f"{' ':>8}integer :: size_{var}\n")
+    else:
+        f.write(f"{' ':>8}integer :: size_{var} = {dim}\n")
+
+def set_local_variables_primitive(f,var : str,ftype_s : str,dimen : str) -> None:
+    """
+    For integer, real and logical types
+    """
+    dim = len(dimen.split(','))-1
+    d = '(:'
+    for i in range(dim):
+        d = d + ',:'
+    d = d + ')'
+    f.write(f"{' ':>8}type(ndarray) :: nd_{var}\n")
+    f.write(f"{' ':>8}{ftype_s}, dimension{d}, pointer :: pointer_{var}\n")
 
 def set_rets(p) -> list:
-
+    """
+    Variables that must be returned. Arguments with intent = 'inout' and 'out',
+    and, if p is a function, the function result
+    """
     rets = []
     for arg in p.arguments.keys():
         if p.arguments[arg].intent != 'in':
-            rets.append(arg)
+            rets.append(p.arguments[arg])
     if type(p) == cfml_objects.Function:
-        rets.append(p.xreturn.name)
+        rets.append(p.xreturn)
     return rets
 
-def unwrap(f,p) -> None:
-
+def unwrap_arguments(f,p) -> None:
+    """
+    Only arguments with intent = 'in' or 'inout' must be unwrapped
+    """
     f.write(f"\n{' ':>8}! Reset error variable\n")
     f.write(f"{' ':>8}ierror = 0\n")
-    f.write(f"\n{' ':>8}! Unwrap arguments\n")
+    f.write(f"\n{' ':>8}! unwrap_arguments\n")
     f.write(f"{' ':>8}call unsafe_cast_from_c_ptr(args,args_ptr)\n")
     i = 0
     for arg in p.arguments.keys():
-        f.write(f"{' ':>8}if (ierror == 0) ierror = args%getitem(item,{i})\n")
-        f.write(f"{' ':>8}if (ierror == 0) ierror = cast({arg},item)\n")
+        if p.arguments[arg].intent.find('in') > -1:
+            dim = p.arguments[arg].dim
+            ftype = p.arguments[arg].fortran_type
+            ftype_s = p.arguments[arg].fortran_type_short
+            f.write(f"{' ':>8}if (ierror == 0) ierror = args%getitem(item,{i})\n")
+            if parser_utils.is_primitive(ftype):
+                if parser_utils.is_array(dim):
+                    if ftype_s == 'character':
+                        unwrap_charray(f,p,arg,ftype,dim)
+                    else:
+                        pass
+                        #unwrap_primarray(f,arg,ftype)
+                else:
+                    f.write(f"{' ':>8}if (ierror == 0) ierror = cast({arg},item)\n")
         i += 1
 
-def wrap(p) -> None:
+def unwrap_charray(f,p,var : str,ftype : str,dim : str) -> None:
+
+    f.write(f"{' ':>8}if (ierror == 0) ierror = cast(li_{var},item)!{dim} {ftype}\n")
+    l = parser_utils.get_len(ftype)
+    if l == '*': # Get len from the maximum length of the list
+        f.write(f"{' ':>8}if (ierror == 0) call maxlen_from_li_charr(li_{var},maxlen_{var},ierror)\n")
+        f.write(f"{' ':>8}if (ierror == 0) then\n")
+        f.write(f"{' ':>12}ierror = EXCEPTION_ERROR\n")
+        f.write(f"{' ':>12}call raise_exception(RuntimeError,\"{p.name}: Error unwrapping python list\")\n")
+        f.write(f"{' ':>8}end if\n")
+    if dim.find(':') > -1: # Set size = number of elements of the list
+        f.write(f"{' ':>8}if (ierror == 0) ierror = li_{var}%len(size_{var})\n")
+    else:
+        f.write(f"{' ':>8}if (ierror == 0) ierror = li_{var}%len(size_aux)\n")
+        f.write(f"{' ':>8}if (size_aux /= size_{var}) then\n")
+        f.write(f"{' ':>12}ierror = EXCEPTION_ERROR\n")
+        f.write(f"{' ':>12}call raise_exception(RuntimeError,\"{p.name}: Error in list size of argument {var}\")\n")
+        f.write(f"{' ':>8}end if\n")
+    f.write(f"{' ':>8}if (ierror == 0) allocate(character(len=maxlen_{var})::{var}(size_{var}))\n")
+    f.write(f"{' ':>8}if (ierror == 0) call list_to_charray(li_{var},{var},ierror)\n")
+
+def unwrap_primarray(f,var : str) -> None:
+
+    f.write(f"{' ':>8}if (ierror == 0) ierror = cast(nd_{var},item)\n")
+    f.write(f"{' ':>8}if (ierror == 0) ierror = nd_{var}%get_data(pointer_{var},order='F')\n")
+    # Here we must check that dimensions of var and pointer_var are consistent
+    f.write(f"{' ':>8}if (ierror == 0) {var} = pointer_{var}\n")
+
+def wrap_procedure(p) -> None:
 
     with open(w_file,'a') as f:
-        init_proc(f,p.name)
-        set_fortran_arguments(f,p)
+        init_procedure(f,p.name)
+        set_fortran_procedures_args(f,p)
         rets = set_rets(p)
-        set_local_variables(f)
-        unwrap(f,p)
-        fortran_proc(f,p)
-        return_tuple(f,p,rets)
+        set_local_variables(f,p,rets)
+        unwrap_arguments(f,p)
+        fortran_procedure(f,p)
+        #return_tuple(f,p,rets)
 
 def write_api_init(procs : dict,nprocs : int) -> None:
 
@@ -196,6 +298,65 @@ def write_api_init(procs : dict,nprocs : int) -> None:
         f.write(f"{' ':>12}\"A Python API for CrysFML08\",method_Table)")
         f.write(f"\n{' ':>4}end function Init\n")
         f.write(f"\nend module api_init\n")
+
+def write_interconversion() -> None:
+
+    with open('interconversion.f90','w') as f:
+        write_license(f)
+        f.write(f"\nmodule interconversion\n")
+        f.write(f"\n{' ':>4}use forpy_mod\n")
+        f.write(f"\n{' ':>4}implicit none\n")
+        f.write(f"\n{' ':>4}contains\n")
+        # Subroutine chararray_to_list
+        f.write(f"\n{' ':>4}subroutine chararray_to_list(charr,li_charr,ierror)\n")
+        f.write(f"\n{' ':>8}! Arguments\n")
+        f.write(f"{' ':>8}character(len=*), dimension(:), intent(in)  :: charr\n")
+        f.write(f"{' ':>8}type(list),                     intent(out) :: li_charr\n")
+        f.write(f"{' ':>8}integer,                        intent(out) :: ierror\n")
+        f.write(f"\n{' ':>8}! Local variables\n")
+        f.write(f"{' ':>8}integer :: i\n")
+        f.write(f"\n{' ':>8}ierror = 0\n")
+        f.write(f"{' ':>8}do i = 1 , size(charr)\n")
+        f.write(f"{' ':>12}if (ierror == 0) ierror = li_charr%append(charr(i))\n")
+        f.write(f"{' ':>8}end do\n")
+        f.write(f"\n{' ':>4}end subroutine chararray_to_list\n")
+        # Subroutine list_to_chararray
+        f.write(f"\n{' ':>4}subroutine list_to_chararray(li_charr,l,charr,ierror)\n")
+        f.write(f"\n{' ':>8}! Arguments\n")
+        f.write(f"{' ':>8}type(list),                     intent(in)  :: li_charr\n")
+        f.write(f"{' ':>8}integer,                        intent(in)  :: l\n")
+        f.write(f"{' ':>8}character(len=l), dimension(:), intent(out) :: charr\n")
+        f.write(f"{' ':>8}integer,                        intent(out) :: ierror\n")
+        f.write(f"\n{' ':>8}! Local variables\n")
+        f.write(f"{' ':>8}integer :: i,n\n")
+        f.write(f"{' ':>8}type(object) :: item\n")
+        f.write(f"\n{' ':>8}ierror = li_charr%len(n)\n")
+        f.write(f"{' ':>8}do i = 1 , n\n")
+        f.write(f"{' ':>12}if (ierror == 0) ierror = li_charr%getitem(item,i-1)\n")
+        f.write(f"{' ':>12}if (ierror == 0) ierror = cast(charr(i),item)\n")
+        f.write(f"{' ':>8}end do\n")
+        f.write(f"\n{' ':>4}end subroutine list_to_chararray\n")
+        # Subroutine maxlen_from_li_charr
+        f.write(f"\n{' ':>4}subroutine maxlen_from_li_charr(li_charr,l,ierror)\n")
+        f.write(f"\n{' ':>8}! Arguments\n")
+        f.write(f"{' ':>8}type(list),                     intent(in)  :: li_charr\n")
+        f.write(f"{' ':>8}integer,                        intent(out) :: l\n")
+        f.write(f"{' ':>8}integer,                        intent(out) :: ierror\n")
+        f.write(f"\n{' ':>8}! Local variables\n")
+        f.write(f"{' ':>8}integer :: i,n\n")
+        f.write(f"{' ':>8}character(len=1024) :: str\n")
+        f.write(f"{' ':>8}type(object) :: item\n")
+        f.write(f"\n{' ':>8}l = 0\n")
+        f.write(f"{' ':>8}ierror = li_charr%len(n)\n")
+        f.write(f"{' ':>8}do i = 1 , n\n")
+        f.write(f"{' ':>12}if (ierror == 0) ierror = li_charr%getitem(item,i-1)\n")
+        f.write(f"{' ':>12}if (ierror == 0) ierror = cast(str,item)\n")
+        f.write(f"{' ':>12}if (ierror == 0) then \n")
+        f.write(f"{' ':>16}if (len(trim(str)) > l) l = len(trim(str)) \n")
+        f.write(f"{' ':>12}end if\n")
+        f.write(f"{' ':>8}end do\n")
+        f.write(f"\n{' ':>4}end subroutine maxlen_from_li_charr\n")
+        f.write(f"\nend module interconversion\n")
 
 def write_license(f) -> None:
 

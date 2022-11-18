@@ -25,6 +25,7 @@ def create_script_windows() -> None:
     with open('scripts/windows/make_ifort_crysfml08api.bat','w') as f:
         f.write(f"{'@echo off'}\n")
         f.write(f"\nifort %FORPY%\\forpy_mod.f90 /fpp /libs:dll /threads /c\n")
+        f.write(f"ifort ..\\..\\src\\fortran\\interconversion.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_atoms.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_eos.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_extincorr.f90 {opt}\n")
