@@ -337,15 +337,15 @@ def wrap_procedures() -> None:
             for arg in modules[m_name].procedures[p_name].arguments.keys():
                 if not parser_utils.is_primitive(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
                     parser_utils.is_optional(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
-                    parser_utils.is_array(modules[m_name].procedures[p_name].arguments[arg].dim) or \
                     modules[m_name].procedures[p_name].is_overload:
+                    #parser_utils.is_array(modules[m_name].procedures[p_name].arguments[arg].dim) or \
                     wrappea = False
                     break
-            if type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
+            if wrappea and type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
                 if not parser_utils.is_primitive(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
                     parser_utils.is_optional(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
-                    parser_utils.is_array(modules[m_name].procedures[p_name].xreturn.dim) or \
                     modules[m_name].procedures[p_name].is_overload:
+                    #parser_utils.is_array(modules[m_name].procedures[p_name].xreturn.dim) or \
                     wrappea = False
             if wrappea:
                 if type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
@@ -355,7 +355,7 @@ def wrap_procedures() -> None:
                 if nwraps == 0:
                     wraper_utils.init_module(modules[m_name])
                     nwraps = 1
-                wraper_utils.wrap(modules[m_name].procedures[p_name])
+                wraper_utils.wrap_procedure(modules[m_name].procedures[p_name])
                 if m_name in procs.keys():
                     procs[m_name].append(p_name)
                 else:
@@ -363,6 +363,8 @@ def wrap_procedures() -> None:
                 nprocs += 1
         if nwraps > 0:
             wraper_utils.end_module(modules[m_name])
+    print(f"{colorama.Fore.GREEN}{'Writing interconversion module'}{colorama.Style.RESET_ALL}")
+    wraper_utils.write_interconversion()
     print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
     wraper_utils.write_api_init(procs,nprocs)
 

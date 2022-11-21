@@ -12,6 +12,7 @@ get_function_result(line : str, s : cfml_objects.Function) -> None:
 get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int
 get_intent(line : str) -> str
 get_interface_name(line : str) -> str
+get_len(ftype : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
 get_overload_procedures(n : int, lines : list, t : cfml_objects.Interface) -> int
@@ -59,11 +60,23 @@ def get_component(line : str) -> list:
     # Defaults
     c_value = 'None'
     c_info = ''
-    c_dim = '(0)'
+    c_dim = '0'
 
     # Type
     i = line.index('::')
     c_type = line[:i].replace(' ','')
+    if c_type.startswith('type'):
+        m = c_type.find('(')
+        n = c_type.find(')')
+        c_type_short = c_type[m+1:n]
+    elif c_type.startswith('integer'):
+        c_type_short = 'integer'
+    elif c_type.startswith('real'):
+        c_type_short = 'real'
+    elif c_type.startswith('character'):
+        c_type_short = 'character'
+    else:
+        c_type_short = 'logical'
 
     # Name, value and info
     j = line[:].find('!')
@@ -88,9 +101,9 @@ def get_component(line : str) -> list:
     if i > -1:
         j = c_type[i:].index('(')
         k = c_type[i:].index(')')
-        c_dim = c_type[i+j:i+k+1]
+        c_dim = c_type[i+j+1:i+k]
     else:
-        c_dim = '(0)'
+        c_dim = '0'
 
     c_value = cast_python(c_value)
 
@@ -98,7 +111,7 @@ def get_component(line : str) -> list:
     names = []
     for n in c_name.split(','):
         names.append(n.strip())
-    return [names,c_type,c_value,c_info,c_dim]
+    return [names,c_type,c_type_short,c_value,c_info,c_dim]
 
 def get_function_name(line : str) -> str:
 
@@ -135,13 +148,14 @@ def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
             c = get_component(line)
             intent = get_intent(line)
             for nam in c[0]:
-                f.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4],intent=intent)
+                f.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5],intent=intent)
         elif j > -1:
             c = get_component(line)
             f.xreturn.fortran_type = c[1]
-            f.xreturn.value = c[2]
-            f.xreturn.info  = c[3]
-            f.xreturn.dim   = c[4]
+            f.xreturn.fortran_type_short = c[2]
+            f.xreturn.value = c[3]
+            f.xreturn.info  = c[4]
+            f.xreturn.dim   = c[5]
         else:
             in_function = False
         n += 1
@@ -175,6 +189,18 @@ def get_interface_name(line : str) -> str:
         return ''
     else:
         return l[1]
+
+def get_len(ftype : str) -> str:
+
+    i = ftype.find('len=')
+    if i > 0:
+        j = ftype[i:].find(')')
+        if j > 0:
+            return ftype[i+4:i+j]
+        else:
+            return ''
+    else:
+        return ''
 
 def get_line(n : int, lines : list) -> tuple:
 
@@ -273,7 +299,7 @@ def get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> 
             c = get_component(line)
             intent = get_intent(line)
             for nam in c[0]:
-                s.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4],intent=intent)
+                s.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5],intent=intent)
             n += 1
         else:
             in_subroutine = False
@@ -294,7 +320,7 @@ def get_type_components(n : int, lines: list, t : cfml_objects.FortranType) -> i
         else:
             c = get_component(line)
             for nam in c[0]:
-                t.components[nam] = cfml_objects.Type_Component(name=nam,fortran_type=c[1],value=c[2],info=c[3],dim=c[4])
+                t.components[nam] = cfml_objects.Type_Component(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5])
         n += 1
     return n
 
@@ -317,7 +343,7 @@ def get_type_parent(line : str) -> str:
 
 def is_array(dim : str) -> bool:
 
-    if dim.strip() == '(0)':
+    if dim.strip() == '0':
         return False
     else:
         return True
