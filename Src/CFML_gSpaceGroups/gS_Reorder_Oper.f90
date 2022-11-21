@@ -193,10 +193,19 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
       !> Reorder the reduced set putting primed elements at the bottom
       if(mag_type == 4) then
          call Sort_oper(Multip,Op(1:Multip),"tim")
+
          !write(*,"(/a/)") " TOTAL LIST OF OPERATORS in Reorder"
          !do i=1,Multip
          !   write(*,"(i6,a)") i, " -> "//trim(Get_Symb_from_Op(Op(i)))
          !end do
+
+         j=1
+         do i=2,Multip
+            imat=Op(i)%Mat(1:d,1:d)
+            if (rational_equal(identity,imat) .or. rational_equal(invers,imat))  exit
+            j=j+1
+         end do
+         Numops=j
       else
         !> Determine the reduced set of symmetry operators"
         j=0

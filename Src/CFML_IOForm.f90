@@ -62,13 +62,14 @@ Module CFML_IOForm
    Use CFML_gSpaceGroups,      only: SpG_Type, SuperSpaceGroup_Type, Kvect_Info_Type,   &
                                      Change_Setting_SpaceG, Set_SpaceGroup, Get_Multip_Pos,&
                                      Get_Orbit, Allocate_Kvector, Write_SpaceGroup_Info, &
-                                     Get_Mat_from_Symb, Get_Symb_From_Mat, Get_Dimension_SymmOp
+                                     Get_Mat_from_Symb, Get_Symb_From_Mat, Get_Dimension_SymmOp, &
+                                     Get_Symb_from_Rational_Mat
+
 
    Use CFML_kvec_Symmetry,     only: MagSymm_k_Type, Readn_Set_Magnetic_Kv_Structure, Magnetic_Domain_type
 
    Use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type
 
-   Use CFML_Messages
    Use CFML_Messages
    Use CFML_Scattering_Tables, only: Get_Z_Symb
 

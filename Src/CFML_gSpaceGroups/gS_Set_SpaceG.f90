@@ -1039,7 +1039,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       logical,                         optional, intent(in ) :: set_inv
 
       !---- Local Variables ----!
-      integer                                      :: i,n_gen, n_it, d, ier !,j
+      integer                                      :: i,j,n_gen, n_it, d, ier !,j
       integer                                      :: n_laue, n_pg, lo !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
@@ -1051,7 +1051,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       !> Init
       by_Gen=.false.; by_Hall=.false.
       ok1=.false.; ok2=.false.; ok3=.false.
-      magnetic=.true.
+      magnetic=.false.
       n_gen=0
       gList=" "
       n_it=0
@@ -1092,6 +1092,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               loc_str=Str
               call ISO_to_jones_notation(loc_str)
               !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
+              magnetic=.true.
             end if
 
             i=index(loc_str,"UNI")
@@ -1101,6 +1102,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                else
                   loc_str=loc_str(1:i-1)
                end if
+               magnetic=.true.
                call Set_Shubnikov_Info()
                do i=1,NUM_SHUBNIKOV
                   if (trim(loc_str) /= trim(Shubnikov_info(i)%STD)) cycle
@@ -1169,7 +1171,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                !> Get generators list from standard
                write(unit=car, fmt='(i3)') n_it
                call Get_SpaceGroup_Symbols(car, str_HM_std)
-               if (trim(str_HM_std)==trim(str_HM)) then
+               if (trim(str_HM_std) == trim(str_HM)) then
                   gList=get_IT_Generators(car)
                end if
                magnetic=.false.
@@ -1213,7 +1215,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                str_hall=spgr_info(i)%hall
                n_laue=spgr_info(i)%laue
                n_pg=  spgr_info(i)%pg
-
+               magnetic=.false.
                !> Get generators list from standard
                write(unit=car,fmt="(i4)") n_it
                call Get_SpaceGroup_Symbols(car, str_HM_std)
@@ -1245,6 +1247,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          by_Gen=.true.
          allocate(l_gen(n_gen))
          l_gen=gen(1:n_gen)
+         do i=1,n_gen
+            j=index(l_gen(i),",",back=.true.)
+            if(trim(l_gen(i)(j+1:)) == "-1" .or. trim(l_gen(i)(j+1:)) == "1" .or. trim(l_gen(i)(j+1:)) == "+1") then
+                magnetic=.true.
+            end if
+         end do
       end if
 
       !> Generate the spacegroup
@@ -1322,6 +1330,8 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           lo=len_trim(SpaceG%Symb_Op(i))
           if(SpaceG%Symb_Op(i)(lo-1:lo) == ",1") &
              SpaceG%Symb_Op(i)=SpaceG%Symb_Op(i)(1:lo-2)
+          if(SpaceG%Symb_Op(i)(lo-2:lo) == ",+1") &
+             SpaceG%Symb_Op(i)=SpaceG%Symb_Op(i)(1:lo-3)
         end do
       end if
 

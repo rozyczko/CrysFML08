@@ -494,8 +494,8 @@
              ngen=ngen+1
              gen(ngen)="x+2/3,y+1/3,z+1/3"
        End Select
+       SPGk%magnetic=.false.
        Call Set_SpaceGroup(" ",SPGk,Ngen,Gen)
-
     End Subroutine Set_Gk
 
     !!----

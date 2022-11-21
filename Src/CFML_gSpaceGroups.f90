@@ -73,7 +73,7 @@ Module CFML_gSpaceGroups
               Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                &
               Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                 &
               Inverse_OP, Get_Orbit, Get_moment_ctr, Get_TFourier_Ctr,                 &
-              ISO_to_jones_notation
+              ISO_to_jones_notation, Get_Symb_from_Rational_Mat
 
     public :: Allocate_OP, Allocate_SpaceGroup, Allocate_KVector, Change_Setting_SpaceG, &
               Get_Cosets, Get_Generators, Get_Laue_PG, Get_Magnetic_Lattice,             &
