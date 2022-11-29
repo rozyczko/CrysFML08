@@ -852,7 +852,7 @@ SubModule (CFML_IOForm) Format_MCIF
             case ('_atom_site_moment.spherical_azimuthal')
                j=j+1
                lugar(8)=j
-            case ('_atom_site_moment.spherical_modulus')
+            case ('_atom_site_moment.spherical_modulus','_atom_site_moment.magnitude')
                j=j+1
                lugar(9)=j
             case ('_atom_site_moment.spherical_polar')
