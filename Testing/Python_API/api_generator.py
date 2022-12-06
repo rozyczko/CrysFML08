@@ -307,7 +307,7 @@ def read() -> None:
     move_to_source()
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
-        if file_name.lower().find('strings') > -1 or file_name.lower().find('messages') > -1:
+        if file_name.lower().find('strings') > -1 or file_name.lower().find('messages') > -1 or file_name.lower().find('keycodes') > -1:
             continue
         read_cfml_module(file_name)
         #break

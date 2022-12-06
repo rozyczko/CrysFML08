@@ -465,8 +465,8 @@ set(CRYSFML_COMMON_SRC
     ${SXTALgeom_SRC}
     ${SF_SRC}
     ${MOLECULES_SRC}
-    ${KEYCODES_SRC}
-    ${KVEC_SYMMETRY})
+    ${KVEC_SYMMETRY}
+    ${KEYCODES_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml_common)
