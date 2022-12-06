@@ -1,0 +1,6 @@
+Src/*
+Src08/*
+CMakeFiles/*
+CMakeCache.txt
+cmake_install.cmake
+Makefile
