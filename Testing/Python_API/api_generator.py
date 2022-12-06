@@ -7,7 +7,7 @@ November 2022
 Functions
 ---------
 check_reading() -> None
-fortran_types_in_dicts() -> None
+fortran_types_to_dicts() -> None
 get_cfml_modules_filenames() -> list
 get_overloads(m_name : str,lines : list,n : int =0) -> int
 get_procedures(m_name : str,lines : list,n : int =0) -> int
@@ -17,7 +17,7 @@ is_overload(m_name : str,p_name : str) -> str
 move_to_install() -> None
 move_to_source() -> None
 read_cfml_module(file_name : str) -> None
-read_crysfml08() -> None
+read() -> None
 run() -> None
 wrap_procedures() -> None
 """
@@ -42,7 +42,7 @@ def check_reading() -> None:
         print(f"{colorama.Fore.RED}{'Error: CrysFML08 library must be read before writing the API.'}{colorama.Style.RESET_ALL}")
         raise IOError
 
-def fortran_types_in_dicts() -> None:
+def fortran_types_to_dicts() -> None:
 
     check_reading()
     print('')
@@ -65,11 +65,15 @@ def fortran_types_in_dicts() -> None:
                 f.write('\n')
                 for c in t.components.keys():
                     left = "d['"+c+"']"
-                    right = '= '+t.components[c].value
+                    if t.components[c].value:
+                        right = '= '+t.components[c].value
+                    else:
+                        right = '= None'
                     f.write(f"{' ':>4}{left:<35}{right}\n")
                 for c in t.components.keys():
                     left = "d['ftype']['"+c+"']"
-                    right = "= '"+t.components[c].fortran_type+"'"
+                    var_def = parser_utils.build_var_def(t.components[c])
+                    right = "= '"+var_def+"'"
                     f.write(f"{' ':>4}{left:<35}{right}\n")
                 f.write('\n')
                 f.write(f"{' ':>4}{'return d'}\n")
@@ -85,7 +89,7 @@ def get_argument_types() -> None:
     for m_name in modules.keys():
         for p_name in modules[m_name].procedures.keys():
             for arg in modules[m_name].procedures[p_name].arguments.keys():
-                ftype = modules[m_name].procedures[p_name].arguments[arg].fortran_type
+                ftype = modules[m_name].procedures[p_name].arguments[arg].ftype
                 if parser_utils.is_primitive(ftype):
                     intent = parser_utils.get_intent(ftype)
                     if ftype.startswith('integer'):
@@ -136,7 +140,7 @@ def get_overloads(m_name : str,lines : list,n : int =0) -> int:
         if i_name == '': # Starting the interface zone
             return n-1
         print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'interface' : <11}{colorama.Fore.CYAN}{i_name}{colorama.Style.RESET_ALL}")
-        modules[m_name].interface[i_name] = cfml_objects.Interface(name=i_name)
+        modules[m_name].interface[i_name] = cfml_objects.Interface(i_name)
         n = parser_utils.get_overload_procedures(n+1,lines,modules[m_name].interface[i_name])
         n += 1
     return n
@@ -150,7 +154,7 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
             f_name = parser_utils.get_function_name(line)
             if f_name in modules[m_name].publics:
                 print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
-                modules[m_name].procedures[f_name] = cfml_objects.Function(name=f_name)
+                modules[m_name].procedures[f_name] = cfml_objects.Function(f_name)
                 parser_utils.get_arguments(line,modules[m_name].procedures[f_name])
                 parser_utils.get_function_result(line,modules[m_name].procedures[f_name])
                 ov = is_overload(m_name,f_name)
@@ -164,7 +168,7 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
             s_name = parser_utils.get_subroutine_name(line)
             if s_name in modules[m_name].publics:
                 print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
-                modules[m_name].procedures[s_name] = cfml_objects.Subroutine(name=s_name)
+                modules[m_name].procedures[s_name] = cfml_objects.Subroutine(s_name)
                 parser_utils.get_arguments(line,modules[m_name].procedures[s_name])
                 ov = is_overload(m_name,s_name)
                 if ov:
@@ -178,7 +182,9 @@ def get_procedures(m_name : str,lines : list,n : int =0) -> int:
     return n
 
 def get_publics(m_name : str,lines : list,n : int =0) -> int:
-
+    """
+    Get the public methods of the module
+    """
     while n < len(lines):
         line = lines[n].lower().strip()
         if line.startswith('type') or line.startswith('interface') or \
@@ -203,6 +209,9 @@ def get_types(m_name : str,lines : list,n : int =0) -> int:
             n += 1
             continue
         if line[4:].strip().startswith('('):
+            n += 1
+            continue
+        if line.find('public') < 0:
             n += 1
             continue
         n,line = parser_utils.get_line(n,lines)
@@ -280,7 +289,7 @@ def read_cfml_module(file_name : str) -> None:
     modules[m_name] = cfml_objects.Module(name=m_name)
     print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
 
-    # Get public objects
+    # Get public methods of the module
     n = get_publics(m_name,lines)
 
     # Get types
@@ -292,7 +301,7 @@ def read_cfml_module(file_name : str) -> None:
     # Get procedures
     n = get_procedures(m_name,lines,n)
 
-def read_crysfml08() -> None:
+def read() -> None:
 
     global is_read
     move_to_source()
@@ -311,10 +320,8 @@ def run() -> None:
     print(f"{' ' :>20}{colorama.Back.GREEN}{'API Generator for CRYSFML08'}{colorama.Style.RESET_ALL}")
     print(f"{' ' :>20}{colorama.Fore.GREEN}{'==========================='}{colorama.Style.RESET_ALL}")
 
-    read_crysfml08()
-    fortran_types_in_dicts()
-    #fortran_python_interconversion()
-    get_argument_types()
+    read()
+    fortran_types_to_dicts()
     wrap_procedures()
     compilation.create_scripts(os.path.join(CRYSFML08,'API'))
 
@@ -335,17 +342,17 @@ def wrap_procedures() -> None:
         for p_name in modules[m_name].procedures.keys():
             wrappea = True
             for arg in modules[m_name].procedures[p_name].arguments.keys():
-                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
-                    parser_utils.is_optional(modules[m_name].procedures[p_name].arguments[arg].fortran_type) or \
-                    modules[m_name].procedures[p_name].is_overload:
-                    #parser_utils.is_array(modules[m_name].procedures[p_name].arguments[arg].dim) or \
+                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].arguments[arg].ftype) or \
+                    parser_utils.is_optional(modules[m_name].procedures[p_name].arguments[arg].ftype) or \
+                    modules[m_name].procedures[p_name].is_overload or \
+                    modules[m_name].procedures[p_name].arguments[arg].ndim > 0:
                     wrappea = False
                     break
             if wrappea and type(modules[m_name].procedures[p_name]) == cfml_objects.Function:
-                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
-                    parser_utils.is_optional(modules[m_name].procedures[p_name].xreturn.fortran_type) or \
-                    modules[m_name].procedures[p_name].is_overload:
-                    #parser_utils.is_array(modules[m_name].procedures[p_name].xreturn.dim) or \
+                if not parser_utils.is_primitive(modules[m_name].procedures[p_name].xreturn.ftype) or \
+                    parser_utils.is_optional(modules[m_name].procedures[p_name].xreturn.ftype) or \
+                    modules[m_name].procedures[p_name].is_overload or \
+                    modules[m_name].procedures[p_name].xreturn.ndim > 0:
                     wrappea = False
             if wrappea:
                 if type(modules[m_name].procedures[p_name]) == cfml_objects.Function:

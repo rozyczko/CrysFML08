@@ -1,24 +1,22 @@
-class Type_Component():
+class FortranVar():
 
-    def __init__(self,name : str ='',fortran_type : str ='',fortran_type_short : str ='',dim : str ='',value : str ='None',info : str =''):
+    def __init__(self,name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',len : str='',allocatable : bool=False, is_class : bool=False,value = None):
 
-        self.name               = name
-        self.fortran_type       = fortran_type
-        self.fortran_type_short = fortran_type_short
-        self.dim                = dim
-        self.value              = value
-        self.info               = info
-
-class Argument(Type_Component):
-
-    def __init__(self,name : str ='',fortran_type : str ='',fortran_type_short : str ='',dim : str ='',value : str ='None',info : str ='',intent : str =''):
-
-        super().__init__(name=name,fortran_type=fortran_type,fortran_type_short=fortran_type_short,dim=dim,value=value,info=info)
-        self.intent = intent
+        self.name        = name
+        self.ftype       = ftype
+        self.kind        = kind
+        self.ndim        = ndim
+        self.dim         = dim
+        self.intent      = intent
+        self.info        = info
+        self.len         = len
+        self.allocatable = allocatable
+        self.is_class    = is_class
+        self.value       = value
 
 class Subroutine():
 
-    def __init__(self,name : str ='',module : str ='',arguments : dict ={},is_overload : bool = False,overload : str = '',has_interface : bool =False):
+    def __init__(self,name : str,module : str ='',arguments : dict ={},is_overload : bool = False,overload : str = '',has_interface : bool =False):
 
         self.name          = name
         self.module        = module
@@ -29,14 +27,14 @@ class Subroutine():
 
 class Function(Subroutine):
 
-    def __init__(self,name : str ='',module : str ='',arguments : dict ={},xreturn : Type_Component =Type_Component()):
+    def __init__(self,name : str,module : str ='',arguments : dict ={},xreturn : FortranVar = FortranVar('','')):
 
-        super().__init__(name=name,module=module,arguments=arguments)
+        super().__init__(name,module=module,arguments=arguments)
         self.xreturn = xreturn
 
 class Interface():
 
-    def __init__(self,name : str ='',procedures : list =[]):
+    def __init__(self,name : str,procedures : list =[]):
 
         self.name       = name
         self.procedures = procedures.copy()
