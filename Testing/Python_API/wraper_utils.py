@@ -74,7 +74,7 @@ def init_module(m : cfml_objects.Module) -> None:
         f.write(f"module {w_name}\n")
         f.write(f"\n{' ':>4}use forpy_mod \n")
         f.write(f"{' ':>4}use iso_c_binding \n")
-        f.write(f"{' ':>4}use wraps\n")
+        #f.write(f"{' ':>4}use wraps\n")
         f.write(f"\n{' ':>4}use cfml_globaldeps \n")
         f.write(f"{' ':>4}use {m.name}\n")
         f.write(f"\n{' ':>4}implicit none\n")

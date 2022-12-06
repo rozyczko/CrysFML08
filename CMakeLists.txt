@@ -95,5 +95,5 @@ add_subdirectory(Src)
 
 if (PYTHON_API)
     set(PYTHON_API_PREFIX ${CMAKE_INSTALL_PREFIX}/Python_API)
-    add_subdirectory(Python_API)
+    add_subdirectory(API)
 endif()

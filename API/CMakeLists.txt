@@ -11,17 +11,25 @@ project(Python_API Fortran)
 set(LIBRARY_NAME crysfml_api)
 
 add_library(${LIBRARY_NAME} SHARED
-  Extensions/API_init.f90
-  # Extensions/API_Atom_TypeDef.f90
-  # Extensions/API_Crystallographic_Symmetry.f90
-  # Extensions/API_Crystal_Metrics.f90
-  # Extensions/API_Diffraction_Patterns.f90
-  # Extensions/API_Error_Messages.f90
-  # Extensions/API_IO_Formats.f90
-  # Extensions/API_Reflections_Utilities.f90
-  # Extensions/API_Structure_Factors.f90
-  # Extensions/CFML_API_Calc_Powder_Pattern.f90
-  Extensions/forpy_mod.F90)
+  src/fortran/forpy_mod.F90
+  src/fortran/wraps.f90
+  src/fortran/API_init.f90
+  src/fortran/py_cfml_atoms.f90 
+  src/fortran/py_cfml_eos.f90 
+  src/fortran/py_cfml_extincorr.f90
+  src/fortran/py_cfml_geom.f90
+  src/fortran/py_cfml_gspacegroups.f90
+  src/fortran/py_cfml_keycodes.f90
+  src/fortran/py_cfml_magnetic_database.f90
+  src/fortran/py_cfml_maths.f90
+  src/fortran/py_cfml_profiles.f90
+  src/fortran/py_cfml_random.f90
+  src/fortran/py_cfml_reflections.f90
+  src/fortran/py_cfml_scattering_tables.f90
+  src/fortran/py_cfml_superspace_database.f90
+  src/fortran/py_cfml_sxtal_geom.f90
+  src/fortran/py_cfml_symmetry_tables.f90)
+  
 
 # Forpy must be preprocessed
 set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
