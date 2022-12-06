@@ -4,9 +4,9 @@ Utilities for parsing CrysFML08
 ---------
 Functions
 ---------
+build_var_def(var : cfml_objects.FortranVar) -> str
 cast_python(val : str) -> str
 get_arguments(line : str, s : cfml_objects.Subroutine) -> None:
-get_component(line : str) -> tuple
 get_function_name(lines : list) -> str
 get_function_result(line : str, s : cfml_objects.Function) -> None:
 get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int
@@ -28,8 +28,28 @@ is_empty(line : str) -> bool
 is_optional(line : str) -> bool
 is_primitive(line : str) -> bool
 is_procedure(procedure : str,line : str) -> bool
+parse_var(line : str) -> tuple
 """
 import cfml_objects
+import colorama
+
+def build_var_def(var : cfml_objects.FortranVar) -> str:
+
+    if var.ftype == 'integer' or var.ftype == 'real' or var.ftype == 'logical' or var.ftype == 'complex':
+        var_def = var.ftype
+        if var.kind:
+            var_def = var_def + '(kind=' + var.kind + ')'
+    elif var.ftype == 'character':
+        var_def = var.ftype +'(len='+var.len+')'
+    elif var.is_class:
+        var_def = 'class('+var.ftype+')'
+    else:
+        var_def = 'type('+var.ftype+')'
+    if var.ndim > 0:
+        var_def = var_def + ',dimension(' + ','.join(var.dim) + ')'
+        if var.allocatable:
+            var_def = var_def + ',allocatable'
+    return var_def
 
 def cast_python(val : str) -> str:
 
@@ -51,67 +71,8 @@ def get_arguments(line: str, s : cfml_objects.Subroutine) -> None:
     l = line[i+1:j].split(',')
     for arg in l:
         name = arg.strip()
-        s.arguments[name] = cfml_objects.Argument(name=name)
-
+        s.arguments[name] = cfml_objects.FortranVar(name,'')
     return None
-
-def get_component(line : str) -> list:
-
-    # Defaults
-    c_value = 'None'
-    c_info = ''
-    c_dim = '0'
-
-    # Type
-    i = line.index('::')
-    c_type = line[:i].replace(' ','')
-    if c_type.startswith('type'):
-        m = c_type.find('(')
-        n = c_type.find(')')
-        c_type_short = c_type[m+1:n]
-    elif c_type.startswith('integer'):
-        c_type_short = 'integer'
-    elif c_type.startswith('real'):
-        c_type_short = 'real'
-    elif c_type.startswith('character'):
-        c_type_short = 'character'
-    else:
-        c_type_short = 'logical'
-
-    # Name, value and info
-    j = line[:].find('!')
-    if j > -1: # Info is given
-        c_info = line[j+1:].strip()
-        k = line[i:j].find('=')
-        if k > -1: # Value is given
-            c_name = line[i+2:i+k].strip()
-            c_value = line[i+k+1:j].strip()
-        else: # No value
-            c_name = line[i+2:j].strip()
-    else: # No info
-        k = line[i:].find('=')
-        if k > -1: # Value is given
-            c_name = line[i+2:i+k].strip()
-            c_value = line[i+k+1:].strip()
-        else: # No value
-            c_name = line[i+2:].strip()
-
-    # Get the dimension
-    i = c_type.find('dimension')
-    if i > -1:
-        j = c_type[i:].index('(')
-        k = c_type[i:].index(')')
-        c_dim = c_type[i+j+1:i+k]
-    else:
-        c_dim = '0'
-
-    c_value = cast_python(c_value)
-
-    # More than one variable can be given in the same line
-    names = []
-    for n in c_name.split(','):
-        names.append(n.strip())
-    return [names,c_type,c_type_short,c_value,c_info,c_dim]
 
 def get_function_name(line : str) -> str:
 
@@ -129,7 +90,7 @@ def get_function_result(line: str, f : cfml_objects.Function) -> None:
     i = line.find('result')
     j = line[i:].find('(')
     k = line[i:].find(')')
-    f.xreturn = cfml_objects.Type_Component(name=line[i+j+1:i+k].strip())
+    f.xreturn = cfml_objects.FortranVar(line[i+j+1:i+k].strip(),'')
 
     return None
 
@@ -142,20 +103,14 @@ def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
             n += 1
             continue
         line = line.lower()
-        i = line.find('intent')
-        j = line.find('::')
+        i = line.find('::')
         if i > -1:
-            c = get_component(line)
-            intent = get_intent(line)
-            for nam in c[0]:
-                f.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5],intent=intent)
-        elif j > -1:
-            c = get_component(line)
-            f.xreturn.fortran_type = c[1]
-            f.xreturn.fortran_type_short = c[2]
-            f.xreturn.value = c[3]
-            f.xreturn.info  = c[4]
-            f.xreturn.dim   = c[5]
+            v = parse_var(line)
+            if 'intent' in v[2].keys():
+                for var_name in v[0]:
+                    f.arguments[var_name] = cfml_objects.FortranVar(var_name,v[1],**v[2])
+            else:
+                f.xreturn = cfml_objects.FortranVar(v[0][0],v[1],**v[2])
         else:
             in_function = False
         n += 1
@@ -166,7 +121,7 @@ def get_intent(line : str) -> str:
     line = line.lower()
     i = line.find('intent')
     if i < 0:
-        intent = 'inout'
+        intent = ''
     else:
         i = i+6
         j = line[i:].find('(')
@@ -293,13 +248,11 @@ def get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> 
                 n += 1
         n,line = get_line(n,lines)
         line = line.lower()
-        i = line.find('intent')
-        j = line.find('::')
-        if i > -1 and j > -1:
-            c = get_component(line)
-            intent = get_intent(line)
-            for nam in c[0]:
-                s.arguments[nam] = cfml_objects.Argument(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5],intent=intent)
+        i = line.find('::')
+        if i > -1:
+            v = parse_var(line)
+            for var_name in v[0]:
+                s.arguments[var_name] = cfml_objects.FortranVar(var_name,v[1],**v[2])
             n += 1
         else:
             in_subroutine = False
@@ -318,9 +271,9 @@ def get_type_components(n : int, lines: list, t : cfml_objects.FortranType) -> i
         if l[0] == 'end' or l[0] == 'endtype':
             in_type = False
         else:
-            c = get_component(line)
-            for nam in c[0]:
-                t.components[nam] = cfml_objects.Type_Component(name=nam,fortran_type=c[1],fortran_type_short=c[2],value=c[3],info=c[4],dim=c[5])
+            v = parse_var(line)
+            for var_name in v[0]:
+                t.components[var_name] = cfml_objects.FortranVar(var_name,v[1],**v[2])
         n += 1
     return n
 
@@ -391,3 +344,96 @@ def is_procedure(procedure : str,line : str) -> bool:
         return True
     else:
         return False
+
+def parse_var(line : str) -> list:
+
+    var_names = ''
+    var_optionals = {}
+
+    # Fortran Type
+    i = line.index('::')
+    var_type = line[:i].replace(' ','')
+    if var_type.startswith('type'):
+        m = var_type.find('(')
+        n = var_type.find(')')
+        var_type = var_type[m+1:n]
+    elif var_type.startswith('class'):
+        m = var_type.find('(')
+        n = var_type.find(')')
+        var_type = var_type[m+1:n]
+        var_optionals['is_class'] = True
+    elif var_type.startswith('integer'):
+        var_type = 'integer'
+    elif var_type.startswith('real'):
+        var_type = 'real'
+    elif var_type.startswith('complex'):
+        var_type = 'complex'
+    elif var_type.startswith('character'):
+        var_type = 'character'
+        ii = line[:i].find('len')
+        if ii > -1:
+            j = line[ii:i].index('=')
+            k = line[ii:i].index(')')
+            var_optionals['len'] = line[ii+j+1:ii+k].strip()
+        else:
+            print(f"{colorama.Fore.RED}Error: character variable without len attribute{colorama.Style.RESET_ALL}")
+            raise IOError
+    elif var_type.startswith('logical'):
+        var_type = 'logical'
+    else:
+        print(line)
+        print(f"{colorama.Fore.RED}Error: unable to parse type {var_type}{colorama.Style.RESET_ALL}")
+        raise IOError
+
+    # Name, value and info
+    i = line.index('::')
+    j = line[:].find('!')
+    if j > -1: # Info is given
+        var_optionals['info'] = line[j+1:].strip()
+        k = line[i:j].find('=')
+        if k > -1: # Value is given
+            var_names = line[i+2:i+k].strip()
+            var_optionals['value'] = cast_python(line[i+k+1:j].strip())
+        else: # No value
+            var_names = line[i+2:j].strip()
+    else: # No info
+        k = line[i:].find('=')
+        if k > -1: # Value is given
+            var_names = line[i+2:i+k].strip()
+            var_optionals['value'] = cast_python(line[i+k+1:].strip())
+        else: # No value
+            var_names = line[i+2:].strip()
+    if not var_names:
+        print(f"{colorama.Fore.RED}Error: unable to parse variable. Variable name not found{colorama.Style.RESET_ALL}")
+        raise IOError
+
+    # Kind
+    i = line.index('::')
+    ii = line[:i].find('kind')
+    if ii > -1:
+        j = line[ii:i].index('=')
+        k = line[ii:i].index(')')
+        var_optionals['kind'] = line[ii+j+1:ii+k].strip()
+
+    # Dimension
+    ii = line[:i].find('dimension')
+    if ii > -1:
+        j = line[ii:i].index('(')
+        k = line[ii:i].index(')')
+        var_optionals['dim'] = line[ii+j+1:ii+k].split(',')
+        var_optionals['ndim'] = len(var_optionals['dim'])
+
+    # Intent
+    ii = line[:i].find('intent')
+    if ii > -1:
+        j = line[ii:i].index('(')
+        k = line[ii:i].index(')')
+        var_optionals['intent'] = ''.join(line[ii+j+1:ii+k].split())
+
+    # Allocatable
+    ii = line[:i].find('allocatable')
+    if ii > -1:
+        var_optionals['allocatable'] = True
+
+    # More than one variable can be given in the same line
+    return [var_names.split(','),var_type,var_optionals]
