@@ -28,6 +28,8 @@ message(STATUS "Setting build type to ${CMAKE_BUILD_TYPE}")
 
 get_filename_component(COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if (DEFINED CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "The installation path.")
 else()
