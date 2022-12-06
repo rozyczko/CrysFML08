@@ -93,10 +93,12 @@ def set_fortran_procedures_args(f,p) -> None:
     f.write(f"\n{' ':>8}! Arguments for the Fortran procedure\n")
     for arg in p.arguments.keys():
         ftype = tune_fortran_type(p.arguments[arg])
-        f.write(f"{' ':>8}{ftype} :: {p.arguments[arg].name} ! CrysFML type: {p.arguments[arg].fortran_type}\n")
+        s = parser_utils.build_var_def(ftype)
+        f.write(f"{' ':>8}{s} :: {p.arguments[arg].name} ! CrysFML type: {p.arguments[arg].ftype}\n")
     if type(p) == cfml_objects.Function:
         ftype = tune_fortran_type(p.xreturn)
-        f.write(f"{' ':>8}{ftype} :: {p.xreturn.name} ! CrysFML type: {p.xreturn.fortran_type}\n")
+        s = parser_utils.build_var_def(ftype)
+        f.write(f"{' ':>8}{s} :: {p.xreturn.name} ! CrysFML type: {p.xreturn.ftype}\n")
 
 def set_local_variables(f,p,rets) -> None:
     """
@@ -109,9 +111,9 @@ def set_local_variables(f,p,rets) -> None:
     f.write(f"{' ':>8}type(nonetype) :: nret\n")
     for arg in p.arguments.keys():
         if p.arguments[arg].intent == 'in':
-            dim = p.arguments[arg].dim
-            ftype = p.arguments[arg].fortran_type
-            if parser_utils.is_primitive(ftype) and parser_utils.is_array(dim):
+            ndim = p.arguments[arg].ndim
+            ftype = p.arguments[arg].ftype
+            if parser_utils.is_primitive(ftype) and ndim > 0:
                 ftype_s = p.arguments[arg].fortran_type_short
                 if ftype_s == 'character':
                     set_local_variables_charray(f,arg,ftype,dim)
@@ -122,13 +124,13 @@ def set_local_variables(f,p,rets) -> None:
             ftype = tune_fortran_type(r)
         else:
             ftype = tune_fortran_type(r)
-        ftype_s = r.fortran_type_short
-        if parser_utils.is_primitive(ftype):
-            if parser_utils.is_array(r.dim):
-                if ftype_s == 'character':
-                    set_local_variables_charray(f,r.name,ftype,r.dim)
-                else:
-                    set_local_variables_primarray(f,r.name,ftype_s,r.dim)
+        #ftype_s = r.fortran_type_short
+        #if parser_utils.is_primitive(ftype):
+        #    if parser_utils.is_array(r.dim):
+        #        if ftype_s == 'character':
+        #            set_local_variables_charray(f,r.name,ftype,r.dim)
+        #        else:
+        #            set_local_variables_primarray(f,r.name,ftype_s,r.dim)
 
 def set_local_variables_charray(f,var : str,ftype : str, dim : str) -> None:
 
@@ -203,17 +205,18 @@ def unwrap_arguments(f,p) -> None:
     for arg in p.arguments.keys():
         a = p.arguments[arg]
         dim = a.dim
-        ftype = a.fortran_type
-        ftype_s = a.fortran_type_short
-        if a.intent.find('in') > -1 or a.dim.find(':') > -1 and a.fortran_type.find('allocatable') < 0:
+        ftype = a.ftype
+        #ftype_s = a.fortran_type_short
+        if a.intent.find('in') > -1 or ':' in a.dim > -1 and a.is_allocatable:
             f.write(f"{' ':>8}if (ierror == 0) ierror = args%getitem(item,{i})\n")
             i += 1
             if parser_utils.is_primitive(ftype):
-                if parser_utils.is_array(dim):
-                    if ftype_s == 'character':
-                        unwrap_charray(f,p,arg,ftype,dim)
-                    else:
-                        unwrap_primarray(f,p,arg,ftype,dim)
+                if a.ndim > 0:
+                    pass
+                    #if ftype_s == 'character':
+                    #    unwrap_charray(f,p,arg,ftype,dim)
+                    #else:
+                    #    unwrap_primarray(f,p,arg,ftype,dim)
                 else:
                     f.write(f"{' ':>8}if (ierror == 0) ierror = cast({arg},item)\n")
 
@@ -270,8 +273,8 @@ def wrap_arguments(f,p,rets : list) -> None:
     f.write(f"{' ':>8}if (ierror == 0) ierror = tuple_create(ret,{n})\n")
     i = 0
     for r in rets:
-        if parser_utils.is_primitive(r.fortran_type):
-            if parser_utils.is_array(r.dim):
+        if parser_utils.is_primitive(r.ftype):
+            if r.ndim > 0:
                 if r.fortran_type.startswith('character'):
                     if r.intent == 'out':
                         f.write(f"{' ':>8}ierror = list_create(li_{r.name})\n")

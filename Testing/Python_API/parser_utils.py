@@ -47,8 +47,8 @@ def build_var_def(var : cfml_objects.FortranVar) -> str:
         var_def = 'type('+var.ftype+')'
     if var.ndim > 0:
         var_def = var_def + ',dimension(' + ','.join(var.dim) + ')'
-        if var.allocatable:
-            var_def = var_def + ',allocatable'
+    if var.allocatable:
+        var_def = var_def + ',allocatable'
     return var_def
 
 def cast_python(val : str) -> str:
