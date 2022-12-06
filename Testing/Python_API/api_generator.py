@@ -323,7 +323,7 @@ def run() -> None:
     read()
     fortran_types_to_dicts()
     wrap_procedures()
-    #compilation.create_scripts(os.path.join(CRYSFML08,'API'))
+    compilation.create_scripts(os.path.join(CRYSFML08,'API'))
 
     return None
 
