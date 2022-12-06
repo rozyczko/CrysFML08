@@ -469,12 +469,12 @@ set(CRYSFML_COMMON_SRC
     ${KVEC_SYMMETRY})
 
 # Build the library
-set(LIBRARY_NAME crysfml)
+set(LIBRARY_NAME crysfml_common)
 
 add_library(${LIBRARY_NAME} STATIC ${CRYSFML_COMMON_SRC})
 
 # The directory where the CrysFML modules files will be stored.
-set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src08/crysfml_modules)
+set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src/crysfml_modules CACHE INTERNAL "")
 
 # Sets the path where to place the mod files for the crysfml_common library.
 set_target_properties(${LIBRARY_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CRYSFML_MODULE_DIRECTORY})

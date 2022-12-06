@@ -39,7 +39,8 @@ set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 #################################
 # Add a dependency to crysfml_common to keep sure that the crysfml_common library will be built first.
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/19226 for linking
-add_dependencies(${LIBRARY_NAME} crysfml)
+include_directories(${CRYSFML_MODULE_DIRECTORY})
+add_dependencies(${LIBRARY_NAME} crysfml_common)
 
 if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
   set(Python3_USE_STATIC_LIBS, TRUE)
