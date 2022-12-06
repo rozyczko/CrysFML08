@@ -19,7 +19,7 @@ add_library(${LIBRARY_NAME} SHARED
   src/fortran/py_cfml_extincorr.f90
   src/fortran/py_cfml_geom.f90
   src/fortran/py_cfml_gspacegroups.f90
-  src/fortran/py_cfml_keycodes.f90
+  #src/fortran/py_cfml_keycodes.f90
   src/fortran/py_cfml_magnetic_database.f90
   src/fortran/py_cfml_maths.f90
   src/fortran/py_cfml_profiles.f90
@@ -66,7 +66,7 @@ endif()
 # Set -Wl,-undefined,dynamic_lookup to OTHER_LDFLAGS
 # Set include and linking
 include_directories(${CRYSFML_COMMON_MODULE_DIRECTORY})
-target_link_libraries(${LIBRARY_NAME} crysfml)
+target_link_libraries(${LIBRARY_NAME} crysfml_common)
 # Fix a problem on Mac OS X when building shared libraries
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
