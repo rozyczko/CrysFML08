@@ -4,12 +4,13 @@
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
-# By default the built is in CONSOLE mode and 32 bits. If 64 bits have to be used one should do -D ARCH32=OFF
+# By default the built is in CONSOLE mode and 64 bits. If 64 bits have to be used one should do -D ARCH32=OFF
 option(MINGW_HDF_TRICK "Help building with MinGW" OFF)
 option(GUI "Build CrysFML and WCrysFML library" OFF)
-option(ARCH32 "32 or 64 bit architecture" ON)
+option(ARCH32 "32 or 64 bit architecture" OFF)
 option(USE_HDF "Build crysfml with HDF5 library" OFF)
 option(HEAP_ARRAYS "Put arrays in heap instead of stack (only for Windows ifort)" OFF)
+option(PYTHON_API "Build Python API" OFF)
 
 if(DEFINED CMAKE_Fortran_COMPILER)
     set(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER} CACHE STRING "The Fortran compiler. One of 'ifort' or 'gfortran'.")
@@ -90,3 +91,9 @@ include(set_compiler_flags)
   set_compiler_flags()
 # The subdirectories of the project.
 add_subdirectory(Src)
+
+
+if (PYTHON_API)
+    set(PYTHON_API_PREFIX ${CMAKE_INSTALL_PREFIX}/Python_API)
+    add_subdirectory(Python_API)
+endif()
