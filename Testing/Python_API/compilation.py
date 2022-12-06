@@ -78,8 +78,8 @@ def create_script_linux() -> None:
         f.write(f"ifort ../../src/fortran/py_cfml_sxtal_geom.f90 {opt}\n")
         f.write(f"ifort ../../src/fortran/py_cfml_symmetry_tables.f90 {opt}\n")
         f.write(f"ifort ../../src/fortran/api_init.f90 {opt}\n")
-        f.write(f"\nifort -o crysfml08_api.lib -shared -fPIC *.o -L$CRYSFML08_INSTALL -lcrysfml\n")
-        f.write(f"del *.o *.mod") 
+        f.write(f"\nifort -o crysfml08_api.so -shared -fPIC *.o -L$CRYSFML08_INSTALL -lcrysfml\n")
+        f.write(f"rm *.o *.mod")
 
 if __name__ == '__main__':
     CRYSFML08 = os.getenv('CRYSFML08')
