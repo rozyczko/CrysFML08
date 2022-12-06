@@ -417,6 +417,19 @@ if(${COMPILER_NAME} STREQUAL ifort)
 else()
     set_source_files_properties(${KEYCODES_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+    endif()
+
+
+# CFML_kvec_symmetry
+file(GLOB SUBMOD_KVEC_SYMMETRY_SRC CFML_kvec_Symmetry/*.f90)
+set(KEYCODES_SRC CFML_kvec_Symmetry.f90
+                 ${SUBMOD_KVEC_SYMMETRY_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
 #  List of all the source files
@@ -452,7 +465,8 @@ set(CRYSFML_COMMON_SRC
     ${SXTALgeom_SRC}
     ${SF_SRC}
     ${MOLECULES_SRC}
-    ${KEYCODES_SRC})
+    ${KEYCODES_SRC}
+    ${KVEC_SYMMETRY})
 
 # Build the library
 set(LIBRARY_NAME crysfml)
