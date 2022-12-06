@@ -44,7 +44,7 @@ SubModule (CFML_Atoms)  Atm_Write_AtmList
    Pure Module Function Wrt_Lab(Nam1,Nam2) Result(Bilabel)
       !---- Arguments ----!
       character (len=*), intent (in) :: nam1,nam2   ! Atoms name
-      character (len=20)             :: bilabel     ! Composed string without underscores
+      character (len=:), allocatable :: bilabel     ! Composed string without underscores
 
       !---- Local variables ----!
       integer :: i1,i2

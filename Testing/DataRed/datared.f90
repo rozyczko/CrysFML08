@@ -109,6 +109,7 @@
              end if
 
              if(tw%ISpG)  then
+               allocate(SpG_Type :: twSpG)
                call Set_SpaceGroup(tw%twin_SpG,twSpG)
                write(unit=lun,fmt="(/,a)") "     SPACE GROUP FOR DOMAINS OF A TWINNED CRYSTAL: USED FOR SYSTEMATIC ABSENCES"
                write(unit=lun,fmt="( a)") "     =========================================================================="

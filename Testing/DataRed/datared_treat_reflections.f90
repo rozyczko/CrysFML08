@@ -1018,7 +1018,7 @@
               end if
             end if
 
-            do i=1,nin
+            do i=1,nin  !Flipping ratios
               j=ini(i)
               hkl(:)=  nint(R%Ref(j)%hr)
               if(cond%hkl_type /= 7) then
