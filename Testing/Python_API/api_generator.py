@@ -377,6 +377,6 @@ def wrap_procedures() -> None:
     print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
     wraper_utils.write_api_init(procs,nprocs)
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
 
-    run()
+run()
