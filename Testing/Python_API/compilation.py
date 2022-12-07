@@ -51,8 +51,8 @@ def create_script_windows() -> None:
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_sxtal_geom.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\py_cfml_symmetry_tables.f90 {opt}\n")
         f.write(f"ifort ..\\..\\src\\fortran\\API_init.f90 {opt}\n")
-        f.write(f"\nlink *.obj /out:\"crysfml08_api.dll\" /libpath:%CRYSFML08_INSTALL%\\lib /dll libCrysFML08.a %LIBPYTHON% /NODEFAULTLIB:libcmt.lib\n")
-        f.write(f"\nmove crysfml08_api.dll ..\\..\\src\\python\\crysfml08_api.pyd\n")
+        f.write(f"\nlink *.obj /out:\"crysfml_api.dll\" /libpath:%CRYSFML08_INSTALL%\\lib /dll libCrysFML.a %LIBPYTHON% /NODEFAULTLIB:libcmt.lib\n")
+        f.write(f"\nmove crysfml_api.dll ..\\..\\src\\python\\crysfml_api.pyd\n")
         f.write(f"del *.obj *.mod *.exp *.lib")
 
 def create_script_linux() -> None:
@@ -78,7 +78,7 @@ def create_script_linux() -> None:
         f.write(f"ifort ../../src/fortran/py_cfml_sxtal_geom.f90 {opt}\n")
         f.write(f"ifort ../../src/fortran/py_cfml_symmetry_tables.f90 {opt}\n")
         f.write(f"ifort ../../src/fortran/api_init.f90 {opt}\n")
-        f.write(f"\nifort -o crysfml08_api.so -shared -fPIC *.o -L$CRYSFML08_INSTALL -lcrysfml\n")
+        f.write(f"\nifort -o crysfml_api.so -shared -fPIC *.o -L$CRYSFML08_INSTALL -lcrysfml\n")
         f.write(f"rm *.o *.mod")
 
 if __name__ == '__main__':
