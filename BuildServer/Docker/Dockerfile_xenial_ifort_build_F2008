@@ -7,12 +7,13 @@ ARG CI_COMMIT_REF_NAME
 
 ENV CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA}
 ENV CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
-ENV HDF5_INCLUDE_PATH=/hdf5/include
-ENV HDF5_LIBRARY_PATH=/hdf5/lib
+ENV PATH=/opt/intel/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/intel/lib/intel64
+
 
 COPY ./ /app/
 WORKDIR /app
 
 ENV CRYSFML08=${WORKDIR}
 
-CMD BuildServer/Unix/build_F2008.sh ifort && cp -a build_ifort_F2008 /artifacts/
+CMD cd Testing/Python_API && python3 api_generator.py && cd - &&  BuildServer/Unix/build_F2008.sh ifort && cp -a build_ifort_F2008 /artifacts/
