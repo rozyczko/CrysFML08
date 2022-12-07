@@ -69,6 +69,22 @@ add_subdirectory(Src)
 
 
 if (PYTHON_API)
-    set(PYTHON_API_PREFIX ${CMAKE_INSTALL_PREFIX}/Python_API)
-    add_subdirectory(API/Src)
+  set(PYTHON_API_PREFIX ${CMAKE_INSTALL_PREFIX}/Python_API)
+
+  if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
+    message(STATUS "Python not in path")
+    set(Python3_USE_STATIC_LIBS, TRUE)
+    find_package(Python3 COMPONENTS Interpreter Development)
+    set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})
+    set(PYTHON_LIBRARY_PATH Python3::Python)
+    message(STATUS "Using Python interpreter found with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with found PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+else()
+    message(STATUS "Using Python interpreter provided with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with provided PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+endif()
+
+  execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "env"  CRYSFML08=${CMAKE_HOME_DIRECTORY} ${Python3_EXECUTABLE} ${CMAKE_HOME_DIRECTORY}/Testing/Python_API/api_generator.py)
+  
+  add_subdirectory(API/Src)
 endif()
