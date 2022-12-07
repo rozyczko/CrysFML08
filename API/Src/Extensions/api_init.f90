@@ -11,8 +11,7 @@
 module api_init
 
     use forpy_mod
-    !use, intrinsic :: iso_c_binding
-    use, intrinsic :: iso_fortran_env
+    !use iso_c_binding
 
     use py_cfml_atoms
     use py_cfml_scattering_tables
@@ -31,7 +30,6 @@ module api_init
 
     implicit none
 
-    private
     type(PythonModule), save :: mod_Def
     type(PythonMethodTable), save :: method_Table
 
@@ -42,15 +40,15 @@ module api_init
     ! Must use bind(c, name="PyInit_<module name>")
     ! Return value must be type(c_ptr),
     ! use the return value of PythonModule%init
-    function PyInit_crysfml_api() bind(c,name="PyInit_crysfml_api") result(m)
-    !DEC$ ATTRIBUTES DLLEXPORT :: PyInit_crysfml_api
+    function PyInit_crysfml08_api() bind(c,name="PyInit_crysfml08_api") result(m)
+    !DEC$ ATTRIBUTES DLLEXPORT :: PyInit_crysfml08_api
 
         ! Local variables
         type(c_ptr) :: m
 
         m = Init()
 
-    end function PyInit_crysfml_api
+    end function PyInit_crysfml08_api
 
     function Init() result(m)
 

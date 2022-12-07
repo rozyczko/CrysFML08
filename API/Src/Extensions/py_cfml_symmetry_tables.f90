@@ -168,7 +168,7 @@ module py_cfml_symmetry_tables
         type(c_ptr)        :: resul
 
         ! Arguments for the Fortran procedure
-        character(len=:),allocatable :: strsg ! CrysFML type: character
+        character(len=:),allocatable :: mystr ! CrysFML type: character
         character(len=:),allocatable :: hm ! CrysFML type: character
         character(len=:),allocatable :: hall ! CrysFML type: character
         integer :: it ! CrysFML type: integer
@@ -186,12 +186,12 @@ module py_cfml_symmetry_tables
         ! Unwrap_arguments
         call unsafe_cast_from_c_ptr(args,args_ptr)
         if (ierror == 0) ierror = args%getitem(item,0)
-        if (ierror == 0) ierror = cast(strsg,item)
+        if (ierror == 0) ierror = cast(mystr,item)
 
         ! Call CrysFML procedure
         if (ierror == 0) then
             call clear_error()
-            call get_spacegroup_symbols(strsg,hm,hall,it,c_hm)
+            call get_spacegroup_symbols(mystr,hm,hall,it,c_hm)
             if (err_cfml%flag) then
                 ierror = EXCEPTION_ERROR
                 call raise_exception(RuntimeError,"get_spacegroup_symbols: "//trim(err_cfml%msg))

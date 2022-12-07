@@ -30,26 +30,25 @@ add_custom_target(
 )
 
 add_library(${LIBRARY_NAME} SHARED
-  src/fortran/forpy_mod.F90
-  src/fortran/wraps.f90
-  src/fortran/API_init.f90
-  src/fortran/py_cfml_atoms.f90 
-  src/fortran/py_cfml_eos.f90 
-  src/fortran/py_cfml_extincorr.f90
-  src/fortran/py_cfml_geom.f90
-  src/fortran/py_cfml_gspacegroups.f90
-  #src/fortran/py_cfml_keycodes.f90
-  src/fortran/py_cfml_magnetic_database.f90
-  src/fortran/py_cfml_maths.f90
-  src/fortran/py_cfml_profiles.f90
-  src/fortran/py_cfml_random.f90
-  src/fortran/py_cfml_reflections.f90
-  src/fortran/py_cfml_scattering_tables.f90
-  src/fortran/py_cfml_superspace_database.f90
-  src/fortran/py_cfml_sxtal_geom.f90
-  src/fortran/py_cfml_symmetry_tables.f90)
+  Extensions/forpy_mod.F90
+  Extensions/wraps.f90
+  Extensions/API_init.f90
+  Extensions/py_cfml_atoms.f90 
+  Extensions/py_cfml_eos.f90 
+  Extensions/py_cfml_extincorr.f90
+  Extensions/py_cfml_geom.f90
+  Extensions/py_cfml_gspacegroups.f90
+  #Extensions/py_cfml_keycodes.f90
+  Extensions/py_cfml_magnetic_database.f90
+  Extensions/py_cfml_maths.f90
+  Extensions/py_cfml_profiles.f90
+  Extensions/py_cfml_random.f90
+  Extensions/py_cfml_reflections.f90
+  Extensions/py_cfml_scattering_tables.f90
+  Extensions/py_cfml_superspace_database.f90
+  Extensions/py_cfml_sxtal_geom.f90
+  Extensions/py_cfml_symmetry_tables.f90)
   
-
 # Forpy must be preprocessed
 set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 
@@ -58,8 +57,7 @@ set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 #################################
 # Add a dependency to crysfml_common to keep sure that the crysfml_common library will be built first.
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/19226 for linking
-include_directories(${CRYSFML_MODULE_DIRECTORY})
-add_dependencies(${LIBRARY_NAME} crysfml_common)
+add_dependencies(${LIBRARY_NAME} crysfml)
 
 if(WIN32 OR MSYS)
   add_library(Python3_LIB STATIC IMPORTED)
@@ -69,8 +67,8 @@ endif()
 
 # Set -Wl,-undefined,dynamic_lookup to OTHER_LDFLAGS
 # Set include and linking
-include_directories(${CRYSFML_COMMON_MODULE_DIRECTORY})
-target_link_libraries(${LIBRARY_NAME} crysfml_common)
+include_directories(${CRYSFML_MODULE_DIRECTORY})
+target_link_libraries(${LIBRARY_NAME} crysfml)
 # Fix a problem on Mac OS X when building shared libraries
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")

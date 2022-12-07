@@ -50,14 +50,14 @@ module wraps
 
         ! Local variables
         integer :: i,n
-        character(len=:), allocatable :: str
+        character(len=:), allocatable :: mystr
         type(object) :: item
 
         ierror = li_charr%len(n)
         do i = 1 , n
             if (ierror == 0) ierror = li_charr%getitem(item,i-1)
-            if (ierror == 0) ierror = cast(str,item)
-            if (ierror == 0) charr(i) = str
+            if (ierror == 0) ierror = cast(mystr,item)
+            if (ierror == 0) charr(i) = mystr
         end do
 
     end subroutine list_to_charray

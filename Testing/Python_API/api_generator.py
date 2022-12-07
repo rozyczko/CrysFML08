@@ -237,16 +237,15 @@ def move_to_install(fortran=False) -> None:
     os.chdir(CRYSFML08)
     if not os.path.isdir('API'):
         os.makedirs('API')
-    if not os.path.isdir('API/src'):
-        os.makedirs('API/src')
-    if not os.path.isdir('API/src/fortran'):
-        os.makedirs('API/src/fortran')
-    if not os.path.isdir('API/src/python'):
-        os.makedirs('API/src/python')
+    if not os.path.isdir('API/Src'):
+        os.makedirs('API/Src')
+    if not os.path.isdir('API/Src/Extensions'):
+        os.makedirs('API/Src/Extensions')
+    
     if not fortran:
-        wdir = os.path.join(CRYSFML08,'API','src','python')
+        wdir = os.path.join(CRYSFML08,'API','Src')
     else:
-        wdir = os.path.join(CRYSFML08,'API','src','fortran')
+        wdir = os.path.join(CRYSFML08,'API','Src','Extensions')
     print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{wdir}{colorama.Style.RESET_ALL}")
     os.chdir(wdir)
     return None
