@@ -10,6 +10,25 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(Python_API Fortran)
 set(LIBRARY_NAME crysfml_api)
 
+# Make sure python is installed...
+if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
+    set(Python3_USE_STATIC_LIBS, TRUE)
+    find_package(Python3 COMPONENTS Interpreter Development)
+    set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})
+    set(PYTHON_LIBRARY_PATH Python3::Python)
+    message(STATUS "Using Python interpreter found with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with found PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+else()
+    message(STATUS "Using Python interpreter provided with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with provided PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+endif()
+
+add_custom_target(
+        run ALL
+        COMMAND ${CMAKE_COMMAND} "-E" "env"  CRYSFML08=${CMAKE_HOME_DIRECTORY} ${Python3_EXECUTABLE} ${CMAKE_HOME_DIRECTORY}/Testing/Python_API/api_generator.py
+        COMMENT "Generating API"
+)
+
 add_library(${LIBRARY_NAME} SHARED
   src/fortran/forpy_mod.F90
   src/fortran/wraps.f90
@@ -41,21 +60,6 @@ set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/19226 for linking
 include_directories(${CRYSFML_MODULE_DIRECTORY})
 add_dependencies(${LIBRARY_NAME} crysfml_common)
-
-if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
-  set(Python3_USE_STATIC_LIBS, TRUE)
-  find_package(Python3 COMPONENTS Interpreter Development)
-  set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})
-  set(PYTHON_LIBRARY_PATH Python3::Python)
-  message(STATUS "Using Python interpreter found with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
-  message(STATUS "Linking Python extension with found PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
-else()
-  message(STATUS "Using Python interpreter provided with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
-  message(STATUS "Linking Python extension with provided PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
-endif()
-
-
-
 
 if(WIN32 OR MSYS)
   add_library(Python3_LIB STATIC IMPORTED)
