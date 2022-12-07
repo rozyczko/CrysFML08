@@ -1,17 +1,44 @@
 stages:
-  - build
+  - docker_pre_clean
+  - make
+  - docker_post_clean
 
-ifort:
-  stage: build
+docker_pre_clean:
+  stage: docker_pre_clean
   script:
-    - mkdir build
-    - cd build
-    - cmake -DARCH32=OFF ..
-    - make -j8
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  allow_failure: true
   tags:
+    - docker
+    - sci
     - ubuntu
-  artifacts:
-    when: on_failure
-    expire_in: 1 week
-    paths:
-    - build/Testing/Temporary/LastTest.log
+
+docker_post_clean:
+  stage: docker_post_clean
+  script:
+    - ${CI_PROJECT_DIR}/BuildServer/Docker/clean.sh
+  allow_failure: true
+  when: always
+  dependencies: []
+  tags:
+    - docker
+    - sci
+    - ubuntu
+    
+#===============
+#== MAKE SECTION
+#===============
+
+make:linux_gfortran:
+  stage: make
+  script:
+    - docker build --force-rm -t ci_crysfml_xenial_gfortran_f2008 -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_setup_F2008 .
+    - docker build --force-rm --no-cache -t ci_crysfml_xenial_gfortran_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_build_F2008 --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} .
+    - docker run -i -v${PWD}:/artifacts/ ci_crysfml_xenial_gfortran_build
+  tags:
+    - docker
+    - sci
+    - ubuntu
+    
+
+
