@@ -14,9 +14,9 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 04/05/2020
     !!
-    Module Subroutine Read_Atom(Str, Atm)
+    Module Subroutine Read_Atom(Str_tmp, Atm)
        !---- Arguments ----!
-       character(len=*), intent(in)    :: Str   ! Input string with ATOM directive
+       character(len=*), intent(in)    :: Str_tmp   ! Input string with ATOM directive
        Class(Atm_Type),  intent(out)   :: Atm   ! Parameters on variable At
 
        !---- Local variables -----!
@@ -25,7 +25,7 @@ SubModule (CFML_IOForm) Format_GEN
        real(kind=cp), dimension (10)     :: vet1
        real(kind=cp), dimension (10)     :: vet2
 
-       character(len=len(str))           :: line
+       character(len=len(Str_tmp))           :: line
        character(len=132), dimension(1)  :: filevar
        character(len=40)                 :: magmom
        character(len=4)                  :: dire
@@ -36,8 +36,8 @@ SubModule (CFML_IOForm) Format_GEN
        call init_atom_type(Atm,0)
        magmom=" "
 
-       !> Copy str to line
-       line=adjustl(trim(str))
+       !> Copy Str_tmp to line
+       line=adjustl(trim(Str_tmp))
 
        ! Look for the item "Utyp" if we want to use Uiso instead of Biso
        iv= index(line,"Utyp")
@@ -166,16 +166,16 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 04/05/2020
     !!
-    Module Subroutine Read_Cell(Str,Celda,Std,Cell,CFrame)
+    Module Subroutine Read_Cell(Str_tmp,Celda,Std,Cell,CFrame)
        !---- Arguments ----!
-       character(len=*),                      intent(in)  :: Str
+       character(len=*),                      intent(in)  :: Str_tmp
        real(kind=cp), dimension(6),           intent(out) :: Celda
        real(kind=cp), dimension(6), optional, intent(out) :: Std
        class(Cell_Type),            optional, intent(out) :: Cell
        character(len=*),            optional, intent(in)  :: CFrame
 
        !---- Local variables -----!
-       character(len=len(str))              :: line
+       character(len=len(Str_tmp))              :: line
        character(len=4)                     :: dire
        character(len=132), dimension(1)     :: filevar
        integer                              :: nlong1,n,iv
@@ -188,7 +188,7 @@ SubModule (CFML_IOForm) Format_GEN
        call clear_error()
 
        !> Copy
-       line=str
+       line=Str_tmp
 
        call cut_string(line,nlong1,dire)
        if (u_case(dire) /= "CELL") then
@@ -228,23 +228,23 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 04/05/2020
     !!
-    Module Subroutine Read_UTherms(Str, Atm)
+    Module Subroutine Read_UTherms(Str_tmp, Atm)
        !---- Arguments ----!
-       character(len=*), intent(in )     :: Str        ! String containing info
+       character(len=*), intent(in )     :: Str_tmp        ! String containing info
        Class (Atm_Type), intent(in out)  :: Atm
 
        !---- Local variables -----!
        integer                              :: iv,nlong1,n
-       character(len=len(str))              :: line
+       character(len=len(Str_tmp))              :: line
        character(len=20)                    :: dire
-       character(len=len(str)), dimension(1):: linec
+       character(len=len(Str_tmp)), dimension(1):: linec
        real(kind=cp), dimension (6)         :: vet1,vet2
 
        !> Init
        call clear_error()
 
-       !> Copy str to line
-       line=adjustl(trim(str))
+       !> Copy Str_tmp to line
+       line=adjustl(trim(Str_tmp))
 
        !> Cut UTherm Directive
        call cut_string(line,nlong1,dire)
@@ -288,23 +288,23 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 04/05/2020
     !!
-    Module Subroutine Read_Moment(Str, Atm)
+    Module Subroutine Read_Moment(Str_tmp, Atm)
        !---- Arguments ----!
-       character(len=*), intent(in )     :: Str        ! String containing info
+       character(len=*), intent(in )     :: Str_tmp        ! String containing info
        Class (Atm_Type), intent(in out)  :: Atm
 
        !---- Local variables -----!
        integer                              :: iv,nlong1,n
-       character(len=len(str))              :: line
+       character(len=len(Str_tmp))              :: line
        character(len=20)                    :: dire
-       character(len=len(str)), dimension(1):: linec
+       character(len=len(Str_tmp)), dimension(1):: linec
        real(kind=cp), dimension (6)         :: vet1,vet2
 
        !> Init
        call clear_error()
 
-       !> Copy str to line
-       line=adjustl(trim(str))
+       !> Copy Str_tmp to line
+       line=adjustl(trim(Str_tmp))
 
        !> Cut Moment Directive
        call cut_string(line,nlong1,dire)
@@ -340,15 +340,15 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 07/05/2020
     !!
-    Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
+    Module Subroutine Read_Modulation_Amplitudes(Str_tmp, Atm, Ulabel, Nt)
        !---- Arguments ----!
-       character(len=*),      intent(in )     :: str
+       character(len=*),      intent(in )     :: Str_tmp
        class(ModAtm_Std_Type),intent(in out)  :: Atm
        character(len=*),      intent(in)      :: ulabel
        integer,               intent(in)      :: nt  !number of the amplitude
 
        !---- Local variables -----!
-       character(len=len(str)), dimension(1):: line
+       character(len=len(Str_tmp)), dimension(1):: line
        real(kind=cp), dimension (12)        :: vet1,vet2
        integer                              :: iv,n,nq,ier
 
@@ -356,7 +356,7 @@ SubModule (CFML_IOForm) Format_GEN
        call clear_error()
 
        !> Copy
-       line(1)=str
+       line(1)=Str_tmp
 
        !> Cut first word
        call Cut_String(line(1))
@@ -428,21 +428,21 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 08/05/2020
     !!
-    Module Subroutine Read_Wavelength(Str,v1,v2,ratio)
+    Module Subroutine Read_Wavelength(Str_tmp,v1,v2,ratio)
        !---- Arguments ----!
-       character(len=*), intent(in)     :: Str
+       character(len=*), intent(in)     :: Str_tmp
        real(kind=cp),    intent(out)    :: v1,v2
        real(kind=cp),    intent(out)    :: ratio
 
        !---- Local Variables ----!
        integer                              :: iv, n
        integer, dimension(3)                :: ivet
-       character(len=len(str)), dimension(1):: linec
+       character(len=len(Str_tmp)), dimension(1):: linec
        real(kind=cp),           dimension(3):: vet
 
        !> Init
        call clear_error()
-       if (len_trim(str) <=0) then
+       if (len_trim(Str_tmp) <=0) then
           ERR_CFML%Ierr=1
           ERR_CFML%Msg=" Empty line in Read_Wavelength procedure !"
           return
@@ -450,7 +450,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !> Copy
        v1=1.54056; v2=0.0; ratio=0.0
-       linec(1)=str
+       linec(1)=Str_tmp
 
        !> Reading values
        n=1
@@ -483,26 +483,26 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 08/05/2020
     !!
-    Module Subroutine Read_SpaceGroup(Str,Spg)
+    Module Subroutine Read_SpaceGroup(Str_tmp,Spg)
        !---- Arguments ----!
-       character(len=*), intent(in)     :: Str
+       character(len=*), intent(in)     :: Str_tmp
        class(SpG_Type),  intent(out)    :: SpG
 
        !---- Local Variables ----!
        integer, parameter       :: NDIR=2
        integer, dimension(NDIR) :: ind
-       character(len=len(str))  :: line
+       character(len=len(Str_tmp))  :: line
 
        !> Init
        call clear_error()
-       if (len_trim(str) <=0) then
+       if (len_trim(Str_tmp) <=0) then
           ERR_CFML%Ierr=1
           ERR_CFML%Msg=" Empty line in Read_SpaceGroup procedure !"
           return
        end if
 
-       ind(1)=index(u_case(str),'SPACEG')
-       ind(2)=index(u_case(str),'SPGR')
+       ind(1)=index(u_case(Str_tmp),'SPACEG')
+       ind(2)=index(u_case(Str_tmp),'SPGR')
 
        if (all(ind ==0)) then
           ERR_CFML%Ierr=1
@@ -511,7 +511,7 @@ SubModule (CFML_IOForm) Format_GEN
        end if
 
        !> copy
-       line=str
+       line=Str_tmp
 
        !> Delet fiirst word
        call cut_string(line)
@@ -533,20 +533,20 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 08/05/2020
     !!
-    Module Subroutine Read_RngSintL(Str, v1,v2)
+    Module Subroutine Read_RngSintL(Str_tmp, v1,v2)
        !---- Arguments ----!
-       character(len=*), intent(in)  :: str
+       character(len=*), intent(in)  :: Str_tmp
        real(kind=cp),    intent(out) :: v1,v2
 
        !---- Local Variables ----!
        integer                     :: iv, n
        integer,       dimension(2) :: ivet
        real(kind=cp), dimension(2) :: vet
-       character(len=len(str)), dimension(1):: linec
+       character(len=len(Str_tmp)), dimension(1):: linec
 
        !> Init
        call clear_error()
-       if (len_trim(str) <=0) then
+       if (len_trim(Str_tmp) <=0) then
           ERR_CFML%Ierr=1
           ERR_CFML%Msg=" Empty line in Read_RngSinTHL!"
           return
@@ -554,7 +554,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !> Copy
        v1=0.0_cp; v2=1.0_cp
-       linec(1)=str
+       linec(1)=Str_tmp
 
        !> Reading values
        n=1
@@ -589,9 +589,9 @@ SubModule (CFML_IOForm) Format_GEN
     !!----
     !!---- 08/05/2020
     !!
-    Module Subroutine Read_Transf(str, trans, orig)
+    Module Subroutine Read_Transf(Str_tmp, trans, orig)
        !---- Arguments ----!
-       character(len=*),                intent(in)     :: str
+       character(len=*),                intent(in)     :: Str_tmp
        real(kind=cp),dimension(3,3),    intent(out)    :: trans
        real(kind=cp),dimension(3  ),    intent(out)    :: orig
 
@@ -599,19 +599,19 @@ SubModule (CFML_IOForm) Format_GEN
        integer                      :: iv,n
        integer,       dimension(12) :: ivet
        real(kind=cp), dimension(12) :: vet
-       character(len=len(str)), dimension(1) :: linec
+       character(len=len(Str_tmp)), dimension(1) :: linec
        character(len=80)                     :: transf_key
 
        !> Init
        call clear_error()
-       if (len_trim(str) <=0) then
+       if (len_trim(Str_tmp) <=0) then
           ERR_CFML%Ierr=1
           ERR_CFML%Msg=" Empty line in Read_SpaceGroup procedure !"
           return
        end if
 
        !> copy
-       linec(1)=str
+       linec(1)=Str_tmp
 
        !> transformation matrix
        n=1

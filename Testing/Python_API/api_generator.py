@@ -237,16 +237,15 @@ def move_to_install(fortran=False) -> None:
     os.chdir(CRYSFML08)
     if not os.path.isdir('API'):
         os.makedirs('API')
-    if not os.path.isdir('API/src'):
-        os.makedirs('API/src')
-    if not os.path.isdir('API/src/fortran'):
-        os.makedirs('API/src/fortran')
-    if not os.path.isdir('API/src/python'):
-        os.makedirs('API/src/python')
+    if not os.path.isdir('API/Src'):
+        os.makedirs('API/Src')
+    if not os.path.isdir('API/Src/Extensions'):
+        os.makedirs('API/Src/Extensions')
+    
     if not fortran:
-        wdir = os.path.join(CRYSFML08,'API','src','python')
+        wdir = os.path.join(CRYSFML08,'API','Src')
     else:
-        wdir = os.path.join(CRYSFML08,'API','src','fortran')
+        wdir = os.path.join(CRYSFML08,'API','Src','Extensions')
     print(f"{colorama.Fore.GREEN}{'Entering in API directory: '}{colorama.Fore.YELLOW}{wdir}{colorama.Style.RESET_ALL}")
     os.chdir(wdir)
     return None
@@ -307,7 +306,9 @@ def read() -> None:
     move_to_source()
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
-        if file_name.lower().find('strings') > -1 or file_name.lower().find('messages') > -1:
+        if file_name.lower().find('strings') > -1 or \
+           file_name.lower().find('messages') > -1 or \
+           file_name.lower().find('keycodes') > -1:
             continue
         read_cfml_module(file_name)
         #break
@@ -375,6 +376,6 @@ def wrap_procedures() -> None:
     print(f"{colorama.Fore.GREEN}{'Writing API_init'}{colorama.Style.RESET_ALL}")
     wraper_utils.write_api_init(procs,nprocs)
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
 
-    run()
+run()

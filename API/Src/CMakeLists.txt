@@ -10,19 +10,45 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(Python_API Fortran)
 set(LIBRARY_NAME crysfml_api)
 
-add_library(${LIBRARY_NAME} SHARED
-  Extensions/API_init.f90
-  # Extensions/API_Atom_TypeDef.f90
-  # Extensions/API_Crystallographic_Symmetry.f90
-  # Extensions/API_Crystal_Metrics.f90
-  # Extensions/API_Diffraction_Patterns.f90
-  # Extensions/API_Error_Messages.f90
-  # Extensions/API_IO_Formats.f90
-  # Extensions/API_Reflections_Utilities.f90
-  # Extensions/API_Structure_Factors.f90
-  # Extensions/CFML_API_Calc_Powder_Pattern.f90
-  Extensions/forpy_mod.F90)
+# Make sure python is installed...
+if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
+    set(Python3_USE_STATIC_LIBS, TRUE)
+    find_package(Python3 COMPONENTS Interpreter Development)
+    set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})
+    set(PYTHON_LIBRARY_PATH Python3::Python)
+    message(STATUS "Using Python interpreter found with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with found PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+else()
+    message(STATUS "Using Python interpreter provided with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
+    message(STATUS "Linking Python extension with provided PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
+endif()
 
+add_custom_target(
+        run ALL
+        COMMAND ${CMAKE_COMMAND} "-E" "env"  CRYSFML08=${CMAKE_HOME_DIRECTORY} ${Python3_EXECUTABLE} ${CMAKE_HOME_DIRECTORY}/Testing/Python_API/api_generator.py
+        COMMENT "Generating API"
+)
+
+add_library(${LIBRARY_NAME} SHARED
+  Extensions/forpy_mod.F90
+  Extensions/wraps.f90
+  Extensions/api_init.f90
+  Extensions/py_cfml_atoms.f90 
+  Extensions/py_cfml_eos.f90 
+  Extensions/py_cfml_extincorr.f90
+  Extensions/py_cfml_geom.f90
+  Extensions/py_cfml_gspacegroups.f90
+  #Extensions/py_cfml_keycodes.f90
+  Extensions/py_cfml_magnetic_database.f90
+  Extensions/py_cfml_maths.f90
+  Extensions/py_cfml_profiles.f90
+  Extensions/py_cfml_random.f90
+  Extensions/py_cfml_reflections.f90
+  Extensions/py_cfml_scattering_tables.f90
+  Extensions/py_cfml_superspace_database.f90
+  Extensions/py_cfml_sxtal_geom.f90
+  Extensions/py_cfml_symmetry_tables.f90)
+  
 # Forpy must be preprocessed
 set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 
@@ -33,21 +59,6 @@ set_source_files_properties(forpy_mod.f90 PROPERTIES COMPILE_FLAG "-cpp")
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/19226 for linking
 add_dependencies(${LIBRARY_NAME} crysfml)
 
-if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
-  set(Python3_USE_STATIC_LIBS, TRUE)
-  find_package(Python3 COMPONENTS Interpreter Development)
-  set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})
-  set(PYTHON_LIBRARY_PATH Python3::Python)
-  message(STATUS "Using Python interpreter found with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
-  message(STATUS "Linking Python extension with found PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
-else()
-  message(STATUS "Using Python interpreter provided with PYTHON_INTERPRETER_PATH variable: " ${PYTHON_INTERPRETER_PATH})
-  message(STATUS "Linking Python extension with provided PYTHON_LIBRARY_PATH variable: " ${PYTHON_LIBRARY_PATH})
-endif()
-
-
-
-
 if(WIN32 OR MSYS)
   add_library(Python3_LIB STATIC IMPORTED)
   set_property(TARGET Python3_LIB PROPERTY IMPORTED_LOCATION ${PYTHON_LIBRARY_PATH})
@@ -56,7 +67,7 @@ endif()
 
 # Set -Wl,-undefined,dynamic_lookup to OTHER_LDFLAGS
 # Set include and linking
-include_directories(${CRYSFML_COMMON_MODULE_DIRECTORY})
+include_directories(${CRYSFML_MODULE_DIRECTORY})
 target_link_libraries(${LIBRARY_NAME} crysfml)
 # Fix a problem on Mac OS X when building shared libraries
 if(APPLE)

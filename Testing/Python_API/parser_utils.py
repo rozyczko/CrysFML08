@@ -435,5 +435,10 @@ def parse_var(line : str) -> list:
     if ii > -1:
         var_optionals['allocatable'] = True
 
+    for i in range(len(var_names)):
+        if var_names[i].lower() == 'str':
+            var_names[i] = 'mystr'
+            break
+        
     # More than one variable can be given in the same line
     return [var_names.split(','),var_type,var_optionals]

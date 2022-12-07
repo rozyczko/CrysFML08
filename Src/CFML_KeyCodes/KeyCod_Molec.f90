@@ -25,7 +25,7 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
 
       do i=n_ini,n_end
          !> load information on line variable
-         line=adjustl(ffile%line(i)%str)
+         line=adjustl(ffile%line(i)%Str_tmp)
          if (line(1:1) ==" ") cycle
          if (line(1:1) =="!") cycle
          k=index(line,"!")

@@ -791,7 +791,7 @@
 
       integer                         :: nkv,i,j,maxorder,ngen !,n,j,k,m,multip
       character(len=1)                :: ans
-      character(len=50)               :: str !,forma
+      character(len=50)               :: Str_tmp !,forma
       real(kind=cp), dimension(3,12)  :: kv
       type(Group_k_Type),dimension(12):: Gk
       type(SpG_Type)                  :: SpG,intSpG !,st_intSpG
@@ -805,8 +805,8 @@
 
       do
         write(*,"(a)",advance="no") " => Enter the number (or the symbol) of a space group: "
-        read(*,"(a)") str
-        if(len_trim(str) == 0) exit
+        read(*,"(a)") Str_tmp
+        if(len_trim(Str_tmp) == 0) exit
         write(*,"(a)",advance="no") " => Enter the number of propagation vectors (1 integer): "
         read(*,*) nkv
         do i=1,nkv
@@ -814,7 +814,7 @@
            read(*,*) kv(:,i)
         end do
 
-        call Set_SpaceGroup(str,SpG)
+        call Set_SpaceGroup(Str_tmp,SpG)
         if(Err_CFML%Ierr /= 0) then
           write(unit=*,fmt="(a)") " => "//trim(Err_CFML%Msg)
           cycle

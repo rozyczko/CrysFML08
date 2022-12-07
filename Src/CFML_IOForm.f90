@@ -161,54 +161,54 @@ Module CFML_IOForm
          integer,              intent(in)  :: i_ini, i_end
       End Subroutine Get_Job_Info
 
-      Module Subroutine Read_Atom(Str, Atm)
-         character(len=*), intent(in)   :: Str
+      Module Subroutine Read_Atom(Str_tmp, Atm)
+         character(len=*), intent(in)   :: Str_tmp
          class (Atm_Type), intent(out)  :: Atm
       End Subroutine Read_Atom
 
-      Module Subroutine Read_Cell(Str,Celda,Std,Cell,CFrame)
-         character(len=*),                      intent(in)  :: Str
+      Module Subroutine Read_Cell(Str_tmp,Celda,Std,Cell,CFrame)
+         character(len=*),                      intent(in)  :: Str_tmp
          real(kind=cp), dimension(6),           intent(out) :: Celda
          real(kind=cp), dimension(6), optional, intent(out) :: Std
          class(Cell_Type),            optional, intent(out) :: Cell
          character(len=*),            optional, intent(in)  :: CFrame
       End Subroutine Read_Cell
 
-      Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
-         character(len=*),    intent(in )     :: str
+      Module Subroutine Read_Modulation_Amplitudes(Str_tmp, Atm, Ulabel, Nt)
+         character(len=*),    intent(in )     :: Str_tmp
          class(ModAtm_Std_Type),intent(in out)  :: Atm
          character(len=*),    intent(in)      :: ulabel
          integer,             intent(in)      :: nt
       End Subroutine Read_Modulation_Amplitudes
 
-      Module Subroutine Read_Moment(Str, Atm)
-         character(len=*), intent(in )     :: Str
+      Module Subroutine Read_Moment(Str_tmp, Atm)
+         character(len=*), intent(in )     :: Str_tmp
          Class (Atm_Type), intent(in out)  :: Atm
       End Subroutine Read_Moment
 
-      Module Subroutine Read_RngSintL(Str, v1,v2)
-         character(len=*), intent(in)  :: str
+      Module Subroutine Read_RngSintL(Str_tmp, v1,v2)
+         character(len=*), intent(in)  :: Str_tmp
          real(kind=cp),    intent(out) :: v1,v2
       End Subroutine Read_RngSintL
 
-      Module Subroutine Read_SpaceGroup(Str,Spg)
-         character(len=*), intent(in)     :: Str
+      Module Subroutine Read_SpaceGroup(Str_tmp,Spg)
+         character(len=*), intent(in)     :: Str_tmp
          class(SpG_Type),  intent(out)    :: SpG
       End Subroutine Read_SpaceGroup
 
-      Module Subroutine Read_Transf(str, trans, orig)
-         character(len=*),                intent(in)     :: str
+      Module Subroutine Read_Transf(Str_tmp, trans, orig)
+         character(len=*),                intent(in)     :: Str_tmp
          real(kind=cp),dimension(3,3),    intent(out)    :: trans
          real(kind=cp),dimension(3  ),    intent(out)    :: orig
       End Subroutine Read_Transf
 
-      Module Subroutine Read_UTherms(Str, Atm)
-         character(len=*),  intent(in )     :: Str
+      Module Subroutine Read_UTherms(Str_tmp, Atm)
+         character(len=*),  intent(in )     :: Str_tmp
          Class (Atm_Type),  intent(in out)  :: Atm
       End Subroutine Read_UTherms
 
-      Module Subroutine Read_Wavelength(Str,v1,v2,ratio)
-         character(len=*), intent(in)     :: Str
+      Module Subroutine Read_Wavelength(Str_tmp,v1,v2,ratio)
+         character(len=*), intent(in)     :: Str_tmp
          real(kind=cp),    intent(out)    :: v1,v2
          real(kind=cp),    intent(out)    :: ratio
       End Subroutine Read_Wavelength
@@ -365,9 +365,9 @@ Module CFML_IOForm
          integer, intent(in) :: Ipr
       End Subroutine Write_CIF_End
 
-      Module Subroutine Write_CIF_Header(Ipr,str)
+      Module Subroutine Write_CIF_Header(Ipr,Str_tmp)
          integer,                    intent(in) :: Ipr
-         character(len=*), optional, intent(in) :: Str
+         character(len=*), optional, intent(in) :: Str_tmp
       End Subroutine Write_CIF_Header
 
       Module Subroutine Write_CIF_Powder_Profile(filename,Pat,r_facts)
