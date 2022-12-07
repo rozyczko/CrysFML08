@@ -16,4 +16,4 @@ WORKDIR /app
 
 ENV CRYSFML08=${WORKDIR}
 
-CMD cd Testing/Python_API && python3 api_generator.py && cd - &&  BuildServer/Unix/build_F2008.sh ifort && cp -a build_ifort_F2008 /artifacts/
+CMD BuildServer/Unix/build_F2008.sh ifort && cp -a build_ifort_F2008 /artifacts/
