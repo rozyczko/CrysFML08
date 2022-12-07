@@ -28,6 +28,9 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y cmake
 
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && apt-get install -y python3.7-dev
+
 RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python3 get-pip.py
 RUN python3 -m pip install numpy colorama
