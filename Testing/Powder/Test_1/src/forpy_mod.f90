@@ -44,7 +44,7 @@ use, intrinsic :: iso_fortran_env, only: int64, int32, real32, real64
 
 implicit none
 
-public :: object, type_py, list, dict, tuple, bytes, str, unicode, module_py, &
+public :: object, type_py, list, dict, tuple, bytes, Str_tmp, unicode, module_py, &
 NoneType, ndarray, Sequence, MutableSequence, ImmutableSequence, Mapping, &
 tuple_create, list_create, dict_create, bytes_create, str_create, &
 unicode_create, NoneType_create, ndarray_create, ndarray_create_nocopy, &
@@ -1504,18 +1504,18 @@ interface bytes_create
   module procedure bytes_create_char_1d
 end interface
 
-!> Type corresponding to Python 'str' - Python's string type.
-type, extends(ImmutableSequence) :: str
+!> Type corresponding to Python 'Str_tmp' - Python's string type.
+type, extends(ImmutableSequence) :: Str_tmp
 
 end type
 
-!> Creates a str object from Fortran character string or character array.
+!> Creates a Str_tmp object from Fortran character string or character array.
 interface str_create
   module procedure str_create_chars
   module procedure str_create_char_1d
 end interface
 
-!> Type corresponding to Python 2 'unicode' or Python 3 'str'.
+!> Type corresponding to Python 2 'unicode' or Python 3 'Str_tmp'.
 type, extends(ImmutableSequence) :: unicode
 
 end type
@@ -2541,7 +2541,7 @@ logical function is_int(obj)
 end function
 #endif
 
-!> Checks if object is a Python str
+!> Checks if object is a Python Str_tmp
 logical function is_str(obj)
   !> The object to check.
   class(object), intent(in) :: obj
@@ -6953,7 +6953,7 @@ function dict_get_helper2(self, item_ptr, key_ptr) result(ierror)
 end function
 
 !-----------------------------------------------------------------------------------------------------
-! bytes, str and unicode
+! bytes, Str_tmp and unicode
 
 function bytes_create_chars(r, string) result(ierror)
   type(bytes), intent(out) :: r
@@ -6988,7 +6988,7 @@ function unicode_create_char_1d(r, string) result(ierror)
 end function
 
 function str_create_chars(r, string) result(ierror)
-  type(str), intent(out) :: r
+  type(Str_tmp), intent(out) :: r
   character(kind=C_CHAR, len=*), intent(in) :: string
   integer(kind=C_INT) :: ierror
 
@@ -7000,7 +7000,7 @@ function str_create_chars(r, string) result(ierror)
 end function
 
 function str_create_char_1d(r, string) result(ierror)
-  type(str), intent(out) :: r
+  type(Str_tmp), intent(out) :: r
   character(kind=C_CHAR), dimension(:), intent(in) :: string
   integer(kind=C_INT) :: ierror
 

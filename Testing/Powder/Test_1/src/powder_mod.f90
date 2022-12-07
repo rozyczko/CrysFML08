@@ -149,11 +149,11 @@ module powder_mod
            ! Look for calculation conditions in the CFL file that are provided before the list !of atoms
             if (mode == "CFL") then
                 do i=1,fich_cfl%nlines
-                    line=adjustl(u_case(fich_cfl%line(i)%str))
+                    line=adjustl(u_case(fich_cfl%line(i)%Str_tmp))
                     if(line(1:4) == "ATOM") exit
                     select case(trim(line(1:7)))
                         case("TITLE")
-                            PPC%title= adjustl(fich_cfl%line(i)%str(6:))
+                            PPC%title= adjustl(fich_cfl%line(i)%Str_tmp(6:))
                         case("UVWX")
                             read(unit=line(7:),fmt=*,iostat=ier) PPC%U,PPC%V,PPC%W,PPC%X
                             if (ier /= 0) then
@@ -166,7 +166,7 @@ module powder_mod
                             read(unit=line(7:),fmt=*,iostat=ier) PPC%bkg
                             if(ier /= 0) PPC%bkg=20.0
                         case("JOBTYPE")
-                            radiation = adjustl(fich_cfl%line(i)%str(8:))
+                            radiation = adjustl(fich_cfl%line(i)%Str_tmp(8:))
                             if (radiation(1:1) == "N" .or. radiation(1:1) == "n") then
                                 PPC%job=1
                                 write(*,*) " => Neutrons Job ...."
@@ -186,7 +186,7 @@ module powder_mod
                             end if
                             write(*,*) " => Lorentzian size: ", PPC%Ls
                         case("POWFILE")
-                            powfile=adjustl(fich_cfl%line(i)%str(8:))
+                            powfile=adjustl(fich_cfl%line(i)%Str_tmp(8:))
                             if (len_trim(powfile) == 0) then
                                 powfile="powder_pattern.dat"
                             end if

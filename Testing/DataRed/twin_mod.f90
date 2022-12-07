@@ -107,7 +107,7 @@
            do
              n=n+1
              if(n > fich_cfl%nlines) exit
-             line=adjustl(fich_cfl%line(n)%str)
+             line=adjustl(fich_cfl%line(n)%Str_tmp)
              if(len_trim(line) == 0) cycle
              if(line(1:1) == "!" .or. line(1:1) == "#") cycle
              j=index(line," ")

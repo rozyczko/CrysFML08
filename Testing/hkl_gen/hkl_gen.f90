@@ -74,7 +74,7 @@ Module Ref_Gen
         if(present(opgiven)) opgiven=.false. !Initialise to false, put to .true. if ANGOR is provided
 
         do j=1,file_dat%nlines
-            line=adjustl(file_dat%line(j)%str)
+            line=adjustl(file_dat%line(j)%Str_tmp)
             line=l_case(line)
             if (line(1:1) ==" ") cycle
             if (line(1:1) =="!") cycle
@@ -136,7 +136,7 @@ Module Ref_Gen
                     end if
 
                 case("instr")
-                    line=file_dat%line(j)%str
+                    line=file_dat%line(j)%Str_tmp
                     i=index(line,"!")
                     if(i /= 0) line=line(1:i-1)
                     i=index(trim(line)," ",back=.true.)
@@ -155,7 +155,7 @@ Module Ref_Gen
 
                 case("ubmat","ubmat1")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub(i,:)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub(i,:)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix in CFL file: "//trim(cfl_file)
                             return
@@ -168,7 +168,7 @@ Module Ref_Gen
 
                 case("ubmat2")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub_matrix(i,:,2)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub_matrix(i,:,2)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 2 in CFL file: "//trim(cfl_file)
                             return
@@ -178,7 +178,7 @@ Module Ref_Gen
 
                 case("ubmat3")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub_matrix(i,:,3)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub_matrix(i,:,3)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 3 in CFL file: "//trim(cfl_file)
                             return
@@ -188,7 +188,7 @@ Module Ref_Gen
 
                 case("ubmat4")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub_matrix(i,:,4)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub_matrix(i,:,4)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 4 in CFL file: "//trim(cfl_file)
                             return
@@ -198,7 +198,7 @@ Module Ref_Gen
 
                 case("ubmat5")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub_matrix(i,:,5)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub_matrix(i,:,5)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 5 in CFL file: "//trim(cfl_file)
                             return
@@ -208,7 +208,7 @@ Module Ref_Gen
 
                 case("ubmat6")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%str,fmt=*,iostat=ier) ub_matrix(i,:,6)
+                        read(unit=file_dat%line(j+i)%Str_tmp,fmt=*,iostat=ier) ub_matrix(i,:,6)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 6 in CFL file: "//trim(cfl_file)
                             return
