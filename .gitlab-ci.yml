@@ -1,0 +1,17 @@
+stages:
+  - build
+
+ifort:
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DARCH32=OFF ..
+    - make -j8
+  tags:
+    - ubuntu
+  artifacts:
+    when: on_failure
+    expire_in: 1 week
+    paths:
+    - build/Testing/Temporary/LastTest.log
