@@ -11,4 +11,5 @@ ENV CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
 COPY ./ /app/
 WORKDIR /app
 
+CMD cd Testing/Python_API && python3 api_generator.py && cd -
 CMD BuildServer/Unix/build_F2008.sh gfortran && cp -a build_gfortran_F2008 /artifacts/
