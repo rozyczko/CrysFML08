@@ -12,6 +12,7 @@ set(LIBRARY_NAME crysfml_api)
 
 # Make sure python is installed...
 if (NOT PYTHON_INTERPRETER_PATH OR NOT PYTHON_LIBRARY_PATH)
+    message(STATUS "Python not in path")
     set(Python3_USE_STATIC_LIBS, TRUE)
     find_package(Python3 COMPONENTS Interpreter Development)
     set(PYTHON_INTERPRETER_PATH ${Python3_EXECUTABLE})

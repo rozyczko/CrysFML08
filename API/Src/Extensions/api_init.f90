@@ -11,7 +11,7 @@
 module api_init
 
     use forpy_mod
-    !use iso_c_binding
+    use iso_fortran_env
 
     use py_cfml_atoms
     use py_cfml_scattering_tables
@@ -257,7 +257,7 @@ module api_init
             c_funloc(py_set_conditions_numop_eps))
 
         ! Build mod_Def
-        m = mod_Def%init("pycrysfml08",&
+        m = mod_Def%init("pycrysfml",&
             "A Python API for CrysFML08",method_Table)
     end function Init
 
