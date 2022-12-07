@@ -75,7 +75,7 @@
 
 
     Type, public :: String_Array_Type          !Type for handling allocatable arrays of allocatable strings
-      character(len=:), allocatable :: str
+      character(len=:), allocatable :: Str_tmp
     End Type String_Array_Type
 
     !!----
@@ -143,26 +143,26 @@
           Integer,         intent (in) ::   nC_L       ! location of last character treated
        End Subroutine FindFMT_Err
 
-       Pure Module Function Frac_Trans_1Dig(Vec) Result(Str)
+       Pure Module Function Frac_Trans_1Dig(Vec) Result(Str_tmp)
           !---- Argument ----!
           real(kind=cp), dimension(3), intent( in)   :: Vec  ! Vector
-          character(:),allocatable                   :: Str  ! String with conversion to fractional
+          character(:),allocatable                   :: Str_tmp  ! String with conversion to fractional
        End Function Frac_Trans_1Dig
 
-       Pure Module Function Frac_Trans_2Dig(Vec) Result(Str)
+       Pure Module Function Frac_Trans_2Dig(Vec) Result(Str_tmp)
           !---- Argument ----!
           real(kind=cp), dimension(3), intent(in) :: Vec   ! Vector
-          character(:), allocatable               :: Str   ! String with conversion to fractional
+          character(:), allocatable               :: Str_tmp   ! String with conversion to fractional
        End Function Frac_Trans_2Dig
 
-       Module Function Get_DateTime() Result(Str)
+       Module Function Get_DateTime() Result(Str_tmp)
           !---- Argument ----!
-          character(len=:), allocatable :: Str  ! String containing the Date and Time
+          character(len=:), allocatable :: Str_tmp  ! String containing the Date and Time
        End Function Get_DateTime
 
-       Pure Module Function Get_Dirname(Str) Result(Directory)
+       Pure Module Function Get_Dirname(Str_tmp) Result(Directory)
           !---- Argument ----!
-          character(Len=*), Intent (In)  :: Str          ! String containing Path + Filename
+          character(Len=*), Intent (In)  :: Str_tmp          ! String containing Path + Filename
           character(Len=:), allocatable  :: Directory    ! Path
        End Function Get_Dirname
 
@@ -173,9 +173,9 @@
           character(len=:), allocatable  :: extension    ! Extension of the file
        End Function Get_Extension
 
-       Pure Module Function Get_Filename(Str) Result(Filename)
+       Pure Module Function Get_Filename(Str_tmp) Result(Filename)
           !---- Argument ----!
-          character(Len=*), intent(in)  :: Str       ! String containing Path + Filename
+          character(Len=*), intent(in)  :: Str_tmp       ! String containing Path + Filename
           character(Len=:), allocatable :: Filename  ! Filename
        End Function Get_Filename
 
@@ -186,56 +186,56 @@
           real(kind=cp),dimension(3,3)                 :: Mat    ! Output
        End Function Get_Mat_From_Symb
 
-       Module Subroutine Get_Num(Str,vet,ivet,iv)
+       Module Subroutine Get_Num(Str_tmp,vet,ivet,iv)
           !---- Argument ----!
-          character (len=*),          intent ( in) :: Str   ! Input String to convert
+          character (len=*),          intent ( in) :: Str_tmp   ! Input String to convert
           real(kind=cp), dimension(:),intent (out) :: vet   ! Vector of real numbers
           integer, dimension(:),      intent (out) :: ivet  ! Vector of integer numbers
           integer,                    intent (out) :: iv    ! Number of numbers in Vet/Ivet
        End Subroutine Get_Num
 
-       Module Subroutine Get_NumStd(Str, value, std, ic)
+       Module Subroutine Get_NumStd(Str_tmp, value, std, ic)
           !----Arguments ----!
-          character(len=*),             intent( in) :: Str     ! Input String
+          character(len=*),             intent( in) :: Str_tmp     ! Input String
           real(kind=cp), dimension(:),  intent(out) :: value   ! Vector of values with real numbers
           real(kind=cp), dimension(:),  intent(out) :: std     ! Vector of standard deviation values
           integer,                      intent(out) :: ic      ! Number of components of vector Value
        End Subroutine Get_NumStd
 
-       Module Subroutine Get_Transf(str,mat,v,cod)
+       Module Subroutine Get_Transf(Str_tmp,mat,v,cod)
           !---- Arguments ----!
-          character(len=*),                          intent(in)  :: str      ! Input string
+          character(len=*),                          intent(in)  :: Str_tmp      ! Input string
           real(kind=cp),dimension(3,3),              intent(out) :: mat      ! Matrix
           real(kind=cp),dimension(3),     optional,  intent(out) :: v        ! Vector
           character(len=1), dimension(4), optional,  intent(in)  :: cod      ! Code
        End Subroutine Get_Transf
 
-       Pure Module Subroutine Get_Separator_Pos(Str,car,pos,ncar)
+       Pure Module Subroutine Get_Separator_Pos(Str_tmp,car,pos,ncar)
           !---- Arguments ----!
-          character(len=*),      intent(in)  :: Str   ! Inout String
+          character(len=*),      intent(in)  :: Str_tmp   ! Inout String
           character(len=1),      intent(in)  :: car   ! Separator character
           integer, dimension(:), intent(out) :: pos   ! Vector with positions of "sep" in "Line"
           integer,               intent(out) :: ncar  ! Number of appearance of "sep" in "Line"
        End Subroutine Get_Separator_Pos
 
-       Pure Module Subroutine Get_Substring_Positions(str,substr,pos,nsubs)
+       Pure Module Subroutine Get_Substring_Positions(Str_tmp,substr,pos,nsubs)
           !---- Arguments ----!
-          character(len=*),      intent(in)  :: str         ! In -> Input String
+          character(len=*),      intent(in)  :: Str_tmp         ! In -> Input String
           character(len=*),      intent(in)  :: substr      ! In -> Substring
           integer, dimension(:), intent(out) :: pos         ! Out -> Vector with positions of the firs character of "substr" in "String"
           integer,               intent(out) :: nsubs       ! Out -> Number of appearance of "substr" in "String"
        End Subroutine Get_Substring_Positions
 
-       Module Function Get_Vec_From_String(Str,Cod) Result(Vec)
+       Module Function Get_Vec_From_String(Str_tmp,Cod) Result(Vec)
           !---- Arguments ----!
-          character(len=*),                intent(in)  :: str   ! Input string
+          character(len=*),                intent(in)  :: Str_tmp   ! Input string
           character(len=1), dimension(3),  intent(in)  :: cod   ! Code
           real(kind=cp),dimension(3)                   :: vec   ! Vector
        End Function Get_Vec_From_String
 
-       Module Subroutine Get_Words(Str,dire,ic,sep)
+       Module Subroutine Get_Words(Str_tmp,dire,ic,sep)
           !---- Argument ----!
-          character(len=*),                 intent ( in) :: Str   ! Input string
+          character(len=*),                 intent ( in) :: Str_tmp   ! Input string
           character(len=*), dimension(:),   intent (out) :: dire  ! Vector of Words
           integer,                          intent (out) :: ic    ! Number of words
           character(len=*), optional,       intent ( in) :: sep   ! separator other than blank
@@ -251,27 +251,27 @@
           integer, optional, intent(in) :: nline
        End Subroutine Init_FindFMT
 
-       Pure Module Function L_Case(Str) Result (LStr)
+       Pure Module Function L_Case(Str_tmp) Result (LStr)
           !---- Argument ----!
-          character (len=*), intent(in)   :: Str    ! Input String
+          character (len=*), intent(in)   :: Str_tmp    ! Input String
           character (len=:), allocatable  :: LStr   ! lower case of Text
        End Function L_Case
 
-       Pure Module Function NumCol_from_NumFmt(Str) Result(n_col)
+       Pure Module Function NumCol_from_NumFmt(Str_tmp) Result(n_col)
           !---- Argument ----!
-          character (len=*), intent(in)  :: Str    ! Input format string
+          character (len=*), intent(in)  :: Str_tmp    ! Input format string
           integer                        :: n_col  ! Integer number of columns
        End Function NumCol_from_NumFmt
 
-       Pure Module Function Pack_String(Str) Result (Strp)
+       Pure Module Function Pack_String(Str_tmp) Result (Strp)
           !---- Argument ----!
-          character(len=*), intent(in) :: str    ! Input String
-          character(len=len_trim(str)) :: strp   ! Output string
+          character(len=*), intent(in) :: Str_tmp    ! Input String
+          character(len=len_trim(Str_tmp)) :: strp   ! Output string
        End Function Pack_String
 
-       Module Function Read_Fract(str) Result(value)
+       Module Function Read_Fract(Str_tmp) Result(value)
           !---- Arguments ----!
-          character(len=*), intent(in) :: str     ! Input String
+          character(len=*), intent(in) :: Str_tmp     ! Input String
           real(kind=cp)                :: value   ! Value
        End Function Read_Fract
 
@@ -348,49 +348,49 @@
           integer,                        intent(   out) :: marker
        End Subroutine Sort_PR_Partition
 
-       Recursive Module Subroutine Sort_Strings(Str)
+       Recursive Module Subroutine Sort_Strings(Str_tmp)
           !---- Argument ----!
-          character(len=*), dimension(:), intent(in out) :: Str
+          character(len=*), dimension(:), intent(in out) :: Str_tmp
        End Subroutine Sort_Strings
 
-       Pure Module Function String_Count(str,substr) Result(N)
+       Pure Module Function String_Count(Str_tmp,substr) Result(N)
           !---- Arguments ----!
-          character(len=*), intent(in) :: str       ! Input String
+          character(len=*), intent(in) :: Str_tmp       ! Input String
           character(len=*), intent(in) :: substr    ! Substring model
           integer                      :: N         ! Number
        End Function String_Count
 
-       Pure Module Function String_Fraction_1Dig(V) Result(Str)
+       Pure Module Function String_Fraction_1Dig(V) Result(Str_tmp)
           !---- Argument ----!
           real(kind=cp),    intent( in) :: V   !  Real value
-          character(:), allocatable     :: Str !  Fracction in character form
+          character(:), allocatable     :: Str_tmp !  Fracction in character form
        End Function String_Fraction_1Dig
 
-       Pure Module Function String_Fraction_2Dig(V) Result(Str)
+       Pure Module Function String_Fraction_2Dig(V) Result(Str_tmp)
           !---- Argument ----!
           real(kind=cp),    intent( in) :: v    ! Real value
-          character(:), allocatable     :: Str  ! Fraction in character form
+          character(:), allocatable     :: Str_tmp  ! Fraction in character form
        End Function String_Fraction_2Dig
 
-       Pure Module Function String_NumStd(Value, Std) Result(Str)
+       Pure Module Function String_NumStd(Value, Std) Result(Str_tmp)
           !---- Argument ----!
           real(kind=cp),   intent(in)  :: Value    ! Value
           real(kind=cp),   intent(in)  :: Std      ! Standard deviation
-          character(len=:),allocatable :: Str      ! String containing the information
+          character(len=:),allocatable :: Str_tmp      ! String containing the information
        End Function String_NumStd
 
-       Pure Module Function String_Real(Val,W) Result(Str)
+       Pure Module Function String_Real(Val,W) Result(Str_tmp)
           !---- Arguments ----!
           real(kind=cp), intent(in)  :: val        ! value to be output
           integer,       intent(in)  :: w          ! Width
-          character(len=w)           :: Str
+          character(len=w)           :: Str_tmp
        End Function String_Real
 
-       Pure Module Function Strip_String(str, to_strip) Result(sstr)
+       Pure Module Function Strip_String(Str_tmp, to_strip) Result(sstr)
           !---- Arguments----!
-          character(len=*), intent(in)  :: str            ! Input string
+          character(len=*), intent(in)  :: Str_tmp            ! Input string
           character(len=*), intent(in)  :: to_strip       ! Pattern
-          character(len=len_trim(str))  :: sstr
+          character(len=len_trim(Str_tmp))  :: sstr
        End Function Strip_String
 
        Pure Module Subroutine SubString_Replace(string, substr, repstr, warning)
@@ -419,9 +419,9 @@
           Integer ,          intent(in out) ::  nCar   ! counts characters in format field
        End Subroutine TreatNumerField
 
-       Pure Module Function U_Case(Str) Result (UStr)
+       Pure Module Function U_Case(Str_tmp) Result (UStr)
           !---- Argument ----!
-          character(len=*), intent(in)  :: Str   ! Input string
+          character(len=*), intent(in)  :: Str_tmp   ! Input string
           character(len=:), allocatable :: UStr  ! Upper conversion
        End Function U_Case
 
@@ -494,7 +494,7 @@
        allocate(filecont%line(nlines))
        do i=1,nlines
           read(unit=lun,fmt="(a)",iostat=ier) buffer
-          filecont%line(i)%str=trim(buffer)
+          filecont%line(i)%Str_tmp=trim(buffer)
        end do
        if (.not. opn) close(unit=lun)
 

@@ -12,7 +12,7 @@ Program Magnetic_Hall
    !---- Variables ----!
    implicit none
 
-   character(len=50)                            :: str_BNS, str_Hall, str
+   character(len=50)                            :: str_BNS, str_Hall, Str_tmp
    character(len=:), allocatable                :: generators
    character(len=60), dimension(:), allocatable :: gen
    integer                                      :: i, n, ngen
@@ -65,40 +65,40 @@ Program Magnetic_Hall
       select case (n)
          case (1259:1261)
             shift=[0,0,1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1262)
             shift=[0,0,-1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1267:1269)
             shift=[0,0,-1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1270)
             shift=[0,0,1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1386:1390)
             shift=[0,0,-1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1391:1400)
             shift=[0,0,1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1401:1407)
             shift=[0,0,-1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case (1408:1409)
             shift=[0,0,1]
-            str=Get_Hall_from_Generators(Ngen, Gen, shift)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen, shift)
          case default
-            str=Get_Hall_from_Generators(Ngen, Gen)
+            Str_tmp=Get_Hall_from_Generators(Ngen, Gen)
       end select
       generators=" "
       do i=1,ngen
         generators=trim(generators)//trim(gen(i))//";"
       end do
       generators=generators(1:len_trim(generators)-1)
-      if (trim(pack_string(Str)) /= trim(pack_string(str_Hall))) then
-         write(unit=*,fmt='(i6,t18,a,t35,a,t60,a,t85,a)') n, trim(str_BNS), trim(str_Hall), trim(str),  'ERROR'
+      if (trim(pack_string(Str_tmp)) /= trim(pack_string(str_Hall))) then
+         write(unit=*,fmt='(i6,t18,a,t35,a,t60,a,t85,a)') n, trim(str_BNS), trim(str_Hall), trim(Str_tmp),  'ERROR'
       else
-         write(unit=*,fmt='(i6,t18,a,t35,a,t60,a,t85,a)') n, trim(str_BNS), trim(str_Hall), trim(str),  "OK  -> "//trim(generators)
+         write(unit=*,fmt='(i6,t18,a,t35,a,t60,a,t85,a)') n, trim(str_BNS), trim(str_Hall), trim(Str_tmp),  "OK  -> "//trim(generators)
       end if
 
    end do

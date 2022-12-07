@@ -1414,7 +1414,7 @@
       use CFML_Symmetry_Tables
       implicit none
       integer                                    :: i,n,k,iout,ngen,ierror
-      character(len=40)                          :: str
+      character(len=40)                          :: Str_tmp
       type(SpG_Type)                             :: SpG
       integer,           dimension(:),allocatable:: point_op
       character(len=40), dimension(:),allocatable:: gen,sym_symb
@@ -1431,8 +1431,8 @@
       ! 527:553 : Hexagonal
       ! 554:612 : Cubic
       do n=1,612  !NUM_SPGR_INFO
-        str=spgr_info(n)%HM
-        call Set_SpaceGroup(str,SpG)
+        Str_tmp=spgr_info(n)%HM
+        call Set_SpaceGroup(Str_tmp,SpG)
         if(Err_CFML%Ierr /= 0) then
           write(unit=*,fmt="(a)") " => "//trim(Err_CFML%Msg)
           cycle
@@ -1450,11 +1450,11 @@
         end do
         call Get_Generators_From_SpGSymbol(SpG,gen,point_op,ngen,list_symb_or)
         !call Get_Set_of_Generators(SpG,gen,point_op,ngen,list_symb_or)
-        write(*,"(//a,t70,i6)")  "  VISIBLE GENERATORS OF SPACE GROUP: "//trim(str),SpG%numspg
-        write(iout,"(//a,t70,i6)")  "  VISIBLE GENERATORS OF SPACE GROUP: "//trim(str),SpG%numspg
+        write(*,"(//a,t70,i6)")  "  VISIBLE GENERATORS OF SPACE GROUP: "//trim(Str_tmp),SpG%numspg
+        write(iout,"(//a,t70,i6)")  "  VISIBLE GENERATORS OF SPACE GROUP: "//trim(Str_tmp),SpG%numspg
 
         if(any(point_op(1:ngen) == 0)) then
-           write(ierror,"(/,a,i8)") "  Error for Space Group: "//trim(str),SpG%numspg
+           write(ierror,"(/,a,i8)") "  Error for Space Group: "//trim(Str_tmp),SpG%numspg
            do i=1,ngen
              if(point_op(i) /= 0) then
                write(ierror,"(i4,a,t50,i3)") i,"  "//list_symb_or(i)//"  "//gen(i),point_op(i)

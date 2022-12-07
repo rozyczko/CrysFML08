@@ -8,7 +8,7 @@
       implicit none
 
       integer :: iclass,nmod,i,k,m
-      character(len=50)  :: str,forma
+      character(len=50)  :: Str_tmp,forma
       !type(SuperSpaceGroup_Type) :: SSpaceGroup
 
       !call Read_SSG_DBase()
@@ -19,15 +19,15 @@
 
 	  do
         write(*,"(a)",advance="no") " => Enter the number (or the symbol) of the SSG: "
-        read(*,"(a)") str
+        read(*,"(a)") Str_tmp
         !if(m <= 0) exit
-		if(len_trim(str) == 0) exit
+		if(len_trim(Str_tmp) == 0) exit
         !if(m > 16697) then
         !  write(*,"(a)") " => There are only 16697 superspace groups in the database! "
         !  cycle
         !end if
 
-		call Read_single_SSG(str,m)
+		call Read_single_SSG(Str_tmp,m)
 		if(err_CFML%Ierr /= 0) then
 		  write(*,"(a)") trim(err_CFML%Msg)
 		  cycle

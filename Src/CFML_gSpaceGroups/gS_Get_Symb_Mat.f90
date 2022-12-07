@@ -144,12 +144,12 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
    !!----
    !!---- 15/05/2019
    !!
-   Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str)
+   Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str_tmp)
       !---- Arguments ----!
       integer,       dimension(3,3), intent(in) :: Mat
       real(kind=cp), dimension(3),   intent(in) :: tr
       logical, optional,             intent(in) :: opposite
-      character(len=:), allocatable             :: Str
+      character(len=:), allocatable             :: Str_tmp
 
       !---- Local variables ----!
       integer           :: i
@@ -176,20 +176,20 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
          if (transl(i:i) == "+") transl(i:i)=" "
       end do
       transl=Pack_string(transl)
-      str="("//trim(transl)//" "//trim(xyz_op)//")"
+      Str_tmp="("//trim(transl)//" "//trim(xyz_op)//")"
       if (present(opposite)) then
          i=len_trim(transl)
-         str="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
+         Str_tmp="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
       end if
    End Function Get_Symb_from_Mat_Tr_I
 
    !Version for real matrices
-   Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str)
+   Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str_tmp)
       !---- Arguments ----!
       real(kind=cp), dimension(3,3), intent(in) :: Mat
       real(kind=cp), dimension(3),   intent(in) :: tr
       logical, optional,             intent(in) :: opposite
-      character(len=:), allocatable             :: Str
+      character(len=:), allocatable             :: Str_tmp
 
       !---- Local variables ----!
       integer           :: i
@@ -216,10 +216,10 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Mat
          if (transl(i:i) == "+") transl(i:i)=" "
       end do
       transl=Pack_string(transl)
-      str="("//trim(transl)//" "//trim(xyz_op)//")"
+      Str_tmp="("//trim(transl)//" "//trim(xyz_op)//")"
       if (present(opposite)) then
          i=len_trim(transl)
-         str="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
+         Str_tmp="("//trim(xyz_op)//"; "//transl(1:i-1)//")"
       end if
    End Function Get_Symb_from_Mat_Tr_R
 

@@ -10,7 +10,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
    !!----
    !!----    Magnetic Hall symbols interpretation based on descriptions on
    !!----    (1) http://cci.lbl.gov/sginfo/hall_symbols.html and
-   !!----    (2) International Tables for Crystallography (2010). Vol. B, Appendix 1.4.2, pp. 122–134
+   !!----    (2) International Tables for Crystallography (2010). Vol. B, Appendix 1.4.2, pp. 122ï¿½134
    !!----
    !!---- 09/05/2019, updated 30/07/2020 (JRC)
    !!
@@ -70,7 +70,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       integer, dimension(3,PMAX)     :: Ti       ! translation for each symbol
       logical, dimension(PMAX)       :: Tr       ! time reversal
 
-      character(len=20)              :: str
+      character(len=20)              :: Str_tmp
       character(len=3)               :: car
       character(len=10),dimension(35):: dire
       integer                        :: i,j,n1,n2,nt,iv,signo
@@ -93,7 +93,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       if (present(R_Shift)) free=R_Shift
 
       !> Copy
-      str=adjustl(Hall)
+      Str_tmp=adjustl(Hall)
 
       !>
       !> Shift origin (N1 N2 N3)
@@ -101,9 +101,9 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       ishift=0
       sh=0//1
 
-      n1=index(str,'(')
-      n2=index(str,')')
-      nt=len_trim(str)
+      n1=index(Str_tmp,'(')
+      n2=index(Str_tmp,')')
+      nt=len_trim(Str_tmp)
       if ((n1 == 0 .and. n2 > 0) .or. (n1 > 0 .and. n2 == 0) .or. (n1 > n2)) then
          Err_CFML%IErr=1
          Err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Error with shift origin format!"
@@ -111,7 +111,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       end if
 
       if (n1 > 0) then
-         call get_num(str(n1+1:n2-1), vet, ivet, iv)
+         call get_num(Str_tmp(n1+1:n2-1), vet, ivet, iv)
          if (iv /= 3) then
             err_CFML%IErr=1
             err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Error with shift origin format!"
@@ -128,9 +128,9 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
          end if
 
          if (n2+1 > nt) then
-            str=str(:n1-1)
+            Str_tmp=Str_tmp(:n1-1)
          else
-            str=str(:n1-1)//' '//str(n2+1:)
+            Str_tmp=Str_tmp(:n1-1)//' '//Str_tmp(n2+1:)
          end if
       end if
 
@@ -140,29 +140,29 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       centro=.false.
       ilat=0
 
-      if (str(1:1)=='-') then
+      if (Str_tmp(1:1)=='-') then
          centro=.true.
-         str=adjustl(str(2:))  !Removing the initial sign from the Hall-symbol
+         Str_tmp=adjustl(Str_tmp(2:))  !Removing the initial sign from the Hall-symbol
       end if
 
-      ilat=index(L,u_case(str(1:1)))
+      ilat=index(L,u_case(Str_tmp(1:1)))
       if (ilat == 0) then
          err_CFML%IErr=1
          err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Unknown lattice translational symmetry!"
          return
       end if
-      str=adjustl(str(2:))  !Removing the lattice symbol for the Hall-symbol
+      Str_tmp=adjustl(Str_tmp(2:))  !Removing the lattice symbol for the Hall-symbol
 
       !>
       !> Anti-translations operators
       !>
       a_latt=0
       car=" "
-      n1=index(str,"1'")
+      n1=index(Str_tmp,"1'")
       if (n1 > 1) then
-        if( str(n1-1:n1-1) == ' ') then
-          if (len_trim(str) > n1+1) then
-             car=str(n1+2:)
+        if( Str_tmp(n1-1:n1-1) == ' ') then
+          if (len_trim(Str_tmp) > n1+1) then
+             car=Str_tmp(n1+2:)
              do i=1,len_trim(car)
                 n2=index(AT,car(i:i))
                 if (n2 == 0) then
@@ -258,12 +258,12 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
                       a_latt=[0,0,6]
                    end if
              end select
-             str=adjustl(str(:n1-1))
+             Str_tmp=adjustl(Str_tmp(:n1-1))
           end if
         end if
       end if
 
-      str=u_case(str)
+      Str_tmp=u_case(Str_tmp)
 
       !>
       !> Operators
@@ -272,7 +272,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       Ni=0; Ai=0; Ti=0
       call Allocate_Op(4, Op)  ! 4 is Dimension
 
-      call get_words(str, dire, iv) !dire constains the items separated by blanks in the stripped (without L-symbol) Hall symbol
+      call get_words(Str_tmp, dire, iv) !dire constains the items separated by blanks in the stripped (without L-symbol) Hall symbol
       if (iv ==0 ) then
          err_CFML%IErr=1
          err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: Hall symbol format is wrong, please check it!"
@@ -990,11 +990,11 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
    !!----
    !!---- 29/05/2019
    !!
-   Module Function Search_Hall_Operators(G, Ishift) Result(Str)
+   Module Function Search_Hall_Operators(G, Ishift) Result(Str_tmp)
       !---- Arguments ----!
       class(spg_type),                 intent(in)  :: G
       integer, dimension(3), optional, intent(in)  :: Ishift
-      character(len=:), allocatable                :: Str
+      character(len=:), allocatable                :: Str_tmp
 
       !---- Local Variables ----!
       Type :: H_Oper
@@ -1037,7 +1037,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
 
 
       !> Init
-      Str="  "
+      Str_tmp="  "
 
       nt=0
       call Allocate_Op(4, Op)
@@ -1546,23 +1546,23 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       !> Symbol
       write(unit=c_rot,fmt='(i2)') HSymb(j1)%N
       if (HSymb(j1)%axis=="z") HSymb(j1)%axis=" "
-      str=trim(c_rot)//trim(HSymb(j1)%axis)//trim(HSymb(j1)%tras)//trim(HSymb(j1)%prime)
+      Str_tmp=trim(c_rot)//trim(HSymb(j1)%axis)//trim(HSymb(j1)%tras)//trim(HSymb(j1)%prime)
 
       if (j2 > 0) then
          write(unit=c_rot,fmt='(i2)') HSymb(j2)%N
          if (HSymb(j2)%axis=="x" .or. HSymb(j2)%axis=="^") HSymb(j2)%axis=" "
-         str=trim(str)//"  "//trim(c_rot)//trim(HSymb(j2)%axis)//trim(HSymb(j2)%tras)//trim(HSymb(j2)%prime)
+         Str_tmp=trim(Str_tmp)//"  "//trim(c_rot)//trim(HSymb(j2)%axis)//trim(HSymb(j2)%tras)//trim(HSymb(j2)%prime)
       end if
 
       if (j3 > 0) then
          write(unit=c_rot,fmt='(i2)') HSymb(j3)%N
          if (HSymb(j3)%axis=="*") HSymb(j3)%axis=" "
-         str=trim(str)//"  "//trim(c_rot)//trim(HSymb(j3)%axis)//trim(HSymb(j3)%tras)//trim(HSymb(j3)%prime)
+         Str_tmp=trim(Str_tmp)//"  "//trim(c_rot)//trim(HSymb(j3)%axis)//trim(HSymb(j3)%tras)//trim(HSymb(j3)%prime)
       end if
 
       if (j4 > 0) then
          write(unit=c_rot,fmt='(i2)') HSymb(j4)%N
-         str=trim(str)//"  "//trim(c_rot)//trim(HSymb(j4)%axis)//trim(HSymb(j4)%tras)//trim(HSymb(j4)%prime)
+         Str_tmp=trim(Str_tmp)//"  "//trim(c_rot)//trim(HSymb(j4)%axis)//trim(HSymb(j4)%tras)//trim(HSymb(j4)%prime)
       end if
 
    End Function Search_Hall_Operators

@@ -193,9 +193,9 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
    !!----
    !!---- 07/05/2019
    !!
-   Module Subroutine Get_SpaceGroup_Symbols(Str, HM, Hall, IT, C_HM)
+   Module Subroutine Get_SpaceGroup_Symbols(Str_tmp, HM, Hall, IT, C_HM)
       !---- Arguments ----!
-      character(len=*),           intent(in)  :: Str   ! Input string with any format for SpaceGroup name
+      character(len=*),           intent(in)  :: Str_tmp   ! Input string with any format for SpaceGroup name
       character(len=*), optional, intent(out) :: HM    ! Hermman-Mauguin
       character(len=*), optional, intent(out) :: Hall  ! Hall
       integer,          optional, intent(out) :: IT    ! Number of SpaceGroup acording to IT
@@ -216,8 +216,8 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
       !> Load Symmetry information
       call Set_Spgr_Info()
 
-      !> Is Str a number?
-      read(unit=str,fmt=*,iostat=ier) n
+      !> Is Str_tmp a number?
+      read(unit=Str_tmp,fmt=*,iostat=ier) n
       if (ier == 0) then
          select case (n)
             case (1:230)
@@ -253,9 +253,9 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
          end if
       end if
 
-      !> Is str a HM?
+      !> Is Str_tmp a HM?
       if (l_it <= 0 .and. .not. found) then
-         l_hm=trim(u_case(Str))
+         l_hm=trim(u_case(Str_tmp))
          do i=1, NUM_SPGR_INFO
             if (trim(spgr_info(i)%hm) == trim(l_hm)) then
                l_it=spgr_info(i)%n
@@ -266,9 +266,9 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
          end do
       end if
 
-      !> Is str a Hall!
+      !> Is Str_tmp a Hall!
       if (l_it <= 0 .and. .not. found) then
-         l_hall=trim((Str))
+         l_hall=trim((Str_tmp))
          do i=1, NUM_SPGR_INFO
             if (trim(spgr_info(i)%hall) == trim(l_hall)) then
                l_it=spgr_info(i)%n
@@ -279,10 +279,10 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
          end do
       end if
 
-      !> Is str a compact HM
+      !> Is Str_tmp a compact HM
       if (l_it <= 0 .and. .not. found) then
          llchm=.false.
-         l_hm=get_hm_compact_HM(u_case(str))
+         l_hm=get_hm_compact_HM(u_case(Str_tmp))
          do i=1, NUM_SPGR_INFO
             if (trim(spgr_info(i)%hm) == trim(l_hm)) then
                l_it=spgr_info(i)%n
@@ -291,7 +291,7 @@ SubModule(CFML_Symmetry_Tables) TAB_Get_SpgSymbols
                exit
             end if
          end do
-         if (llchm) l_chm=trim(u_case(str))
+         if (llchm) l_chm=trim(u_case(Str_tmp))
       end if
 
       !> Compact HM
