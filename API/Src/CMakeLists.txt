@@ -32,7 +32,7 @@ add_custom_target(
 add_library(${LIBRARY_NAME} SHARED
   Extensions/forpy_mod.F90
   Extensions/wraps.f90
-  Extensions/API_init.f90
+  Extensions/api_init.f90
   Extensions/py_cfml_atoms.f90 
   Extensions/py_cfml_eos.f90 
   Extensions/py_cfml_extincorr.f90
