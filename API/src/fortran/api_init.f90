@@ -42,15 +42,15 @@ module api_init
     ! Must use bind(c, name="PyInit_<module name>")
     ! Return value must be type(c_ptr),
     ! use the return value of PythonModule%init
-    function PyInit_crysfml08_api() bind(c,name="PyInit_crysfml08_api") result(m)
-    !DEC$ ATTRIBUTES DLLEXPORT :: PyInit_crysfml08_api
+    function PyInit_crysfml_api() bind(c,name="PyInit_crysfml_api") result(m)
+    !DEC$ ATTRIBUTES DLLEXPORT :: PyInit_crysfml_api
 
         ! Local variables
         type(c_ptr) :: m
 
         m = Init()
 
-    end function PyInit_crysfml08_api
+    end function PyInit_crysfml_api
 
     function Init() result(m)
 
