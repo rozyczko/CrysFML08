@@ -72,7 +72,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
 
       character(len=20)              :: str
       character(len=3)               :: car
-      character(len=10),dimension(5) :: dire
+      character(len=10),dimension(35):: dire
       integer                        :: i,j,n1,n2,nt,iv,signo
       integer                        :: ilat, axis
       integer, dimension(3)          :: ishift, v_trans, a_latt
@@ -1590,7 +1590,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       character(len=2)               :: c_latt
       character(len=1)               :: c_alatt
       character(len=8)               :: car_prime
-      character(len=8), dimension(5) :: car_op,nc_lat,nc_alat
+      character(len=10),dimension(35):: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
       integer                        :: i,prime,n,iv,Invt,ind_sh
       integer                        :: n1,n2,n_lat,n_alat,n_antic

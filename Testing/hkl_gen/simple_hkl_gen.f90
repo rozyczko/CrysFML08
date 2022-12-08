@@ -21,14 +21,13 @@ Program Test_HKL_GEN
    character(len=1)             :: car
    character(len=40)            :: name_file
    character(len=4)             :: Ref_typ="Refl"
-   character(len=20)            :: spgr
    character(len=180)           :: texto
    class(SpG_Type), allocatable :: grp_espacial
    type (Cell_G_Type)           :: cell
-   integer                      :: i,j,k,num,nk, ier, MaxNumRef, dr, i_out, Mult
+   integer                      :: i,j,k,num,nk, ier, dr, i_out, Mult
    real(kind=cp),dimension(3)   :: celda, angulo
    integer, dimension(3,2)      :: hlim
-   real(kind=cp)                :: sintlmax,lambda,angle_2theta
+   real(kind=cp)                :: sintlmax,lambda
    logical                      :: info, mag
    type(RefList_Type)           :: reflections
    type(kvect_info_type)        :: kinfo

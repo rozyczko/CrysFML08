@@ -255,7 +255,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
         SpG%Op(i)%time_inv=SpaceG%Op(i)%time_inv
         SpG%Op(i)%dt=SpaceG%Op(i)%dt
         SpG%Symb_Op(i)=Get_Symb_from_Mat(SpG%Op(i)%Mat, Strcode,SpG%Op(i)%time_inv)
-        if(i > 1 .and. i < SpaceG%Numops) then
+        if(i > 1 .and. i <= SpaceG%Numops) then
           k=k+1
           gen_new(k)=SpG%Symb_Op(i)
         end if
@@ -266,12 +266,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       end if
       ng=k
 
-      do i=1,Npos !Looking for anticentring
-        if(rational_equal(SpG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv == -1) then
-          SpG%AntiCentre_coord=rational(1_LI,2_LI) * SpG%Op(i)%Mat(1:d,Dd)
-          exit
-        end if
-      end do
 
       if(centring) then
         n=Npos
@@ -298,6 +292,41 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       SpaceG%Symb_Op=SpG%Symb_Op
       SpaceG%Num_Lat=Spg%Num_lat
       SpaceG%Num_aLat=SpaceG%Num_aLat*(1+SpG%Num_Lat)
+
+      SpaceG%centred = 1
+      do i=1,SpaceG%Multip !Looking for -1
+        if(rational_equal(SpaceG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv ==  1) then
+          SpaceG%Centre_coord=rational(1_LI,2_LI) * SpaceG%Op(i)%Mat(1:d,Dd)
+          if(sum(abs(SpaceG%Centre_coord)) > 0_LI) then
+            SpaceG%centred = 0
+            SpaceG%Centre="                                                                                                                           "
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Centrosymmetric with centre at: [ ",(trim(Rational_String(SpaceG%Centre_coord(j)))//" ",j=1,d),"]"
+          else
+            SpaceG%centred = 2
+            SpaceG%Centre_coord=0_LI//1_LI
+            SpaceG%Centre="Centrosymmetric with centre at origin"
+          end if
+          exit
+        end if
+      end do
+
+      SpaceG%anticentred=1
+      do i=1,Npos !Looking for anticentring
+        if(rational_equal(SpaceG%Op(i)%Mat(1:d,1:d),-identd) .and. SpaceG%Op(i)%time_inv == -1) then
+          SpaceG%AntiCentre_coord=rational(1_LI,2_LI) * SpaceG%Op(i)%Mat(1:d,Dd)
+          if(sum(abs(SpaceG%AntiCentre_coord)) > 0_LI) then
+            SpaceG%anticentred = 0
+            SpaceG%Centre="                                                                                                   "
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Non-centrosymmetric, Anti-centric with -1' @ : [ ",(trim(Rational_String(SpaceG%AntiCentre_coord(j)))//" ",j=1,d),"]"
+          else
+            SpaceG%anticentred = 2
+            SpaceG%AntiCentre_coord=0_LI//1_LI
+            SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' @ origin"
+          end if
+          exit
+        end if
+      end do
+
 
       if(SpaceG%Num_Lat > 0) then
          if(allocated(SpaceG%Lat_tr)) deallocate(SpaceG%Lat_tr)
@@ -494,6 +523,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       character(len=5)                :: data_typ
       character(len=6)                :: xyz_typ
       character(len=256)              :: line
+      character(len=:), allocatable   :: sett,loc_str
       logical                         :: change_setting,centring
       type(rational), dimension(4,4)  :: identity
       type(rational), dimension(3,3)  :: mag_mat,ident3
@@ -519,7 +549,15 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           change_setting=.false.
         else
           change_setting=.true.
+          sett=setting
         end if
+      end if
+      loc_str=Str
+      i=index(Str,"::")
+      if(i /= 0) then
+        loc_str=Str(1:i-1)
+        sett=adjustl(Str(i+2:))
+        change_setting=.true.
       end if
       xyz_typ="xyz"
       if(present(xyz_type)) xyz_typ=xyz_type
@@ -528,19 +566,19 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
         case ("SHUBN")
           call Read_Magnetic_Data()
-          read(unit=str,fmt=*,iostat=ier) num
+          read(unit=loc_str,fmt=*,iostat=ier) num
           if(ier /= 0) then
             num=0 !It is supposed that a symbol has been provided
             do i=1,magcount
               !write(*,"(i5,tr5,a)") i, spacegroup_label_bns(i)
-              if(trim(str) == trim(spacegroup_label_bns(i)) .or. &
-                 trim(str) == trim(spacegroup_label_og(i))) then
+              if(trim(loc_str) == trim(spacegroup_label_bns(i)) .or. &
+                 trim(loc_str) == trim(spacegroup_label_og(i))) then
                  num=i
                  exit
               end if
             end do
             if(num == 0) then
-               Err_CFML%Msg=" => The BNS symbol: "//trim(str)//" is illegal! "
+               Err_CFML%Msg=" => The BNS symbol: "//trim(loc_str)//" is illegal! "
                Err_CFML%Ierr=1
                if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                return
@@ -746,19 +784,21 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           end do
           SpaceG%Centre="Non-Centrosymmetric"                          ! Alphanumeric information about the center of symmetry
           if(SpaceG%Centred == 0) then
-            SpaceG%Centre="Centrosymmetric, -1 not @the origin "       ! Alphanumeric information about the center of symmetry
             SpaceG%Centre_coord=rational(1_LI,2_LI) * SpaceG%Op(m)%Mat(1:d,Dd)
+            SpaceG%Centre="                                                                                                              "
+            write(unit=SpaceG%Centre,fmt="(a,10a)") "Centrosymmetric (-1 not @the origin), centre at: [ ",(trim(Rational_String(SpaceG%Centre_coord(j)))//" ",j=1,d),"]"
             SpaceG%NumOps=SpaceG%NumOps/2
           else if(SpaceG%Centred == 2) then
-            SpaceG%Centre="Centrosymmetric, -1 @the origin "           ! Alphanumeric information about the center of symmetry
+            SpaceG%Centre="Centrosymmetric with centre at origin"           ! Alphanumeric information about the center of symmetry
             SpaceG%NumOps=SpaceG%NumOps/2
           end if
 
           if(SpaceG%Centred == 1 .and. SpaceG%anticentred /= 1) then
              if(SpaceG%anticentred == 0) then
-                SpaceG%Centre=trim(SpaceG%Centre)//": -1' not @the origin"
+               SpaceG%Centre="                                                                                               "
+               write(unit=SpaceG%Centre,fmt="(a,10a)") "Non-centrosymmetric, Anti-centric with -1' @ : [ ",(trim(Rational_String(SpaceG%AntiCentre_coord(j)))//" ",j=1,d),"]"
              else
-                SpaceG%Centre=trim(SpaceG%Centre)//": -1' @the origin"
+                SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' at origin "
                 SpaceG%AntiCentre_coord=0_LI//1_LI
              end if
           end if
@@ -780,7 +820,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           write(SpaceG%UNI_num,"(i4)") Litvin2IT(num)
 
           if(change_setting) then
-              call Change_Setting_SpaceG(setting, SpaceG)
+              call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                 return
@@ -795,9 +835,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
         case ("SUPER")  !Read the superspace Database
         !---------------------------------------
           if(present(database_path)) then
-             call Read_single_SSG(str,num,database_path)
+             call Read_single_SSG(loc_str,num,database_path)
           else
-             call Read_single_SSG(str,num)
+             call Read_single_SSG(loc_str,num)
           end if
           if(Err_CFML%Ierr /= 0)  return
           iclass=igroup_class(num)
@@ -932,11 +972,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                 if(sum(abs(SpaceG%Op(i)%Mat(1:D,Dd))) == 0_LI) then
                   SpaceG%AntiCentred=2
                   SpaceG%AntiCentre_coord=0//1
-                  SpaceG%Centre="Anti-centric with -1' @ origin"
+                  SpaceG%Centre="Non-centrosymmetric, Anti-centric with -1' @ origin"
                 else
                   SpaceG%AntiCentred=0
                   SpaceG%AntiCentre_coord=SpaceG%Op(i)%Mat(1:D,Dd)/2_LI
-                  write(unit=SpaceG%Centre,fmt="(a)") "Anti-centric with -1' @ : "//Rational_String(SpaceG%AntiCentre_coord)
+                  SpaceG%Centre="                                                                                                 "
+                  write(unit=SpaceG%Centre,fmt="(a)") "Non-centrosymmetric, Anti-centric with -1' @ : "//Rational_String(SpaceG%AntiCentre_coord)
                 end if
                 exit
               end if
@@ -962,7 +1003,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           if(SpaceG%Centred == 2 .or. SpaceG%Centred == 0) SpaceG%NumOps=SpaceG%NumOps/2
 
           if(change_setting) then
-              call Change_Setting_SpaceG(setting, SpaceG)
+              call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_SSG_DBase()
                 return
@@ -1008,7 +1049,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       logical,                         optional, intent(in ) :: set_inv
 
       !---- Local Variables ----!
-      integer                                      :: i,n_gen, n_it, d, ier !,j
+      integer                                      :: i,j,n_gen, n_it, d, ier !,j
       integer                                      :: n_laue, n_pg, lo !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
@@ -1020,7 +1061,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       !> Init
       by_Gen=.false.; by_Hall=.false.
       ok1=.false.; ok2=.false.; ok3=.false.
-      magnetic=.true.
+      magnetic=.false.
       n_gen=0
       gList=" "
       n_it=0
@@ -1061,6 +1102,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               loc_str=Str
               call ISO_to_jones_notation(loc_str)
               !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
+              magnetic=.true.
             end if
 
             i=index(loc_str,"UNI")
@@ -1070,6 +1112,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                else
                   loc_str=loc_str(1:i-1)
                end if
+               magnetic=.true.
                call Set_Shubnikov_Info()
                do i=1,NUM_SHUBNIKOV
                   if (trim(loc_str) /= trim(Shubnikov_info(i)%STD)) cycle
@@ -1138,7 +1181,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                !> Get generators list from standard
                write(unit=car, fmt='(i3)') n_it
                call Get_SpaceGroup_Symbols(car, str_HM_std)
-               if (trim(str_HM_std)==trim(str_HM)) then
+               if (trim(str_HM_std) == trim(str_HM)) then
                   gList=get_IT_Generators(car)
                end if
                magnetic=.false.
@@ -1182,7 +1225,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                str_hall=spgr_info(i)%hall
                n_laue=spgr_info(i)%laue
                n_pg=  spgr_info(i)%pg
-
+               magnetic=.false.
                !> Get generators list from standard
                write(unit=car,fmt="(i4)") n_it
                call Get_SpaceGroup_Symbols(car, str_HM_std)
@@ -1214,6 +1257,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          by_Gen=.true.
          allocate(l_gen(n_gen))
          l_gen=gen(1:n_gen)
+         do i=1,n_gen
+            j=index(l_gen(i),",",back=.true.)
+            if(trim(l_gen(i)(j+1:)) == "-1" .or. trim(l_gen(i)(j+1:)) == "1" .or. trim(l_gen(i)(j+1:)) == "+1") then
+                magnetic=.true.
+            end if
+         end do
       end if
 
       !> Generate the spacegroup
@@ -1291,6 +1340,8 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           lo=len_trim(SpaceG%Symb_Op(i))
           if(SpaceG%Symb_Op(i)(lo-1:lo) == ",1") &
              SpaceG%Symb_Op(i)=SpaceG%Symb_Op(i)(1:lo-2)
+          if(SpaceG%Symb_Op(i)(lo-2:lo) == ",+1") &
+             SpaceG%Symb_Op(i)=SpaceG%Symb_Op(i)(1:lo-3)
         end do
       end if
 

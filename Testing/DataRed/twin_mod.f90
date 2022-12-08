@@ -119,7 +119,6 @@
                  Twins%twin_name = line(j:)
 
                case("TWIN_TYP")
-
                  Read(unit=line(j:),fmt=*,iostat=ier) Twins%itwin
                  if(ier /= 0) then
                    call Error_message (" => Error reading the TWIN law file, item: TWIN_typ")
@@ -183,7 +182,6 @@
                  Twins%machine= trim(line(j:))
 
                case("TWIN_SPG")
-
                 Twins%iSpG=.true.
                 Twins%twin_Spg=adjustl(trim(line(j:)))
 

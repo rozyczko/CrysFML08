@@ -460,7 +460,7 @@
        Pure Module Function Wrt_Lab(Nam1,Nam2) Result(Bilabel)
           !---- Arguments ----!
           character (len=*), intent (in) :: nam1,nam2
-          character (len=8)              :: bilabel
+          character (len=:), allocatable :: bilabel
        End Function Wrt_Lab
 
        Pure Module Function Index_AtLab_on_AtList(AtLab, IPhase, AtList) Result(Indx)

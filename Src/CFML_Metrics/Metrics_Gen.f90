@@ -157,12 +157,12 @@ Submodule (CFML_Metrics) Metrics_Gen
        real(kind=cp), dimension(3,3)               :: Mat        ! Convsersion matrix
 
        !---- Local Variables ----!
-       character(len=2) :: car
-       real(kind=cp)    :: cosgas, singas, cosbes, sinbes
+       character(len=:), allocatable :: car
+       real(kind=cp)                 :: cosgas, singas, cosbes, sinbes
 
 
        !> Init and checks
-       Car=" "
+       Car="            "
        if (present(CarType)) then
           Car=U_case(adjustl(CarType))
 

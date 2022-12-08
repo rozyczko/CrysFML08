@@ -73,8 +73,8 @@ Submodule (CFML_Strings) StringTools
    !!
    Pure Module Function L_Case(Str) Result (LStr)
       !---- Argument ----!
-      character (len=*), intent(in) :: Str    ! Input String
-      character (len=len(str))      :: LStr   ! lower case of Text
+      character (len=*), intent(in)  :: Str    ! Input String
+      character (len=:), allocatable :: LStr   ! lower case of Text
 
       !---- Local variables ----!
       integer, parameter :: INC = ICHAR("A") - ICHAR("a")
@@ -97,8 +97,8 @@ Submodule (CFML_Strings) StringTools
    !!
    Pure Module Function U_Case(Str) Result (UStr)
       !---- Argument ----!
-      character (len=*), intent(in) :: Str   ! Input string
-      character (len=len(Str))      :: UStr  ! Upper conversion
+      character (len=*), intent(in)  :: Str   ! Input string
+      character (len=:), allocatable :: UStr  ! Upper conversion
 
       !---- Local variables ----!
       integer, parameter :: INC = ICHAR("A") - ICHAR("a")
@@ -294,7 +294,7 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!----    A call like:  call Get_Separator_Pos(line,',',pos,ncar) provides
    !!----    ncar= 3
-   !!----    pos= (/ 4, 25, 36, 0, ..../)
+   !!----    pos= [ 4, 25, 36, 0, ....]
    !!----
    !!---- 05/04/2019
    !!

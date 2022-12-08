@@ -179,20 +179,22 @@ main="Calc_Sfac.f90"
 ##
 ## Powder Patterns
 ##
-#[[executable]]
-#name="Simple_Calc_Mag_Powder"
-#source-dir="Testing/PowderPattern"
-#main="Simple_calc_Mag_powder.f90"
+[[executable]]
+name="Simple_Calc_Powder"
+source-dir="Testing/PowderPattern"
+main="Simple_calc_powder.f90"
+
+[[executable]]
+name="Simple_Calc_Mag_Powder"
+source-dir="Testing/PowderPattern"
+main="Simple_calc_Mag_powder.f90"
+
 #
 #[[executable]]
 #name="Calc_Powder"
 #source-dir="Testing/PowderPattern"
 #main="calc_powder.f90"
 #
-#[[executable]]
-#name="Simple_Calc_Powder"
-#source-dir="Testing/PowderPattern"
-#main="Simple_calc_powder.f90"
 #
 ##
 ## Structures_GlobalOptimization

@@ -966,21 +966,23 @@ Submodule (CFML_Structure_Factors) SF_Calculations
    !!----
    !!---- Update: April - 2022
    !!
-   Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, lun)
+   Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, mode, lun)
       !---- Arguments ----!
-      type(RefList_Type),    intent(in out) :: Reflex
-      type(Cell_G_Type),     intent(in)     :: Cell
-      type(AtList_type),     intent(in out) :: Atm
-      type(SpG_type),        intent(in)     :: Grp
-      real(kind=cp),         intent(in)     :: Smax ! maximum sinTheta/Lambda)
-      type(StrfList_Type),   intent(out)    :: Stf
-      integer, optional,     intent(in)     :: lun
+      type(RefList_Type),        intent(in out) :: Reflex
+      type(Cell_G_Type),         intent(in)     :: Cell
+      type(AtList_type),         intent(in out) :: Atm
+      type(SpG_type),            intent(in)     :: Grp
+      real(kind=cp),             intent(in)     :: Smax ! maximum sinTheta/Lambda)
+      type(StrfList_Type),       intent(out)    :: Stf
+      character(len=*),optional, intent(in)     :: mode ! P: powder, S: Single crystal
+      integer,         optional, intent(in)     :: lun
 
       !---- Local variables ----!
       integer                                   :: i
       Type(Scattering_Species_Type)             :: Scf
 
-      call Gener_Reflections_Shub(Cell, Grp, Smax, Reflex)
+      !call Gener_Reflections_Shub(Cell, Grp, Smax, Reflex)
+      call Gener_Reflections(Cell, 0.0, smax, Reflex, Grp, MagExt=.true.,unique=.true.,Friedel=.true.,Ref_typ="Refl")
 
       Stf%Nref=Reflex%NRef
       allocate(Stf%Strf(Stf%Nref))
@@ -995,9 +997,15 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          write(unit=*,fmt='(a)') trim(err_CFML%Msg)
          return
       end if
-      do i=1,Reflex%Nref
-         call Calc_Mag_Structure_Factor(Reflex%Ref(i),Cell,Grp,Atm,Scf,"P",Stf%Strf(i))
-      end do
+      if(present(mode)) then
+        do i=1,Reflex%Nref
+           call Calc_Mag_Structure_Factor(Reflex%Ref(i),Cell,Grp,Atm,Scf,mode,Stf%Strf(i))
+        end do
+      else
+        do i=1,Reflex%Nref
+           call Calc_Mag_Structure_Factor(Reflex%Ref(i),Cell,Grp,Atm,Scf,"P",Stf%Strf(i))
+        end do
+      end if
    End Subroutine Magnetic_Structure_Factors
 
    !!----
@@ -1024,7 +1032,7 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       character(len=*),            optional, intent(In)  :: Twin     ! Representing a particular orientation domain
                                                                      ! Useful only for single crystals
       !---- L o c a l   V a r i a b l e s ----!
-      integer :: i,ni, ii, ir
+      integer :: i,ni, ii, ir, j, k
       real(kind=cp), dimension(Atm%natoms)     :: otr, oti, frc, frs
       real(kind=cp), dimension(3)              :: h, hnn, xi, cosa, side, aa, bb, t, ar, br,ed,ec
       real(kind=cp), dimension(6)              :: betas
@@ -1032,8 +1040,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       complex(kind=cp),dimension(3)            :: Mc
       logical                                  :: mag,nuc,mag_only, magAtm
       character(len=1)                         :: tw
-      real(kind=cp) :: ffr, ffi, ffx, cosr, sinr, scosr, ssinr, temp,snexi !,x1, yy, z
-      real(kind=cp) :: x, arg, arg2, exparg,ssnn
+      real(kind=cp) :: ffr, ffi, ffx, cosr, sinr, scosr, ssinr, temp,snexi, x1, yy,delta_timinv !, z
+      real(kind=cp) :: x, arg, arg2, exparg,ssnn,aux
       real(kind=dp) :: a1, a3, b1, b3, av,bv
       real(kind=dp), parameter  :: pn=0.2695420113693928312
 
@@ -1115,8 +1123,9 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             end if
 
             if (mag .and. magAtm) then
-               SMcos(:,:)=SMcos(:,:)+cosr*sm
-               SMsin(:,:)=SMsin(:,:)+sinr*sm
+               delta_timinv=grp%op(ir)%time_inv * grp%op(ir)%dt
+               SMcos(:,:)=SMcos(:,:)+cosr*sm * delta_timinv
+               SMsin(:,:)=SMsin(:,:)+sinr*sm * delta_timinv
             end if
          end do     ! End over symmetry operators
 
@@ -1172,40 +1181,15 @@ Submodule (CFML_Structure_Factors) SF_Calculations
 
       !> MAGNETIC STRUCTURE FACTOR
       if (mag) then
-         !=========================
-         !  Calcul of F2= Fm.Fm* - (e.Fm)*(e.Fm)
-         !x=0.0
-         !yy=0.0
-         !DO i=1,3
-         !  DO j=i,3
-         !    k=6-i-j
-         !    x1=1.0
-         !    IF(i /= j) x1=2.0*cosa(k)
-         !    x=x1*aa(i)*aa(j)+x   ! Fm.Fm with unit vectors along a,b,c metric tensor
-         !    x1=2.0
-         !    IF(i == j) x1=1.0
-         !    yy=x1*hnn(i)*hnn(j)*aa(i)*aa(j)/(side(i)*side(j))+yy  !(e.Fm).(e.Fm)
-         !    IF(icent == 1) THEN
-         !      x1=1.0
-         !      IF(i /= j) x1=2.0*cosa(k)
-         !      x=x1*bb(i)*bb(j)+x
-         !      x1=2.0
-         !      IF(i == j) x1=1.0
-         !      yy=x1*hnn(i)*hnn(j)*bb(i)*bb(j)/(side(i)*side(j))+yy
-         !    END IF
-         !  END DO
-         !END DO
-         !Strf%sqMiV=(x-0.25*yy/ssnn)!*nlatti(iph)      ! Halpern & Johnson F2= Fm.Fm* - (e.Fm)*(e.Fm)
-
+         ! The FullProf calculation gives the same result as the following for sqMiV
          Strf%MsF=cmplx(aa,bb) !MsF in basis {e1,e2,e3}
          ed = matmul(cell%GR, 0.5*hm%h/hm%s)    ! unitary vector referred to the direct    "
          ec = matmul(Cell%Cr_Orth_cel,ed)       ! Cartesian
          Mc = Strf%MsF / Cell%cell              ! Magnetic structure factor in basis {a,b,c}
-         Mc = matmul(Cell%Cr_Orth_cel,Mc)       !                            Cartesian
+         Mc = matmul(Cell%Cr_Orth_cel,Mc)       ! Cartesian
          Strf%MiVC = Mc - dot_product(ec,Mc) * ec      !Magnetic interaction vector in Cartesian components
          Strf%MiV = matmul(Cell%Orth_Cr_cel,Strf%MiVC)* Cell%cell       !Magnetic interaction vector in basis  {e1,e2,e3}
          Strf%sqMiV= dot_product(Strf%MiVC, Strf%MiVC)
-
       else
          Strf%sqMiV=0.0      ! Halpern & Johnson F2= Fm.Fm* - (e.Fm)*(e.Fm)
          Strf%MsF=cmplx(0.0,0.0)

@@ -5,7 +5,7 @@
  Program Test_SHX_CIF_CFL
     !---- Use Modules ----!
     use CFML_Globaldeps
-    use CFML_Strings,      only: File_type, u_case 
+    use CFML_Strings,      only: File_type, u_case
     use CFML_Metrics,      only: Cell_G_Type, Write_Crystal_Cell
     use CFML_gSpaceGroups, only: Spg_Type, SuperSpaceGroup_Type, Write_SpaceGroup_Info
     use CFML_Atoms,        only: AtList_Type, Write_Atom_List

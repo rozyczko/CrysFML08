@@ -26,8 +26,8 @@
        character(len=1), optional,     intent(in)      :: comment     ! Character that define a comment line
 
        !---- Local Variable ----!
-       character(len=len(filevar(1))) :: line,linec
-       character(len=len(keyword))    :: keyw
+       character(len=:), allocatable  :: line,linec
+       character(len=:), allocatable  :: keyw
        character(len=1)               :: cc
        integer                        :: i,np,nt
 
@@ -85,8 +85,8 @@
 
        !---- Local Variable ----!
        logical                        :: sval
-       character(len=len(filevar(1))) :: line,linec
-       character(len=len(keyword))    :: keyw
+       character(len=:), allocatable  :: line,linec
+       character(len=:), allocatable  :: keyw
        character(len=1)               :: cc
        integer                        :: i,np,nt
 
@@ -158,8 +158,8 @@
        character(len=*),     optional, intent(out)    :: line_key           ! Out -> Cut line where keyword is read
 
        !---- Local Variable ----!
-       character(len=len(filevar(1))) :: line
-       character(len=len(keyword))    :: keyw
+       character(len=:), allocatable  :: line
+       character(len=:), allocatable  :: keyw
        character(len=1)               :: cc
        integer                        :: i,np,nt
 
@@ -215,8 +215,8 @@
        character(len=1),      optional, intent(in)     :: comment         ! Consider the character passed in comment as a comment to skip the line
 
        !---- Local Variable ----!
-       character(len=len(filevar(1))) :: line
-       character(len=len(keyword))    :: keyw
+       character(len=:), allocatable  :: line
+       character(len=:), allocatable  :: keyw
        character(len=1)               :: cc
        integer                        :: i,np,nt
 
@@ -240,7 +240,7 @@
           line=line(np:)
           call cut_string(line)
           call get_numstd(line,vet1,vet2,iv)
-          if (Err_CFML%ierr /=0) exit
+          if (Err_CFML%ierr /= 0) exit
           nline_ini=i
           exit
        end do

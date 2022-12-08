@@ -29,7 +29,7 @@ SubModule (CFML_IOForm) Format_GEN
        character(len=132), dimension(1)  :: filevar
        character(len=40)                 :: magmom
        character(len=4)                  :: dire
-       character(len=5)                  :: label
+       character(len=6)                  :: label
 
        !> Init
        call clear_error()
@@ -75,7 +75,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !> Atom Label
        call cut_string(line,nlong1,label)
-       atm%lab=label(1:5)
+       atm%lab=label
 
        !> Atom Type (Chemical symbol & Scattering Factor)
        call cut_string(line,nlong1,label)
@@ -342,10 +342,10 @@ SubModule (CFML_IOForm) Format_GEN
     !!
     Module Subroutine Read_Modulation_Amplitudes(Str, Atm, Ulabel, Nt)
        !---- Arguments ----!
-       character(len=*),    intent(in )     :: str
+       character(len=*),      intent(in )     :: str
        class(ModAtm_Std_Type),intent(in out)  :: Atm
-       character(len=*),    intent(in)      :: ulabel
-       integer,             intent(in)      :: nt  !number of the amplitude
+       character(len=*),      intent(in)      :: ulabel
+       integer,               intent(in)      :: nt  !number of the amplitude
 
        !---- Local variables -----!
        character(len=len(str)), dimension(1):: line

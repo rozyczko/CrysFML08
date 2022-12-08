@@ -936,8 +936,8 @@
 
        Pure Module Subroutine LU_Descomposition(a,p)
           !---- Arguments ----!
-          real(kind=cp), intent(in out) :: a(:,:)
-          integer,       intent(   out) :: p(:)
+          real(kind=cp), dimension(:,:), intent(in out) :: a
+          integer,       dimension(:),   intent(   out) :: p
        End Subroutine LU_Descomposition
 
        Pure Module Function Mat_Cross_C(Vec) Result(M)

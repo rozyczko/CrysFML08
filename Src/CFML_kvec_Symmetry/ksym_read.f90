@@ -68,10 +68,10 @@ SubModule (CFML_kvec_Symmetry) ksym_read
           if (index(file_cfl%line(i)%str(1:1),"!")/=0 .or. index(file_cfl%line(i)%str(1:1),"#")/=0) cycle
           lowline=adjustl(l_case(file_cfl%line(i)%str))
 
-          if (lowline(1:13) == "mag_structure") then
+          if (lowline(1:13) == "mag_structure" .or. lowline(1:1) == "{") then
              no_iline=i
           end if
-          if (lowline(1:7) =="end_mag" ) then
+          if (lowline(1:7) =="end_mag" .or. lowline(1:1) == "}") then
              no_eline=i
              exit
           end if
@@ -243,7 +243,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
           end if
 
           ! Read propagation vectors
-          if (lowline(1:5) == "kvect" .and. kvect_begin) then
+          if ((lowline(1:5) == "kvect" .or. lowline(1:2) == "k ") .and. kvect_begin) then
              num_k=num_k+1
              read(unit=lowline(6:),fmt=*,iostat=ier) MGp%kvec(:,num_k)
              if (ier /= 0) then
@@ -256,7 +256,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
                 lowline=adjustl(l_case(file_cfl%line(i)%str))
                 ! write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
-                if (lowline(1:5) == "kvect") then
+                if (lowline(1:5) == "kvect" .or. lowline(1:2) == "k ") then
                    num_k=num_k+1
                    read(unit=lowline(6:),fmt=*,iostat=ier) MGp%kvec(:,num_k)
                    if (ier /= 0) then
@@ -556,11 +556,19 @@ SubModule (CFML_kvec_Symmetry) ksym_read
              num_matom=num_matom+1
              num_skp=0
              line=adjustl(file_cfl%line(i)%str)
-             read(unit=line(6:),fmt=*,iostat=ier) Am%atom(num_matom)%lab,      & !Label
-                                                  Am%atom(num_matom)%SfacSymb, & !Formfactor label
-                                                  Am%atom(num_matom)%x,        & !Fract. coord.
-                                                  Am%atom(num_matom)%Biso,     & !Is. Temp. Fact.
-                                                  Am%atom(num_matom)%occ         !occupation
+             j=index(line,"scale")
+             if(j /= 0) then
+                line=line(1:j-1)
+                read(unit=line(6:),fmt=*,iostat=ier) Am%atom(num_matom)%lab,      & !Label
+                                                     Am%atom(num_matom)%SfacSymb, & !Formfactor label
+                                                     Am%atom(num_matom)%x           !Fract. coord.
+             else
+                read(unit=line(6:),fmt=*,iostat=ier) Am%atom(num_matom)%lab,      & !Label
+                                                     Am%atom(num_matom)%SfacSymb, & !Formfactor label
+                                                     Am%atom(num_matom)%x,        & !Fract. coord.
+                                                     Am%atom(num_matom)%Biso,     & !Is. Temp. Fact.
+                                                     Am%atom(num_matom)%occ         !occupation
+             end if
              if (ier /= 0) then
                 Err_CFML%flag=.true.
                 write(unit=Err_CFML%Msg,fmt="(a,i4)")" Error reading magnetic atom #",num_matom

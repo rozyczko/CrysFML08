@@ -49,6 +49,7 @@
     integer                  :: n_ini,n_end
     real                     :: seconds, End_time, start_time, det,occ
     integer, dimension(3,3)  :: Mat        !Auxiliary matrix
+    integer, dimension(1024) :: ind_group = 0
     real, dimension(3,3)     :: trans      !matrix transforming the cells
     real, dimension(3,3,1024):: invMt,Mstd !Transformation of coordinates to standard setting
     real, dimension(3,1024)  :: tor        !Origin for transforming to standard setting
@@ -145,7 +146,7 @@
 
     call Write_SpaceGroup_Info(SpaceGroup,lun)
     call Write_Crystal_Cell(Cell,lun)
-    call Write_Atom_List(A,lun)
+    call Write_Atom_List(A,Iunit=lun)
     call Extend_Atom_List(SpaceGroup,cell,A,Ate,lun)
     n_ini=1
     n_end=file_dat%nlines
@@ -159,8 +160,8 @@
     none_given=.false.
     call clear_error()
     do i=4,n_end
+      write(*,"(a)") " -> "//file_dat%line(i)%str
       line=l_case(adjustl(file_dat%line(i)%str))
-      write(*,"(a)") " -> "//line
       if(line(1:1) == "!") cycle
       if(line(1:4) == "none") none_given=.true.
       j=index(line," ")
@@ -221,11 +222,6 @@
       SpaceGroup_n=SpaceGroup
       if(trim(trans_symb)/="a,b,c;0,0,0") then
         call Change_Setting_SpaceG(trans_symb, SpaceGroup_n)
-        !if(fix_given) then
-        !   call Similar_Transf_SG(trans,orig,SpaceGroup,SpaceGroup_n,fix_lat=fix_lat)
-        !else
-        !   call Similar_Transf_SG(trans,orig,SpaceGroup,SpaceGroup_n)
-        !end if
       end if
 
        if(trim(trans_symb)=="a,b,c;0,0,0") then
@@ -255,7 +251,7 @@
         write(unit=*,fmt="(a)") trim(err_CFML%Msg)
       end if
       ! Write the atoms the in new asymmetric unit
-      call Write_Atom_List(A_n,lun)
+      call Write_Atom_List(A_n,Iunit=lun)
 
       if(full_given) then
         write(unit=lun,fmt="(/,a,/,a,/)")" => List of all atoms in the new cell", &
@@ -300,7 +296,8 @@
       write(unit=lun,fmt="(/,/,a,a,/)") " => LIST of Subgroups for: ",SpaceGroup_n%BNS_Symb
       do i=1,nsg
         indx=SpaceGroup_n%Multip/SubGroup(i)%multip
-        if(index_given .and. indx /= indice) cycle
+        ind_group(i) =indx
+        if(index_given .and. indx > indice) cycle
         ng=SubGroup(i)%numops
         if(len_trim(SubGroup(i)%mat2std_shu) == 0  ) then
            write(unit=SubGroup(i)%mat2std_shu,fmt="(i4)") i
@@ -363,8 +360,8 @@
       Mat=identity
       nauas=SpaceGroup_n%Multip*A%natoms
       do i=1,nsg
-        indx=SpaceGroup_n%Multip/SubGroup(i)%multip
-        if(index_given .and. indx /= indice ) cycle
+        indx=ind_group(i)
+        if(index_given .and. indx > indice ) cycle
         write(*,"(a,i4,a,a,i4,a)") " => SubGroup #",i,"   "//SubGroup(i)%BNS_Symb," of index [",indx,"]"
         write(unit=lun,fmt="(/,a)") "    --------------------------------------------------------------------------------------"
         write(unit=lun,fmt="(3a,i4,a)")  " => Decomposition of orbits for subgroup: ", &
@@ -425,14 +422,13 @@
            write(unit=i_cfl,fmt="(a,3f12.5,3f8.3)") "SpGR  "//trim(SubGroup(i)%Spg_Symb)
         end if
         write(unit=i_cfl,fmt="(a)") "!"
-        write(unit=i_cfl,fmt="(a)") "!    Label     Sfac      x         y         z       Biso       occ    2*Spin     Q"
+        write(unit=i_cfl,fmt="(a)") "!    Label        Sfac/Chem        x         y         z       Biso       occ     2*Spin  Q"
 
         !Construct for each atom in the asymmetric unit of the initial space group the whole list
         !of equivalent points
         na=0
-        norbi=maxval(pl_n%p)
         write(*,"(a,i6,a)") " => Allocating Atom List Asub for ",nauas," atoms"
-        call Allocate_Atom_List(nauas,Asub,"Atm",0)
+        call Allocate_Atom_List(nauas,Asub,"atm_type",0)
         call clear_Error()
         do n=1,A%natoms  !loop over atoms in the asymmetric unit of the original group
           Call get_orbit(A%atom(n)%x,SpaceGroup,orb)
@@ -444,18 +440,16 @@
           end do
 
           call get_transf_list(trans,orig,pl,pl_n)  !Transform the list in SpaceGroup to the list in SPGn
-
           if(Err_CFML%Ierr == 0) then
              !CALL CPU_TIME(seconds)
              call set_orbits_inlist(SubGroup(i),pl_n)     !Determines the decomposition of orbits w.r.t. SubGroup(i)
+             norbi=maxval(pl_n%p(1:pl_n%np))
              !CALL CPU_TIME(end_time)
              !write(unit=*,fmt="(a,f9.3,a)") " =>set_orbits_inlist calculated !, CPU-time: ",end_time-seconds, " seconds"
-
              if(full_given) then
-
                write(unit=lun,fmt="(a,i3,a)")     " => Atom number: ",n," of label: "//trim(A%atom(n)%lab)
                write(unit=lun,fmt="(a,2(i3,a))")  "    List of equivalent atoms in the subgroup: ",pl_n%np,&
-                                                       " atoms in " ,norbi, " orbits"
+                                                  " atoms in " ,norbi, " orbits"
               !!--..       A'  = M  A           X'  = inv(Mt) X
               !!--..   If a change of origin is performed the positions are changed
               !!--..   Ot=(o1,o2,o3) origin of the new basis A' w.r.t. old basis A
@@ -483,6 +477,7 @@
                      mult=orb%mult
                      occ=real(mult)/real(SubGroup(i)%Multip)
                      na=na+1
+                     !write(*,"(3(a,i4))") "Group:",i," Atom#:",na, "  Max#atoms:",nauas
                      !Asub%Atom(na)=A%atom(n) !it does not compile with gfortran
                      Asub%Atom(na)%ChemSymb=A%atom(n)%ChemSymb
                      Asub%Atom(na)%SfacSymb=A%atom(n)%SfacSymb
@@ -560,6 +555,7 @@
           end if
 
         end do !n atoms
+        if((index_given .and. ind_group(i) >  indice) .or. na == 0) cycle
         Asub%natoms=na
         !call Write_Atom_List(Asub)
         if(.not. trn_std) then

@@ -178,10 +178,10 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
       !---- Local Variables ----!
       integer                            :: i,ier
       ! Types :: Atm_Type, Atm_Std_Type, ModAtm_Std_Type, Atm_Ref_Type, ModAtm_Ref_Type
-      type(Atm_Type)       :: Atm
-      type(Atm_Std_Type)   :: Atm_Std
+      type(Atm_Type)         :: Atm
+      type(Atm_Std_Type)     :: Atm_Std
       type(ModAtm_Std_Type)  :: ModAtm_Std
-      type(Atm_Ref_Type)   :: Atm_Ref
+      type(Atm_Ref_Type)     :: Atm_Ref
       type(ModAtm_Ref_Type)  :: ModAtm_Ref
 
       !> Init
@@ -203,13 +203,13 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
          case("atm_std_type")
             allocate(A%atom(n),source=Atm_Std,stat=ier)
 
-         case("ModAtm_std_type")
+         case("modatm_std_type")
             allocate(A%atom(n),source=ModAtm_Std,stat=ier)
 
          case("atm_ref_type")
             allocate(A%atom(n),source=Atm_Ref,stat=ier)
 
-         case("ModAtm_ref_type")
+         case("modatm_ref_type")
             allocate(A%atom(n),source=ModAtm_Ref,stat=ier)
 
          case default
@@ -362,7 +362,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
     !!----
     !!---- Updated: April - 2005, June -2014
     !!
-    Module Subroutine Allocate_Matom_List(N,A,MField,dirF)
+    Module Subroutine Allocate_mAtom_List(N,A,MField,dirF)
        !---- Arguments ----!
        integer,                              intent(in)     :: n  !# atoms in asymmetric magnetic unit
        type (mAtom_list_type),               intent(in out) :: A  !Objet to be allocated
@@ -388,7 +388,7 @@ SubModule (CFML_Atoms) Atm_Allocating_Atoms
           call init_mAtom_type(A%Atom(i))
        end do
 
-    End Subroutine Allocate_mAtom_list
+    End Subroutine Allocate_mAtom_List
 
     !!----
     !!---- Module Subroutine Deallocate_mAtom_list(A)

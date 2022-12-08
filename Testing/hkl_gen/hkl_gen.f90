@@ -48,7 +48,7 @@ Module Ref_Gen
         !---- Local variables ----!
         character(len=132)   :: line, file_inst
         real                 :: wave,wav,tmin,tmax,omeg,chi,phi,dmin!,s1,s2,ang12,tet1,tet2
-        real, dimension(3,3) :: ub,ub_ini
+        real, dimension(3,3) :: ub
         integer, dimension(3):: uvw
         real,    dimension(3):: h1,h2,hv
         real, dimension(6)   :: dcel,incel

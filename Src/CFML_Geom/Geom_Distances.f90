@@ -241,7 +241,6 @@
              nam1=a%atom(k)%lab
              do j=1,npeq
                 xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
-                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)
@@ -369,7 +368,7 @@
        !---- Local Variables ----!
        logical                            :: iprin
        integer,parameter                  :: nconst=3500
-       integer                            :: i,j,k,lk,i1,i2,i3,jl,nn,L,&
+       integer                            :: i,j,k,lk,i1,i2,i3,jl,nn,L,ip,&
                                              itnum1,itnum2,num_const, max_coor,num_angc,ico,d
        character(len=  6)                 :: nam,nam1,nam2
        character(len= 40)                 :: transla
@@ -382,7 +381,7 @@
        integer, dimension(3,3)            :: Rot
        integer, dimension(192)            :: itnum
        real(kind=cp),dimension(3,3,6)     :: DerM
-       real(kind=cp),    dimension(3)     :: xx,x1,xo,Tn, QD,so,ss,s1,s2,x2,tr1,tr2,tr
+       real(kind=cp),    dimension(3)     :: xx,x1,xo,Tn, QD,so,ss,s1,s2,x2,tr1,tr2
        real(kind=cp)                      :: T,dd, da1,da2,da12,cang12,ang12,cang1,ang2,ang1,rest_d,rest_a
        real(kind=cp)                      :: sdd,sda1,sda2,sda12,sang12,sang2,sang1,srel1,srel2,srel12
 
@@ -556,12 +555,10 @@
              End Select
              ss(:)=x_std(:,k)
              do j=1,Spg%Multip
-                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
                 xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do_i3:do i3=ic1(3),ic2(3)
-
                             Tn(:)=real([i1,i2,i3])
                             x1(:)=xx(:)+tn(:)
                             do l=1,3
@@ -602,10 +599,8 @@
 
                             if(present(lun_cons) .and. dd <= rest_d) then
                               esta=.false.
-                              tr=real(Spg%Op(j)%Mat(1:3,4))
-                              !tr=trr(:,j)
                               write(unit=line,fmt="(a4,tr2,a4,i5,3f10.5,tr5,2f7.4)") A%atom(i)%lab ,A%atom(k)%lab ,&
-                                     Itnum(j), tn+tr ,dd, sdd
+                                     Itnum(j), tn+trr(:,j) ,dd, sdd
                               if(num_const == 0) then
                                 const_text(1)=line(1:132)
                                 num_const=1
@@ -680,8 +675,9 @@
                   nam1=" "//trim(nam1)
              End Select
              if (present(lun_cons)) then
-               itnum1=itnum(Coord_Info%N_sym(j,i))
-               tr1(:)=trcoo(:,j)+real(Spg%Op(Coord_Info%N_sym(j,i))%Mat(1:3,4))
+               ip=Coord_Info%N_sym(j,i)
+               itnum1=itnum(ip)
+               tr1(:)=trcoo(:,j)+ trr(:,ip)  !real(Spg%Op(Coord_Info%N_sym(j,i))%Mat(1:3,4))
              end if
              do k=j+1,Coord_Info%Coord_Num(i)
                 if (Coord_Info%Dist(k,i) < epsi .OR. Coord_Info%Dist(k,i) > dangl) cycle
@@ -696,8 +692,9 @@
                      nam2=" "//trim(nam2)
                 End Select
                 if (present(lun_cons)) then
-                  itnum2=itnum(Coord_Info%N_sym(k,i))
-                  tr2(:)=trcoo(:,k)+real(Spg%Op(Coord_Info%N_sym(k,i))%Mat(1:3,4))
+                  ip=Coord_Info%N_sym(k,i)
+                  itnum2=itnum(ip)
+                  tr2(:)=trcoo(:,k)+ trr(:,ip) !real(Spg%Op(Coord_Info%N_sym(k,i))%Mat(1:3,4))
                   !tr2(:)=trcoo(:,k)+trr(:,Coord_Info%N_sym(k,i))
                 end if
                 x1(:)=bcoo(:,k)
@@ -881,7 +878,7 @@
                       line=" "
                       write(unit=line,fmt="(a,2f9.3,a)") "AFIX ",ang12,sang12,&
                                                           " "//trim(nam1)//"  "//trim(A%atom(i)%lab)
-                      codesym= Write_SymTrans_Code(1,(/0.0,0.0,0.0/))
+                      codesym= Write_SymTrans_Code(1,[0.0,0.0,0.0])
                       line=trim(line)//trim(codesym)//" "//trim(nam2)
                       codesym= Write_SymTrans_Code(Coord_Info%N_sym(k,i),trcoo(:,k))
                       line=trim(line)//trim(codesym)
@@ -907,7 +904,7 @@
                       line=" "
                       write(unit=line,fmt="(a,2f9.3,a)") "AFIX ",ang12,sang12,&
                                                           " "//trim(nam2)//"  "//trim(A%atom(i)%lab)
-                      codesym=Write_SymTrans_Code(1,(/0.0,0.0,0.0/))
+                      codesym=Write_SymTrans_Code(1,[0.0,0.0,0.0])
                       line=trim(line)//trim(codesym)//" "//trim(nam1)
                       codesym= Write_SymTrans_Code(Coord_Info%N_sym(j,i),trcoo(:,j))
                       line=trim(line)//trim(codesym)
@@ -1240,15 +1237,17 @@
        real(kind=cp),    dimension(3)    :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                     :: T,dd
        real(kind=cp),    dimension(3,A%Natoms*Spg%multip) :: uu
-       real(kind=cp),    dimension(3,SpG%Multip)          :: tr
+       real(kind=cp),    dimension(3,SpG%Multip)          :: trr
+       real(kind=cp),    dimension(3,0:SpG%Num_Lat)       :: Lat_tr
        integer,          dimension(3,3,SpG%Multip)        :: Mat
 
        d=SpG%d
        do i=1,SpG%Multip
-         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
-          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+         Mat(:,:,i) = SpG%Op(i)%Mat(1:3,1:3)
+           trr(:,i) = SpG%Op(i)%Mat(1:3,d)
        End do
-
+       Lat_tr=0.0
+       Lat_tr(:,1:SpG%Num_Lat)  = real(SpG%Lat_tr(1:3,1:SpG%Num_Lat))
        qd(:)=1.0/cell%rcell(:)
        ic2(:)= nint(dmax/cell%cell(:)+1.0)
        ic1(:)=-ic2(:)
@@ -1288,12 +1287,12 @@
              nam1=a%atom(k)%lab
              do j=1,npeq
                 !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
+                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)
-                         do_jl:do jl=1,Spg%Num_Lat
-                            Tn(:)=real([i1,i2,i3])+real(Spg%Lat_tr(1:3,jl))
+                         do_jl:do jl=0,SpG%Num_Lat
+                            Tn(:)=real([i1,i2,i3])+Lat_tr(1:3,jl)
                             x1(:)=xx(:)+tn(:)
                             do l=1,3
                                t=abs(x1(l)-xo(l))*qd(l)

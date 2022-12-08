@@ -251,7 +251,7 @@
 
 
     Function modulation_function(At,SpG,s,Lat,time_v,tshift) result(v)
-      type(ModAtm_Std_Type),          intent(in) :: At     !Modulated atom type
+      type(ModAtm_Std_Type),        intent(in) :: At     !Modulated atom type
       type(SuperSpaceGroup_type),   intent(in) :: SpG
       integer,                      intent(in) :: s      !Pointer to the symmetry operator relating x and x0: x= g(s) x0 + t(s) + Lat
       integer,       dimension(:),  intent(in) :: Lat    !Additional lattice translation
@@ -303,7 +303,7 @@
       end if
     End Function modulation_function
 
-    Subroutine Get_MAtoms_inBOX(A,SpG,TBOX,Ol)
+    Subroutine Get_ModAtoms_inBOX(A,SpG,TBOX,Ol)
       !---- Arguments ----!
       type(AtList_Type),       intent(in)  :: A
       class(SpG_Type),         intent(in)  :: spg
@@ -465,13 +465,11 @@
 
       end do !Atoms
 
-    End Subroutine Get_MAtoms_inBOX
-
-
+    End Subroutine Get_ModAtoms_inBOX
 
  End Module Atoms_in_BOX
 
- Program Test_SHX_CIF_CFL
+ Program Test_CIF_CFL_SHX
     !---- Use Modules ----!
     use CFML_Globaldeps
     use CFML_Maths,        only: Set_EPS_Math
@@ -492,7 +490,7 @@
     real(kind=cp)                       :: start, fin
     type(AtList_Type)                   :: Atm
     type(orbit_list)                    :: Ol
-    integer, dimension(3)               :: TBOX=[2,2,8]
+    integer, dimension(3)               :: TBOX=[1,1,1]
     integer, dimension(3)               :: mcell
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -503,13 +501,14 @@
     type(File_type)                     :: flist
     type(Point_Orbit)                   :: orb, orb3
     !type(Orbit_type)                    :: orb3D
-    integer :: i, j, d, codini, s, nt
+    integer :: i, j, d, codini, s, nt, ier
     real(kind=cp), dimension(3)               :: codes=1.0, v
     real(kind=cp), dimension(:,:),allocatable :: codeT
+    logical :: box_given
 
     !> Init
     narg=COMMAND_ARGUMENT_COUNT()
-    cmdline=" "; nlong=0
+    cmdline=" "; nlong=0; box_given=.false.
     if (narg ==0) then
        write(unit=*,fmt='(/,a)',advance='no') " => Introduce the name of the file: "
        read(unit=*,fmt='(a)') fname
@@ -534,28 +533,34 @@
          if(line(1:5) =="MCELL") then
            read(line(6:),*) mcell
            tbox(:)=mcell
+           box_given=.true.
            exit
          end if
        end do
-       call Write_Crystal_Cell(Cell)
-       if(len_trim(Grp%setting) /= 0) then
-         write(*,"(/,a)") " => Transformed Cell"
-         if(Grp%D > 4) then
-           i=index(Grp%setting,"d")
-           setting=Grp%setting(1:d-2)//";0,0,0"
-         else
-           setting=Grp%setting
-         end if
-         call Change_Setting_Cell(Cell,setting,Celln)
-         call Write_Crystal_Cell(Celln)
+       if(.not. box_given) then
+          write(*,"(a)",advance="no") " => Please enter the box for calculations (3 integers): "
+          read(*,*,iostat=ier) tbox
+          if(ier /= 0) tbox=[1,1,1]
        end if
+       call Write_Crystal_Cell(Cell)
+
+       !if(len_trim(Grp%setting) /= 0) then  !This has been suppressed because the change of setting is done in Read_Xtal_structure
+       !  write(*,"(/,a)") " => Transformed Cell"
+       !  if(Grp%D > 4) then
+       !    i=index(Grp%setting,"d")
+       !    setting=Grp%setting(1:d-2)//";0,0,0"
+       !  else
+       !    setting=Grp%setting
+       !  end if
+       !  call Change_Setting_Cell(Cell,setting,Celln)
+       !  call Write_Crystal_Cell(Celln)
+       !end if
+
        !Determine the inverse operators
        Grp%Inv= Get_Inv_OP(Grp%Op)
 
        call Write_SpaceGroup_Info(Grp)
 
-       i=index(fname,".")
-       call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
 
        call Set_Eps_Math(0.0002_cp)
        if(Atm%natoms > 0) then
@@ -626,22 +631,30 @@
                       !    write(*,"(i5,3f10.5,tr8,3f10.5,i8,tr5,3i4,3f12.5)") j,orb3%pos(1:3,j),orb3%mom(1:3,j),s,orb3%Lat(1:3,j),orb3%mom(1:3,j)
                       !end do
 
-                 nt=orb3%Mult
-                 allocate(Ol%orbit(i)%pos(3,nt),Ol%orbit(i)%mom(3,nt),Ol%orbit(i)%Ls(nt),Ol%orbit(i)%Latt(3,nt))
-                 allocate(Ol%orbit(i)%Lab(nt),Ol%orbit(i)%ChemSymb(nt),Ol%orbit(i)%pts(nt))
-                 Ol%orbit(i)%ChemSymb(1:nt)=At%ChemSymb
-                 Ol%orbit(i)%mult=nt
-                 do j=1,nt
-                   Ol%orbit(i)%pos(:,j) = orb%pos(1:3,j)
-                   Ol%orbit(i)%mom(:,j) = orb%mom(1:3,j)
-                   Ol%orbit(i)%Ls(j)    = j
-                   Ol%orbit(i)%pts(j)   = orb%pts(j)
-                   Ol%orbit(i)%Latt(:,j)= orb%Lat(1:3,j)
-                   write(unit=Ol%orbit(i)%lab(j),fmt="(a,i5)")  trim(At%Lab)//"_",j
-                   Ol%orbit(i)%lab(j)=pack_string(Ol%orbit(i)%lab(j))
-                 end do
+                      nt=orb3%Mult
+                      allocate(Ol%orbit(i)%pos(3,nt),Ol%orbit(i)%mom(3,nt),Ol%orbit(i)%Ls(nt),Ol%orbit(i)%Latt(3,nt))
+                      allocate(Ol%orbit(i)%Lab(nt),Ol%orbit(i)%ChemSymb(nt),Ol%orbit(i)%pts(nt))
+                      Ol%orbit(i)%ChemSymb(1:nt)=At%ChemSymb
+                      Ol%orbit(i)%mult=nt
+                      do j=1,nt
+                        Ol%orbit(i)%pos(:,j) = orb%pos(1:3,j)
+                        Ol%orbit(i)%mom(:,j) = orb%mom(1:3,j)
+                        Ol%orbit(i)%Ls(j)    = j
+                        Ol%orbit(i)%pts(j)   = orb%pts(j)
+                        Ol%orbit(i)%Latt(:,j)= orb%Lat(1:3,j)
+                        write(unit=Ol%orbit(i)%lab(j),fmt="(a,i5)")  trim(At%Lab)//"_",j
+                        Ol%orbit(i)%lab(j)=pack_string(Ol%orbit(i)%lab(j))
+                      end do
 
                  End Select
+
+              Type is(Spg_Type)
+
+                 do j=1,orb%Mult
+                     s=orb%pts(j)
+                     write(*,forma) j,orb%pos(1:d,j),orb%mom(1:d,j),s,orb%Lat(1:d,j),orb%mom(1:3,j)
+                 end do
+                 !write(*,"(/,a)") " => Orbit of atom (restricted to 3D): "//trim(Atm%Atom(i)%Lab)
             End Select
             !write(*,"(/,a)") " => Orbit of atom: "//trim(Atm%Atom(i)%Lab)//"  restricted to 3D but within TBOX"
             !call Get_Orbit3D(Atm%Atom(i)%x,Atm%Atom(i)%Lab,Atm%Atom(i)%ChemSymb,Grp,orb3D,tbox)
@@ -680,17 +693,29 @@
            end select
           end do
 
-          ! Testing atoms in BOX
-          !call Get_MAtoms_inBOX(Atm,Grp,TBOX,Ol)
-          formb="(a15,tr5,a, 3f14.6,2i4,a,3i4,a)"
-          do i=1,Ol%num_orbs
-            write(*,"(/,a,i4)") " Orbit of atom: ",i
-            do j=1,Ol%orbit(i)%mult
-               write(*,formb) Ol%orbit(i)%Lab(j),Ol%orbit(i)%ChemSymb(j),Ol%orbit(i)%pos(1:3,j),Ol%orbit(i)%pts(j),Ol%orbit(i)%Ls(j),"  [",Ol%orbit(i)%Latt(:,j)," ]"
-               write(*,"(tr22,3f14.6)") Ol%orbit(i)%mom(1:3,j)
-            end do
-          end do
-          call Write_CIF_P1()
+          Select Type (Grp)
+
+              Type is (SuperSpaceGroup_Type)
+                ! Testing atoms in BOX
+                call Get_ModAtoms_inBOX(Atm,Grp,TBOX,Ol)
+                formb="(a15,tr5,a, 3f14.6,2i4,a,3i4,a)"
+                do i=1,Ol%num_orbs
+                  write(*,"(/,a,i4)") " Orbit of atom: ",i
+                  do j=1,Ol%orbit(i)%mult
+                     write(*,formb) Ol%orbit(i)%Lab(j),Ol%orbit(i)%ChemSymb(j),Ol%orbit(i)%pos(1:3,j),Ol%orbit(i)%pts(j),Ol%orbit(i)%Ls(j),"  [",Ol%orbit(i)%Latt(:,j)," ]"
+                     write(*,"(tr22,3f14.6)") Ol%orbit(i)%mom(1:3,j)
+                  end do
+                end do
+                call Write_CIF_P1()
+                i=index(fname,".")
+                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_ssg_MCIF")
+
+              Type is (SPG_Type)
+                i=index(fname,".")
+                call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
+                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_MCIF")
+
+          End Select
        end if
     else
       write(*,"(a)") " => Error found!"
@@ -776,4 +801,4 @@
         close(unit=Ipr)
     End Subroutine Write_CIF_P1
 
-End Program Test_SHX_CIF_CFL
+End Program Test_CIF_CFL_SHX
