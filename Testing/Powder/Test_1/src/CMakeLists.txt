@@ -7,6 +7,10 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 #################################
 # The project is declared. It is a Fortran project.
 project(Python_API_test1 Fortran)
+
+include(set_compiler_flags)
+set_compiler_flags()
+
 set(LIBRARY_NAME powder_mod)
 
 add_library(${LIBRARY_NAME} SHARED

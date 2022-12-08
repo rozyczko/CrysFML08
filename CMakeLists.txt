@@ -87,7 +87,7 @@ endif()
   execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "env"  CRYSFML08=${CMAKE_HOME_DIRECTORY} ${Python3_EXECUTABLE} ${CMAKE_HOME_DIRECTORY}/Testing/Python_API/api_generator.py)
   
   add_subdirectory(API/Src)
-
+  #add_subdirectory(Testing/Powder/Test_1/src)
   add_subdirectory(Testing/Powder/Test_2/fortran/src)
   
 endif()

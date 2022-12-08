@@ -1,7 +1,7 @@
 macro(set_compiler_flags)
 
     # Nullify all the Fortran flags.
-    set(CMAKE_Fortran_FLAGS "-fPIC")
+    set(CMAKE_Fortran_FLAGS "")
     set(CMAKE_Fortran_FLAGS_DEBUG "")
 
     get_filename_component(COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
@@ -61,9 +61,11 @@ macro(set_compiler_flags)
                 set(OPT_FLAGS1 "-O3 -std=f2008 -ffree-line-length-0  -fdec-math -fall-intrinsics")
             endif()
         elseif(COMPILER_NAME STREQUAL ifort)
-            if(CMAKE_BUILD_TYPE STREQUAL Debug)
-                set(OPT_FLAGS0 "-O0 -Warn" )
-                set(OPT_FLAGS1 "-g  -Warn")
+          if(CMAKE_BUILD_TYPE STREQUAL Debug)
+	        set(CMAKE_Fortran_FLAGS_DEBUG "-g -warn -ffree-line-length-none -fPIC")
+                #set(OPT_FLAGS "-g" )
+		#set(OPT_FLAGS0 "-g" )
+                #set(OPT_FLAGS1 "-g")
             elseif(CMAKE_BUILD_TYPE STREQUAL Release)
                 set(OPT_FLAGS0 "-O0")
                 set(OPT_FLAGS1 "-O2")
