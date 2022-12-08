@@ -7,8 +7,8 @@ module powder_mod
     use CFML_DiffPatt, only: DiffPat_Type,DiffPat_E_Type,allocate_pattern
     use CFML_GlobalDeps, only: Clear_Error,Err_CFML,to_Deg
     use CFML_gSpaceGroups, only: SpG_Type, Set_SpaceGroup, &
-    Write_SpaceGroup_Info
-    use CFML_IOForm, only: Read_Xtal_Structure
+         Write_SpaceGroup_Info
+    !use CFML_IOForm, only: Read_Xtal_Structure
     use CFML_Maths, only: locate
     use CFML_Metrics, only: Cell_G_Type,set_Crystal_Cell,write_crystal_cell
     use CFML_Profiles, only: PseudoVoigt
@@ -37,7 +37,7 @@ module powder_mod
     !  Must use bind(c, name="PyInit_<module name>")
     !  Return value must be type(c_ptr),
     !  use the return value of PythonModule%init
-    function PyInit_powder_mod() &
+      function PyInit_powder_mod() &
         bind(c,name="PyInit_powder_mod") result(m)
         !DEC$ ATTRIBUTES DLLEXPORT :: PyInit_powder_mod
         ! Local variables
@@ -45,7 +45,7 @@ module powder_mod
 
         m = Init()
 
-    end function
+      end function PyInit_powder_mod
 
     function Init() result(m)
 
@@ -117,7 +117,7 @@ module powder_mod
         end if
 
         ! Read cfl file
-        if (.not. err_cfml%flag) call Read_Xtal_Structure(trim(filcod)//".cfl",cell,spg,a,ftype=fich_cfl)
+        !if (.not. err_cfml%flag) call Read_Xtal_Structure(trim(filcod)//".cfl",cell,spg,a,ftype=fich_cfl)
         if (err_cfml%flag) then
             ierror = EXCEPTION_ERROR
             call raise_exception(RuntimeError,'simulation: '//trim(err_cfml%msg))
