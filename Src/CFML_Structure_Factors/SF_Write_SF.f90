@@ -16,7 +16,7 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
       type(RefList_Type),         intent(in) :: Reflex
       integer,                    intent(in) :: lun
       character(len=*), optional, intent(in) :: Mode
-      
+
       !---- Local Variables ----!
       integer :: i
 
@@ -25,16 +25,16 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
             case ("nuc")
                write(unit=lun,fmt="(/,/,a)") "    LIST OF REFLECTIONS AND STRUCTURE FACTORS(NEUTRONS)"
                write(unit=lun,fmt="(a)")     "    ==================================================="
-          
+
             case ("ele")
                write(unit=lun,fmt="(/,/,a)") "    LIST OF REFLECTIONS AND STRUCTURE FACTORS(ELECTRONS)"
                write(unit=lun,fmt="(a)")     "    ===================================================="
-          
+
             case default
                write(unit=lun,fmt="(/,/,a)") "    LIST OF REFLECTIONS AND STRUCTURE FACTORS(X-RAYS)"
                write(unit=lun,fmt="(a)")     "    ================================================="
          end Select
-      
+
       else
          write(unit=lun,fmt="(a)")   "    LIST OF REFLECTIONS AND STRUCTURE FACTORS(X-RAYS)"
          write(unit=lun,fmt="(a)")   "    ================================================="
@@ -42,7 +42,7 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
 
       write(unit=lun,fmt="(/,a,/)") &
            "   H   K   L   Mult    SinTh/Lda       dspc          |Fc|         Phase          F-Real        F-Imag       |Fc|^2      Num"
-      
+
       select type (ref => reflex%ref)
          class is (SRefl_Type)
             do i=1,reflex%Nref
@@ -51,9 +51,9 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
                                ref(i)%Fc, ref(i)%Phase, ref(i)%a, ref(i)%b, ref(i)%Fc*ref(i)%Fc, i
             end do
       end select
-            
+
    End Subroutine Write_Structure_Factors_Crys
-   
+
    !!--++
    !!--++ SUBROUTINE WRITE_STRUCTURE_FACTORS_MAG
    !!--++
@@ -70,7 +70,7 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
       type(StrfList_Type),     intent(in) :: stf
       integer,                 intent(in) :: lun
       logical, optional,       intent(in) :: full
-      
+
       !---- Local Variables ----!
       character(len=7),dimension(0:2), parameter :: RTYP=["  Nuc  ","  Mag  ","Nuc+Mag"]
       integer :: i
@@ -80,13 +80,13 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
 
       write(unit=lun,fmt="(/,a,/)") "   H   K   L Mult SinTh/Lda d-spacing  ref-type       sqNuc       sqMiV  NumRef"
       select type (ref => reflex%ref)
-         class is (SRefl_Type)
+         class is (Refl_Type)
             do i=1,reflex%Nref
                write(unit=lun,fmt="(3i4,i5,2f10.5,tr3,a,2f12.5,i8)") &
               ref(i)%h, ref(i)%mult, ref(i)%S, 0.5/ref(i)%S, RTYP(ref(i)%imag), &
               stf%strf(i)%sqNuc, stf%strf(i)%sqMiV,i
             end do
-      end select      
+      end select
 
       if (present(full)) then
          write(unit=lun,fmt="(/,a,/)") &
@@ -98,7 +98,7 @@ Submodule (CFML_Structure_Factors) SF_Write_SF
          end do
       else
       end if
-      
+
    End Subroutine Write_Structure_Factors_Mag
- 
-End Submodule SF_Write_SF 
+
+End Submodule SF_Write_SF

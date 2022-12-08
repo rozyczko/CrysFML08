@@ -299,6 +299,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%Centre_coord=rational(1_LI,2_LI) * SpaceG%Op(i)%Mat(1:d,Dd)
           if(sum(abs(SpaceG%Centre_coord)) > 0_LI) then
             SpaceG%centred = 0
+            SpaceG%Centre="                                                                                                                           "
             write(unit=SpaceG%Centre,fmt="(a,10a)") "Centrosymmetric with centre at: [ ",(trim(Rational_String(SpaceG%Centre_coord(j)))//" ",j=1,d),"]"
           else
             SpaceG%centred = 2
@@ -522,6 +523,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       character(len=5)                :: data_typ
       character(len=6)                :: xyz_typ
       character(len=256)              :: line
+      character(len=:), allocatable   :: sett,loc_str
       logical                         :: change_setting,centring
       type(rational), dimension(4,4)  :: identity
       type(rational), dimension(3,3)  :: mag_mat,ident3
@@ -547,7 +549,15 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           change_setting=.false.
         else
           change_setting=.true.
+          sett=setting
         end if
+      end if
+      loc_str=Str
+      i=index(Str,"::")
+      if(i /= 0) then
+        loc_str=Str(1:i-1)
+        sett=adjustl(Str(i+2:))
+        change_setting=.true.
       end if
       xyz_typ="xyz"
       if(present(xyz_type)) xyz_typ=xyz_type
@@ -556,19 +566,19 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
         case ("SHUBN")
           call Read_Magnetic_Data()
-          read(unit=str,fmt=*,iostat=ier) num
+          read(unit=loc_str,fmt=*,iostat=ier) num
           if(ier /= 0) then
             num=0 !It is supposed that a symbol has been provided
             do i=1,magcount
               !write(*,"(i5,tr5,a)") i, spacegroup_label_bns(i)
-              if(trim(str) == trim(spacegroup_label_bns(i)) .or. &
-                 trim(str) == trim(spacegroup_label_og(i))) then
+              if(trim(loc_str) == trim(spacegroup_label_bns(i)) .or. &
+                 trim(loc_str) == trim(spacegroup_label_og(i))) then
                  num=i
                  exit
               end if
             end do
             if(num == 0) then
-               Err_CFML%Msg=" => The BNS symbol: "//trim(str)//" is illegal! "
+               Err_CFML%Msg=" => The BNS symbol: "//trim(loc_str)//" is illegal! "
                Err_CFML%Ierr=1
                if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                return
@@ -810,7 +820,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           write(SpaceG%UNI_num,"(i4)") Litvin2IT(num)
 
           if(change_setting) then
-              call Change_Setting_SpaceG(setting, SpaceG)
+              call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                 return
@@ -825,9 +835,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
         case ("SUPER")  !Read the superspace Database
         !---------------------------------------
           if(present(database_path)) then
-             call Read_single_SSG(str,num,database_path)
+             call Read_single_SSG(loc_str,num,database_path)
           else
-             call Read_single_SSG(str,num)
+             call Read_single_SSG(loc_str,num)
           end if
           if(Err_CFML%Ierr /= 0)  return
           iclass=igroup_class(num)
@@ -993,7 +1003,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           if(SpaceG%Centred == 2 .or. SpaceG%Centred == 0) SpaceG%NumOps=SpaceG%NumOps/2
 
           if(change_setting) then
-              call Change_Setting_SpaceG(setting, SpaceG)
+              call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_SSG_DBase()
                 return

@@ -152,9 +152,9 @@
           i2=Locate(Pat%x,th2,npts)
           i1=max(i1,1)
           i2=min(i2,npts)
-               Intens= LorentzF *ref(i)%mult * ref(i)%Fc**2 * PPC%Scalef
+          Intens= LorentzF *ref(i)%mult * ref(i)%Fc**2 * PPC%Scalef
           do j=i1,i2
-             Pat%ycalc(j)=Pat%ycalc(j)+ PseudoVoigt( Pat%x(j)-Bragg, (/fwhm,eta /) ) * Intens
+             Pat%ycalc(j)=Pat%ycalc(j)+ PseudoVoigt( Pat%x(j)-Bragg, [fwhm,eta ] ) * Intens
           end do
        end do
       End Select
@@ -304,7 +304,7 @@
                       PPC%Thmin=1.00; PPC%step=0.05;  PPC%Thmax= 120.0
                    end if
 
-                Case("SIZE_LG")
+                Case("SIZE_L")
                    read(unit=line(8:),fmt=*,iostat=ier) PPC%Ls
                    if (ier /= 0) then
                       PPC%Ls=1900.0

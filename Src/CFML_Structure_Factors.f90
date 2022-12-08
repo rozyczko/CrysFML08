@@ -48,7 +48,7 @@ Module CFML_Structure_Factors
     Use CFML_gSpaceGroups,                only: Spg_Type
     Use CFML_Metrics,                     only: Cell_G_Type
     Use CFML_Reflections,                 only: RefList_Type, Refl_Type, SRefl_Type, MRefl_Type, &
-                                                Gener_Reflections_Shub
+                                                Gener_Reflections_Shub, Gener_Reflections
     Use CFML_Scattering_Tables
     Use CFML_Rational
 
@@ -355,15 +355,16 @@ Module CFML_Structure_Factors
           complex, optional,                  intent(out):: fc
        End Subroutine Calc_StrFactor
 
-       Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, lun)
+       Module Subroutine Magnetic_Structure_Factors(Reflex, Cell, Atm, Grp, Smax, Stf, mode, lun)
           !---- Arguments ----!
-          type(RefList_Type),    intent(in out) :: Reflex
-          type(Cell_G_Type),     intent(in)     :: Cell
-          type(AtList_type),     intent(in out) :: Atm
-          type(SpG_type),        intent(in)     :: Grp
-          real(kind=cp),         intent(in)     :: Smax
-          type(StrfList_Type),   intent(out)    :: Stf
-          integer, optional,     intent(in)     :: lun
+          type(RefList_Type),        intent(in out) :: Reflex
+          type(Cell_G_Type),         intent(in)     :: Cell
+          type(AtList_type),         intent(in out) :: Atm
+          type(SpG_type),            intent(in)     :: Grp
+          real(kind=cp),             intent(in)     :: Smax
+          type(StrfList_Type),       intent(out)    :: Stf
+          character(len=*),optional, intent(in)     :: mode
+          integer,         optional, intent(in)     :: lun
        End Subroutine Magnetic_Structure_Factors
 
        Module Subroutine Calc_Mag_Structure_Factor(Hm, Cell, Grp, Atm, Scf, Mode, Strf, Magonly, Mdom, Tdom, Twin)

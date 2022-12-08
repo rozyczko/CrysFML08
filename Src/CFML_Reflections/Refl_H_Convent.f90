@@ -25,14 +25,14 @@ Submodule (CFML_Reflections) Refl_H_Convent
       integer, dimension(3,2),optional, intent(in)     :: hlim
 
       !---- Local variables ----!
-      real(kind=cp)                   :: v1,v2,sval
-      integer                         :: h,k,l,hmin,kmin,lmin,hmax,kmax,lmax, i, num_ref
-      integer, dimension(Spg%d-1)           :: hh,kk,nulo
-      integer,  dimension(  MaxRef)   :: ind
-      integer,  dimension(  MaxRef)   :: mul
-      integer,  dimension(Spg%d-1,MaxRef)   :: hkl
-      real(kind=cp),dimension(MaxRef) :: sv
-      character(len=2)                :: inf
+      real(kind=cp)                       :: v1,v2,sval
+      integer                             :: h,k,l,hmin,kmin,lmin,hmax,kmax,lmax, i, num_ref
+      integer, dimension(Spg%d-1)         :: hh,kk,nulo
+      integer,  dimension(  MaxRef)       :: ind
+      integer,  dimension(  MaxRef)       :: mul
+      integer,  dimension(Spg%d-1,MaxRef) :: hkl
+      real(kind=cp),dimension(MaxRef)     :: sv
+      character(len=2)                    :: inf
 
       !> Init
       nulo=0
