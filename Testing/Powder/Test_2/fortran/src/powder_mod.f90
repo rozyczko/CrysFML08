@@ -1,7 +1,7 @@
 module powder_mod
 
     use forpy_mod
-    use iso_c_binding
+    use,intrinsic :: iso_c_binding
 
     use CFML_Atoms, only: AtList_Type,Allocate_Atom_List,Write_Atom_List
     use CFML_DiffPatt, only: DiffPat_Type,DiffPat_E_Type,allocate_pattern
