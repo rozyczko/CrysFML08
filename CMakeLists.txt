@@ -88,6 +88,6 @@ endif()
   
   add_subdirectory(API/Src)
 
-  add_subdirectory(Testing/Powder/Test_1/src)
+  add_subdirectory(Testing/Powder/Test_2/fortran/src)
   
 endif()
