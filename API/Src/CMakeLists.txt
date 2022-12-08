@@ -10,6 +10,9 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 project(Python_API Fortran)
 set(LIBRARY_NAME crysfml_api)
 
+include(set_compiler_flags)
+set_compiler_flags()
+
 add_library(${LIBRARY_NAME} SHARED
   Extensions/forpy_mod.F90
   Extensions/wraps.f90
