@@ -9,4 +9,4 @@ def load_data(fname : str) -> dict:
 
 def compute_pattern(data: dict):
 
-    powder_mod.simulation(data)
+    return powder_mod.simulation(data)
