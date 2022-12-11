@@ -410,7 +410,7 @@
 
     Module Subroutine Calc_Polar(frame,wave,Cell,UB, Pin, NSF, Mag_dom, Mh, Pf,ok,mess,B_Q)
        !---- Arguments ----!
-       character(len=3),             intent(in)    :: frame
+       character(len=*),             intent(in)    :: frame
        real(kind=cp),                intent(in)    :: wave
        type (Cell_G_Type),           intent(in)    :: Cell
        Real(kind=cp), dimension(3,3),intent(in)    :: UB
@@ -425,7 +425,7 @@
     End Subroutine Calc_Polar
 
     Module Subroutine Get_Pol_Tensor_Pc(frame,wave,Cell,UB,Pin, NSF, Mag_dom, Mh, Pol_tens, Pc,ok,mess,B_Q)
-       character(len=3),             intent(in)    :: frame
+       character(len=*),             intent(in)    :: frame
        real(kind=cp),                intent(in)    :: wave
        type (Cell_G_Type),           intent(in)    :: Cell
        Real(kind=cp), dimension(3,3),intent(in)    :: UB
