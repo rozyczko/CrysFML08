@@ -1,31 +1,45 @@
-Title NiFePO5
-!   Unit cell parameters:  a, b, c, Alpha, Beta, Gamma
-Cell  7.1882(2)   6.3924(2)   7.4847(3)  90.000  90.000  90.000
-!     Space Group
-Spgr  P n m a
-!  Atom-strings in the order: Label, Species, x, y, z, Biso, Occ [,2*Spin, charge]
-Atom Ni  NI2+  0.0000       0.0000     0.0000       0.74     0.5
-Atom Fe  FE+3  0.1443(9)    0.2500     0.7074(2)    0.63     0.5
-Atom P   P5+   0.3718(9)    0.2500     0.1424(2)    0.79     0.5
-Atom O1  O2-   0.3988(9)    0.2500     0.64585(2)   0.71     0.5
-Atom O2  O-2   0.19415(4)   0.2500     0.0253(4)    0.70     0.5
-Atom O3  O-2   0.0437(2)    0.2500     0.4728(2)    0.83     0.5
-Atom O4  O-2   0.3678(2)    0.0566(1)  0.2633(2)    0.77     1.0
+Title KeyCode Checking
 !   Commands
 COMMANDS
-  vary xyz P O
-  vary uiso_O1 x_O2 y_O3
-  fix x_O1
 
-  %Pattern
-     Vary UVW_Pat1
-     Fix U_Pat1
-  %EndPattern
+  %Phase Ortho1
+     cell  7.1882(2)   6.3924(2)   7.4847(3)  90.000  90.000  90.000
+     vary cell ! significa que varia los parametros de la phase 1
+     ....
+     ....
+     %Pattern Xray1
+     ...
+     ...
+     ...
+     %End_Pattern
 
-  %Pattern 2
-     Vary UVW
-     Vary BKG1 BKG2 BKG3
-  %EndPattern
+     %Pattern Neu1
+     ...
+     ...
+     ...
+     %End_Pattern
 
-END COMMANDS
+  %End_Phase
+
+  %Phase Mono2
+     cell  12.45882(2)   3.2424(2)   9.1467(3)  90.000 103.345  90.000
+     .....
+
+     %Pattern Neu2
+     ....
+     %End_Pattern
+  %End_Phase
+
+  %Phase General3
+     .....
+     .....
+     %Pattern Xray1
+     ....
+     %End_Pattern
+     %Pattern Neu2
+     ....
+     %End_Pattern
+  %End_Phase
+
+END_COMMANDS
 

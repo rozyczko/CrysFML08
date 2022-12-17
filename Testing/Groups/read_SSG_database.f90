@@ -17,21 +17,21 @@
       !  stop
       !end if
 
-	  do
+      do
         write(*,"(a)",advance="no") " => Enter the number (or the symbol) of the SSG: "
         read(*,"(a)") str
         !if(m <= 0) exit
-		if(len_trim(str) == 0) exit
+        if(len_trim(str) == 0) exit
         !if(m > 16697) then
         !  write(*,"(a)") " => There are only 16697 superspace groups in the database! "
         !  cycle
         !end if
 
-		call Read_single_SSG(str,m)
-		if(err_CFML%Ierr /= 0) then
-		  write(*,"(a)") trim(err_CFML%Msg)
-		  cycle
-		end if
+        call Read_single_SSG(str,m)
+        if(err_CFML%Ierr /= 0) then
+          write(*,"(a)") trim(err_CFML%Msg)
+          cycle
+        end if
         write(*,"(4(a,i5))") " Order number:",m, " Group number:",igroup_number(m), " Bravais class:",igroup_class(m), "  Basic Group #:",igroup_spacegroup(m)
         iclass=igroup_class(m)
         nmod=iclass_nmod(iclass)
