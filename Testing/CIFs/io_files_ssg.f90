@@ -494,9 +494,9 @@
     integer, dimension(3)               :: mcell
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    character(len=256)                  :: setting,ctr_code,forma,formb
+    character(len=256)                  :: ctr_code,forma,formb !setting,
     character(len=256),dimension(26)    :: tctr_code
-    type(Cell_G_Type)                   :: Cell,Celln
+    type(Cell_G_Type)                   :: Cell !,Celln
     class(Spg_Type), allocatable        :: Grp
     type(File_type)                     :: flist
     type(Point_Orbit)                   :: orb, orb3

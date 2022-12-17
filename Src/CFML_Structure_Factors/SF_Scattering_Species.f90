@@ -154,8 +154,6 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      integer,                      optional, intent(in)    :: lun
 
      !---- Local variables ----!
-     character(len=12), parameter            :: DIGPM="0123456789+-"
-
      character(len=4)                        :: symbcar
      character(len=4), dimension(atm%natoms) :: symb
      character(len=4), dimension(atm%natoms) :: elem
