@@ -154,8 +154,6 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
      integer,                      optional, intent(in)    :: lun
 
      !---- Local variables ----!
-     character(len=12), parameter            :: DIGPM="0123456789+-"
-
      character(len=4)                        :: symbcar
      character(len=4), dimension(atm%natoms) :: symb
      character(len=4), dimension(atm%natoms) :: elem
@@ -199,6 +197,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
 
      Scf%br=bs(1:n)
      if (present(lambda)) then
+
         call Set_Delta_Fp_Fpp()
 
         !> Select wavelength (by default is CuKalpha1: k=5 in the list)
@@ -327,11 +326,6 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
 
      !> Printing Information
      if (present(lun)) then
-        if (present(lambda)) then
-           write(unit=lun,fmt="(/,a,f10.6,a)")  "  WAVELENGTH: ",lambda," Angstroms"
-        else
-           write(unit=lun,fmt="(/,a)")  "  WAVELENGTH NOT PROVIDED! "
-        end if
         write(unit=lun,fmt="(/,a)")  "  INFORMATION FROM TABULATED NEUTRON SCATTERING LENGTHS"
         write(unit=lun,fmt="(a,/)")  "  ====================================================="
         write(unit=lun,fmt="(a)")    "  FERMI LENGTHS "
@@ -348,6 +342,11 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
            write(unit=lun,fmt="(a,/)")  "  ==================================================="
            write(unit=lun,fmt="(/,a,/)")    "   ATOMIC SCATTERING FACTOR COEFFICIENTS: {A(i),B(i),I=1,4},C  Dfp  Dfpp "
            write(unit=lun,fmt="(a,i3)")     "   Number of chemically different species: ",Scf%Num_Species
+           if(present(lambda)) then
+              write(unit=lun,fmt="(a,f10.6,a)")  "  Wavelength: ",lambda," Angstroms"
+           else
+              write(unit=lun,fmt="(/,a)")  "  WAVELENGTH not provided: anomalous scattering not applied "
+           end if
            write(unit=lun,fmt="(/,a)") &
                  " Atom(ScF)  Atom(ScFX)           a1       b1       a2       b2       a3       b3       a4       b4        c      Dfp     Dfpp"
            do k=1,Scf%Num_species

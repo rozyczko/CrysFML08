@@ -459,15 +459,15 @@ Module CFML_IOForm
          Integer,             optional, intent(in)  :: Nphase
       End Subroutine Read_XTal_CIF
 
-   !   Module Subroutine Read_XTal_FST(fst, Cell, Spg, Atm, MGp, mAtm, Mag_dom)
-   !     Type(File_Type),                     intent(in)     :: FST
-   !      Class(Cell_Type),                    intent(out)    :: Cell
-   !      Class(SpG_Type),        allocatable, intent(out)    :: SpG
-   !      Type(AtList_Type),                   intent(out)    :: Atm
-   !      Type(MagSymm_k_Type),      optional, intent(out)    :: MGp
-   !      Type(mAtom_List_Type),     optional, intent(out)    :: mAtm
-   !      Type(Magnetic_Domain_type),optional, intent(out)    :: Mag_dom
-   !   End Subroutine Read_XTal_FST
+      Module Subroutine Read_XTal_FST(fst, Cell, Spg, Atm, MGp, mAtm, Mag_dom)
+         Type(File_Type),                     intent(in)     :: FST
+         Class(Cell_Type),                    intent(out)    :: Cell
+         Class(SpG_Type),        allocatable, intent(out)    :: SpG
+         Type(AtList_Type),                   intent(out)    :: Atm
+         Type(MagSymm_k_Type),      optional, intent(out)    :: MGp
+         Type(mAtom_List_Type),     optional, intent(out)    :: mAtm
+         Type(Magnetic_Domain_type),optional, intent(out)    :: Mag_dom
+      End Subroutine Read_XTal_FST
 
       Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
          type(File_Type),                 intent(in)  :: cif
@@ -715,16 +715,16 @@ Module CFML_IOForm
           case ('INS','RES')
              allocate(SpG_Type :: SpG)
              call Read_XTal_SHX(f, Cell, SpG, Atm)
-          !case ('FST')
-          !   if(present(mAtm) .and. present(MGp)) then
-          !      if(present(Mag_Dom)) then
-          !         call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm, Mag_dom)
-          !      else
-          !         call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm)
-          !      end if
-          !   else
-          !      call Read_XTal_FST(f, Cell, SpG, Atm)
-          !   end if
+          case ('FST')
+             if(present(mAtm) .and. present(MGp)) then
+                if(present(Mag_Dom)) then
+                   call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm, Mag_dom)
+                else
+                   call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm)
+                end if
+             else
+                call Read_XTal_FST(f, Cell, SpG, Atm)
+             end if
           case ('PCR')
           case ('MCIF')
              call Read_XTal_MCIF(f, Cell, Spg, ATM)

@@ -355,6 +355,7 @@ SubModule (CFML_Reflections) Refl_Generate
       integer,       dimension(:),   allocatable :: indx,ini,fin,itreat
       real(kind=cp), dimension(:),   allocatable :: sv,sm
       logical :: Frd,Lcentred
+
       Frd=.true.; Lcentred=.false.
       if(present(Friedel)) Frd=Friedel
       !> Init
@@ -412,7 +413,7 @@ SubModule (CFML_Reflections) Refl_Generate
             fin(indp)=i
 
             do j=i+1,num_ref  !look for equivalent reflections to the current (i) in the list
-               if (abs(sm(i)-sm(j)) > 0.000001) exit
+               if (abs(sm(i)-sm(j)) > 0.001) exit
                kk=hklm(:,j)
                if (h_equiv(hh,kk,SpG,Frd)) then ! if  hh eqv kk
                   itreat(j) = i                 ! add kk to the list equivalent to i
@@ -476,7 +477,7 @@ SubModule (CFML_Reflections) Refl_Generate
          hh=hkl(:,i)
          reflex%ref(i)%h    = hh
          reflex%ref(i)%s    = sm(i)
-         reflex%ref(i)%mult = h_mult(hh,SpG,.false.)
+         reflex%ref(i)%mult = h_mult(hh,SpG,Frd)
          reflex%ref(i)%imag = indx(i)
       end do
    End Subroutine Gener_Reflections_Shub

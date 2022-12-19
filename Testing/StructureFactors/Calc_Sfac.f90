@@ -195,7 +195,7 @@ Program Calc_Structure_Factors
    !> Magnetic structure factors
    if (Spg%Magnetic) then
       call clear_error()
-      call Magnetic_Structure_Factors(hkl, Cell, A, SpG, stlmax, Stf, lun)
+      call Magnetic_Structure_Factors(hkl, Cell, A, SpG, stlmax, Stf, lun=lun)
       call Write_Structure_Factors_Mag(hkl, Stf, Lun, .true.)
    end if
 

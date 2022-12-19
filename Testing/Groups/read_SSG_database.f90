@@ -17,7 +17,7 @@
       !  stop
       !end if
 
-	  do
+      do
         write(*,"(a)",advance="no") " => Enter the number (or the symbol) of the SSG: "
         read(*,"(a)") Str_tmp
         !if(m <= 0) exit
@@ -28,10 +28,10 @@
         !end if
 
 		call Read_single_SSG(Str_tmp,m)
-		if(err_CFML%Ierr /= 0) then
-		  write(*,"(a)") trim(err_CFML%Msg)
-		  cycle
-		end if
+        if(err_CFML%Ierr /= 0) then
+          write(*,"(a)") trim(err_CFML%Msg)
+          cycle
+        end if
         write(*,"(4(a,i5))") " Order number:",m, " Group number:",igroup_number(m), " Bravais class:",igroup_class(m), "  Basic Group #:",igroup_spacegroup(m)
         iclass=igroup_class(m)
         nmod=iclass_nmod(iclass)

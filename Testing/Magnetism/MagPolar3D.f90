@@ -308,7 +308,7 @@ Program MagPolar3D
          call Write_Polar_line(Polari)
          !
          if(wave_given .and. ub_given) then
-           pin=(/1.0,0.0,0.0/)
+           pin=[1.0,0.0,0.0]
            call Calc_Polar("BM",wave,Cell,UB, Pin, NSF, Mag_dom, Mh, Pf,ok,line)
            if(.not. ok) then
               write(unit=*,fmt="(a)") " => "//trim(line)
@@ -317,7 +317,7 @@ Program MagPolar3D
               write(unit=lun,fmt="(a,2(3f9.5,tr4))") " => Incident & final polarisation in Blume-Maleyev frame: ",pin,pf
               write(unit=*,  fmt="(a,2(3f9.5,tr4))") " => Incident & final polarisation in Blume-Maleyev frame: ",pin,pf
            end if
-           pin=(/0.0,1.0,0.0/)
+           pin=[0.0,1.0,0.0]
            call Calc_Polar("BM",wave,Cell,UB, Pin, NSF, Mag_dom, Mh, Pf,ok,line)
            if(.not. ok) then
               write(unit=*,fmt="(a)") " => "//trim(line)
@@ -325,7 +325,7 @@ Program MagPolar3D
               write(unit=lun,fmt="(a,2(3f9.5,tr4))") " => Incident & final polarisation in Blume-Maleyev frame: ",pin,pf
               write(unit=*,  fmt="(a,2(3f9.5,tr4))") " => Incident & final polarisation in Blume-Maleyev frame: ",pin,pf
            end if
-           pin=(/0.0,0.0,1.0/)
+           pin=[0.0,0.0,1.0]
            call Calc_Polar("BM",wave,Cell,UB, Pin, NSF, Mag_dom, Mh, Pf,ok,line)
            if(.not. ok) then
               write(unit=*,fmt="(a)") " => "//trim(line)

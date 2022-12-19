@@ -20,5 +20,3 @@ The environnement variable `CRYSFML08` needs to be set to the root directory of 
 - Create a build birectory `mkdir build && cd build`
 - Run the cmake configuation `cmake -DCMAKE_Fortran_COMPILER=ifort -DPYTHON_API=ON ..`
 - Build and install the project `make -j4 && make install`
-
-
