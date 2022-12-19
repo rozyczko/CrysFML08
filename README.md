@@ -1,3 +1,5 @@
+# CrysFML 2008
+
 This project intends to be an upgrade of the full CrysFML library existing in 
 the SVN and GIT repositories. Contrary to CrysFML that is mostly written in 
 Fortran 95, the new project is totally based in the latest standard of Fortran 
@@ -10,4 +12,13 @@ intel fortran (ifort) are supported for the three platforms: Windows, Linux and
 MacOS. Presently the project is operational up to a certain point. The project will be 
 progressively updated up to contain the whole set of procedures (or equivalent) 
 as the existing CrysFML in the SVN (https://forge.epn-campus.eu/projects/crysfml/repository) 
-and GitLAB (https://code.ill.fr/scientific-software/crysfml) repositories. 
+and GitLAB (https://code.ill.fr/scientific-software/crysfml) repositories.
+
+## Installation
+### Unix systems
+The environnement variable `CRYSFML08` needs to be set to the root directory of the project.
+- Create a build birectory `mkdir build && cd build`
+- Run the cmake configuation `cmake -DCMAKE_Fortran_COMPILER=ifort -DPYTHON_API=ON ..`
+- Build and install the project `make -j4 && make install`
+
+
