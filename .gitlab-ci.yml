@@ -51,5 +51,24 @@ make:linux_ifort:
     - sci
     - ubuntu
     
+#===============
+
+make:macos_gfortran:
+  stage: make
+  script:
+    - BuildServer/Unix/build_F2008.sh gfortran
+  tags:
+    - sci
+    - osx-10.13
+    
+make:macos_ifort:
+  stage: make
+  script:
+    - BuildServer/Unix/build_F2008.sh ifort
+  tags:
+    - sci
+    - osx-10.13
+
+
 
 
