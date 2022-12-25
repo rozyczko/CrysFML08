@@ -2384,7 +2384,7 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%name_inst=" "                !Short name of the instrument
       Current_Instrm%geom="Eulerian_4C"           !"Eulerian_4C","Kappa_4C","Lifting_arm","Powder","Laue"
       Current_Instrm%BL_frame="z-up"              !Kind of BL-frame: "z-up" or "z-down"
-      Current_Instrm%data_ordering="topleftcolmajor"
+      Current_Instrm%data_ordering="unknown"
       Current_Instrm%dist_units="mm"              !distance units: "mm  ","cm  ","inch"
       Current_Instrm%r_ord="xyz"                  ! xyz, yxz, ... Order of detector tilt calculations: xyz means Rx Ry Rz
       Current_Instrm%angl_units="deg"             !angle units: "rad","deg"
