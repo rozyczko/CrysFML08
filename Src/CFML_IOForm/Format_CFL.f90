@@ -50,7 +50,7 @@ SubModule (CFML_IOForm) Format_CFL
       na=0
       mom_comp=" "
       do i=j_ini,j_end
-          line=adjustl(cfl%line(i)%str)
+          line=adjustl(cfl%line(i)%Str_tmp)
           if (len_trim(line) == 0) cycle
           if (line(1:1) == "!" .or. line(1:1) == "#") cycle
 
@@ -76,7 +76,7 @@ SubModule (CFML_IOForm) Format_CFL
 
       na=0
       do i=j_ini,j_end
-         line=adjustl(cfl%line(i)%str)
+         line=adjustl(cfl%line(i)%Str_tmp)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
 
@@ -117,7 +117,7 @@ SubModule (CFML_IOForm) Format_CFL
          do
             j=j+1
             if ( j < j_end ) then
-               line=adjustl(cfl%line(j)%str)
+               line=adjustl(cfl%line(j)%Str_tmp)
 
                if (len_trim(line) == 0) cycle
                if (line(1:1) == "!" .or. line(1:1) == "#") cycle
@@ -161,7 +161,7 @@ SubModule (CFML_IOForm) Format_CFL
                do
                   j=j+1
                   if ( j < j_end ) then
-                     line=adjustl(cfl%line(j)%str)
+                     line=adjustl(cfl%line(j)%Str_tmp)
 
                      if (len_trim(line) == 0) cycle
                      if (line(1:1) == "!" .or. line(1:1) == "#") cycle
@@ -243,7 +243,7 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Search: CELL
       do i=j_ini,j_end
-         lines(1)=adjustl(u_case(cfl%line(i)%str))
+         lines(1)=adjustl(u_case(cfl%line(i)%Str_tmp))
          if (lines(1)(1:4) == "CELL") exit
          lines(1)=" "
       end do
@@ -310,7 +310,7 @@ SubModule (CFML_IOForm) Format_CFL
 
       nk=0; nq=0
       do i=j_ini,j_end
-         line=adjustl(cfl%line(i)%str)
+         line=adjustl(cfl%line(i)%Str_tmp)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
 
@@ -444,7 +444,7 @@ SubModule (CFML_IOForm) Format_CFL
       if (present(xyz_type)) strcode=trim(xyz_type)
 
       do i=j_ini,j_end
-         line=adjustl(cfl%line(i)%str)
+         line=adjustl(cfl%line(i)%Str_tmp)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
 
@@ -551,7 +551,7 @@ SubModule (CFML_IOForm) Format_CFL
 
             nk=0; nq=0
             do i=j_ini,j_end
-               line=adjustl(cfl%line(i)%str)
+               line=adjustl(cfl%line(i)%Str_tmp)
                if (len_trim(line) == 0) cycle
                if (line(1:1) == "!" .or. line(1:1) == "#") cycle
 
@@ -842,7 +842,7 @@ SubModule (CFML_IOForm) Format_CFL
       !> Calculating number of Phases
       nt_phases=0; ip=cfl%nlines; ip(1)=1
       do i=1,cfl%nlines
-         line=adjustl(cfl%line(i)%str)
+         line=adjustl(cfl%line(i)%Str_tmp)
          if (l_case(line(1:6)) == "phase_")  then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
@@ -880,7 +880,7 @@ SubModule (CFML_IOForm) Format_CFL
       set_moment=.false.
       set_ModAtm_std=.false.
       do i=n_ini,n_end
-         line=adjustl(cfl%line(i)%str)
+         line=adjustl(cfl%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '!') cycle
@@ -888,7 +888,7 @@ SubModule (CFML_IOForm) Format_CFL
          if (u_case(line(1:4)) /= 'ATOM') cycle
 
          do j=i+1,n_end
-            line=adjustl(cfl%line(j)%str)
+            line=adjustl(cfl%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '!') cycle
 
@@ -1026,7 +1026,7 @@ SubModule (CFML_IOForm) Format_CFL
       Job_info%Num_Patterns=1
 
       do i=i_ini,i_end
-         line=u_case(adjustl(cfl%line(i)%str))
+         line=u_case(adjustl(cfl%line(i)%Str_tmp))
 
          if (line(1:5) == "TITLE") Job_info%title=line(7:)
 
@@ -1126,7 +1126,7 @@ SubModule (CFML_IOForm) Format_CFL
          do n_pat=1, Job_info%Num_Patterns
             i=ipt(n_pat)
 
-            line=u_case(adjustl(cfl%line(i)%str))
+            line=u_case(adjustl(cfl%line(i)%Str_tmp))
             line=line(8:)
             call findfmt(0,line,fmtfields,fmtformat)
             read(unit=line,fmt=fmtformat) Job_Info%Patt_typ(n_pat), a1,a2,a3,a4,a5
@@ -1215,7 +1215,7 @@ SubModule (CFML_IOForm) Format_CFL
       if (ip(1) /= 0) then
          do i=1,nphas
             j=ip(i)
-            line=adjustl(cfl%line(j)%str)
+            line=adjustl(cfl%line(j)%Str_tmp)
             Job_Info%Phas_nam(i)=line(8:)
          end do
       else
@@ -1225,7 +1225,7 @@ SubModule (CFML_IOForm) Format_CFL
       !> Command Lines, stored but not analysed here
       do i=1,ncmd
          j=ic(i)
-         line=adjustl(cfl%line(j)%str)
+         line=adjustl(cfl%line(j)%Str_tmp)
          Job_Info%cmd(i)=line(8:)
       end do
 

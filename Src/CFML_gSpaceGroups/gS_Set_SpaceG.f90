@@ -360,13 +360,13 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       end if
    End Subroutine Change_Setting_SpaceG
 
-   Subroutine transf_E_groups(str)
-     character(len=*), intent(in out) :: str
+   Subroutine transf_E_groups(Str_tmp)
+     character(len=*), intent(in out) :: Str_tmp
      ! --- Local variables ---!
-     character(len=len(str)) :: e_group
+     character(len=len(Str_tmp)) :: e_group
      integer :: p2,pm,pm2,pe
 
-     e_group = pack_string(u_case(str))
+     e_group = pack_string(u_case(Str_tmp))
      p2 = index(e_group,"2")
      pm2= index(e_group,"M",back=.true.)
      pm = index(e_group,"M")
@@ -381,25 +381,25 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
            Case(2)
 
              if(e_group(1:1) == "B") then  ! e-> a
-               str="B M A 2"  ! Bme2
+               Str_tmp="B M A 2"  ! Bme2
              else
-               str="C M 2 A"  ! Cm2e
+               Str_tmp="C M 2 A"  ! Cm2e
              end if
 
            Case(3)
 
              if(e_group(1:1) == "A") then  ! e-> b
-               str="A B M 2"  !Aem2
+               Str_tmp="A B M 2"  !Aem2
              else
-               str="C 2 M B"  !C2me
+               Str_tmp="C 2 M B"  !C2me
              end if
 
            Case(4)
 
             if(e_group(1:1) == "A") then  ! e-> c
-              str="A C 2 M"  !Ae2m
+              Str_tmp="A C 2 M"  !Ae2m
             else
-              str="B 2 C M"  !B2em
+              Str_tmp="B 2 C M"  !B2em
             end if
 
           End Select
@@ -411,25 +411,25 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
             Case(4)
 
               if(e_group(1:1) == "A") then  ! e-> b,a
-                str="A B A 2"  !Aea2
+                Str_tmp="A B A 2"  !Aea2
               else
-                str="B B A 2"  !Bbe2
+                Str_tmp="B B A 2"  !Bbe2
               end if
 
             Case(3)
 
               if(e_group(1:1) == "A") then  ! e-> c,a
-                str="A C 2 A"  !Ae2a
+                Str_tmp="A C 2 A"  !Ae2a
               else
-                str="C C 2 A"  !Cc2e
+                Str_tmp="C C 2 A"  !Cc2e
               end if
 
             Case(2)
 
               if(e_group(1:1) == "B") then  ! e-> c,b
-                str="B 2 C B"  !B2eb
+                Str_tmp="B 2 C B"  !B2eb
               else
-                str="C 2 C B"  !C2ce
+                Str_tmp="C 2 C B"  !C2ce
               end if
 
           End Select
@@ -447,29 +447,29 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               Case(2) ! Cmce Bmeb
 
                 if(e_group(1:1) == "C") then
-                  str="C M C A"  !Cmce
+                  Str_tmp="C M C A"  !Cmce
                 else
-                  str="B M A B"  !Bmeb
+                  Str_tmp="B M A B"  !Bmeb
                 end if
 
               Case(3)  !Ccme Aema
 
                 if(e_group(1:1) == "C") then
-                  if(index(str,":") /= 0) then
-                    str="C C M B"  !Cmce
+                  if(index(Str_tmp,":") /= 0) then
+                    Str_tmp="C C M B"  !Cmce
                   else
-                    str="A C M B:1"  !Cmce:1
+                    Str_tmp="A C M B:1"  !Cmce:1
                   end if
                 else
-                  str="A B M A"  !Aema
+                  Str_tmp="A B M A"  !Aema
                 end if
 
               Case(4) !Aeam Bbem
 
                 if(e_group(1:1) == "A") then
-                  str="A C A M"  !Aeam
+                  Str_tmp="A C A M"  !Aeam
                 else
-                  str="B B C M"  !Bbem
+                  Str_tmp="B B C M"  !Bbem
                 end if
 
             End Select
@@ -477,11 +477,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
             Select Case (pe)
               case(2) !Aemm Ambiguous notation because the two groups Abmm and Acmm are not distinguished
-                str="A B M M"  !another option is str="A C M M"
+                Str_tmp="A B M M"  !another option is Str_tmp="A C M M"
               case(3) !Bmem
-                str="B M C M"  !another option is str="B M A M"
+                Str_tmp="B M C M"  !another option is Str_tmp="B M A M"
               case(4)
-                str="C M M A"  !another option is str="C M M B"
+                Str_tmp="C M M A"  !another option is Str_tmp="C M M B"
             End Select
          end if
 
@@ -489,11 +489,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          Select Case (pe) !
            case(2) !Aeaa Ambiguous notation because the two groups Abmm and Acmm are not distinguished
-             str="A B A A"  !another option is str="A C A A"
+             Str_tmp="A B A A"  !another option is Str_tmp="A C A A"
            case(3) !Bbcb
-             str="B B C B"  !another option is str="B B A B"
+             Str_tmp="B B C B"  !another option is Str_tmp="B B A B"
            case(4)
-             str="C C C A"  !another option is str="C C C B"
+             Str_tmp="C C C A"  !another option is Str_tmp="C C C B"
          End Select
 
        end if
@@ -507,9 +507,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
+   Module Subroutine Set_SpaceGroup_DBase(Str_tmp,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
       !---- Arguments ----!
-      character(len=*),           intent(in ) :: Str
+      character(len=*),           intent(in ) :: Str_tmp
       character(len=*),           intent(in ) :: mode
       class(spg_type),            intent(out) :: SpaceG
       character(len=*), optional, intent(in ) :: xyz_type
@@ -535,7 +535,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       call Init_SpaceGroup(SpaceG)
 
       !> Check
-      if (len_trim(Str) <= 0) then
+      if (len_trim(Str_tmp) <= 0) then
          err_CFML%Ierr=1
          Err_CFML%Msg="Set_SpaceGroup_DBase@GSPACEGROUPS: Argument not valid to set Space Group!"
          return
@@ -552,11 +552,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           sett=setting
         end if
       end if
-      loc_str=Str
-      i=index(Str,"::")
+      loc_str=Str_tmp
+      i=index(Str_tmp,"::")
       if(i /= 0) then
-        loc_str=Str(1:i-1)
-        sett=adjustl(Str(i+2:))
+        loc_str=Str_tmp(1:i-1)
+        sett=adjustl(Str_tmp(i+2:))
         change_setting=.true.
       end if
       xyz_typ="xyz"
@@ -601,7 +601,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%BNS_symb=spacegroup_label_bns(num)
           SpaceG%OG_symb =spacegroup_label_og(num)
           SpaceG%mag_type=magtype(num)
-          SpaceG%init_label=Str
+          SpaceG%init_label=Str_tmp
           ! Crystal system
           Select Case (num)
             case(1:7)
@@ -885,7 +885,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               SpaceG%CrystalSys="Unknown"
           End Select
           SpaceG%Pg=" "                               ! Point group
-          SpaceG%init_label=Str
+          SpaceG%init_label=Str_tmp
           SpaceG%Mag_Pg=" "                           ! Magnetic Point group
           SpaceG%Laue=" "                             ! laue class
           SpaceG%setting=" "                          ! setting
@@ -1040,9 +1040,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, set_inv)
+   Module Subroutine Set_SpaceGroup_gen(Str_tmp, SpaceG, NGen, Gen, set_inv)
       !---- Arguments ----!
-      character(len=*),                          intent(in ) :: Str
+      character(len=*),                          intent(in ) :: Str_tmp
       class(spg_type),                           intent(out) :: SpaceG
       integer,                         optional, intent(in ) :: NGen
       character(len=*),  dimension(:), optional, intent(in ) :: Gen
@@ -1077,31 +1077,31 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       ti=[1.0/2.0,1.0/2.0,1.0/2.0]
       tr2=[1.0/3.0,2.0/3.0,2.0/3.0]
       tr1=[2.0/3.0,1.0/3.0,1.0/3.0]
-      loc_str=Str
+      loc_str=Str_tmp
       call clear_error()
 
       call Init_SpaceGroup(SpaceG)
       if (present(ngen) .and. present(gen)) n_gen=ngen
 
       !> Check
-      if (len_trim(Str) <= 0 .and. n_gen <= 0) then
+      if (len_trim(Str_tmp) <= 0 .and. n_gen <= 0) then
          err_CFML%Ierr=1
-         Err_CFML%Msg="Set_SpaceGroup@GSPACEGROUPS: Argument not valid to set Space Group!: len_trim(Str) <= 0 .and. n_gen <= 0"
+         Err_CFML%Msg="Set_SpaceGroup@GSPACEGROUPS: Argument not valid to set Space Group!: len_trim(Str_tmp) <= 0 .and. n_gen <= 0"
          return
       end if
 
-      !> Spacegroup from Str argument
+      !> Spacegroup from Str_tmp argument
       if (n_gen == 0) then
 
          !> Check if we are providing a generator list as the first argument
-         i=index(Str,")")
-         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
+         i=index(Str_tmp,")")
+         if (index(Str_tmp,";") > 4 .or. index(Str_tmp,",1") /= 0 .or. index(Str_tmp,",-1") /= 0 .or. i /= 0 .or. index(Str_tmp,"UNI") /= 0) then !Call directly to the space group constructor
 
             if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
               !Transform the list of generators to the standard form in CrysFML
-              loc_str=Str
+              loc_str=Str_tmp
               call ISO_to_jones_notation(loc_str)
-              !write(*,"(a)") trim(Str)//"      "//trim(loc_str)
+              !write(*,"(a)") trim(Str_tmp)//"      "//trim(loc_str)
               magnetic=.true.
             end if
 
@@ -1147,10 +1147,10 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          call Set_Spgr_Info()
 
          !> Is a IT  number?
-         read(unit=str, fmt=*, iostat=ier) n_it
+         read(unit=Str_tmp, fmt=*, iostat=ier) n_it
          if (ier == 0) then
-            gList=get_IT_Generators(str)  ! IT take our default choice for SpaceGroup
-            call Get_SpaceGroup_Symbols(Str, str_HM, str_Hall)
+            gList=get_IT_Generators(Str_tmp)  ! IT take our default choice for SpaceGroup
+            call Get_SpaceGroup_Symbols(Str_tmp, str_HM, str_Hall)
             do i=1,NUM_SPGR_INFO
                if (trim(str_HM) /= trim(spgr_info(i)%hm)) cycle
                n_laue=spgr_info(i)%laue
@@ -1165,7 +1165,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          !> Is HM symbol defined in SPGR_INFO?
          if (n_it == 0) then
-            str_HM=u_case(trim(Str))
+            str_HM=u_case(trim(Str_tmp))
             !Check if the new nomenclature of some orthorhombic groups are being used
             if(index(str_HM,"E") /= 0) then !Convert to the traditional nomenclature to use the appropriate generators
               !The new notation cannot handle all possible settings for the space groups 67 and 68
@@ -1191,7 +1191,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          !> Is Hall symbol defined in SPGR_INFO?
          if (n_it == 0) then
-            Str_Hall=l_case(trim(Str))
+            Str_Hall=l_case(trim(Str_tmp))
             if (str_hall(1:1) == '-') then
                str_hall(2:2)=u_case(str_hall(2:2))
             else
@@ -1217,7 +1217,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          !> Is compact HM symbol?
          if (n_it == 0) then
-            Str_CHM=u_case(trim(Str))
+            Str_CHM=u_case(trim(Str_tmp))
             call Get_SpaceGroup_Symbols(str_CHM, str_HM)
             do i=1,NUM_SPGR_INFO
                if (trim(str_HM) /= trim(spgr_info(i)%hm)) cycle
@@ -1240,7 +1240,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          if (n_it == 0) then
             call Set_Shubnikov_Info()
             do i=1,NUM_SHUBNIKOV
-               if (trim(str) /= trim(Shubnikov_info(i)%BNS)) cycle
+               if (trim(Str_tmp) /= trim(Shubnikov_info(i)%BNS)) cycle
                str_hall=Shubnikov_info(i)%Mhall
                exit
             end do
@@ -1272,7 +1272,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       else
         call Group_Constructor(l_gen,SpaceG)
       end if
-      SpaceG%init_label=Str
+      SpaceG%init_label=Str_tmp
       if (Err_CFML%Ierr /= 0) return
       if(n_it /= 0) SpaceG%spg_symb= str_HM_std(1:1)//l_case(str_HM_std(2:))
       if(len_trim(str_hall) /= 0) SpaceG%Hall=str_hall
@@ -1324,7 +1324,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
         end if
         SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
         if(by_Hall) then
-           SpaceG%spg_symb = str(1:1)//l_case(str(2:))
+           SpaceG%spg_symb = Str_tmp(1:1)//l_case(Str_tmp(2:))
         else if (.not. by_Gen) then
            str_HM = Get_HM_Standard(SpaceG%numspg)
            SpaceG%spg_symb = str_HM(1:1)//l_case(str_HM(2:))
@@ -1347,14 +1347,14 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
    End Subroutine Set_SpaceGroup_gen
 
-   !!---- Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
-   !!----   character(len=*), intent(in) :: str
+   !!---- Module Subroutine Set_gSpG_from_string(Str_tmp,SpG,Setting_Search)
+   !!----   character(len=*), intent(in) :: Str_tmp
    !!----   Class(SpG_Type),  intent(out):: SpG
    !!----   logical,optional, intent(in) :: Setting_Search
    !!----
    !!----   Subroutine for selecting the proper interface for constructing
    !!----   a general Space Group (including superspace group)
-   !!----   The string str may contain the setting an other instructions
+   !!----   The string Str_tmp may contain the setting an other instructions
    !!----   for selecting the proper interface to generate the general
    !!----   space group. The string may have whatever of the following forms:
    !!----
@@ -1374,14 +1374,14 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!----
    !!----
-   Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
+   Module Subroutine Set_gSpG_from_string(Str_tmp,SpG,Setting_Search)
       !---- Arguments ----!
-      character(len=*),          intent(in) :: str
+      character(len=*),          intent(in) :: Str_tmp
       Class(SpG_Type),           intent(out):: SpG
       logical, optional,         intent(in) :: Setting_Search
       !--- Local Variables ---!
       !character(len=:),allocatable :: sett, strs,aux
-      character(len=len(str)) :: sett, strs,aux
+      character(len=len(Str_tmp)) :: sett, strs,aux
       character(len=5) :: Mode
       integer :: ier, num_group, i, j
       logical :: set_given, setting
@@ -1389,7 +1389,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
        setting=.false.
        if(present(Setting_Search)) setting=.true.
        Mode=" "
-       strs=trim(str)
+       strs=trim(Str_tmp)
        set_given=.false.
        !Strip the input string to remove eventual SPGR, SSPG, SPG, GEN, Generators, etc
        i=index(strs," ")
@@ -1419,7 +1419,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           !Now determine if setting is appearing in which case it uses data bases
           i=index(strs,"::")
           if(i /= 0) then
-             j=index(str,"sup")  !Superspace
+             j=index(Str_tmp,"sup")  !Superspace
              if(j /= 0) then
                Mode="SUPER"
                if((index(strs,"a1") /= 0 .or. index(strs,"d") /= 0) .and. setting) then
@@ -1446,11 +1446,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
        else
           i=index(strs,"::")
           if(i /= 0) then
-             j=index(str,"sup")  !Superspace
+             j=index(Str_tmp,"sup")  !Superspace
              if(j /= 0) then
                Mode="SUPER"
                if(index(strs,"a1") /= 0  .or. index(strs,"d") /= 0 .and. setting) then
-                 sett= adjustl(str(i+2:j-1))
+                 sett= adjustl(Str_tmp(i+2:j-1))
                  set_given=.true.
                end if
              else
@@ -1458,12 +1458,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                if(j /= 0) then
                  Mode="SHUBN"
                  if(setting) then
-                   sett= adjustl(str(i+2:j-1))
+                   sett= adjustl(Str_tmp(i+2:j-1))
                    if(len_trim(sett) /= 0) set_given=.true.
                  end if
                else
                  if(setting) then
-                   sett= adjustl(str(i+2:))
+                   sett= adjustl(Str_tmp(i+2:))
                    if(len_trim(sett) /= 0) set_given=.true.
                  end if
                end if

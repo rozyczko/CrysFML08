@@ -4148,8 +4148,8 @@ Module CFML_ILL_Instrm_Data
     !!---- Subroutine to read a Numor of D4 Instrument at ILL
     !!----
     !!---- 9 Detectors x 64 cells
-    !!----   Each cell every 0.125�  (Total 8� by detector)
-    !!----   Angular space between detectors is 7�
+    !!----   Each cell every 0.125  (Total 8 by detector)
+    !!----   Angular space between detectors is 7
     !!----
     !!---- Update: 18/03/2011
     !!

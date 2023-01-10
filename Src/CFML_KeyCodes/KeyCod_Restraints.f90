@@ -45,7 +45,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       !> Dimension for DFIX
       nr=0
       do i=l_ini,l_end
-         line=adjustl(ffile%line(i)%str)
+         line=adjustl(ffile%line(i)%Str_tmp)
          if (u_case(line(1:4)) /= "DFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
@@ -89,7 +89,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       !> Dimension for AFIX
       nr=0
       do i=l_ini,l_end
-         line=adjustl(ffile%line(i)%str)
+         line=adjustl(ffile%line(i)%Str_tmp)
          if (u_case(line(1:4)) /= "AFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
@@ -135,7 +135,7 @@ Submodule (CFML_KeyCodes) KeyCod_Restraints
       !> Dimension for TFIX
       nr=0
       do i=l_ini,l_end
-         line=adjustl(ffile%line(i)%str)
+         line=adjustl(ffile%line(i)%Str_tmp)
          if (u_case(line(1:4)) /= "TFIX") cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)

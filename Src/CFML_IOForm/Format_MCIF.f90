@@ -7,7 +7,7 @@ SubModule (CFML_IOForm) Format_MCIF
    implicit none
 
    character(len=132)            :: line
-   character(len=:), allocatable :: str
+   character(len=:), allocatable :: Str_tmp
 
 
    Contains
@@ -39,7 +39,7 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -83,20 +83,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str=trim(keyword)
-      nl=len_trim(str)
+      Str_tmp=trim(keyword)
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
 
@@ -112,18 +112,18 @@ SubModule (CFML_IOForm) Format_MCIF
 
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /= str) exit
+         if (line(1:nl) /= Str_tmp) exit
 
          j=j+1
       end do
 
       j_ini=j_ini+j
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <= 0) exit
@@ -167,7 +167,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Calculating number of Phases
       nt_phases=0; ip=cif%nlines; ip(1)=1
       do i=1,cif%nlines
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
          if (l_case(line(1:5)) == "data_" .and. l_case(line(1:11)) /= "data_global" )  then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
@@ -791,20 +791,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_atom_site_moment."
-      nl=len_trim(str)
+      Str_tmp="_atom_site_moment."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -821,11 +821,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /= str) exit
+         if (line(1:nl) /= Str_tmp) exit
 
          select case (trim(line))
             case ('_atom_site_moment.label')
@@ -903,7 +903,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Read vales
       is_new=.true.
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (is_new) then
             if (line(1:1) == '#') cycle
@@ -1094,21 +1094,21 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_atom_site_moment_Fourier"
-      nl=len_trim(str)
+      Str_tmp="_atom_site_moment_Fourier"
+      nl=len_trim(Str_tmp)
 
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
 
@@ -1125,11 +1125,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /= str) exit
+         if (line(1:nl) /= Str_tmp) exit
 
          select case (trim(line))
             case ('_atom_site_moment_Fourier.atom_site_label')
@@ -1239,7 +1239,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Read vales
       j_ini=j_ini+np
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -1486,20 +1486,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop for Propagation vectors
       found=.false.
-      str="_parent_propagation_vector.kxkykz"
-      nl=len_trim(str)
+      Str_tmp="_parent_propagation_vector.kxkykz"
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -1516,7 +1516,7 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (index(line,'_parent')==0) exit
@@ -1535,7 +1535,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Number of k-vectors
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (index(line,'_parent') > 0) cycle
@@ -1553,7 +1553,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> Read k-vectors
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (index(line,'_parent') > 0) cycle
@@ -1642,20 +1642,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop for Wave vectors
       found=.false.
-      str="_cell_wave_vector_"
-      nl=len_trim(str)
+      Str_tmp="_cell_wave_vector_"
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -1672,10 +1672,10 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
-         if (index(line,str)==0) exit
+         if (index(line,Str_tmp)==0) exit
 
          select case (trim(line))
             case ('_cell_wave_vector_seq_id')
@@ -1701,7 +1701,7 @@ SubModule (CFML_IOForm) Format_MCIF
       end if
 
       !> Number of modulation vectors
-      k=get_NElem_Loop(cif,str,j_ini-1,j_end)
+      k=get_NElem_Loop(cif,Str_tmp,j_ini-1,j_end)
       if (k ==0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_MCIF_Cell_Wave_Vector: No modulation vectors was determined!"
@@ -1714,7 +1714,7 @@ SubModule (CFML_IOForm) Format_MCIF
       j_ini=j_ini+np
 
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -1846,20 +1846,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop for Wave vectors
       found=.false.
-      str="_atom_site_Fourier_wave_vector"
-      nl=len_trim(str)
+      Str_tmp="_atom_site_Fourier_wave_vector"
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -1876,10 +1876,10 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
-         if (index(line,str)==0) exit
+         if (index(line,Str_tmp)==0) exit
 
          select case (trim(line))
             case ('_atom_site_Fourier_wave_vector.seq_id','_atom_site_Fourier_wave_vector_seq_id')
@@ -1917,7 +1917,7 @@ SubModule (CFML_IOForm) Format_MCIF
       end if
 
       !> Number of Q Coeff
-      Nq=get_NElem_Loop(cif,str,j_ini-1,j_end)
+      Nq=get_NElem_Loop(cif,Str_tmp,j_ini-1,j_end)
       if (Nq == 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_MCIF_Atom_Site_Fourier_Wave_Vector: Error in loop"
@@ -1968,7 +1968,7 @@ SubModule (CFML_IOForm) Format_MCIF
       j_ini=j_ini+np
 
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -2348,14 +2348,14 @@ SubModule (CFML_IOForm) Format_MCIF
       if (present(i_end)) j_end=i_end
 
       !> Name_BNS
-      str="_space_group_magn.name_BNS"
+      Str_tmp="_space_group_magn.name_BNS"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2381,14 +2381,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> Name_OG
-      str="_space_group_magn.name_OG"
+      Str_tmp="_space_group_magn.name_OG"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2414,14 +2414,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> Number_BNS
-      str="_space_group_magn.number_BNS"
+      Str_tmp="_space_group_magn.number_BNS"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2447,14 +2447,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> Number_OG
-      str="_space_group_magn.number_OG"
+      Str_tmp="_space_group_magn.number_OG"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2482,14 +2482,14 @@ SubModule (CFML_IOForm) Format_MCIF
       !> OG_wavevector_kxkykz (Not implemented)
 
       !> point_group_name
-      str="_space_group_magn.point_group_name"
+      Str_tmp="_space_group_magn.point_group_name"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2514,14 +2514,14 @@ SubModule (CFML_IOForm) Format_MCIF
       !> transform_OG_Pp (Not implemented)
 
       !> transform_BNS_Pp_abc
-      str="_space_group_magn.transform_BNS_Pp_abc"
+      Str_tmp="_space_group_magn.transform_BNS_Pp_abc"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2547,14 +2547,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> transform_OG_Pp_abc
-      str="_space_group_magn.transform_OG_Pp_abc"
+      Str_tmp="_space_group_magn.transform_OG_Pp_abc"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2584,14 +2584,14 @@ SubModule (CFML_IOForm) Format_MCIF
       !> --------
 
       !> SSG_Name
-      str="_space_group_magn.ssg_name"
+      Str_tmp="_space_group_magn.ssg_name"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2617,14 +2617,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> SSG_number
-      str="_space_group_magn.ssg_number"
+      Str_tmp="_space_group_magn.ssg_number"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -2682,10 +2682,10 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_space_group_magn_transforms."
-      nl=len_trim(str)
+      Str_tmp="_space_group_magn_transforms."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -2697,12 +2697,12 @@ SubModule (CFML_IOForm) Format_MCIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -2719,7 +2719,7 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -2747,7 +2747,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> reading transformations
       np=0
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -2793,20 +2793,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_space_group_symop_magn_centering."
-      nl=len_trim(str)
+      Str_tmp="_space_group_symop_magn_centering."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -2823,11 +2823,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /=str) exit
+         if (line(1:nl) /=Str_tmp) exit
 
          select case (trim(line))
             case ('_space_group_symop_magn_centering.id')
@@ -2853,7 +2853,7 @@ SubModule (CFML_IOForm) Format_MCIF
       !> How many operators
       j_ini=j_ini+j
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -2926,20 +2926,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_space_group_symop_magn_ssg_centering."
-      nl=len_trim(str)
+      Str_tmp="_space_group_symop_magn_ssg_centering."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -2956,11 +2956,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /=str) exit
+         if (line(1:nl) /=Str_tmp) exit
 
          select case (trim(line))
             case ('_space_group_symop_magn_ssg_centering.id')
@@ -2982,7 +2982,7 @@ SubModule (CFML_IOForm) Format_MCIF
 
       j_ini=j_ini+j
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -3054,20 +3054,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_space_group_symop_magn_operation."
-      nl=len_trim(str)
+      Str_tmp="_space_group_symop_magn_operation."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos == 0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -3084,11 +3084,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /=str) exit
+         if (line(1:nl) /=Str_tmp) exit
 
          select case (trim(line))
             case ('_space_group_symop_magn_operation.id')
@@ -3113,7 +3113,7 @@ SubModule (CFML_IOForm) Format_MCIF
 
       j_ini=j_ini+j
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -3185,20 +3185,20 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !> Search loop
       found=.false.
-      str="_space_group_symop_magn_ssg_operation."
-      nl=len_trim(str)
+      Str_tmp="_space_group_symop_magn_ssg_operation."
+      nl=len_trim(Str_tmp)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%str)
+            line=adjustl(cif%line(j)%Str_tmp)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -3215,11 +3215,11 @@ SubModule (CFML_IOForm) Format_MCIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
-         if (line(1:nl) /=str) exit
+         if (line(1:nl) /=Str_tmp) exit
 
          select case (trim(line))
             case ('_space_group_symop_magn_ssg_operation.id')
@@ -3241,7 +3241,7 @@ SubModule (CFML_IOForm) Format_MCIF
 
       j_ini=j_ini+j
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -3337,14 +3337,14 @@ SubModule (CFML_IOForm) Format_MCIF
       if (present(i_end)) j_end=i_end
 
       !> Child_Transform_Pp_abc
-      str="_parent_space_group.child_transform_Pp_abc"
+      Str_tmp="_parent_space_group.child_transform_Pp_abc"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -3370,14 +3370,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> IT_number
-      str="_parent_space_group.IT_number"
+      Str_tmp="_parent_space_group.IT_number"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -3409,14 +3409,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> H-M
-      str="_parent_space_group.name_H-M_alt"
+      Str_tmp="_parent_space_group.name_H-M_alt"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -3442,14 +3442,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> Reference_setting
-      str="_parent_space_group.reference_setting"
+      Str_tmp="_parent_space_group.reference_setting"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)
@@ -3475,14 +3475,14 @@ SubModule (CFML_IOForm) Format_MCIF
       end do
 
       !> Transorm_Pp_abc
-      str="_parent_space_group.transform_Pp_abc"
+      Str_tmp="_parent_space_group.transform_Pp_abc"
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+         line=adjustl(cif%line(i)%Str_tmp)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
 
-         npos=index(line,str)
+         npos=index(line,Str_tmp)
          if (npos ==0) cycle
 
          call cut_string(line)

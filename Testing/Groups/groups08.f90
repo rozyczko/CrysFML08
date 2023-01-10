@@ -13,8 +13,8 @@
 
    contains
 
-     Subroutine Set_gSpG(str,SpG,Mode,Setting)
-       character(len=*),          intent(in) :: str
+     Subroutine Set_gSpG(Str_tmp,SpG,Mode,Setting)
+       character(len=*),          intent(in) :: Str_tmp
        Class(SpG_Type),           intent(out):: SpG
        Character(len=*),          intent(in) :: Mode
        Character(len=*),optional, intent(in) :: Setting
@@ -23,12 +23,12 @@
        Select Case (trim(Mode))
          Case("SHUBN","SUPER")
            if(present(setting)) then
-             call Set_SpaceGroup(Str,Mode,SpG,Setting=Setting)
+             call Set_SpaceGroup(Str_tmp,Mode,SpG,Setting=Setting)
            else
-             call Set_SpaceGroup(Str,Mode,SpG)
+             call Set_SpaceGroup(Str_tmp,Mode,SpG)
            end if
          Case default
-           call Set_SpaceGroup(Str,SpG)
+           call Set_SpaceGroup(Str_tmp,SpG)
            if(present(setting)) then
              call Change_Set_SpaceG(setting,SpG)
              if(err_CFML%Ierr /= 0) then

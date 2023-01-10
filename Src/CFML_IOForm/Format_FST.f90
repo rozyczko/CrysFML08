@@ -23,7 +23,7 @@ SubModule (CFML_IOForm) Format_fst
 
       npos=fst%nlines
       do i=1, fst%nlines
-        line=adjustl(fst%line(i)%str)
+        line=adjustl(fst%line(i)%str_tmp)
         if(line(1:1) == "{") then
            npos=i-1
            exit
@@ -36,18 +36,18 @@ SubModule (CFML_IOForm) Format_fst
       allocate(struct%line(npos))
       struct%line(1:npos)=fst%line(1:npos)
       do i=1,npos
-        struct%line(i)%str=adjustl(struct%line(i)%str)
-        line=l_case(struct%line(i)%str)
+        struct%line(i)%str_tmp=adjustl(struct%line(i)%str_tmp)
+        line=l_case(struct%line(i)%str_tmp)
         n_ini=index(line,"scale")
-        if( n_ini /= 0) struct%line(i)%str(n_ini:) = " "
+        if( n_ini /= 0) struct%line(i)%str_tmp(n_ini:) = " "
         n_ini=index(line,"multiple")
-        if( n_ini /= 0) struct%line(i)%str(n_ini:) = " "
+        if( n_ini /= 0) struct%line(i)%str_tmp(n_ini:) = " "
         n_ini=index(line,"nodisplay")
-        if( n_ini /= 0) struct%line(i)%str(n_ini:) = " "
+        if( n_ini /= 0) struct%line(i)%str_tmp(n_ini:) = " "
         n_ini=index(line,"display")
-        if( n_ini /= 0) struct%line(i)%str(n_ini:) = " "
+        if( n_ini /= 0) struct%line(i)%str_tmp(n_ini:) = " "
         n_ini=index(line,"color")
-        if( n_ini /= 0) struct%line(i)%str(n_ini:) = " "
+        if( n_ini /= 0) struct%line(i)%str_tmp(n_ini:) = " "
       end do
 
       call Read_XTal_CFL(struct, Cell, SpG, Atm)
@@ -64,14 +64,14 @@ SubModule (CFML_IOForm) Format_fst
          magstr%line(1:magstr%nlines)=fst%line(npos+1:fst%nlines)
 
          do i=1,magstr%nlines
-           magstr%line(i)%str=adjustl(magstr%line(i)%str)
-           line=l_case(magstr%line(i)%str)
+           magstr%line(i)%str_tmp=adjustl(magstr%line(i)%str_tmp)
+           line=l_case(magstr%line(i)%str_tmp)
            n_ini=index(line,"scale")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:) = " "
+           if( n_ini /= 0) magstr%line(i)%str_tmp(n_ini:) = " "
            n_ini=index(line,"nodisplay")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:n_ini+8) = " "
+           if( n_ini /= 0) magstr%line(i)%str_tmp(n_ini:n_ini+8) = " "
            n_ini=index(line,"color")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:) = " "
+           if( n_ini /= 0) magstr%line(i)%str_tmp(n_ini:) = " "
          end do
 
          !Attempt to read the magnetic part to construct the magnetic atoms and the MagSymm_k_Type object MGp
