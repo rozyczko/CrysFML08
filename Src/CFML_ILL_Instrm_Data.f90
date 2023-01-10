@@ -427,6 +427,7 @@ Module CFML_ILL_Instrm_Data
       character(len=3)                           :: r_ord                ! xyz, yxz, ... Order of detector tilt calculations: xyz means Rx Ry Rz
       character(len=4)                           :: angl_units           !angle units: "rad","deg"
       character(len=30)                          :: detector_type        !"Point","Flat_rect","Cylin_ImPlate","Tube_PSD", Put ipsd=1,2,...
+      character(len=30)                          :: data_ordering        !Data ordering in data file: 'topleftcolmajor','toprightcolmajor','bottomleftcolmajor','bottomrightcolmajor','topleftrowmajor','toprightrowmajor','bottomleftrowmajor','bottomrightrowmajor'
       real(kind=cp)                              :: dist_samp_detector   ! dist. to centre for: point, Flat_rect, Tube_PSD; radius for: Cylin_ImPlate
       real(kind=cp)                              :: wave                 !Current wavelength
       real(kind=cp)                              :: wave_min,wave_max    !Minimum and maximum wavelengths (Laue diffractometers)
@@ -2383,6 +2384,7 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%name_inst=" "                !Short name of the instrument
       Current_Instrm%geom="Eulerian_4C"           !"Eulerian_4C","Kappa_4C","Lifting_arm","Powder","Laue"
       Current_Instrm%BL_frame="z-up"              !Kind of BL-frame: "z-up" or "z-down"
+      Current_Instrm%data_ordering="unknown"
       Current_Instrm%dist_units="mm"              !distance units: "mm  ","cm  ","inch"
       Current_Instrm%r_ord="xyz"                  ! xyz, yxz, ... Order of detector tilt calculations: xyz means Rx Ry Rz
       Current_Instrm%angl_units="deg"             !angle units: "rad","deg"
@@ -3087,6 +3089,9 @@ Module CFML_ILL_Instrm_Data
 
             Case("ANGL_UNITS")
                 Current_Instrm%angl_units = adjustl(line(i+1:))
+
+            Case("DATA_ORDERING")
+                Current_Instrm%data_ordering = adjustl(line(i+1:))
 
             Case("DET_TYPE")
                 Current_Instrm%detector_type = adjustl(line(i+1:))

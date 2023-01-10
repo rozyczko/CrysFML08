@@ -528,7 +528,7 @@
     if(Err_CFML%Ierr == 0) then
        mcell=0
        do i=1,flist%nlines
-         line=adjustl(flist%line(i)%str)
+         line=adjustl(flist%line(i)%Str_tmp)
          if(len_trim(line) < 6) cycle
          if(line(1:5) =="MCELL") then
            read(line(6:),*) mcell
