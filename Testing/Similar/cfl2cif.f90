@@ -111,7 +111,7 @@
     trn_std = .false.
     call clear_error()
     do i=4,n_end
-      line=l_case(adjustl(file_dat%line(i)%Str_tmp))
+      line=l_case(adjustl(file_dat%line(i)%Str))
       if(line(1:1) == "!") cycle
       j=index(line," ")
       if(line(1:5) == "trans") then
