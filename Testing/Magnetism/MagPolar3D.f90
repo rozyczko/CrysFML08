@@ -102,8 +102,8 @@ Program MagPolar3D
        write(unit=*,fmt="( a )") "    Text of the input CFL file"
        write(unit=*,fmt="(a,/)") "    =========================="
        do i=1,fich_cfl%nlines
-         write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//trim(fich_cfl%line(i)%Str_tmp)
-         write(unit=*,fmt="(a,i5,a)")   " Line:",i,"  "//trim(fich_cfl%line(i)%Str_tmp)
+         write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//trim(fich_cfl%line(i)%Str)
+         write(unit=*,fmt="(a,i5,a)")   " Line:",i,"  "//trim(fich_cfl%line(i)%Str)
        end do
 
 
@@ -120,7 +120,7 @@ Program MagPolar3D
        end if
        !---- looking for orientation information and wavelength
        do i=1,n_end
-           line=l_case(adjustl(fich_cfl%line(i)%Str_tmp))
+           line=l_case(adjustl(fich_cfl%line(i)%Str))
            if(line(1:6) == "lambda" .or. line(1:6) == "wave  ") then
              read(unit=line(7:),fmt=*,iostat=ier) wave
              if(ier /= 0) then
@@ -133,7 +133,7 @@ Program MagPolar3D
              m=0
              do j=i+1,i+3
                 m=m+1
-                read(unit=fich_cfl%line(j)%Str_tmp,fmt=*,iostat=ier) UB(m,:)
+                read(unit=fich_cfl%line(j)%Str,fmt=*,iostat=ier) UB(m,:)
                 if(ier /= 0) then
                    write(unit=*,fmt="(a,i3)") " => Error reading the UB-matrix at line: ",j
                    stop

@@ -200,7 +200,7 @@ Program Bond_Str
      else
         write(unit=lun,fmt="(a,/)") " => Content of the input file: "
         do i=1,fich_cfl%nlines
-           write(unit=lun,fmt="(tr10,a)") fich_cfl%line(i)%Str_tmp
+           write(unit=lun,fmt="(tr10,a)") fich_cfl%line(i)%Str
         end do
      end if
 
@@ -243,7 +243,7 @@ Program Bond_Str
         sout=.true.
      else
         do i=1,fich_cfl%nlines
-           lineor=adjustl(fich_cfl%line(i)%Str_tmp)
+           lineor=adjustl(fich_cfl%line(i)%Str)
            line=u_case(lineor)
 
            if (line(1:4) == "TITL") then

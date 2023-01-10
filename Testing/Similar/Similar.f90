@@ -160,8 +160,8 @@
     none_given=.false.
     call clear_error()
     do i=4,n_end
-      write(*,"(a)") " -> "//file_dat%line(i)%Str_tmp
-      line=l_case(adjustl(file_dat%line(i)%Str_tmp))
+      write(*,"(a)") " -> "//file_dat%line(i)%Str
+      line=l_case(adjustl(file_dat%line(i)%Str))
       if(line(1:1) == "!") cycle
       if(line(1:4) == "none") none_given=.true.
       j=index(line," ")
@@ -183,12 +183,12 @@
         cycle
       end if
       if(index(line,"index") /= 0) then
-        read(unit=file_dat%line(i)%Str_tmp(6:),fmt=*,iostat=ier) indice
+        read(unit=file_dat%line(i)%Str(6:),fmt=*,iostat=ier) indice
         if(ier == 0) index_given=.true.
         cycle
       end if
       if(index(line,"fix_lat") /= 0) then
-        fix_lat=adjustl(file_dat%line(i)%Str_tmp(8:))
+        fix_lat=adjustl(file_dat%line(i)%Str(8:))
         if(index("PABCIRF",fix_lat) /= 0) fix_given=.true.
         cycle
       end if

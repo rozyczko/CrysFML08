@@ -90,7 +90,7 @@ Program Schwinger
        write(unit=lun,fmt="( a )") "    Text of the input CFL file"
        write(unit=lun,fmt="(a,/)") "    =========================="
        do i=1,fich_cfl%nlines
-         write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str_tmp
+         write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str
        end do
 
 
@@ -99,7 +99,7 @@ Program Schwinger
        call Write_Atom_List(A,Iunit=lun)
        lambda=0.8
        do i=1,fich_cfl%nlines
-         line=adjustl(fich_cfl%line(i)%Str_tmp)
+         line=adjustl(fich_cfl%line(i)%Str)
          if(U_Case(line(1:6)) == "LAMBDA") then
            read(unit=line(7:),fmt=*,iostat=ier) lambda
            if(ier /= 0) lambda=0.8
