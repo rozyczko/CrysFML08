@@ -163,8 +163,8 @@ contains
       !--- Read the wave vector as in Readn_Set_Magnetic_Structure
       !---
       do i=1,file_cfl%nlines
-        if(len_trim(file_cfl%line(i)%str) == 0) cycle
-        lowline=l_case(adjustl(file_cfl%line(i)%str))
+        if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+        lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
         if (lowline(1:13) == "mag_structure") then
            n_ini=i
         end if
@@ -179,8 +179,8 @@ contains
       do
         i=i+1
         if(i >= n_end) exit
-        if(len_trim(file_cfl%line(i)%str) == 0) cycle
-        lowline=l_case(adjustl(file_cfl%line(i)%str))
+        if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+        lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
         ! Read propagation vectors
         if(lowline(1:5) == "kvect" .and. kvect_begin) then
           num_k=num_k+1
@@ -192,8 +192,8 @@ contains
           end if
           do !repeat reading until continuous KVECT lines are exhausted
              i=i+1
-             if(len_trim(file_cfl%line(i)%str) == 0) cycle
-             lowline=adjustl(l_case(file_cfl%line(i)%str))
+             if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+             lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
              if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
              if (lowline(1:5) == "kvect") then
                 read(unit=lowline(6:),fmt=*,iostat=ier) MGp%kvec(:,num_k+1)
@@ -228,8 +228,8 @@ contains
       !--- Analyse how many data are provided in cfl file
       !---
       do i=1,file_cfl%nlines
-        if(len_trim(file_cfl%line(i)%str) == 0) cycle
-        lowline=l_case(adjustl(file_cfl%line(i)%str))
+        if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+        lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
         if(lowline(1:10) == "f2mag_data") then
           Nset=Nset+1
         end if
@@ -287,8 +287,8 @@ contains
       !--- Write Multidata%datfile,Multidata%MagDom,etc
       !---
       do i=1,file_cfl%nlines
-        if(len_trim(file_cfl%line(i)%str) == 0) cycle
-        lowline=l_case(adjustl(file_cfl%line(i)%str))
+        if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+        lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
 
         if(lowline(1:10) == "f2mag_data") then
            Nset=Nset+1
@@ -802,8 +802,8 @@ contains
        i=0
 
        do j=1,file_cfl%nlines
-          if(len_trim(file_cfl%line(i)%str) == 0) cycle
-          line=adjustl(file_cfl%line(j)%str)
+          if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+          line=adjustl(file_cfl%line(j)%Str_tmp)
           line=l_case(line)
           if (line(1:1) ==" ") cycle
           if (line(1:1) =="!") cycle
@@ -894,7 +894,7 @@ contains
 !******************************************!
     Subroutine Calc_sqMiV_Data(iset,lun)
 !******************************************!
-! gets magn str Factor and Miv from Calc_Magnetic_StrF_MiV
+! gets magn Str_tmp Factor and Miv from Calc_Magnetic_StrF_MiV
 ! lun is used only at 0-cycle !!
        !---- Argument ----!
        integer, optional,           intent(in) :: iset,lun
@@ -1199,7 +1199,7 @@ contains
 
       i=0
       do j=1,file_cfl%nlines
-        line=adjustl(file_cfl%line(j)%str)
+        line=adjustl(file_cfl%line(j)%Str_tmp)
         line=l_case(line)
         if (line(1:1) ==" ") cycle
         if (line(1:1) =="!") cycle

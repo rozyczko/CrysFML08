@@ -43,7 +43,7 @@
        i=0; i1=0; i2=0; i3=0; i4=0
 
        do j=1,file_cfl%nlines
-          line=adjustl(file_cfl%line(j)%str)
+          line=adjustl(file_cfl%line(j)%Str_tmp)
           line=l_case(line)
           if (len_trim(line) == 0) cycle
           if (line(1:1) =="!" .or. line(1:1) =="#") cycle
@@ -491,21 +491,21 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
       i=i+1
       if(i >= file_cfl%nlines) exit
 
-      lowline=l_case(adjustl(file_cfl%line(i)%str))
+      lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
 
       if(lowline(1:6) == "magdom".and.magdom_begin) then
         num_dom=num_dom+1
         ip=index(lowline,":")
-        write(unit=file_cfl%line(i)%str,fmt="(a,2f7.4)") lowline(1:ip),Mag_Dom%Pop(1:2,num_dom)
-        write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%str)
+        write(unit=file_cfl%line(i)%Str_tmp,fmt="(a,2f7.4)") lowline(1:ip),Mag_Dom%Pop(1:2,num_dom)
+        write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%Str_tmp)
         do
           i=i+1
-          lowline=adjustl(l_case(file_cfl%line(i)%str))
+          lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
           if(lowline(1:6) == "magdom") then
             num_dom=num_dom+1
             ip=index(lowline,":")
-            write(unit=file_cfl%line(i)%str,fmt="(a,2f7.4)") lowline(1:ip),Mag_Dom%Pop(1:2,num_dom)
-            write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%str)
+            write(unit=file_cfl%line(i)%Str_tmp,fmt="(a,2f7.4)") lowline(1:ip),Mag_Dom%Pop(1:2,num_dom)
+            write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%Str_tmp)
           else
             i=i-1
             magdom_begin=.false.
@@ -520,8 +520,8 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
          num_skp=0
          skp_begin=.true.
          bfcoef_begin=.true.
-         write(unit=file_cfl%line(i)%str,fmt="(a)") trim(file_cfl%line(i)%str)
-         write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%str)
+         write(unit=file_cfl%line(i)%Str_tmp,fmt="(a)") trim(file_cfl%line(i)%Str_tmp)
+         write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%Str_tmp)
          cycle
        end if
 
@@ -538,10 +538,10 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
            Ph=mA%atom(num_matom)%mphas(ik)
          end if
 
-         write(unit=file_cfl%line(i)%str,fmt='(a,i8,i3,7f8.3)') 'skp',ik,im,Rsk,Isk,Ph
+         write(unit=file_cfl%line(i)%Str_tmp,fmt='(a,i8,i3,7f8.3)') 'skp',ik,im,Rsk,Isk,Ph
          do
            i=i+1
-           lowline=adjustl(l_case(file_cfl%line(i)%str))
+           lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
            if(lowline(1:3) == "skp") then
              num_skp=num_skp+1
              read(unit=lowline(4:),fmt=*,iostat=ier) ik,im,Rsk,Isk,Ph
@@ -554,7 +554,7 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
                Isk(:)=mA%atom(num_matom)%Ski(:,ik)
                Ph=mA%atom(num_matom)%mphas(ik)
              end if
-             write(unit=file_cfl%line(i)%str,fmt='(a,i8,i3,7f8.3)') 'skp',ik,im,Rsk,Isk,Ph
+             write(unit=file_cfl%line(i)%Str_tmp,fmt='(a,i8,i3,7f8.3)') 'skp',ik,im,Rsk,Isk,Ph
            else
              i=i-1
              skp_begin=.false.
@@ -575,11 +575,11 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
          read(unit=lowline(7:),fmt=*,iostat=ier) ik,im,coef(1:n),ph
          coef(1:n)= mA%atom(num_matom)%cbas(1:n,ik)
          Ph=mA%atom(num_matom)%mphas(ik)
-         write(unit=file_cfl%line(i)%str,fmt=forma) 'bfcoef',ik,im,coef(1:n),Ph
+         write(unit=file_cfl%line(i)%Str_tmp,fmt=forma) 'bfcoef',ik,im,coef(1:n),Ph
 
          do
            i=i+1
-           lowline=adjustl(l_case(file_cfl%line(i)%str))
+           lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
            if(lowline(1:6) == "bfcoef") then
              num_skp=num_skp+1
              read(unit=lowline(7:),fmt=*,iostat=ier) ik,im
@@ -588,7 +588,7 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
              read(unit=lowline(7:),fmt=*,iostat=ier) ik,im,coef(1:n),ph
              coef(1:n)= mA%atom(num_matom)%cbas(1:n,ik)
              Ph=mA%atom(num_matom)%mphas(ik)
-             write(unit=file_cfl%line(i)%str,fmt="(a,i8,i3,4f8.3)") 'bfcoef',ik,im,coef(1:n),Ph
+             write(unit=file_cfl%line(i)%Str_tmp,fmt="(a,i8,i3,4f8.3)") 'bfcoef',ik,im,coef(1:n),Ph
            else
              i=i-1
              bfcoef_begin=.false.
@@ -597,7 +597,7 @@ Subroutine Write_SOL_mCFL(lun,file_cfl,mA,Mag_dom,comment)
          enddo
        endif! end bfcoef
 
-       write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%str)
+       write(unit=lun,fmt="(a)") trim(file_cfl%line(i)%Str_tmp)
 
       end do
 
