@@ -374,8 +374,8 @@
        real(kind=cp),     allocatable, dimension(:,:)  :: mI_Coor              !Refinement codes (or multipliers) of internal coordinates
        integer,           allocatable, dimension(:,:)  :: lI_coor              !Numbers of LSQ parameters for internal coordinates
        real(kind=cp),     allocatable, dimension(  :)  :: U_iso                !Isotropic temperature factor
-       real(kind=cp),     allocatable, dimension(  :)  :: mU_iso              !Refinement codes (or multipliers) of Isotropic temperature factor
-       integer,           allocatable, dimension(  :)  :: lU_iso              !Numbers of LSQ parameters for Isotropic temperature factor
+       real(kind=cp),     allocatable, dimension(  :)  :: mU_iso               !Refinement codes (or multipliers) of Isotropic temperature factor
+       integer,           allocatable, dimension(  :)  :: lU_iso               !Numbers of LSQ parameters for Isotropic temperature factor
        real(kind=cp),     allocatable, dimension(  :)  :: occ                  !Occupation factor
        real(kind=cp),     allocatable, dimension(  :)  :: mocc                 !Refinement codes (or multipliers) of Occupation factor
        integer,           allocatable, dimension(  :)  :: locc                 !Numbers of LSQ parameters for Occupation factor

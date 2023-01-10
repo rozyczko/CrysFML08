@@ -26,7 +26,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       do i=n_ini,n_end
          !> load information on line variable
          line=adjustl(ffile%line(i)%str)
-         if (line(1:1) ==" ") cycle
+         if (len_trim(line) == 0) cycle
          if (line(1:1) =="!") cycle
          k=index(line,"!")
          if( k /= 0) line=line(:k-1)

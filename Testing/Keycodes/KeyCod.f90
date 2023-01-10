@@ -6,7 +6,7 @@ Program KeyCodes
    !---- Use Modules ----!
    use CFML_GlobalDeps,   only: CP, Err_CFML, clear_error, set_error
    Use CFML_Strings,      only: File_Type, U_Case, Cut_String, Get_Words, &
-                                Get_Num, Reading_File
+                                Get_Num, Reading_File, l_case
    use CFML_gSpaceGroups, only: SpG_Type, Write_SpaceGroup_Info
    use CFML_IOForm,       only: Read_Xtal_Structure, Read_CFL_Cell
    use CFML_Metrics,      only: Cell_GLS_Type, Write_Crystal_Cell
@@ -32,10 +32,46 @@ Program KeyCodes
 
    type(File_type)                  :: Ffile
 
-   class(SPG_Type),     dimension(:), allocatable  :: SpGr
-   type(Cell_GLS_Type), dimension(NMAX_PHAS)  :: Cell
-   type(AtList_Type),   dimension(NMAX_ATLIS) :: At
-   type(molecule_type), dimension(NMAX_MOLE)  :: Mol
+    type :: Phase_Type
+       character(len=:),      allocatable :: phas_name
+       logical, dimension(:), allocatable :: patt_contrib ! Contribution to patterns
+       type(Cell_GLS_Type)                :: Cell         ! Cell object
+       class(SpG_Type),       allocatable :: SpG          ! Space Group object
+       type(Atlist_Type)                  :: Atm          ! Atom List object
+    end type Phase_Type
+
+    type, extends(Phase_Type) :: PowderPhase_Type
+       real(kind=cp) :: iso_size, Gauss_iso_size_frac
+       real(kind=cp) :: miso_size, mGauss_iso_size_frac
+       integer       :: Liso_size, LGauss_iso_size_frac
+       real(kind=cp) :: iso_strain, Lorent_iso_strain_frac
+       real(kind=cp) :: miso_strain, mLorent_iso_strain_frac
+       integer       :: Liso_strain, LLorent_iso_strain_frac
+       integer       :: aniso_size_model
+       integer       :: aniso_strain_model
+       real(kind=cp), dimension(:),  allocatable :: aniso_size, aniso_strain
+       real(kind=cp), dimension(:),  allocatable :: maniso_size, maniso_strain
+       integer,       dimension(:),  allocatable :: Laniso_size, Laniso_strain
+    end type PowderPhase_Type
+
+    Type, extends(Phase_Type) :: MolPhase_Type
+       integer                                              :: N_Mol=0          ! Number of Molecules
+       integer                                              :: N_Species=0      ! Number of species
+       type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
+    End type MolPhase_Type
+
+    Type, extends(PowderPhase_Type) :: PowderMolPhase_Type
+       integer                                              :: N_Mol=0          ! Number of Molecules
+       integer                                              :: N_Species=0      ! Number of species
+       type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
+    End type PowderMolPhase_Type
+
+    type(Phase_Type), dimension(:), allocatable :: Ph
+
+   !class(SPG_Type),     dimension(:), allocatable  :: SpGr
+   !type(Cell_GLS_Type), dimension(NMAX_PHAS)  :: Cell
+   !type(AtList_Type),   dimension(NMAX_ATLIS) :: At
+   !type(molecule_type), dimension(NMAX_MOLE)  :: Mol
 
    type(RelationList_Type)          :: RelG
 
@@ -52,18 +88,14 @@ Program KeyCodes
    character(len=2)                :: ans
    character(len=40)               :: str
 
-   integer                         :: i, narg, lun
+   integer                         :: i, j, k, narg, lun, nphases
 
    real(kind=cp)                   :: T_ini,T_fin, T_Time
 
    character(len=150)              :: line
    character(len=3)                :: ktype
    character(len=40), dimension(10):: dire
-
-   integer                         :: j
-
    integer, dimension(10)          :: ivet
-
    real(kind=cp), dimension(10)    :: vet
 
 
@@ -87,12 +119,16 @@ Program KeyCodes
    integer, parameter                     :: NB_MAX=50
    integer                                :: NB_Phas, NB_Patt, NB_Mol, NB_Atm, NB_Tot
    integer, dimension(2,NB_MAX)           :: Ind
-   character(len=40), dimension(NB_MAX)   :: ID_Str
+   integer, dimension(2,NMAX_PATT)        :: ib_Patt
+   integer, dimension(2,NMAX_MOLE)        :: Ib_Mol
+   integer, dimension(2,NMAX_ATLIS)       :: Ib_Atm
+   integer, dimension(2,NMAX_PHAS)        :: Ib_Phas
+   character(len=40), dimension(4,NB_MAX) :: ID_Str
 
    type(Block_Info_Type), dimension(NB_MAX) :: Block_Phases
    type(Block_Info_Type), dimension(NB_MAX) :: Block_Patterns
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Molecules
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Atms
+   type(Block_Info_Type), dimension(NB_MAX) :: Block_Molec
+   type(Block_Info_Type), dimension(NB_MAX) :: Block_Atm
 
 
    !> Init
@@ -107,7 +143,7 @@ Program KeyCodes
       arg_given=.true.
    end if
 
-   do
+   !do
       write(unit=*,fmt="(/,/,8(a,/))")                                                        &
               "                      =============================="                        , &
               "                      ====== PROGRAM KEYCODES ======"                        , &
@@ -116,7 +152,7 @@ Program KeyCodes
               "    *   Checking Key Codes for Refinement Procedures using CrysFML2008    *" , &
               "    *                            Reading only .cfl                        *" , &
               "    ***********************************************************************" , &
-              "                           (version: October 2022)"
+              "                     (version: December 2022 JGP+NAK+JRC)"
       write(unit=*,fmt=*) " "
 
       if (.not. arg_given) then
@@ -148,14 +184,75 @@ Program KeyCodes
          stop
       end if
 
+      !Determine the number of phases
+      nphases=0
+      do i = 1 , ffile%nlines
+          line = adjustl(ffile%line(i)%str)
+          if (l_case(line(1:6)) == "phase_")  then
+              nphases = nphases + 1
+          end if
+      end do
+      if (nphases == 0) then
+          write(*,"(a)") ' No phase_ command found in the CFL file'
+          write(*,"(a)") ' Assuming a single phase'
+          nphases=1
+      end if
+
       !> Create a Log File
       if (debug) then
          open(newunit=lun,file=trim(filcod)//".log", status="replace",action="write")
+         write(unit=lun,fmt="(/,/,8(a,/))")                                                        &
+              "                      =============================="                        , &
+              "                      ====== PROGRAM KEYCODES ======"                        , &
+              "                      =============================="                        , &
+              "    ***********************************************************************" , &
+              "    *   Checking Key Codes for Refinement Procedures using CrysFML2008    *" , &
+              "    *                            Reading only .cfl                        *" , &
+              "    ***********************************************************************" , &
+              "                     (version: December 2022 JGP+NAK+JRC)"
       end if
 
-      !> ----------------------
-      !> ---- Testing Zone ----
-      !> ----------------------
+     ! Reading phases
+     write(unit=lun,fmt='(a,1x,i2,1x,a)') ' => Reading',nphases,'phases'
+     allocate(ph(nphases))
+     !Setting the phases' name
+     j=0
+      do i = 1 , ffile%nlines
+          line = adjustl(ffile%line(i)%str)
+          if (l_case(line(1:6)) == "phase_")  then
+              j = j + 1
+              k=index(line," ")
+              if(k >= 7) then
+                ph(j)%Phas_name=line(7:k)
+              else
+                write(*,"(a,i3)")  ' => A name is compulsory for phase #',j
+               stop
+              end if
+          end if
+      end do
+
+     do i = 1 , nphases
+         call Read_XTal_Structure(trim(filcod)//'.cfl',ph(i)%Cell,ph(i)%Spg,ph(i)%Atm,IPhase=i)
+         if (Err_CFML%IErr == 1) then
+             write(*,"(a,i3)")  ' => Error reading phase #',i
+             stop
+         end if
+         write(unit=lun,fmt='(4x,a,1x,i2,1x,a)') 'Phase',i,'read'
+     end do
+
+      !> Write Information about the read phases
+     do i = 1 , nphases
+         write(unit=lun,fmt='(/,a)')  '  ==========================='
+         write(unit=lun,fmt='(a,i4)') '  Information about Phase',i
+         write(unit=lun,fmt='(a,/)')  '  ==========================='
+         call Write_SpaceGroup_Info(Ph(i)%SpG,lun)
+         call Write_Atom_List(Ph(i)%atm,Iunit=lun)
+     end do
+
+
+      !> ----------------------------------
+      !> ---- Testing Zone for commands----
+      !> ----------------------------------
 
       !> Command zone?
       zonecommand=.false.
@@ -164,12 +261,12 @@ Program KeyCodes
       if (any(zcomm > 0)) zonecommand=.true.
 
       if (Debug) then
-         write(unit=lun, fmt='(a)') ' ---- Command Zone ----'
+         write(unit=lun, fmt='(//,a)') ' ---- Command Zone ----'
          if (zonecommand) then
             write(unit=lun, fmt='(a, i5)') "   Start line: ", zcomm(1)
             write(unit=lun, fmt='(a, i5)') "   End   line: ", zcomm(2)
          else
-            write(unit=lun, fmt='(a)') "   Dont'exist Command Zone! "
+            write(unit=lun, fmt='(a)') "   Command Zone doesnt'exist ! "
          end if
          write(unit=lun, fmt='(a)') ' ---- End Command Zone ----'
          write(unit=lun, fmt='(a)') ' '
@@ -180,65 +277,31 @@ Program KeyCodes
       NB_Patt=0; NB_Phas=0; NB_Atm=0; NB_Mol=0
 
       if (zonecommand) then
-         !> Phase Blocks
-         call Get_Block_Key('Phase',   ffile, zcomm(1), zcomm(2), NB_Phas, Ind, ID_str)
+         call Get_Block_Key('Phase',   ffile, zcomm(1), zcomm(2), NB_Phas, Ind, ID_str(1,:))
          do i=1,NB_Phas
-            call Set_Block_Phase(Block_Phases, ID_str(i), ind(:,i),ffile)
+            call Set_Block_Phase(Block_Phases, ID_str(1,i), ind(:,i),ffile)
          end do
          NB_Phas=0
          do i=1,size(Block_Phases)
             if (len_trim(Block_Phases(i)%Block%Name) >0) NB_Phas=NB_Phas+1
          end do
 
-         !> Pattern Blocks
-         call Get_Block_Key('Pattern',   ffile, zcomm(1), zcomm(2), NB_Patt, Ind, ID_str)
-         lab1: do i=1,NB_Patt
-            do j=1,NB_Phas
-               if (ind(1,i) >= Block_Phases(j)%Block%Line(1) .and. ind(1,i) <= Block_Phases(j)%Block%Line(2)) cycle lab1
-            end do
-            call Set_Block_Pattern(Block_Patterns, ID_str(i), ind(:,i),ffile)
-         end do lab1
 
-         NB_Patt=0
-         do i=1,size(Block_Patterns)
-            if (len_trim(Block_Patterns(i)%Block%Name) >0) NB_Patt=NB_Patt+1
-         end do
+         call Get_Block_Key('Pattern', ffile, zcomm(1), zcomm(2), NB_Patt, ib_Patt, ID_str(2,:))
+         call Get_Block_Key('Molec',   ffile, zcomm(1), zcomm(2), NB_Mol,  Ib_Mol,  ID_str(3,:))
+         call Get_Block_Key('Atoms',   ffile, zcomm(1), zcomm(2), NB_Atm,  Ib_Atm,  ID_str(4,:))
 
-         !> Molec Blocks
-         call Get_Block_Key('Molec',   ffile, zcomm(1), zcomm(2), NB_Mol, Ind, ID_str)
-         lab2: do i=1,NB_Mol
-            do j=1,NB_Phas
-               if (ind(1,i) >= Block_Phases(j)%Block%Line(1) .and. ind(1,i) <= Block_Phases(j)%Block%Line(2)) cycle lab2
-            end do
-            do j=1,NB_Patt
-               if (ind(1,i) >= Block_Patterns(j)%Block%Line(1) .and. ind(1,i) <= Block_Patterns(j)%Block%Line(2)) cycle lab2
-            end do
-            call Set_Block_Molec(Block_Molecules, ID_str(i), ind(:,i),ffile)
-         end do lab2
+         NB_Tot=NB_Patt+NB_Phas+NB_Mol+NB_Atm
 
-         NB_Mol=0
-         do i=1,size(Block_Molecules)
-            if (len_trim(Block_Molecules(i)%Block%Name) >0) NB_Mol=NB_Mol+1
-         end do
+         write(unit=lun, fmt='(a,i4)') 'Num. Total Blocks: ',NB_Tot
+         write(unit=lun, fmt='(a,i4)') '     Phase Blocks: ',NB_Phas
+         write(unit=lun, fmt='(a,i4)') '  Patterns Blocks: ',NB_Patt
+         write(unit=lun, fmt='(a,i4)') ' Molecules Blocks: ',NB_Mol
+         write(unit=lun, fmt='(a,i4)') '      AtomsBlocks: ',NB_Atm
+         write(unit=lun, fmt='(a)') ' '
 
-         !> Atoms Blocks
-         call Get_Block_Key('Atom',   ffile, zcomm(1), zcomm(2), NB_Mol, Ind, ID_str)
-         lab3: do i=1,NB_Atm
-            do j=1,NB_Phas
-               if (ind(1,i) >= Block_Phases(j)%Block%Line(1) .and. ind(1,i) <= Block_Phases(j)%Block%Line(2)) cycle lab3
-            end do
-            do j=1,NB_Patt
-               if (ind(1,i) >= Block_Patterns(j)%Block%Line(1) .and. ind(1,i) <= Block_Patterns(j)%Block%Line(2)) cycle lab3
-            end do
-            do j=1,NB_Mol
-               if (ind(1,i) >= Block_Molecules(j)%Block%Line(1) .and. ind(1,i) <= Block_Molecules(j)%Block%Line(2)) cycle lab3
-            end do
-            call Set_Block_Atom(Block_Atms, ID_str(i), ind(:,i),ffile)
-         end do lab3
-
-         NB_Atm=0
-         do i=1,size(Block_Atms)
-            if (len_trim(Block_Atms(i)%Block%Name) >0) NB_Atm=NB_Atm+1
+         do i=1,NB_Phas
+            call Set_Block_Phase(Block_Phases, ID_str(1,i), ind(:,i),ffile)
          end do
 
 
@@ -251,32 +314,47 @@ Program KeyCodes
             write(unit=lun, fmt='(a)') ' '
 
             if (NB_Tot ==0 ) then
-                write(unit=lun, fmt='(a)') "   Dont'exist Blocks! "
+                write(unit=lun, fmt='(a)') "   Blocks dont'exist ! "
                 write(unit=lun, fmt='(a)') ' '
             else
-               do i=1,NB_Phas
+               if (NB_Phas > 0) then
                   write(unit=lun, fmt='(a)') ' >>>> Phase Block Zone'
                   write(unit=lun, fmt='(a)') ' '
-                  call WriteInfo_Block(Block_Phases(i), lun)
-               end do
+                  do i=1,NB_Phas
+                     call WriteInfo_Block(Block_Phases(i), lun)
+                  end do
+               end if
 
-               do i=1,NB_Patt
-                  write(unit=lun, fmt='(a)') ' >>>> Pattern Block Zone'
-                  write(unit=lun, fmt='(a)') ' '
-                  call WriteInfo_Block(Block_Patterns(i), lun)
-               end do
+               if (NB_Patt > 0) then
+                  write(unit=lun, fmt='(a)') ' ---- Pattern Block Zone ----'
+                  do i=1,NB_Patt
+                     write(unit=lun, fmt='(a, i3)') "   Pattern: ", i
+                     write(unit=lun, fmt='(a, i5)') "       Ini: ", ib_Patt(1,i)
+                     write(unit=lun, fmt='(a, i5)') "       End: ", ib_Patt(2,i)
+                     write(unit=lun, fmt='(a)') ' '
+                  end do
+               end if
 
-               do i=1,NB_Mol
-                  write(unit=lun, fmt='(a)') ' >>>> Molecule Block Zone'
-                  write(unit=lun, fmt='(a)') ' '
-                  call WriteInfo_Block(Block_Molecules(i), lun)
-               end do
 
-               do i=1,NB_Atm
-                  write(unit=lun, fmt='(a)') ' >>>> Atoms Block Zone'
-                  write(unit=lun, fmt='(a)') ' '
-                  call WriteInfo_Block(Block_Atms(i), lun)
-               end do
+               if (NB_Mol > 0) then
+                  write(unit=lun, fmt='(a)') ' ---- Molecule Block Zone ----'
+                  do i=1,NB_Mol
+                     write(unit=lun, fmt='(a, i3)') "  Molecule: ", i
+                     write(unit=lun, fmt='(a, i5)') "       Ini: ", ib_Mol(1,i)
+                     write(unit=lun, fmt='(a, i5)') "       End: ", ib_Mol(2,i)
+                     write(unit=lun, fmt='(a)') ' '
+                  end do
+               end if
+
+               if (NB_Atm > 0) then
+                  write(unit=lun, fmt='(a)') ' ---- Atom Block Zone ----'
+                  do i=1,NB_Atm
+                     write(unit=lun, fmt='(a, i3)') "      Atom: ", i
+                     write(unit=lun, fmt='(a, i5)') "       Ini: ", ib_Atm(1,i)
+                     write(unit=lun, fmt='(a, i5)') "       End: ", ib_Atm(2,i)
+                     write(unit=lun, fmt='(a)') ' '
+                  end do
+               end if
 
             end if
 
@@ -292,6 +370,78 @@ Program KeyCodes
 
 
 
+
+      arg_given=.false.
+
+
+      !> Allocating Relation List for Non atomic parameters
+       call Allocate_RelationList(50,RPat)   ! 18 Parameters for Pattern
+       call Allocate_RelationList(50,RPhas)  ! 6  Parameters for Phase
+       call Allocate_RelationList(50,RMol)   ! 6  Parameters for Phase
+
+      !> Doing space for Refinement vectors
+      !> add parameters according to the number of atoms in each phase
+      Npar=18+ 6+ 11*20   ! At the moment only 1 Phase
+      call Allocate_VecRef(Npar)
+
+
+      !if (nc_i > 0 .and. nc_i < nc_f) then
+
+         !> ==== Blocks ====
+         !> NB... is the number of blocks in the command zone
+         !> IB... star/end for each Phase/Pattern/....
+
+         !> Patterns
+         if (NB_Patt > 0) then
+            icyc=0
+            do ip=1,size(IB_Patt,dim=2)
+               if (IB_Patt(1,ip) == 0) cycle
+               icyc=icyc+1
+               call Read_RefCodes_PATT(ffile, IB_Patt(1,ip),IB_Patt(2,ip), Ip, RPat)
+               if (icyc == NB_Patt) exit
+            end do
+         end if
+
+         !> Phases
+         if (NB_Phas > 0) then
+            icyc=0
+            do ip=1,size(IB_Phas,dim=2)
+               if (IB_Phas(1,ip) == 0) cycle
+
+               icyc=icyc+1
+               !call read_cfl_cell(ffile, Ph(icyc)%cell,i_ini=IB_Phas(1,ip),i_end=IB_Phas(2,ip))
+               !call Write_Crystal_Cell(Cell(icyc),lun)
+               write(unit=lun,fmt="(a,/)") " "
+
+               call Read_RefCodes_PHAS(ffile, IB_Phas(1,ip),IB_Phas(2,ip), Ip, RPhas)
+               call RList_to_Cell(RPhas, ip, Ph(icyc)%Cell)
+
+               if (icyc == NB_Phas) exit
+            end do
+         end if
+
+         !> Molec
+         !if (NB_Mol > 0) then
+         !   icyc=0
+         !   do im=1,size(IB_Mol,dim=2)
+         !      if (IB_Mol(1,im) ==0) cycle
+         !
+         !      icyc=icyc+1
+         !      call Read_RefCodes_MOL(ffile, IB_Mol(1,im),IB_Mol(2,im), Im, RMol)
+         !      call RList_to_Molec(RMol, im, Mol)
+         !
+         !      if (icyc == NB_Mol) exit
+         !   end do
+         !end if
+
+         !> Print info
+         call WriteInfo_RefParams()
+         call WriteInfo_RefParams(lun)
+
+         !call WriteInfo_Restraints(At)
+         !call WriteInfo_Restraints(At, Iunit=lun)
+      !end if
+
       !> --------------------------
       !> ---- End Testing Zone ----
       !> --------------------------
@@ -304,97 +454,16 @@ Program KeyCodes
       T_ini=(T_ini-T_fin)*60.0
 
       write(unit=*,fmt='(a,i3,a,f8.4,a)')    " => CPU-time: ",nint(T_fin)," minutes",T_ini," seconds"
+      T_ini=T_time/60.0
+      T_fin=int(T_ini)
+      T_ini=(T_ini-T_fin)*60.0
+      write(unit=*,fmt='(a,i3,a,f8.4,a)')       " => TOTAL CPU-time: ",nint(T_fin)," minutes",T_ini," seconds"
       if (Debug) then
-         write(unit=lun,fmt='(/,a)')            " => Normal End of: PROGRAM KEYCODES "
-         write(unit=lun,fmt='(a,i3,a,f8.4,a)')  " => CPU-time: ",nint(T_fin)," minutes",T_ini," seconds"
-         close(unit=lun)
+        write(unit=lun,fmt='(/,a)')            " => Normal End of: PROGRAM KEYCODES "
+        write(unit=lun,fmt='(a,i3,a,f8.4,a)')  " => CPU-time: ",nint(T_fin)," minutes",T_ini," seconds"
+        close(unit=lun)
       end if
-
-      arg_given=.false.
-   end do
-   T_ini=T_time/60.0
-   T_fin=int(T_ini)
-   T_ini=(T_ini-T_fin)*60.0
-   write(unit=*,fmt='(a,i3,a,f8.4,a)')       " => TOTAL CPU-time: ",nint(T_fin)," minutes",T_ini," seconds"
-
-
-      !call Read_Xtal_Structure(trim(filcod)//'.cfl', Cell, SpGr, At, FType=ffile)
-
-      !> Write Information
-
-      !call Write_SpaceGroup_Info(SpGr,lun)
-      !write(unit=lun,fmt="(a,/)") " "
-
-      !call Write_Atom_List(At,Iunit=lun)
-
-      !> Allocating Relation List for Non atomic parameters
-!      call Allocate_RelationList(50,RPat)   ! 18 Parameters for Pattern
-!      call Allocate_RelationList(50,RPhas)  ! 6  Parameters for Phase
-!      call Allocate_RelationList(50,RMol)   ! 6  Parameters for Phase
-
-      !> Doing space for Refinement vectors
-      !> add parameters according to the number of atoms in each phase
-!      Npar=18+ 6+ 11*20   ! At the moment only 1 Phase
-!      call Allocate_VecRef(Npar)
-
-
-!      if (nc_i > 0 .and. nc_i < nc_f) then
-!
-!         !> ==== Blocks ====
-!         !> NB... is the number of blocks in the command zone
-!         !> IB... star/end for each Phase/Pattern/....
-!
-!         !> Patterns
-!         if (NB_Patt > 0) then
-!            icyc=0
-!            do ip=1,size(IB_Patt,dim=2)
-!               if (IB_Patt(1,ip) ==0) cycle
-!
-!               icyc=icyc+1
-!               call Read_RefCodes_PATT(ffile, IB_Patt(1,ip),IB_Patt(2,ip), Ip, RPat)
-!               if (icyc == NB_Patt) exit
-!            end do
-!         end if
-!
-!         !> Phases
-!         if (NB_Phas > 0) then
-!            icyc=0
-!            do ip=1,size(IB_Phas,dim=2)
-!               if (IB_Phas(1,ip) ==0) cycle
-!
-!               icyc=icyc+1
-!               call read_cfl_cell(ffile, cell(icyc),i_ini=IB_Phas(1,ip),i_end=IB_Phas(2,ip))
-!               call Write_Crystal_Cell(Cell(icyc),lun)
-!               write(unit=lun,fmt="(a,/)") " "
-!
-!               call Read_RefCodes_PHAS(ffile, IB_Phas(1,ip),IB_Phas(2,ip), Ip, RPhas)
-!               call RList_to_Cell(RPhas, ip, Cell(icyc))
-!
-!               if (icyc == NB_Phas) exit
-!            end do
-!         end if
-!
-!         !> Molec
-!         if (NB_Mol > 0) then
-!            icyc=0
-!            do im=1,size(IB_Mol,dim=2)
-!               if (IB_Mol(1,im) ==0) cycle
-!
-!               icyc=icyc+1
-!               call Read_RefCodes_MOL(ffile, IB_Mol(1,im),IB_Mol(2,im), Im, RMol)
-!               call RList_to_Molec(RMol, im, Mol)
-!
-!               if (icyc == NB_Mol) exit
-!            end do
-!         end if
-!
-!         !> Print info
-!         call WriteInfo_RefParams()
-!         call WriteInfo_RefParams(lun)
-!
-!         call WriteInfo_Restraints(At)
-!         call WriteInfo_Restraints(At, Iunit=lun)
-!      end if
+   !end do
 
    Contains
 
@@ -480,6 +549,7 @@ Program KeyCodes
 
       !> Subblock Molec
       call Get_Block_Key('Molec', ffile, B(i)%Block%line(1), B(i)%Block%line(2), nb, Indc, IDstr)
+      k=0
       if (nb > 0) then
          loop2: do j=1,nb
             if (k > 0) then
@@ -495,82 +565,6 @@ Program KeyCodes
             B(i)%SBlock(k)%line=Indc(:,j)
          end do loop2
       end if
-
-      !> Subblock Atoms
-      call Get_Block_Key('Atoms', ffile, B(i)%Block%line(1), B(i)%Block%line(2), nb, Indc, IDstr)
-      if (nb > 0) then
-         loop3: do j=1,nb
-            if (k > 0) then
-               do ii=1,k
-                  if (u_case(B(i)%SBlock(ii)%Name)==u_case(IDstr(j))) cycle loop3
-               end do
-            end if
-
-            k=k+1
-            B(i)%SBlock(k)%Name=adjustl(IDStr(j))
-            B(i)%SBlock(k)%Type='Atoms'
-            B(i)%SBlock(k)%IType=4
-            B(i)%SBlock(k)%line=Indc(:,j)
-         end do loop3
-      end if
-
-   End Subroutine Set_Block_Phase
-
-   Subroutine Set_Block_Molec(B, StrName, Ind, ffile)
-      !---- Arguments ----!
-      type(Block_Info_Type), dimension(:), intent(in out) :: B
-      character(len=*),                    intent(in)     :: StrName
-      integer, dimension(2),               intent(in)     :: ind
-      type(File_type) ,                    intent(in)     :: ffile
-
-      !---- Local Variables ----!
-      integer                  :: i,j,k,ii,ndim,nb
-      integer, dimension(2,10) :: indc
-      character(len=40)                :: Str1, Str2
-      character(len=3)                 :: car
-      character(len=40), dimension(10) :: IDStr
-
-      !> Init
-      Str1 = u_case(adjustl(StrName))
-
-      ndim=size(B)
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) > 0) then
-            if (trim(str1) == trim(str2)) return
-         end if
-      end do
-
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) /= 0) cycle
-
-         B(i)%Block%name = adjustl(StrName)
-         B(i)%Block%Type='Molec'
-         B(i)%Block%IType=3
-         B(i)%Block%line=Ind
-
-         exit
-      end do
-
-      !> SubBlocks
-      nb=0
-      do j=B(i)%Block%line(1),B(i)%Block%line(2)
-         car=adjustl(ffile%line(j)%str)
-         if (car(1:1) =='!') cycle
-         if (car(1:1) ==' ') cycle
-
-         if (index(car,'%') > 0) nb=nb+1
-      end do
-      if (mod(nb,2) /= 0) then
-         print*,'Error in Number of Blocks!!!!'
-         return
-      end if
-
-      B(i)%N_SBlocks=nb/2
-      if (allocated(B(i)%SBlock)) deallocate(B(i)%SBlock)
-      if (B(i)%N_SBlocks > 0) allocate(B(i)%SBlock(nb))
-
 
       !> Subblock Atoms
       call Get_Block_Key('Atoms', ffile, B(i)%Block%line(1), B(i)%Block%line(2), nb, Indc, IDstr)
@@ -591,110 +585,7 @@ Program KeyCodes
          end do loop3
       end if
 
-   End Subroutine Set_Block_Molec
-
-   Subroutine Set_Block_Pattern(B, StrName, Ind, ffile)
-      !---- Arguments ----!
-      type(Block_Info_Type), dimension(:), intent(in out) :: B
-      character(len=*),                    intent(in)     :: StrName
-      integer, dimension(2),               intent(in)     :: ind
-      type(File_type) ,                    intent(in)     :: ffile
-
-      !---- Local Variables ----!
-      integer                  :: i,j,k,ii,ndim,nb
-      integer, dimension(2,10) :: indc
-      character(len=40)                :: Str1, Str2
-      character(len=3)                 :: car
-      character(len=40), dimension(10) :: IDStr
-
-      !> Init
-      Str1 = u_case(adjustl(StrName))
-
-      ndim=size(B)
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) > 0) then
-            if (trim(str1) == trim(str2)) return
-         end if
-      end do
-
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) /= 0) cycle
-
-         B(i)%Block%name = adjustl(StrName)
-         B(i)%Block%Type='Pattern'
-         B(i)%Block%IType=2
-         B(i)%Block%line=Ind
-
-         exit
-      end do
-
-      !> SubBlocks
-      nb=0
-      do j=B(i)%Block%line(1),B(i)%Block%line(2)
-         car=adjustl(ffile%line(j)%str)
-         if (car(1:1) =='!') cycle
-         if (car(1:1) ==' ') cycle
-
-         if (index(car,'%') > 0) nb=nb+1
-      end do
-      if (mod(nb,2) /= 0) then
-         print*,'Error in Number of Blocks!!!!'
-         return
-      end if
-
-      B(i)%N_SBlocks=nb/2
-      if (allocated(B(i)%SBlock)) deallocate(B(i)%SBlock)
-      if (B(i)%N_SBlocks > 0) allocate(B(i)%SBlock(nb))
-
-
-   End Subroutine Set_Block_Pattern
-
-   Subroutine Set_Block_Atom(B, StrName, Ind, ffile)
-      !---- Arguments ----!
-      type(Block_Info_Type), dimension(:), intent(in out) :: B
-      character(len=*),                    intent(in)     :: StrName
-      integer, dimension(2),               intent(in)     :: ind
-      type(File_type) ,                    intent(in)     :: ffile
-
-      !---- Local Variables ----!
-      integer                  :: i,j,k,ii,ndim,nb
-      integer, dimension(2,10) :: indc
-      character(len=40)                :: Str1, Str2
-      character(len=3)                 :: car
-      character(len=40), dimension(10) :: IDStr
-
-      !> Init
-      Str1 = u_case(adjustl(StrName))
-
-      ndim=size(B)
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) > 0) then
-            if (trim(str1) == trim(str2)) return
-         end if
-      end do
-
-      do i=1,ndim
-         str2=u_case(adjustl(B(i)%Block%Name))
-         if (len_trim(str2) /= 0) cycle
-
-         B(i)%Block%name = adjustl(StrName)
-         B(i)%Block%Type='Atom'
-         B(i)%Block%IType=4
-         B(i)%Block%line=Ind
-
-         exit
-      end do
-
-      !> SubBlocks
-      B(i)%N_SBlocks=0
-      if (allocated(B(i)%SBlock)) deallocate(B(i)%SBlock)
-      if (B(i)%N_SBlocks > 0) allocate(B(i)%SBlock(nb))
-
-
-   End Subroutine Set_Block_Atom
+   End Subroutine
 
 
    Subroutine WriteInfo_Block(B, lun)

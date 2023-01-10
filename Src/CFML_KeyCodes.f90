@@ -142,7 +142,7 @@ Module CFML_KeyCodes
    !---- Parameters ----!
    integer, private, parameter :: NKEY_ATM =14      ! Number of Keywords for Atoms
    integer, private, parameter :: NKEY_MATM=25      ! Number of Keywords for Magnetic atoms
-   integer, private, parameter :: NKEY_MOL =15       ! Number of Keywords for Molecule
+   integer, private, parameter :: NKEY_MOL =15      ! Number of Keywords for Molecule
    integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
    integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
    integer, private, parameter :: NKEY_PATT=25      ! Number of Keywords for Patterns
@@ -180,7 +180,7 @@ Module CFML_KeyCodes
    !-------------------!
 
    !---- Private ----!
-   character(len=132), private                :: line=" "
+   character(len=:),   private, allocatable   :: line
    character(len=40),  private, dimension(40) :: dire=" "
    integer,            private, dimension(10) :: ivet=0
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
@@ -199,7 +199,7 @@ Module CFML_KeyCodes
    integer,           public, dimension(:)  , allocatable :: Vec_PointPar ! Vector of indices pointing to the parameter number
    real(kind=cp),     public, dimension(:,:), allocatable :: Vec_LimPar   ! Vector of Lower, Upper limits and Step for Parameters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefPar   ! Vector of refined parameters (values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STF refined paramaters
+   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of standard deviations of refined paramaters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
