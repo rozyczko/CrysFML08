@@ -14,20 +14,20 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function Pack_String(Str_tmp) Result (Strp)
+   Pure Module Function Pack_String(Str) Result (Strp)
       !---- Argument ----!
-      character(len=*), intent(in) :: Str_tmp    ! Input String
-      character(len=len_trim(Str_tmp)) :: strp   ! Output string
+      character(len=*), intent(in) :: str    ! Input String
+      character(len=len_trim(str)) :: strp   ! Output string
 
       !---- Local variables ----!
       integer ::  i,n
 
       n=0
       strp=" "
-      do i=1,len(Str_tmp)
-         if (Str_tmp(i:i) /= " ") then
+      do i=1,len(str)
+         if (str(i:i) /= " ") then
             n=n+1
-            strp(n:n)=Str_tmp(i:i)
+            strp(n:n)=str(i:i)
          end if
       end do
 
@@ -39,14 +39,14 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function String_Count(Str_tmp,substr) Result(N)
+   Pure Module Function String_Count(str,substr) Result(N)
       !---- Arguments ----!
-      character(len=*), intent(in) :: Str_tmp       ! Input String
+      character(len=*), intent(in) :: str       ! Input String
       character(len=*), intent(in) :: substr    ! Substring model
       integer                      :: N         ! Number
 
       !---- Local variables ---!
-      character(len=len_trim(Str_tmp)) :: string
+      character(len=len_trim(str)) :: string
       integer                      :: i,lstr
 
       !> Init
@@ -54,7 +54,7 @@ Submodule (CFML_Strings) StringTools
 
       !lstr=len_trim(substr)-1
       lstr=len_trim(substr)        ! Changed by JGP 07/05/2019
-      string=Str_tmp
+      string=str
       do
          i=index(string,trim(substr))
          if (i == 0) exit
@@ -71,16 +71,16 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function L_Case(Str_tmp) Result (LStr)
+   Pure Module Function L_Case(Str) Result (LStr)
       !---- Argument ----!
-      character (len=*), intent(in)  :: Str_tmp    ! Input String
+      character (len=*), intent(in)  :: Str    ! Input String
       character (len=:), allocatable :: LStr   ! lower case of Text
 
       !---- Local variables ----!
       integer, parameter :: INC = ICHAR("A") - ICHAR("a")
       integer            :: leng, pos
 
-      lstr=Str_tmp
+      lstr=str
       leng=len_trim(lstr)
       do pos=1,leng
          if (lstr(pos:pos) >= "A" .and. lstr(pos:pos) <= "Z")           &
@@ -95,16 +95,16 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function U_Case(Str_tmp) Result (UStr)
+   Pure Module Function U_Case(Str) Result (UStr)
       !---- Argument ----!
-      character (len=*), intent(in)  :: Str_tmp   ! Input string
+      character (len=*), intent(in)  :: Str   ! Input string
       character (len=:), allocatable :: UStr  ! Upper conversion
 
       !---- Local variables ----!
       integer, parameter :: INC = ICHAR("A") - ICHAR("a")
       integer            :: leng, pos
 
-      UStr=Str_tmp
+      UStr=Str
       leng=len_trim(UStr)
       do pos=1,leng
          if (UStr(pos:pos) >= "a" .and. UStr(pos:pos) <= "z")           &
@@ -119,19 +119,19 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function Strip_String(Str_tmp, to_strip) Result(sstr)
+   Pure Module Function Strip_String(str, to_strip) Result(sstr)
       !---- Arguments----!
-      character(len=*), intent(in) :: Str_tmp            ! Input string
+      character(len=*), intent(in) :: str            ! Input string
       character(len=*), intent(in) :: to_strip       ! Pattern
-      character(len=len_trim(Str_tmp)) :: sstr
+      character(len=len_trim(str)) :: sstr
 
       !---- Local variables ----!
       integer :: i
 
-      sstr=trim(Str_tmp)
+      sstr=trim(str)
 
-      i=index(Str_tmp,trim(to_strip),back=.true.)
-      if (i > 0) sstr=Str_tmp(1:i-1)
+      i=index(str,trim(to_strip),back=.true.)
+      if (i > 0) sstr=str(1:i-1)
 
    End Function Strip_String
 
@@ -185,9 +185,9 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Module Function Get_DateTime() Result(Str_tmp)
+   Module Function Get_DateTime() Result(Str)
       !---- Argument ----!
-      character(len=:), allocatable :: Str_tmp  ! String containing the Date and Time
+      character(len=:), allocatable :: Str  ! String containing the Date and Time
 
       !---- Local Variables ----!
       character(len=10) :: dat
@@ -195,7 +195,7 @@ Submodule (CFML_Strings) StringTools
 
       call date_and_time(date=dat,time=tim)
 
-      Str_tmp="Date: "//dat(7:8)//"/"//dat(5:6)//"/"//dat(1:4)//      &
+      Str="Date: "//dat(7:8)//"/"//dat(5:6)//"/"//dat(1:4)//      &
           "  Time: "//tim(1:2)//":"//tim(3:4)//":"//tim(5:10)
 
    End Function Get_DateTime
@@ -206,17 +206,17 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function Get_Dirname(Str_tmp) Result(Directory)
+   Pure Module Function Get_Dirname(Str) Result(Directory)
       !---- Argument ----!
-      Character(Len=*), Intent (In)  :: Str_tmp          ! String containing Path + Filename
+      Character(Len=*), Intent (In)  :: Str          ! String containing Path + Filename
       Character(Len=:), allocatable  :: Directory    ! Path
 
       !---- Local Variables ----!
       Integer :: i
 
-      i=index(Str_tmp, OPS_SEP, Back=.True.)
+      i=index(str, OPS_SEP, Back=.True.)
       if (i > 0) then
-         Directory=Str_tmp(1:I)
+         Directory=str(1:I)
       else
          Directory=" "
       end If
@@ -229,19 +229,19 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Function Get_Filename(Str_tmp) Result(Filename)
+   Pure Module Function Get_Filename(Str) Result(Filename)
       !---- Argument ----!
-      character(Len=*), intent(in)  :: Str_tmp       ! String containing Path + Filename
+      character(Len=*), intent(in)  :: Str       ! String containing Path + Filename
       character(Len=:), allocatable :: Filename  ! Filename
 
       !---- Local Variables ----!
       integer :: i
 
-      i=index(Str_tmp, OPS_SEP, Back = .True.)
+      i=index(str, OPS_SEP, Back = .True.)
       if (i > 0) then
-         Filename=Str_tmp(i+1:)
+         Filename=Str(i+1:)
       else
-         Filename=trim(Str_tmp)
+         Filename=trim(Str)
       end If
 
    End Function Get_Filename
@@ -298,9 +298,9 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Subroutine Get_Separator_Pos(Str_tmp,car,pos,ncar)
+   Pure Module Subroutine Get_Separator_Pos(Str,car,pos,ncar)
       !---- Arguments ----!
-      character(len=*),      intent(in)  :: Str_tmp   ! Inout String
+      character(len=*),      intent(in)  :: Str   ! Inout String
       character(len=1),      intent(in)  :: car   ! Separator character
       integer, dimension(:), intent(out) :: pos   ! Vector with positions of "sep" in "Line"
       integer,               intent(out) :: ncar  ! Number of appearance of "sep" in "Line"
@@ -313,18 +313,18 @@ Submodule (CFML_Strings) StringTools
       pos=0
 
       j=0
-      do i=1,len_trim(Str_tmp)
+      do i=1,len_trim(str)
          j=j+1
-         if (Str_tmp(j:j) == '"') then  !A chains of characters is found, advance up to the next "
-            do k=1,len_trim(Str_tmp)    !the character "car" is ignored if it is within " "
+         if (str(j:j) == '"') then  !A chains of characters is found, advance up to the next "
+            do k=1,len_trim(str)    !the character "car" is ignored if it is within " "
                j=j+1
-               if(j > len_trim(Str_tmp)) exit
-               if (Str_tmp(j:j) /= '"') cycle
+               if(j > len_trim(str)) exit
+               if (str(j:j) /= '"') cycle
                exit
             end do
          end if
 
-         if (Str_tmp(j:j) == car) then
+         if (str(j:j) == car) then
             ncar=ncar+1
             pos(ncar)=j
          end if
@@ -342,22 +342,22 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Module Subroutine Get_Words(Str_tmp,dire,ic,sep)
+   Module Subroutine Get_Words(Str,dire,ic,sep)
       !---- Argument ----!
-      character(len=*),                 intent ( in) :: Str_tmp   ! Input string
+      character(len=*),                 intent ( in) :: Str   ! Input string
       character(len=*), dimension(:),   intent (out) :: dire  ! Vector of Words
       integer,                          intent (out) :: ic    ! Number of words
       character(len=*), optional,       intent ( in) :: sep   ! separator other than blank
 
       !---- Local variables ----!
-      character (len=len(Str_tmp))  :: line1,line2
+      character (len=len(Str))  :: line1,line2
       integer                   :: nlong2
       integer                   :: ndim, j
 
       !> Init
       ic=0
       ndim=size(dire)
-      line1=Str_tmp
+      line1=Str
       !Remove tabs, or a provided separator, replacing them by blanks
       do j=1,len_trim(line1)
         if(line1(j:j) == char(9)) line1(j:j)=" "
@@ -454,9 +454,9 @@ Submodule (CFML_Strings) StringTools
    !!----
    !!---- 05/04/2019
    !!
-   Pure Module Subroutine Get_Substring_Positions(Str_tmp,substr,pos,nsubs)
+   Pure Module Subroutine Get_Substring_Positions(str,substr,pos,nsubs)
       !---- Arguments ----!
-      character(len=*),      intent(in)  :: Str_tmp         ! In -> Input String
+      character(len=*),      intent(in)  :: str         ! In -> Input String
       character(len=*),      intent(in)  :: substr      ! In -> Substring
       integer, dimension(:), intent(out) :: pos         ! Out -> Vector with positions of the firs character of "substr" in "String"
       integer,               intent(out) :: nsubs       ! Out -> Number of appearance of "substr" in "String"
@@ -470,9 +470,9 @@ Submodule (CFML_Strings) StringTools
 
       lsubs=len_trim(substr)
       j=0
-      do i=1,len_trim(Str_tmp)
+      do i=1,len_trim(str)
          j=j+1
-         if (Str_tmp(j:j+lsubs-1) == trim(substr)) then
+         if (str(j:j+lsubs-1) == trim(substr)) then
             nsubs=nsubs+1
             pos(nsubs)=j
          end if
@@ -556,17 +556,17 @@ Submodule (CFML_Strings) StringTools
     !!----
     !!---- 03/04/2019
     !!
-    Recursive Module Subroutine Sort_Strings(Str_tmp)
+    Recursive Module Subroutine Sort_Strings(Str)
        !---- Argument ----!
-       character(len=*), dimension(:), intent(in out) :: Str_tmp
+       character(len=*), dimension(:), intent(in out) :: Str
 
        !---- Local variables ----!
        integer :: iq
 
-       if (size(Str_tmp) > 1) then
-          call Sort_PR_Partition(Str_tmp, iq)
-          call Sort_Strings(Str_tmp(:iq-1))
-          call Sort_Strings(Str_tmp(iq:))
+       if (size(Str) > 1) then
+          call Sort_PR_Partition(Str, iq)
+          call Sort_Strings(Str(:iq-1))
+          call Sort_Strings(Str(iq:))
        end if
 
     End Subroutine Sort_Strings

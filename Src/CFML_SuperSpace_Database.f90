@@ -116,8 +116,8 @@ Module CFML_SuperSpace_Database
          character(len=*), optional, intent(in)  :: EnvDB
       End Subroutine Read_SSG_DBase
 
-      Module Subroutine Read_single_SSG(Str_tmp,num,DB_Path, EnvDB)
-         character(len=*),           intent(in)  :: Str_tmp
+      Module Subroutine Read_single_SSG(str,num,DB_Path, EnvDB)
+         character(len=*),           intent(in)  :: str
          integer,                    intent(out) :: num
          character(len=*), optional, intent(in)  :: DB_Path
          character(len=*), optional, intent(in)  :: EnvDB

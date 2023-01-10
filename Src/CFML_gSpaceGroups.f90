@@ -356,17 +356,17 @@ Module CFML_gSpaceGroups
           integer, dimension(:), allocatable, intent(out) :: cosets
        End Subroutine Get_Cosets
 
-       Module Function Get_Crystal_System_from_Laue(Laue) Result(Str_tmp)
+       Module Function Get_Crystal_System_from_Laue(Laue) Result(Str)
           !---- Arguments ----!
           character(len=*), intent(in)  :: Laue
-          character(len=:), allocatable :: Str_tmp
+          character(len=:), allocatable :: Str
        End Function Get_Crystal_System_from_Laue
 
-       Module Function Get_Crystal_System_Str(Ops, nops) Result(Str_tmp)
+       Module Function Get_Crystal_System_Str(Ops, nops) Result(Str)
           !---- Arguments ----!
           type(Symm_Oper_Type), dimension(:), intent(in) :: Ops
           integer,                            intent(in) :: NOps
-          character(len=:), allocatable                  :: Str_tmp
+          character(len=:), allocatable                  :: Str
        End Function Get_Crystal_System_Str
 
        Module Function Get_Dimension_SymmOp(Symb) Result(d)
@@ -650,20 +650,20 @@ Module CFML_gSpaceGroups
           logical,                  optional,intent(in)  :: printd
        End Subroutine Get_SubGroups_full
 
-       Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str_tmp)
+       Module Function Get_Symb_from_Mat_Tr_I(Mat, tr, opposite) Result(Str)
           !---- Arguments ----!
           integer,       dimension(3,3), intent(in) :: Mat
           real(kind=cp), dimension(3),   intent(in) :: tr
           logical, optional,             intent(in) :: opposite
-          character(len=:), allocatable             :: Str_tmp
+          character(len=:), allocatable             :: Str
        End Function Get_Symb_from_Mat_Tr_I
 
-       Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str_tmp)
+       Module Function Get_Symb_from_Mat_Tr_R(Mat, tr, opposite) Result(Str)
           !---- Arguments ----!
           real(kind=cp), dimension(3,3), intent(in) :: Mat
           real(kind=cp), dimension(3),   intent(in) :: tr
           logical, optional,             intent(in) :: opposite
-          character(len=:),  allocatable            :: Str_tmp
+          character(len=:),  allocatable            :: Str
        End Function Get_Symb_from_Mat_Tr_R
 
        Module Function Get_Symb_from_Rational_Mat(Matt, Strcode, Invt) Result(Symb)
@@ -674,11 +674,11 @@ Module CFML_gSpaceGroups
           character(len=:), allocatable              :: symb
        End Function Get_Symb_from_Rational_Mat
 
-       Module Function Search_Hall_Operators(G, Ishift) Result(Str_tmp)
+       Module Function Search_Hall_Operators(G, Ishift) Result(Str)
           !---- Arguments ----!
           class(spg_type),                 intent(in)  :: G
           integer, dimension(3), optional, intent(in)  :: Ishift
-          character(len=:), allocatable                :: Str_tmp
+          character(len=:), allocatable                :: Str
        End Function Search_Hall_Operators
 
        Module Function Search_OnePrime_Operator(G) Result(Prime)
@@ -936,9 +936,9 @@ Module CFML_gSpaceGroups
           character(len=*), optional, intent(in )    :: xyz_type
        End Subroutine Change_Setting_SpaceG
 
-       Module Subroutine Set_SpaceGroup_DBase(Str_tmp,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
+       Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
           !---- Arguments ----!
-          character(len=*),           intent(in ) :: Str_tmp
+          character(len=*),           intent(in ) :: Str
           character(len=*),           intent(in ) :: mode
           class(spg_type),            intent(out) :: SpaceG
           character(len=*), optional, intent(in ) :: xyz_type
@@ -948,25 +948,25 @@ Module CFML_gSpaceGroups
           character(len=*), optional, intent(in ) :: database_path
        End Subroutine Set_SpaceGroup_DBase
 
-       Module Subroutine Set_SpaceGroup_gen(Str_tmp, SpaceG, NGen, Gen, set_inv)
+       Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, set_inv)
           !---- Arguments ----!
-          character(len=*),                          intent(in ) :: Str_tmp
+          character(len=*),                          intent(in ) :: Str
           class(spg_type),                           intent(out) :: SpaceG
           integer,                         optional, intent(in ) :: NGen
           character(len=*),  dimension(:), optional, intent(in ) :: Gen
           logical,                         optional, intent(in ) :: set_inv
        End Subroutine Set_SpaceGroup_gen
 
-       Module Subroutine Set_gSpG_from_string(str_tmp,SpG,Setting_Search)
+       Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
           !---- Arguments ----!
-          character(len=*),          intent(in) :: str_tmp
+          character(len=*),          intent(in) :: str
           Class(SpG_Type),           intent(out):: SpG
           logical, optional,         intent(in) :: Setting_Search
        End Subroutine Set_gSpG_from_string
 
-       !Module Subroutine Set_SpaceGroup_symb(Str_tmp, SpaceG, NGen, Gen)
+       !Module Subroutine Set_SpaceGroup_symb(Str, SpaceG, NGen, Gen)
        !   !---- Arguments ----!
-       !   character(len=*),                          intent(in ) :: Str_tmp
+       !   character(len=*),                          intent(in ) :: Str
        !   class(spg_type),                           intent(out) :: SpaceG
        !   integer,                         optional, intent(in ) :: NGen
        !   character(len=*),  dimension(:), optional, intent(in ) :: Gen

@@ -866,10 +866,10 @@ Module CFML_Rational
     !!----
     !!---- 08/04/2019
     !!
-    Elemental Function Rational_String(R) Result (Str_tmp)
+    Elemental Function Rational_String(R) Result (Str)
        !---- Arguments ----!
        type(rational),   intent(in)   :: r
-       character(len=80)              :: Str_tmp
+       character(len=80)              :: Str
 
        !---- Local Variables ----!
        character(len=100) :: line
@@ -885,7 +885,7 @@ Module CFML_Rational
        else
           write(unit=line,fmt="(i40,a,i40)") sr%numerator,"/",sr%denominator
        end if
-       Str_tmp=adjustl(Pack_String(line))
+       str=adjustl(Pack_String(line))
 
     End Function Rational_String
 

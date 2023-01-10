@@ -10,11 +10,11 @@ SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
    !!----
    !!---- 13/05/2019
    !!
-   Module Function Get_Crystal_System_Str(Ops, nops) Result(Str_tmp)
+   Module Function Get_Crystal_System_Str(Ops, nops) Result(Str)
       !---- Arguments ----!
       type(Symm_Oper_Type), dimension(:), intent(in) :: Ops    ! Reduced operators (Numops)
       integer,                            intent(in) :: NOps   ! Numops
-      character(len=:), allocatable                  :: Str_tmp
+      character(len=:), allocatable                  :: Str
 
       !---- Local variables ----!
       integer :: nrot_1, nrot_1b
@@ -26,7 +26,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
 
       !> Init
       N=0
-      Str_tmp=" "
+      Str=" "
       if (Nops ==0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Get_Crystal_System_Num@GSPACEGROUPS: The number of symmetry operators is zero!"
@@ -77,48 +77,48 @@ SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
       !> Cubic
       if ( (nrot_3 + nrot_3b == 8) ) then
          n=7
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Hexagonal
       if ( (nrot_6 + nrot_6b == 2) ) then
          n=6
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Trigonal
       if ( (nrot_3 + nrot_3b == 2) ) then
          n=5
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Tetragonal
       if ( (nrot_4 + nrot_4b == 2) ) then
          n=4
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Orthorhombic
       if ( (nrot_2 + nrot_2b == 3) ) then
          n=3
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Monoclinic
       if ( (nrot_2 + nrot_2b == 1)  ) then
          n=2
-         Str_tmp=SYS_CRY(n)
+         str=SYS_CRY(n)
          return
       end if
 
       !> Triclinic
        n=1
-       Str_tmp=SYS_CRY(n)
+       str=SYS_CRY(n)
 
    End Function Get_Crystal_System_Str
 
@@ -127,10 +127,10 @@ SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
    !!----
    !!----
    !!
-   Module Function Get_Crystal_System_from_Laue(Laue) Result(Str_tmp)
+   Module Function Get_Crystal_System_from_Laue(Laue) Result(Str)
       !---- Arguments ----!
       character(len=*), intent(in)  :: Laue
-      character(len=:), allocatable :: Str_tmp
+      character(len=:), allocatable :: Str
 
       !---- Local Variables ----!
       character(len=:), allocatable :: car
@@ -153,7 +153,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_CrystalSys
          case default
             n=1
       end select
-      Str_tmp=SYS_CRY(n)
+      str=SYS_CRY(n)
    End Function Get_Crystal_System_from_Laue
 
 End SubModule gS_Get_CrystalSys

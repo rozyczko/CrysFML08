@@ -213,21 +213,21 @@
        c%seed=0      ! If different from zero, holds the seed for random number generator
 
        do_read: do i=1,file_list%nlines
-         if(file_list%line(i)%Str_tmp(1:7) == "SIM_ANN") then
+         if(file_list%line(i)%Str(1:7) == "SIM_ANN") then
 
            do j=i+1,file_list%nlines
-              line=u_case(file_list%line(j)%Str_tmp)
+              line=u_case(file_list%line(j)%Str)
 
               Select Case (line(1:7))
 
                  Case("COSTNAM")
                     k=index(line,"!")
                     if( k == 0) then
-                      k=len_trim(file_list%line(j)%Str_tmp)
+                      k=len_trim(file_list%line(j)%Str)
                     else
                       k=k-1
                     end if
-                    c%Cost_function_name=adjustl(file_list%line(j)%Str_tmp(8:k))
+                    c%Cost_function_name=adjustl(file_list%line(j)%Str(8:k))
 
                  Case("THRESHO")
                     read(unit=line(10:),fmt=*,iostat=ier) c%threshold
