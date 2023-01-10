@@ -64,9 +64,9 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
        do i=n_ini,n_end
           ! Read comment
-          if(len_trim(file_cfl%line(i)%str) == 0) cycle
-          if (index(file_cfl%line(i)%str(1:1),"!")/=0 .or. index(file_cfl%line(i)%str(1:1),"#")/=0) cycle
-          lowline=adjustl(l_case(file_cfl%line(i)%str))
+          if(len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+          if (index(file_cfl%line(i)%Str_tmp(1:1),"!")/=0 .or. index(file_cfl%line(i)%Str_tmp(1:1),"#")/=0) cycle
+          lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
 
           if (lowline(1:13) == "mag_structure" .or. lowline(1:1) == "{") then
              no_iline=i
@@ -93,7 +93,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
        n=0
        done=.false.
        do i=n_ini,n_end
-          lowline=l_case(adjustl(file_cfl%line(i)%str))
+          lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
           if (index(lowline(1:4),"symm") == 0 ) cycle
           n=n+1
 
@@ -101,7 +101,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
           if(.not. done) then
             m=0
             do j=i+1,i+8
-               lowline=l_case(adjustl(file_cfl%line(j)%str))
+               lowline=l_case(adjustl(file_cfl%line(j)%Str_tmp))
                if (index(lowline(1:4),"msym") /= 0 ) then
                  m=m+1
                  cycle
@@ -130,7 +130,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
        num_matom=0
        do i=n_ini,n_end
-          lowline=l_case(adjustl(file_cfl%line(i)%str))
+          lowline=l_case(adjustl(file_cfl%line(i)%Str_tmp))
           if (index(lowline(1:5),"matom") ==0 ) cycle
           num_matom=num_matom+1
        end do
@@ -173,8 +173,8 @@ SubModule (CFML_kvec_Symmetry) ksym_read
           if(i >= n_end) exit
 
           ! Read comment
-          if( len_trim(file_cfl%line(i)%str) == 0) cycle
-          lowline=adjustl(l_case(file_cfl%line(i)%str))
+          if( len_trim(file_cfl%line(i)%Str_tmp) == 0) cycle
+          lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
           if (lowline(1:1) == "!" .or. lowline(1:1)=="#") cycle
 
           ! Detect keywords
@@ -253,7 +253,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
              end if
              do !repeat reading until continuous KVECT lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 ! write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 if (lowline(1:5) == "kvect" .or. lowline(1:2) == "k ") then
@@ -326,7 +326,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
                 do  !repeat reading until continuous MAGDOM lines are exhausted
                    i=i+1
-                   lowline=adjustl(l_case(file_cfl%line(i)%str))
+                   lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                    ! write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                    if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                    if (lowline(1:6) == "magdom") then
@@ -417,7 +417,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
              end if
              do  !repeat reading until continuous icoebf lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 ! write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 if (lowline(1:5) == "icomp") then
@@ -454,7 +454,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
              read(unit=lowline(5:),fmt="(a)") MGp%MSymopSymb(num_xsym,num_msym)
              do  !repeat reading until continuous MSYM lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 ! write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 if (lowline(1:4) == "msym") then
@@ -483,7 +483,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
              end if
              if (n < 0) then  !Read the imaginary part of the basis functions
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 !write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:4) == "basi") then
                    read(unit=lowline(5:),fmt=*,iostat=ier) (bi(:,j),j=1,abs(n))
@@ -506,7 +506,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
              do  !repeat reading until continuous BASR or BASI lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 !write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 if (lowline(1:4) == "basr") then
@@ -522,7 +522,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
                    end if
                    if (n < 0) then  !Read the imaginary part of the basis functions
                       i=i+1
-                      lowline=adjustl(l_case(file_cfl%line(i)%str))
+                      lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                       !write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                       if (lowline(1:4) == "basi") then
                          read(unit=lowline(5:),fmt=*,iostat=ier) (bi(:,j),j=1,abs(n))
@@ -555,7 +555,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
           if (lowline(1:5) == "matom") then
              num_matom=num_matom+1
              num_skp=0
-             line=adjustl(file_cfl%line(i)%str)
+             line=adjustl(file_cfl%line(i)%Str_tmp)
              j=index(line,"scale")
              if(j /= 0) then
                 line=line(1:j-1)
@@ -608,7 +608,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
              do  !repeat reading until continuous SPK lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 !write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 if (lowline(1:3) == "skp") then
@@ -671,7 +671,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
 
              do  !repeat reading until continuous bfcoef lines are exhausted
                 i=i+1
-                lowline=adjustl(l_case(file_cfl%line(i)%str))
+                lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
                 if (lowline(1:1) == "!" .or. lowline(1:1) == "#") cycle
                 !write(unit=*,fmt="(i6,a)") i,"  -> "//trim(lowline)
                 if (lowline(1:6) == "bfcoef" ) then
@@ -716,9 +716,9 @@ SubModule (CFML_kvec_Symmetry) ksym_read
        !together with th SYMM and MSYM matrices
        if(Am%suscept) then
          do i=1,file_cfl%nlines
-            lowline=adjustl(l_case(file_cfl%line(i)%str))
+            lowline=adjustl(l_case(file_cfl%line(i)%Str_tmp))
             if (lowline(1:4) == "spgr" .or. lowline(1:3) == "spg" .or. lowline(1:6) == "spaceg") then
-               lowline=adjustl(file_cfl%line(i)%str)
+               lowline=adjustl(file_cfl%line(i)%Str_tmp)
                j=index(lowline," ")
                lowline=lowline(j+1:)
                call Set_SpaceGroup(trim(lowline),SpG)

@@ -160,8 +160,8 @@ SubModule (CFML_SuperSpace_Database) TAB_Read_SSG_DBase
    !!----
    !!---- 14/05/2020
    !!
-   Module Subroutine Read_single_SSG(str,num,DB_Path, EnvDB)
-      character(len=*),           intent(in)  :: str
+   Module Subroutine Read_single_SSG(Str_tmp,num,DB_Path, EnvDB)
+      character(len=*),           intent(in)  :: Str_tmp
       integer,                    intent(out) :: num
       character(len=*), optional, intent(in)  :: DB_Path
       character(len=*), optional, intent(in)  :: EnvDB
@@ -203,15 +203,15 @@ SubModule (CFML_SuperSpace_Database) TAB_Read_SSG_DBase
 
       call clear_error()
       found=.false.
-      !First determine the number of the space groups (it may be provided in the string "str")
-      read(unit=str,fmt=*,iostat=ier) num
+      !First determine the number of the space groups (it may be provided in the string "Str_tmp")
+      read(unit=Str_tmp,fmt=*,iostat=ier) num
       if (ier /= 0) then !The provided string does not contain the number
          open(newunit=i_lab,file=trim(lab_file),status='old',action='read',position='rewind',iostat=ier)
          read(i_lab,*)
          do i=1,m_ngs
             read(i_lab,"(a)") line
-            !write(*,"(a)") trim(line)//"     <====>   "//trim(str)
-            j=index(line,trim(str))
+            !write(*,"(a)") trim(line)//"     <====>   "//trim(Str_tmp)
+            j=index(line,trim(Str_tmp))
             if (j /= 0) then
                found=.true.
                !backspace(i_lab)
@@ -222,7 +222,7 @@ SubModule (CFML_SuperSpace_Database) TAB_Read_SSG_DBase
          end do
          if (.not. found) then
             err_CFML%IErr=1
-            err_CFML%Msg= 'The space group label: '//trim(str)//" has not been found in the database!"
+            err_CFML%Msg= 'The space group label: '//trim(Str_tmp)//" has not been found in the database!"
             return
          end if
       end if

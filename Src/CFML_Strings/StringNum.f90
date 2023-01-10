@@ -18,10 +18,10 @@
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function String_Fraction_1Dig(V) Result(Str)
+    Pure Module Function String_Fraction_1Dig(V) Result(Str_tmp)
        !---- Argument ----!
        real(kind=cp),    intent( in) :: V   !  Real value
-       character(:), allocatable     :: Str !  Fracction in character form
+       character(:), allocatable     :: Str_tmp !  Fracction in character form
 
        !---- Local variables ----!
        character(len=10)::  car
@@ -49,7 +49,7 @@
                       write(unit=car, fmt="(2(a,i1))") "-",numerator,"/",denominator
                    end if
                    car=Pack_String(car)
-                   str=trim(car)
+                   Str_tmp=trim(car)
                    return
                 end if
              end do
@@ -61,7 +61,7 @@
           end if
        end if
        car=Pack_String(car)
-       str=trim(car)
+       Str_tmp=trim(car)
 
     End Function String_Fraction_1Dig
 
@@ -69,11 +69,11 @@
     !!---- STRING_REAL
     !!----    Return a string of w characters containing the real value VAL
     !!----
-    Pure Module Function String_Real(Val,W) Result(Str)
+    Pure Module Function String_Real(Val,W) Result(Str_tmp)
        !---- Arguments ----!
        real(kind=cp), intent(in)  :: val        ! value to be output
        integer,       intent(in)  :: w          ! Width
-       character(len=w)           :: Str
+       character(len=w)           :: Str_tmp
 
        !---- Local Variables ----!
        character(len=4) :: carw,card
@@ -82,19 +82,19 @@
        real(kind=cp)    :: x, xlim
 
        !> Initialise
-       Str="  "
+       Str_tmp="  "
 
        !> Test for NaN
        if (ieee_is_nan(val)) then
-          Str(1:w-3)=' '
-          Str(w-2:w)='NaN'
+          Str_tmp(1:w-3)=' '
+          Str_tmp(w-2:w)='NaN'
           return
        end if
 
        !> Test for INF
        if (.not. ieee_is_finite(val)) then
-          Str(1:w-3)=' '
-          Str(w-2:w)='INF'
+          Str_tmp(1:w-3)=' '
+          Str_tmp(w-2:w)='INF'
           return
        end if
 
@@ -119,7 +119,7 @@
           write(unit=card,fmt='(i4)') d
           card=adjustl(card)
           forms='(E'//trim(carw)//'.'//trim(card)//')'
-          write(unit=Str,fmt=trim(forms)) val
+          write(unit=Str_tmp,fmt=trim(forms)) val
           return
        end if
 
@@ -141,7 +141,7 @@
        write(unit=card,fmt='(i4)') d
        card=adjustl(card)
        forms='(F'//trim(carw)//'.'//trim(card)//')'
-       write(unit=Str,fmt=trim(forms)) val
+       write(unit=Str_tmp,fmt=trim(forms)) val
 
     End Function String_Real
 
@@ -151,21 +151,21 @@
     !!----    3D translation vector written in fractional form as quotient
     !!----    of 1-digit integers with sign.
     !!----             Vector -> ( 0.25, -0.4, 0.33333)
-    !!----             Str ->    "(1/4,-2/5,1/3)"
+    !!----             Str_tmp ->    "(1/4,-2/5,1/3)"
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function Frac_Trans_1Dig(Vec) Result(Str)
+    Pure Module Function Frac_Trans_1Dig(Vec) Result(Str_tmp)
        !---- Argument ----!
        real(kind=cp), dimension(3), intent( in)   :: Vec  ! Vector
-       character(:),allocatable                   :: Str  ! String with conversion to fractional
+       character(:),allocatable                   :: Str_tmp  ! String with conversion to fractional
 
        !---- Local Variables ----!
        character(len=8), dimension(3)   :: Frac
        integer                           :: i,j
 
        !> Init
-       Str="(        ,        ,        )"
+       Str_tmp="(        ,        ,        )"
 
        do i=1,3
           Frac(i)=String_Fraction_1Dig(vec(i))
@@ -173,10 +173,10 @@
           if (j /= 0) Frac(i)(j:j) = " "
        end do
 
-       Str(2:9)  =Frac(1)
-       Str(11:18)=Frac(2)
-       Str(20:27)=Frac(3)
-       Str=Pack_String(Str)
+       Str_tmp(2:9)  =Frac(1)
+       Str_tmp(11:18)=Frac(2)
+       Str_tmp(20:27)=Frac(3)
+       Str_tmp=Pack_String(Str_tmp)
 
     End Function Frac_Trans_1Dig
 
@@ -189,10 +189,10 @@
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function String_Fraction_2Dig(V) Result(Str)
+    Pure Module Function String_Fraction_2Dig(V) Result(Str_tmp)
        !---- Argument ----!
        real(kind=cp),    intent( in) :: v    ! Real value
-       character(:), allocatable     :: Str  ! Fraction in character form
+       character(:), allocatable     :: Str_tmp  ! Fraction in character form
 
        !---- Local variables ----!
        character(len=10)  :: car
@@ -227,7 +227,7 @@
                       write(unit=car,fmt=formm) "-",numerator,"/",denominator
                    end if
                    car=Pack_String(car)
-                   str=trim(car)
+                   Str_tmp=trim(car)
                    return
                 end if
              end do
@@ -239,7 +239,7 @@
           end if
        end if
        car=Pack_String(car)
-       str=trim(car)
+       Str_tmp=trim(car)
 
     End Function String_Fraction_2Dig
 
@@ -249,14 +249,14 @@
     !!----    3D translation vector written in fractional form as quotient
     !!----    of 2-digit integers with sign.
     !!----             Vector -> ( 0.3, -0.4, -5.5)
-    !!----             Str ->    "(3/10,-2/5,-11/2)"
+    !!----             Str_tmp ->    "(3/10,-2/5,-11/2)"
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function Frac_Trans_2Dig(Vec) Result(Str)
+    Pure Module Function Frac_Trans_2Dig(Vec) Result(Str_tmp)
        !---- Argument ----!
        real(kind=cp), dimension(3), intent(in) :: Vec   ! Vector
-       character(:), allocatable               :: Str   ! String with conversion to fractional
+       character(:), allocatable               :: Str_tmp   ! String with conversion to fractional
 
        !---- Local Variables ----!
        character (len=10), dimension(3) :: Frac
@@ -274,7 +274,7 @@
        strc(24:33) =Frac(3)
 
        Strc=Pack_String(strc)
-       Str=trim(strc)
+       Str_tmp=trim(strc)
 
     End Function Frac_Trans_2Dig
 
@@ -337,51 +337,51 @@
     !!----
     !!---- 05/04/2019
     !!
-    Module Function Get_Vec_From_String(Str,Cod) Result(Vec)
+    Module Function Get_Vec_From_String(Str_tmp,Cod) Result(Vec)
        !---- Arguments ----!
-       character(len=*),                intent(in)  :: str   ! Input string
+       character(len=*),                intent(in)  :: Str_tmp   ! Input string
        character(len=1), dimension(3),  intent(in)  :: cod   ! Code
        real(kind=cp),dimension(3)                   :: vec   ! Vector
 
        !--- Local variables ---!
        integer                                 :: i,k,ns,np,nterm,m,nsp,jk,jp
        integer, dimension(3)                   :: j,pos,neg, klist
-       character(len=len(str)), dimension(3)   :: split
+       character(len=len(Str_tmp)), dimension(3)   :: split
 
        !> Init
        Vec=0.0_cp
-       if (len_trim(str) <=0) return
+       if (len_trim(Str_tmp) <=0) return
 
-       call Get_Separator_Pos(str,"+",pos,np)
-       call Get_Separator_Pos(str,"-",neg,ns)
+       call Get_Separator_Pos(Str_tmp,"+",pos,np)
+       call Get_Separator_Pos(Str_tmp,"-",neg,ns)
        nterm=np+ns
 
        !> Construct the splitted terms depending on +/- separators
        Select Case (nterm)
           Case(0)  !only 1 positive item without sign
              nsp=1
-             split(1)=str
+             split(1)=Str_tmp
 
           Case(1)
              Select Case(np)
                 Case(0) !A single term with a negative symbol or two terms separated by the negative symbol
                    if (neg(1) == 1) then !single term
                       nsp=1
-                      split(1)=str
+                      split(1)=Str_tmp
                    else
                       nsp=2
-                      split(1)=str(1:neg(1)-1)
-                      split(2)=str(neg(1):)
+                      split(1)=Str_tmp(1:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):)
                    end if
 
                 Case(1) !A single term with a positive symbol or two positive terms
                    if (pos(1) == 1) then !single term
                       nsp=1
-                      split(1)=str(2:)
+                      split(1)=Str_tmp(2:)
                    else
                       nsp=2
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:)
                    end if
              End Select
 
@@ -390,46 +390,46 @@
                 Case(0) !No positive terms then (1) -cccc -dddd or (2)xxxx - yyyy -  zzzz
                    if (neg(1) == 1) then !two negative terms (1)
                       nsp=2
-                      split(1)=str(1:neg(2)-1)
-                      split(2)=str(neg(2):)
+                      split(1)=Str_tmp(1:neg(2)-1)
+                      split(2)=Str_tmp(neg(2):)
                    else                  !Three terms as (2)
                       nsp=3
-                      split(1)=str(1:neg(1)-1)
-                      split(2)=str(neg(1):neg(2)-1)
-                      split(3)=str(neg(2):)
+                      split(1)=Str_tmp(1:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):neg(2)-1)
+                      split(3)=Str_tmp(neg(2):)
                    end if
 
                 Case(1) !Four options (1)+xxxx-yyyy  (2)-xxxx+yyyy  (3)xxxx+yyyyy-zzzzz  (4)xxxx-yyyy+zzzz
                    if (pos(1) == 1) then !(1)
                       nsp=2
-                      split(1)=str(2:neg(1)-1)
-                      split(2)=str(neg(1):)
+                      split(1)=Str_tmp(2:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):)
                    else if(neg(1) == 1) then  !(2)
                       nsp=2
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:)
                    else if(pos(1) < neg(1)) then !(3)
                       nsp=3
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:neg(1)-1)
-                      split(3)=str(neg(1):)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:neg(1)-1)
+                      split(3)=Str_tmp(neg(1):)
                    else if(pos(1) > neg(1)) then !(4)
                       nsp=3
-                      split(1)=str(1:neg(1)-1)
-                      split(2)=str(neg(1):pos(1)-1)
-                      split(3)=str(pos(1)+1:)
+                      split(1)=Str_tmp(1:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):pos(1)-1)
+                      split(3)=Str_tmp(pos(1)+1:)
                    end if
 
                 Case(2) !Two options (1)+xxxx+yyyy  (2) xxxx+yyyy+zzzz
                    if (pos(1) == 1) then !(1)
                       nsp=2
-                      split(1)=str(2:pos(2)-1)
-                      split(2)=str(pos(2)+1:)
+                      split(1)=Str_tmp(2:pos(2)-1)
+                      split(2)=Str_tmp(pos(2)+1:)
                    else   !2
                       nsp=3
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:pos(2)-1)
-                      split(3)=str(pos(2)+1:)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:pos(2)-1)
+                      split(3)=Str_tmp(pos(2)+1:)
                    end if
              End Select
 
@@ -437,47 +437,47 @@
              nsp=3
              Select Case(np)
                 Case(0) !No positive terms  a single option: -xxxx - yyyy -  zzzz
-                   split(1)=str(1:neg(2)-1)
-                   split(2)=str(neg(2):neg(3)-1)
-                   split(3)=str(neg(3):)
+                   split(1)=Str_tmp(1:neg(2)-1)
+                   split(2)=Str_tmp(neg(2):neg(3)-1)
+                   split(3)=Str_tmp(neg(3):)
 
                 Case(1) !Three options (1)+xxxx-yyyy-zzzz  (2)-xxxx+yyyy-zzzz  (3)-xxxx-yyyyy+zzzzz
                    if (pos(1) == 1) then !(1)
-                      split(1)=str(2:neg(1)-1)
-                      split(2)=str(neg(1):neg(2)-1)
-                      split(3)=str(neg(2):)
+                      split(1)=Str_tmp(2:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):neg(2)-1)
+                      split(3)=Str_tmp(neg(2):)
 
                    else if(pos(1) <  neg(2)) then  !(2)
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:neg(2)-1)
-                      split(3)=str(neg(2):)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:neg(2)-1)
+                      split(3)=Str_tmp(neg(2):)
 
                    else if(pos(1) > neg(2)) then !(3)
-                      split(1)=str(1:neg(2)-1)
-                      split(2)=str(neg(2):pos(1)-1)
-                      split(3)=str(pos(1)+1:)
+                      split(1)=Str_tmp(1:neg(2)-1)
+                      split(2)=Str_tmp(neg(2):pos(1)-1)
+                      split(3)=Str_tmp(pos(1)+1:)
                    end if
 
                 Case(2) !Two options (1)+xxx+yyy-zzz  (2)-xxx+yyy+zzzz (3) +xxx-yyy+zzz
                    if (neg(1) == 1) then !(2)
-                      split(1)=str(1:pos(1)-1)
-                      split(2)=str(pos(1)+1:pos(2)-1)
-                      split(3)=str(pos(2)+1:)
+                      split(1)=Str_tmp(1:pos(1)-1)
+                      split(2)=Str_tmp(pos(1)+1:pos(2)-1)
+                      split(3)=Str_tmp(pos(2)+1:)
 
                    else if(neg(1) > pos(2)) then !(1)
-                      split(1)=str(2:pos(2)-1)
-                      split(2)=str(pos(2)+1:neg(1)-1)
-                      split(3)=str(neg(1):)
+                      split(1)=Str_tmp(2:pos(2)-1)
+                      split(2)=Str_tmp(pos(2)+1:neg(1)-1)
+                      split(3)=Str_tmp(neg(1):)
                    else if(neg(1) < pos(2)) then !(3)
-                      split(1)=str(2:neg(1)-1)
-                      split(2)=str(neg(1):pos(2)-1)
-                      split(3)=str(pos(2)+1:)
+                      split(1)=Str_tmp(2:neg(1)-1)
+                      split(2)=Str_tmp(neg(1):pos(2)-1)
+                      split(3)=Str_tmp(pos(2)+1:)
                    end if
 
                 Case(3) !Single option (1)+xxx+yyy+zzz
-                   split(1)=str(2:pos(2)-1)
-                   split(2)=str(pos(2)+1:pos(3)-1)
-                   split(3)=str(pos(3)+1:)
+                   split(1)=Str_tmp(2:pos(2)-1)
+                   split(2)=Str_tmp(pos(2)+1:pos(3)-1)
+                   split(3)=Str_tmp(pos(3)+1:)
              End Select
        End Select
 
@@ -505,14 +505,14 @@
              if (k == klist(i)) then
                 !> This is impossible in principle
                 err_cfml%ierr=1
-                err_cfml%msg=" The provided symbol is illegal: "//trim(str)
+                err_cfml%msg=" The provided symbol is illegal: "//trim(Str_tmp)
                 return
              end if
           end do
           jk=j(k)
           i=jk-1
           jp=jk+1
-          if (i == 0 .and. np == 1 ) then !the code is the first character replace it by "1" and read the rest of the str
+          if (i == 0 .and. np == 1 ) then !the code is the first character replace it by "1" and read the rest of the Str_tmp
              split(m)(jk:jk)="1"
           else if(i == 0) then
              if (split(m)(jp:jp) ==  "/") then
@@ -650,16 +650,16 @@
     !!----
     !!----  Created: January 2014 (JRC)
     !!----
-    Module Subroutine Get_Transf(str,mat,v,cod)
+    Module Subroutine Get_Transf(Str_tmp,mat,v,cod)
        !---- Arguments ----!
-       character(len=*),                          intent(in)  :: str      ! Input string
+       character(len=*),                          intent(in)  :: Str_tmp      ! Input string
        real(kind=cp),dimension(3,3),              intent(out) :: mat      ! Matrix
        real(kind=cp),dimension(3),     optional,  intent(out) :: v        ! Vector
        character(len=1), dimension(4), optional,  intent(in)  :: cod      ! Code
 
        !--- Local variables ---!
        character(len=1), dimension(4) :: cd
-       character(len=len(str))        :: transf_key,cmat,ori
+       character(len=len(Str_tmp))        :: transf_key,cmat,ori
        integer                        :: i,j,nc
        integer,dimension(2)           :: pos
 
@@ -667,7 +667,7 @@
        mat=0.0_cp
        cd=(/"a","b","c",";"/)
        if (present(cod)) cd=cod
-       transf_key=str
+       transf_key=Str_tmp
 
        !> Remove the parenthesis is present
        j=index(transf_key,"(")
@@ -712,7 +712,7 @@
           end if
        else
           err_cfml%ierr=1
-          err_cfml%msg=" No appropriate separator ("//cd(4)//") is present in the input string:"//trim(str)
+          err_cfml%msg=" No appropriate separator ("//cd(4)//") is present in the input string:"//trim(Str_tmp)
        end if
 
     End Subroutine Get_Transf
@@ -723,16 +723,16 @@
     !!----
     !!---- 05/04/2019
     !!
-    Module Subroutine Get_Num(Str,vet,ivet,iv)
+    Module Subroutine Get_Num(Str_tmp,vet,ivet,iv)
        !---- Argument ----!
-       character (len=*),          intent ( in) :: Str   ! Input String to convert
+       character (len=*),          intent ( in) :: Str_tmp   ! Input String to convert
        real(kind=cp), dimension(:),intent (out) :: vet   ! Vector of real numbers
        integer, dimension(:),      intent (out) :: ivet  ! Vector of integer numbers
        integer,                    intent (out) :: iv    ! Number of numbers in Vet/Ivet
 
        !---- Local variables ----!
        logical                   :: numero
-       character (len=len(Str))  :: resto,cifre
+       character (len=len(Str_tmp))  :: resto,cifre
        integer                   :: i,isum,ncharl,nchard,isegno,iniz,ipoi,idec,idig
        integer                   :: nchart, npos,nchard1,isum_exp,ioper
        real(kind=cp)             :: suma,segno,dec
@@ -742,7 +742,7 @@
        iv=0
        ivet=0; vet=0.0
 
-       resto=u_case(Str)
+       resto=u_case(Str_tmp)
        do
           ioper=0
           isum_exp=0
@@ -859,15 +859,15 @@
     !!----
     !!---- 05/04/2019
     !!
-    Module Subroutine Get_NumStd(Str, value, std, ic)
+    Module Subroutine Get_NumStd(Str_tmp, value, std, ic)
        !----Arguments ----!
-       character(len=*),             intent( in) :: Str     ! Input String
+       character(len=*),             intent( in) :: Str_tmp     ! Input String
        real(kind=cp), dimension(:),  intent(out) :: value   ! Vector of values with real numbers
        real(kind=cp), dimension(:),  intent(out) :: std     ! Vector of standard deviation values
        integer,                      intent(out) :: ic      ! Number of components of vector Value
 
        !---- Local Variables ----!
-       character(len=len(Str))                :: resto,dire,numm
+       character(len=len(Str_tmp))                :: resto,dire,numm
        integer                                :: iv,nlong,i
        integer                                :: np, np1, np2
        integer, dimension(size(value))        :: ivet
@@ -878,21 +878,21 @@
        ic=0
 
        !> Initial Checks
-       if (len_trim(Str) == 0) then
+       if (len_trim(Str_tmp) == 0) then
           err_cfml%ierr=1
           err_cfml%msg="Blank line into Get_NumStd procedure"
           return
        end if
 
-       i=index(Str,"!")
+       i=index(Str_tmp,"!")
        if (i /= 0) then
-          resto=adjustl(Str(1:i-1))
+          resto=adjustl(Str_tmp(1:i-1))
        else
-          i=index(Str,"#")
+          i=index(Str_tmp,"#")
           if (i /= 0) then
-             resto=adjustl(Str(1:i-1))
+             resto=adjustl(Str_tmp(1:i-1))
           else
-             resto=adjustl(Str)
+             resto=adjustl(Str_tmp)
           end if
        end if
 
@@ -914,7 +914,7 @@
              call get_num(dire,vet,ivet,iv)
              if (iv /= 1 .or. Err_CFML%ierr /=0) then
                 err_cfml%ierr=1
-                err_cfml%msg="Bad format in Get_NumStd procedure, directive -> "//trim(dire)//"  Input string:"//trim(Str)
+                err_cfml%msg="Bad format in Get_NumStd procedure, directive -> "//trim(dire)//"  Input string:"//trim(Str_tmp)
                 return
              end if
              ic=ic+1
@@ -926,7 +926,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1 .or. Err_CFML%ierr /=0) then
                    err_cfml%Ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure, numm1 -> "//trim(numm)//"  Input string:"//trim(Str)
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm1 -> "//trim(numm)//"  Input string:"//trim(Str_tmp)
                    return
                 end if
                 ic=ic+1
@@ -935,7 +935,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure, numm2 -> "//trim(numm)//"  Input string:"//trim(Str)
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm2 -> "//trim(numm)//"  Input string:"//trim(Str_tmp)
                    return
                 end if
                 std(ic)=vet(1)
@@ -944,7 +944,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1 .or. Err_CFML%ierr /=0) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure, numm3 -> "//trim(numm)//"  Input string:"//trim(Str)
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm3 -> "//trim(numm)//"  Input string:"//trim(Str_tmp)
                    return
                 end if
                 ic=ic+1
@@ -953,7 +953,7 @@
                 call get_num(numm,vet,ivet,iv)
                 if (iv /= 1 .or. Err_CFML%ierr /= 0) then
                    err_cfml%ierr=1
-                   err_cfml%msg="Bad format in Get_NumStd procedure, numm4 -> "//trim(numm)//"  Input string:"//trim(Str)
+                   err_cfml%msg="Bad format in Get_NumStd procedure, numm4 -> "//trim(numm)//"  Input string:"//trim(Str_tmp)
                    return
                 end if
                 std(ic)=vet(1)/(10.0_cp**np)
@@ -969,21 +969,21 @@
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function NumCol_from_NumFmt(Str) Result(n_col)
+    Pure Module Function NumCol_from_NumFmt(Str_tmp) Result(n_col)
        !---- Argument ----!
-       character (len=*), intent(in)  :: Str    ! Input format string
+       character (len=*), intent(in)  :: Str_tmp    ! Input format string
        integer                        :: n_col  ! Integer number of columns
 
        !---- Local variables ----!
        integer                         :: i,j,L,ncom,n1,n2,point,ier
-       integer, dimension(0:len(Str))  :: pos
-       character(len=len(Str))        :: fm
+       integer, dimension(0:len(Str_tmp))  :: pos
+       character(len=len(Str_tmp))        :: fm
        character(len=10)              :: string
 
        !> Init
        n_col=0
 
-       fm=U_case(adjustl(Str))
+       fm=U_case(adjustl(Str_tmp))
        fm=pack_string(fm)
        L=len_trim(fm)
        fm=fm(2:L-1)
@@ -1049,9 +1049,9 @@
     !!----
     !!---- 05/04/2019
     !!
-    Module Function Read_Fract(str) Result(value)
+    Module Function Read_Fract(Str_tmp) Result(value)
        !---- Arguments ----!
-       Character(len=*), intent(in) :: str     ! Input String
+       Character(len=*), intent(in) :: Str_tmp     ! Input String
        real(kind=cp)                :: value   ! Value
 
        !--- Local variables ---!
@@ -1060,43 +1060,43 @@
 
        !> Init
        Value=0.0_cp
-       if (len_trim(str) <= 0) return
+       if (len_trim(Str_tmp) <= 0) return
 
-       if (len_trim(str) == 1) then
-          if (str == "+") then
+       if (len_trim(Str_tmp) == 1) then
+          if (Str_tmp == "+") then
              value=1.0_cp
              return
 
-          else if(str == "-") then
+          else if(Str_tmp == "-") then
              value=-1.0_cp
              return
           end if
        end if
 
-       k=index(str,"/")
+       k=index(Str_tmp,"/")
        if (k == 0) then !a single number
-          read(unit=str,fmt=*,iostat=ierr) value
+          read(unit=Str_tmp,fmt=*,iostat=ierr) value
           if (ierr /= 0) then
              value=0.0_cp
              err_cfml%ierr=1
-             err_cfml%msg=" The provided symbol is illegal: "//trim(str)
+             err_cfml%msg=" The provided symbol is illegal: "//trim(Str_tmp)
              return
           end if
 
        else !fraction
-          read(unit=str(1:k-1),fmt=*,iostat=ierr) num
+          read(unit=Str_tmp(1:k-1),fmt=*,iostat=ierr) num
           if (ierr /= 0) then
              value=0.0_cp
              err_cfml%ierr=1
-             err_cfml%msg=" The provided symbol is illegal: "//str(1:k-1)
+             err_cfml%msg=" The provided symbol is illegal: "//Str_tmp(1:k-1)
              return
           end if
 
-          read(unit=str(k+1:),fmt=*,iostat=ierr) den
+          read(unit=Str_tmp(k+1:),fmt=*,iostat=ierr) den
           if (ierr /= 0) then
              value=0.0_cp
              err_cfml%ierr=1
-             err_cfml%msg=" The provided symbol is illegal: "//str(k+1:)
+             err_cfml%msg=" The provided symbol is illegal: "//Str_tmp(k+1:)
              return
           end if
 
@@ -1112,11 +1112,11 @@
     !!----
     !!---- 05/04/2019
     !!
-    Pure Module Function String_NumStd(Value, Std) Result(Str)
+    Pure Module Function String_NumStd(Value, Std) Result(Str_tmp)
        !---- Argument ----!
        real(kind=cp),   intent(in)  :: Value    ! Value
        real(kind=cp),   intent(in)  :: Std      ! Standard deviation
-       character(len=:),allocatable :: Str      ! String containing the information
+       character(len=:),allocatable :: Str_tmp      ! String containing the information
 
        !---- Local Variables ----!
        character(len=10) :: fmtcar
@@ -1133,7 +1133,7 @@
           end if
           aux=adjustl(aux)
           if (aux(1:1) /= "-") aux=" "//trim(aux)
-          str=trim(aux)
+          Str_tmp=trim(aux)
 
           return
        end if
@@ -1149,8 +1149,8 @@
 
        aux=" "
        write(unit=aux,fmt=*) value
-       str=trim(adjustl(aux))
-       n=len_trim(str)
+       Str_tmp=trim(adjustl(aux))
+       n=len_trim(Str_tmp)
        if(n-np < 6) n=np+6
        fmtcar="f"
        if (n < 10) then
@@ -1189,7 +1189,7 @@
        end if
        aux=pack_string(sss)
        if (aux(1:1) /= "-") aux=" "//trim(aux)
-       str=trim(aux)
+       Str_tmp=trim(aux)
 
     End Function String_NumStd
 

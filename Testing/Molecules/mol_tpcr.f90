@@ -117,7 +117,7 @@
        pt_mol=0
        nmol=0
        do i=1,fdat%nlines
-          line=u_case(fdat%line(i)%str)
+          line=u_case(fdat%line(i)%Str_tmp)
           if (line(1:1) =='!') cycle
           if (index(line,'MOLE') > 0) then
              nmol=nmol+1
@@ -142,7 +142,7 @@
           !> Search for three points (fractional coordinates)  defining a Cartesian 
           !> frame up to the next molecule
           do i=n_ini, n_end
-             line=adjustl(fdat%line(i)%str)
+             line=adjustl(fdat%line(i)%Str_tmp)
              if (line(1:1) == '!') cycle
              lline=l_case(line)
              if (lline(1:9) /= "xyz_frame") cycle
@@ -157,7 +157,7 @@
        
        !> Search for a unit cell for all molecules
        do i=1, fdat%nlines
-          line=adjustl(fdat%line(i)%str)
+          line=adjustl(fdat%line(i)%Str_tmp)
           lline=l_case(line)
           if (lline(1:4) /= "cell") cycle
 

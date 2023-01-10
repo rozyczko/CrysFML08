@@ -24,7 +24,7 @@ SubModule (CFML_gSpaceGroups) gS_Match_SpG3D
 
        !---- Local variables ----!
        integer                                         :: s,i,j,ng,ng_,n_gen,d,ier
-       character(len=4)                                :: str
+       character(len=4)                                :: Str_tmp
        character(len=12)                               :: str_HM
        character(len=256)                              :: symb, glist
        character(len=40),    dimension(:), allocatable :: l_gen
@@ -96,19 +96,19 @@ SubModule (CFML_gSpaceGroups) gS_Match_SpG3D
           return
        end if
 
-       write(unit=str, fmt='(i3)', iostat=ier) G%numspg
+       write(unit=Str_tmp, fmt='(i3)', iostat=ier) G%numspg
        if (ier /= 0) then
           Err_CFML%Ierr = 1
           Err_CFML%Msg ="Match_SpaceGroup_3D@GSPACEGROUPS: Error taken standard spacegroup!"
           return
        end if
 
-       gList=get_IT_Generators(str)  ! IT take our default choice for SpaceGroup
+       gList=get_IT_Generators(Str_tmp)  ! IT take our default choice for SpaceGroup
        call Get_Generators(gList, d, l_gen, n_gen)
        call Group_Constructor(l_gen,G_std)
        call Identify_PointGroup(G_std)
        call Identify_LaueClass(G_std)
-       call Get_SpaceGroup_Symbols(Str, str_HM)
+       call Get_SpaceGroup_Symbols(Str_tmp, str_HM)
        str_HM=adjustl(str_HM)
        G_std%spg_lat=str_HM(1:1)
        G_std%spg_symb=str_HM(1:1)//l_case(str_HM(2:))

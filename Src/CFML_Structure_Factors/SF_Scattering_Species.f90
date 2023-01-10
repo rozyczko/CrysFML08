@@ -69,7 +69,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
       nsp=0
 
       do i=1,fil%nlines
-         line=adjustl(fil%line(i)%str)
+         line=adjustl(fil%line(i)%Str_tmp)
          if (U_case(line(1:2)) == "B_") then
             nsp=nsp+1
             j=index(line," ")

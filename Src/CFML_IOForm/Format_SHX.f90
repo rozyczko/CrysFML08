@@ -47,7 +47,7 @@ SubModule (CFML_IOForm) Format_SHX
       n=0
       flag_atm=.false.
       do i=1, shx%nlines
-         line=shx%line(i)%str
+         line=shx%line(i)%Str_tmp
 
          !> check
          if (len_trim(line) == 0) cycle
@@ -65,7 +65,7 @@ SubModule (CFML_IOForm) Format_SHX
 
          call get_words(line,label,nc)
          if (iv > 0) then
-            line=shx%line(i+1)%str
+            line=shx%line(i+1)%Str_tmp
             call get_words(line,label(nc:),iv)
             nc=nc+iv-1
          end if
@@ -334,7 +334,7 @@ SubModule (CFML_IOForm) Format_SHX
       !> Wave, CELL
       iv=0
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -355,7 +355,7 @@ SubModule (CFML_IOForm) Format_SHX
       !> Z, STD
       iv=0
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -407,7 +407,7 @@ SubModule (CFML_IOForm) Format_SHX
 
       iv=0
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -454,7 +454,7 @@ SubModule (CFML_IOForm) Format_SHX
       end if
 
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -502,7 +502,7 @@ SubModule (CFML_IOForm) Format_SHX
       end if
 
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -547,7 +547,7 @@ SubModule (CFML_IOForm) Format_SHX
       end if
 
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -594,7 +594,7 @@ SubModule (CFML_IOForm) Format_SHX
 
       iv=0
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -640,7 +640,7 @@ SubModule (CFML_IOForm) Format_SHX
 
       !> Define the elements types: C H N O
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle
@@ -657,7 +657,7 @@ SubModule (CFML_IOForm) Format_SHX
       if (present(n_elem)) then
          iv=0
          do i=1,shx%nlines
-            line=adjustl(shx%line(i)%str)
+            line=adjustl(shx%line(i)%Str_tmp)
 
             !> Check
             if (len_trim(line) == 0) cycle
@@ -705,7 +705,7 @@ SubModule (CFML_IOForm) Format_SHX
 
       !> SYMM
       do i=1,shx%nlines
-         line=adjustl(shx%line(i)%str)
+         line=adjustl(shx%line(i)%Str_tmp)
 
          !> Check
          if (len_trim(line) == 0) cycle

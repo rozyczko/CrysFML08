@@ -29,7 +29,8 @@ elseif(UNIX)
         # GFortran compiler
         set(GLOBAL_DEPS_SRC CFML_GlobalDeps_Linux_GFOR.f90)
     endif()
-endif()
+  endif()
+  
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${GLOBAL_DEPS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
@@ -433,7 +434,7 @@ else()
 endif()
 
 #  List of all the source files
-set(CRYSFML_COMMON_SRC
+set(CRYSFML_SRC
     ${GLOBAL_DEPS_SRC}
     ${MESSAGES_SRC}
     ${MATHS_SRC}
@@ -465,16 +466,16 @@ set(CRYSFML_COMMON_SRC
     ${SXTALgeom_SRC}
     ${SF_SRC}
     ${MOLECULES_SRC}
-    ${KEYCODES_SRC}
-    ${KVEC_SYMMETRY})
+    ${KVEC_SYMMETRY}
+    ${KEYCODES_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)
 
-add_library(${LIBRARY_NAME} STATIC ${CRYSFML_COMMON_SRC})
+add_library(${LIBRARY_NAME} STATIC ${CRYSFML_SRC})
 
 # The directory where the CrysFML modules files will be stored.
-set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src08/crysfml_modules)
+set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src/crysfml_modules CACHE INTERNAL "")
 
 # Sets the path where to place the mod files for the crysfml_common library.
 set_target_properties(${LIBRARY_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CRYSFML_MODULE_DIRECTORY})

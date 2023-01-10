@@ -55,7 +55,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          i=i+1
          if (i > n_end) exit
 
-         line=adjustl(filetype%line(i)%str)
+         line=adjustl(filetype%line(i)%Str_tmp)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          if (u_case(line(1:4)) /= "ATOM") cycle
 
@@ -74,7 +74,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          i=i+1
          if (i > n_end) exit
 
-         line=adjustl(filetype%line(i)%str)
+         line=adjustl(filetype%line(i)%Str_tmp)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
 
          !> Atom label
@@ -135,7 +135,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                i=i+1
                if (i > n_end) exit
 
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
 
                call get_num(line,vet,ivet,iv)
@@ -292,7 +292,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
          i=i+1
          if (i > n_end) exit
 
-         line=adjustl(filetype%line(i)%str)
+         line=adjustl(filetype%line(i)%Str_tmp)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
@@ -353,7 +353,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             i=i+1
             if (i > n_end) exit
 
-            line=adjustl(filetype%line(i)%str)
+            line=adjustl(filetype%line(i)%Str_tmp)
             if (line(1:1) == '!' .or. line(1:1) == '#') cycle
             npos=index(line,'!')
             if (npos > 0) line=line(:npos-1)
@@ -416,7 +416,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             i=i+1
             if (i > n_end) exit
 
-            line=adjustl(filetype%line(i)%str)
+            line=adjustl(filetype%line(i)%Str_tmp)
             if (line(1:1) == '!' .or. line(1:1) == '#') cycle
             npos=index(line,'!')
             if (npos > 0) line=line(:npos-1)
@@ -437,7 +437,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -455,7 +455,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -475,7 +475,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -493,7 +493,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -513,7 +513,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -533,7 +533,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
             do
                i=i+1
                if (i > n_end) exit
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
@@ -561,7 +561,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
       do
          i=i+1
          if (i > n_end) exit
-         line=adjustl(filetype%line(i)%str)
+         line=adjustl(filetype%line(i)%Str_tmp)
          if (line(1:1) == '!' .or. line(1:1) == '#') cycle
          npos=index(line,'!')
          if (npos > 0) line=line(:npos-1)
@@ -641,7 +641,7 @@ Submodule (CFML_Molecules) Mol_ReadInfo
                   call set_error(1," Trying to read a Code line for Atom "//trim(AtName))
                   return
                end if
-               line=adjustl(filetype%line(i)%str)
+               line=adjustl(filetype%line(i)%Str_tmp)
                if (line(1:1) == '!' .or. line(1:1) == '#') cycle
                npos=index(line,'!')
                if (npos > 0) line=line(:npos-1)
