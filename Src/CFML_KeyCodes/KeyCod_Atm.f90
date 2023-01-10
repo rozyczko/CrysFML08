@@ -55,7 +55,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
 
       do i=n_ini,n_end
          !> load information on line variable
-         line=adjustl(ffile%line(i)%Str_tmp)
+         line=adjustl(ffile%line(i)%str)
          if (line(1:1) ==" ") cycle
          if (line(1:1) =="!") cycle
          k=index(line,"!")
@@ -799,7 +799,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
 
       !---- Local Variables ----!
       integer           :: i,j,n,iv
-      character(len=40) :: Str_tmp
+      character(len=40) :: str
 
       !> Init
       Nc=0
@@ -813,29 +813,29 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
       call get_words(string, dire, n)
 
       do i=1,n
-         Str_tmp=adjustl(dire(i))
-         j=index(Str_tmp,'_')
+         str=adjustl(dire(i))
+         j=index(str,'_')
          if (j == 0) cycle
 
          nc=nc+1
-         keys(nc)=trim(Str_tmp(:j-1))
+         keys(nc)=trim(str(:j-1))
 
          !> Look for phase /mol
-         Str_tmp=Str_tmp(j+1:)
-         j=index(Str_tmp,'_')
+         str=str(j+1:)
+         j=index(str,'_')
          if ( j > 0) then
-            if (Str_tmp(j+1:j+2)=='PH') then
-               call get_num(Str_tmp(j+3:),vet,ivet,iv)
+            if (str(j+1:j+2)=='PH') then
+               call get_num(str(j+3:),vet,ivet,iv)
                if (iv ==1) iphas(nc)=ivet(1) ! Positive values for phases
 
-            else if (Str_tmp(j+1:j+3) == 'MOL') then
-               call get_num(Str_tmp(j+4:),vet,ivet,iv)
+            else if (str(j+1:j+3) == 'MOL') then
+               call get_num(str(j+4:),vet,ivet,iv)
                if (iv ==1) iphas(nc)=-ivet(1) ! Negative values for Molecules
 
             end if
-            atlab(nc)=trim(Str_tmp(:j-1))
+            atlab(nc)=trim(str(:j-1))
          else
-            atlab(nc)=trim(Str_tmp)
+            atlab(nc)=trim(str)
          end if
       end do
 
@@ -925,7 +925,7 @@ Submodule (CFML_KeyCodes) KeyCod_Atm
             end do
 
          type is (ModAtm_Ref_Type)
-            !! Faltan todavia partes magnï¿½ticas...
+            !! Faltan todavia partes magnéticas...
             !> Delete the NPar Parameter
             do i=1,AtList%natoms
                do j=1,3

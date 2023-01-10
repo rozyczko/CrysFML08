@@ -1627,19 +1627,19 @@ Contains
                if (i > 0)U=U_case(system(i-1:i-1))
                select case(U)
                   case('A')
-                     !> beta = gamma = 90
+                     !> beta = gamma = 90º
                      dat%eosd(1:ndat)%ang(2)=90.0
                      dat%eosd(1:ndat)%ang(3)=90.0
                      dat%eosd(1:ndat)%siga(2)=0.0
                      dat%eosd(1:ndat)%siga(3)=0.0
                   case('B')
-                     !> alpha = gamma = 90
+                     !> alpha = gamma = 90º
                      dat%eosd(1:ndat)%ang(1)=90.0
                      dat%eosd(1:ndat)%ang(3)=90.0
                      dat%eosd(1:ndat)%siga(1)=0.0
                      dat%eosd(1:ndat)%siga(3)=0.0
                   case('C')
-                     !> alpha = beta = 90
+                     !> alpha = beta = 90º
                      dat%eosd(1:ndat)%ang(1)=90.0
                      dat%eosd(1:ndat)%ang(2)=90.0
                      dat%eosd(1:ndat)%siga(1)=0.0
@@ -1647,7 +1647,7 @@ Contains
                end select
 
             case ('ORTH')
-               !> Angles =90
+               !> Angles =90º
                dat%eosd(1:ndat)%ang(1)=90.0
                dat%eosd(1:ndat)%ang(2)=90.0
                dat%eosd(1:ndat)%ang(3)=90.0
@@ -1656,7 +1656,7 @@ Contains
                dat%eosd(1:ndat)%siga(3)=0.0
 
             case ('TETR')
-               !> Angles =90
+               !> Angles =90º
                dat%eosd(1:ndat)%ang(1)=90.0
                dat%eosd(1:ndat)%ang(2)=90.0
                dat%eosd(1:ndat)%ang(3)=90.0
@@ -1669,7 +1669,7 @@ Contains
                dat%eosd(1:ndat)%sigc(2)=dat%eosd(1:ndat)%sigc(1)
 
             case ('TRIG','HEXA')
-               !> Angles alpha=beta=90, gamma=120
+               !> Angles alpha=beta=90º, gamma=120º
                dat%eosd(1:ndat)%ang(1)= 90.0
                dat%eosd(1:ndat)%ang(2)= 90.0
                dat%eosd(1:ndat)%ang(3)  =120.0
@@ -1695,7 +1695,7 @@ Contains
                dat%eosd(1:ndat)%sigc(3)=dat%eosd(1:ndat)%sigc(1)
 
             case ('CUBI')
-               !> Angles =90
+               !> Angles =90º
                dat%eosd(1:ndat)%ang(1)=90.0
                dat%eosd(1:ndat)%ang(2)=90.0
                dat%eosd(1:ndat)%ang(3)=90.0

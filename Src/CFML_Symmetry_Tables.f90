@@ -496,9 +496,9 @@
           character(len=:), allocatable :: Strgen
        End Function Get_IT_Generators
 
-       Module Subroutine Get_SpaceGroup_Symbols(Str_tmp, HM, Hall, IT, C_HM)
+       Module Subroutine Get_SpaceGroup_Symbols(Str, HM, Hall, IT, C_HM)
           !---- Arguments ----!
-          character(len=*),           intent(in)  :: Str_tmp
+          character(len=*),           intent(in)  :: Str
           character(len=*), optional, intent(out) :: HM
           character(len=*), optional, intent(out) :: Hall
           integer,          optional, intent(out) :: IT

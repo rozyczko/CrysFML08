@@ -6,7 +6,7 @@ SubModule (CFML_IOForm) Format_CIF
 
    !---- Local Variables ----!
    character(len=132)            :: line
-   character(len=:), allocatable :: Str_tmp
+   character(len=:), allocatable :: str
    integer                       :: j_ini, j_end
 
    Contains
@@ -15,10 +15,10 @@ SubModule (CFML_IOForm) Format_CIF
    !!----
    !!---- 15/05/2020
    !!
-   Module Subroutine Write_CIF_Header(Ipr,Str_tmp)
+   Module Subroutine Write_CIF_Header(Ipr,str)
       !---- Arguments ----!
       integer,                    intent(in) :: Ipr
-      character(len=*), optional, intent(in) :: Str_tmp
+      character(len=*), optional, intent(in) :: Str
 
       !---- Local Variables ----!
 
@@ -34,7 +34,7 @@ SubModule (CFML_IOForm) Format_CIF
       write(unit=ipr,fmt="(a)") "_audit_creation_method  'CrysFML' "
       write(unit=Ipr,fmt="(a)") " "
       write(unit=ipr,fmt="(a)") " "
-      if(present(Str_tmp)) write(unit=ipr,fmt="(a)") "#  "//trim(Str_tmp)
+      if(present(Str)) write(unit=ipr,fmt="(a)") "#  "//trim(Str)
       write(unit=ipr,fmt="(a)") "#============================================================================="
       write(unit=ipr,fmt="(a)") "data_global"
       write(unit=ipr,fmt="(a)") "#============================================================================="
@@ -502,10 +502,10 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       !> Search loop for atoms
-      Str_tmp="_atom_site_label"
-      nl=len_trim(Str_tmp)
+      str="_atom_site_label"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -517,12 +517,12 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%Str_tmp)
+            line=adjustl(cif%line(j)%str)
             if (len_trim(line) <=0) cycle
             if (line(1:1) == '#') cycle
 
@@ -537,7 +537,7 @@ SubModule (CFML_IOForm) Format_CIF
       lugar=0
       j=0
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -593,7 +593,7 @@ SubModule (CFML_IOForm) Format_CIF
       n=0
       j_ini=i
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <= 0) exit
@@ -616,7 +616,7 @@ SubModule (CFML_IOForm) Format_CIF
       !> reading atoms
       n=0
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (line(1:1) == '#') cycle
          if (len_trim(line) <=0) exit
@@ -772,11 +772,11 @@ SubModule (CFML_IOForm) Format_CIF
 
       j_ini=i  !This is kept fixed for anisotropic search, below we use ja_ini
       !> Search for _atom_type_symbol and _atom_type_oxidation_number
-      Str_tmp="_atom_type_symbol"
-      nl=len_trim(Str_tmp)
+      str="_atom_type_symbol"
+      nl=len_trim(str)
 
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
          if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
          !> elimination of tabs
@@ -785,11 +785,11 @@ SubModule (CFML_IOForm) Format_CIF
             if (iv == 0) exit
             line(iv:iv)=' '
          end do
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos == 0) cycle
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%Str_tmp)
+            line=adjustl(cif%line(j)%str)
             if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
             npos=index(line,'loop_')
@@ -805,7 +805,7 @@ SubModule (CFML_IOForm) Format_CIF
         lugar=0
         j=0
         do i=ja_ini,j_end
-            line=adjustl(cif%line(i)%Str_tmp)
+            line=adjustl(cif%line(i)%str)
             if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
             if (line(1:5) /='_atom') exit
@@ -822,7 +822,7 @@ SubModule (CFML_IOForm) Format_CIF
         j=0
         !> reading atom type symbols
         do i=ja_ini, j_end
-           line=adjustl(cif%line(i)%Str_tmp)
+           line=adjustl(cif%line(i)%str)
            if (line(1:1) == '#') cycle
            if (len_trim(line) <= 0) exit
            if (line(1:1) == "_" .or. line(1:5) == "loop_") exit
@@ -843,10 +843,10 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       !> Search loop for atoms in aniso
-      Str_tmp="_atom_site_aniso_label"
-      nl=len_trim(Str_tmp)
+      str="_atom_site_aniso_label"
+      nl=len_trim(str)
       do i=j_ini,j_end  !Here we re-take the initial position after reading atoms
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
@@ -858,12 +858,12 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos == 0) cycle
 
          !> search the loop
          do j=i-1,j_ini,-1
-            line=adjustl(cif%line(j)%Str_tmp)
+            line=adjustl(cif%line(j)%str)
             if (len_trim(line) <= 0) cycle
             if (line(1:1) == '#') cycle
 
@@ -880,7 +880,7 @@ SubModule (CFML_IOForm) Format_CIF
         lugar=0
         j=0
         do i=j_ini,j_end
-           line=adjustl(cif%line(i)%Str_tmp)
+           line=adjustl(cif%line(i)%str)
 
            if (len_trim(line) <= 0) cycle
            if (line(1:1) == '#') cycle
@@ -914,7 +914,7 @@ SubModule (CFML_IOForm) Format_CIF
         !> reading anisotropic thermal parameters
         j_ini=i
         do i=j_ini, j_end
-           line=adjustl(cif%line(i)%Str_tmp)
+           line=adjustl(cif%line(i)%str)
 
            if (line(1:1) == '#') cycle
            if (len_trim(line) <=0) exit
@@ -1102,10 +1102,10 @@ SubModule (CFML_IOForm) Format_CIF
       ierror=.false.
 
       !> a
-      Str_tmp="_cell_length_a"
-      nl=len_trim(Str_tmp)
+      str="_cell_length_a"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1117,7 +1117,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1131,10 +1131,10 @@ SubModule (CFML_IOForm) Format_CIF
       end do
 
       !> b
-      Str_tmp="_cell_length_b"
-      nl=len_trim(Str_tmp)
+      str="_cell_length_b"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1146,7 +1146,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1160,10 +1160,10 @@ SubModule (CFML_IOForm) Format_CIF
       end do
 
       !> c
-       Str_tmp="_cell_length_c"
-      nl=len_trim(Str_tmp)
+       str="_cell_length_c"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1175,7 +1175,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1189,10 +1189,10 @@ SubModule (CFML_IOForm) Format_CIF
       end do
 
       !> alpha
-      Str_tmp="_cell_angle_alpha"
-      nl=len_trim(Str_tmp)
+      str="_cell_angle_alpha"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1203,7 +1203,7 @@ SubModule (CFML_IOForm) Format_CIF
             if (iv == 0) exit
             line(iv:iv)=' '
          end do
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1217,10 +1217,10 @@ SubModule (CFML_IOForm) Format_CIF
       end do
 
       !> beta
-      Str_tmp="_cell_angle_beta"
-      nl=len_trim(Str_tmp)
+      str="_cell_angle_beta"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1231,7 +1231,7 @@ SubModule (CFML_IOForm) Format_CIF
             if (iv == 0) exit
             line(iv:iv)=' '
          end do
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1245,10 +1245,10 @@ SubModule (CFML_IOForm) Format_CIF
       end do
 
       !> gamma
-      Str_tmp="_cell_angle_gamma"
-      nl=len_trim(Str_tmp)
+      str="_cell_angle_gamma"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1259,7 +1259,7 @@ SubModule (CFML_IOForm) Format_CIF
             if (iv == 0) exit
             line(iv:iv)=' '
          end do
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1312,11 +1312,11 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_diffrn_radiation_wavelength"
-      nl=len_trim(Str_tmp)
+      str="_diffrn_radiation_wavelength"
+      nl=len_trim(str)
 
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1328,7 +1328,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_num(line(npos+nl:),vet,ivet,iv)
@@ -1374,11 +1374,11 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_cell_formula_units_Z"
-      nl=len_trim(Str_tmp)
+      str="_cell_formula_units_Z"
+      nl=len_trim(str)
 
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1390,7 +1390,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_num(line(npos+nl:),vet,ivet,iv)
@@ -1435,10 +1435,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_end)) j_end=i_end
 
       !> First tentative
-      Str_tmp="_chemical_name_common"
-      nl=len_trim(Str_tmp)
+      str="_chemical_name_common"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1450,7 +1450,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          ChemName=adjustl(line(npos+nl:))
@@ -1467,10 +1467,10 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       !> Second tentative
-      Str_tmp="_chemical_name_systematic"
-      nl=len_trim(Str_tmp)
+      str="_chemical_name_systematic"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1482,7 +1482,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          ChemName=adjustl(line(npos+nl:))
@@ -1537,11 +1537,11 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_chemical_formula_sum"
-      nl=len_trim(Str_tmp)
+      str="_chemical_formula_sum"
+      nl=len_trim(str)
       line=" "
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1553,7 +1553,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          line=adjustl(line(npos+nl:))
@@ -1641,10 +1641,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_diffrn_ambient_pressure"
-      nl=len_trim(Str_tmp)
+      str="_diffrn_ambient_pressure"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1656,7 +1656,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1697,10 +1697,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_publ_section_title"
-      nl=len_trim(Str_tmp)
+      str="_publ_section_title"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1712,7 +1712,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          title=adjustl(line(npos+nl:))
@@ -1763,10 +1763,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_space_group_IT_number"
-      nl=len_trim(Str_tmp)
+      str="_space_group_IT_number"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1778,7 +1778,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Num(line(npos+nl:), vet, ivet, iv)
@@ -1821,10 +1821,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      Str_tmp="_diffrn_ambient_temperature"
-      nl=len_trim(Str_tmp)
+      str="_diffrn_ambient_temperature"
+      nl=len_trim(str)
       do i=j_ini,j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1836,7 +1836,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          call get_Numstd(line(npos+nl:), vet1, vet2, iv)
@@ -1878,10 +1878,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_end)) j_end=i_end
 
       !> First tentative
-      Str_tmp="_space_group_name_Hall"
-      nl=len_trim(Str_tmp)
+      str="_space_group_name_Hall"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1893,7 +1893,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          hall=adjustl(line(npos+nl:))
@@ -1910,10 +1910,10 @@ SubModule (CFML_IOForm) Format_CIF
       end if
 
       !> Second tentative
-      Str_tmp="_symmetry_space_group_name_Hall"
-      nl=len_trim(Str_tmp)
+      str="_symmetry_space_group_name_Hall"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1925,7 +1925,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          hall=adjustl(line(npos+nl:))
@@ -1972,10 +1972,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_end)) j_end=i_end
 
       !> First tentative
-      Str_tmp="_space_group_name_H-M_alt"
-      nl=len_trim(Str_tmp)
+      str="_space_group_name_H-M_alt"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -1987,7 +1987,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          spgr_hm=adjustl(line(npos+nl:))
@@ -2041,10 +2041,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (len_trim(spgr_hm) > 0) return
 
       !> Second tentative
-      Str_tmp="_symmetry_space_group_name_H-M"
-      nl=len_trim(Str_tmp)
+      str="_symmetry_space_group_name_H-M"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -2056,7 +2056,7 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          spgr_hm=adjustl(line(npos+nl:))
@@ -2135,10 +2135,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_end)) j_end=i_end
 
       !> First tentative
-      Str_tmp="_space_group_symop_operation_xyz"
-      nl=len_trim(Str_tmp)
+      str="_space_group_symop_operation_xyz"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -2150,11 +2150,11 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          do j=i+1,j_end
-            line=adjustl(cif%line(j)%Str_tmp)
+            line=adjustl(cif%line(j)%str)
             if (len_trim(line) <=0) exit
             if (line(1:1) == '_') exit
             if (line(1:1) == '#') cycle
@@ -2171,10 +2171,10 @@ SubModule (CFML_IOForm) Format_CIF
       if (n_oper > 0) return
 
       !> Second tentative
-      Str_tmp="_symmetry_equiv_pos_as_xyz"
-      nl=len_trim(Str_tmp)
+      str="_symmetry_equiv_pos_as_xyz"
+      nl=len_trim(str)
       do i=j_ini, j_end
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '#') cycle
@@ -2186,11 +2186,11 @@ SubModule (CFML_IOForm) Format_CIF
             line(iv:iv)=' '
          end do
 
-         npos=index(line,Str_tmp)
+         npos=index(line,str)
          if (npos ==0) cycle
 
          do j=i+1,j_end
-            line=adjustl(cif%line(j)%Str_tmp)
+            line=adjustl(cif%line(j)%str)
             if (len_trim(line) <=0) exit
             if (line(1:1) == '_') exit
             if (line(1:1) == '#') cycle
@@ -2970,7 +2970,7 @@ SubModule (CFML_IOForm) Format_CIF
       !> Calculating number of Phases
       nt_phases=0; ip=cif%nlines; ip(1)=1
       do i=1,cif%nlines
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
          if (l_case(line(1:5)) == "data_" .and. l_case(line(1:11)) /= "data_global" )  then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
@@ -3089,7 +3089,7 @@ SubModule (CFML_IOForm) Format_CIF
       !> Number of Phases
       IPhas=cif%nlines; IPhas(1)=1
       do i=1,cif%nlines
-         line=adjustl(cif%line(i)%Str_tmp)
+         line=adjustl(cif%line(i)%str)
 
          if (len_trim(line) <= 0) cycle
          if (line(1:1) =='#')     cycle

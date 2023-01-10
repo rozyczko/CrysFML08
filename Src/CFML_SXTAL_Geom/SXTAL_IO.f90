@@ -58,7 +58,7 @@
 
           n=n+1
           if(n > fich_cfl%nlines) exit
-          line=fich_cfl%line(n)%Str_tmp
+          line=fich_cfl%line(n)%Str
 
         end if
 

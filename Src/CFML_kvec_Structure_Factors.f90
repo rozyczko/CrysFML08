@@ -352,9 +352,9 @@
     !!---- PN
     !!----    real(kind=dp), parameter, public :: pn=0.2695420113693928312
     !!----
-    !!----    pn=Constant=  1/2 * gamma (N) * r0 (units of 10^-12 cm)
-    !!----    gamma: magnetic moment of neutrons in nuclear magnetons = 1.91304272(45) N
-    !!----    r0   : Classical radius of the electron = 0.28179403267(27)  10-12 cm
+    !!----    pn=Constant=  1/2 * gamma (µN) * r0 (units of 10^-12 cm)
+    !!----    gamma: magnetic moment of neutrons in nuclear magnetons = 1.91304272(45) µN
+    !!----    r0   : Classical radius of the electron = 0.28179403267(27) × 10-12 cm
     !!----
     !!---- Update: May - 2015
     !!

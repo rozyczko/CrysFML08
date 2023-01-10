@@ -38,7 +38,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
      i=N_ini
      do while(i <= N_end)
-        line=adjustl(ffile%line(i)%Str_tmp)
+        line=adjustl(ffile%line(i)%str)
 
         !> No comments, No blank lines
         if (line(1:1) =='!') then
@@ -75,7 +75,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
         str=adjustl(dire(1))
 
         do n=i+1,n_end
-           line=adjustl(ffile%line(n)%Str_tmp)
+           line=adjustl(ffile%line(n)%str)
            if (line(1:1) =='!') cycle
            if (line(1:1) ==' ') cycle
 
@@ -118,7 +118,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
       !> Determine the zone of commands in the file
       do i=1,ffile%nlines
-         line=adjustl(ffile%line(i)%Str_tmp)
+         line=adjustl(ffile%line(i)%str)
          if (line(1:1) =='!') cycle
          if (line(1:1) ==' ') cycle
 
