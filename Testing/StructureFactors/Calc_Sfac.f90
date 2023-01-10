@@ -138,7 +138,7 @@ Program Calc_Structure_Factors
    lambda=0.70926 !Mo kalpha (used only for x-rays)
    if (lfil3) then
       do i=1,fich_cfl%nlines
-         line=adjustl(fich_cfl%line(i)%Str_tmp)
+         line=adjustl(fich_cfl%line(i)%str)
          if (u_case(line(1:6)) == "LAMBDA") then
             read(unit=line(7:),fmt=*,iostat=ier) lambda
             if (ier /= 0) lambda=0.70926

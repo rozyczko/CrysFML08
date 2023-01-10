@@ -83,8 +83,8 @@ Program MagRef
      write(unit=*,fmt="( a )") "    Text of the input CFL file"
      write(unit=*,fmt="(a,/)") "    =========================="
      do i=1,fich_cfl%nlines
-       write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str_tmp
-       write(unit=*,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str_tmp
+       write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%str
+       write(unit=*,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%str
      end do
 
 

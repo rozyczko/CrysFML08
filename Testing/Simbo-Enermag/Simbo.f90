@@ -871,10 +871,10 @@
 
    write(unit=lun,fmt="(/,a,a,/)")" => Information deduced from the content of the input file: ",infil(1:ln)//".cfl"
    do i=1,File_inp%nlines
-     texto=u_case(File_inp%line(i)%Str_tmp)
+     texto=u_case(File_inp%line(i)%str)
      j=index(texto,"TITLE")
      if( j /= 0) then
-       title=File_inp%line(i)%Str_tmp(j+5:)
+       title=File_inp%line(i)%str(j+5:)
        exit
      end if
    end do
