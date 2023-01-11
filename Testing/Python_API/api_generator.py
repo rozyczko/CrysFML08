@@ -21,6 +21,7 @@ read() -> None
 run() -> None
 wrap_procedures() -> None
 """
+
 import colorama
 import compilation
 import cfml_objects
