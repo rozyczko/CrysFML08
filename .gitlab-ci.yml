@@ -64,6 +64,7 @@ make:macos_gfortran:
 make:macos_ifort:
   stage: make
   script:
+    - source /opt/intel/oneapi/setvars.sh
     - BuildServer/Unix/build_F2008.sh ifort
   tags:
     - sci
