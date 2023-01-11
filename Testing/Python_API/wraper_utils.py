@@ -72,7 +72,7 @@ def init_module(m : cfml_objects.Module) -> None:
     with open(w_file,'w') as f:
         write_license(f)
         f.write(f"module {w_name}\n")
-        f.write(f"\n{' ':>4}use forpy_mod \n")
+        f.write(f"\n{' ':>4}use forpy_mod, str_fp => str  \n")
         f.write(f"{' ':>4}use iso_c_binding \n")
         #f.write(f"{' ':>4}use wraps\n")
         f.write(f"\n{' ':>4}use cfml_globaldeps \n")
@@ -304,7 +304,7 @@ def write_api_init(procs : dict,nprocs : int) -> None:
     with open('api_init.f90','w') as f:
         write_license(f)
         f.write(f"\nmodule api_init\n")
-        f.write(f"\n{' ':>4}use forpy_mod\n")
+        f.write(f"\n{' ':>4}use forpy_mod, str_fp => str \n")
         f.write(f"{' ':>4}use iso_fortran_env\n")
         f.write(f"\n")
         for m in procs.keys():
@@ -348,7 +348,7 @@ def write_interconversion() -> None:
     with open('wraps.f90','w') as f:
         write_license(f)
         f.write(f"\nmodule wraps\n")
-        f.write(f"\n{' ':>4}use forpy_mod\n")
+        f.write(f"\n{' ':>4}use forpy_mod, str_fp => str \n")
         f.write(f"\n{' ':>4}implicit none\n")
         f.write(f"\n{' ':>4}contains\n")
         # Subroutine charray_to_list
