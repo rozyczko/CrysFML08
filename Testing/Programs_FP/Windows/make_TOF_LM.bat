@@ -52,9 +52,8 @@ rem
 rem
 rem > Compilation
 rem > Go to the proper directory
-cd ..\..\XRfit
+cd ..\..\TOF-fit
    if [%_COMP%]==[ifort] (
-      ifort /c ODR_wrapper.f90     /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /c TOF_module_LM.f90   /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC  /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /c TOF_fitting_LM.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC  /I%CRYSFML%\%DIRECTORY%\ODR_sp
       ifort /exe:TOF_fit_LM *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib  %CRYSFML%\%DIRECTORY%\ODR_sp\odr_sp.lib  /link /stack:300000000 
