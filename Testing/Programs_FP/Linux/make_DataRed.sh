@@ -29,7 +29,7 @@ done
 # Settings
 #
 if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML/ifort/LibC"
+   INC="-I$CRYSFML/ifort/LibC "
    LIB="-L$CRYSFML/ifort/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux"
@@ -40,9 +40,9 @@ else
    VERS="Linux64"
 fi
 if [ $DEBUG == "Y" ]; then
-   OPT1="-c -g -$ARCH"
+   OPT1="-c -g -heap-arrays -$ARCH"
 else
-   OPT1="-c -warn -$ARCH -O2 -qopt-report=0"
+   OPT1="-c -warn -heap-arrays -$ARCH -O2 -qopt-report=0"
 fi
 #
 #
@@ -53,11 +53,11 @@ echo " ########################################################"
 echo " ####  nDataRed Program                        (1.0) ####"
 echo " ####  JRC                             CopyLeft-2022 ####"
 echo " ########################################################"
-$COMP $OPT1 Twin_Mod.f90                  $INC
-$COMP $OPT1 DataRed_Mod.f90               $INC
-$COMP $OPT1 DataRed_rnw_reflections.f90   $INC
-$COMP $OPT1 DataRed_treat_reflections.f90 $INC
-$COMP $OPT1 DataRed.f90                   $INC
+$COMP $OPT1 twin_mod.f90                  $INC
+$COMP $OPT1 datared_mod.f90               $INC
+$COMP $OPT1 datared_rnw_reflections.f90   $INC
+$COMP $OPT1 datared_treat_reflections.f90 $INC
+$COMP $OPT1 datared.f90                   $INC
 $COMP -$ARCH *.o -o nDataRed -static-intel $LIB  $LIBSTATIC
 #
 # Final process
