@@ -40,9 +40,9 @@ else
    VERS="Linux64"
 fi
 if [ $DEBUG == "Y" ]; then
-   OPT1="-c -g -$ARCH"
+   OPT1="-c -g -$ARCH -heap-arrays"
 else
-   OPT1="-c -warn -$ARCH -O2 -qopt-report=0"
+   OPT1="-c -warn -$ARCH -O2 -qopt-report=0 -heap-arrays"
 fi
 #
 #
