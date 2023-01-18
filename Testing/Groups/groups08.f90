@@ -445,7 +445,7 @@
     use CFML_gSpaceGroups
     use Get_gSpG
     implicit none
-    character(len=256)                  :: generatorList
+    character(len=512)                  :: generatorList
     character(len=180)                  :: setting
     character(len=25)                   :: forma="(i5,tr2,a,   i4,a,i8)"
     character(len=25)                   :: mode
