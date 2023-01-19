@@ -53,21 +53,21 @@ rem > Compilation
 rem > Go to the proper directory
 cd ..\..\DataRed
    if [%_COMP%]==[ifort] (
-      ifort /c Twin_Mod.f90                   /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c DataRed_Mod.f90                /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c DataRed_rnw_reflections.f90    /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c DataRed_treat_reflections.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /c DataRed.f90                    /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /exe:DataRed *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
+      ifort /c Twin_Mod.f90                   /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /c DataRed_Mod.f90                /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /c DataRed_rnw_reflections.f90    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /c DataRed_treat_reflections.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /c DataRed.f90                    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /exe:DataRed *.obj  %CRYSFML08%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
    )
 rem   
    if [%_COMP%]==[gfortran] (
-      gfortran -c Twin_Mod.f90                   %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c DataRed_Mod.f90                %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c DataRed_rnw_reflections.f90    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c DataRed_treat_reflections.f90  %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -c DataRed.f90                    %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -o DataRed.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c Twin_Mod.f90                   %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -c DataRed_Mod.f90                %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -c DataRed_rnw_reflections.f90    %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -c DataRed_treat_reflections.f90  %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -c DataRed.f90                    %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -o DataRed.exe *.o -L%CRYSFML08%\%DIRECTORY%\LibC -lcrysfml
    )
 rem 
    if exist %FULLPROF% copy DataRed.exe %FULLPROF%\nDataRed.exe  

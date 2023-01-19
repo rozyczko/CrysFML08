@@ -29,15 +29,15 @@ done
 # Settings
 #
 if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML/ifort/LibC"
-   LIB="-L$CRYSFML/ifort/LibC"
+   INC="-I$CRYSFML08/ifort/LibC"
+   LIB="-L$CRYSFML08/ifort/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux"
 else
-   INC="-I$CRYSFML/ifort64/LibC"
-   INCODR="-I$CRYSFML/ifort64/ODR_sp"
-   LIB="-L$CRYSFML/ifort64/LibC"
-   LIBODR="-L$CRYSFML/ifort64/ODR_sp"
+   INC="-I$CRYSFML08/ifort64/LibC"
+   INCODR="-I$CRYSFML08/ifort64/ODR_sp"
+   LIB="-L$CRYSFML08/ifort64/LibC"
+   LIBODR="-L$CRYSFML08/ifort64/ODR_sp"
    LIBSTATIC="-lcrysfml"
    LIBSTATIC_ODR="-lodr_sp"
    VERS="Linux64"
