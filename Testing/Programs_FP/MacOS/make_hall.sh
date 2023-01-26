@@ -5,47 +5,56 @@
 # Date: January 2021
 # ----------------------------------------
 # General Options
-COMP="ifort"
-DEBUG="N"
-ARCH="m64"
+compiler="ifort"
+debug="N"
 #
 # Arguments
 #
 for arg in "$@"
 do
-   case "$arg" in
-      "m32")
-         ARCH=$arg
+    case "$arg" in
+       "ifort")
+         compiler=$arg
          ;;
-      "m64")
-         ARCH=$arg
+      "gfortran")
+         compiler=$arg
          ;;
       "debug"*)
-         DEBUG="Y"
+         debug="Y"
          ;;
    esac
 done
 #
 # Settings
 #
-if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML08/ifort/LibC"
-   LIB="-L$CRYSFML08/ifort/LibC"
-   LIBSTATIC="-lcrysfml"
-   VERS="Linux"
-else
-   INC="-I$CRYSFML08/ifort64/LibC"
-   LIB="-L$CRYSFML08/ifort64/LibC"
-   LIBSTATIC="-lcrysfml"
-   VERS="Linux64"
-fi
-if [ $DEBUG == "Y" ]; then
-   OPT1="-c -g -$ARCH -heap-arrays"
-else
-   OPT1="-c -warn -$ARCH -O2 -qopt-report=0 -heap-arrays"
-fi
 #
+# Intel compiler
 #
+if [ $compiler == "ifort" ]; then
+   inc="-I$CRYSFML08/ifort64/LibC08"
+   lib="-L$CRYSFML08/ifort64/LibC08"
+   mode="-static-intel"
+   if [ $debug == "Y" ]; then
+      opt1="-c -g -warn -arch x86_64 -heap-arrays"
+   else
+      opt1="-c -O2 -arch x86_64 -qopt-report=0 -heap-arrays"
+   fi
+fi
+
+#
+# GFortran compiler
+#
+if [ $compiler == "gfortran" ]; then
+   inc="-I$CRYSFML/GFortran64/LibC08"
+   lib="-L$CRYSFML/GFortran64/LibC08"
+   mode="-static-libgfortran"
+   if [ $debug == "Y" ]; then
+      opt1="-c -g -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
+   else
+      opt1="-c -O2 -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
+   fi
+fi
+
 # Compilation Process
 #
 cd ../../Hall_Symbols
@@ -53,15 +62,21 @@ echo " ########################################################"
 echo " #### MHall       Program                      (1.0) ####"
 echo " #### JRC                              CopyLeft-2020 ####"
 echo " ########################################################"
-$COMP $OPT1 MHall.f90 $INC
-$COMP -$ARCH *.o -o MHall -static-intel $LIB  $LIBSTATIC
+$compiler $opt1 MHall.f90 $inc
+$compiler -arch x86_64 *.o -o MHall $lib $mode
 #
 # Final process
 #
+rm -rf *.o *.mod *_genmod.f90
 upx MHall
-rm -rf *.o *.mod
-cp MHall $FULLPROF/.
-mv MHall $PROGCFML/DistFPS/$VERS
-cd ../Programs_FP/Linux
+if [ ! -d $PROGCFML/DistFPS/MacOS ]; then
+   mkdir $PROGCFML/DistFPS/MacOS
+fi
+cp MHall $PROGCFML/DistFPS/MacOS
 #
+if [ -d $FULLPROF ]; then
+   mv -f MHall $FULLPROF
+fi
+# END
+
 
