@@ -65,6 +65,6 @@ $COMP -$ARCH *.o -o nDataRed -static-intel $LIB  $LIBSTATIC
 upx nDataRed
 rm -rf *.o *.mod
 cp nDataRed $FULLPROF/.
-mv nDataRed $PROGCFML/DistFPS/$VERS/.
-cd ../Programs_FP/Linux
+mv nDataRed $PROGCFML/DistFPS/MacOS
+cd ../Programs_FP/MacOS
 #

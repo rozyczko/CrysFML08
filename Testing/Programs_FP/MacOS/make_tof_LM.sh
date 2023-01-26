@@ -43,8 +43,8 @@ fi
 # GFortran compiler
 #
 if [ $compiler == "gfortran" ]; then
-   inc="-I$CRYSFML/GFortran64/LibC -I$CRYSFML08/gfortran64/ODR_sp"
-   lib="-L$CRYSFML/GFortran64/LibC -L$CRYSFML08/gfortran64/ODR_sp"
+   inc="-I$CRYSFML08/GFortran64/LibC -I$CRYSFML08/gfortran64/ODR_sp"
+   lib="-L$CRYSFML08/GFortran64/LibC -L$CRYSFML08/gfortran64/ODR_sp"
    mode="-static-libgfortran"
    if [ $debug == "Y" ]; then
       opt1="-c -g -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
