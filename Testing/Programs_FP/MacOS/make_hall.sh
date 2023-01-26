@@ -25,14 +25,11 @@ do
    esac
 done
 #
-# Settings
-#
-#
 # Intel compiler
 #
 if [ $compiler == "ifort" ]; then
-   inc="-I$CRYSFML08/ifort64/LibC08"
-   lib="-L$CRYSFML08/ifort64/LibC08"
+   inc="-I$CRYSFML08/ifort64/LibC"
+   lib="-L$CRYSFML08/ifort64/LibC"
    mode="-static-intel"
    if [ $debug == "Y" ]; then
       opt1="-c -g -warn -arch x86_64 -heap-arrays"
@@ -45,8 +42,8 @@ fi
 # GFortran compiler
 #
 if [ $compiler == "gfortran" ]; then
-   inc="-I$CRYSFML/GFortran64/LibC08"
-   lib="-L$CRYSFML/GFortran64/LibC08"
+   inc="-I$CRYSFML/GFortran64/LibC"
+   lib="-L$CRYSFML/GFortran64/LibC"
    mode="-static-libgfortran"
    if [ $debug == "Y" ]; then
       opt1="-c -g -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
@@ -77,6 +74,8 @@ cp MHall $PROGCFML/DistFPS/MacOS
 if [ -d $FULLPROF ]; then
    mv -f MHall $FULLPROF
 fi
+
+cd ../Programs_FP/MacOS
 # END
 
 
