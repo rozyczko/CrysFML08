@@ -62,8 +62,8 @@ echo " #### TOF_fit_LM   Program                     (1.0) ####"
 echo " #### JRC                              CopyLeft-2021 ####"
 echo " ########################################################"
 $compiler $opt1 TOF_module_LM.f90 $inc
-$compiler $OPT1 TOF_fitting_LM.f90 $inc
-$compiler -arch x86_64 *.o -o TOF_fit_LM $lib $mode
+$compiler $opt1 TOF_fitting_LM.f90 $inc
+$compiler -arch x86_64 *.o -o TOF_fit_LM $lib $mode -lcrysfml -lodr_sp
 #
 # Final process
 #
