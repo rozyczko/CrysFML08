@@ -39,6 +39,11 @@ make:linux_gfortran:
     - docker
     - sci
     - ubuntu
+  artifacts:
+    path: ${CI_PROJECT_DIR}/gfortran/
+    untracked: false
+    when: on_success
+    expire_in: 30 days
 
 make:linux_ifort:
   stage: make
@@ -50,6 +55,11 @@ make:linux_ifort:
     - docker
     - sci
     - ubuntu
+  artifacts:
+    path: ${CI_PROJECT_DIR}/ifort/
+    untracked: false
+    when: on_success
+    expire_in: 30 days
     
 #===============
 
