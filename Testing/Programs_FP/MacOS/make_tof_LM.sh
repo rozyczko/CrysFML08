@@ -5,7 +5,6 @@
 # Date: January 2021
 # ------------------------------
 # General Options
-# General Options
 compiler="ifort"
 debug="N"
 #
@@ -68,8 +67,6 @@ $compiler -arch x86_64 *.o -o TOF_fit_LM $lib $mode -lcrysfml -lodr_sp
 # Final process
 #
 rm -rf *.o *.mod *_genmod.f90
-upx TOF_fit_LM
-
 
 if [ ! -d $PROGCFML/DistFPS/MacOS ]; then
    mkdir $PROGCFML/DistFPS/MacOS

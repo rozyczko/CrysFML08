@@ -66,7 +66,7 @@ $compiler -arch x86_64 *.o -o MHall $lib $mode -lcrysfml
 # Final process
 #
 rm -rf *.o *.mod *_genmod.f90
-upx MHall
+
 if [ ! -d $PROGCFML/DistFPS/MacOS ]; then
    mkdir $PROGCFML/DistFPS/MacOS
 fi

@@ -1,6 +1,6 @@
  Submodule (CFML_Optimization_LSQ) OPT_LSQ_Marquard_Fit
-  implicit none
-   contains
+   implicit none
+ contains
 
     !!--++
     !!--++  Subroutine Curfit_v1(Model_Functn, X, Y, W, Nobs, c, A, Sa, Fl, Yc, Chir, Ifail,nt)
