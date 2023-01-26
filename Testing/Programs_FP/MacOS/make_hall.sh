@@ -55,12 +55,13 @@ fi
 # Compilation Process
 #
 cd ../../Hall_Symbols
+
 echo " ########################################################"
 echo " #### MHall       Program                      (1.0) ####"
 echo " #### JRC                              CopyLeft-2020 ####"
 echo " ########################################################"
 $compiler $opt1 MHall.f90 $inc
-$compiler -arch x86_64 *.o -o MHall $lib $mode
+$compiler -arch x86_64 *.o -o MHall $lib $mode -lcrysfml
 #
 # Final process
 #
