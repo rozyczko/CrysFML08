@@ -40,8 +40,8 @@ make:linux_gfortran:
     - sci
     - ubuntu
   artifacts:
-    path: ${CI_PROJECT_DIR}/gfortran/
-    untracked: false
+    paths: ${CI_PROJECT_DIR}/gfortran/
+    untracked: true
     when: on_success
     expire_in: 30 days
 
@@ -56,8 +56,8 @@ make:linux_ifort:
     - sci
     - ubuntu
   artifacts:
-    path: ${CI_PROJECT_DIR}/ifort/
-    untracked: false
+    paths: ${CI_PROJECT_DIR}/ifort/
+    untracked: true
     when: on_success
     expire_in: 30 days
     
@@ -70,6 +70,11 @@ make:macos_gfortran:
   tags:
     - sci
     - osx-10.13
+  artifacts:
+    paths: ${CI_PROJECT_DIR}/gfortran/
+    untracked: true
+    when: on_success
+    expire_in: 30 days
     
 make:macos_ifort:
   stage: make
@@ -79,6 +84,12 @@ make:macos_ifort:
   tags:
     - sci
     - osx-10.13
+  artifacts:
+    paths: ${CI_PROJECT_DIR}/ifort/
+    untracked: true
+    when: on_success
+    expire_in: 30 days
+    
 
 
 
