@@ -483,6 +483,7 @@ SubModule (CFML_IOForm) Format_CFL
             case("SSG","SUPER","SSPG")
                allocate(SuperSpaceGroup_Type :: Spg)
                call Set_SpaceGroup(line,"SUPER",SpG, strcode)
+               d=SpG%d
                exit
 
             case("GENLIST","GENERATORS","LIST")
@@ -538,6 +539,12 @@ SubModule (CFML_IOForm) Format_CFL
             if (allocated(SpG%nharm))   deallocate (SpG%nharm)
             if (allocated(SpG%sintlim)) deallocate (SpG%sintlim)
             if (allocated(SpG%q_coeff)) deallocate (SpG%q_coeff)
+            if (allocated(SpG%Rot)) deallocate (SpG%Rot)
+            if (allocated(SpG%t)) deallocate (SpG%t)
+            if (allocated(SpG%tI)) deallocate (SpG%tI)
+            if (allocated(SpG%M)) deallocate (SpG%M)
+            if (allocated(SpG%Ep)) deallocate (SpG%Ep)
+
 
             allocate(SpG%Rot(3,3,Mult),SpG%t(3,Mult),SpG%tI(nk,Mult),SpG%M(nk,3,Mult),SpG%Ep(nk,nk,Mult))
 
