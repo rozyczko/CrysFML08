@@ -16,7 +16,7 @@ SubModule (CFML_Reflections) Refl_Generate
    !!----    logical,                 optional, intent(in)     :: MagExt   !Magnetic extinctions taken into account if true
    !!----    type(kvect_info_type),   optional, intent(in)     :: Kinfo    !Modulation vector information
    !!----    logical,                 optional, intent(in)     :: Order    !If true the reflections are ordered by increasing sinTheta/Lambda
-   !!----    logical,                 optional, intent(in)     :: Unique   !Ordered unique reflections are gnerated
+   !!----    logical,                 optional, intent(in)     :: Unique   !Ordered unique reflections are generated
    !!----    integer, dimension(3),   optional, intent(in)     :: seqindx  !Sequence of indices change
    !!----    integer, dimension(3,2), optional, intent(in)     :: hlim     !Index limits
    !!----    logical,                 optional, intent(in)     :: Mag_only !Only magnetic reflections are generated

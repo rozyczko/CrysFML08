@@ -50,28 +50,21 @@
     private
 
     !---- List of public functions ----!
-    public :: Equal_Sets_Text, &
-              Frac_Trans_1Dig, Frac_Trans_2Dig, &
-              Get_DateTime, Get_Dirname, Get_Extension, Get_Filename, &
-              Get_Mat_From_Symb, Get_Vec_From_String, &
-              L_Case, U_Case, &
-              NumCol_from_NumFmt, &
-              Pack_String, &
-              Read_Fract, &
-              Number_Lines, Reading_File, &
+    public :: Equal_Sets_Text, Frac_Trans_1Dig, Frac_Trans_2Dig,          &
+              Get_DateTime, Get_Dirname, Get_Extension, Get_Filename,     &
+              Get_Mat_From_Symb, Get_Vec_From_String,L_Case, U_Case,      &
+              NumCol_from_NumFmt, Pack_String, Read_Fract,Number_Lines,   &
               Set_Symb_From_Mat, String_Count, Strip_String, String_Real, &
-              String_Fraction_1Dig, String_Fraction_2Dig, String_NumStd
+              String_Fraction_1Dig, String_Fraction_2Dig, String_NumStd,  &
+              Reading_File
 
 
     !---- List of public subroutines ----!
-    public :: Cut_string, &
-              FindFMT, &
-              Get_Separator_Pos, Get_Substring_Positions, Get_Words, &
-              Get_Num, Get_NumStd, Get_Transf, &
-              Init_FindFmt, Inc_LineNum, &
-              Reading_Lines, Read_Key_Str, Read_Key_StrVal, Read_Key_Value, &
-              Read_Key_ValueSTD, &
-              Sort_Strings, SubString_Replace
+    public :: Cut_string, FindFMT, &
+              Get_Separator_Pos, Get_Substring_Positions, Get_Words,      &
+              Get_Num, Get_NumStd, Get_Transf, Init_FindFmt, Inc_LineNum, &
+              Reading_Lines, Read_Key_Str,Read_Key_StrVal,Read_Key_Value, &
+              Read_Key_ValueSTD, Sort_Strings, SubString_Replace
 
 
     Type, public :: String_Array_Type          !Type for handling allocatable arrays of allocatable strings
@@ -614,7 +607,5 @@
        end if
 
     End Function Number_Lines
-
-
 
  End Module CFML_Strings

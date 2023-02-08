@@ -50,39 +50,26 @@
     private
 
     !---- List of public functions ----!
-    public :: Co_Linear, Co_Prime, Cross_Product, Cubic_Harm_Ang, Cubic_Harm_Ucvec, &
-              Debye, Determ, Determ_V, Determ2D, Determ3D, Determ4D,             &
-              Equal_Matrix, Equal_Vector, Erfc_Deriv,                            &
-              Factorial_I, Factorial_R, First_Derivative,                        &
-              Gcd, Get_EPS_Math, Get_Cart_from_Cylin, Get_Cart_from_Spher,       &
-              Get_Cylin_from_Cart, Get_Cylin_from_Spher, Get_Spher_from_Cart,    &
-              Get_Spher_from_Cylin,          &
-              Inverse_Matrix, In_Limits, Is_Diagonal_Matrix, Is_Null_Vector,     &
-              Integral_Slater_Bessel,        &
-              Lcm, Linear_Dependent, Linear_Interpol, Locate, Lower_Triangular,  &
-              Mat_Cross, Modulo_Lat,         &
-              Negligible, Norm,              &
-              Outerprod, Polyhedron_Volume,  &
-              Poly_Legendre, Polynomial_Fit, &
-              mRank, Rotation_OX, Rotation_OY, Rotation_OZ, Real_Spher_Harm_Ang,  &
-              Real_Spher_Harm_Ucvec, Real_Spher_HarmCharge_Ucvec, &
-              Scalar, Second_Derivative, Smoothing_Vec, Sort, Spline_Interpol, Spline_D2y,  &
-              Tensor_Product, Trace,         &
-              Upper_Triangular,              &
-              Vec_Length,                    &
-              Zbelong
+    public :: Co_Linear, Co_Prime, Cross_Product, Cubic_Harm_Ang, Cubic_Harm_Ucvec,  &
+              Debye, Determ, Determ_V, Determ2D, Determ3D, Determ4D,                 &
+              Equal_Matrix, Equal_Vector, Erfc_Deriv,                                &
+              Factorial_I, Factorial_R, First_Derivative,                            &
+              Gcd, Get_EPS_Math, Get_Cart_from_Cylin, Get_Cart_from_Spher,           &
+              Get_Cylin_from_Cart, Get_Cylin_from_Spher, Get_Spher_from_Cart,        &
+              Get_Spher_from_Cylin,Inverse_Matrix, In_Limits,Is_Diagonal_Matrix,     &
+              Is_Null_Vector, Integral_Slater_Bessel, Lcm, Linear_Dependent,         &
+              Linear_Interpol, Locate, Lower_Triangular, Mat_Cross, Modulo_Lat,      &
+              Negligible, Norm, Outerprod, Polyhedron_Volume, Poly_Legendre,         &
+              Polynomial_Fit, mRank, Rotation_OX, Rotation_OY, Rotation_OZ,          &
+              Real_Spher_Harm_Ang,Real_Spher_Harm_Ucvec,Real_Spher_HarmCharge_Ucvec, &
+              Scalar, Second_Derivative, Smoothing_Vec, Sort, Spline_Interpol,       &
+              Spline_D2y,Tensor_Product, Trace, Upper_Triangular, Vec_Length,Zbelong
 
     !---- List of public subroutines ----!
-    public :: Co_Prime_Vector,               &
-              Diagonalize_SH,                &
-              Diagonalize_RGen,              &
-              LU_Descomposition,             &
-              Invert_Matrix_R,               &
-              Orient_Eigenvectors,           &
-              Points_In_Line2D, Pikout_Lj_Cubic, &
-              RowEchelonForm,                &
-              Set_EPS_Math, SmithNormalForm, Svdcmp, Swap, Resolv_Sist_1x2,      &
-              Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3,&
+    public :: Co_Prime_Vector, Diagonalize_SH,Diagonalize_RGen, LU_Descomposition,    &
+              Invert_Matrix_R, Orient_Eigenvectors, Points_In_Line2D, Pikout_Lj_Cubic,&
+              RowEchelonForm,Set_EPS_Math,SmithNormalForm,Svdcmp,Swap,Resolv_Sist_1x2,&
+              Resolv_Sist_1x3, Resolv_Sist_2x2, Resolv_Sist_2x3, Resolv_Sist_3x3,     &
               Lat_Modulo, Get_Plane_from_3Points, Get_Centroid_Coord, bubblesort
 
 

@@ -52,7 +52,7 @@
 !!--..    program To_F90, by Alan Miller.
 !!--..    Date: 2005-03-06  Time: 22:07:48
 !!--..
-!!--..    The persons that, to my knowledge have contributed to maintain these procedures
+!!--..    The persons that, to my knowledge, have contributed to maintain these procedures
 !!--..    in some way are: R.F.D Stansfield, A. Barthelemy, Garry McIntyre, John Allibon,
 !!--..    S.A. Mason, M.Thomas and Alain Filhol
 !!--..
