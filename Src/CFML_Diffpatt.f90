@@ -52,10 +52,11 @@
     public ::  Add_Patterns, FWHM_peak
 
     !---- List of public subroutines ----!
-    public ::  Allocate_Pattern, Deallocate_Pattern, &
-               Calc_Background, Del_NoisyPoints, &
+    public ::  Allocate_Pattern, Deallocate_Pattern,    &
+               Calc_Background, Del_NoisyPoints,        &
                Read_Background_File, Read_Pattern,      &
-               Write_Pattern
+               Write_Pattern,Write_Pattern_FreeFormat,  &
+               Write_Pattern_INSTRM5,Write_Pattern_XYSig
 
     !---- Definitions ----!
 

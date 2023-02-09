@@ -2783,7 +2783,7 @@ Module CFML_ILL_Instrm_Data
     !!----    type(Powder_Numor_Type),dimension(:),      intent(in)  :: PNumors    ! Powder Numors Vector
     !!----    integer,                                   intent(in)  :: N          ! Number of Numors
     !!----    logical,dimension(:),                      intent(in)  :: ActList    ! Active list for Numors
-    !!----    type (DiffPat_E_Type),           intent(out) :: Pat        ! Pattern Diffraction
+    !!----    type (DiffPat_E_Type),                     intent(out) :: Pat        ! Pattern Diffraction
     !!----    real(kind=cp), optional,                   intent(in)  :: VNorm      ! Normalization value
     !!----    type(calibration_detector_type), optional, intent(in)  :: Cal        ! Calibration Information
     !!----    logical, optional,                         intent(in)  :: angcor,perm
@@ -2798,7 +2798,7 @@ Module CFML_ILL_Instrm_Data
        type(Powder_Numor_Type),dimension(:),      intent(in)  :: PNumors    ! Powder Numors Vector
        integer,                                   intent(in)  :: N          ! Number of Numors
        logical,dimension(:),                      intent(in)  :: ActList    ! Active list for Numors
-       type (DiffPat_E_Type),           intent(out) :: Pat        ! Pattern Diffraction
+       type (DiffPat_E_Type),                     intent(out) :: Pat        ! Diffraction Pattern
        real(kind=cp), optional,                   intent(in)  :: VNorm      ! Normalization value
        integer, optional ,                        intent(in)  :: Detect     ! Select a particular detector (for D4)
        type(calibration_detector_type), optional, intent(in)  :: Cal        ! Calibration Information
