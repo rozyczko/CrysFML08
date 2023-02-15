@@ -68,7 +68,9 @@ module nexus_mod
         real                                   :: fcoupling
         real                                   :: magnetic_field
         real                                   :: reg_temperature
+        real                                   :: scan_start
         real                                   :: scan_step
+        real                                   :: scan_width
         real                                   :: setp_temperature
         real                                   :: temperature
         real                                   :: virtual_cgap
@@ -147,6 +149,9 @@ module nexus_mod
         pnum%conditions(2) = nexus%reg_temperature
         pnum%conditions(3) = nexus%temperature
         pnum%conditions(5) = nexus%magnetic_field
+        pnum%scans(1) = nexus%scan_start
+        pnum%scans(2) = nexus%scan_step
+        pnum%scans(3) = nexus%scan_width
         if (nexus%is_timef) pnum%tmc_ang(1,:) = nexus%timef(:)
         if (nexus%is_monitor) pnum%tmc_ang(2,:) = nexus%monitor(:)
         if (nexus%is_total_counts) pnum%tmc_ang(3,:) = nexus%total_counts(:)
@@ -219,7 +224,9 @@ module nexus_mod
         nexus%magnetic_field    = 0.0
         nexus%reflection(:)     = 0.0
         nexus%reg_temperature   = 0.0
+        nexus%scan_start        = 0.0
         nexus%scan_step         = 0.0
+        nexus%scan_width        = 0.0
         nexus%setp_temperature  = 0.0
         nexus%temperature       = 0.0
         nexus%ub(:,:)           = 0.0
@@ -662,34 +669,64 @@ module nexus_mod
                 if (nexus%nbang == 1) then
                     if (motors(1) == 1) then
                         nexus%manip = 4
-                        nexus%scan_type = 'phi'
+                        nexus%scan_type  = 'phi'
+                        nexus%scan_start = nexus%angles(1,1)
+                        nexus%scan_width = nexus%angles(1,nexus%nf) - nexus%angles(1,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(2) == 1) then
                         nexus%manip = 3
                         nexus%scan_type = 'chi'
+                        nexus%scan_start = nexus%angles(2,1)
+                        nexus%scan_width = nexus%angles(2,nexus%nf) - nexus%angles(2,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(3) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'omega'
+                        nexus%scan_start = nexus%angles(3,1)
+                        nexus%scan_width = nexus%angles(3,nexus%nf) - nexus%angles(3,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(4) == 1) then
                         nexus%manip = 1
                         nexus%scan_type = 'gamma'
+                        nexus%scan_start = nexus%angles(4,1)
+                        nexus%scan_width = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(5) == 1) then
                         nexus%scan_type = 'psi'
+                        nexus%scan_start = nexus%angles(5,1)
+                        nexus%scan_width = nexus%angles(5,nexus%nf) - nexus%angles(5,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(6) == 1) then
                         nexus%scan_type = 'canne'
+                        nexus%scan_start = nexus%angles(6,1)
+                        nexus%scan_width = nexus%angles(6,nexus%nf) - nexus%angles(6,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(7) == 1) then
                         nexus%scan_type = 'nu'
+                        nexus%scan_start = nexus%angles(7,1)
+                        nexus%scan_width = nexus%angles(7,nexus%nf) - nexus%angles(7,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(8) == 1) then
                         nexus%manip = 1
                         nexus%scan_type = '2theta'
+                        nexus%scan_start = nexus%angles(8,1)
+                        nexus%scan_width = nexus%angles(8,nexus%nf) - nexus%angles(8,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     end if
                 else if (nexus%nbang == 2) then
                     if (motors(3) == 1 .and. motors(4) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'omega'
+                        nexus%scan_start = nexus%angles(3,1)
+                        nexus%scan_width = nexus%angles(3,nexus%nf) - nexus%angles(3,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                         nexus%fcoupling = (nexus%angles(3,nexus%nf)-nexus%angles(3,1)) / (nexus%angles(4,nexus%nf)-nexus%angles(4,1))
                     else if (motors(3) == 1 .and. motors(4) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'canne'
+                        nexus%scan_start = nexus%angles(6,1)
+                        nexus%scan_width = nexus%angles(6,nexus%nf) - nexus%angles(6,1)
+                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                         nexus%fcoupling = (nexus%angles(6,nexus%nf)-nexus%angles(6,1)) / (nexus%angles(4,nexus%nf)-nexus%angles(4,1))
                     end if
                 end if
