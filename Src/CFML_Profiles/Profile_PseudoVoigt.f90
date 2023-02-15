@@ -134,7 +134,7 @@ SubModule (CFML_Profiles) Profile_PseudoVoigt
        real(kind=cp), intent(in)  :: eta       ! mixing coefficient between Gaussian and Lorentzian
        real(kind=cp), intent(in)  :: gamm     ! FWHM
        real(kind=cp), intent(out) :: dprdt     ! derivative of profile wrt TwoTH0
-       real(kind=cp), intent(out) :: dprdg     ! derivative of profile wrt Gamma
+       real(kind=cp), intent(out) :: dprdg     ! derivative of profile wrt gamm
        real(kind=cp), intent(out) :: dprde     ! derivative of profile wrt Eta
        real(kind=cp), intent(out) :: psvoigt
 

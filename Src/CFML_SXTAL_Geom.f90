@@ -82,8 +82,8 @@
 !!--..    The reciprocal Cartesian Frame used by Busing-Levy has "x" along a*
 !!--..    "y" in the (a*,b*) plane and "z" perpendicular to that plane. The
 !!--..    matrix passing from (h,k,l) in r.l.u. to the cartesian frame is
-!!--..           | a*   b*.cos(gamma*)   c*.cos(beta*)            |
-!!--..    [B] =  | 0    b*.sin(gamma*)  -c*.sin(beta*).cos(alpha) |
+!!--..           | a*   b*.cos(gamm*)   c*.cos(beta*)            |
+!!--..    [B] =  | 0    b*.sin(gamm*)  -c*.sin(beta*).cos(alpha) |
 !!--..           ! 0          0          1/c                      |
 !!--..
 !!--..        [hc] = [B] [h]

@@ -67,7 +67,7 @@ module nexus_mod
         integer                                :: nf
         real                                   :: wave
         real                                   :: scan_step
-        real                                   :: gamma_step
+        real                                   :: gamm_step
         real                                   :: virtual_cgap
         real, dimension(3)                     :: reflection
         real, dimension(5)                     :: conditions ! Temp-s.pt,Temp-Regul,Temp-sample,Voltmeter,Mag.field
@@ -75,7 +75,7 @@ module nexus_mod
         real, dimension(:), allocatable        :: monitor
         real, dimension(:), allocatable        :: timef
         real, dimension(:), allocatable        :: total_counts
-        real, dimension(:,:), allocatable      :: angles     ! phi,chi,omega,gamma,psi,canne,nu,2theta
+        real, dimension(:,:), allocatable      :: angles     ! phi,chi,omega,gamm,psi,canne,nu,2theta
         integer, dimension(:,:,:), allocatable :: counts     ! (nz,nx,nf)
         character(len=:), allocatable          :: data_ordering
         character(len=:), allocatable          :: end_time
@@ -89,7 +89,7 @@ module nexus_mod
         character(len=:), allocatable          :: title
         character(len=:), allocatable          :: user_name
         character(len=:), allocatable          :: local_contact
-        logical                                :: is_gamma
+        logical                                :: is_gamm
         logical                                :: is_omega
         logical                                :: is_chi
         logical                                :: is_phi
@@ -102,7 +102,7 @@ module nexus_mod
         logical                                :: is_total_counts
         logical                                :: is_ub
         logical                                :: is_virtual
-        logical                                :: gamma_coupling
+        logical                                :: gamm_coupling
 
     end type nexus_type
 
@@ -135,7 +135,7 @@ module nexus_mod
 
         ! Initialize variables
         err_nexus  = .false.
-        nexus%is_gamma          = .false.
+        nexus%is_gamm          = .false.
         nexus%is_omega          = .false.
         nexus%is_chi            = .false.
         nexus%is_phi            = .false.
@@ -147,7 +147,7 @@ module nexus_mod
         nexus%is_total_counts   = .false.
         nexus%is_ub             = .false.
         nexus%is_virtual        = .false.
-        nexus%gamma_coupling    = .false.
+        nexus%gamm_coupling    = .false.
 
         ! Check that nexus file exists
         inquire(file=filename,exist=exist)
@@ -275,10 +275,10 @@ module nexus_mod
 
         ! Local variables
         integer :: i,i_moni,nvar,mode
-        integer, dimension(7,3) :: motors ! phi, chi, omega, gamma, psi, canne, nu
+        integer, dimension(7,3) :: motors ! phi, chi, omega, gamm, psi, canne, nu
         integer, dimension(:), allocatable :: scanned
         integer(SIZE_T), dimension(:), allocatable :: str_len
-        real :: ga_val,nu_val,ome_val,chi_val,phi_val,dgamma
+        real :: ga_val,nu_val,ome_val,chi_val,phi_val,dgamm
         real, dimension(:,:), allocatable :: datos
         character(len=30) :: data_ordering
         character(len=STR_MAX_LEN) :: key
@@ -370,11 +370,11 @@ module nexus_mod
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
             if (hdferr /= -1) call h5dread_f(dset3,H5T_NATIVE_REAL,datos,dims3,hdferr)
 
-            !   Motors rows: phi,chi,omega,gamma,psi,canne
+            !   Motors rows: phi,chi,omega,gamm,psi,canne
             !   Motors columns: firts column,  1 -> motor read, 0 -> motor not found in nexus
             !                   second column, 1 -> motor moves during the scan, 0 -> motor does not move
-            !   There is a specific case, where gamma moves with omega, where scanned is cero for gamma
-            !   in the nexus file. This is not a problem because the values of gamma for every frame are
+            !   There is a specific case, where gamm moves with omega, where scanned is cero for gamm
+            !   in the nexus file. This is not a problem because the values of gamm for every frame are
             !   accesible.
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
@@ -395,11 +395,11 @@ module nexus_mod
                             motors(3,3) = i
                             if (scanned(i) == 1) motors(3,2) = 1
                             nexus%is_omega = .true.
-                        case('gamma')
+                        case('gamm')
                             motors(4,1) = 1
                             motors(4,3) = i
                             if (scanned(i) == 1) motors(4,2) = 1
-                            nexus%is_gamma = .true.
+                            nexus%is_gamm = .true.
                         case('psi')
                             motors(5,1) = 1
                             motors(5,3) = i
@@ -426,16 +426,16 @@ module nexus_mod
                     nexus%monitor(:) = datos(:,i_moni)
                     nexus%is_monitor = .true.
                 end if
-                !   Check that gamma, nu, omega, chi and phi have been read. If not,
+                !   Check that gamm, nu, omega, chi and phi have been read. If not,
                 !   read them from entry0/instrument.
                 !
-                !   Gamma
+                !   gamm
                 if (motors(4,1) == 0) then
-                    call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+                    call h5dopen_f(file_id,'entry0/instrument/gamm/value',dset,hdferr)
                     if (hdferr == -1) then
                         hdferr = 0
                     else
-                        nexus%is_gamma = .true.
+                        nexus%is_gamm = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,ga_val,scalar,hdferr)
                         call h5dclose_f(dset,hdferr)
                     end if
@@ -508,12 +508,12 @@ module nexus_mod
                         if (abs(nexus%angles(3,nexus%nf)-nexus%angles(3,1)) < MIN_DANGLE) motors(3,2) = 0
                     end if
                 end if
-                if (motors(4,1) == 1) then ! Gamma
+                if (motors(4,1) == 1) then ! gamm
                     nexus%angles(4,:) = datos(:,motors(4,3))
-                    dgamma = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
-                    if (abs(dgamma) > 0.001) then
-                        nexus%gamma_coupling = .true.
-                        nexus%gamma_step = dgamma / (nexus%nf-1)
+                    dgamm = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
+                    if (abs(dgamm) > 0.001) then
+                        nexus%gamm_coupling = .true.
+                        nexus%gamm_step = dgamm / (nexus%nf-1)
                     end if
                 else
                     nexus%angles(4,:) = ga_val
@@ -561,7 +561,7 @@ module nexus_mod
                     nexus%angles(1,:) = 0.0 ! phi
                     nexus%angles(2,:) = 0.0 ! chi
                 else if (motors(1,2) == 0 .and. motors(2,2) == 0 .and. motors(3,2) == 0 .and. motors(4,2) == 1 .and. motors(5,2) == 0) then
-                    nexus%scan_type = 'gamma'
+                    nexus%scan_type = 'gamm'
                     nexus%scan_step = abs(nexus%angles(4,nexus%nf) - nexus%angles(4,1)) / max(1,nexus%nf-1)
                 else if (motors(1,2) == 0 .and. motors(2,2) == 0 .and. motors(3,2) == 0 .and. motors(4,2) == 0 .and. motors(5,2) == 1) then
                     nexus%scan_type = 'psi'
@@ -600,11 +600,11 @@ module nexus_mod
                 end if
             end if
 
-        else ! No scan. This case corresponds to a virtual nexus written by program gamma_scan
-            ! Read gamma
+        else ! No scan. This case corresponds to a virtual nexus written by program gamm_scan
+            ! Read gamm
             if (allocated(nexus%angles)) deallocate(nexus%angles)
             allocate(nexus%angles(7,nexus%nf))
-            call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+            call h5dopen_f(file_id,'entry0/instrument/gamm/value',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ga_val,scalar,hdferr)
             if (hdferr /= -1) nexus%angles(4,:) = ga_val
             if (hdferr /= -1) call h5dclose_f(dset,hdferr)
@@ -735,7 +735,7 @@ module nexus_mod
             return
         end if
 
-        ! Read gamma values
+        ! Read gamm values
         call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/name',dset,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/scanned',dset2,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/data',dset3,hdferr)
@@ -765,11 +765,11 @@ module nexus_mod
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
             if (hdferr /= -1) call h5dread_f(dset3,H5T_NATIVE_REAL,datos,dims3,hdferr)
 
-            !   Motors rows: phi,chi,omega,gamma,psi,canne
+            !   Motors rows: phi,chi,omega,gamm,psi,canne
             !   Motors columns: firts column,  1 -> motor read, 0 -> motor not found in nexus
             !                   second column, 1 -> motor moves during the scan, 0 -> motor does not move
-            !   There is a specific case, where gamma moves with omega, where scanned is cero for gamma
-            !   in the nexus file. This is not a problem because the values of gamma for every frame are
+            !   There is a specific case, where gamm moves with omega, where scanned is cero for gamm
+            !   in the nexus file. This is not a problem because the values of gamm for every frame are
             !   accesible.
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
@@ -832,7 +832,7 @@ module nexus_mod
 
         ! Local variables
         integer :: i,i_moni,nvar
-        integer, dimension(8,3) :: motors ! phi, chi, omega, gamma, psi, canne, nu, 2theta
+        integer, dimension(8,3) :: motors ! phi, chi, omega, gamm, psi, canne, nu, 2theta
         integer, dimension(:), allocatable :: scanned
         integer(SIZE_T), dimension(:), allocatable :: str_len
         real :: ga_val,nu_val
@@ -900,7 +900,7 @@ module nexus_mod
             return
         end if
 
-        ! Read gamma values
+        ! Read gamm values
         call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/name',dset,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/scanned',dset2,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/data',dset3,hdferr)
@@ -930,11 +930,11 @@ module nexus_mod
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
             if (hdferr /= -1) call h5dread_f(dset3,H5T_NATIVE_REAL,datos,dims3,hdferr)
 
-            !   Motors rows: phi,chi,omega,gamma,psi,canne
+            !   Motors rows: phi,chi,omega,gamm,psi,canne
             !   Motors columns: firts column,  1 -> motor read, 0 -> motor not found in nexus
             !                   second column, 1 -> motor moves during the scan, 0 -> motor does not move
-            !   There is a specific case, where gamma moves with omega, where scanned is cero for gamma
-            !   in the nexus file. This is not a problem because the values of gamma for every frame are
+            !   There is a specific case, where gamm moves with omega, where scanned is cero for gamm
+            !   in the nexus file. This is not a problem because the values of gamm for every frame are
             !   accesible.
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
@@ -960,7 +960,7 @@ module nexus_mod
                     allocate(nexus%monitor(nexus%nf))
                     nexus%monitor(:) = datos(:,i_moni)
                 end if
-                ! Check that this is a gamma scan, and store gamma values
+                ! Check that this is a gamm scan, and store gamm values
                 if (allocated(nexus%angles)) deallocate(nexus%angles)
                 allocate(nexus%angles(8,nexus%nf))
                 if (motors(8,2) == 0) then
@@ -992,11 +992,11 @@ module nexus_mod
             call h5dclose_f(dset,hdferr)
             call h5dclose_f(dset2,hdferr)
             call h5dclose_f(dset3,hdferr)
-        else ! No scan. This case corresponds to a virtual nexus written by program gamma_scan
-            ! Read gamma
+        else ! No scan. This case corresponds to a virtual nexus written by program gamm_scan
+            ! Read gamm
             if (allocated(nexus%angles)) deallocate(nexus%angles)
             allocate(nexus%angles(7,nexus%nf))
-            call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+            call h5dopen_f(file_id,'entry0/instrument/gamm/value',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ga_val,scalar,hdferr)
             if (hdferr /= -1) nexus%angles(4,:) = ga_val
             if (hdferr /= -1) call h5dclose_f(dset,hdferr)
@@ -1019,7 +1019,7 @@ module nexus_mod
             return
         end if
 
-        ! Transform 2theta into gamma values
+        ! Transform 2theta into gamm values
         if (nexus%is_tth) then
             do i = 1 , nexus%nf
                 nexus%angles(4,i) = nexus%angles(8,i) - 0.5 * (NPIXELS_HORIZ-1) * WIDTH_HORIZ + 0.5 * WIDTH_HORIZ
@@ -1035,7 +1035,7 @@ module nexus_mod
 
         ! Local variables
         integer :: i,i_moni,i_time,i_total_counts,nvar
-        integer, dimension(8,3) :: motors ! phi, chi, omega, gamma, psi, canne, nu, 2theta
+        integer, dimension(8,3) :: motors ! phi, chi, omega, gamm, psi, canne, nu, 2theta
         integer, dimension(:), allocatable :: scanned
         integer(SIZE_T), dimension(:), allocatable :: str_len
         real, dimension(:,:), allocatable :: datos
@@ -1135,7 +1135,7 @@ module nexus_mod
             return
         end if
 
-        ! Read gamma values
+        ! Read gamm values
         call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/name',dset,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/variables_names/scanned',dset2,hdferr)
         if (hdferr /= -1) call h5dopen_f(file_id,'entry0/data_scan/scanned_variables/data',dset3,hdferr)
@@ -1165,11 +1165,11 @@ module nexus_mod
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
             if (hdferr /= -1) call h5dread_f(dset3,H5T_NATIVE_REAL,datos,dims3,hdferr)
 
-            !   Motors rows: phi,chi,omega,gamma,psi,canne
+            !   Motors rows: phi,chi,omega,gamm,psi,canne
             !   Motors columns: firts column,  1 -> motor read, 0 -> motor not found in nexus
             !                   second column, 1 -> motor moves during the scan, 0 -> motor does not move
-            !   There is a specific case, where gamma moves with omega, where scanned is cero for gamma
-            !   in the nexus file. This is not a problem because the values of gamma for every frame are
+            !   There is a specific case, where gamm moves with omega, where scanned is cero for gamm
+            !   in the nexus file. This is not a problem because the values of gamm for every frame are
             !   accesible.
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
@@ -1242,10 +1242,10 @@ module nexus_mod
 
         ! Local variables
         integer :: i,i_moni,i_time,i_total_counts,nvar,mode
-        integer, dimension(7,3) :: motors ! phi, chi, omega, gamma, psi, canne, nu
+        integer, dimension(7,3) :: motors ! phi, chi, omega, gamm, psi, canne, nu
         integer, dimension(:), allocatable :: scanned
         integer(SIZE_T), dimension(:), allocatable :: str_len
-        real :: ga_val,nu_val,ome_val,chi_val,phi_val,dgamma
+        real :: ga_val,nu_val,ome_val,chi_val,phi_val,dgamm
         real, dimension(9) :: ub
         real, dimension(:,:), allocatable :: datos
         character(len=30) :: data_ordering
@@ -1369,11 +1369,11 @@ module nexus_mod
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
             if (hdferr /= -1) call h5dread_f(dset3,H5T_NATIVE_REAL,datos,dims3,hdferr)
 
-            !   Motors rows: phi,chi,omega,gamma,psi,canne
+            !   Motors rows: phi,chi,omega,gamm,psi,canne
             !   Motors columns: firts column,  1 -> motor read, 0 -> motor not found in nexus
             !                   second column, 1 -> motor moves during the scan, 0 -> motor does not move
-            !   There is a specific case, where gamma moves with omega, where scanned is cero for gamma
-            !   in the nexus file. This is not a problem because the values of gamma for every frame are
+            !   There is a specific case, where gamm moves with omega, where scanned is cero for gamm
+            !   in the nexus file. This is not a problem because the values of gamm for every frame are
             !   accesible.
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
@@ -1394,11 +1394,11 @@ module nexus_mod
                             motors(3,3) = i
                             if (scanned(i) == 1) motors(3,2) = 1
                             nexus%is_omega = .true.
-                        case('gamma')
+                        case('gamm')
                             motors(4,1) = 1
                             motors(4,3) = i
                             if (scanned(i) == 1) motors(4,2) = 1
-                            nexus%is_gamma = .true.
+                            nexus%is_gamm = .true.
                         case('psi')
                             motors(5,1) = 1
                             motors(5,3) = i
@@ -1442,15 +1442,15 @@ module nexus_mod
                     allocate(nexus%total_counts(nexus%nf))
                     nexus%total_counts(:) = datos(:,i_total_counts)
                 end if
-                !   Check that gamma, nu, omega, chi and phi have been read. If not,
+                !   Check that gamm, nu, omega, chi and phi have been read. If not,
                 !   read them from entry0/instrument.
-                !   Gamma
+                !   gamm
                 if (motors(4,1) == 0) then
-                    call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+                    call h5dopen_f(file_id,'entry0/instrument/gamm/value',dset,hdferr)
                     if (hdferr == -1) then
                         hdferr = 0
                     else
-                        nexus%is_gamma = .true.
+                        nexus%is_gamm = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,ga_val,scalar,hdferr)
                         call h5dclose_f(dset,hdferr)
                     end if
@@ -1525,14 +1525,14 @@ module nexus_mod
                         if (abs(nexus%angles(3,nexus%nf)-nexus%angles(3,1)) < MIN_DANGLE) motors(3,2) = 0
                     end if
                 end if
-                nexus%gamma_coupling = .false.
-                if (motors(4,1) == 1) then ! Gamma
-                    nexus%is_gamma = .true.
+                nexus%gamm_coupling = .false.
+                if (motors(4,1) == 1) then ! gamm
+                    nexus%is_gamm = .true.
                     nexus%angles(4,:) = datos(:,motors(4,3))
-                    dgamma = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
-                    if (abs(dgamma) > 0.001) then
-                        nexus%gamma_coupling = .true.
-                        nexus%gamma_step = dgamma / (nexus%nf-1)
+                    dgamm = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
+                    if (abs(dgamm) > 0.001) then
+                        nexus%gamm_coupling = .true.
+                        nexus%gamm_step = dgamm / (nexus%nf-1)
                     end if
                 else
                     nexus%angles(4,:) = ga_val
@@ -1582,7 +1582,7 @@ module nexus_mod
                     nexus%angles(1,:) = 0.0 ! phi
                     nexus%angles(2,:) = 0.0 ! chi
                 else if (motors(1,2) == 0 .and. motors(2,2) == 0 .and. motors(3,2) == 0 .and. motors(4,2) == 1 .and. motors(5,2) == 0) then
-                    nexus%scan_type = 'gamma'
+                    nexus%scan_type = 'gamm'
                     nexus%scan_step = abs(nexus%angles(4,nexus%nf) - nexus%angles(4,1)) / max(1,nexus%nf-1)
                 else if (motors(1,2) == 0 .and. motors(2,2) == 0 .and. motors(3,2) == 0 .and. motors(4,2) == 0 .and. motors(5,2) == 1) then
                     nexus%scan_type = 'psi'
@@ -1620,11 +1620,11 @@ module nexus_mod
                 end if
             end if
 
-        else ! No scan. This case corresponds to a virtual nexus written by program gamma_scan
-            ! Read gamma
+        else ! No scan. This case corresponds to a virtual nexus written by program gamm_scan
+            ! Read gamm
             if (allocated(nexus%angles)) deallocate(nexus%angles)
             allocate(nexus%angles(7,nexus%nf))
-            call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+            call h5dopen_f(file_id,'entry0/instrument/gamm/value',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ga_val,scalar,hdferr)
             if (hdferr /= -1) nexus%angles(4,:) = ga_val
             if (hdferr /= -1) call h5dclose_f(dset,hdferr)

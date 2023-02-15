@@ -709,7 +709,7 @@
       !   character(len=12)                          :: Instrm      ! Instrument name
       !   character(len=32)                          :: title       !
       !   character(len=8)                           :: Scantype    ! omega, phi, etc...
-      !   real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+      !   real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
       !   real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
       !   real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
       !   real(kind=cp)                              :: time        ! Total time: sum times of each frame
@@ -752,7 +752,7 @@
            Pnum%Scans(2)=nexus%scan_step
            Pnum%Scans(3)=nexus%scan_step
            Pnum%wave=nexus%wave
-           !do i=1,5 ! Angles: phi, chi, omega, 2theta(gamma), psi
+           !do i=1,5 ! Angles: phi, chi, omega, 2theta(gamm), psi
            !   Pnum%angles(i)=0.5*(nexus%angles(i,1) + nexus%angles(i,nf))
            !end do
 
@@ -775,7 +775,7 @@
       !    character(len=8)                           :: Scantype    ! omega, phi, etc...
       !    real(kind=cp), dimension(3)                :: hmin        ! or h,k,l for omega-scans
       !    real(kind=cp), dimension(3)                :: hmax        !
-      !    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+      !    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
       !    real(kind=cp), dimension(3,3)              :: UB          ! UB-matrix
       !    real(kind=cp), dimension(3)                :: dh          ! delta_h, delta_k, delta_l
       !    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
@@ -828,7 +828,7 @@
            Snum%ub=nexus%ub
            Snum%icalc=1
            if(nexus%geometry == "NB")  Snum%icalc=2
-           do i=1,5 ! Angles: phi, chi, omega, 2theta(gamma), psi
+           do i=1,5 ! Angles: phi, chi, omega, 2theta(gamm), psi
               Snum%angles(i)=0.5*(nexus%angles(i,1) + nexus%angles(i,nf))
            end do
 
@@ -1900,7 +1900,7 @@
              end do
           end do
         end do
-        ! Gamma Values
+        ! gamm Values
          if(correction) then
             num=0
             do i=1,N
@@ -1929,14 +1929,14 @@
         step=real(nstep)*0.001
 
         if (allocated(zz)) deallocate(zz)
-        allocate(zz(ncell,np)) ! (z,gamma)
+        allocate(zz(ncell,np)) ! (z,gamm)
         if (allocated(vz)) deallocate(vz)
-        allocate(vz(ncell,np)) ! (z,gamma)
+        allocate(vz(ncell,np)) ! (z,gamm)
         zz=0.0; vz=0.0
         if (allocated(gam)) deallocate(gam)
-        allocate(gam(np)) ! (gamma)
+        allocate(gam(np)) ! (gamm)
         if (allocated(nd)) deallocate(nd)
-        allocate(nd(np)) ! (gamma)
+        allocate(nd(np)) ! (gamm)
         do i=1,np
           gam(i)=real(50+(i-1)*nstep)*0.001
         end do
@@ -2141,7 +2141,7 @@
         real, dimension(:,:),   allocatable :: x,zz
         real, dimension(:,:,:), allocatable :: z, xx,yy,vv,d2yy
         real                                :: cnorm,sumdif,zc,xmin,xmax,step,x1,x2,rporc
-        real                                :: dh,zh,cos_2Theta,cos_nu,nu,gamma,fac
+        real                                :: dh,zh,cos_2Theta,cos_nu,nu,gamm,fac
         real                                :: time_ini, time2
 
 
@@ -2237,7 +2237,7 @@
            if (allocated(x)) deallocate(x)
            if (allocated(z)) deallocate(z)
 
-           allocate(x(ndet,PNumors(i)%nframes))          ! Gammas angles
+           allocate(x(ndet,PNumors(i)%nframes))          ! gamms angles
            allocate(z(ncell,ndet,Pnumors(i)%nframes))    ! Intensities
            x=0.0
            z=0.0
@@ -2246,7 +2246,7 @@
               !> Total Points -> Calculated taking into account excluded detectors
               !ncc(:,num)=ndet*Pnumors(i)%nframes
 
-              ! Gamma Values
+              ! gamm Values
               !      v---frames
               x(ndet,:)=PNumors(i)%tmc_ang(4,:)
               do nt=ndet-1,1,-1
@@ -2286,7 +2286,7 @@
 
               x(ndet,:)=PNumors(i)%tmc_ang(4,:)
               do nf=1,Pnumors(i)%nframes
-                 ! Gammas
+                 ! gamms
                  x(:,nf)=x(ndet,nf)+Cal%PosX(:)
 
                  ! Intensities
@@ -2392,7 +2392,7 @@
               end if
               nu=atan2(zh,radio)             ! Latitude angle
               cos_nu=cos(nu)
-              gamma=acosd(cos_2theta/cos_nu) ! This is the gamma of the cell at the required 2theta
+              gamm=acosd(cos_2theta/cos_nu) ! This is the gamm of the cell at the required 2theta
 
               do j=1,num                     ! Add numors
 
@@ -2402,16 +2402,16 @@
                  if (nc == 0) cycle
                  x1=minval(xx(1:nc,k,j))
                  x2=maxval(xx(1:nc,k,j))
-                 if (gamma < x1 .or. gamma > x2) cycle
-                 zc=Spline_Interpol(gamma,xx(1:nc,k,j),yy(1:nc,k,j),d2yy(1:nc,k,j),nc)
+                 if (gamm < x1 .or. gamm > x2) cycle
+                 zc=Spline_Interpol(gamm,xx(1:nc,k,j),yy(1:nc,k,j),d2yy(1:nc,k,j),nc)
                  Pat%y(i)=Pat%y(i)+zc
                  if (.not. calibration) then
                     Pat%sigma(i)=Pat%sigma(i)+zc
                  else
-                    if (abs(gamma-x2) <= 0.001) then
+                    if (abs(gamm-x2) <= 0.001) then
                        nk=nc
                     else
-                       nk=locate(xx(1:nc,k,j),gamma)
+                       nk=locate(xx(1:nc,k,j),gamm)
                     end if
                     Pat%sigma(i)=Pat%sigma(i)+zc*vv(nk,k,j)
                  end if
@@ -2425,16 +2425,16 @@
                  if (nc == 0) cycle
                  x1=minval(xx(1:nc,nk,j))
                  x2=maxval(xx(1:nc,nk,j))
-                 if (gamma < x1 .or. gamma > x2) cycle
-                 zc=Spline_Interpol(gamma,xx(1:nc,nk,j),yy(1:nc,nk,j),d2yy(1:nc,nk,j),nc)
+                 if (gamm < x1 .or. gamm > x2) cycle
+                 zc=Spline_Interpol(gamm,xx(1:nc,nk,j),yy(1:nc,nk,j),d2yy(1:nc,nk,j),nc)
                  Pat%y(i)=Pat%y(i)+zc
                  if (.not. calibration) then
                     Pat%sigma(i)=Pat%sigma(i)+zc
                  else
-                    if (abs(gamma-x2) <= 0.001) then
+                    if (abs(gamm-x2) <= 0.001) then
                        nkk=nc
                     else
-                       nkk=locate(xx(1:nc,nk,j),gamma)
+                       nkk=locate(xx(1:nc,nk,j),gamm)
                     end if
                     Pat%sigma(i)=Pat%sigma(i)+zc*vv(nkk,nk,j)
                  end if

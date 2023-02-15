@@ -46,8 +46,8 @@
 !!--..    The reciprocal Cartesian Frame used by Busing-Levy has "x" along a*
 !!--..    "y" in the (a*,b*) plane and "z" perpendicular to that plane. The
 !!--..    matrix passing from (h,k,l) in r.l.u. to the cartesian frames is
-!!--..             | a*   b*.cos(gamma*)   c*.cos(beta*)            |
-!!--..      [B] =  | 0    b*.sin(gamma*)  -c*.sin(beta*).cos(alpha) |
+!!--..             | a*   b*.cos(gamm*)   c*.cos(beta*)            |
+!!--..      [B] =  | 0    b*.sin(gamm*)  -c*.sin(beta*).cos(alpha) |
 !!--..             ! 0          0          1/c                      |
 !!--..
 !!--..          [hc] = [B] [h]
@@ -372,7 +372,7 @@ Module CFML_ILL_Instrm_Data
    !!----    logical                                   :: tilted               ! True if RD /= I
    !!----    real(kind=cp), dimension(3,3)             :: RD                   ! Rotation matrix giving the orientation of the D-frame w.r.t. the L-frame
                                                                                ! RD= Rx(tiltz_d) Ry(tilty_d) Rz(tiltz_d)  or with the permutation given by r_order
-   !!----    real(kind=cp)                             :: ga_d,nu_d            ! Angles gamma and nu of the detector centre
+   !!----    real(kind=cp)                             :: ga_d,nu_d            ! Angles gamm and nu of the detector centre
    !!----    real(kind=cp)                             :: tiltx_d=0.0          ! Tilt of the flat detector around x-axis (normally = nu_d)
    !!----    real(kind=cp)                             :: tilty_d=0.0          ! Tilt of the flat detector around y-axis (normally = 0)
    !!----    real(kind=cp)                             :: tiltz_d=0.0          ! Tilt of the flat detector around z-axis (normally = 0)
@@ -382,8 +382,8 @@ Module CFML_ILL_Instrm_Data
    !!----    real(kind=cp),dimension(3)                :: e2                   ! Components of e2 in {i,j,k}
    !!----    real(kind=cp),dimension(3)                :: e3                   ! Components of e3 in {i,j,k}
    !!----    logical                                   :: gnxz_limited         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-   !!----    real(kind=cp)                             :: gap_min,gap_max      ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-   !!----    real(kind=cp)                             :: gan_min,gan_max      ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+   !!----    real(kind=cp)                             :: gap_min,gap_max      ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+   !!----    real(kind=cp)                             :: gan_min,gan_max      ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
    !!----    real(kind=cp)                             :: nu_min,nu_max
    !!----    real(kind=cp)                             :: d_min                !Resolution limit ... if not given d_min= 2/L_min
    !!----    real(kind=cp)                             :: x_min,x_max          !in mm
@@ -407,9 +407,9 @@ Module CFML_ILL_Instrm_Data
    !!----    character(len=512)                        :: alpha_file           !Name of the alpha file
    !!----    logical                                   :: resol_given          !True if the resolution curve has been provided
    !!----    integer                                   :: nGa,nNu              !Dimensions of the matrix ReSurf
-   !!----    real(kind=cp),dimension(:,:),  allocatable:: ReSurf               !Resolution surface in gamma-Nu space: ReSurf(Nu,Ga)
+   !!----    real(kind=cp),dimension(:,:),  allocatable:: ReSurf               !Resolution surface in gamm-Nu space: ReSurf(Nu,Ga)
    !!----                                                                      !ReSurf(1,1): multiplicative factor to be applied to the widths
-   !!----                                                                      !ReSurf(1,2:nGa): Values of detector Gammas
+   !!----                                                                      !ReSurf(1,2:nGa): Values of detector gamms
    !!----                                                                      !ReSurf(2:nNu,1): Values of detector Nus
    !!----                                                                      !ReSurf(Nu,Ga)  : (Nu >1, Ga >1) Values of the expected FWHM in degrees
    !!---- End Type diffractometer_type
@@ -440,7 +440,7 @@ Module CFML_ILL_Instrm_Data
       logical                                    :: tilted               ! True if RD /= I
       real(kind=cp), dimension(3,3)              :: RD                   ! Rotation matrix giving the orientation of the D-frame w.r.t. the L-frame
                                                                          ! RD= Rx(tiltz_d) Ry(tilty_d) Rz(tiltz_d)  or with the permutation given by r_order
-      real(kind=cp)                              :: ga_d,nu_d            ! Angles gamma and nu of the detector centre
+      real(kind=cp)                              :: ga_d,nu_d            ! Angles gamm and nu of the detector centre
       real(kind=cp)                              :: tiltx_d=0.0          ! Tilt of the flat detector around x-axis (normally = nu_d)
       real(kind=cp)                              :: tilty_d=0.0          ! Tilt of the flat detector around y-axis (normally = 0)
       real(kind=cp)                              :: tiltz_d=0.0          ! Tilt of the flat detector around z-axis (normally = 0)
@@ -450,8 +450,8 @@ Module CFML_ILL_Instrm_Data
       real(kind=cp),dimension(3)                 :: e2                   ! Components of e2 in {i,j,k}
       real(kind=cp),dimension(3)                 :: e3                   ! Components of e3 in {i,j,k}
       logical                                    :: gnxz_limited         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-      real(kind=cp)                              :: gap_min,gap_max      ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      real(kind=cp)                              :: gan_min,gan_max      ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+      real(kind=cp)                              :: gap_min,gap_max      ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      real(kind=cp)                              :: gan_min,gan_max      ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
       real(kind=cp)                              :: nu_min,nu_max        ! minimum admissible nu  and maximum admissible nu
       real(kind=cp)                              :: d_min                ! Resolution limit ... if not given d_min= 2/L_min
       real(kind=cp)                              :: x_min,x_max          ! in mm
@@ -474,9 +474,9 @@ Module CFML_ILL_Instrm_Data
       character(len=512)                         :: alpha_file           !Name of the alpha file
       logical                                    :: resol_given          !True if the resolution curve has been provided
       integer                                    :: nGa,nNu              !Dimensions of the matrix ReSurf
-      real(kind=cp),dimension(:,:),  allocatable :: ReSurf               !Resolution surface in gamma-Nu space: ReSurf(Nu,Ga)
+      real(kind=cp),dimension(:,:),  allocatable :: ReSurf               !Resolution surface in gamm-Nu space: ReSurf(Nu,Ga)
                                                                          !ReSurf(1,1): multiplicative factor to be applied to the widths
-                                                                         !ReSurf(1,2:nGa): Values of detector Gammas
+                                                                         !ReSurf(1,2:nGa): Values of detector gamms
                                                                          !ReSurf(2:nNu,1): Values of detector Nus
                                                                          !ReSurf(Nu,Ga)  : (Nu >1, Ga >1) Values of the expected FWHM in degrees
    End Type diffractometer_type
@@ -624,7 +624,7 @@ Module CFML_ILL_Instrm_Data
    !!----    character(len=12)                          :: Instrm      ! Instrument name
    !!----    character(len=32)                          :: title       !
    !!----    character(len=8)                           :: Scantype    ! omega, phi, etc...
-   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
    !!----    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
    !!----    real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
    !!----    real(kind=cp)                              :: time        ! Total time: sum times of each frame
@@ -652,7 +652,7 @@ Module CFML_ILL_Instrm_Data
       character(len=12)                          :: Instrm      ! Instrument name
       character(len=32)                          :: title       !
       character(len=8)                           :: Scantype    ! omega, phi, etc...
-      real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+      real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
       real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
       real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
       real(kind=cp)                              :: time        ! Total time: sum times of each frame
@@ -681,7 +681,7 @@ Module CFML_ILL_Instrm_Data
    !!----    character(len=8)                           :: Scantype    ! omega, phi, etc...
    !!----    real(kind=cp), dimension(3)                :: hmin        ! or h,k,l for omega-scans
    !!----    real(kind=cp), dimension(3)                :: hmax        !
-   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
    !!----    real(kind=cp), dimension(3,3)              :: UB          ! UB-matrix
    !!----    real(kind=cp), dimension(3)                :: dh          ! delta_h, delta_k, delta_l
    !!----    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
@@ -715,7 +715,7 @@ Module CFML_ILL_Instrm_Data
       character(len=8)                           :: Scantype        ! omega, phi, etc...
       real(kind=cp), dimension(3)                :: hmin            ! The hkls min
       real(kind=cp), dimension(3)                :: hmax            ! The hkls max
-      real(kind=cp), dimension(5)                :: angles          ! Angles: phi, chi, omega, 2theta(gamma), psi
+      real(kind=cp), dimension(5)                :: angles          ! Angles: phi, chi, omega, 2theta(gamm), psi
       real(kind=cp), dimension(3,3)              :: UB              ! UB-matrix
       real(kind=cp), dimension(3)                :: dh              ! delta_h, delta_k, delta_l
       real(kind=cp), dimension(3)                :: scans           ! scan start, scan step, scan width
@@ -2034,11 +2034,11 @@ Module CFML_ILL_Instrm_Data
         ! Ideally the data needs to be put into 'icnt' from the samples point of view
         ! Instead of machine name, a number can be provided in order to read the pixels
         ! in a particular way.
-        ! 1: Column by column with zero at high nu, high gamma (e.g. D19 banana)
-        ! 2: Row by Row with zero at high nu, high gamma (e.g. D9 and D10)
-        ! 3: Row wire by Row with zero at high nu, low gamma (e.g. D19 bidim?)
-        ! 4: Column by column with zero at low nu, low gamma (e.g. D19 bidim on DB21)
-        ! 5: Row by Row wire with zero at high nu, low gamma (e.g. D19 bidim on DB21)
+        ! 1: Column by column with zero at high nu, high gamm (e.g. D19 banana)
+        ! 2: Row by Row with zero at high nu, high gamm (e.g. D9 and D10)
+        ! 3: Row wire by Row with zero at high nu, low gamm (e.g. D19 bidim?)
+        ! 4: Column by column with zero at low nu, low gamm (e.g. D19 bidim on DB21)
+        ! 5: Row by Row wire with zero at high nu, low gamm (e.g. D19 bidim on DB21)
 
         select case(l_case(trim(machineName)))
             case('d9','d10')
@@ -2107,11 +2107,11 @@ Module CFML_ILL_Instrm_Data
         ! Ideally the data needs to be put into 'icnt' from the samples point of view
         ! Instead of machine name, a number can be provided in order to read the pixels
         ! in a particular way.
-        ! 1: Column by column with zero at high nu, high gamma (e.g. D19 banana)
-        ! 2: Row by Row with zero at high nu, high gamma (e.g. D9 and D10)
-        ! 3: Row wire by Row with zero at high nu, low gamma (e.g. D19 bidim?)
-        ! 4: Column by column with zero at low nu, low gamma (e.g. D19 bidim on DB21)
-        ! 5: Row by Row wire with zero at high nu, low gamma (e.g. D19 bidim on DB21)
+        ! 1: Column by column with zero at high nu, high gamm (e.g. D19 banana)
+        ! 2: Row by Row with zero at high nu, high gamm (e.g. D9 and D10)
+        ! 3: Row wire by Row with zero at high nu, low gamm (e.g. D19 bidim?)
+        ! 4: Column by column with zero at low nu, low gamm (e.g. D19 bidim on DB21)
+        ! 5: Row by Row wire with zero at high nu, low gamm (e.g. D19 bidim on DB21)
 
         select case(l_case(trim(machineName)))
             case('d9','d10')
@@ -2239,7 +2239,7 @@ Module CFML_ILL_Instrm_Data
        Select Case(iord)
 
          Case(1)   ! D19
-           ! Read vertical-wire by vertical-wire, with zero at high nu, high gamma.
+           ! Read vertical-wire by vertical-wire, with zero at high nu, high gamm.
            ! D19 Banana
            ncat =  Current_instrm%np_vert
            nano =  Current_instrm%np_horiz
@@ -2252,7 +2252,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(2)   ! D9/D10
-           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamma?
+           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamm?
            ! D9, D10
            ncat =  Current_instrm%np_vert
            nano =  Current_instrm%np_horiz
@@ -2265,7 +2265,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(3)   ! D19-Flat
-           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamma.
+           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamm.
            ! D19 flat detector (but we reverse IA because of the funny different
            ! conversion for flat and curved detectors in subroutine d19amd.
            ncat =  Current_instrm%np_vert
@@ -2279,7 +2279,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(4)   ! ID20-trial
-           ! Read vertical-wire by vertical-wire, with zero at low nu, high gamma.
+           ! Read vertical-wire by vertical-wire, with zero at low nu, high gamm.
            ! ID20 flat detector (but we reverse IA because of the funny different
            ! conversion for flat and curved detectors in subroutine d19amd).
            ncat =  Current_instrm%np_vert
@@ -2403,8 +2403,8 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%RD=reshape([1.0,0.0,0.0, & ! Rotation matrix giving the orientation of the D-frame
                                   0.0,1.0,0.0, & ! w.r.t. the L-frame
                                   0.0,0.0,1.0],[3,3])
-      Current_Instrm%ga_d=0.0                     ! Angles gamma and nu of the detector centre
-      Current_Instrm%nu_d=0.0                     ! Angles gamma and nu of the detector centre
+      Current_Instrm%ga_d=0.0                     ! Angles gamm and nu of the detector centre
+      Current_Instrm%nu_d=0.0                     ! Angles gamm and nu of the detector centre
       Current_Instrm%tiltx_d=0.0                  ! Tilt of the flat detector around x-axis (normally = nu_d)
       Current_Instrm%tilty_d=0.0                  ! Tilt of the flat detector around y-axis (normally = 0)
       Current_Instrm%tiltz_d=0.0                  ! Tilt of the flat detector around z-axis (normally = 0)
@@ -2414,10 +2414,10 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%e2=[0.0,1.0,0.0]            ! Components of e2 in {i,j,k}
       Current_Instrm%e3=[0.0,0.0,1.0]            ! Components of e3 in {i,j,k}
       Current_Instrm%gnxz_limited=.false.         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-      Current_Instrm%gap_min=0.0                  ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      Current_Instrm%gap_max=140.0                ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      Current_Instrm%gan_min=0.0                  ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
-      Current_Instrm%gan_max=0.0                  ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+      Current_Instrm%gap_min=0.0                  ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      Current_Instrm%gap_max=140.0                ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      Current_Instrm%gan_min=0.0                  ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
+      Current_Instrm%gan_max=0.0                  ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
       Current_Instrm%nu_min=-15.0                 ! minimum admissible nu  and maximum admissible nu
       Current_Instrm%nu_max=15.0                  ! minimum admissible nu  and maximum admissible nu
       Current_Instrm%d_min=0.5                    ! Resolution limit ... if not given d_min= 2/L_min
@@ -3160,12 +3160,12 @@ Module CFML_ILL_Instrm_Data
                   return
                 end if
 
-            Case("GN_CENTRE","GAMMA_NU_CENTRE")
+            Case("GN_CENTRE","gamm_NU_CENTRE")
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%ga_d, Current_Instrm%nu_d
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading Gamma and Nu of detector centre"
+                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading gamm and Nu of detector centre"
                   return
                 end if
 
@@ -3198,7 +3198,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(positive) limits"
+                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the gamm(positive) limits"
                   return
                 end if
                 g_lim= .true.
@@ -3209,7 +3209,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(negative) limits"
+                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the gamm(negative) limits"
                   return
                 end if
                 g_lim= .true.
@@ -4398,12 +4398,12 @@ Module CFML_ILL_Instrm_Data
                 case (5)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamma omega?)
+                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamm omega?)
 
                 case (6:)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamma, omega, Chi,phi, psi?
+                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamm, omega, Chi,phi, psi?
                    check_qscan=.true.
 
                 case default
@@ -4570,12 +4570,12 @@ Module CFML_ILL_Instrm_Data
                 case (5)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamma omega?)
+                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamm omega?)
 
                 case (6:)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamma, omega, Chi,phi, psi?
+                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamm, omega, Chi,phi, psi?
                    check_qscan=.true.
 
                 case default
@@ -5880,7 +5880,7 @@ Module CFML_ILL_Instrm_Data
          npz = 1980
          Current_Instrm%agap=0
          Current_Instrm%cgap=0
-         Current_Instrm%ang_names(1) ="Gamma"
+         Current_Instrm%ang_names(1) ="gamm"
          Current_Instrm%ang_Limits(1,1:2)=[2.0,175.0]
        else
          Current_Instrm%info= "Default 4-cercles diffractrometer"
@@ -6806,7 +6806,7 @@ Module CFML_ILL_Instrm_Data
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_PHI: ", Num%angles(1)
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_CHI: ", Num%angles(2)
        write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_OMEGA: ", Num%angles(3)
-       write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_GAMMA: ", Num%angles(4)
+       write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_gamm: ", Num%angles(4)
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_PSI: ", Num%angles(5)
        write(unit=ipr,fmt="(a,f14.3)") "     SCAN_START: ", Num%scans(1)
        write(unit=ipr,fmt="(a,f14.3)") "     SCAN_STEP : ", Num%scans(2)
@@ -6938,7 +6938,7 @@ Module CFML_ILL_Instrm_Data
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_PHI: ", Num%angles(1)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_CHI: ", Num%angles(2)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_OMEGA: ", Num%angles(3)," "//Current_Instrm%angl_units
-       write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_GAMMA: ", Num%angles(4)," "//Current_Instrm%angl_units
+       write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_gamm: ", Num%angles(4)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_PSI: ", Num%angles(5)," "//Current_Instrm%angl_units
        if (Num%Scantype == "phi") then
           write(unit=ipr,fmt="(a,f14.3,a)") "     SCAN_START: ", Num%scans(1) ," r.l.u."
