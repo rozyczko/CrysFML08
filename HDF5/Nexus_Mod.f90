@@ -415,12 +415,12 @@ module nexus_mod
         call h5dclose_f(dset,hdferr)
 
         ! Setpoint temperature
-        call h5dopen_f(file_id,'entry0/sample/setp_temperatureerature',dset,hdferr)
+        call h5dopen_f(file_id,'entry0/sample/setp_temperature',dset,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%setp_temperature,scalar,hdferr)
         call h5dclose_f(dset,hdferr)
 
         ! Regulation temperature
-        call h5dopen_f(file_id,'entry0/sample/reg_temperatureerature',dset,hdferr)
+        call h5dopen_f(file_id,'entry0/sample/reg_temperature',dset,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%reg_temperature,scalar,hdferr)
         call h5dclose_f(dset,hdferr)
 
