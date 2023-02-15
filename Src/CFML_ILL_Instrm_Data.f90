@@ -2343,6 +2343,7 @@ Module CFML_ILL_Instrm_Data
         Numor%time=0.0
         Numor%wave=0.0
         Numor%conditions=0.0
+        Numor%ICDesc=0
 
         Numor%nbdata=0
         Numor%nbang=0
