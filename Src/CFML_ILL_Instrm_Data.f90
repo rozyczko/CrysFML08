@@ -330,7 +330,7 @@ Module CFML_ILL_Instrm_Data
    !!----   character(len=12)                            :: Name_Instrm       ! Instrument Name
    !!----   integer                                      :: NDet              ! Number of Detectors
    !!----   integer                                      :: NPointsDet        ! Number of Points by Detector
-   !!----   real(kind=cp), dimension(:), allocatable     :: PosX              ! Relative Positions of each Detector
+   !!----   real(kind=cp), dimension(:),   allocatable   :: PosX              ! Relative Positions of each Detector
    !!----   real(kind=cp), dimension(:,:), allocatable   :: Effic             ! Efficiency of each point detector (NpointsDetect,NDect)
    !!----   logical,       dimension(:,:), allocatable   :: Active            ! Flag for active detector or not
    !!---- End Type Calibration_Detector_Type
@@ -341,7 +341,7 @@ Module CFML_ILL_Instrm_Data
       character(len=12)                            :: Name_Instrm      ! Instrument Name
       integer                                      :: NDet             ! Number of Detectors
       integer                                      :: NPointsDet       ! Number of Points per Detector
-      real(kind=cp), dimension(:), allocatable     :: PosX             ! Relative Positions of each Detector
+      real(kind=cp), dimension(:),   allocatable   :: PosX             ! Relative Positions of each Detector
       real(kind=cp), dimension(:,:), allocatable   :: Effic            ! Efficiency of each point detector (NpointsDetect,NDect)
       logical,       dimension(:,:), allocatable   :: Active           ! Flag for active points on detector
    End Type Calibration_Detector_Type
@@ -2140,7 +2140,7 @@ Module CFML_ILL_Instrm_Data
                 !        cnt(ix,iy) = snum%counts(idx,np)
                 !    end do
                 !end do
-                cnt=reshape(snum%counts(:,np),(/xsize,ysize/))
+                cnt=reshape(snum%counts(:,np),[xsize,ysize])
             case default
                 ERR_ILLData_Mess= 'Error in Get_Counts: Unknown machine!'
                 Err_CFML%Ierr=1
@@ -2400,9 +2400,9 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%np_vert=0                    !number of pixels in vertical direction
       Current_Instrm%np_horiz=0                   !number of pixels in horizontal direction
       Current_Instrm%tilted=.false.               ! True if RD /= I
-      Current_Instrm%RD=reshape((/1.0,0.0,0.0, & ! Rotation matrix giving the orientation of the D-frame
+      Current_Instrm%RD=reshape([1.0,0.0,0.0, & ! Rotation matrix giving the orientation of the D-frame
                                   0.0,1.0,0.0, & ! w.r.t. the L-frame
-                                  0.0,0.0,1.0/),(/3,3/))
+                                  0.0,0.0,1.0],[3,3])
       Current_Instrm%ga_d=0.0                     ! Angles gamma and nu of the detector centre
       Current_Instrm%nu_d=0.0                     ! Angles gamma and nu of the detector centre
       Current_Instrm%tiltx_d=0.0                  ! Tilt of the flat detector around x-axis (normally = nu_d)
@@ -2410,9 +2410,9 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%tiltz_d=0.0                  ! Tilt of the flat detector around z-axis (normally = 0)
       Current_Instrm%igeom=0                      ! 1: Bisecting (PSI=0),2: Bisecting - HiCHI, 3: Normal beam, 4:Parallel (PSI=90)
       Current_Instrm%ipsd=0                       ! 1: Flat,2: Vertically Curved detector (used in D19amd), 3:
-      Current_Instrm%e1=(/1.0,0.0,0.0/)           ! Components of e1 in {i,j,k}
-      Current_Instrm%e2=(/0.0,1.0,0.0/)           ! Components of e2 in {i,j,k}
-      Current_Instrm%e3=(/0.0,0.0,1.0/)           ! Components of e3 in {i,j,k}
+      Current_Instrm%e1=[1.0,0.0,0.0]            ! Components of e1 in {i,j,k}
+      Current_Instrm%e2=[0.0,1.0,0.0]            ! Components of e2 in {i,j,k}
+      Current_Instrm%e3=[0.0,0.0,1.0]            ! Components of e3 in {i,j,k}
       Current_Instrm%gnxz_limited=.false.         ! The limits in gamm, nu, x and z accessible in the detector have been provided
       Current_Instrm%gap_min=0.0                  ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
       Current_Instrm%gap_max=140.0                ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
@@ -3706,7 +3706,7 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D1A
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,1,2,0,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,1,2,0,0],7)) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D1A Format'
@@ -3836,11 +3836,11 @@ Module CFML_ILL_Instrm_Data
        new_form = .false.; very_old=.false.; old=.false.
 
                                     !R A S F I J V
-       if (equal_vector(n_keytypes,(/1,2,1,2,2,0,0/),7)) then
+       if (equal_vector(n_keytypes,[1,2,1,2,2,0,0],7)) then
            new_form = .true.
-       else if (equal_vector(n_keytypes,(/1,2,1,1,2,0,0/),7)) then
+       else if (equal_vector(n_keytypes,[1,2,1,1,2,0,0],7)) then
            old=.true.
-       else if (equal_vector(n_keytypes,(/1,2,1,2,1,0,0/),7)) then
+       else if (equal_vector(n_keytypes,[1,2,1,2,1,0,0],7)) then
            very_old=.true.
        else
            Err_CFML%Ierr=1
@@ -3905,7 +3905,7 @@ Module CFML_ILL_Instrm_Data
        if (nval_f > 0 .and. very_old ) then
           n%monitor=rvalues(1)
           n%time=rvalues(2)
-          n%scans(1)=rvalues(3)        ! Initial 2theta
+          n%scans(1)=rvalues(3)             ! Initial 2theta
           n%conditions(1:3)=rvalues(15:17)  ! Temp-s, Temp-r, Temp-sample
           n%wave=rvalues(18)  !Not sure
           !write(*,*) " Monitor, time, 2theta_zero, T-set T-reg, T-samp"
@@ -3925,10 +3925,6 @@ Module CFML_ILL_Instrm_Data
          allocate(n%counts(n%nbdata,n%nframes))
          n%counts=0.0
 
-         if (allocated(n%tmc_ang)) deallocate(n%tmc_ang)
-         allocate(n%tmc_ang(n%nbang+4,n%nframes))
-         n%tmc_ang=0.0
-
          ! Loading Frames
          n%monitor=0.0
          n%time=0.0
@@ -3936,6 +3932,10 @@ Module CFML_ILL_Instrm_Data
          !Time/Monitor/Counts/Angles
          call read_F_keyType(filevar,nl_keytypes(4,2,1),nl_keytypes(4,2,2))
          if (nval_f > 0 ) then
+            !write(*,*) " Allocating tmc_ang with ",n%nbang+nval_f,""
+            if (allocated(n%tmc_ang)) deallocate(n%tmc_ang)
+            allocate(n%tmc_ang(n%nbang+nval_f,n%nframes))
+            n%tmc_ang=0.0
             n%tmc_ang(1,1)=rvalues(1)*0.001 ! Time (s)
             n%tmc_ang(2:3,1)=rvalues(2:3)   ! Monitor and Total Counts
             n%tmc_ang(4:nval_f,1)=rvalues(4:nval_f)*0.001  ! Angles in degrees
@@ -4929,7 +4929,7 @@ Module CFML_ILL_Instrm_Data
        ! Case where no frame selection was provided by the user. All the frames will be included in the numor structure.
        else
           allocate(n%selected_frames(n%nframes))
-          n%selected_frames = (/(i, i=1,n%nframes)/)
+          n%selected_frames = [(i, i=1,n%nframes)]
           n_selected_frames = n%nframes
        end if
 
@@ -5076,7 +5076,7 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D20
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,6,0,1,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,6,0,1,0],7)) then
           Err_CFML%Ierr=1
           Err_CFML%Msg='This numor: '//trim(fileinfo)//' does not correspond with D20 Format'
           return
@@ -5338,7 +5338,7 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D20
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,6,0,1,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,6,0,1,0],7)) then
           Err_CFML%Ierr=1
           Err_CFML%Msg='This numor: '//trim(fileinfo)//' does not correspond with D20 Format'
           return
@@ -5812,7 +5812,7 @@ Module CFML_ILL_Instrm_Data
        !real(kind=cp)                 :: det
        real(kind=cp), dimension(3,3) :: mat
 
-       Current_Orient%conv=reshape( (/1.0,0.0,0.0,  0.0,1.0,0.0,  0.0,0.0,1.0/),(/3,3/))
+       Current_Orient%conv=reshape( [1.0,0.0,0.0,  0.0,1.0,0.0,  0.0,0.0,1.0],[3,3])
 
        if (present(setting)) then
           mat=matmul(setting,ub)  !check that point
@@ -5855,9 +5855,9 @@ Module CFML_ILL_Instrm_Data
        Current_Instrm%ang_Limits=0.0
        Current_Instrm%disp_names=" "
        Current_Instrm%ang_names=" "
-       Current_Instrm%e1=(/1.0,0.0,0.0/)
-       Current_Instrm%e2=(/0.0,1.0,0.0/)
-       Current_Instrm%e3=(/0.0,0.0,1.0/)
+       Current_Instrm%e1=[1.0,0.0,0.0]
+       Current_Instrm%e2=[0.0,1.0,0.0]
+       Current_Instrm%e3=[0.0,0.0,1.0]
        if(present(typ)) then
          Current_Instrm%info= "Default Laue diffractrometer"
          Current_Instrm%name_inst= "LaueDiff"
@@ -5881,7 +5881,7 @@ Module CFML_ILL_Instrm_Data
          Current_Instrm%agap=0
          Current_Instrm%cgap=0
          Current_Instrm%ang_names(1) ="Gamma"
-         Current_Instrm%ang_Limits(1,1:2)=(/2.0,175.0/)
+         Current_Instrm%ang_Limits(1,1:2)=[2.0,175.0]
        else
          Current_Instrm%info= "Default 4-cercles diffractrometer"
          Current_Instrm%name_inst= "4C-Diff"
@@ -5898,24 +5898,24 @@ Module CFML_ILL_Instrm_Data
          Current_Instrm%agap=2
          Current_Instrm%cgap=2
          Current_Instrm%ang_names(1) ="2Theta"
-         Current_Instrm%ang_Limits(1,1:2)=(/2.0,130.0/)
+         Current_Instrm%ang_Limits(1,1:2)=[2.0,130.0]
        end if
        Current_Instrm%BL_frame="z-up"
        Current_Instrm%dist_units = "mm"
        Current_Instrm%angl_units = "deg"
        Current_Instrm%detector_type = "Flat_rect"
        Current_Instrm%ipsd=2          !Flat detector
-       ub=reshape((/-0.0989455,   0.0671905,  -0.1005396, &
-                     0.0045075,  -0.1487497,  -0.0642365, &
-                    -0.1588914,  -0.0460609,   0.0607861/),(/3,3/))
+       ub=reshape([-0.0989455,   0.0671905,  -0.1005396, &
+                    0.0045075,  -0.1487497,  -0.0642365, &
+                   -0.1588914,  -0.0460609,   0.0607861],[3,3])
        Current_Instrm%num_ang=4
        Current_Instrm%num_disp=0
        Current_Instrm%ang_names(2) ="Omega"
        Current_Instrm%ang_names(3) ="Chi"
        Current_Instrm%ang_names(4) ="Phi"
-       Current_Instrm%ang_Limits(2,1:2)=(/1.0,49.0/)
-       Current_Instrm%ang_Limits(3,1:2)=(/77.0,202.0/)
-       Current_Instrm%ang_Limits(4,1:2)=(/-180.0,180.0/)
+       Current_Instrm%ang_Limits(2,1:2)=[1.0,49.0]
+       Current_Instrm%ang_Limits(3,1:2)=[77.0,202.0]
+       Current_Instrm%ang_Limits(4,1:2)=[-180.0,180.0]
        if (allocated(Current_Instrm%alphas)) deallocate(Current_Instrm%alphas)
        allocate(Current_Instrm%alphas(npx,npz))
        Current_Instrm%alphas(:,:)=1.0

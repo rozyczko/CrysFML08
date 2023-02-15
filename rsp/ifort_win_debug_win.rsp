@@ -1,4 +1,4 @@
 options install --prefix ifort_debug_win
 options --profile debug
 options --compiler ifort
-options --flag "/I ../../wint/lib.i64  /check:noarg_temp_created"
+options --flag "/debug:full /check /static /heap-arrays /check:noarg_temp_created /traceback /nologo /CB /I ../../wint/lib.i64"

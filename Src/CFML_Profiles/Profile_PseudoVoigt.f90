@@ -127,12 +127,12 @@ SubModule (CFML_Profiles) Profile_PseudoVoigt
     !!--++
     !!--++ Update: October - 2005
     !!
-    Module Subroutine PsVoigtian(Twoth , Twoth0 , Eta , Gamma, Dprdt , Dprdg , Dprde, PsVoigt )
+    Module Subroutine PsVoigtian(Twoth , Twoth0 , Eta , Gamm, Dprdt , Dprdg , Dprde, PsVoigt )
        !---- Arguments ----!
        real(kind=cp), intent(in)  :: twoth     ! point at which to evaluate the profile
        real(kind=cp), intent(in)  :: twoth0    ! two theta value for peak
        real(kind=cp), intent(in)  :: eta       ! mixing coefficient between Gaussian and Lorentzian
-       real(kind=cp), intent(in)  :: gamma     ! FWHM
+       real(kind=cp), intent(in)  :: gamm     ! FWHM
        real(kind=cp), intent(out) :: dprdt     ! derivative of profile wrt TwoTH0
        real(kind=cp), intent(out) :: dprdg     ! derivative of profile wrt Gamma
        real(kind=cp), intent(out) :: dprde     ! derivative of profile wrt Eta
@@ -144,8 +144,8 @@ SubModule (CFML_Profiles) Profile_PseudoVoigt
        real(kind=cp) :: dgdt , dgdg , dldt , dldg
 
 
-       call Prof_Gaussian(twoth , twoth0 , gamma , dgdt , dgdg ,Gauss)
-       call Prof_Lorentzian(twoth , twoth0 , gamma , dldt , dldg, Lorentz)
+       call Prof_Gaussian(twoth , twoth0 , gamm , dgdt , dgdg ,Gauss)
+       call Prof_Lorentzian(twoth , twoth0 , gamm , dldt , dldg, Lorentz)
        psvoigt = eta * Lorentz + (1.0_cp - eta) * Gauss
        dprdt = eta * dldt + (1.0_cp - eta) * dgdt
        dprdg = eta * dldg + (1.0_cp - eta) * dgdg
