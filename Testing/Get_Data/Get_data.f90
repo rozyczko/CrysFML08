@@ -37,7 +37,7 @@
     Use CFML_Strings,         only: get_num, cut_string, l_case,u_case, Get_Separator_Pos
     Use CFML_SXTAL_Geom,      only: Get_z1_from_pixel, Set_PSD, cell_fr_UB, PSD
     Use Nexus_Mod,            only: read_nexus, nexus_type,err_nexus, war_nexus,err_nexus_mess, war_nexus_mess, &
-                                    nxs_to_powder_numor
+                                    nxs_to_powder_numor, read_calibration
 
     !---- Variables ----!
     implicit none
@@ -1285,13 +1285,17 @@
 
           case ('D1B','D20')
              if (len_trim(calpath) > 0) then
-                call Read_Calibration_File(CalPath,trim(machine),Cal)
-                if (err_illdata) then
-                   call error_message(trim(err_illdata_mess))
+                if(nxs) then
+                   call read_calibration(trim(CalPath),"mantid_workspace_1/workspace/values",machine,Cal)
                 else
-                   write(unit=*,fmt="(a)") " => Calibration file: "//trim(CalPath)
-                   write(unit=i_log,fmt="(/,a)") " => Calibration file: "//trim(CalPath)
-                   calibration=.true.
+                   call Read_Calibration_File(CalPath,trim(machine),Cal)
+                   if (err_illdata) then
+                      call error_message(trim(err_illdata_mess))
+                   else
+                      write(unit=*,fmt="(a)") " => Calibration file: "//trim(CalPath)
+                      write(unit=i_log,fmt="(/,a)") " => Calibration file: "//trim(CalPath)
+                      calibration=.true.
+                   end if
                 end if
              end if
              if(calibration) then
@@ -1350,11 +1354,15 @@
 
           case ('D2B')
              if (len_trim(calpath) > 0) then
-                call Read_Calibration_File(CalPath,'D2B',Cal)
-                if (err_illdata) then
-                   call error_message(trim(err_illdata_mess))
+                if(nxs) then
+                   call Read_Calibration(trim(CalPath),"mantid_workspace_1/workspace/values",machine,Cal)
                 else
-                   calibration=.true.
+                   call Read_Calibration_File(CalPath,'D2B',Cal)
+                   if (err_illdata) then
+                      call error_message(trim(err_illdata_mess))
+                   else
+                      calibration=.true.
+                   end if
                 end if
                 cal_d2b=0
                 do j=1,128
@@ -1389,11 +1397,15 @@
 
           case ('D4')
              if (len_trim(calpath) > 0) then
-                call Read_Calibration_File(CalPath,'D4',Cal)
-                if (err_illdata) then
-                   call error_message(trim(err_illdata_mess))
+                if(nxs) then
+                   call Read_Calibration(trim(CalPath),"mantid_workspace_1/workspace/values",machine,Cal)
                 else
-                   calibration=.true.
+                   call Read_Calibration_File(CalPath,'D4',Cal)
+                   if (err_illdata) then
+                      call error_message(trim(err_illdata_mess))
+                   else
+                      calibration=.true.
+                   end if
                 end if
              end if
 

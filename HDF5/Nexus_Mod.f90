@@ -45,7 +45,7 @@ module nexus_mod
 
     use hdf5
     use CFML_GlobalDeps, only: ops_sep
-    use CFML_ILL_Instrm_Data, only: Powder_Numor_Type,Initialize_Numor
+    use CFML_ILL_Instrm_Data, only: Powder_Numor_Type,Initialize_Numor, Calibration_Detector_Type
     use CFML_Strings, only: L_Case,Get_Filename
 
     implicit none
@@ -276,12 +276,14 @@ module nexus_mod
 
     end subroutine initialize_nexus
 
-    subroutine read_calibration(filename,path,calibration)
+    subroutine read_calibration(filename,path,machine,calibration)
 
         ! Arguments
         character(len=*),                  intent(in)  :: filename
         character(len=*),                  intent(in)  :: path
-        real, dimension(:,:), allocatable, intent(out) :: calibration
+        character(len=*),                  intent(in)  :: machine
+        type(Calibration_Detector_Type),  intent(out)  :: calibration
+
 
         ! Local variables
         integer :: i,j,hdferr,nx,nz
@@ -289,6 +291,7 @@ module nexus_mod
         integer(HSIZE_T), dimension(3) :: dims,dims_
         real, parameter :: epsilon = 0.001
         logical :: exist
+        real, dimension(:,:), allocatable :: calib
 
         ! Check that nexus file exists
         inquire(file=filename,exist=exist)
@@ -334,8 +337,8 @@ module nexus_mod
         if (hdferr /= -1) then
             nx = dims(1)
             nz = dims(2)
-            allocate(calibration(nx,nz))
-            call h5dread_f(dset,H5T_NATIVE_REAL,calibration,dims,hdferr)
+            allocate(calib(nx,nz))
+            call h5dread_f(dset,H5T_NATIVE_REAL,calib,dims,hdferr)
             call h5dclose_f(dset,hdferr)
         else
             err_nexus = .true.
@@ -355,11 +358,40 @@ module nexus_mod
         call h5close_f(hdferr)
 
         ! Replace zeros by epsilon
-        do i = 1 , size(calibration,1)
-            do j = 1 , size(calibration,2)
-                if (abs(calibration(i,j)) < epsilon) calibration(i,j) = epsilon
+        do i = 1 , size(calib,1)
+            do j = 1 , size(calib,2)
+                if (abs(calib(i,j)) < epsilon) calib(i,j) = epsilon
             end do
         end do
+
+        !Setting up the calibration type
+        !Type, public :: Calibration_Detector_Type
+        !   character(len=12)                            :: Name_Instrm      ! Instrument Name
+        !   integer                                      :: NDet             ! Number of Detectors
+        !   integer                                      :: NPointsDet       ! Number of Points per Detector
+        !   real(kind=cp), dimension(:),   allocatable   :: PosX             ! Relative Positions of each Detector
+        !   real(kind=cp), dimension(:,:), allocatable   :: Effic            ! Efficiency of each point detector (NpointsDetect,NDect)
+        !   logical,       dimension(:,:), allocatable   :: Active           ! Flag for active points on detector
+        !End Type Calibration_Detector_Type
+        calibration%Name_Instrm=machine
+        calibration%NDet=size(calib,2)
+        calibration%NPointsDet=size(calib,1)
+        if(allocated(calibration%PosX)) deallocate(calibration%PosX)
+        if(allocated(calibration%Effic)) deallocate(calibration%Effic)
+        if(allocated(calibration%Active)) deallocate(calibration%Active)
+        allocate(calibration%PosX(calibration%NDet))
+        allocate(calibration%Effic(calibration%NPointsDet,calibration%NDet))
+        allocate(calibration%Active(calibration%NPointsDet,calibration%NDet))
+        calibration%Active=.true.; calibration%PosX=0.0
+        Select Case(trim(machine))
+          case("D1B")
+               calibration%PosX(:)=[((i-1)*0.1, i=1,calibration%NDet)]
+          case("D20")
+               calibration%PosX(:)=[((i-1)*0.05, i=1,calibration%NDet)]
+          case("D2B")
+               calibration%PosX(:)=[((i-1)*1.25, i=1,calibration%NDet)]
+        End Select
+        calibration%Effic=calib
 
     end subroutine read_calibration
 
