@@ -265,12 +265,13 @@ module nexus_mod
 
     end subroutine initialize_nexus
 
-    subroutine read_nexus(filename,nexus,source)
+    subroutine read_nexus(filename,nexus,source,raw)
 
         ! Arguments
         character(len=*), intent(in)  :: filename
         type(nexus_type), intent(out) :: nexus
         character(len=*), intent(in), optional :: source
+        logical,          intent(in), optional :: raw
 
         ! Local variables
         integer :: i
@@ -327,8 +328,12 @@ module nexus_mod
             src = 'ill'
         end if
 
-        if (source == 'ill') then
-            call read_nexus_ILL(nexus)
+        if (src == 'ill') then
+            if (present(raw)) then
+                call read_nexus_ILL(nexus,raw)
+            else
+                call read_nexus_ILL(nexus)
+            end if
         else
             err_nexus = .true.
             err_nexus_mess = "read_nexus: unknown source"
@@ -343,10 +348,11 @@ module nexus_mod
 
     end subroutine read_nexus
 
-    subroutine read_nexus_ill(nexus)
+    subroutine read_nexus_ill(nexus,raw)
 
         ! Arguments
-        type(nexus_type), intent(inout) :: nexus
+        type(nexus_type),  intent(inout) :: nexus
+        logical, optional, intent(in)    :: raw
 
         ! Local variables
         integer :: i,mode,nvar
@@ -479,14 +485,15 @@ module nexus_mod
         call h5dclose_f(dset,hdferr)
 
         ! Counts
-        call h5dopen_f(file_id,'entry0/data_scan/detector_data/data',dset,hdferr)
-        if (hdferr == -1) then
+        if (present(raw)) then
             call h5dopen_f(file_id,'entry0/data_scan/detector_data/raw_data',dset,hdferr)
-            if (hdferr == -1) then
-                err_nexus = .true.
-                err_nexus_mess = 'read_nexus_ill: data not found in nexus.'
-                return
-            end if
+        else
+            call h5dopen_f(file_id,'entry0/data_scan/detector_data/data',dset,hdferr)
+        end if
+        if (hdferr == -1) then
+            err_nexus = .true.
+            err_nexus_mess = 'read_nexus_ill: data not found in nexus.'
+            return
         end if
         call h5dget_space_f(dset,space,hdferr)
         call h5sget_simple_extent_dims_f(space,dims,dims3,hdferr)
