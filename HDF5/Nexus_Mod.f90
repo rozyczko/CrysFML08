@@ -122,7 +122,7 @@ module nexus_mod
     integer(HSIZE_T), dimension(3) :: dims,dims3
 
     ! List of public subroutines
-    public :: nxs_to_powder_numor,initialize_nexus,read_nexus
+    public :: nxs_to_powder_numor,initialize_nexus,read_calibration,read_nexus
 
     contains
 
@@ -275,6 +275,94 @@ module nexus_mod
         if (allocated(nexus%angles))       deallocate(nexus%angles)
 
     end subroutine initialize_nexus
+
+    subroutine read_calibration(filename,path,calibration,ierr)
+
+        ! Arguments
+        character(len=*),                  intent(in)  :: filename
+        character(len=*),                  intent(in)  :: path
+        real, dimension(:,:), allocatable, intent(out) :: calibration
+        integer,                           intent(out) :: ierr
+
+        ! Local variables
+        integer :: i,j,hdferr,nx,nz
+        integer(HID_T) :: file_id,dset,space
+        integer(HSIZE_T), dimension(3) :: dims,dims_
+        real, parameter :: epsilon = 0.001
+        logical :: exist
+
+        ! Check that nexus file exists
+        inquire(file=filename,exist=exist)
+        if (.not. exist) then
+            err_nexus = .true.
+            war_nexus_mess = 'read_calibration: file '//trim(filename)//' not found'
+            return
+        end if
+
+        ! Initialize fortran interface
+        call h5open_f(hdferr)
+        if (hdferr == -1) then
+            err_nexus = .true.
+            err_nexus_mess = "read_calibration: error opening hdf5 fortran interface"
+            return
+        end if
+
+        ! Prevent error messages
+        if (hdferr /= -1) call h5eset_auto_f(0,hdferr)
+
+        ! Open NEXUS file
+        if (hdferr /= -1) then
+            call h5fopen_f(trim(filename),H5F_ACC_RdoNLY_F,file_id,hdferr)
+            if (hdferr == -1) then
+                err_nexus = .true.
+                err_nexus_mess = "read_calibration: error opening nexus file"
+                return
+            end if
+        end if
+
+        ! Get calibration
+        call h5dopen_f(file_id,path,dset,hdferr)
+        if (hdferr == -1) then
+            err_nexus = .true.
+            err_nexus_mess = 'read_calibration: wrong path.'
+            return
+        end if
+
+        !   Get dimensions of the dataset
+        call h5dget_space_f(dset,space,hdferr)
+        call h5sget_simple_extent_dims_f(space,dims,dims_,hdferr)
+        !   Assign memory to arrays and read data
+        if (hdferr /= -1) then
+            nx = dims(1)
+            nz = dims(2)
+            allocate(calibration(nx,nz))
+            call h5dread_f(dset,H5T_NATIVE_REAL,calibration,dims,hdferr)
+            call h5dclose_f(dset,hdferr)
+        else
+            err_nexus = .true.
+            err_nexus_mess = 'read_calibration: calibration cannot be applied, only implemented for d2b.'
+            return
+        end if
+        if (hdferr == -1) then
+            err_nexus = .true.
+            err_nexus_mess = 'read_calibration: error reading calibration data.'
+            return
+        end if
+
+        ! Close NEXUS file.
+        call h5fclose_f(file_id,hdferr)
+
+        ! Close FORTRAN interface.
+        call h5close_f(hdferr)
+
+        ! Replace zeros by epsilon
+        do i = 1 , size(calibration,1)
+            do j = 1 , size(calibration,2)
+                if (abs(calibration(i,j)) < epsilon) calibration(i,j) = epsilon
+            end do
+        end do
+
+    end subroutine read_calibration
 
     subroutine read_nexus(filename,nexus,source,raw)
 
