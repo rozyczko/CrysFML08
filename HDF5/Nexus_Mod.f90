@@ -135,16 +135,17 @@ module nexus_mod
         type(Powder_Numor_type)      :: pnum
 
         ! Local variables
-        integer :: i,n,ia,ic,nf
+        integer :: i,n,ia,ic
 
-        call Initialize_Numor(pnum,nexus%nbang,nexus%nbdata,nexus%nf)
-        pnum%title = trim(nexus%experiment_id)
-        pnum%header = trim(nexus%user)//trim(nexus%local_contact)//trim(nexus%end_time)
-        pnum%instrm = trim(nexus%instrument_name)
-        pnum%numor = nexus%run_number
-        pnum%manip = nexus%manip
+
+        call Initialize_Numor(pnum,max(nexus%nbang,1),nexus%nbdata,nexus%nf)
+        pnum%title    = trim(nexus%experiment_id)
+        pnum%header   = trim(nexus%user)//trim(nexus%local_contact)//trim(nexus%end_time)
+        pnum%instrm   = trim(adjustl(nexus%instrument_name))
+        pnum%numor    = nexus%run_number
+        pnum%manip    = nexus%manip
         pnum%scantype = nexus%scan_type
-        pnum%wave = nexus%wave
+        pnum%wave     = nexus%wave
         pnum%conditions(1) = nexus%setp_temperature
         pnum%conditions(2) = nexus%reg_temperature
         pnum%conditions(3) = nexus%temperature
@@ -152,10 +153,20 @@ module nexus_mod
         pnum%scans(1) = nexus%scan_start
         pnum%scans(2) = nexus%scan_step
         pnum%scans(3) = nexus%scan_width
-        if (nexus%is_timef) pnum%tmc_ang(1,:) = nexus%timef(:)
-        if (nexus%is_monitor) pnum%tmc_ang(2,:) = nexus%monitor(:)
+
+        Select Case(trim(pnum%instrm))
+          Case("d1b")
+            pnum%scans(1)=0.77
+            pnum%scans(2)=128.0/pnum%nbdata
+          Case("d20")
+            pnum%scans(2)=160.0/pnum%nbdata
+        End Select
+        pnum%scans(3)=pnum%scans(1)+(nexus%nbdata-1)*pnum%scans(2)
+
+        if (nexus%is_timef)        pnum%tmc_ang(1,:) = nexus%timef(:)
+        if (nexus%is_monitor)      pnum%tmc_ang(2,:) = nexus%monitor(:)
         if (nexus%is_total_counts) pnum%tmc_ang(3,:) = nexus%total_counts(:)
-        pnum%time = sum(pnum%tmc_ang(1,:))
+        pnum%time =    sum(pnum%tmc_ang(1,:))
         pnum%monitor = sum(pnum%tmc_ang(2,:)) / pnum%nframes
         if (nexus%is_phi) pnum%angles(1) = 0.5*(nexus%angles(1,1) + nexus%angles(1,nexus%nf))
         if (nexus%is_chi) pnum%angles(2) = 0.5*(nexus%angles(2,1) + nexus%angles(2,nexus%nf))
@@ -170,7 +181,7 @@ module nexus_mod
             pnum%angles(4) = 0.5*(nexus%angles(4,1) + nexus%angles(4,nexus%nf))
         end if
         if (nexus%is_phi) pnum%angles(5) = 0.5*(nexus%angles(5,1) + nexus%angles(5,nexus%nf))
-        do n = 1 , nf
+        do n = 1 , nexus%nf
             i = 0
             do ic = 1 , nexus%nx
                 do ia = 1 , nexus%nz
@@ -179,7 +190,7 @@ module nexus_mod
                 end do
             end do
         end do
-        if (nexus%nbang == 1) then
+        if (nexus%nbang <= 1) then
             if (nexus%scan_type == 'phi') then
                 pnum%tmc_ang(4,:) = nexus%angles(1,:)
             else if (nexus%scan_type == 'chi') then
@@ -276,7 +287,11 @@ module nexus_mod
         ! Local variables
         integer :: i
         logical :: exist
-        character(len=:), allocatable :: basename,src
+        character(len=:), allocatable :: basename
+        character(len=:), allocatable :: lsource
+
+        lsource="ill"
+        if(present(source)) lsource=source
 
         ! Initialize variables
         err_nexus  = .false.
@@ -322,17 +337,11 @@ module nexus_mod
             end if
         end if
 
-        if (present(source)) then
-            src = source
-        else
-            src = 'ill'
-        end if
-
-        if (src == 'ill') then
-            if (present(raw)) then
-                call read_nexus_ILL(nexus,raw)
+        if (lsource == 'ill') then
+            if(present(raw)) then
+              call read_nexus_ILL(nexus,raw)
             else
-                call read_nexus_ILL(nexus)
+              call read_nexus_ILL(nexus)
             end if
         else
             err_nexus = .true.
@@ -341,6 +350,7 @@ module nexus_mod
             call h5close_f(hdferr)
             return
         end if
+        nexus%nbdata=nexus%nx * nexus%nz
 
         ! Close NEXUS file anf FORTRAN interface
         call h5fclose_f(file_id,hdferr)
@@ -351,8 +361,8 @@ module nexus_mod
     subroutine read_nexus_ill(nexus,raw)
 
         ! Arguments
-        type(nexus_type),  intent(inout) :: nexus
-        logical, optional, intent(in)    :: raw
+        type(nexus_type),  intent(in out) :: nexus
+        logical, optional, intent(in)     :: raw
 
         ! Local variables
         integer :: i,mode,nvar
@@ -375,7 +385,17 @@ module nexus_mod
         if (hdferr /= -1) call h5dread_f(dset,filetype,name,dims,hdferr)
         call h5dclose_f(dset,hdferr)
         if (hdferr /= -1) then
-            nexus%instrument_name = L_Case(adjustl(trim(name)))
+            nexus%instrument_name = L_Case(name)
+            if(index(nexus%instrument_name,"d1b") /= 0) nexus%instrument_name="d1b"
+            if(index(nexus%instrument_name,"d20") /= 0) nexus%instrument_name="d20"
+            if(index(nexus%instrument_name,"d2b") /= 0) nexus%instrument_name="d2b"
+            if(index(nexus%instrument_name,"d3") /= 0)  nexus%instrument_name="d3"
+            if(index(nexus%instrument_name,"d4") /= 0)  nexus%instrument_name="d4"
+            if(index(nexus%instrument_name,"d9") /= 0)  nexus%instrument_name="d9"
+            if(index(nexus%instrument_name,"d10") /= 0) nexus%instrument_name="d10"
+            if(index(nexus%instrument_name,"d19") /= 0) nexus%instrument_name="d19"
+            if(index(nexus%instrument_name,"d16") /= 0) nexus%instrument_name="d16"
+            if(index(nexus%instrument_name,"xtd") /= 0) nexus%instrument_name="xtd"
         else
             err_nexus = .true.
             err_nexus_mess = "read_nexus_ill: error getting instrument name"
@@ -479,7 +499,7 @@ module nexus_mod
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ub,dims,hdferr)
         if (hdferr /= -1) then
-            nexus%ub = transpose(reshape(ub,(/3,3/)))
+            nexus%ub = transpose(reshape(ub,[3,3]))
             nexus%is_ub = .true.
         end if
         call h5dclose_f(dset,hdferr)
@@ -533,7 +553,7 @@ module nexus_mod
             if (hdferr /= -1) allocate(datos(nexus%nf,nvar))
             if (hdferr /= -1) str_len(:) = STR_MAX_LEN
             if (hdferr /= -1) scanned(:) = 0
-            if (hdferr /= -1) data_dims = (/ STR_MAX_LEN , dims(1) /)
+            if (hdferr /= -1) data_dims = [ STR_MAX_LEN , dims(1) ]
             !   Read data
             if (hdferr /= -1) call h5dread_vl_f(dset,filetype,var_names,data_dims,str_len,hdferr,space)
             if (hdferr /= -1) call h5dread_f(dset2,H5T_NATIVE_INTEGER,scanned,dims,hdferr)
@@ -679,48 +699,44 @@ module nexus_mod
                         nexus%scan_type  = 'phi'
                         nexus%scan_start = nexus%angles(1,1)
                         nexus%scan_width = nexus%angles(1,nexus%nf) - nexus%angles(1,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(2) == 1) then
                         nexus%manip = 3
                         nexus%scan_type = 'chi'
                         nexus%scan_start = nexus%angles(2,1)
                         nexus%scan_width = nexus%angles(2,nexus%nf) - nexus%angles(2,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(3) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'omega'
                         nexus%scan_start = nexus%angles(3,1)
                         nexus%scan_width = nexus%angles(3,nexus%nf) - nexus%angles(3,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(4) == 1) then
                         nexus%manip = 1
                         nexus%scan_type = 'gamma'
                         nexus%scan_start = nexus%angles(4,1)
                         nexus%scan_width = nexus%angles(4,nexus%nf) - nexus%angles(4,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(5) == 1) then
                         nexus%scan_type = 'psi'
                         nexus%scan_start = nexus%angles(5,1)
                         nexus%scan_width = nexus%angles(5,nexus%nf) - nexus%angles(5,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(6) == 1) then
                         nexus%scan_type = 'canne'
                         nexus%scan_start = nexus%angles(6,1)
                         nexus%scan_width = nexus%angles(6,nexus%nf) - nexus%angles(6,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(7) == 1) then
                         nexus%scan_type = 'nu'
                         nexus%scan_start = nexus%angles(7,1)
                         nexus%scan_width = nexus%angles(7,nexus%nf) - nexus%angles(7,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     else if (motors(8) == 1) then
                         nexus%manip = 1
                         nexus%scan_type = '2theta'
                         nexus%scan_start = nexus%angles(8,1)
                         nexus%scan_width = nexus%angles(8,nexus%nf) - nexus%angles(8,1)
-                        if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                     end if
+
+                    if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
+
                 else if (nexus%nbang == 2) then
+
                     if (motors(3) == 1 .and. motors(4) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'omega'
@@ -739,7 +755,9 @@ module nexus_mod
                 end if
                 if (allocated(datos)) deallocate(datos)
             end if
+
         else ! Virtual detector?
+
             call h5dopen_f(file_id,'entry0/instrument/Detector/virtual_cgap',dset,hdferr)
             if (hdferr == -1) call h5dopen_f(file_id,'entry0/instrument/Det1/virtual_cgap',dset,hdferr)
             if (hdferr /= 1) then
