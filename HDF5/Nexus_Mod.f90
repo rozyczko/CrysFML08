@@ -385,17 +385,8 @@ module nexus_mod
         if (hdferr /= -1) call h5dread_f(dset,filetype,name,dims,hdferr)
         call h5dclose_f(dset,hdferr)
         if (hdferr /= -1) then
-            nexus%instrument_name = L_Case(name)
-            if(index(nexus%instrument_name,"d1b") /= 0) nexus%instrument_name="d1b"
-            if(index(nexus%instrument_name,"d20") /= 0) nexus%instrument_name="d20"
-            if(index(nexus%instrument_name,"d2b") /= 0) nexus%instrument_name="d2b"
-            if(index(nexus%instrument_name,"d3") /= 0)  nexus%instrument_name="d3"
-            if(index(nexus%instrument_name,"d4") /= 0)  nexus%instrument_name="d4"
-            if(index(nexus%instrument_name,"d9") /= 0)  nexus%instrument_name="d9"
-            if(index(nexus%instrument_name,"d10") /= 0) nexus%instrument_name="d10"
-            if(index(nexus%instrument_name,"d19") /= 0) nexus%instrument_name="d19"
-            if(index(nexus%instrument_name,"d16") /= 0) nexus%instrument_name="d16"
-            if(index(nexus%instrument_name,"xtd") /= 0) nexus%instrument_name="xtd"
+            i=index(name,char(0))
+            nexus%instrument_name = L_Case(name(1:i-1))
         else
             err_nexus = .true.
             err_nexus_mess = "read_nexus_ill: error getting instrument name"
@@ -416,28 +407,40 @@ module nexus_mod
         call h5dopen_f(file_id,'entry0/user/name',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,user,dims,hdferr)
-        if (hdferr /= -1) nexus%user = user
+        if (hdferr /= -1) then
+            i=index(user,char(0))
+            nexus%user = user(1:i-1)
+        end if
         call h5dclose_f(dset,hdferr)
 
         ! Local contact
         call h5dopen_f(file_id,'entry0/user/namelocalcontact',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,local_contact,dims,hdferr)
-        if (hdferr /= -1) nexus%local_contact = local_contact
+        if (hdferr /= -1) then
+            i=index(local_contact,char(0))
+            nexus%local_contact = local_contact(1:i-1)
+        end if
         call h5dclose_f(dset,hdferr)
 
         ! End time
         call h5dopen_f(file_id,'entry0/end_time',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,end_time,dims,hdferr)
-        if (hdferr /= -1) nexus%end_time = end_time
+        if (hdferr /= -1) then
+            i=index(end_time,char(0))
+            nexus%end_time = end_time(1:i-1)
+        end if
         call h5dclose_f(dset,hdferr)
 
         ! Experiment identifier
         call h5dopen_f(file_id,'entry0/experiment_identifier',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,experiment_id,dims,hdferr)
-        if (hdferr /= -1) nexus%experiment_id = experiment_id
+        if (hdferr /= -1) then
+            i=index(experiment_id,char(0))
+            nexus%experiment_id = experiment_id(1:i-1)
+        end if
         call h5dclose_f(dset,hdferr)
 
         ! Setpoint temperature
