@@ -36,7 +36,8 @@
     Use CFML_DiffPatt,        only: DiffPat_E_Type,Allocate_Pattern
     Use CFML_Strings,         only: get_num, cut_string, l_case,u_case, Get_Separator_Pos
     Use CFML_SXTAL_Geom,      only: Get_z1_from_pixel, Set_PSD, cell_fr_UB, PSD
-    Use Nexus_Mod,            only: read_nexus, nexus_type,err_nexus, war_nexus,err_nexus_mess, war_nexus_mess
+    Use Nexus_Mod,            only: read_nexus, nexus_type,err_nexus, war_nexus,err_nexus_mess, war_nexus_mess, &
+                                    nxs_to_powder_numor
 
     !---- Variables ----!
     implicit none
@@ -144,89 +145,80 @@
     !!
     Subroutine Manual()
 
-       ! Clear Screen
-       !if (ops == 1) then
-       !   call execute_command_line('cls')
-       !else
-       !   call execute_command_line('clear')
-       !end if
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  GET_DATA PROGRAM"
+      write(unit=*,fmt="(a)") "  ================"
+      write(unit=*,fmt="(a)") "  The program GET_DATA can be used for retrieving information on the ILL DataBase or for"
+      write(unit=*,fmt="(a)") "  creating corrected files from powder diffraction instruments (D1A, D1B, D2B,...)"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  The invocation of the program without arguments produces this information."
+      write(unit=*,fmt="(a)") "  The minimal information for running the program is to provide as arguments the name of"
+      write(unit=*,fmt="(a)") "  the instrument and the numors."
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  List of possible arguments"
+      write(unit=*,fmt="(a)") "  If '-fil myfile' is provided as argument, the arguments containing the instructions"
+      write(unit=*,fmt="(a)") "  are written in myfile. In such a case the list of arguments can be extended over"
+      write(unit=*,fmt="(a)") "  several lines if each line ends with an ampersand '&', which is considered as a"
+      write(unit=*,fmt="(a)") "  continuation character. The arguments then finish with the first line without &."
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  Mandatory arguments"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  -ins   instrument_name     : Instrument name (D1B, D1A,...)"
+      write(unit=*,fmt="(a)") "  -num   num1  [num2 [step]] : Numors from num1 to num2 every step numors. "
+      write(unit=*,fmt="(a)") "                               If step < 0 the multiples of |nstep| are skipped"
+      write(unit=*,fmt="(a)") "         n1 n2 ... [n9 n10]  : Up to 5 blocks of range in Numors (2 blocks is the minimum)"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  -dir   pathdir             : The program search the data in directory 'pathdir' "
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  (Optionals):"
+      write(unit=*,fmt="(a)") "  -nxs                       : Tells the program to use NeXus files of the form nnnnnn.nxs"
+      write(unit=*,fmt="(a)") "  -add                       : Adds all Numors"
+      write(unit=*,fmt="(a)") "  -add   [N n ]              : Adds blocks of n Numors between num1 and num2"
+      write(unit=*,fmt="(a)") "  -add   [T dT]              : Adds Numors with temperatures within a range of +/- dT "
+      write(unit=*,fmt="(a)") "  -cal   filename            : File name of calibration data for the instrument (including path)"
+      write(unit=*,fmt="(a)") "  -zer   zero_shift          : Zero-shift to be applied before writing the data"
+      write(unit=*,fmt="(a)") "  -xmin  value               : Minimum 2theta angle for output"
+      write(unit=*,fmt="(a)") "  -xmax  value               : Maximum 2theta angle for output"
+      write(unit=*,fmt="(a)") "  -ang                       : Angular positions of calibration file are used for a banana detector"
+      write(unit=*,fmt="(a)") "  -prm                       : Permutation of alphas according to angular positions is used for a banana detector"
+      write(unit=*,fmt="(a)") "  -cod   Codefiles           : Prepends the content of 'codefiles' to the name of the files "
+      write(unit=*,fmt="(a)") "                             : If not given, the instrument name is used for naming the files"
+      write(unit=*,fmt="(a)") "  -det   n                   : Create a file with the scan measured by detector n"
+      write(unit=*,fmt="(a)") "  -fil   file_instructions   : File containing the directives for run get_data program"
+      write(unit=*,fmt="(a)") "  -fmt   0|1|2               : 0 Convert the Numors to INSTR=0 "
+      write(unit=*,fmt="(a)") "                             : 1 Convert the Numors to XYSigma Format (this is the default value)"
+      write(unit=*,fmt="(a)") "                             : 2 Convert the Numors to INSTR=5 Format (appropriate for D1B/D20)"
+      write(unit=*,fmt="(a)") "  -inf                       : The program reads only the headers and produces a file called "
+      write(unit=*,fmt="(a)") "                             : 'info_data_inst.inf', listing relevant info on the given numors"
+      write(unit=*,fmt="(a)") "  -lab   T                   : Appends the Temperature(in 0.01K) to the name of the files "
+      write(unit=*,fmt="(a)") "  -nor   value               : Normalization value for Monitor normalization"
+      write(unit=*,fmt="(a)") "  -tor   value               : Normalization value for Time normalization"
+      write(unit=*,fmt="(a)") "  -dex   n_1  n_2 ...nexcl   : Identification numbers of detectors to be excluded "
+      write(unit=*,fmt="(a)") "  -cex   n_1  n_2 ...nexcel  : Identification numbers of cells to be excluded (banana detector)"
+      write(unit=*,fmt="(a)") "  -per   value               : Percentage of vertical cells to add for integration (D2B)"
 
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  GET_DATA PROGRAM"
-       write(unit=*,fmt="(a)") "  ================"
-       write(unit=*,fmt="(a)") "  The program GET_DATA can be used for retrieving information on the ILL DataBase or for"
-       write(unit=*,fmt="(a)") "  creating corrected files from powder diffraction instruments (D1A, D1B, D2B,...)"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  The invocation of the program without arguments produces this information."
-       write(unit=*,fmt="(a)") "  The minimal information for running the program is to provide as arguments the name of"
-       write(unit=*,fmt="(a)") "  the instrument and the numors."
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  List of possible arguments"
-       write(unit=*,fmt="(a)") "  If '-fil myfile' is provided as argument, the arguments containing the instructions"
-       write(unit=*,fmt="(a)") "  are written in myfile. In such a case the list of arguments can be extended over"
-       write(unit=*,fmt="(a)") "  several lines if each line ends with an ampersand '&', which is considered as a"
-       write(unit=*,fmt="(a)") "  continuation character. The arguments then finish with the first line without &."
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  Mandatory arguments"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  -ins   instrument_name     : Instrument name (D1B, D1A,...)"
-       write(unit=*,fmt="(a)") "  -num   num1  [num2 [step]] : Numors from num1 to num2 every step numors. "
-       write(unit=*,fmt="(a)") "                               If step < 0 the multiples of |nstep| are skipped"
-       write(unit=*,fmt="(a)") "         n1 n2 ... [n9 n10]  : Up to 5 blocks of range in Numors (2 blocks is the minimum)"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  -dir   pathdir             : The program search the data in directory 'pathdir' "
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  (Optionals):"
-       write(unit=*,fmt="(a)") "  -nxs                       : Tells the program to use NeXus files of the form nnnnnn.nxs"
-       write(unit=*,fmt="(a)") "  -add                       : Adds all Numors"
-       write(unit=*,fmt="(a)") "  -add   [N n ]              : Adds blocks of n Numors between num1 and num2"
-       write(unit=*,fmt="(a)") "  -add   [T dT]              : Adds Numors with temperatures within a range of +/- dT "
-       write(unit=*,fmt="(a)") "  -cal   filename            : File name of calibration data for the instrument (including path)"
-       write(unit=*,fmt="(a)") "  -zer   zero_shift          : Zero-shift to be applied before writing the data"
-       write(unit=*,fmt="(a)") "  -xmin  value               : Minimum 2theta angle for output"
-       write(unit=*,fmt="(a)") "  -xmax  value               : Maximum 2theta angle for output"
-       write(unit=*,fmt="(a)") "  -ang                       : Angular positions of calibration file are used for a banana detector"
-       write(unit=*,fmt="(a)") &
-       "  -prm                       : Permutation of alphas according to angular positions is used for a banana detector"
+      write(unit=*,fmt="(a)") "                             : (Default Value = 100, then all the 128 cells contribute)"
+      write(unit=*,fmt="(a)") "                             : Example: -per 31.25 means 128*0.3125=40 central cells contribute"
+      write(unit=*,fmt="(a)") "  -yc    year cycle          : Year (4 digits) and cycle(1-4) integer numbers (needs ILL DataBase)"
+      write(unit=*,fmt="(a)") "  -mat  file_name            : The UB matrix (SXtals) is read from file file_name instead of using"
+      write(unit=*,fmt="(a)") "                             : that of the NUMOR. If file_name is not given, 'ubfrom.raf' is assumed"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  Examples of use of this program:"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  get_data  -ins d1b -dir c:\bd_ill\data\d1b  -num 12341 12387 -cod ymn2 -add -fmt 0"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  get_data  -ins d2b -dir \\Serdon\illdata\111\d2b  -num 85544 85553 -cod test -add -fmt 1"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  get_data  -fil run_d20"
+      write(unit=*,fmt="(a)") "  "
+      write(unit=*,fmt="(a)") "  The content of the file 'run_d20' in the last example is formed by the four lines below:"
+      write(unit=*,fmt="(a)") ' -ins D20 -dir "C:\Disk-D\Data\xxx\yyyy\D20" -num 897965  897972 -add &    '
+      write(unit=*,fmt="(a)") ' -fmt 1 -cod "Feoxal"  -tor 60.0 -zer 2.53       &                         '
+      write(unit=*,fmt="(a)") ' -cal "C:\Disk-D\Data\xxx\yyyy\D20\calib_d20.cal"      &                   '
+      write(unit=*,fmt="(a)") ' -cex 867 868 869 870 871 872   2543 2544 2545 2546 2547 2548 2549 2550 2551  2552 '
+      write(unit=*,fmt="(a)") "  "
 
-       write(unit=*,fmt="(a)") "  -cod   Codefiles           : Prepends the content of 'codefiles' to the name of the files "
-       write(unit=*,fmt="(a)") "                             : If not given, the instrument name is used for naming the files"
-       write(unit=*,fmt="(a)") "  -det   n                   : Create a file with the scan measured by detector n"
-       write(unit=*,fmt="(a)") "  -fil   file_instructions   : File containing the directives for run get_data program"
-       write(unit=*,fmt="(a)") "  -fmt   0|1|2               : 0 Convert the Numors to INSTR=0 "
-       write(unit=*,fmt="(a)") "                             : 1 Convert the Numors to XYSigma Format (this is the default value)"
-       write(unit=*,fmt="(a)") "                             : 2 Convert the Numors to INSTR=5 Format (appropriate for D1B/D20)"
-       write(unit=*,fmt="(a)") "  -inf                       : The program reads only the headers and produces a file called "
-       write(unit=*,fmt="(a)") "                             : 'info_data_inst.inf', listing relevant info on the given numors"
-       write(unit=*,fmt="(a)") "  -lab   T                   : Appends the Temperature(in 0.01K) to the name of the files "
-       write(unit=*,fmt="(a)") "  -nor   value               : Normalization value for Monitor normalization"
-       write(unit=*,fmt="(a)") "  -tor   value               : Normalization value for Time normalization"
-       write(unit=*,fmt="(a)") "  -dex   n_1  n_2 ...nexcl   : Identification numbers of detectors to be excluded "
-       write(unit=*,fmt="(a)") "  -cex   n_1  n_2 ...nexcel  : Identification numbers of cells to be excluded (banana detector)"
-       write(unit=*,fmt="(a)") "  -per   value               : Percentage of vertical cells to add for integration (D2B)"
-       write(unit=*,fmt="(a)") "                             : (if not given, Value=100, then all the 128 cells contribute)"
-       write(unit=*,fmt="(a)") "                             : Example: -per 31.25 means 128*0.3125=40 central cells contribute"
-       write(unit=*,fmt="(a)") "  -yc    year cycle          : Year (4 digits) and cycle(1-4) integer numbers (needs ILL DataBase)"
-       write(unit=*,fmt="(a)") "  -mat  file_name            : The UB matrix (SXtals) is read from file file_name instead of using"
-       write(unit=*,fmt="(a)") "                             : that of the NUMOR. If file_name is not given, 'ubfrom.raf' is assumed"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  Examples of use of this program:"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  get_data  -ins d1b -dir c:\bd_ill\data\d1b  -num 12341 12387 -cod ymn2 -add -fmt 0"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  get_data  -ins d2b -dir \\Serdon\illdata\111\d2b  -num 85544 85553 -cod test -add -fmt 1"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  get_data  -fil run_d20"
-       write(unit=*,fmt="(a)") "  "
-       write(unit=*,fmt="(a)") "  The content of the file 'run_d20' in the last example is formed by the four lines below:"
-       write(unit=*,fmt="(a)") ' -ins D20 -dir "C:\Disk-D\Data\xxx\yyyy\D20" -num 897965  897972 -add &       '
-       write(unit=*,fmt="(a)") ' -fmt 1 -cod "Feoxal"  -tor 60.0 -zer 2.53       &                                          '
-       write(unit=*,fmt="(a)") ' -cal "C:\Disk-D\Data\xxx\yyyy\D20\calib_d20.cal"      &                          '
-       write(unit=*,fmt="(a)") ' -cex 867 868 869 870 871 872   2543 2544 2545 2546 2547 2548 2549 2550 2551  2552     '
-       write(unit=*,fmt="(a)") "  "
-
-       return
     End Subroutine Manual
 
     !!----
@@ -695,147 +687,86 @@
         return
     End Subroutine Process_CmdLine
 
-    Function NXS2_PowderNumor(nexus,num) Result(Pnum)
-      type(nexus_type), intent (in) :: nexus
-      integer,          intent (in) :: num
-      type(POWDER_Numor_type)       :: Pnum
 
-      integer :: Np,i,Ia,Ic,nf,ndat
-      !Type, public :: POWDER_Numor_type
-      !   integer                                    :: numor       ! Numor
-      !   integer                                    :: manip       ! principle scan angle
-      !   integer                                    :: icalc       ! angle calculation type
-      !   character(len=32)                          :: header      ! User, local contact, date
-      !   character(len=12)                          :: Instrm      ! Instrument name
-      !   character(len=32)                          :: title       !
-      !   character(len=8)                           :: Scantype    ! omega, phi, etc...
-      !   real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
-      !   real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
-      !   real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
-      !   real(kind=cp)                              :: time        ! Total time: sum times of each frame
-      !   real(kind=cp)                              :: wave        ! wavelength
-      !   real(kind=cp), dimension(5)                :: conditions  ! Temp-s.pt,Temp-Regul,Temp-sample,Voltmeter,Mag.field
-      !   integer                                    :: nbdata      ! Total number of pixels nx*ny = np_vert*np_horiz
-      !   integer                                    :: nframes     ! Total number of frames
-      !   integer                                    :: nbang       ! Total number of angles moved during scan
-      !   integer, dimension(11)                     :: icdesc      ! Integer values
-      !   real(kind=cp),allocatable,dimension(:,:)   :: tmc_ang     ! time,monitor,total counts, angles*1000
-      !                                                             ! To be allocated as tmc_ang(nbang,nframes)
-      !   real(kind=cp),allocatable,dimension(:,:)   :: counts      ! Counts array to be reshaped (np_vert,np_horiz,nframes) in case of 2D detectors
-      !                                                             ! To be allocated as counts(nbdata,nframes)
-      !End type POWDER_Numor_type
-           !Assign values to Pnum
-           ndat=nexus%nx * nexus%nz
-           nf=nexus%Nf
-           call Initialize_Numor(Pnum,5,ndat,nf)
-           Pnum%numor=num
-           Pnum%nbdata=ndat
-           Pnum%Manip=1
-           Pnum%scantype="2Theta"
-           Do Np=1,Nf
-               Pnum%Tmc_Ang(1,Np)=nexus%timef(Np)
-               Pnum%Tmc_Ang(2,Np)=nexus%monitor(Np)
-               Pnum%Tmc_Ang(3,Np)=nexus%total_counts(Np)
-               !Pnum%Tmc_Ang(4,Np)=nexus%angles(3,Np)
-               !Pnum%Tmc_Ang(5,Np)=nexus%angles(4,Np)
-               Pnum%Conditions=nexus%conditions
-               I=0
-               Do Ic=1,nexus%nx
-                   Do Ia=1,nexus%nz
-                       I=I+1
-                       Snum%Counts(I,Np)= nexus%Counts(Ia,Ic,Np) ! (nz,nx,nf)
-                   End Do
-               End Do
-           End Do
+    function nxs_to_sxtal_numor(nexus) Result(Snum)
 
-           Pnum%Scans(1)=0.75
-           Pnum%Scans(2)=nexus%scan_step
-           Pnum%Scans(3)=nexus%scan_step
-           Pnum%wave=nexus%wave
-           !do i=1,5 ! Angles: phi, chi, omega, 2theta(gamm), psi
-           !   Pnum%angles(i)=0.5*(nexus%angles(i,1) + nexus%angles(i,nf))
-           !end do
+        ! Arguments
+        type(nexus_type), intent(in) :: nexus
+        type(SXTAL_Numor_type)       :: snum
 
+        ! Local variables
+        integer :: i,n,ia,ic
 
-    End Function NXS2_PowderNumor
+        call Initialize_Numor(Snum,nexus%nbang,nexus%nbdata,nexus%nf)
+        Snum%title  = trim(nexus%experiment_id)
+        Snum%header = trim(nexus%user)//trim(nexus%local_contact)//trim(nexus%end_time)
+        Snum%instrm = trim(nexus%instrument_name)
+        Snum%numor  = nexus%run_number
+        Snum%manip  = nexus%manip
+        Snum%scantype = nexus%scan_type
+        Snum%wave = nexus%wave
+        Snum%conditions(1) = nexus%setp_temperature
+        Snum%conditions(2) = nexus%reg_temperature
+        Snum%conditions(3) = nexus%temperature
+        Snum%conditions(5) = nexus%magnetic_field
+        Snum%scans(1) = nexus%scan_start
+        Snum%scans(2) = nexus%scan_step
+        Snum%scans(3) = nexus%scan_width
+        if (nexus%is_timef)        Snum%tmc_ang(1,:) = nexus%timef(:)
+        if (nexus%is_monitor)      Snum%tmc_ang(2,:) = nexus%monitor(:)
+        if (nexus%is_total_counts) Snum%tmc_ang(3,:) = nexus%total_counts(:)
+        if (nexus%is_phi) Snum%angles(1) = 0.5*(nexus%angles(1,1) + nexus%angles(1,nexus%nf))
+        if (nexus%is_chi) Snum%angles(2) = 0.5*(nexus%angles(2,1) + nexus%angles(2,nexus%nf))
+        if (nexus%is_omega) then
+            Snum%angles(3) = 0.5*(nexus%angles(3,1) + nexus%angles(3,nexus%nf))
+        else if (nexus%is_canne) then
+            Snum%angles(3) = 0.5*(nexus%angles(6,1) + nexus%angles(6,nexus%nf))
+        end if
+        if (nexus%is_tth) then
+            Snum%angles(4) = 0.5*(nexus%angles(8,1) + nexus%angles(8,nexus%nf))
+        else if (nexus%is_gamma) then
+            Snum%angles(4) = 0.5*(nexus%angles(4,1) + nexus%angles(4,nexus%nf))
+        end if
+        if (nexus%is_phi) Snum%angles(5) = 0.5*(nexus%angles(5,1) + nexus%angles(5,nexus%nf))
+        do n = 1 , nexus%nf
+            i = 0
+            do ic = 1 , nexus%nx
+                do ia = 1 , nexus%nz
+                    i = i + 1
+                    Snum%counts(i,n)= nexus%counts(ia,ic,n) ! (nz,nx,nf)
+                end do
+            end do
+        end do
+        if (nexus%nbang == 1) then
+            if (nexus%scan_type == 'phi') then
+                Snum%tmc_ang(4,:) = nexus%angles(1,:)
+            else if (nexus%scan_type == 'chi') then
+                Snum%tmc_ang(4,:) = nexus%angles(2,:)
+            else if (nexus%scan_type == 'omega') then
+                Snum%tmc_ang(4,:) = nexus%angles(3,:)
+            else if (nexus%scan_type == 'gamma') then
+                Snum%tmc_ang(4,:) = nexus%angles(4,:)
+            else if (nexus%scan_type == 'psi') then
+                Snum%tmc_ang(4,:) = nexus%angles(5,:)
+            else if (nexus%scan_type == 'canne') then
+                Snum%tmc_ang(4,:) = nexus%angles(6,:)
+            else if (nexus%scan_type == 'nu') then
+                Snum%tmc_ang(4,:) = nexus%angles(7,:)
+            else if (nexus%scan_type == '2theta') then
+                Snum%tmc_ang(4,:) = nexus%angles(8,:)
+            end if
+        else if (nexus%nbang == 2) then
+            if (nexus%scan_type == 'omega') then
+                Snum%tmc_ang(4,:) = nexus%angles(3,:)
+                Snum%tmc_ang(5,:) = nexus%angles(4,:)
+            else if (nexus%scan_type == 'canne') then
+                Snum%tmc_ang(4,:) = nexus%angles(6,:)
+                Snum%tmc_ang(5,:) = nexus%angles(4,:)
+            end if
+        end if
+        if (nexus%geometry == 'NB') Snum%icalc = 1
 
-    Function NXS2_SxtalNumor(nexus,num) Result(Snum)
-      type(nexus_type), intent (in) :: nexus
-      integer,          intent (in) :: num
-      type(SXTAL_Numor_type)        :: Snum
-      ! --- Local variables ---!
-      integer :: Np,i,Ia,Ic,nf,ndat
-      ! Type, public :: SXTAL_Numor_type
-      !    integer                                    :: numor       ! Numor
-      !    integer                                    :: manip       ! principle scan angle
-      !    integer                                    :: icalc       ! angle calculation type
-      !    character(len=32)                          :: header      ! User, local contact, date
-      !    character(len=12)                          :: Instrm      ! Instrument name
-      !    character(len=32)                          :: title       !
-      !    character(len=8)                           :: Scantype    ! omega, phi, etc...
-      !    real(kind=cp), dimension(3)                :: hmin        ! or h,k,l for omega-scans
-      !    real(kind=cp), dimension(3)                :: hmax        !
-      !    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
-      !    real(kind=cp), dimension(3,3)              :: UB          ! UB-matrix
-      !    real(kind=cp), dimension(3)                :: dh          ! delta_h, delta_k, delta_l
-      !    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
-      !    real(kind=cp)                              :: preset      !
-      !    real(kind=cp)                              :: wave        ! wavelength
-      !    real(kind=cp)                              :: dist        ! wavelength
-      !    real(kind=cp)                              :: cpl_fact    ! Coupling Factor
-      !    real(kind=cp), dimension(5)                :: conditions  ! Temp-s.pt,Temp-Regul,Temp-sample,Voltmeter,Mag.field
-      !    integer                                    :: nbdata      ! Total number of pixels nx*ny = np_vert*np_horiz
-      !    integer                                    :: nframes     ! Total number of frames
-      !    integer                                    :: nbang       ! Total number of angles moved during scan
-      !    integer, dimension(11)                     :: icdesc      ! Integer values
-      !    real(kind=cp),allocatable,dimension(:,:)   :: tmc_ang     ! time,monitor,total counts, angles*1000
-      !                                                              ! To be allocated as tmc_ang(nbang,nframes)
-      !    real(kind=cp),allocatable,dimension(:,:)   :: counts      ! Counts array to be reshaped (np_vert,np_horiz,nframes) in case of 2D detectors
-      !                                                              ! To be allocated as counts(nbdata,nframes)
-           !Assign values to Snum
-           ndat=nexus%nx * nexus%nz
-           nf=nexus%Nf
-           call Initialize_Numor(Snum,5,ndat,nf)
-
-           Snum%numor=num
-           Snum%nbdata=ndat
-           Select Case(trim(nexus%scan_type))
-             Case("omega","canne")
-                Snum%Manip=2
-             Case("phi")
-                Snum%Manip=4
-           End Select
-
-           Do Np=1,Nf
-               Snum%Tmc_Ang(1,Np)=nexus%timef(Np)
-               Snum%Tmc_Ang(2,Np)=nexus%monitor(Np)
-               Snum%Tmc_Ang(3,Np)=nexus%total_counts(Np)
-               Snum%Tmc_Ang(4,Np)=nexus%angles(3,Np)
-               Snum%Tmc_Ang(5,Np)=nexus%angles(4,Np)
-               Snum%Conditions=nexus%conditions
-               I=0
-               Do Ic=1,nexus%nx
-                   Do Ia=1,nexus%nz
-                       I=I+1
-                       Snum%Counts(I,Np)= nexus%Counts(Ia,Ic,Np) ! (nz,nx,nf)
-                   End Do
-               End Do
-           End Do
-
-           Snum%Scans(2)=nexus%scan_step
-           Snum%wave=nexus%wave
-           Snum%hmin=nint(nexus%reflection)
-           Snum%ub=nexus%ub
-           Snum%icalc=1
-           if(nexus%geometry == "NB")  Snum%icalc=2
-           do i=1,5 ! Angles: phi, chi, omega, 2theta(gamm), psi
-              Snum%angles(i)=0.5*(nexus%angles(i,1) + nexus%angles(i,nf))
-           end do
-
-           Snum%cpl_fact=abs(nexus%angles(4,Nf)-nexus%angles(4,1))/abs(nexus%angles(3,Nf)-nexus%angles(3,1))
-           Snum%scantype=nexus%scan_type
-
-    End Function NXS2_SxtalNumor
+    end function nxs_to_sxtal_numor
 
  End Module GetData_General_Procedures
 
@@ -961,7 +892,6 @@
           else
             i=index(cm_line,"&")
             if( i /= 0) then
-              nr=nr-1
               cmdline=adjustl(trim(cmdline)//" "//trim(cm_line(1:i-1)))
               cycle
             else
@@ -1101,9 +1031,7 @@
 
        !> Reading
        if(nxs) then
-         write(*,*) " => Reading Nexus Numor", num
          call read_nexus(trim(line),nxsf)
-         write(*,*) " => Finishing reading Nexus Numor", num
          if(err_nexus) then
             call error_message(err_nexus_mess)
             num=num-1
@@ -1114,11 +1042,9 @@
          end if
          !Convert nxsf to numor
           if (powdat) then
-             write(*,*) " => Assigning Nexus to PNumor", num
-             PNum(num) = NXS2_PowderNumor(nxsf,num)
-             write(*,*) " => End Assigning Nexus to PNumor", num
+             PNum(num) = nxs_to_powder_numor(nxsf)
           else
-             SNum(num) = NXS2_SXTALNumor(nxsf,num)
+             SNum(num) = nxs_to_sxtal_numor(nxsf)
          end if
 
        else
@@ -1534,24 +1460,28 @@
        !>-----------------------<
        !>---- Output Format ----<
        !>-----------------------<
-       write(unit=*,fmt="(a)") " => Writing file: "//trim(aux)
-       write(unit=i_log,fmt="(a)") " => Writing file: "//trim(aux)
-       if(wbuf) write(unit=ibuf,fmt="(a)") trim(aux)
+       if (err_illdata) then
+          call error_message(trim(err_illdata_mess))
+       else
+          write(unit=*,fmt="(a)") " => Writing file: "//trim(aux)
+          write(unit=i_log,fmt="(a)") " => Writing file: "//trim(aux)
+          if(wbuf) write(unit=ibuf,fmt="(a)") trim(aux)
 
-       !Applying the zero shift before writing
-       Pat%x=Pat%x+zero_shift
-       !write(*,*) " => Zero_Shift: ",zero_shift
-       if(.not. xmin_read) xang_min= Pat%xmin
-       if(.not. xmax_read) xang_max= Pat%xmax
+          !Applying the zero shift before writing
+          Pat%x=Pat%x+zero_shift
+          !write(*,*) " => Zero_Shift: ",zero_shift
+          if(.not. xmin_read) xang_min= Pat%xmin
+          if(.not. xmax_read) xang_max= Pat%xmax
 
-       select case (ifmt)
-          case (0)
-             call Write_Pattern_FreeFormat(trim(aux),Pat,excl_cel,xang_min,xang_max)
-          case (1)
-             call write_pattern_XYSig(trim(aux),Pat,excl_cel,xang_min,xang_max)
-          case (2)
-             call Write_Pattern_INSTRM5(trim(aux),Pat,excl_cel,xang_min,xang_max)
-       end select
+          select case (ifmt)
+             case (0)
+                call Write_Pattern_FreeFormat(trim(aux),Pat,excl_cel,xang_min,xang_max)
+             case (1)
+                call write_pattern_XYSig(trim(aux),Pat,excl_cel,xang_min,xang_max)
+             case (2)
+                call Write_Pattern_INSTRM5(trim(aux),Pat,excl_cel,xang_min,xang_max)
+          end select
+       end if
 
     end do ! Fin de cada fichero
 

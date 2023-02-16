@@ -2358,7 +2358,7 @@ Module CFML_ILL_Instrm_Data
         if (present(nframes)) then
            if (present(nbang)) then
               if (nframes > 0 .and. nbang > 0) then
-                 allocate(Numor%tmc_ang(nbang,nframes))
+                 allocate(Numor%tmc_ang(3+nbang,nframes))
                  Numor%tmc_ang=0.0
               end if
            end if
