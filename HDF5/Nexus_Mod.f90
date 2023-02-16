@@ -276,13 +276,12 @@ module nexus_mod
 
     end subroutine initialize_nexus
 
-    subroutine read_calibration(filename,path,calibration,ierr)
+    subroutine read_calibration(filename,path,calibration)
 
         ! Arguments
         character(len=*),                  intent(in)  :: filename
         character(len=*),                  intent(in)  :: path
         real, dimension(:,:), allocatable, intent(out) :: calibration
-        integer,                           intent(out) :: ierr
 
         ! Local variables
         integer :: i,j,hdferr,nx,nz
@@ -654,6 +653,7 @@ module nexus_mod
             motors(:) = 0
             if (allocated(nexus%angles)) deallocate(nexus%angles)
             allocate(nexus%angles(8,nexus%nf))
+            nexus%angles(:,:) = 0.0
             if (hdferr /= -1) then
                 do i = 1 , dims(1)
                     key = l_case(var_names(i))
