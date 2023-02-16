@@ -328,7 +328,7 @@ module nexus_mod
             src = 'ill'
         end if
 
-        if (source == 'ill') then
+        if (src == 'ill') then
             if (present(raw)) then
                 call read_nexus_ILL(nexus,raw)
             else
