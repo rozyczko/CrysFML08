@@ -1045,8 +1045,7 @@
              PNum(num) = nxs_to_powder_numor(nxsf)
           else
              SNum(num) = nxs_to_sxtal_numor(nxsf)
-         end if
-
+          end if
        else
           if (powdat) then
              call Read_Numor(trim(line),u_case(trim(inst)),PNum(num),info)
@@ -1762,14 +1761,14 @@
                                                 time_fin,ttheta,cosg, sumdif, cnorm, fac,     &
                                                 delta, dx, dg, dgdx
         real, parameter                      :: h=300.0          ! 300mm of height
-        real, parameter                      :: radius=1500.0    ! Distance from Sample to Detector
+        real, parameter                      :: radius=1296.0    ! Distance from Sample to Detector
         integer, dimension(:),      allocatable :: nd
         real,    dimension(:,:),    allocatable :: zz,vz
         real,    dimension(:,:,:,:),allocatable :: z
         real,    dimension(:,:,:),  allocatable :: x
         real,    dimension(:),      allocatable :: gam
         real,    dimension(ncell)               :: cnu
-        real,    dimension(ncell,ndet)          :: effic=1.0
+        real,    dimension(ncell,ndet)          :: effic
         logical, dimension(ncell,ndet)          :: active=.true.
 
 
@@ -1792,6 +1791,7 @@
         end if
 
         cnorm=1.0
+        effic=1.0
         if (present(Cal))  then
            correction=.true.
            effic=Cal%Effic
@@ -1819,9 +1819,9 @@
         end do
         nf_max=maxval(PNumors(1:N)%nframes,mask=ActList)
         if (allocated(z)) deallocate(z)
-        allocate(z(nf_max,ncell,ndet,Num)) ! Intensities (cell,detector,frames,active_numors)
+        allocate(z(nf_max,ncell,ndet,Num)) ! Intensities (frames,cell,detector,active_numors)
         if (allocated(x)) deallocate(x)
-        allocate(x(nf_max,ndet,Num)) ! Angles(detector,frames,active_numors)
+        allocate(x(nf_max,ndet,Num)) ! Angles(frames,detector,active_numors)
 
         z=0.0
         num=0
@@ -1831,19 +1831,25 @@
           do nf=1,PNumors(i)%nframes
              fac=cnorm/PNumors(i)%tmc_ang(2,nf)
              nc=0
-             do nt=1,ndet-1,2
+             !do nt=1,ndet-1,2
+             !   do k=1,ncell
+             !     z(nf,:,nt,num)=PNumors(i)%counts(nc+1:nc+ncell,nf)*fac/effic(k,nt)
+             !   end do
+             !   nc=nc+ncell+ncell
+             !   do k=ncell,1,-1
+             !      z(nf,k,nt+1,num)=PNumors(i)%counts(nc-k+1,nf)*fac/effic(k,nt)
+             !   end do
+             !end do
+             do nt=1,ndet
                 do k=1,ncell
                   z(nf,:,nt,num)=PNumors(i)%counts(nc+1:nc+ncell,nf)*fac/effic(k,nt)
-                end do
-                nc=nc+ncell+ncell
-                do k=ncell,1,-1
-                   z(nf,k,nt+1,num)=PNumors(i)%counts(nc-k+1,nf)*fac/effic(k,nt)
+                  nc=nc+ncell
                 end do
              end do
           end do
         end do
         ! gamm Values
-         if(correction) then
+        if(correction) then
             num=0
             do i=1,N
               if (.not. ActList(i)) cycle
@@ -1853,7 +1859,7 @@
                  x(nf,:,num)=x(nf,ndet,num)+Cal%PosX(:)
               end do
             end do
-         else
+        else
            num=0
            do i=1,N
              if (.not. ActList(i)) cycle
@@ -1863,7 +1869,7 @@
                 x(:,nt,num)=x(:,nt+1,num)-1.25
              end do
            end do
-         end if
+        end if
 
         xmin=0.05; xmax=maxval(x)
         np=ndet*nf_max
@@ -1920,6 +1926,7 @@
         end do
 
         open(unit=3, file='d2b.bin', access="stream",status="replace", action="write")
+        write(*,*) " Ncell",ncell,"  Number of columns",np
         write(unit=3) ncell,np
         write(unit=3) nint(zz)
         close(unit=3)

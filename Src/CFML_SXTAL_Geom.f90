@@ -231,7 +231,8 @@
                                       Rot_Gibbs_Matrix
     Use CFML_Geom,              Only: Get_OmegaChiPhi, Get_Matrix_moving_v_to_u,&
                                       Get_Anglen_Axis_From_Rotmat, Set_Rotation_Matrix
-    Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm,SXTAL_Numor_type
+    Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm, SXTAL_Numor_type, &
+                                      Diffractometer_Type
     Use CFML_Strings,           Only: file_type
 
     !---- Variables ----!
@@ -250,7 +251,7 @@
               triple, z3frz1, z2frz1, z1frfc, z1frnb, z1frmd, z1frz4, z1frz3, z1frz2, z4frgn,   &
               z4frz1, calang, genb, genub, cell_fr_UB, set_psd, get_z1_from_pixel,              &
               Get_z1_D9angls, psd_convert, Get_UB_from_uvw_hkl_omega, Get_UB_from_hkl_hkl_omega,&
-              Get_FlatCone_Angles_D10, Read_Twinlaw, Write_Twinlaw
+              Get_FlatCone_Angles_D10, Read_Twinlaw, Write_Twinlaw, psd_convert_old
 
 
     !---- Definitions ----!
@@ -685,13 +686,25 @@
          real(kind=cp), dimension(4)               :: angl_4C
       End Function snb4c
 
-      ! End SubModule (CFML_Geometry_SXTAL) SXTAL_Angles
 
-      ! SubModule (CFML_Geometry_SXTAL) SXTAL_PSD
-
-      Module Subroutine psd_convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+      Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
          !---- Arguments ----!
-         Integer, Intent(In)               :: mpsd
+        type(diffractometer_type), intent(in out) :: diffractometer
+        integer,                   intent(in)     :: f_virtual
+        integer,                   intent(in)     :: conversion_type
+        real(kind=cp),             intent(in)     :: ga_D
+        real(kind=cp),             intent(in)     :: nu_D
+        real(kind=cp),             intent(in out) :: px ! pixel x
+        real(kind=cp),             intent(in out) :: pz ! pixel z
+        real(kind=cp),             intent(in out) :: x_D
+        real(kind=cp),             intent(in out) :: z_D
+        real(kind=cp),             intent(in out) :: ga_P
+        real(kind=cp),             intent(in out) :: nu_P
+      End Subroutine psd_convert
+
+      Module Subroutine psd_convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+         !---- Arguments ----!
+         Integer,          Intent(In)      :: mpsd
          real(kind=cp),    Intent(In)      :: gamm
          real(kind=cp),    Intent(In Out)  :: gamp
          real(kind=cp),    Intent(In Out)  :: nup
@@ -699,7 +712,7 @@
          real(kind=cp),    Intent(Out)     :: zobs
          real(kind=cp),    Intent(in Out)  :: cath
          real(kind=cp),    Intent(in Out)  :: anod
-      End Subroutine psd_convert
+      End Subroutine psd_convert_old
 
       Module Subroutine d19psd(mpsd,ga,nu,cath,anod)
          !---- Arguments ----!
