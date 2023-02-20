@@ -4,8 +4,121 @@
 
   Contains
 
+    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+
+        ! Pixel numbering start by zero
+        !
+        ! r_D contains the pixel coordinates in the detector
+        ! reference system
+        !
+        ! r_L contains the pixel coordinates in the laboratory
+        ! reference system, when the detector is at gamma = 0
+        ! and nu = 0
+        !
+        ! conversion_type = 0: pixels to angles
+        ! conversion_type = 1: angles to pixels
+
+        ! Arguments
+        type(diffractometer_type), intent(inout)  :: diffractometer
+        integer,                   intent(in)     :: f_virtual
+        integer,                   intent(in)     :: conversion_type
+        real(kind=cp),             intent(in)     :: ga_D
+        real(kind=cp),             intent(in)     :: nu_D
+        real(kind=cp),             intent(in out) :: px ! pixel x
+        real(kind=cp),             intent(in out) :: pz ! pixel z
+        real(kind=cp),             intent(in out) :: x_D
+        real(kind=cp),             intent(in out) :: z_D
+        real(kind=cp),             intent(in out) :: ga_P
+        real(kind=cp),             intent(in out) :: nu_P
+
+        ! Local variables
+        integer :: i,j
+        real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_
+
+        call clear_error()
+        diffractometer%np_horiz = diffractometer%np_horiz * f_virtual
+        diffractometer%cgap = diffractometer%cgap / f_virtual
+        px_mid = diffractometer%np_horiz / 2.0
+        pz_mid = diffractometer%np_vert / 2.0
+        px_ = px
+        pz_ = pz
+
+        if (conversion_type == 0) then ! pixels to angles
+
+            ! Refer pixels to the origin at the bottom left
+            i = index(diffractometer%data_ordering,'top')
+            j = index(diffractometer%data_ordering,'right')
+            if (i > 0) pz_ = diffractometer%np_vert - pz_ - 1
+            if (j > 0) px_ = diffractometer%np_horiz - px_ - 1
+
+            ! Detector reference system: origin at the center of the detector
+            x_D = (px_ - px_mid) * diffractometer%cgap
+            y_D = 0.0
+            z_D = (pz_ - pz_mid) * diffractometer%agap
+
+            ! Cartesian coordinates in the laboratory system
+            select case(diffractometer%ipsd)
+                case(2) ! Flat detector
+                    x_L = x_D + diffractometer%det_offsets(1)
+                    y_L = y_D + diffractometer%det_offsets(2) + diffractometer%dist_samp_detector
+                    z_L = z_D + diffractometer%det_offsets(3)
+                case(3) ! Horizontal banana
+                    x_L = diffractometer%dist_samp_detector * sin(x_D/diffractometer%dist_samp_detector) + &
+                        diffractometer%det_offsets(1)
+                    y_L = diffractometer%dist_samp_detector * cos(x_D/diffractometer%dist_samp_detector) + &
+                        diffractometer%det_offsets(2)
+                    z_L = z_D + diffractometer%det_offsets(3)
+                case default ! Unknown detector
+                    Err_CFML%ierr=-1
+                    Err_CFML%Msg="Unknown detector"
+                    return
+            end select
+
+            ga_P = ga_D + atan2d(x_L,y_L)
+            nu_P = nu_D + atan2d(z_L,sqrt(x_L**2 + y_L**2))
+
+        else ! angles to pixels
+
+            ga_P = ga_P - ga_D
+            nu_P = nu_P - nu_D
+            radius = diffractometer%dist_samp_detector + diffractometer%det_offsets(2)
+
+            select case(diffractometer%ipsd)
+                case(2) ! Flat detector
+                    x_D = radius * tand(ga_P) - diffractometer%det_offsets(1)
+                    z_D = radius * tand(nu_P) / cosd(ga_P) - diffractometer%det_offsets(3)
+                case(3) ! Horizontal banana
+                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1)
+                    z_D = radius * tand(nu_P) - diffractometer%det_offsets(3)
+                case default ! Unknown detector
+                    Err_CFML%ierr=-1
+                    Err_CFML%Msg="Unknown detector"
+                    return
+            end select
+
+            ! Restore original values of ga_P and nu_P
+            ga_P = ga_P + ga_D
+            nu_P = nu_P + nu_D
+
+            ! Compute pixels from detector coordinates
+            px = px_mid + x_D / diffractometer%cgap
+            pz = pz_mid + z_D / diffractometer%agap
+
+            ! Refer pixels to the origin according to data_ordering
+            i = index(diffractometer%data_ordering,'top')
+            j = index(diffractometer%data_ordering,'right')
+            if (i > 0) pz = diffractometer%np_vert - pz - 1
+            if (j > 0) px = diffractometer%np_horiz - px - 1
+
+        end if
+
+        ! Restore original values
+        diffractometer%np_horiz = diffractometer%np_horiz / f_virtual
+        diffractometer%cgap = diffractometer%cgap * f_virtual
+
+    End Subroutine psd_convert
     !!----
-    !!---- Module Subroutine psd_convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+    !!---- Module Subroutine psd_convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
     !!----    Integer, Intent(In)            :: mpsd
     !!----    real(kind=cp), Intent(In)      :: gamm
     !!----    real(kind=cp), Intent(In Out)  :: gamp
@@ -37,7 +150,7 @@
     !!----
     !!---- Update: July 2010
     !!
-    Module Subroutine psd_convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+    Module Subroutine psd_convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
        !---- Arguments ----!
        Integer, Intent(In)               :: mpsd
        real(kind=cp),    Intent(In)      :: gamm
@@ -127,7 +240,7 @@
 
           End Select
        End If
-    End Subroutine psd_convert
+    End Subroutine psd_convert_old
 
     !!----
     !!---- Module Subroutine d19psd(mpsd,ga,nu,cath,anod)
@@ -236,7 +349,7 @@
        wave  = Current_Orient%wave
 
        ! Find GAMP and NUP for this pixel
-       Call Psd_Convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+       Call Psd_Convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
 
        ! Find the scattering vector in cartesian coordinates for this pixel
        ! from GAMP, NUP, CHIM, OMEGM and PHIM
@@ -266,7 +379,7 @@
        cath  = npx
 
        ! Find GAMP and NUP for this pixel
-       Call Psd_Convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+       Call Psd_Convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
 
        ! Find the scattering vector in cartesian coordinates for this pixel
        ! from GAMP, NUP, CHIM, OMEGM and PHIM

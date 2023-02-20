@@ -45,13 +45,17 @@ module nexus_mod
 
     use hdf5
     use CFML_GlobalDeps, only: ops_sep
-    use CFML_ILL_Instrm_Data, only: Powder_Numor_Type,Initialize_Numor, Calibration_Detector_Type
+    use CFML_ILL_Instrm_Data, only: Powder_Numor_Type,Initialize_Numor, Calibration_Detector_Type, &
+                                    Current_Instrm
     use CFML_Strings, only: L_Case,Get_Filename
 
     implicit none
 
     private
 
+    ! List of public subroutines
+    public :: nxs_to_powder_numor, initialize_nexus, read_calibration, read_nexus, write_vnexus, &
+              display_nexus
     ! List of public variables
     logical, public :: err_nexus, war_nexus
     character(len=:), allocatable, public :: err_nexus_mess, war_nexus_mess
@@ -121,8 +125,6 @@ module nexus_mod
     integer(HSIZE_T), dimension(2) :: maxdims,maxdims3,data_dims
     integer(HSIZE_T), dimension(3) :: dims,dims3
 
-    ! List of public subroutines
-    public :: nxs_to_powder_numor,initialize_nexus,read_calibration,read_nexus
 
     contains
 
@@ -275,6 +277,95 @@ module nexus_mod
         if (allocated(nexus%angles))       deallocate(nexus%angles)
 
     end subroutine initialize_nexus
+
+    subroutine display_nexus(lun,nexus)
+       integer,          intent(in) :: lun
+       type(nexus_type), intent(in) :: nexus
+
+       integer :: i,j
+       write(lun,"(a)")       "   Data_Ordering: "//trim(nexus%data_ordering  )
+       write(lun,"(a)")       "        End_Time: "//trim(nexus%end_time       )
+       write(lun,"(a)")       "   Experiment_id: "//trim(nexus%experiment_id  )
+       write(lun,"(a)")       "          Filcod: "//trim(nexus%filcod         )
+       write(lun,"(a)")       "        Filename: "//trim(nexus%filename       )
+       write(lun,"(a)")       "        Geometry: "//trim(nexus%geometry       )
+       write(lun,"(a)")       " Instrument_Name: "//trim(nexus%instrument_name)
+       write(lun,"(a)")       "   Local_Contact: "//trim(nexus%local_contact  )
+       write(lun,"(a)")       "       Scan_Type: "//trim(nexus%scan_type      )
+       write(lun,"(a)")       "          Source: "//trim(nexus%source         )
+       write(lun,"(a)")       "            User: "//trim(nexus%user           )
+       write(lun,"(a,i8)")    "           Manip: ", nexus%manip
+       write(lun,"(a,i8)")    "              Nz: ", nexus%nz
+       write(lun,"(a,i8)")    "              Nx: ", nexus%nx
+       write(lun,"(a,i8)")    "         Nframes: ", nexus%nf
+       write(lun,"(a,i8)")    "           Numor: ", nexus%run_number
+       write(lun,"(a,f8.5)")  "      Wavelength: ", nexus%wave
+       write(lun,"(a,f8.3)")  "      f-coupling: ", nexus%fcoupling
+       write(lun,"(a,f8.3)")  "       Mag.Field: ", nexus%magnetic_field
+       write(lun,"(a,3f8.3)") "             hkl: ", nexus%reflection(:)
+       write(lun,"(a,f8.3)")  "       Reg.Temp.: ", nexus%reg_temperature
+       write(lun,"(a,f8.3)")  "       Set.Temp.: ", nexus%setp_temperature
+       write(lun,"(a,f8.3)")  "     Temperature: ", nexus%temperature
+       write(lun,"(a,f8.3)")  "      Scan_start: ", nexus%scan_start
+       write(lun,"(a,f8.3)")  "       Scan_step: ", nexus%scan_step
+       write(lun,"(a,f8.3)")  "      Scan_width: ", nexus%scan_width
+       write(lun,"(a,f8.3)")  "    Virtual-cgap: ", nexus%virtual_cgap
+       write(lun,"(a,L)")     "        is_canne: ",nexus%is_canne
+       write(lun,"(a,L)")     "          is_chi: ",nexus%is_chi
+       write(lun,"(a,L)")     "        is_gamma: ",nexus%is_gamma
+       write(lun,"(a,L)")     "         is_mode: ",nexus%is_mode
+       write(lun,"(a,L)")     "      is_monitor: ",nexus%is_monitor
+       write(lun,"(a,L)")     "           is_nu: ",nexus%is_nu
+       write(lun,"(a,L)")     "        is_omega: ",nexus%is_omega
+       write(lun,"(a,L)")     "          is_phi: ",nexus%is_phi
+       write(lun,"(a,L)")     "          is_psi: ",nexus%is_psi
+       write(lun,"(a,L)")     "        is_timef: ",nexus%is_timef
+       write(lun,"(a,L)")     "          is_tth: ",nexus%is_tth
+       write(lun,"(a,L)")     " is_total_counts: ",nexus%is_total_counts
+       write(lun,"(a,L)")     "      is_virtual: ",nexus%is_virtual
+       write(lun,"(a,L)")     "           is_ub: ",nexus%is_ub
+       if(nexus%is_ub) then
+          write(lun,"(a)")    "       UB-matrix: "
+          do i=1,3
+            write(lun,"(tr10,3f14.6)") nexus%ub(i,:)
+          end do
+       end if
+       if (allocated(nexus%monitor)) then
+         write(lun,"(a)")     "  First 5 values of Monitor:"
+         write(lun,"(5f12.2)")  nexus%monitor(1:min(5,nexus%nf))
+       else
+           write(lun,"(a)")  "  => Monitor not allocated!"
+       end if
+       if (allocated(nexus%timef))  then
+         write(lun,"(a)")  "  First 5 values of Time:"
+         write(lun,"(5f12.4)")  nexus%timef(1:min(5,nexus%nf))
+       else
+           write(lun,"(a)")  "  => Timef not allocated!"
+       end if
+       if (allocated(nexus%total_counts)) then
+         write(lun,"(a)")  "  First 5 values of Total_Counts:"
+         write(lun,"(5f12.4)")  nexus%total_counts(1:min(5,nexus%nf))
+       else
+           write(lun,"(a)")  "  => Total_Counts not allocated!"
+       end if
+       if (allocated(nexus%angles))  then
+          write(lun,"(a)")  "  First 5 List of values of Angles:"
+          do i=1,min(5,nexus%nf)
+            write(lun,"(8f12.4)")  nexus%angles(:,i)
+          end do
+       else
+           write(lun,"(a)")  "  => Angles not allocated!"
+       end if
+       if (allocated(nexus%counts))  then
+          write(lun,"(a)")  "  Max-values of counts of the first 5 frames"
+          do i=1,min(5,nexus%nf)
+              write(lun,"(2(a,i5))") " Frame #",i,"  MaxVal (counts(:,:)) =", maxval(nexus%counts(:,:,i))
+          end do
+       else
+           write(lun,"(a)")  "  => Counts not allocated!"
+       end if
+
+    end subroutine display_nexus
 
     subroutine read_calibration(filename,path,machine,calibration)
 
@@ -450,7 +541,7 @@ module nexus_mod
             call h5fopen_f(trim(nexus%filename),H5F_ACC_RdoNLY_F,file_id,hdferr)
             if (hdferr == -1) then
                 err_nexus = .true.
-                err_nexus_mess = "read_nexus: error opening nexus file"
+                err_nexus_mess = "read_nexus: error opening nexus file: "//trim(filename)
                 call h5close_f(hdferr)
                 return
             end if
@@ -722,7 +813,7 @@ module nexus_mod
                             nexus%is_tth = .true.
                             nexus%angles(8,:) = datos(:,i)
                             if (abs(nexus%angles(8,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(8) = 1
-                        case('monitor1','Monitor_1')
+                        case('monitor1','monitor_1')
                             nexus%is_monitor = .true.
                             if (allocated(nexus%monitor)) deallocate(nexus%monitor)
                             allocate(nexus%monitor(nexus%nf))
@@ -946,5 +1037,205 @@ module nexus_mod
         data_ordering=key1//key2//key3//'major'
 
     end subroutine set_data_ordering
+
+    subroutine write_vnexus(namef,ga_Dv,nu_Dv,avcounts,nexus)
+        ! Arguments
+        character(len=*),          intent(in) :: namef
+        real,                      intent(in) :: ga_Dv,nu_Dv
+        integer, dimension(:,:,:), intent(in) :: avcounts
+        type(nexus_type),          intent(in) :: nexus
+
+        ! Local variables
+        integer :: i,hdferr,filter_info,filter_info_both,nv,nh
+        integer(HID_T) :: file,filetype,group,subgroup,space,dset,dcpl ! handles
+        integer(SIZE_T) :: length
+        integer(HSIZE_T), dimension(1) :: dims_1D
+        integer(HSIZE_T), dimension(3) :: dims_3D,chunk_3D
+        real, dimension(:), allocatable :: val
+        character(len=100), dimension(:), allocatable :: paths
+        character(len=:), allocatable, target :: inst_name,data_ordering
+        logical :: avail
+        type(C_PTR) :: f_ptr
+
+        ! Initialize Fortran interface
+        call h5open_f(hdferr)
+
+        !  Check if gzip compression is available and can be used for both
+        !  compression and decompression.  Normally we do not perform error
+        !  checking in these examples for the sake of clarity, but in this
+        !  case we will make an exception because this filter is an
+        !  optional part of the hdf5 library.
+        !
+        call h5zfilter_avail_f(H5Z_FILTER_DEFLATE_F, avail, hdferr)
+        if (.not. avail) then
+            write(*,'("gzip filter not available.",/)')
+            stop
+        end if
+        call h5zget_filter_info_f(H5Z_FILTER_DEFLATE_F, filter_info, hdferr)
+        filter_info_both = IOR(H5Z_FILTER_ENCODE_ENABLED_F,H5Z_FILTER_DECODE_ENABLED_F)
+        if (filter_info .ne. filter_info_both) then
+            write(*,'("gzip filter not available for encoding and decoding.",/)')
+            stop
+        end if
+
+        inst_name = current_instrm%name_inst
+
+        ! Create the hdf5 file
+        call h5fcreate_f(namef,H5F_ACC_TRUNC_F,file,hdferr)
+
+        ! Create Nexus structure
+        !   /entry0
+        !   /entry0/instrument
+        !   /entry0/instrument/Det1
+        !   /entry0/instrument/gamma
+        !   /entry0/instrument/nu
+        !   /entry0/data_scan
+        !   /entry0/data_scan/detector_data
+        call h5gcreate_f(file,'entry0',group,hdferr)
+        call h5gcreate_f(group,'instrument',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gcreate_f(group,'data_scan',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gclose_f(group,hdferr)
+        call h5gopen_f(file,'entry0/instrument',group,hdferr)
+        i = index(inst_name,'19')
+        if (i < 1) then
+            call h5gcreate_f(group,'Detector',subgroup,hdferr)
+        else
+            call h5gcreate_f(group,'Det1',subgroup,hdferr)
+        end if
+        call h5gclose_f(subgroup,hdferr)
+        call h5gcreate_f(group,'gamma',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gcreate_f(group,'nu',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gclose_f(group,hdferr)
+        call h5gopen_f(file,'entry0/data_scan',group,hdferr)
+        call h5gcreate_f(group,'detector_data',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+
+        ! Write wavelength
+        dims_1D = 1
+        !   Create dataspace
+        call h5screate_simple_f(1,dims_1D,space,hdferr)
+        call h5gopen_f(file,'entry0/wavelength',group,hdferr)
+        call h5dcreate_f(group,'value',H5T_NATIVE_REAL,space,dset,hdferr)
+        !   Write the data to the dataset
+        call h5dwrite_f(dset,H5T_NATIVE_REAL,nexus%wave,dims_1D,hdferr)
+        !   Close and release resources
+        call h5gclose_f(group,hdferr)
+        call h5dclose_f(dset,hdferr)
+        call h5sclose_f(space,hdferr)
+
+        ! Write instrument name
+        dims_1D = 1
+        !   Create file datatype
+        length = len(trim(current_instrm%name_inst))
+        call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
+        call h5tset_size_f(filetype,length,hdferr)
+        !   Create dataspace
+        call h5screate_simple_f(1,dims_1D,space,hdferr)
+        !   Create the dataset and write the string data to it
+        call h5gopen_f(file,'entry0/instrument',group,hdferr)
+        call h5dcreate_f(group,'name',filetype,space,dset,hdferr)
+        f_ptr = C_LOC(inst_name(1:1))
+        call h5dwrite_f(dset,filetype,f_ptr,hdferr)
+        !   Close and release resources
+        call h5gclose_f(group,hdferr)
+        call h5dclose_f(dset,hdferr)
+        call h5sclose_f(space,hdferr)
+        call h5tclose_f(filetype,hdferr)
+
+        ! Write data ordering
+        ! Write instrument name
+        dims_1D = 1
+        !   Create file datatype
+        length = len(trim(current_instrm%data_ordering))
+        call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
+        call h5tset_size_f(filetype,length,hdferr)
+        !   Create dataspace
+        call h5screate_simple_f(1,dims_1D,space,hdferr)
+        !   Create the dataset and write the string data to it
+        i = index(inst_name,'19')
+        if (i < 1) then
+            call h5gopen_f(file,'entry0/instrument/Detector',group,hdferr)
+        else
+            call h5gopen_f(file,'entry0/instrument/Det1',group,hdferr)
+        end if
+        call h5dcreate_f(group,'data_ordering',filetype,space,dset,hdferr)
+        data_ordering = current_instrm%data_ordering
+        f_ptr = C_LOC(data_ordering(1:1))
+        call h5dwrite_f(dset,filetype,f_ptr,hdferr)
+        !   Close and release resources
+        call h5gclose_f(group,hdferr)
+        call h5dclose_f(dset,hdferr)
+        call h5sclose_f(space,hdferr)
+        call h5tclose_f(filetype,hdferr)
+
+        ! Write virtual cgap
+        dims_1D = 1
+        !   Create dataspace
+        call h5screate_simple_f(1,dims_1D,space,hdferr)
+        i = index(inst_name,'19')
+        if (i < 1) then
+            call h5gopen_f(file,'entry0/instrument/Detector',group,hdferr)
+        else
+            call h5gopen_f(file,'entry0/instrument/Det1',group,hdferr)
+        end if
+        call h5dcreate_f(group,'virtual_cgap',H5T_NATIVE_REAL,space,dset,hdferr)
+        !   Write the data to the dataset
+        call h5dwrite_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,dims_1D,hdferr)
+        !   Close and release resources
+        call h5gclose_f(group,hdferr)
+        call h5dclose_f(dset,hdferr)
+        call h5sclose_f(space,hdferr)
+
+        ! Write gamma and nu of the detector
+        allocate(paths(2),val(2))
+        paths(1) = 'entry0/instrument/gamma'
+        paths(2) = 'entry0/instrument/nu'
+        val(1) = ga_Dv
+        val(2) = nu_Dv
+        do i = 1 , 2
+            dims_1D = 1
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            call h5gopen_f(file,trim(paths(i)),group,hdferr)
+            call h5dcreate_f(group,'value',H5T_NATIVE_REAL,space,dset,hdferr)
+            !   Write the data to the dataset
+            call h5dwrite_f(dset,H5T_NATIVE_REAL,val(i),dims_1D,hdferr)
+            !   Close and release resources
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
+        end do
+
+        ! Write counts
+        nv = size(avcounts,1)
+        nh = size(avcounts,2)
+        dims_3D = [nv,nh,1]
+        chunk_3D = [nv,nh,1]
+        !   Create dataspace
+        call h5screate_simple_f(3,dims_3D,space,hdferr)
+        !   Create the dataset creation property list, add the gzip
+        !   compression filter and set the chunk size.  !
+        call h5pcreate_f(H5P_DATASET_CREATE_F,dcpl,hdferr)
+        call h5pset_deflate_f(dcpl,6,hdferr)
+        call h5pset_chunk_f(dcpl,3,chunk_3D,hdferr)
+        !
+        call h5gopen_f(file,'entry0/data_scan/detector_data',group,hdferr)
+        call h5dcreate_f(group,'data',H5T_NATIVE_INTEGER,space,dset,hdferr,dcpl)
+        !   Write the data to the dataset
+        call h5dwrite_f(dset,H5T_NATIVE_INTEGER,avcounts,dims_3D,hdferr)
+        !   Close and release resources
+        call h5pclose_f(dcpl,hdferr)
+        call h5gclose_f(group,hdferr)
+        call h5dclose_f(dset,hdferr)
+        call h5sclose_f(space,hdferr)
+
+        ! Close the hdf5 file
+        call h5fclose_f(file,hdferr)
+
+    end subroutine write_vnexus
 
 end module nexus_mod
