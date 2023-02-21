@@ -44,7 +44,6 @@ module D2B_data_mod
 
     ! List of public subroutines
     public :: average_virtual_counts,fill_virtual_detector,set_virtual_detector, &
-              finish,write_header,write_warning_message,write_error_message, &
               get_powder_pattern
 
     integer, parameter :: NSAMPLES_MAX = 1000
@@ -58,35 +57,10 @@ module D2B_data_mod
     real, public :: ga_D_virtual
     real, public :: ga_range_real
 
-    ! Error message
-    character(len=1024), public :: war_D2B_mess, err_D2B_mess
     logical :: pattern_allocated = .false.
 
     type(diffractometer_type), public :: virtual_instrm
 
-    type, public :: cfl_D2B_type
-
-        integer            :: nscans
-        integer            :: nz_int
-        real               :: scale_fac
-        real               :: tth_min
-        real               :: tth_max
-        real               :: nsigma
-        logical            :: is_tth_min = .false.
-        logical            :: is_tth_max = .false.
-        logical            :: calibration,combine,raw
-        logical            :: suma
-        logical            :: single
-        logical            :: align
-        character(len=6)   :: calib_gen
-        character(len=12)  :: instrument_name
-        character(len=20)  :: suffix
-        character(len=512) :: scan_path,calib_path,calib_file,combine_name
-        integer, dimension(:,:),          allocatable :: scan_list
-        character(len=512), dimension(:), allocatable :: scans
-        character(len=:),                 allocatable :: label_sum
-
-    end type cfl_D2B_type
 
     contains
 
@@ -97,8 +71,8 @@ module D2B_data_mod
         if (allocated(nsamples)) deallocate(nsamples)
         ! Assign memory to arrays
         allocate(ave_counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,1))
-        allocate(counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,NSAMPLES_MAX))
-        allocate(nsamples(virtual_instrm%np_vert,virtual_instrm%np_horiz))
+        allocate(    counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,NSAMPLES_MAX))
+        allocate(          nsamples(virtual_instrm%np_vert,virtual_instrm%np_horiz))
         ave_counts_virtual(:,:,:) = 0
         counts_virtual(:,:,:) = 0
         nsamples(:,:) = 0
@@ -144,7 +118,7 @@ module D2B_data_mod
                             ave_counts_virtual(i,j,1) + counts_virtual(i,j,k)
                     end if
                 end do
-                if (n > 0) ave_counts_virtual(i,j,1) = nint(ave_counts_virtual(i,j,1)  / float(n))
+                if (n > 0) ave_counts_virtual(i,j,1) = nint(real(ave_counts_virtual(i,j,1))  / real(n))
             end do
         end do
 
@@ -205,88 +179,33 @@ module D2B_data_mod
         virtual_instrm%data_ordering      = current_instrm%data_ordering
         ga_D_virtual = 0.5 * (ga_1 + ga_N)
         call allocate_virtual_arrays()
-        write(*,'(8x,a,1x,f8.3)') 'Gamma step: ', dga
-        write(*,'(8x,a,1x,f8.3)') 'Gamma range of the real    detector: ', ga_range_real
-        write(*,'(8x,a,1x,f8.3)') 'Gamma range of the virtual detector: ', ga_N - ga_1
-        write(*,'(8x,a,1x,i6)')   'Number of horizontal pixels of the real    detector: ', current_instrm%np_horiz
-        write(*,'(8x,a,1x,i6)')   'Number of horizontal pixels of the virtual detector: ', virtual_instrm%np_horiz
-        write(*,'(8x,a,1x,f8.3)') 'Size of horizontal pixel of the real    detector (mm): ', current_instrm%cgap
-        write(*,'(8x,a,1x,f8.3)') 'Size of horizontal pixel of the virtual detector (mm): ', virtual_instrm%cgap
-        write(*,'(8x,a,1x,f8.3)') 'Gamma value for the first pixel of the virtual detector: ', ga_1
-        write(*,'(8x,a,1x,f8.3)') 'Gamma value for the last  pixel of the virtual detector: ', ga_N
+        write(*,'(/,8x,a)')         'VIRTUAL DETECTOR FEATURES: '
+        write(*,'(8x,a,1x,f8.3)')   'Gamma step: ', dga
+        write(*,'(8x,a,1x,f8.3)')   'Gamma range of the real    detector: ', ga_range_real
+        write(*,'(8x,a,1x,f8.3)')   'Gamma range of the virtual detector: ', ga_N - ga_1
+        write(*,'(8x,a,1x,i6)')     'Number of horizontal pixels of the real    detector: ', current_instrm%np_horiz
+        write(*,'(8x,a,1x,i6)')     'Number of horizontal pixels of the virtual detector: ', virtual_instrm%np_horiz
+        write(*,'(8x,a,1x,f8.3)')   'Size of horizontal pixel of the real    detector (mm): ', current_instrm%cgap
+        write(*,'(8x,a,1x,f8.3)')   'Size of horizontal pixel of the virtual detector (mm): ', virtual_instrm%cgap
+        write(*,'(8x,a,1x,f8.3)')   'Gamma value for the first pixel of the virtual detector: ', ga_1
+        write(*,'(8x,a,1x,f8.3,/)') 'Gamma value for the last  pixel of the virtual detector: ', ga_N
 
     end subroutine set_virtual_detector
 
-    subroutine finish(t_ini)
 
-        ! Finish the program due to an error
 
-        ! Arguments
-        real, intent(in) :: t_ini
-
-        call write_error_message(6,t_ini)
-        stop
-
-    end subroutine finish
-
-    subroutine write_header(iout)
+    subroutine get_powder_pattern(nz_int,scale_fac,align,np_horiz,virtual_cgap,ga_D,nu_D,data2D,pat)
 
         ! Arguments
-        integer, intent(in), optional :: iout
-
-        ! Local variables
-        integer :: i,lun
-
-        lun=6
-        if(present(iout)) lun=iout
-
-        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
-        write(unit=lun,fmt='(13x,a)') ' Integrating D2B data'
-        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
-        write(unit=lun,fmt='(1x,a)') ' Program: D2B_int, February 2023'
-        write(unit=lun,fmt='(1x,a)') ' Authors: Nebil A. Katcho and J. Rodriguez-Carvajal'
-        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
-
-    end subroutine write_header
-
-    subroutine write_error_message(lun,t_ini)
-
-        ! Stop the program, printing out an error message
-
-        ! Arguments
-        integer, intent(in) :: lun
-        real,    intent(in) :: t_ini
-
-        ! Local variables
-        real :: t_fin
-
-        call cpu_time(t_fin)
-        write(unit=lun, fmt='(a,a)')       ' => D2B_int stopped!: ', trim(err_CFML%Msg)
-        write(unit=lun, fmt='(a,f10.4,a)') ' => Total CPU-time: ',t_fin-t_ini,' seconds'
-
-    end subroutine write_error_message
-
-    subroutine write_warning_message(lun)
-
-        ! Print a warning message
-
-        ! Arguments
-        integer, intent(in) :: lun
-
-        write(unit=lun, fmt='(a,a)') ' => Warning!: ', trim(war_D2B_mess)
-
-    end subroutine write_warning_message
-
-    subroutine get_powder_pattern(cfl,np_horiz,virtual_cgap,ga_D,nu_D,data2D,pat)
-
-        ! Arguments
-        type(cfl_D2B_type),      intent(in)    :: cfl
-        integer,                 intent(in)    :: np_horiz
-        real,                    intent(in)    :: virtual_cgap
-        real,                    intent(in)    :: ga_D
-        real,                    intent(in)    :: nu_D
-        integer, dimension(:,:), intent(in)    :: data2D
-        type(DiffPat_E_Type),    intent(inout) :: pat
+        integer,                 intent(in)     :: nz_int
+        real,                    intent(in)     :: scale_fac
+        logical,                 intent(in)     :: align
+        integer,                 intent(in)     :: np_horiz
+        real,                    intent(in)     :: virtual_cgap
+        real,                    intent(in)     :: ga_D
+        real,                    intent(in)     :: nu_D
+        integer, dimension(:,:), intent(in)     :: data2D
+        type(DiffPat_E_Type),    intent(in out) :: pat
 
         ! Local variables
         integer :: i,k,k1,k2,nc,ith
@@ -298,7 +217,7 @@ module D2B_data_mod
         current_instrm%cgap = virtual_cgap
         span_angle = (((current_instrm%np_horiz-1) * current_instrm%cgap) / current_instrm%dist_samp_detector) * to_deg
 
-        if (.not. cfl%align .or. .not. pattern_allocated) then
+        if (.not. align .or. .not. pattern_allocated) then
             ! Allocating a 1D powder diffraction pattern
             call Allocate_Pattern(pat,np_horiz)
             pattern_allocated = .true.
@@ -322,7 +241,7 @@ module D2B_data_mod
         pat%nd    = 0
 
         ! Compute integration limits
-        nc = max(1,cfl%nz_int/2)
+        nc = max(1,nz_int/2)
         nc = min(current_instrm%np_vert/2,nc)
         k1 = current_instrm%np_vert/2 - nc + 1
         k2 = current_instrm%np_vert/2 + nc
@@ -347,7 +266,7 @@ module D2B_data_mod
 
         ! Average
         do i = 1 , pat%npts
-            fac = cfl%scale_fac / max(1,pat%nd(i))
+            fac = scale_fac / max(1,pat%nd(i))
             pat%y(i) = pat%y(i) * fac
             if (pat%y(i) < 1.00) pat%y(i) = 1.0
             pat%sigma(i) = pat%y(i)
