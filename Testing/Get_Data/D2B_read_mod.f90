@@ -37,12 +37,11 @@ module D2B_read_mod
     !       read_cfl
 
     use hdf5
-    use CFML_GlobalDeps,      only: Clear_Error,Err_CFML
+    use CFML_GlobalDeps,      only: Clear_Error,Err_CFML,OPS_Sep
     use CFML_ILL_Instrm_Data, only: Current_Instrm,Read_Current_Instrm
     use CFML_Strings,         only: L_Case,Reading_File,File_Type
     use CFML_SXTAL_Geom,      only: Set_PSD
-    use D2B_data_mod,         only: calibration,cfl_D2B_type, war_D2B_mess, err_D2B_mess
-
+    use D2B_data_mod,         only: calibration
     use nexus_mod
 
     implicit none
@@ -51,6 +50,31 @@ module D2B_read_mod
 
     ! List of public subroutines
     public :: read_calibration_lamp,read_calibration_mantid,read_cfl_D2B
+
+    type, public :: cfl_D2B_type
+
+        integer            :: nscans
+        integer            :: nz_int
+        real               :: scale_fac
+        real               :: tth_min
+        real               :: tth_max
+        real               :: nsigma
+        logical            :: is_tth_min = .false.
+        logical            :: is_tth_max = .false.
+        logical            :: calibration,combine,raw
+        logical            :: suma
+        logical            :: single
+        logical            :: align
+        logical            :: verbose
+        character(len=6)   :: calib_gen
+        character(len=12)  :: instrument_name
+        character(len=20)  :: suffix
+        character(len=512) :: scan_path,calib_path,calib_file,combine_name
+        integer, dimension(:,:),          allocatable :: scan_list
+        character(len=512), dimension(:), allocatable :: scans
+        character(len=:),                 allocatable :: label_sum
+
+    end type cfl_D2B_type
 
     character(len=3) :: suffix_DEFAULT = 'd2b'
     real, parameter  :: NSIGMA_DEFAULT = 3.0
@@ -64,6 +88,8 @@ module D2B_read_mod
     logical,          parameter :: SINGLE_DEFAULT     = .false.
     logical,          parameter :: SUM_DEFAULT        = .false.
     character(len=3), parameter :: LABEL_SUM_DEFAULT  = 'sum'
+    ! Error message
+    character(len=1024), public :: war_D2B_mess, err_D2B_mess
 
 
     contains
@@ -267,7 +293,7 @@ module D2B_read_mod
         integer,             intent(out) :: ierr
 
         ! Local variables
-        integer                       :: i,j,k,n,ierror
+        integer                       :: i,j,k,n,ierror,num1,num2
         character(len=100)            :: keyword,gen_calib
         character(len=1024)           :: path_calib,combine_name
         character(len=:), allocatable :: line,file_inst,file_calib,namef
@@ -283,9 +309,12 @@ module D2B_read_mod
         cfl%calibration = CALIBRATION_DEFAULT
         cfl%combine = .false.
         cfl%raw = .false.
+        cfl%verbose = .false.
         cfl%suffix = suffix_DEFAULT
         cfl%nsigma = NSIGMA_DEFAULT
         cfl%nscans = 0
+        cfl%nscans = 0
+        cfl%scan_path=" "
 
         ! Put the content in cfl_file_type
         !cfl_file_type = Reading_File('gamma_scan.cfl')
@@ -304,6 +333,39 @@ module D2B_read_mod
             end if
 
             select case (keyword)
+
+                case('scan_path')
+                    if (j > 0) read(unit=line(j:),fmt='(a)',iostat=ierror) combine_name
+                    if(ierror /= 0 .or. j == 0) then
+                        ierr = 1
+                        err_D2B_mess = 'read_cfl: error reading the scan_path name'
+                        return
+                    else
+                       cfl%scan_path=trim(adjustl(combine_name))
+                       k=len_trim(cfl%scan_path)
+                       if(cfl%scan_path(k:k) /= OPS_SEP) cfl%scan_path(k+1:k+1)=OPS_SEP
+                    end if
+
+                case('numors')
+                    if(len_trim(cfl%scan_path) == 0) then
+                        ierr = 1
+                        err_D2B_mess = 'read_cfl: error, scan_path should be provided before reading numors'
+                        return
+                    end if
+                    read(line(j+1:),*,iostat=ierror) num1,num2
+                    if (ierror == 0) then
+                        n = num2-num1+1
+                        cfl%nscans = num2-num1+1
+                        allocate(cfl%scans(n))
+                        do k = num1,num2
+                            write(cfl%scans(k),"(a,i6.6,a)") trim(cfl%scan_path),k,".nxs"
+                        end do
+                    else
+                        ierr = 1
+                        err_D2B_mess = 'read_cfl: error reading numors'
+                        return
+                    end if
+
                 case('combine')
                     cfl%combine = .true.
                     ierror = 0
@@ -311,7 +373,7 @@ module D2B_read_mod
                     if (ierror /= 0 .or. j == 0) then
                         cfl%combine_name = 'gsc'
                     else
-                        cfl%combine_name = combine_name
+                        cfl%combine_name = adjustl(combine_name)
                     end if
 
 
@@ -348,25 +410,33 @@ module D2B_read_mod
                 case('calibration_gen')
                     read(unit=line(j+1:),fmt='(a)',iostat=ierror) gen_calib
                     if (ierror == 0) cfl%calib_gen = adjustl(trim(gen_calib))
+
                 case('calibration_path')
                     read(unit=line(j+1:),fmt='(a)',iostat=ierror) path_calib
                     cfl%calib_path = adjustl(path_calib)
                     if (ierror == 0) is_calib_path = .true.
+
                 case('suffix')
                     read(line(j+1:),*,iostat=ierror) cfl%suffix
                     if (ierror /= 0) cfl%suffix = suffix_DEFAULT
+
                 case('nsigma')
                     read(line(j+1:),*,iostat=ierror) cfl%nsigma
                     if (ierror /= 0) cfl%nsigma = NSIGMA_DEFAULT
+
                 case ('raw')
                     cfl%raw = .true.
+
+                case ('verbose')
+                    cfl%verbose = .true.
+
                 case('scans')
                     read(line(j+1:),*,iostat=ierror) n
                     if (ierror == 0) then
                         allocate(cfl%scans(n))
                         do k = 1 , n
-                            line = cfl_file_type%line(i+k)%str
-                            read(line,*,iostat=ierror) cfl%scans(k)
+                            line = adjustl(cfl_file_type%line(i+k)%str)
+                            read(line,"(a)",iostat=ierror) cfl%scans(k)
                             if (ierror /= 0) exit
                         end do
                     end if

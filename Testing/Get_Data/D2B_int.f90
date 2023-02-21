@@ -31,7 +31,7 @@
 
 program D2B_int
 
-    use CFML_GlobalDeps,      only: to_deg
+    use CFML_GlobalDeps,      only: to_deg,err_CFML
     use CFML_ILL_Instrm_Data, only: Current_Instrm
     use CFML_Strings,         only: L_Case
     use CFML_DiffPatt,        only: DiffPat_E_Type,write_pattern
@@ -47,16 +47,16 @@ program D2B_int
     real,    parameter :: D2B_WIDTH_HORIZ = 1.25 ! degrees
 
     ! Local variables
-    integer            :: ierr,i,j,nscans
-    real               :: t_ini,dga_i,dga,ga_D_min_i,ga_D_max_i,ga_D_min,ga_D_max,ga_1,ga_N
+    integer            :: ierr,i,j,nscans,last
+    real               :: t_ini,dga_i,dga,ga_D_min_i,ga_D_max_i,ga_D_min,ga_D_max,ga_1,ga_N,t_end
     character(len=512) :: scanf, cfl_file
     type(cfl_D2B_type) :: cfl
-    type(nexus_type)   :: nexus
+    type(nexus_type),dimension(:),allocatable   :: nexus
+    type(nexus_type)   :: snexus  !Single nexus
 
-    integer :: np_horiz,np_horiz_virtual
-    integer, dimension(:,:), allocatable :: data2D
+    integer :: np_horiz
+    integer, dimension(3) :: dims
     real    :: ga_D,nu_D,xmin,cgap
-    logical :: is_virtual_detector_set
     type(DiffPat_E_Type) :: pow_pat
 
     ! Starting time
@@ -68,6 +68,9 @@ program D2B_int
     write(*,'(a)') ' => Reading cfl file: '//trim(cfl_file)
     call read_cfl_D2B(cfl_file,cfl,ierr)
     if (ierr > 0) call finish(t_ini)
+
+    if(allocated(nexus)) deallocate(nexus)
+    allocate(nexus(cfl%nscans))
 
     ! Read calibration file if it was given
     if (cfl%calibration) then
@@ -101,57 +104,14 @@ program D2B_int
     end if
 
     ga_range_real = to_deg * current_instrm%cgap * (current_instrm%np_horiz - 1) / current_instrm%dist_samp_detector
-    if (cfl%combine) then
-        ! Determine the virtual detector common for all scans
-        write(*,'(4x,a)') ' => Computing virtual detector common for all scans'
-        do i = 1 , cfl%nscans
-            write(*,'(8x,a,1x,a)') 'Reading nexus file', trim(cfl%scans(i))
-            call read_nexus(trim(cfl%scans(i)),nexus)
-            if (err_nexus) then
-                write(*,'(8x,a)') trim(err_nexus_mess)
-                cycle
-            end if
-            if (is_d2b) then
-                ! Transform 2theta into gamma values
-                if (nexus%is_tth) then
-                    do j = 1 , nexus%nf
-                        nexus%angles(4,j) = nexus%angles(8,j) - 0.5 * (D2B_NPIXELS_HORIZ-1) * D2B_WIDTH_HORIZ + 0.5 * D2B_WIDTH_HORIZ
-                    end do
-                end if
-            end if
-            ! dga_i -> scan step of the scan i
-            ! ga_D_min_i -> minimum value of the gamma detector value for frames in the scan
-            ! ga_D_max_i -> maximum value of the gamma detector value for frames in the scan
-            dga_i = abs(nexus%angles(4,nexus%nf)-nexus%angles(4,1)) / (nexus%nf - 1)
-            ga_D_min_i = min(nexus%angles(4,nexus%nf),nexus%angles(4,1))
-            ga_D_max_i = max(nexus%angles(4,nexus%nf),nexus%angles(4,1))
-            if (i == 1) then
-                dga = dga_i
-                ga_D_min = ga_D_min_i
-                ga_D_max = ga_D_max_i
-            else
-                if (abs(dga-dga_i) > EPSIL) then
-                    err_D2B_mess = 'Scans with different scan steps cannot be combined'
-                    call finish(t_ini)
-                end if
-                if (ga_D_min_i < ga_D_min) ga_D_min = ga_D_min_i
-                if (ga_D_max_i > ga_D_max) ga_D_max = ga_D_max_i
-            end if
-        end do
-        ! ga_1 -> gamma value of the first pixel of the virtual detector
-        ! ga_N -> gamma value of the last  pixel of the virtual detector
-        ga_1 = ga_D_min - 0.5 * ga_range_real
-        ga_N = ga_D_max + 0.5 * ga_range_real
-        call set_virtual_detector(ga_1,ga_N,dga)
-    end if
-
-    ! Start looping over scans
+    ! Determine the virtual detector common for all scans
+    write(*,'(4x,a)') ' => Computing virtual detector common for all scans'
     do i = 1 , cfl%nscans
-        write(*,'(4x,a,1x,a)') ' => Reading nexus file', trim(cfl%scans(i))
+        write(*,'(8x,a,1x,a)') 'Reading nexus file', trim(cfl%scans(i))
         if (cfl%raw) then
-            call read_nexus(trim(cfl%scans(i)),nexus,raw=cfl%raw)
+            call read_nexus(trim(cfl%scans(i)),nexus(i),raw=cfl%raw)
         else
-            call read_nexus(trim(cfl%scans(i)),nexus)
+            call read_nexus(trim(cfl%scans(i)),nexus(i))
         end if
         if (err_nexus) then
             write(*,'(8x,a)') trim(err_nexus_mess)
@@ -159,135 +119,170 @@ program D2B_int
         end if
         if (is_d2b) then
             ! Transform 2theta into gamma values
-            if (nexus%is_tth) then
-                do j = 1 , nexus%nf
-                    nexus%angles(4,j) = nexus%angles(8,j) - 0.5 * (D2B_NPIXELS_HORIZ-1) * D2B_WIDTH_HORIZ + 0.5 * D2B_WIDTH_HORIZ
+            if (nexus(i)%is_tth) then
+                do j = 1 , nexus(i)%nf
+                    nexus(i)%angles(4,j) = nexus(i)%angles(8,j) - 0.5 * (D2B_NPIXELS_HORIZ-1) * D2B_WIDTH_HORIZ + 0.5 * D2B_WIDTH_HORIZ
                 end do
             end if
         end if
-        if (abs(current_instrm%wave-nexus%wave) > EPSIL) then
-            write(*,'(8x,a)') 'Warning! Wavelengths from instrument and nexus differ! Instrument wavelength will be used'
-            write(*,'(8x,a,f6.4)') 'Wavelength (instrument): ',current_instrm%wave
-            write(*,'(8x,a,f6.4)') 'Wavelength (nexus): ',nexus%wave
+        ! dga_i -> scan step of the scan i
+        ! ga_D_min_i -> minimum value of the gamma detector value for frames in the scan
+        ! ga_D_max_i -> maximum value of the gamma detector value for frames in the scan
+        dga_i = abs(nexus(i)%angles(4,nexus(i)%nf)-nexus(i)%angles(4,1)) / (nexus(i)%nf - 1)
+        ga_D_min_i = min(nexus(i)%angles(4,nexus(i)%nf),nexus(i)%angles(4,1))
+        ga_D_max_i = max(nexus(i)%angles(4,nexus(i)%nf),nexus(i)%angles(4,1))
+        if (i == 1) then
+            dga = dga_i
+            ga_D_min = ga_D_min_i
+            ga_D_max = ga_D_max_i
         else
-            write(*,'(8x,a,f6.4)') 'Wavelength: ',nexus%wave
-        end if
-        if (trim(current_instrm%data_ordering) /= nexus%data_ordering) then
-            write(*,'(8x,a)') 'Warning! Data ordering from instrument and nexus differ! Instrument data ordering will be used'
-            write(*,'(8x,a,a)') 'Data ordering (instrument): ',trim(current_instrm%data_ordering)
-            write(*,'(8x,a,a)') 'Data ordering (nexus)     : ',trim(nexus%data_ordering)
-        else
-            write(*,'(8x,2a)') 'Data ordering: ',nexus%data_ordering
-        end if
-        if (.not. cfl%combine) then
-            write(*,'(4x,a)') ' => Building virtual detector'
-            dga = abs(nexus%angles(4,nexus%nf)-nexus%angles(4,1)) / (nexus%nf - 1)
-            ga_D_min = min(nexus%angles(4,nexus%nf),nexus%angles(4,1))
-            ga_D_max = max(nexus%angles(4,nexus%nf),nexus%angles(4,1))
-            ga_1 = ga_D_min - 0.5 * ga_range_real
-            ga_N = ga_D_max + 0.5 * ga_range_real
-            call set_virtual_detector(ga_1,ga_N,dga)
-        end if
-        write(*,'(4x,a)') ' => Putting counts in the virtual detector'
-        call fill_virtual_detector(nexus)
-
-        if (.not. cfl%combine) then
-            write(*,'(4x,a)') ' => Averaging counts for virtual pixels'
-            call average_virtual_counts(cfl%nsigma)
-            write(scanf,'(2a)') trim(nexus%filcod),'_'//trim(cfl%suffix)//'.nxs'
-            write(*,'(4x,2a)') ' => Writing nexus file ', trim(scanf)
-            !Setting nexus%virtual_cgap
-            nexus%virtual_cgap=virtual_instrm%cgap
-            call write_vnexus(trim(scanf),ga_D_virtual,nu_D_virtual,ave_counts_virtual,nexus)
+            if (abs(dga-dga_i) > EPSIL) then
+                err_D2B_mess = 'Scans with different scan steps cannot be combined'
+                call finish(t_ini)
+            end if
+            if (ga_D_min_i < ga_D_min) ga_D_min = ga_D_min_i
+            if (ga_D_max_i > ga_D_max) ga_D_max = ga_D_max_i
         end if
     end do
+    ! ga_1 -> gamma value of the first pixel of the virtual detector
+    ! ga_N -> gamma value of the last  pixel of the virtual detector
+    ga_1 = ga_D_min - 0.5 * ga_range_real
+    ga_N = ga_D_max + 0.5 * ga_range_real
+    call set_virtual_detector(ga_1,ga_N,dga)
+    ! Start looping over scans
+    do i = 1 , cfl%nscans
+        if (is_d2b) then
+            ! Transform 2theta into gamma values
+            if (nexus(i)%is_tth) then
+                do j = 1 , nexus(i)%nf
+                    nexus(i)%angles(4,j) = nexus(i)%angles(8,j) - 0.5 * (D2B_NPIXELS_HORIZ-1) * D2B_WIDTH_HORIZ + 0.5 * D2B_WIDTH_HORIZ
+                end do
+            end if
+        end if
+        if (abs(current_instrm%wave-nexus(i)%wave) > EPSIL) then
+            write(*,'(8x,a)') 'Warning! Wavelengths from instrument and nexus differ! Instrument wavelength will be used'
+            write(*,'(8x,a,f6.4)') 'Wavelength (instrument): ',current_instrm%wave
+            write(*,'(8x,a,f6.4)') 'Wavelength (nexus): ',nexus(i)%wave
+        end if
+        if (trim(current_instrm%data_ordering) /= nexus(i)%data_ordering) then
+            write(*,'(8x,a)') 'Warning! Data ordering from instrument and nexus differ! Instrument data ordering will be used'
+            write(*,'(8x,a,a)') 'Data ordering (instrument): ',trim(current_instrm%data_ordering)
+            write(*,'(8x,a,a)') 'Data ordering (nexus)     : ',trim(nexus(i)%data_ordering)
+        end if
+        call fill_virtual_detector(nexus(i))
+    end do
 
-    if (cfl%combine) then
-        write(*,'(4x,a)') ' => Averaging counts for virtual pixels'
-        call average_virtual_counts(cfl%nsigma)
-        write(scanf,'(2a)') trim(adjustl(cfl%combine_name))//'.nxs'
-        write(*,'(4x,2a)') ' => Writing nexus file ', trim(scanf)
-        !Setting nexus%virtual_cgap
-        nexus%virtual_cgap=virtual_instrm%cgap
-        call write_vnexus(scanf,ga_D_virtual,nu_D_virtual,ave_counts_virtual,nexus)
+    last=cfl%nscans
+    write(*,'(4x,a)') ' => Averaging counts for virtual pixels'
+    call average_virtual_counts(cfl%nsigma)
+    write(scanf,'(2a)') trim(adjustl(cfl%combine_name))//'.nxs'
+    write(*,'(4x,2a)') ' => Writing nexus file ', trim(scanf)
+
+    !Setting snexus%virtual_cgap
+    dims(1)=size(ave_counts_virtual,1)
+    dims(2)=size(ave_counts_virtual,2)
+    dims(3)=size(ave_counts_virtual,3)
+    call initialize_nexus(snexus,dims)
+    call partial_nexus_copy(nexus(last),snexus)
+    snexus%virtual_cgap=virtual_instrm%cgap
+    snexus%angles(4,1)=ga_D_virtual
+    snexus%angles(7,1)=nu_D_virtual
+    snexus%counts=ave_counts_virtual
+    call write_simple_nexus(trim(scanf),snexus)
+
+    !Integration
+
+    if(cfl%verbose) call display_nexus(6,snexus)
+
+    ga_D = snexus%angles(4,1)
+    nu_D = snexus%angles(7,1)
+    np_horiz = size(snexus%counts,2)
+    cgap = snexus%virtual_cgap
+    if(cfl%verbose) then
+       write(*,'(4x,a)') 'Setting parameters of the virtual detector'
+       write(*,'(8x,a,1x,i6)')   'Number of horizontal pixels:',np_horiz
+       write(*,'(8x,a,1x,f6.2)') 'Horizontal pixel size (mm): ',cgap
+       write(*,'(8x,a,1x,f6.2)') 'Gamma:',ga_D
+       write(*,'(8x,a,1x,f6.2)') 'Nu:   ',nu_D
     end if
 
-    !Continue with integration
-
-    call display_nexus(6,nexus)
-
-    nscans = 0
-    is_virtual_detector_set = .false.
-
-        write(*,'(a,1x,a)') ' => Reading nexus file', trim(scanf)
-        call read_nexus(scanf,nexus)
-        if (err_nexus) then
-            write(*,'(4x,a)') trim(err_nexus_mess)//"  -> "//trim(scanf)
-            call finish(t_ini)
-        end if
-        ga_D = nexus%angles(4,1)
-        nu_D = nexus%angles(7,1)
-        np_horiz = size(nexus%counts,2)
-        if (.not. is_virtual_detector_set) then
-            ga_D_virtual = ga_D
-            nu_D_virtual = nu_D
-            np_horiz_virtual = np_horiz
-            is_virtual_detector_set = .true.
-            if (nexus%is_virtual) then
-                cgap = nexus%virtual_cgap
-            else
-                cgap = current_instrm%cgap
-            end if
-            write(*,'(4x,a)') 'Setting parameters of the virtual detector'
-            write(*,'(8x,a,1x,i6)')   'Number of horizontal pixels:',np_horiz_virtual
-            write(*,'(8x,a,1x,f6.2)') 'Horizontal pixel size (mm): ',cgap
-            write(*,'(8x,a,1x,f6.2)') 'Gamma:',ga_D_virtual
-            write(*,'(8x,a,1x,f6.2)') 'Nu:   ',nu_D_virtual
-        end if
-
-        if (cfl%single) then
-            write(*,'(4x,a)') 'Integrating'
-            call get_powder_pattern(cfl,np_horiz_virtual,cgap,ga_D,nu_D,nexus%counts(:,:,1),pow_pat)
-            if (cfl%is_tth_min) then
-                xmin = cfl%tth_min
-            else
-                xmin = pow_pat%xmin
-            end if
-            if (cfl%is_tth_max) then
-                call write_pattern(trim(nexus%filcod)//'.xys',pow_pat,'xys',xmin=xmin,xmax=cfl%tth_max)
-            else
-                call write_pattern(trim(nexus%filcod)//'.xys',pow_pat,'xys',xmin=xmin)
-            end if
-        end if
-
-        if (cfl%suma) then
-            if (.not. allocated(data2D)) then
-                allocate(data2D(nexus%nz,nexus%nx))
-                data2D(:,:) = 0
-            end if
-            if (abs(ga_D-ga_D_virtual) > EPSIL .or. abs(nu_D-nu_D_virtual) > EPSIL .or. &
-                np_horiz /= np_horiz_virtual) then
-                write(*,'(8x,a)') 'This scan cannot be averaged. Inconsistent dimensions'
-            else
-                data2D(:,:) = data2D(:,:) + nexus%counts(:,:,1)
-                nscans = nscans + 1
-            end if
-        end if
-
-
-    if (cfl%suma .and. nscans > 0) then
-        write(*,'(a)') ' => Integrating the sum'
-        call get_powder_pattern(cfl,np_horiz_virtual,cgap,ga_D,nu_D,data2D,pow_pat)
-        if (cfl%is_tth_min) then
-            xmin = cfl%tth_min
-        else
-            xmin = pow_pat%xmin
-        end if
-        if (cfl%is_tth_max) then
-            call write_pattern(trim(cfl%label_sum)//'.xys',pow_pat,'xys',xmin=xmin,xmax=cfl%tth_max)
-        else
-            call write_pattern(trim(cfl%label_sum)//'.xys',pow_pat,'xys',xmin=xmin)
-        end if
+    call get_powder_pattern(cfl%nz_int,cfl%scale_fac,cfl%align,np_horiz,cgap,ga_D,nu_D,snexus%counts(:,:,1),pow_pat)
+    if (cfl%is_tth_min) then
+        xmin = cfl%tth_min
+    else
+        xmin = pow_pat%xmin
     end if
+    write(*,'(4x,2a)') ' => Writing xys file ', trim(cfl%combine_name)//'.xys'
+    if (cfl%is_tth_max) then
+        call write_pattern(trim(cfl%combine_name)//'.xys',pow_pat,'xys',xmin=xmin,xmax=cfl%tth_max)
+    else
+        call write_pattern(trim(cfl%combine_name)//'.xys',pow_pat,'xys',xmin=xmin)
+    end if
+
+    call cpu_time(t_end)
+    write(unit=*, fmt='(/,a)')       ' => D2B_int finished normally  '
+    write(unit=*, fmt='(a,f10.4,a)') ' => Total CPU-time: ',t_end-t_ini,' seconds'
+
+  contains
+
+    subroutine finish(t_ini)
+
+        ! Finish the program due to an error
+
+        ! Arguments
+        real, intent(in) :: t_ini
+
+        call write_error_message(6,t_ini)
+        stop
+
+    end subroutine finish
+
+    subroutine write_header(iout)
+
+        ! Arguments
+        integer, intent(in), optional :: iout
+
+        ! Local variables
+        integer :: i,lun
+
+        lun=6
+        if(present(iout)) lun=iout
+
+        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
+        write(unit=lun,fmt='(13x,a)') ' Integrating D2B data'
+        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
+        write(unit=lun,fmt='(1x,a)') ' Program: D2B_int, February 2023'
+        write(unit=lun,fmt='(1x,a)') ' Authors: Nebil A. Katcho and J. Rodriguez-Carvajal'
+        write(unit=lun,fmt='(1x,60a)') ('-',i=1,52)
+
+    end subroutine write_header
+
+    subroutine write_error_message(lun,t_ini)
+
+        ! Stop the program, printing out an error message
+
+        ! Arguments
+        integer, intent(in) :: lun
+        real,    intent(in) :: t_ini
+
+        ! Local variables
+        real :: t_fin
+
+        call cpu_time(t_fin)
+        write(unit=lun, fmt='(a,a)')       ' => D2B_int stopped!: ', trim(err_CFML%Msg)
+        write(unit=lun, fmt='(a,f10.4,a)') ' => Total CPU-time: ',t_fin-t_ini,' seconds'
+
+    end subroutine write_error_message
+
+    subroutine write_warning_message(lun)
+
+        ! Print a warning message
+
+        ! Arguments
+        integer, intent(in) :: lun
+
+        write(unit=lun, fmt='(a,a)') ' => Warning!: ', trim(war_D2B_mess)
+
+    end subroutine write_warning_message
 
 end program D2B_int
