@@ -43,7 +43,7 @@
         px_ = px
         pz_ = pz
         if(present(shifts)) then
-          deltaX=diffractometer%shifts(px+1) !indices for pixels in the calling program start with 0
+          deltaX=diffractometer%shifts(nint(px)+1) !indices for pixels in the calling program start with 0
         else
           deltaX=0.0
         end if
