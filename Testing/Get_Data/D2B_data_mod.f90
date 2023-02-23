@@ -32,7 +32,8 @@
 module D2B_data_mod
 
     use CFML_GlobalDeps,      only: To_Rad,To_Deg,Err_CFML,clear_error
-    use CFML_ILL_Instrm_Data, only: Current_Instrm,Diffractometer_Type
+    use CFML_ILL_Instrm_Data, only: Current_Instrm,Diffractometer_Type, Calibration_Detector_Type, &
+                                    Write_Current_Instrm_data
     use CFML_SXTAL_Geom,      only: diffractometer => psd, psd_convert
     use CFML_DiffPatt,        only: DiffPat_E_Type,Allocate_Pattern
     use HDF5
@@ -44,15 +45,16 @@ module D2B_data_mod
 
     ! List of public subroutines
     public :: average_virtual_counts,fill_virtual_detector,set_virtual_detector, &
-              get_powder_pattern
+              get_powder_pattern, set_alphas_shifts_D2B
 
     integer, parameter :: NSAMPLES_MAX = 1000
     real,    parameter :: EPSIL = 0.01
 
     integer, dimension(:,:),   allocatable, public :: nsamples
-    integer, dimension(:,:,:), allocatable, public :: counts_virtual
-    integer, dimension(:,:,:), allocatable, public :: ave_counts_virtual
+    real,    dimension(:,:,:), allocatable, public :: counts_virtual
+    real,    dimension(:,:,:), allocatable, public :: ave_counts_virtual
     real,    dimension(:,:),   allocatable, public :: calibration
+    type(Calibration_Detector_Type),        public :: Cal
     real, public :: nu_D_virtual = 0.0
     real, public :: ga_D_virtual
     real, public :: ga_range_real
@@ -73,8 +75,8 @@ module D2B_data_mod
         allocate(ave_counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,1))
         allocate(    counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,NSAMPLES_MAX))
         allocate(          nsamples(virtual_instrm%np_vert,virtual_instrm%np_horiz))
-        ave_counts_virtual(:,:,:) = 0
-        counts_virtual(:,:,:) = 0
+        ave_counts_virtual(:,:,:) = 0.0
+        counts_virtual(:,:,:) = 0.0
         nsamples(:,:) = 0
 
     end subroutine allocate_virtual_arrays
@@ -118,17 +120,17 @@ module D2B_data_mod
                             ave_counts_virtual(i,j,1) + counts_virtual(i,j,k)
                     end if
                 end do
-                if (n > 0) ave_counts_virtual(i,j,1) = nint(real(ave_counts_virtual(i,j,1))  / real(n))
+                if (n > 0) ave_counts_virtual(i,j,1) = ave_counts_virtual(i,j,1)  / real(n)
             end do
         end do
 
     end subroutine average_virtual_counts
 
-    subroutine fill_virtual_detector(nexus)
+    subroutine fill_virtual_detector(nexus,Cal)
 
         ! Arguments
-        type(nexus_type), intent(in) :: nexus
-
+        type(nexus_type),                intent(in) :: nexus
+        type(Calibration_Detector_Type), intent(in) :: Cal
         ! Local variables
         integer :: i,j,k,ii,jj
         real :: ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P
@@ -138,10 +140,11 @@ module D2B_data_mod
             nu_D = nexus%angles(7,k)
             do j = 1 , nexus%nx
                 do i = 1 , nexus%nz
-                    px = j - 1
+                    if(.not. Cal%Active(i,j)) cycle
+                    px = j - 1 !Should be corrected for horizontal positions of detectors
                     pz = i - 1
-                    call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
-                    call psd_convert(virtual_instrm,1,1,ga_D_virtual,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+                    call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,.true.)         !Pixels(px,pz) -> Angles(ga_P,nu_P)
+                    call psd_convert(virtual_instrm,1,1,ga_D_virtual,nu_D,px,pz,x_D,z_D,ga_P,nu_P) !Angles(ga_P,nu_P) -> Pixels(px,pz)
                     if (Err_CFML%ierr == 0) then
                         ii = nint(pz) + 1
                         jj = nint(px) + 1
@@ -149,7 +152,7 @@ module D2B_data_mod
                             nsamples(ii,jj) = nsamples(ii,jj) + 1
                             if (nsamples(ii,jj) <= NSAMPLES_MAX) then
                                 counts_virtual(ii,jj,nsamples(ii,jj)) = &
-                                    counts_virtual(ii,jj,nsamples(ii,jj)) + nexus%counts(i,j,k) * calibration(i,j)
+                                    counts_virtual(ii,jj,nsamples(ii,jj)) + nexus%counts(i,j,k) * current_instrm%alphas(i,j)
                             else
                                 write(*,'(8x,a)') 'Warning! Nsamples reached its maximum allowed value!'
                                 nsamples(ii,jj) = NSAMPLES_MAX
@@ -192,8 +195,6 @@ module D2B_data_mod
 
     end subroutine set_virtual_detector
 
-
-
     subroutine get_powder_pattern(nz_int,scale_fac,align,np_horiz,virtual_cgap,ga_D,nu_D,data2D,pat)
 
         ! Arguments
@@ -213,8 +214,8 @@ module D2B_data_mod
         real :: px,pz,x_D,z_D,ga_P,nu_P
 
         call clear_Error()
-        current_instrm%np_horiz = np_horiz
-        current_instrm%cgap = virtual_cgap
+        current_instrm%np_horiz = np_horiz  !This makes partially "current_instrm" equal
+        current_instrm%cgap = virtual_cgap  !to the constructed virtual instrument
         span_angle = (((current_instrm%np_horiz-1) * current_instrm%cgap) / current_instrm%dist_samp_detector) * to_deg
 
         if (.not. align .or. .not. pattern_allocated) then
@@ -229,7 +230,7 @@ module D2B_data_mod
             pat%xmin    = ga_d - span_angle * 0.5
             pat%xmax    = ga_d + span_angle * 0.5
             pat%step    = span_angle / (current_instrm%np_horiz - 1)
-            pat%wave(1)   = current_instrm%wave
+            pat%wave(1) = current_instrm%wave
             ! Initialize pattern
             do i = 1 , current_instrm%np_horiz
                 pat%x(i) = pat%xmin + (i-1) * pat%step
@@ -249,10 +250,10 @@ module D2B_data_mod
 
         ! Map Data2D -> Pat
         do i = 1 , np_horiz
+            px = i - 1
             do k = k1 , k2
                 pz = k - 1
-                px = i - 1
-                call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+                call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P) !Pixels(px,pz) -> Angles(ga_P,nu_P)
                 if (err_CFML%ierr == 0) then
                     tth = acosd(cosd(nu_P)*cosd(ga_P))
                     ith = nint((tth-pat%xmin) / pat%step) + 1
@@ -274,5 +275,31 @@ module D2B_data_mod
         end do
 
     end subroutine get_powder_pattern
+
+    subroutine set_alphas_shifts_D2B(Cal)
+      type(Calibration_Detector_Type), intent(in) :: Cal
+      ! Local variables
+      integer :: i,lun
+      real, dimension(size(Cal%PosX)) :: angles
+
+      if(allocated(current_instrm%alphas)) deallocate(current_instrm%alphas)
+      if(allocated(current_instrm%shifts)) deallocate(current_instrm%shifts)
+      allocate(current_instrm%alphas(current_instrm%np_vert,current_instrm%np_horiz))
+      allocate(current_instrm%shifts(current_instrm%np_horiz))
+
+      current_instrm%alphas=Cal%Effic
+      where(.not. Cal%Active) current_instrm%alphas=-1.0
+      !Calculate the shifts of the detector pixels in mm
+      do i=1,size(Cal%PosX)
+        angles(i) = to_rad*(-158.750+(i-1)*1.25 - Cal%PosX(i)) ! A negative value means a shift towards lower gamma
+        current_instrm%shifts(i)=angles(i)*current_instrm%dist_samp_detector
+      end do
+      current_instrm%alpha_correct=.true.
+      current_instrm%shift_correct=.true.
+      !Testing
+      open(newunit=lun,file="wtest_D2B.geom",status="replace",action="write",position="rewind")
+      call Write_Current_Instrm_data(lun,"fil")
+      close(unit=lun)
+    end subroutine set_alphas_shifts_D2B
 
 end module D2B_data_mod

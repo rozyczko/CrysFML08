@@ -578,8 +578,7 @@ Program Sxtal_Ref_Gen
                                       Init_Structure_Factors,Calc_General_StrFactor,&
                                       Scattering_Species_Type, Allocate_Scattering_Species, &
                                       Additional_Scattering_Factors, Set_Form_Factors
-    use CFML_ILL_Instrm_data,   only: Err_ILLdata_Mess, Err_ILLdata, &
-                                      SXTAL_Orient_type, Current_Orient, diffractometer_type, &
+    use CFML_ILL_Instrm_data,   only: SXTAL_Orient_type, Current_Orient, diffractometer_type, &
                                       Current_Instrm, Write_Current_Instrm_data
     use CFML_SXTAL_Geom
     use CFML_kvec_Symmetry
@@ -750,7 +749,7 @@ Program Sxtal_Ref_Gen
 
         if(.not. ok) then
             write(unit=*,fmt="(a)") "Error in read_sxtal_geom -> Mess: "//trim(mess)
-            if(Err_ILLdata) write(unit=*,fmt="(a)") " ILL_data: "//trim(Err_ILLdata_Mess)
+            if(Err_CFML%Flag) write(unit=*,fmt="(a)") " ILL_data: "//trim(Err_CFML%Msg)
             call finish()
         end if
 

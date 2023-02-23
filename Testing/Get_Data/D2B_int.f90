@@ -32,7 +32,7 @@
 program D2B_int
 
     use CFML_GlobalDeps,      only: to_deg,err_CFML
-    use CFML_ILL_Instrm_Data, only: Current_Instrm
+    use CFML_ILL_Instrm_Data, only: Current_Instrm,Calibration_Detector_Type
     use CFML_Strings,         only: L_Case
     use CFML_DiffPatt,        only: DiffPat_E_Type,write_pattern
     use D2B_data_mod
@@ -47,7 +47,7 @@ program D2B_int
     real,    parameter :: D2B_WIDTH_HORIZ = 1.25 ! degrees
 
     ! Local variables
-    integer            :: ierr,i,j,nscans,last
+    integer            :: ierr,i,j,last
     real               :: t_ini,dga_i,dga,ga_D_min_i,ga_D_max_i,ga_D_min,ga_D_max,ga_1,ga_N,t_end
     character(len=512) :: scanf, cfl_file
     type(cfl_D2B_type) :: cfl
@@ -73,34 +73,44 @@ program D2B_int
     allocate(nexus(cfl%nscans))
 
     ! Read calibration file if it was given
-    if (cfl%calibration) then
-        if (trim(L_Case(cfl%calib_gen)) == 'mantid') then
-            write(*,'(4x,a)') ' => Calibration generator: mantid'
-            write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
-            write(*,'(8x,a,1x,a)') 'Data path:', trim(adjustl(cfl%calib_path))
-            call read_calibration_mantid(cfl%calib_file,cfl%calib_path,ierr)
-            if (ierr > 0) then
-                write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
-                write(*,'(8x,a)') 'Calibration will not be applied'
-                cfl%calibration = .false.
-            end if
-        else if (trim(L_Case(cfl%calib_gen)) == 'lamp') then
-            write(*,'(4x,a)') ' => Calibration generator: lamp'
-            write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
-            call read_calibration_lamp(cfl%calib_file,ierr)
-            if (ierr > 0) then
-                write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
-                write(*,'(8x,a)') 'Calibration will not be applied'
-                cfl%calibration = .false.
-            end if
-        else
-            write(*,'(4x,a)') ' => Calibration generator: unknown'
-            write(*,'(8x,a)') 'Calibration will not be applied'
-            cfl%calibration = .false.
-        end if
-    else
-        if (.not. allocated(calibration)) allocate(calibration(current_instrm%np_vert,current_instrm%np_horiz))
-        calibration(:,:) = 1.0
+    if(.not. (current_instrm%alpha_correct)) then
+       if (cfl%calibration ) then
+           if (trim(L_Case(cfl%calib_gen)) == 'mantid') then
+               write(*,'(4x,a)') ' => Calibration generator: mantid'
+               write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
+               write(*,'(8x,a,1x,a)') 'Data path:', trim(adjustl(cfl%calib_path))
+               call read_calibration_mantid(cfl%calib_file,cfl%calib_path,Cal,ierr)
+               if (ierr > 0) then
+                   write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
+                   write(*,'(8x,a)') 'Calibration will not be applied'
+                   cfl%calibration = .false.
+               end if
+           else if (trim(L_Case(cfl%calib_gen)) == 'lamp') then
+               write(*,'(4x,a)') ' => Calibration generator: lamp'
+               write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
+               call read_calibration_lamp(cfl%calib_file,Cal,ierr)
+               if (ierr > 0) then
+                   write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
+                   write(*,'(8x,a)') 'Calibration will not be applied'
+                   cfl%calibration = .false.
+               end if
+           else
+               write(*,'(4x,a)') ' => Calibration generator: unknown'
+               write(*,'(8x,a)') 'Calibration will not be applied'
+               cfl%calibration = .false.
+           end if
+       else
+           if (.not. allocated(Cal%Effic)) allocate(Cal%Effic(current_instrm%np_vert,current_instrm%np_horiz))
+           if (.not. allocated(Cal%Active)) allocate(Cal%Active(current_instrm%np_vert,current_instrm%np_horiz))
+           if (.not. allocated(Cal%PosX)) allocate(Cal%PosX(current_instrm%np_horiz))
+           Cal%Effic = 1.0
+           Cal%Active = .true.
+           Cal%PosX=0.0
+       end if
+
+       !Calculate the horizontal shifts in mm or the detector tubes in put them, as well as alphas, in (Current_instrm%alphas,Current_instrm%shifts)
+       call set_alphas_shifts_D2B(Cal)
+
     end if
 
     ga_range_real = to_deg * current_instrm%cgap * (current_instrm%np_horiz - 1) / current_instrm%dist_samp_detector
@@ -148,7 +158,10 @@ program D2B_int
     ! ga_N -> gamma value of the last  pixel of the virtual detector
     ga_1 = ga_D_min - 0.5 * ga_range_real
     ga_N = ga_D_max + 0.5 * ga_range_real
+
+    !Construction of "virtual_instrm" of type diffractometer_type
     call set_virtual_detector(ga_1,ga_N,dga)
+
     ! Start looping over scans
     do i = 1 , cfl%nscans
         if (is_d2b) then
@@ -169,7 +182,7 @@ program D2B_int
             write(*,'(8x,a,a)') 'Data ordering (instrument): ',trim(current_instrm%data_ordering)
             write(*,'(8x,a,a)') 'Data ordering (nexus)     : ',trim(nexus(i)%data_ordering)
         end if
-        call fill_virtual_detector(nexus(i))
+        call fill_virtual_detector(nexus(i),cal)
     end do
 
     last=cfl%nscans
@@ -187,8 +200,8 @@ program D2B_int
     snexus%virtual_cgap=virtual_instrm%cgap
     snexus%angles(4,1)=ga_D_virtual
     snexus%angles(7,1)=nu_D_virtual
-    snexus%counts=ave_counts_virtual
-    call write_simple_nexus(trim(scanf),snexus)
+    snexus%counts=nint(ave_counts_virtual)
+    call write_simple_nexus(trim(scanf),snexus) !Corresponds to the virtual instrument
 
     !Integration
 

@@ -4,7 +4,7 @@
 
   Contains
 
-    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,Shifts)
 
         ! Pixel numbering start by zero
         !
@@ -19,7 +19,7 @@
         ! conversion_type = 1: angles to pixels
 
         ! Arguments
-        type(diffractometer_type), intent(inout)  :: diffractometer
+        type(diffractometer_type), intent(in out) :: diffractometer
         integer,                   intent(in)     :: f_virtual
         integer,                   intent(in)     :: conversion_type
         real(kind=cp),             intent(in)     :: ga_D
@@ -30,10 +30,10 @@
         real(kind=cp),             intent(in out) :: z_D
         real(kind=cp),             intent(in out) :: ga_P
         real(kind=cp),             intent(in out) :: nu_P
-
+        logical,   optional,       intent(in)     :: shifts
         ! Local variables
         integer :: i,j
-        real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_
+        real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_, deltaX
 
         call clear_error()
         diffractometer%np_horiz = diffractometer%np_horiz * f_virtual
@@ -42,6 +42,11 @@
         pz_mid = diffractometer%np_vert / 2.0
         px_ = px
         pz_ = pz
+        if(present(shifts)) then
+          deltaX=diffractometer%shifts(px+1) !indices for pixels in the calling program start with 0
+        else
+          deltaX=0.0
+        end if
 
         if (conversion_type == 0) then ! pixels to angles
 
@@ -64,9 +69,9 @@
                     z_L = z_D + diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
                     x_L = diffractometer%dist_samp_detector * sin(x_D/diffractometer%dist_samp_detector) + &
-                        diffractometer%det_offsets(1)
+                          diffractometer%det_offsets(1) + deltaX
                     y_L = diffractometer%dist_samp_detector * cos(x_D/diffractometer%dist_samp_detector) + &
-                        diffractometer%det_offsets(2)
+                          diffractometer%det_offsets(2)
                     z_L = z_D + diffractometer%det_offsets(3)
                 case default ! Unknown detector
                     Err_CFML%ierr=-1
@@ -88,7 +93,7 @@
                     x_D = radius * tand(ga_P) - diffractometer%det_offsets(1)
                     z_D = radius * tand(nu_P) / cosd(ga_P) - diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
-                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1)
+                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1) - deltaX
                     z_D = radius * tand(nu_P) - diffractometer%det_offsets(3)
                 case default ! Unknown detector
                     Err_CFML%ierr=-1

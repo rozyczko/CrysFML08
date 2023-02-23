@@ -519,13 +519,6 @@ module nexus_mod
         ! Close FORTRAN interface.
         call h5close_f(hdferr)
 
-        ! Replace zeros by epsilon
-        do i = 1 , size(calib,1)
-            do j = 1 , size(calib,2)
-                if (abs(calib(i,j)) < epsilon) calib(i,j) = epsilon
-            end do
-        end do
-
         !Setting up the calibration type
         !Type, public :: Calibration_Detector_Type
         !   character(len=12)                            :: Name_Instrm      ! Instrument Name
@@ -545,6 +538,16 @@ module nexus_mod
         allocate(calibration%Effic(calibration%NPointsDet,calibration%NDet))
         allocate(calibration%Active(calibration%NPointsDet,calibration%NDet))
         calibration%Active=.true.; calibration%PosX=0.0
+        ! Replace zeros by epsilon and make Active false
+        do i = 1 , size(calib,1)
+            do j = 1 , size(calib,2)
+                if (abs(calib(i,j)) < epsilon) then
+                    calib(i,j) = epsilon
+                    calibration%Active=.false.
+                end if
+            end do
+        end do
+
         Select Case(trim(machine))
           case("D1B")
                calibration%PosX(:)=[((i-1)*0.1, i=1,calibration%NDet)]
@@ -553,7 +556,6 @@ module nexus_mod
           case("D2B")
                calibration%PosX(:)=[((i-1)*1.25, i=1,calibration%NDet)]
         End Select
-        calibration%Effic=calib
 
     end subroutine read_calibration
 
