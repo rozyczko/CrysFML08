@@ -86,7 +86,7 @@
     Type, public, extends (DiffPat_Type) ::  DiffPat_E_Type
        character(len=30)           :: Instr   =" "                    ! Instrument name
        character(len=80)           :: Filename=" "                    ! Filename
-       character(len=512)          :: FilePath=" "                    ! Path
+       character(len=512)          :: FilePath=" "                    ! Path, info, etc.
        real(kind=cp)               :: Scal    =1.0_cp                 ! Scale factor
        real(kind=cp)               :: Monitor =0.0_cp
        real(kind=cp)               :: Norm_Mon=0.0_cp
