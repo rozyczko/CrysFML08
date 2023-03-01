@@ -862,31 +862,31 @@ module nexus_mod
                         case('chi')
                             nexus%is_chi = .true.
                             nexus%angles(2,:) = datos(:,i)
-                            if (abs(nexus%angles(2,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(2) = 1
+                            if (abs(nexus%angles(2,nexus%nf)-nexus%angles(2,1)) > MIN_SCAN_ANGLE) motors(2) = 1
                         case('omega')
                             nexus%is_omega = .true.
                             nexus%angles(3,:) = datos(:,i)
-                            if (abs(nexus%angles(3,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(3) = 1
+                            if (abs(nexus%angles(3,nexus%nf)-nexus%angles(3,1)) > MIN_SCAN_ANGLE) motors(3) = 1
                         case('gamma')
                             nexus%is_gamma = .true.
                             nexus%angles(4,:) = datos(:,i)
-                            if (abs(nexus%angles(4,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(4) = 1
+                            if (abs(nexus%angles(4,nexus%nf)-nexus%angles(4,1)) > MIN_SCAN_ANGLE) motors(4) = 1
                         case('psi')
                             nexus%is_psi = .true.
                             nexus%angles(5,:) = datos(:,i)
-                            if (abs(nexus%angles(5,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(5) = 1
+                            if (abs(nexus%angles(5,nexus%nf)-nexus%angles(5,1)) > MIN_SCAN_ANGLE) motors(5) = 1
                         case('canne')
                             nexus%is_canne = .true.
                             nexus%angles(6,:) = datos(:,i)
-                            if (abs(nexus%angles(6,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(6) = 1
+                            if (abs(nexus%angles(6,nexus%nf)-nexus%angles(6,1)) > MIN_SCAN_ANGLE) motors(6) = 1
                         case('nu')
                             nexus%is_nu = .true.
                             nexus%angles(7,:) = datos(:,i)
-                            if (abs(nexus%angles(7,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(7) = 1
+                            if (abs(nexus%angles(7,nexus%nf)-nexus%angles(7,1)) > MIN_SCAN_ANGLE) motors(7) = 1
                         case('2theta')
                             nexus%is_tth = .true.
                             nexus%angles(8,:) = datos(:,i)
-                            if (abs(nexus%angles(8,nexus%nf)-nexus%angles(1,1)) > MIN_SCAN_ANGLE) motors(8) = 1
+                            if (abs(nexus%angles(8,nexus%nf)-nexus%angles(8,1)) > MIN_SCAN_ANGLE) motors(8) = 1
                         case('monitor1','monitor_1')
                             nexus%is_monitor = .true.
                             if (allocated(nexus%monitor)) deallocate(nexus%monitor)

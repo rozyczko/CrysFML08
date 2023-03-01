@@ -519,7 +519,11 @@ Module Racer_CFML_Files
                Snum%Tmc_Ang(3,Np)=nexus%total_counts(Np)
                Snum%Tmc_Ang(4,Np)=nexus%angles(3,Np)
                Snum%Tmc_Ang(5,Np)=nexus%angles(4,Np)
-               Snum%Conditions=nexus%conditions
+               Snum%Conditions(1)=nexus%setp_temperature
+               Snum%Conditions(2)=nexus%reg_temperature
+               Snum%Conditions(3)=nexus%temperature
+               Snum%Conditions(4)=0.0
+               Snum%Conditions(5)=nexus%magnetic_field
 
                Vraw(:,:,Np)=nexus%Counts(:,:,Np)  ! (nz,nx,nf)  !Correction of alphas (Not applied)
 
