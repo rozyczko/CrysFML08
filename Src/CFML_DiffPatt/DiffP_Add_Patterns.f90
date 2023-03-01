@@ -11,98 +11,82 @@ Submodule (CFML_DiffPatt) DiffP_Add_Patterns
     !!----
     !!---- 30/04/2019
     !!
-    Module Subroutine Add_Patterns(Patterns, N, Active, Pat, VNorm)
+    Module Subroutine Add_Patterns(Patterns, N, Active, Pat, step_int, VNorm)
         !---- Arguments ----!
         class(DiffPat_Type), dimension(:), intent(in)  :: Patterns
         integer,                           intent(in)  :: N
         logical,             dimension(:), intent(in)  :: Active
         class(DiffPat_Type),               intent(out) :: Pat
+        real(kind=cp), optional,           intent(in)  :: step_int
         real(kind=cp), optional,           intent(in)  :: VNorm
 
         !---- Local Variables ----!
-        integer                           :: i,j,k,npts,nc,np
-        real(kind=cp)                     :: xmin,xmax,step,x1,x2,y,cnorm,fac
-        real(kind=cp), dimension(:,:), allocatable :: d2y
+        integer                           :: i,j,npts,nc, np
+        real(kind=cp)                     :: xmin,xmax,step,y,cnorm
 
-        !> Init
-        Pat%npts=0
 
         !> Checking
         if (N <= 0) return
         if (all(active) .eqv. .false.) return
-
+        call clear_error()
         !> Initial values
         xmin=minval(Patterns(1:N)%xmin, mask= (active .eqv. .true.) )
         xmax=maxval(Patterns(1:N)%xmax, mask= (active .eqv. .true.) )
 
-        npts=maxval(Patterns(1:N)%npts, mask= (active .eqv. .true.) )
-        if (npts <= 1) then
-           Err_CFML%IErr=1
-           Err_CFML%Msg="Add_Patterns@DIFFPAT: Number of Points in the new Pattern was zero! "
-           return
+        if(present(step_int)) then
+           step=step_int
+           npts=nint((xmax-xmin)/step)+1
+           np=maxval(Patterns(1:N)%npts, mask= (active .eqv. .true.) )
+        else
+           np =maxval(Patterns(1:N)%npts, mask= (active .eqv. .true.) )
+           if (np  <= 1) then
+              Err_CFML%IErr=1
+              Err_CFML%Msg="Add_Patterns@DIFFPAT: Number of Points in the new Pattern was zero! "
+              return
+           end if
+
+           step=(xmax-xmin)/real(np -1)
+           if (abs(step) <= epsilon(1.0_cp)) then
+              Err_CFML%IErr=1
+              Err_CFML%Msg="Add_Patterns@DIFFPAT: Step size in the new Pattern was close to zero! "
+              return
+           end if
         end if
-
-        step=(xmax-xmin)/real(npts-1)
-        if (abs(step) <= epsilon(1.0_cp)) then
-           Err_CFML%IErr=1
-           Err_CFML%Msg="Add_Patterns@DIFFPAT: Step size in the new Pattern was close to zero! "
-           return
-        end if
-
-        !> Second Derivative
-        if (allocated(d2y)) deallocate(d2y)
-        allocate(d2y(npts,n))
-        d2y=0.0_cp
-
-        do i=1,n
-           if (.not. active(i)) cycle
-           d2y(:,i)=second_derivative(Patterns(i)%x,Patterns(i)%y,Patterns(i)%npts)
-        end do
-
-        np=nint((xmax-xmin)/step)+1
 
         !> Allocating New Pat
-        call Allocate_Pattern (Pat, np)
+        call Allocate_Pattern (Pat, npts)
 
         if (present(vnorm)) then
            cnorm=vnorm
         else
-           cnorm=maxval(Patterns(1:N)%ymax, mask= (active .eqv. .true.) )
+           cnorm=1.0
         end if
 
-        do j=1,np
-           Pat%x(j)=xmin + (j-1)*step
+        do i=1,npts
+           Pat%x(i)=xmin + (i-1)*step
+           Pat%y(i)=0.0
            nc=0
-           do i=1,N
-              if (.not. active(i) ) cycle
-
-              x1=minval(Patterns(i)%x)
-              x2=maxval(Patterns(i)%x)
-              k=locate(Patterns(i)%x,Pat%x(j))
-              if (k == 0) cycle
+           do j=1,N
+              if(Pat%x(i) < Patterns(j)%xmin) cycle      !This is to ensure that only points in range are treated
+              if(Pat%x(i) > Patterns(j)%xmax) cycle
+              np=Patterns(j)%npts
               nc=nc+1
-              y=spline_interpol(Pat%x(j),Patterns(i)%x,Patterns(i)%y,d2y(:,i),Patterns(i)%npts)
-              fac=cnorm/Patterns(i)%ymax
-              Pat%y(j)=Pat%y(j)+ y*fac
-              Pat%sigma(j)=Pat%sigma(j)+ Patterns(i)%sigma(k)
+              y=Linear_Interpol(Pat%x(i),Patterns(j)%x(1:np),Patterns(j)%y(1:np))
+              Pat%y(i)=Pat%y(i) + y
            end do
-
            !> control
            if (nc > 0) then
               Pat%y(i)=Pat%y(i)/real(nc)
-              Pat%sigma(i)=abs(Pat%sigma(i))/real(nc*nc)  ! No lo tengo muy claro
-              !Pat%nd(i)=nc
+              Pat%sigma(i)=sqrt(Pat%y(i))
            else
-              Pat%y(i)=0.0_cp
-              Pat%sigma(i)=1.0_cp
-              !Pat%nd(i)=0
+              Pat%y(i)=0.0
+              Pat%sigma(i)=1.0
            end if
         end do
 
-        !Pat%Monitor=cnorm
         Pat%xmin=xmin
         Pat%xmax=xmax
-        !Pat%step=step
+        Pat%step=step
         Pat%ymin=minval(Pat%y)
         Pat%ymax=maxval(Pat%y)
     End Subroutine Add_Patterns

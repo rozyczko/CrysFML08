@@ -86,6 +86,8 @@ cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=O
 cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
 cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_Fortran_COMPILER_FORCED=ON -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+
+cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D PYTHON_API=ON -D ARCH32=OFF -D -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_py -D CRYSFML_PREFIX=LibC ..\..\.
 -----------------------------------------------------------------------OK for debug
 
 Building CrysFML only for console mode  

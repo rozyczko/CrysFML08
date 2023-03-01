@@ -1,0 +1,7 @@
+INSTRM       d2b
+NZ1-NZ2    51 77              ! 56-72 w=17,  54-74 w=21,   51-77 w=27,  59-69  w=11
+SCALE_FAC  1.00
+COMBINE    suma_noshift
+!!APPLY_SHIFTS
+SCAN_PATH          c:\ILL_Git\CrysFML08\Testing\Get_Data\test_d2b\rawdata\
+NUMORS  564723  564732
