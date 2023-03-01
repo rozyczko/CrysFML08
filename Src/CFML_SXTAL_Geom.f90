@@ -233,7 +233,7 @@
                                       Get_Anglen_Axis_From_Rotmat, Set_Rotation_Matrix
     Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm, SXTAL_Numor_type, &
                                       Diffractometer_Type
-    Use CFML_Strings,           Only: file_type
+    Use CFML_Strings,           Only: file_type,l_case
 
     !---- Variables ----!
     Implicit None
@@ -687,7 +687,7 @@
       End Function snb4c
 
 
-      Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+      Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,Shifts,origin)
          !---- Arguments ----!
         type(diffractometer_type), intent(in out) :: diffractometer
         integer,                   intent(in)     :: f_virtual
@@ -700,6 +700,8 @@
         real(kind=cp),             intent(in out) :: z_D
         real(kind=cp),             intent(in out) :: ga_P
         real(kind=cp),             intent(in out) :: nu_P
+        logical, optional,         intent(in)     :: Shifts
+        integer, optional,         intent(in)     :: origin
       End Subroutine psd_convert
 
       Module Subroutine psd_convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)

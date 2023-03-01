@@ -14,6 +14,8 @@ Submodule (CFML_Maths) Maths_Locate
     !!----
     !!----          V(J) <= X < V(J+1)
     !!----
+    !!----  If X is outside the range of the V(:) values j=0
+    !!----
     !!---- 28/03/2019
     !!
     Pure Module Function Locate_I(V,x,n) Result(j)
@@ -37,18 +39,10 @@ Submodule (CFML_Maths) Maths_Locate
           end if
        end if
 
-       !> Init
-       j=i1-1
-
        !> Check
-       if (x <= v(i1)) then
-          j=i1
+       if (x <  v(i1) .or. x >  v(i2) ) then
+          j=0
           return
-       end if
-
-       if(x >= v(i2)) then
-         j=i2
-         return
        end if
 
        jl=i1-1

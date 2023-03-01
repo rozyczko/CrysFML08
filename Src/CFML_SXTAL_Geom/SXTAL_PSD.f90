@@ -4,7 +4,7 @@
 
   Contains
 
-    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)
+    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,Shifts,origin)
 
         ! Pixel numbering start by zero
         !
@@ -17,9 +17,14 @@
         !
         ! conversion_type = 0: pixels to angles
         ! conversion_type = 1: angles to pixels
+        !
+        ! origin = 0 : top    left
+        ! origin = 1 : top    right
+        ! origin = 2 : bottom right
+        ! origin = 3 : bottom left
 
         ! Arguments
-        type(diffractometer_type), intent(inout)  :: diffractometer
+        type(diffractometer_type), intent(in out) :: diffractometer
         integer,                   intent(in)     :: f_virtual
         integer,                   intent(in)     :: conversion_type
         real(kind=cp),             intent(in)     :: ga_D
@@ -30,10 +35,12 @@
         real(kind=cp),             intent(in out) :: z_D
         real(kind=cp),             intent(in out) :: ga_P
         real(kind=cp),             intent(in out) :: nu_P
-
+        logical, optional,         intent(in)     :: shifts
+        integer, optional,         intent(in)     :: origin
         ! Local variables
-        integer :: i,j
-        real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_
+        integer :: i,j,orig
+        real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_,deltaX
+        character(len=:), allocatable :: blfr
 
         call clear_error()
         diffractometer%np_horiz = diffractometer%np_horiz * f_virtual
@@ -42,19 +49,32 @@
         pz_mid = diffractometer%np_vert / 2.0
         px_ = px
         pz_ = pz
+        if(present(shifts)) then
+          deltaX=diffractometer%shifts(nint(px)+1) !indices for pixels in the calling program start with 0
+        else
+          deltaX=0.0
+        end if
+        if(present(origin)) then
+          orig = origin
+        else
+          orig = 0
+        end if
 
         if (conversion_type == 0) then ! pixels to angles
 
-            ! Refer pixels to the origin at the bottom left
-            i = index(diffractometer%data_ordering,'top')
-            j = index(diffractometer%data_ordering,'right')
-            if (i > 0) pz_ = diffractometer%np_vert - pz_ - 1
-            if (j > 0) px_ = diffractometer%np_horiz - px_ - 1
-
             ! Detector reference system: origin at the center of the detector
+            blfr = L_Case(diffractometer%bl_frame)
+            px_ = px
+            pz_ = pz
+            if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ - 1
+            if (orig == 1 .or. orig == 2) px_ = diffractometer%np_horiz - px_ - 1
             x_D = (px_ - px_mid) * diffractometer%cgap
             y_D = 0.0
             z_D = (pz_ - pz_mid) * diffractometer%agap
+            if (trim(blfr) == 'z-down') then
+               x_D = -x_D
+               z_D = -z_D
+            end if
 
             ! Cartesian coordinates in the laboratory system
             select case(diffractometer%ipsd)
@@ -64,9 +84,9 @@
                     z_L = z_D + diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
                     x_L = diffractometer%dist_samp_detector * sin(x_D/diffractometer%dist_samp_detector) + &
-                        diffractometer%det_offsets(1)
+                          diffractometer%det_offsets(1) + deltaX
                     y_L = diffractometer%dist_samp_detector * cos(x_D/diffractometer%dist_samp_detector) + &
-                        diffractometer%det_offsets(2)
+                          diffractometer%det_offsets(2)
                     z_L = z_D + diffractometer%det_offsets(3)
                 case default ! Unknown detector
                     Err_CFML%ierr=-1
@@ -88,7 +108,7 @@
                     x_D = radius * tand(ga_P) - diffractometer%det_offsets(1)
                     z_D = radius * tand(nu_P) / cosd(ga_P) - diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
-                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1)
+                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1) - deltaX
                     z_D = radius * tand(nu_P) - diffractometer%det_offsets(3)
                 case default ! Unknown detector
                     Err_CFML%ierr=-1
@@ -101,14 +121,14 @@
             nu_P = nu_P + nu_D
 
             ! Compute pixels from detector coordinates
+            if (trim(blfr) == 'z-down') then
+               x_D = -x_D
+               z_D = -z_D
+            end if
             px = px_mid + x_D / diffractometer%cgap
             pz = pz_mid + z_D / diffractometer%agap
-
-            ! Refer pixels to the origin according to data_ordering
-            i = index(diffractometer%data_ordering,'top')
-            j = index(diffractometer%data_ordering,'right')
-            if (i > 0) pz = diffractometer%np_vert - pz - 1
-            if (j > 0) px = diffractometer%np_horiz - px - 1
+            if (orig == 0 .or. orig == 1) pz = diffractometer%np_vert - pz - 1
+            if (orig == 1 .or. orig == 2) px = diffractometer%np_horiz - px - 1
 
         end if
 

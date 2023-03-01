@@ -38,10 +38,10 @@ module D2B_read_mod
 
     use hdf5
     use CFML_GlobalDeps,      only: Clear_Error,Err_CFML,OPS_Sep
-    use CFML_ILL_Instrm_Data, only: Current_Instrm,Read_Current_Instrm
+    use CFML_ILL_Instrm_Data, only: Current_Instrm,Read_Current_Instrm,Calibration_Detector_Type, &
+                                    Read_Calibration_File
     use CFML_Strings,         only: L_Case,Reading_File,File_Type
     use CFML_SXTAL_Geom,      only: Set_PSD
-    use D2B_data_mod,         only: calibration
     use nexus_mod
 
     implicit none
@@ -55,24 +55,33 @@ module D2B_read_mod
 
         integer            :: nscans
         integer            :: nz_int
+        integer            :: num1,num2
+        integer            :: kc1,kc2
         real               :: scale_fac
         real               :: tth_min
         real               :: tth_max
         real               :: nsigma
+        real               :: Norm_Monitor
+        real               :: ef_cutoff
         logical            :: is_tth_min = .false.
         logical            :: is_tth_max = .false.
+        logical            :: is_label   = .false.
         logical            :: calibration,combine,raw
         logical            :: suma
+        logical            :: is_numor     = .false.
+        logical            :: is_ef_cutoff = .false.
         logical            :: single
         logical            :: align
-        logical            :: verbose
+        logical            :: Apply_Shifts
+        logical            :: verbose =.false.
+        logical            :: monitor ! if true, a given Norm_Monitor is used for nomalization
         character(len=6)   :: calib_gen
         character(len=12)  :: instrument_name
         character(len=20)  :: suffix
         character(len=512) :: scan_path,calib_path,calib_file,combine_name
-        integer, dimension(:,:),          allocatable :: scan_list
         character(len=512), dimension(:), allocatable :: scans
         character(len=:),                 allocatable :: label_sum
+        character(len=:),                 allocatable :: label
 
     end type cfl_D2B_type
 
@@ -88,17 +97,18 @@ module D2B_read_mod
     logical,          parameter :: SINGLE_DEFAULT     = .false.
     logical,          parameter :: SUM_DEFAULT        = .false.
     character(len=3), parameter :: LABEL_SUM_DEFAULT  = 'sum'
+    character(len=3), parameter :: LABEL_DEFAULT      = 'w80'
     ! Error message
     character(len=1024), public :: war_D2B_mess, err_D2B_mess
 
 
     contains
 
-    subroutine read_calibration_lamp(filename,ierr)
-
+    subroutine read_calibration_lamp(filename,Cal,ierr)
         ! Arguments
-        character(len=*),   intent(in)  :: filename
-        integer,            intent(out) :: ierr
+        character(len=*),                intent(in)  :: filename
+        type(calibration_detector_type), intent(out) :: Cal
+        integer,                         intent(out) :: ierr
 
         ! Local variables
         integer :: i
@@ -122,33 +132,46 @@ module D2B_read_mod
             war_D2B_mess = 'read_calibration: calibration for instrument '//trim(namef)//' not implemented'
             return
         else
-            call read_calibration_lamp_d2b(filename,ierr)
+            !call read_calibration_lamp_d2b(filename,Cal,ierr)
+            call Read_Calibration_File(filename, "D2B", Cal)
+            if(Cal%Pos_read) write(*,"(12f10.4)") Cal%PosX
+
+            if(Err_CFML%Flag) then
+                write(*,"(a)") trim(Err_CFML%Msg)
+                ierr=1
+            end if
+            war_D2B_mess = Err_CFML%Msg
         end if
 
     end subroutine read_calibration_lamp
 
-    subroutine read_calibration_lamp_d2b(filename,ierr)
+    subroutine read_calibration_lamp_d2b(filename,Cal,ierr)
 
         ! Arguments
-        character(len=*),   intent(in)  :: filename
-        integer,            intent(out) :: ierr
+        character(len=*),               intent(in)  :: filename
+        type(Calibration_Detector_Type),intent(out) :: Cal
+        integer,                        intent(out) :: ierr
 
         ! Local variables
-        integer :: i,j,m,n,i1,i2,i1_,i2_,i_tubo
+        integer :: i,j,m,n,i1,i2,i1_,i2_,i_tubo, i_cal,ier
         integer, dimension(2,128) :: active_pixels
-        character(len=256) line
-
+        character(len=256)        :: line
+        real, dimension(128,128)  :: calibration
         ierr = 0
-        if (allocated(calibration)) deallocate(calibration)
-        allocate(calibration(128,128))
 
-        open(11,file=filename,status='old',action='read')
-        read(unit=11,fmt=*)
-        read(unit=11,fmt=*)
+        Cal%Name_Instrm="D2B-Lamp"
+        Cal%NDet=128                ! Number of detectors
+        Cal%NPointsDet=128          ! Number of Points per Detector
+
+        allocate( Cal%PosX(Cal%NDet), Cal%Effic(Cal%NPointsDet,Cal%NDet), Cal%Active(Cal%NPointsDet,Cal%NDet) ) ! Relative angular positions of detectors, efficiencies, mask
+        Cal%PosX(:)=0.0
+        open(newunit=i_cal,file=filename,status='old',action='read')
+        read(unit=i_cal,fmt=*)
+        read(unit=i_cal,fmt=*)
         ! read active pixels
         do i = 0 , 63
             i_tubo = 2*i + 1
-            read(unit=11,fmt='(a)') line
+            read(unit=i_cal,fmt='(a)') line
             j = index(line,'*')
             if (j > 0) then
                 read(unit=line(:j-1),fmt=*) active_pixels(1:2,i_tubo),active_pixels(1:2,i_tubo+1)
@@ -158,26 +181,33 @@ module D2B_read_mod
         end do
         active_pixels(:,:) = active_pixels(:,:) + 1
         ! read efficiencies
-        read(11,*)
+        read(i_cal,*)
         n = 0
         do i = 0,127
             n = i + 1
             if (mod(i,2) == 0) then
                 m = 1
                 do j = 1 , 21
-                    read(unit=11,fmt=*) calibration(m:m+5,n)
+                    read(unit=i_cal,fmt=*) calibration(m:m+5,n)
                     m = m + 6
                 end do
-                read(unit=11,fmt=*) calibration(127:128,n)
+                read(unit=i_cal,fmt=*) calibration(127:128,n)
             else
                 m = 128
                 do j = 1 , 21
-                    read(unit=11,fmt=*) calibration(m:m-5:-1,n)
+                    read(unit=i_cal,fmt=*) calibration(m:m-5:-1,n)
                     m = m - 6
                 end do
-                read(unit=11,fmt=*) calibration(2:1:-1,n)
+                read(unit=i_cal,fmt=*) calibration(2:1:-1,n)
             end if
         end do
+        read(i_cal,*)
+        read(i_cal,*,iostat=ier) Cal%PosX
+        if(ier == 0) then
+           Cal%Pos_read=.true.
+        else
+           Cal%Pos_read=.false.
+        end if
         ! replace efficiencies of non-active pixels by a negative number
         do i = 0 , 127
             n = i + 1
@@ -194,21 +224,27 @@ module D2B_read_mod
             if (i2 < 128) calibration(i2+1:,n) = -1
         end do
 
+        where(calibration <= 0.0)
+            Cal%Active=.false.
+        elsewhere
+            Cal%effic=1.0/calibration  !convert efficiencies to alphas
+        end where
     end subroutine read_calibration_lamp_d2b
 
-    subroutine read_calibration_mantid(filename,path,ierr)
+    subroutine read_calibration_mantid(filename,path,Cal,ierr)
 
         ! Arguments
-        character(len=*),   intent(in)  :: filename
-        character(len=*),   intent(in)  :: path
-        integer,            intent(out) :: ierr
+        character(len=*),               intent(in)  :: filename
+        character(len=*),               intent(in)  :: path
+        type(Calibration_Detector_Type),intent(out) :: Cal
+        integer,                        intent(out) :: ierr
 
         ! Local variables
         integer :: i,hdferr,nx,nz
         integer(HID_T) :: file_id,dset,space
         integer(HSIZE_T), dimension(3) :: dims,dims_
         logical :: exist
-
+        real, dimension(:,:), allocatable :: calibration
         ierr = 0
 
         ! Check that nexus file exists
@@ -281,6 +317,20 @@ module D2B_read_mod
         ! Close FORTRAN interface.
         call h5close_f(hdferr)
 
+        !Construction of Cal object
+        Cal%Name_Instrm="D2B-Mantid"
+        Cal%NDet=128                ! Number of detectors
+        Cal%NPointsDet=128          ! Number of Points per Detector
+
+        allocate( Cal%PosX(Cal%NDet), Cal%Effic(Cal%NPointsDet,Cal%NDet), Cal%Active(Cal%NPointsDet,Cal%NDet) ) ! Relative angular positions of detectors, efficiencies, mask
+        Cal%PosX(:)=[(-158.750+(i-1)*1.25,i=1,128)]
+        Cal%Pos_read=.true.; Cal%effic=1.0; Cal%Active=.true.
+        where(calibration <= 0.0)
+            Cal%Active=.false.
+        elsewhere
+           where(Cal%effic > 0.0) Cal%effic=1.0/calibration
+        end where
+
     end subroutine read_calibration_mantid
 
     subroutine read_cfl_D2B(cfl_file,cfl,ierr)
@@ -295,7 +345,7 @@ module D2B_read_mod
         ! Local variables
         integer                       :: i,j,k,n,ierror,num1,num2
         character(len=100)            :: keyword,gen_calib
-        character(len=1024)           :: path_calib,combine_name
+        character(len=1024)           :: path_calib,combine_name,code_path
         character(len=:), allocatable :: line,file_inst,file_calib,namef
         logical                       :: is_file,is_calib_file,is_calib_path
         type(File_Type)               :: cfl_file_type
@@ -308,17 +358,21 @@ module D2B_read_mod
         ! Set defaults
         cfl%calibration = CALIBRATION_DEFAULT
         cfl%combine = .false.
-        cfl%raw = .false.
+        cfl%monitor = .false.
+        cfl%align   = .false.
+        cfl%raw     = .false.
         cfl%verbose = .false.
-        cfl%suffix = suffix_DEFAULT
-        cfl%nsigma = NSIGMA_DEFAULT
-        cfl%nscans = 0
-        cfl%nscans = 0
+        cfl%apply_shifts  = .false.
+        cfl%suffix  = suffix_DEFAULT
+        cfl%nsigma  = NSIGMA_DEFAULT
+        cfl%nscans  = 0
+        cfl%num1  = 0
+        cfl%num2  = 0
+        cfl%kc1  = 56   ! 56-72 w=17,  54-74 w=21,   51-77 w=27,  59-69  w=11
+        cfl%kc2  = 72
         cfl%scan_path=" "
 
         ! Put the content in cfl_file_type
-        !cfl_file_type = Reading_File('gamma_scan.cfl')
-
         cfl_file_type = Reading_File(cfl_file)
 
         ! Read content
@@ -334,14 +388,36 @@ module D2B_read_mod
 
             select case (keyword)
 
+                case('instrm')
+                    read(line(j+1:),*,iostat=ierror) cfl%instrument_name
+                    if (ierror == 0) then
+                        cfl%instrument_name = "d2b"
+                    end if
+
+                case('nz1-nz2')
+                    read(line(j+1:),*,iostat=ierror) cfl%kc1,cfl%kc2
+                    if (ierror /= 0) then
+                       cfl%kc1 = 56; cfl%kc2=72
+                    end if
+
+                case('monitor')
+                    read(line(j+1:),*,iostat=ierror) cfl%Norm_monitor
+                    if (ierror == 0) then
+                        cfl%monitor = .true.
+                    end if
+
+                case('ef_cutoff')
+                    read(line(j+1:),*,iostat=ierror) cfl%ef_cutoff
+                    if (ierror == 0) cfl%is_ef_cutoff = .true.
+
                 case('scan_path')
-                    if (j > 0) read(unit=line(j:),fmt='(a)',iostat=ierror) combine_name
+                    if (j > 0) read(unit=line(j:),fmt='(a)',iostat=ierror) code_path
                     if(ierror /= 0 .or. j == 0) then
                         ierr = 1
                         err_D2B_mess = 'read_cfl: error reading the scan_path name'
                         return
                     else
-                       cfl%scan_path=trim(adjustl(combine_name))
+                       cfl%scan_path=trim(adjustl(code_path))
                        k=len_trim(cfl%scan_path)
                        if(cfl%scan_path(k:k) /= OPS_SEP) cfl%scan_path(k+1:k+1)=OPS_SEP
                     end if
@@ -357,8 +433,13 @@ module D2B_read_mod
                         n = num2-num1+1
                         cfl%nscans = num2-num1+1
                         allocate(cfl%scans(n))
+                        cfl%num1=num1
+                        cfl%num2=num2
+                        cfl%is_numor=.true.
+                        n=0
                         do k = num1,num2
-                            write(cfl%scans(k),"(a,i6.6,a)") trim(cfl%scan_path),k,".nxs"
+                            n=n+1
+                            write(cfl%scans(n),"(a,i6.6,a)") trim(cfl%scan_path),k,".nxs"
                         end do
                     else
                         ierr = 1
@@ -427,6 +508,9 @@ module D2B_read_mod
                 case ('raw')
                     cfl%raw = .true.
 
+                case ('apply_shifts')
+                    cfl%apply_shifts = .true.
+
                 case ('verbose')
                     cfl%verbose = .true.
 
@@ -465,6 +549,10 @@ module D2B_read_mod
                 case('sum')
                     if (len(trim(line(j+1:))) > 0) cfl%label_sum = adjustl(trim(line(j+1:)))
                     cfl%suma = .true.
+
+                case('label')
+                    if (len(trim(line(j+1:))) > 0) cfl%label = adjustl(trim(line(j+1:)))
+                    cfl%is_label = .true.
 
                 case('tth_min')
                     read(line(j+1:),*,iostat=ierror) cfl%tth_min

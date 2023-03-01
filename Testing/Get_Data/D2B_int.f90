@@ -32,7 +32,7 @@
 program D2B_int
 
     use CFML_GlobalDeps,      only: to_deg,err_CFML
-    use CFML_ILL_Instrm_Data, only: Current_Instrm
+    use CFML_ILL_Instrm_Data, only: Current_Instrm,Calibration_Detector_Type
     use CFML_Strings,         only: L_Case
     use CFML_DiffPatt,        only: DiffPat_E_Type,write_pattern
     use D2B_data_mod
@@ -47,17 +47,20 @@ program D2B_int
     real,    parameter :: D2B_WIDTH_HORIZ = 1.25 ! degrees
 
     ! Local variables
-    integer            :: ierr,i,j,nscans,last
-    real               :: t_ini,dga_i,dga,ga_D_min_i,ga_D_max_i,ga_D_min,ga_D_max,ga_1,ga_N,t_end
+    integer            :: ierr,i,j,last
+    real               :: t_ini,t_end
     character(len=512) :: scanf, cfl_file
     type(cfl_D2B_type) :: cfl
     type(nexus_type),dimension(:),allocatable   :: nexus
     type(nexus_type)   :: snexus  !Single nexus
 
-    integer :: np_horiz
+    integer               :: np_horiz
     integer, dimension(3) :: dims
-    real    :: ga_D,nu_D,xmin,cgap
-    type(DiffPat_E_Type) :: pow_pat
+    real                  :: ga_D,nu_D,xmin,cgap, scale_fac,aver_mon
+    type(DiffPat_E_Type)  :: pow_pat
+    !logical, dimension(128) :: actlist=.true., Excl=.false.
+    logical :: is_virtual_detector_set
+    character(len=:), allocatable :: fname
 
     ! Starting time
     call cpu_time(t_ini)
@@ -73,39 +76,48 @@ program D2B_int
     allocate(nexus(cfl%nscans))
 
     ! Read calibration file if it was given
-    if (cfl%calibration) then
-        if (trim(L_Case(cfl%calib_gen)) == 'mantid') then
-            write(*,'(4x,a)') ' => Calibration generator: mantid'
-            write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
-            write(*,'(8x,a,1x,a)') 'Data path:', trim(adjustl(cfl%calib_path))
-            call read_calibration_mantid(cfl%calib_file,cfl%calib_path,ierr)
-            if (ierr > 0) then
-                write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
-                write(*,'(8x,a)') 'Calibration will not be applied'
-                cfl%calibration = .false.
-            end if
-        else if (trim(L_Case(cfl%calib_gen)) == 'lamp') then
-            write(*,'(4x,a)') ' => Calibration generator: lamp'
-            write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
-            call read_calibration_lamp(cfl%calib_file,ierr)
-            if (ierr > 0) then
-                write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
-                write(*,'(8x,a)') 'Calibration will not be applied'
-                cfl%calibration = .false.
-            end if
-        else
-            write(*,'(4x,a)') ' => Calibration generator: unknown'
-            write(*,'(8x,a)') 'Calibration will not be applied'
-            cfl%calibration = .false.
-        end if
-    else
-        if (.not. allocated(calibration)) allocate(calibration(current_instrm%np_vert,current_instrm%np_horiz))
-        calibration(:,:) = 1.0
+    if(.not. (current_instrm%alpha_correct)) then
+       if (cfl%calibration ) then
+           if (trim(L_Case(cfl%calib_gen)) == 'mantid') then
+               write(*,'(4x,a)') ' => Calibration generator: mantid'
+               write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
+               write(*,'(8x,a,1x,a)') 'Data path:', trim(adjustl(cfl%calib_path))
+               call read_calibration_mantid(cfl%calib_file,cfl%calib_path,Cal,ierr)
+               !write(*,"(12f10.4)") Cal%effic
+               if (ierr > 0) then
+                   write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
+                   write(*,'(8x,a)') 'Calibration will not be applied'
+                   cfl%calibration = .false.
+               end if
+           else if (trim(L_Case(cfl%calib_gen)) == 'lamp') then
+               write(*,'(4x,a)') ' => Calibration generator: lamp'
+               write(*,'(8x,a,1x,a)') 'Reading calibration file:', trim(cfl%calib_file)
+               call read_calibration_lamp(cfl%calib_file,Cal,ierr)
+               if (ierr > 0) then
+                   write(*,'(8x,2a)') 'Warning! Error reading calibration: -> ',trim(err_D2B_mess)
+                   write(*,'(8x,a)') 'Calibration will not be applied'
+                   cfl%calibration = .false.
+               end if
+           else
+               write(*,'(4x,a)') ' => Calibration generator: unknown'
+               write(*,'(8x,a)') 'Calibration will not be applied'
+               cfl%calibration = .false.
+           end if
+           if (cfl%calibration .and. cfl%is_ef_cutoff ) call set_state(cfl%ef_cutoff)
+       else
+           if (.not. allocated(Cal%Effic)) allocate(Cal%Effic(current_instrm%np_vert,current_instrm%np_horiz))
+           if (.not. allocated(Cal%Active)) allocate(Cal%Active(current_instrm%np_vert,current_instrm%np_horiz))
+           if (.not. allocated(Cal%PosX)) allocate(Cal%PosX(current_instrm%np_horiz))
+           Cal%Effic = 1.0
+           Cal%Active = .true.
+           Cal%PosX=[(-158.750+(i-1)*1.25,i=1,128)]
+       end if
+       !Calculate the horizontal shifts in mm or the detector tubes in put them, as well as alphas, in (Current_instrm%alphas,Current_instrm%shifts)
+       call set_alphas_shifts_D2B(Cal)
+
     end if
 
-    ga_range_real = to_deg * current_instrm%cgap * (current_instrm%np_horiz - 1) / current_instrm%dist_samp_detector
-    ! Determine the virtual detector common for all scans
-    write(*,'(4x,a)') ' => Computing virtual detector common for all scans'
+    write(*,'(4x,a)') ' => Reading all scans'
     do i = 1 , cfl%nscans
         write(*,'(8x,a,1x,a)') 'Reading nexus file', trim(cfl%scans(i))
         if (cfl%raw) then
@@ -125,70 +137,68 @@ program D2B_int
                 end do
             end if
         end if
-        ! dga_i -> scan step of the scan i
-        ! ga_D_min_i -> minimum value of the gamma detector value for frames in the scan
-        ! ga_D_max_i -> maximum value of the gamma detector value for frames in the scan
-        dga_i = abs(nexus(i)%angles(4,nexus(i)%nf)-nexus(i)%angles(4,1)) / (nexus(i)%nf - 1)
-        ga_D_min_i = min(nexus(i)%angles(4,nexus(i)%nf),nexus(i)%angles(4,1))
-        ga_D_max_i = max(nexus(i)%angles(4,nexus(i)%nf),nexus(i)%angles(4,1))
-        if (i == 1) then
-            dga = dga_i
-            ga_D_min = ga_D_min_i
-            ga_D_max = ga_D_max_i
-        else
-            if (abs(dga-dga_i) > EPSIL) then
-                err_D2B_mess = 'Scans with different scan steps cannot be combined'
-                call finish(t_ini)
-            end if
-            if (ga_D_min_i < ga_D_min) ga_D_min = ga_D_min_i
-            if (ga_D_max_i > ga_D_max) ga_D_max = ga_D_max_i
-        end if
-    end do
-    ! ga_1 -> gamma value of the first pixel of the virtual detector
-    ! ga_N -> gamma value of the last  pixel of the virtual detector
-    ga_1 = ga_D_min - 0.5 * ga_range_real
-    ga_N = ga_D_max + 0.5 * ga_range_real
-    call set_virtual_detector(ga_1,ga_N,dga)
-    ! Start looping over scans
-    do i = 1 , cfl%nscans
-        if (is_d2b) then
-            ! Transform 2theta into gamma values
-            if (nexus(i)%is_tth) then
-                do j = 1 , nexus(i)%nf
-                    nexus(i)%angles(4,j) = nexus(i)%angles(8,j) - 0.5 * (D2B_NPIXELS_HORIZ-1) * D2B_WIDTH_HORIZ + 0.5 * D2B_WIDTH_HORIZ
-                end do
-            end if
-        end if
-        if (abs(current_instrm%wave-nexus(i)%wave) > EPSIL) then
-            write(*,'(8x,a)') 'Warning! Wavelengths from instrument and nexus differ! Instrument wavelength will be used'
-            write(*,'(8x,a,f6.4)') 'Wavelength (instrument): ',current_instrm%wave
-            write(*,'(8x,a,f6.4)') 'Wavelength (nexus): ',nexus(i)%wave
-        end if
-        if (trim(current_instrm%data_ordering) /= nexus(i)%data_ordering) then
-            write(*,'(8x,a)') 'Warning! Data ordering from instrument and nexus differ! Instrument data ordering will be used'
-            write(*,'(8x,a,a)') 'Data ordering (instrument): ',trim(current_instrm%data_ordering)
-            write(*,'(8x,a,a)') 'Data ordering (nexus)     : ',trim(nexus(i)%data_ordering)
-        end if
-        call fill_virtual_detector(nexus(i))
+
+        if (cfl%single) then
+
+           ga_D = nexus(i)%angles(4,1)
+           nu_D = nexus(i)%angles(7,1)
+           np_horiz = size(nexus(i)%counts,2)
+           if (.not. is_virtual_detector_set) then
+               ga_D_virtual = ga_D
+               nu_D_virtual = nu_D
+               is_virtual_detector_set = .true.
+               if (nexus(i)%is_virtual) then
+                   cgap = nexus(i)%virtual_cgap
+               else
+                   cgap = current_instrm%cgap
+               end if
+               write(*,'(4x,a)') 'Setting parameters of the virtual detector'
+               write(*,'(8x,a,1x,i6)')   'Number of horizontal pixels:',np_horiz
+               write(*,'(8x,a,1x,f6.2)') 'Horizontal pixel size (mm): ',cgap
+               write(*,'(8x,a,1x,f6.2)') 'Gamma:',ga_D_virtual
+               write(*,'(8x,a,1x,f6.2)') 'Nu:   ',nu_D_virtual
+           end if
+           write(*,'(4x,a)') 'Integrating individual scans'
+           call get_powder_pattern(cfl%nz_int,cfl%scale_fac,np_horiz,cgap,ga_D,pow_pat,counts_int=nexus(i)%counts(:,:,1))
+           if (cfl%is_tth_min) then
+               xmin = cfl%tth_min
+           else
+               xmin = pow_pat%xmin
+           end if
+           if (cfl%label /= '') then
+               fname = trim(nexus(i)%filcod)//'_'//trim(cfl%label)//'.xys'
+           else
+               fname = trim(nexus(i)%filcod)//'.xys'
+           end if
+           if (cfl%is_tth_max) then
+               call write_pattern(trim(fname),pow_pat,'xys',xmin=xmin,xmax=cfl%tth_max)
+           else
+               call write_pattern(trim(fname),pow_pat,'xys',xmin=xmin)
+           end if
+        end if !single
     end do
 
-    last=cfl%nscans
-    write(*,'(4x,a)') ' => Averaging counts for virtual pixels'
-    call average_virtual_counts(cfl%nsigma)
-    write(scanf,'(2a)') trim(adjustl(cfl%combine_name))//'.nxs'
-    write(*,'(4x,2a)') ' => Writing nexus file ', trim(scanf)
+       if(cfl%calibration) then
+         call construct_virtual_detector(nexus,cfl%nscans,cfl%nsigma,cfl%Norm_Monitor,cfl%verbose,cfl%Apply_Shifts,trim(cfl%calib_file))
+       else
+         call construct_virtual_detector(nexus,cfl%nscans,cfl%nsigma,cfl%Norm_Monitor,cfl%verbose)
+       end if
+
+    write(scanf,'(a)') trim(cfl%combine_name)//'_'//trim(cfl%suffix)//'.nxs'
+    write(*,'(4x,a)') ' => Writing nexus file '//trim(scanf)
 
     !Setting snexus%virtual_cgap
-    dims(1)=size(ave_counts_virtual,1)
-    dims(2)=size(ave_counts_virtual,2)
-    dims(3)=size(ave_counts_virtual,3)
+    last=cfl%nscans
+    dims(1)=size(Data2D,1)
+    dims(2)=size(Data2D,2)
+    dims(3)=1
     call initialize_nexus(snexus,dims)
     call partial_nexus_copy(nexus(last),snexus)
     snexus%virtual_cgap=virtual_instrm%cgap
     snexus%angles(4,1)=ga_D_virtual
     snexus%angles(7,1)=nu_D_virtual
-    snexus%counts=ave_counts_virtual
-    call write_simple_nexus(trim(scanf),snexus)
+    snexus%counts(:,:,1)=nint(Data2D)
+    call write_simple_nexus(trim(scanf),snexus) !Corresponds to the virtual instrument
 
     !Integration
 
@@ -205,8 +215,23 @@ program D2B_int
        write(*,'(8x,a,1x,f6.2)') 'Gamma:',ga_D
        write(*,'(8x,a,1x,f6.2)') 'Nu:   ',nu_D
     end if
+    if(cfl%monitor) then
+       aver_mon=0.0
+       do i=1, cfl%nscans
+         aver_mon = aver_mon + sum(nexus(i)%monitor(:))/nexus(i)%nf
+       end do
+       aver_mon = aver_mon / cfl%nscans
+       scale_fac=cfl%Norm_monitor/ aver_mon
+       call get_powder_pattern(cfl%nz_int,scale_fac,np_horiz,cgap,ga_D,pow_pat)
+    else
+       call get_powder_pattern(cfl%nz_int,cfl%scale_fac,np_horiz,cgap,ga_D,pow_pat)
+    end if
 
-    call get_powder_pattern(cfl%nz_int,cfl%scale_fac,cfl%align,np_horiz,cgap,ga_D,nu_D,snexus%counts(:,:,1),pow_pat)
+    if(Err_CFML%flag) then
+       write(*,"(a)") " => "//trim(Err_CFML%Msg)
+       call finish(t_ini)
+    end if
+
     if (cfl%is_tth_min) then
         xmin = cfl%tth_min
     else
