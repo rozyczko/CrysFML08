@@ -533,7 +533,7 @@ Module Racer_CFML_Files
 
            Snum%Scans(2)=nexus%scan_step
            Snum%wave=nexus%wave
-           Snum%hmin=nint(nexus%reflection)
+           Snum%hmin=nexus%reflection
            Snum%ub=nexus%ub
            Snum%icalc=1
            if(nexus%geometry == "NB")  Snum%icalc=2
