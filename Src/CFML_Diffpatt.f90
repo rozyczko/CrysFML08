@@ -41,7 +41,7 @@
  Module CFML_DiffPatt
     !---- Use Modules ----!
     Use CFML_GlobalDeps, only : cp, ops_sep, err_cfml, clear_error
-    Use CFML_Maths,      only : spline_d2y, spline_interpol, locate, second_derivative
+    Use CFML_Maths,      only : spline_d2y, spline_interpol, locate, second_derivative, Linear_Interpol
     use CFML_Strings,    only : u_case, get_words, get_num, Get_NumStd
 
     implicit none
@@ -49,14 +49,14 @@
     private
 
     !---- List of public functions ----!
-    public ::  Add_Patterns, FWHM_peak
+    public ::   FWHM_peak
 
     !---- List of public subroutines ----!
-    public ::  Allocate_Pattern, Deallocate_Pattern,    &
-               Calc_Background, Del_NoisyPoints,        &
-               Read_Background_File, Read_Pattern,      &
-               Write_Pattern,Write_Pattern_FreeFormat,  &
-               Write_Pattern_INSTRM5,Write_Pattern_XYSig
+    public ::  Add_Patterns,Allocate_Pattern, Deallocate_Pattern,     &
+               Calc_Background, Del_NoisyPoints, Read_Pattern,        &
+               Read_Background_File, Write_Pattern_FreeFormat,        &
+               Write_Pattern, Write_Pattern_INSTRM5, Write_Pattern_XYSig
+
 
     !---- Definitions ----!
 
@@ -126,12 +126,13 @@
     End Interface
 
     Interface
-       Module Subroutine Add_Patterns(Patterns, N, Active, Pat, VNorm)
+       Module Subroutine Add_Patterns(Patterns, N, Active, Pat, step_int, VNorm)
           !---- Arguments ----!
           class(DiffPat_Type), dimension(:), intent(in)  :: Patterns
           integer,                           intent(in)  :: N
           logical,             dimension(:), intent(in)  :: Active
           class(DiffPat_Type),               intent(out) :: Pat
+          real(kind=cp), optional,           intent(in)  :: step_int
           real(kind=cp), optional,           intent(in)  :: VNorm
        End Subroutine Add_Patterns
 
