@@ -47,7 +47,7 @@ Module Racer_CFML_Files
 
     Use CFML_Strings ,         Only: Get_Filename, Get_num, Get_Words, L_case, U_case, File_Type, Reading_File
 
-    Use CFML_Ill_Instrm_Data,  Only: Err_Illdata, Err_Illdata_Mess, Sxtal_Numor_Type, Read_Numor, &
+    Use CFML_Ill_Instrm_Data,  Only: Sxtal_Numor_Type, Read_Numor, &
                                      Set_Instrm_Directory, Initialize_Data_Directory, Get_Absolute_Data_Path, &
                                      Instrm_directory,Initialize_Numor
 
@@ -555,11 +555,12 @@ Module Racer_CFML_Files
         Else
 
            Call Read_Numor(trim(Path),trim(Config%Instrument), Snum)
-           If (Err_Illdata) Then
+           If (Err_CFML%IErr /= 0) Then
                Racer_File_Error = .True.
-               Write(Racer_File_Error_Mess,"(A,1X,I6.6,1X,A)") ' !!! '//Trim(Err_Illdata_Mess)//' Numor', Numor, 'Skipped !!!'
-               Err_ILLdata = .False.
-               Err_ILLdata_Mess = ""
+               Write(Racer_File_Error_Mess,"(A,1X,I6.6,1X,A)") ' !!! '//Trim(Err_CFML%Msg)//' Numor', Numor, 'Skipped !!!'
+               Err_CFML%Ierr = 0
+               Err_CFML%Flag = .False.
+               Err_CFML%Msg = ""
                Return
            End If
 
@@ -1560,11 +1561,12 @@ Module Racer_CFML_Files
 
         Call Set_Instrm_Directory(Working_Dir = Cfg%Data_Directory)
 
-        If (Err_Illdata) Then
+        If (Err_CFML%Ierr /= 0) Then
             Racer_File_Error      = .True.
-            Racer_File_Error_Mess = Err_Illdata_Mess
-            Err_Illdata           = .False.
-            Err_Illdata_Mess      = ""
+            Racer_File_Error_Mess = Err_CFML%Msg
+            Err_CFML%Ierr     = 0
+            Err_CFML%Flag     = .False.
+            Err_CFML%Msg      = ""
         End If
 
     End Subroutine Check_Configuration
