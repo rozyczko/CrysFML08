@@ -12,16 +12,16 @@ program D2B_tubes
     ! Local parameters
 
     ! Local variables
-    integer            :: ierr,i,j,k,nmax,nf,n
+    integer            :: i,j,k,nmax,nf,n, i_cal=1
     integer, parameter :: nt=128 !Number of tubes
-    real               :: t_ini,t_end,xmin,step,xmax
-    character(len=132) :: fname,straux,cfl_file
+    real               :: t_ini,t_end,xmin,step,xmax,varI,varE,sqI,sqE
+    character(len=132) :: fname,straux,cfl_file,calib_file
     type(cfl_D2B_type) :: cfl
     type(nexus_type),    dimension(:), allocatable  :: nexus
     type(DiffPat_E_Type)     :: pat
     type(DiffPat_E_Type),dimension(nt) :: patterns
     logical, dimension(nt)  :: Active=.true.
-    real,   dimension (nt)  :: PosX
+    real,   dimension (nt)  :: PosX, sPosX, inv_Eff, sig_inv_Eff
     real,   dimension (:,:), allocatable :: IntTubes
     real,   dimension (:,:), allocatable :: TwoThetaTubes
     integer,dimension (:),   allocatable :: np
@@ -34,24 +34,36 @@ program D2B_tubes
     ! Read the cfl file
     call Get_Command_Argument(1,cfl_file)
     write(*,'(a)') ' => Reading cfl file: '//trim(cfl_file)
-    call read_cfl_D2B(cfl_file,cfl,ierr)
-    if (ierr > 0) call finish(t_ini)
+    call read_cfl_D2B(cfl_file,cfl)
+    if (Err_CFML%ierr /= 0) call finish(t_ini)
 
     if(allocated(nexus)) deallocate(nexus)
     allocate(nexus(cfl%nscans))
 
+    if(.not. cfl%kc12) then
+        cfl%kc1=51; cfl%kc1=77
+        cfl%kc12=.true.
+    end if
+
     !PosX=[(-158.750+(i-1)*1.25,i=1,nt)] !theoretical positions with respect to the last detector colected in nexus%angle(8,nf)
     if(cfl%apply_shifts) then
-       open(unit=1,file="calib_d2b.pos",status="old", action= "read",position="rewind")
+       call Get_Command_Argument(2,calib_file)
+       if(len_trim(calib_file) == 0) then
+          open(unit=i_cal,file="calib_d2b.pos",status="old", action= "read",position="rewind")
+       else
+          open(unit=i_cal,file=trim(calib_file),status="old", action= "read",position="rewind")
+       end if
+       read(unit=i_cal,fmt="(a)") straux
        do i=1,nt
-         read(unit=1,fmt="(i4,2f12.4)") j,xmin,xmax !In reality theoretical position and shift
+         read(unit=i_cal,fmt="(i4,5f12.4)") j,xmin,xmax,sPosX(i),inv_Eff(i),sig_inv_Eff(i) !In reality theoretical position, shift, sigma, inverse efficiency, sigma
          PosX(i)= xmin - xmax  !New positions
        end do
        close(unit=1)
     else
        PosX=[(-158.750+(i-1)*1.25,i=1,128)]
+       sPosX=0.0; inv_Eff=1.0; sig_inv_Eff=0.0
     end if
-    write(*,'(4x,a)') ' => Reading all scans'
+    write(*,'(a,i5,a)') ' => Reading all',cfl%nscans,' scans'
     do i = 1 , cfl%nscans
         write(*,'(8x,a,1x,a)') 'Reading nexus file', trim(cfl%scans(i))
         if (cfl%raw) then
@@ -91,34 +103,52 @@ program D2B_tubes
        Patterns(j)%Title=trim(straux)
        Patterns(j)%x(1:np(j))=TwoThetaTubes(1:np(j),j)
        Patterns(j)%npts=np(j)
-       Patterns(j)%y(1:np(j))=cfl%scale_fac*IntTubes(1:np(j),j)
+       Patterns(j)%y(1:np(j))=cfl%scale_fac*IntTubes(1:np(j),j)*inv_Eff(j)
+
+       do k=1,np(j)
+         varI=IntTubes(k,j) ; varE=sig_inv_Eff(j)*sig_inv_Eff(j)
+         sqI=IntTubes(k,j)*IntTubes(k,j) ; sqE=inv_Eff(j)*inv_Eff(j)
+         Patterns(j)%sigma(k)= cfl%scale_fac*sqrt(sqE * varI + sqI * varE)
+       end do
+
        n=Patterns(j)%npts
        Patterns(j)%xmin=Patterns(j)%x(1)
        Patterns(j)%ymin=minval(Patterns(j)%y)
        Patterns(j)%xmax=Patterns(j)%x(n)
        Patterns(j)%ymax=maxval(Patterns(j)%y)
-       if(.not. cfl%apply_shifts) then
-          write(fname,"(a,i3.3,a)") "tube_",j,".xys"
+       if(cfl%tubes_output) then
+          if(cfl%Apply_Shifts) then
+             write(fname,"(3(a,i3.3),a)") "NZ_",cfl%kc1,"_",cfl%kc2,"_Shift_tube_",j,".xys"
+          else
+             write(fname,"(3(a,i3.3),a)") "NZ_",cfl%kc1,"_",cfl%kc2,"_tube_",j,".xys"
+          end if
           write(*,'(a)') ' => Writing xys file '//trim(fname)
           call write_pattern(trim(fname),Patterns(j),'xys')
        end if
 
     end do
-    if(cfl%apply_shifts) then
+    if(.not. cfl%tubes_output) then
        write(*,'(/,a)') ' => Output of individual tubes suppressed! '
        write(*,'(a)')   '    It is supposed that the shifts of detectors are '
        write(*,'(a)')   '    already refined and we output only the final integrated pattern. '
     else
-       write(*,'(/,a)') ' => The individual tube patterns are output with ideal positions '
-       write(*,'(a)')   '    they are prepared to be used by FullProf in sequential mode, '
-       write(*,'(a)')   '    for refining the Zero-shifts of each tube '
+       if(cfl%Apply_shifts) then
+            write(*,'(/,a)') ' => The individual tube patterns are output with corrected positions '
+       else
+            write(*,'(/,a)') ' => The individual tube patterns are output with ideal positions '
+            write(*,'(a)')   '    they are prepared to be used by FullProf in sequential mode, '
+            write(*,'(a)')   '    for refining the Zero-shifts of each tube '
+       end if
     end if
-    call Add_Patterns(Patterns, nt, Active, Pat, step_int=step)
-    if(err_CFML%Ierr /= 0) then
-        write(*,"") "  ERROR! "//trim(err_CFML%Msg)
+
+    if(cfl%combine) then  !Output the total integrated pattern if COMBINE is provided
+       call Add_Patterns(Patterns, nt, Active, Pat, step_int=step)
+       if(err_CFML%Ierr /= 0) then
+           write(*,"") "  ERROR! "//trim(err_CFML%Msg)
+       end if
+       write(*,"(a)") " => Writing combined integrated file: "//trim(cfl%combine_name)//".xys"
+       call write_pattern(trim(cfl%combine_name)//".xys",Pat,'xys')
     end if
-    write(*,"(a)") " => Writing combined integrated file: "//trim(cfl%combine_name)//".xys"
-    call write_pattern(trim(cfl%combine_name)//".xys",Pat,'xys')
 
     call cpu_time(t_end)
     write(unit=*, fmt='(/,a)')       ' => D2B_tubes finished normally  '
@@ -170,7 +200,7 @@ program D2B_tubes
         real :: t_fin
 
         call cpu_time(t_fin)
-        write(unit=lun, fmt='(a,a)')       ' => D2B_int stopped!: ', trim(err_CFML%Msg)
+        write(unit=lun, fmt='(a,a)')       ' => D2B_tubes stopped!: ', trim(err_CFML%Msg)
         write(unit=lun, fmt='(a,f10.4,a)') ' => Total CPU-time: ',t_fin-t_ini,' seconds'
 
     end subroutine write_error_message

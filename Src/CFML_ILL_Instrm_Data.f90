@@ -328,21 +328,27 @@ Module CFML_ILL_Instrm_Data
    !!----   integer                                      :: NDet         ! Number of Detectors
    !!----   integer                                      :: NPointsDet   ! Number of Points by Detector
    !!----   logical                                      :: Pos_read     ! True if PosX have been allocated and read
+   !!----   logical                                      :: True_Eff     ! True if the content of Effic are really efficiencies, otherwise they are Inv_Eff
    !!----   real(kind=cp), dimension(:),   allocatable   :: PosX         ! Relative Positions of each Detector
    !!----   real(kind=cp), dimension(:,:), allocatable   :: Effic        ! Efficiency of each point detector (NpointsDetect,NDect)
+   !!----   real(kind=cp), dimension(:),   allocatable   :: sPosX        ! Standard deviation of Relative Positions for each Detector
+   !!----   real(kind=cp), dimension(:,:), allocatable   :: sEffic       ! Standard deviation of Efficiency for each point detector (NpointsDetect,NDect)
    !!----   logical,       dimension(:,:), allocatable   :: Active       ! Flag for active detector or not
    !!---- End Type Calibration_Detector_Type
    !!----
    !!---- Update: April - 2009
    !!
    Type, public :: Calibration_Detector_Type
-      character(len=12)                            :: Name_Instrm      ! Instrument Name
-      integer                                      :: NDet             ! Number of Detectors
-      integer                                      :: NPointsDet       ! Number of Points per Detector
-      logical                                      :: Pos_read         ! True if PosX have been allocated and read
-      real(kind=cp), dimension(:),   allocatable   :: PosX             ! Relative Positions of each Detector
-      real(kind=cp), dimension(:,:), allocatable   :: Effic            ! Efficiency of each point detector (NpointsDetect,NDect)
-      logical,       dimension(:,:), allocatable   :: Active           ! Flag for active points on detector
+      character(len=12)                            :: Name_Instrm  ! Instrument Name
+      integer                                      :: NDet         ! Number of Detectors
+      integer                                      :: NPointsDet   ! Number of Points per Detector
+      logical                                      :: Pos_read     ! True if PosX have been allocated and read
+      logical                                      :: True_Eff     ! True if the content of Effic are really efficiencies, otherwise they are Inv_Eff
+      real(kind=cp), dimension(:),   allocatable   :: PosX         ! Relative Positions of each Detector
+      real(kind=cp), dimension(:,:), allocatable   :: Effic        ! Efficiency of each point detector (NpointsDetect,NDect)
+      real(kind=cp), dimension(:),   allocatable   :: sPosX        ! Standard deviation of Relative Positions for each Detector
+      real(kind=cp), dimension(:,:), allocatable   :: sEffic       ! Standard deviation of Efficiency for each point detector (NpointsDetect,NDect)
+      logical,       dimension(:,:), allocatable   :: Active       ! Flag for active points on detector
    End Type Calibration_Detector_Type
 
    !!----
@@ -7171,7 +7177,7 @@ Module CFML_ILL_Instrm_Data
     !!--++    character(len=*), intent(in)                 :: FileCal    ! Path+Filename of Calibration File
     !!--++    type(calibration_detector_type), intent(out) :: Cal        ! Calibration Detector Object
     !!--++
-    !!--++ Load the Calibration parameters for a D2B Instrument
+    !!--++ Load the Calibration parameters for a D2B Instrument. This corresponds to LAMP way of storing calibration
     !!--++
     !!--++ 17/03/2011 updated 21/02/2023
     !!

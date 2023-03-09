@@ -35,7 +35,8 @@ module D2B_data_mod
     use CFML_ILL_Instrm_Data, only: Current_Instrm,Diffractometer_Type, Calibration_Detector_Type, &
                                     Write_Current_Instrm_data
     use CFML_SXTAL_Geom,      only: diffractometer => psd, psd_convert
-    use CFML_DiffPatt,        only: DiffPat_E_Type,Allocate_Pattern
+    use CFML_DiffPatt,        only: DiffPat_E_Type,Allocate_Pattern,write_pattern,Add_patterns
+    use D2B_read_mod,         only: cfl_D2B_type
     use HDF5
     use nexus_mod
 
@@ -44,7 +45,8 @@ module D2B_data_mod
     private
 
     ! List of public subroutines
-    public :: construct_virtual_detector, get_powder_pattern, set_alphas_shifts_D2B, set_state
+    public :: construct_virtual_detector, get_powder_pattern, set_alphas_shifts_D2B, set_state, &
+              VerticalStraight_Integration
 
     !Private module variables
     integer, parameter :: NSAMPLES_MAX = 1000
@@ -66,10 +68,11 @@ module D2B_data_mod
 
     contains
 
-    Subroutine Construct_Virtual_Detector(nex,nscans,nsigma,norm_monitor,printt,ApplyShifts,Cal_file)
+    Subroutine Construct_Virtual_Detector(nex,nscans,nsigma,num_vc,norm_monitor,printt,ApplyShifts,Cal_file)
        type(nexus_type), dimension(:),  intent(in) :: nex
        integer,                         intent(in) :: nscans
        real,                            intent(in) :: nsigma
+       integer,                         intent(in) :: num_vc
        real,                            intent(in) :: norm_monitor
        logical,                         intent(in) :: printt
        logical,         optional,       intent(in) :: ApplyShifts
@@ -132,7 +135,7 @@ module D2B_data_mod
 
        write(*,'(a)') ' => Averaging counts for virtual pixels'
 
-       call average_virtual_counts(nsigma) !-> Construct Data2D
+       call average_virtual_counts(nsigma,num_vc) !-> Construct Data2D
 
        !Setting information about the diffraction pattern to be output
 
@@ -170,10 +173,10 @@ module D2B_data_mod
 
     End Subroutine allocate_virtual_arrays
 
-    Subroutine average_virtual_counts(nsigma)
+    Subroutine average_virtual_counts(nsigma, num_vc)
         ! Arguments
         real,    intent(in) :: nsigma
-
+        integer, intent(in) :: num_vc
         ! Local variables
         integer :: i,j,k,n
         real    :: ave,sigma,dsigma
@@ -210,7 +213,7 @@ module D2B_data_mod
                         Data2D(i,j) = Data2D(i,j) + counts_virtual(i,j,k)
                     end if
                 end do
-                if (n > 0) Data2D(i,j) =  Data2D(i,j)  / real(n)
+                if (n > 0) Data2D(i,j) =  num_vc * Data2D(i,j)  / real(n)
             end do
         end do
         !where(Data2D > 0) Data2D = Data2D * 25
@@ -239,7 +242,7 @@ module D2B_data_mod
                     if(apply) then
                        call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,.true.)  !Pixels(px,pz) -> Angles(ga_P,nu_P)
                     else
-                       call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)  !Pixels(px,pz) -> Angles(ga_P,nu_P)
+                       call psd_convert(current_instrm,1,0,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P)      !Pixels(px,pz) -> Angles(ga_P,nu_P)
                     end if
                     call psd_convert(virtual_instrm,1,1,ga_D_virtual,nu_D,px,pz,x_D,z_D,ga_P,nu_P) !Angles(ga_P,nu_P) -> Pixels(px,pz)
                     if (Err_CFML%ierr == 0) then
@@ -294,7 +297,7 @@ module D2B_data_mod
         end if
     End Subroutine set_virtual_detector
 
-    Subroutine get_powder_pattern(nz_int,scale_fac,np_horiz,virtual_cgap,ga_D,pat,counts_int)
+    Subroutine get_powder_pattern(nz_int,scale_fac,np_horiz,virtual_cgap,ga_D,pat,counts_int,nz2)
         ! Arguments
         integer,                        intent(in)     :: nz_int
         real,                           intent(in)     :: scale_fac
@@ -303,6 +306,8 @@ module D2B_data_mod
         real,                           intent(in)     :: ga_D
         type(DiffPat_E_Type),           intent(in out) :: pat
         integer,optional,dimension(:,:),intent(in)     :: counts_int
+        integer,optional,               intent(in)     :: nz2
+
         ! Local variables
         integer                         :: i,k,k1,k2,nc,ith
         real                            :: span_angle,tth,fac
@@ -356,11 +361,16 @@ module D2B_data_mod
         pat%nd    = 0
 
         ! Compute integration limits
-        nc = max(1,nz_int/2)
-        nc = min(current_instrm%np_vert/2,nc)
-        k1 = current_instrm%np_vert/2 - nc + 1
-        k2 = current_instrm%np_vert/2 + nc
-        write(unit=*,fmt="(12x,a,2i4)") "Vertical Integration between cells: ",k1,k2
+        if(present(nz2)) then
+           k1=max(nz_int,1)
+           k2=min(nz2,current_instrm%np_vert)
+        else
+           nc = max(1,nz_int/2)
+           nc = min(current_instrm%np_vert/2,nc)
+           k1 = current_instrm%np_vert/2 - nc   !+ 1
+           k2 = current_instrm%np_vert/2 + nc
+        end if
+        write(unit=*,fmt="(12x,a,2i4)") " 2Theta-Arc Integration between cells: ",k1,k2
 
         if(present(counts_int)) then
             data2D=counts_int
@@ -401,7 +411,11 @@ module D2B_data_mod
       allocate(current_instrm%alphas(current_instrm%np_vert,current_instrm%np_horiz))
       allocate(current_instrm%shifts(current_instrm%np_horiz))
 
-      current_instrm%alphas=Cal%Effic
+      if(Cal%True_Eff) then
+        current_instrm%alphas=1.0/Cal%Effic
+      else
+        current_instrm%alphas=Cal%Effic
+      end if
       where(.not. Cal%Active) current_instrm%alphas=-1.0
       !Calculate the shifts of the detector pixels in mm
       do i=1,size(Cal%PosX)
@@ -435,5 +449,105 @@ module D2B_data_mod
         end do
 
     End Subroutine set_state
+
+    Subroutine VerticalStraight_Integration(nexus,cfl,cal,pat)
+        ! Arguments
+        type(nexus_type),dimension(:),  intent(in)  :: nexus
+        type(cfl_D2B_type),             intent(in)  :: cfl
+        type(Calibration_Detector_Type),intent(in)  :: Cal
+        type(DiffPat_E_Type),           intent(out) :: pat
+
+        ! Local variables
+        integer, parameter :: nt=128 !Number of tubes
+        integer                              :: i,j,k,nmax,nf,n
+        logical, dimension(nt)               :: Active
+        real,   dimension (:,:), allocatable :: IntTubes
+        real,   dimension (:,:), allocatable :: TwoThetaTubes
+        integer,dimension (:),   allocatable :: np
+        real                                 :: step,varI,varE,sqI,sqE
+        character(len=132)                   :: straux,fname
+        type(DiffPat_E_Type),dimension(nt)   :: patterns
+
+        call clear_Error()
+        nmax= cfl%nscans * maxval(nexus(:)%nf)
+        step=0.05
+        allocate(IntTubes(nmax,nt),TwoThetaTubes(nmax,nt),np(nmax))
+        IntTubes=0.0; TwoThetaTubes=0.0
+        !Integration of the central part just suming the counts along each tube
+        write(*,"(/,a,2i4,a,i3,/)") " => Integrating individual tubes between vertical pixels: ",cfl%kc1,cfl%kc2, &
+                                  " -> width: ",cfl%kc2-cfl%kc1+1
+        do j=1,nt
+           np(j)=0
+           do i=1, cfl%nscans
+             do nf=1,nexus(i)%nf
+                np(j)=np(j)+1
+                TwoThetaTubes(np(j),j)=nexus(i)%angles(8,nf)+cal%PosX(j)
+                IntTubes(np(j),j)=0.0
+                do k=cfl%kc1,cfl%kc2  !Vertical integration of each individual detector
+                  IntTubes(np(j),j)=IntTubes(np(j),j)+nexus(i)%counts(k,j,nf)
+                end do
+             end do
+           end do
+           call Allocate_Pattern(Patterns(j),np(j))
+           write(straux,"(2(a,i4),a,2i4)") " Tube #",j,"    Number of points: ",np(j), " -> Integration between vertical pixels: ",cfl%kc1,cfl%kc2
+           Patterns(j)%kindrad = 'Neutrons'
+           Patterns(j)%scatvar = '2theta'
+           Patterns(j)%Title=trim(straux)
+           Patterns(j)%x(1:np(j))=TwoThetaTubes(1:np(j),j)
+           Patterns(j)%npts=np(j)
+           Patterns(j)%y(1:np(j))=cfl%scale_fac*IntTubes(1:np(j),j)*cal%Effic(1,j)
+
+           do k=1,np(j)
+             varI=IntTubes(k,j) ; varE=cal%sEffic(1,j)*cal%sEffic(1,j)
+             sqI=IntTubes(k,j)*IntTubes(k,j) ; sqE=cal%sEffic(1,j)*cal%sEffic(1,j)
+             Patterns(j)%sigma(k)= cfl%scale_fac*sqrt(sqE * varI + sqI * varE)
+           end do
+
+           n=Patterns(j)%npts
+           Patterns(j)%xmin=Patterns(j)%x(1)
+           Patterns(j)%ymin=minval(Patterns(j)%y)
+           Patterns(j)%xmax=Patterns(j)%x(n)
+           Patterns(j)%ymax=maxval(Patterns(j)%y)
+           if(cfl%tubes_output) then
+              if(cfl%Apply_Shifts) then
+                 write(fname,"(3(a,i3.3),a)") "NZ_",cfl%kc1,"_",cfl%kc2,"_Shift_tube_",j,".xys"
+              else
+                 write(fname,"(3(a,i3.3),a)") "NZ_",cfl%kc1,"_",cfl%kc2,"_tube_",j,".xys"
+              end if
+              write(*,'(a)') ' => Writing xys file '//trim(fname)
+              call write_pattern(trim(fname),Patterns(j),'xys')
+           end if
+
+        end do
+        if(.not. cfl%tubes_output) then
+           write(*,'(/,a)') ' => Output of individual tubes suppressed! '
+           write(*,'(a)')   '    It is supposed that the shifts of detectors are '
+           write(*,'(a)')   '    already refined and we output only the final integrated pattern. '
+        else
+           if(cfl%Apply_shifts) then
+                write(*,'(/,a)') ' => The individual tube patterns are output with corrected positions '
+           else
+                write(*,'(/,a)') ' => The individual tube patterns are output with ideal positions '
+                write(*,'(a)')   '    they are prepared to be used by FullProf in sequential mode, '
+                write(*,'(a)')   '    for refining the Zero-shifts of each tube '
+           end if
+        end if
+
+        if(cfl%combine) then  !Output the total integrated pattern if COMBINE is provided
+           Active=.true.
+           if(cfl%excl_dets) then
+             do j=1,size(cfl%det_excluded)
+                n=cfl%det_excluded(j)
+                Active(n) = .false.
+             end do
+           end if
+           call Add_Patterns(Patterns, nt, Active, Pat, step_int=step)
+           if(err_CFML%Ierr /= 0) then
+               write(*,"(a)") "  ERROR! "//trim(err_CFML%Msg)
+           end if
+        end if
+
+    End Subroutine VerticalStraight_Integration
+
 
 end module D2B_data_mod

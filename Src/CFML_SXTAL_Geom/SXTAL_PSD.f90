@@ -38,7 +38,7 @@
         logical, optional,         intent(in)     :: shifts
         integer, optional,         intent(in)     :: origin
         ! Local variables
-        integer :: i,j,orig
+        integer :: orig
         real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_,deltaX
         character(len=:), allocatable :: blfr
 
@@ -59,11 +59,11 @@
         else
           orig = 0
         end if
+        blfr = L_Case(diffractometer%bl_frame)
 
         if (conversion_type == 0) then ! pixels to angles
 
             ! Detector reference system: origin at the center of the detector
-            blfr = L_Case(diffractometer%bl_frame)
             px_ = px
             pz_ = pz
             if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ - 1
@@ -84,7 +84,7 @@
                     z_L = z_D + diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
                     x_L = diffractometer%dist_samp_detector * sin(x_D/diffractometer%dist_samp_detector) + &
-                          diffractometer%det_offsets(1) + deltaX
+                          diffractometer%det_offsets(1) - deltaX
                     y_L = diffractometer%dist_samp_detector * cos(x_D/diffractometer%dist_samp_detector) + &
                           diffractometer%det_offsets(2)
                     z_L = z_D + diffractometer%det_offsets(3)
@@ -108,7 +108,7 @@
                     x_D = radius * tand(ga_P) - diffractometer%det_offsets(1)
                     z_D = radius * tand(nu_P) / cosd(ga_P) - diffractometer%det_offsets(3)
                 case(3) ! Horizontal banana
-                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1) - deltaX
+                    x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1) + deltaX
                     z_D = radius * tand(nu_P) - diffractometer%det_offsets(3)
                 case default ! Unknown detector
                     Err_CFML%ierr=-1

@@ -23,7 +23,7 @@ Submodule (CFML_DiffPatt) DiffP_Add_Patterns
         !---- Local Variables ----!
         integer                           :: i,j,npts,nc, np
         real(kind=cp)                     :: xmin,xmax,step,y,cnorm
-
+        real(kind=cp), dimension(:), allocatable :: varI
 
         !> Checking
         if (N <= 0) return
@@ -53,6 +53,9 @@ Submodule (CFML_DiffPatt) DiffP_Add_Patterns
            end if
         end if
 
+        if(allocated(varI)) deallocate(varI)
+        allocate(varI(np))
+
         !> Allocating New Pat
         call Allocate_Pattern (Pat, npts)
 
@@ -64,26 +67,33 @@ Submodule (CFML_DiffPatt) DiffP_Add_Patterns
 
         do i=1,npts
            Pat%x(i)=xmin + (i-1)*step
-           Pat%y(i)=0.0
+           Pat%y(i)=0.0; Pat%sigma(i)=0.0
            nc=0
            do j=1,N
               if(Pat%x(i) < Patterns(j)%xmin) cycle      !This is to ensure that only points in range are treated
               if(Pat%x(i) > Patterns(j)%xmax) cycle
               np=Patterns(j)%npts
+              if(Patterns(j)%SigVar) then
+                varI(1:np)=Patterns(j)%sigma(1:np)*Patterns(j)%sigma(1:np)
+              else
+                varI(1:np)=Patterns(j)%sigma(1:np)
+              end if
               nc=nc+1
               y=Linear_Interpol(Pat%x(i),Patterns(j)%x(1:np),Patterns(j)%y(1:np))
               Pat%y(i)=Pat%y(i) + y
+              y=Linear_Interpol(Pat%x(i),Patterns(j)%x(1:np),varI(1:np)) !variance
+              Pat%sigma(i)=Pat%sigma(i)+y
            end do
            !> control
            if (nc > 0) then
               Pat%y(i)=Pat%y(i)/real(nc)
-              Pat%sigma(i)=sqrt(Pat%y(i))
+              Pat%sigma(i)=sqrt(Pat%sigma(i)/real(nc))
            else
               Pat%y(i)=0.0
               Pat%sigma(i)=1.0
            end if
         end do
-
+        Pat%SigVar=.true.
         Pat%xmin=xmin
         Pat%xmax=xmax
         Pat%step=step
