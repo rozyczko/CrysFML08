@@ -477,9 +477,11 @@ Module CFML_ILL_Instrm_Data
       logical                                    :: rangtim              !If .true. range_time has been set
       real(kind=cp),dimension(:,:,:),allocatable :: range_time           !Curves for calculating the velocitiy of angular motors (2,np,15)
       real(kind=cp),dimension(:,:),  allocatable :: alphas               !Efficiency corrections for each pixel
+      real(kind=cp),dimension(:,:),  allocatable :: sigma_alphas         !Estimated error of Efficiency corrections for each pixel
       logical                                    :: shift_correct        !True if shifts correction is to be applied
       real(kind=cp),dimension(:),   allocatable  :: shifts               !Horizontal Shift corrections for vertical tube in mm
       logical                                    :: alpha_correct        !True if alpha correction is to be applied
+      logical                                    :: sigma_alpha_correct  !True if the sigma of alpha correction have been provided
       character(len=512)                         :: alpha_file           !Name of the alpha file
       logical                                    :: resol_given          !True if the resolution curve has been provided
       integer                                    :: nGa,nNu              !Dimensions of the matrix ReSurf
@@ -2417,6 +2419,7 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%det_offsets=0.0              !Offsets X,Y,Z of the detector centre (roD)
       Current_Instrm%rangtim=.false.
       Current_Instrm%alpha_correct=.false.        !Alpha correction not applied
+      Current_Instrm%sigma_alpha_correct=.false.  !Sigmas of Alpha correction not applied
       Current_Instrm%shift_correct=.false.        !Shifts correction not applied
       Current_Instrm%resol_given=.false.          !Resolution curve not given
       Current_Instrm%alpha_file=" "
@@ -3371,17 +3374,44 @@ Module CFML_ILL_Instrm_Data
                       return
                     end if
                   end do
-                  !Try to read pixel shifts
-                  read(unit=ial,fmt="(a)",iostat=ier) kshift !horizontal shifts
+
+                  !Try to read sigma of alphase
+                  read(unit=ial,fmt="(a)",iostat=ier) kshift !sigma of alphas
                   if(ier == 0) then
-                    if(allocated(Current_Instrm%shifts)) deallocate(Current_Instrm%shifts)
-                    allocate(Current_Instrm%shifts(npx))
-                    Current_Instrm%shifts=0.0
-                    Current_Instrm%shift_correct=.true.
-                    read(unit=ial,fmt=*,iostat=ier) Current_Instrm%shifts(1:npx)
-                    if(ier /= 0) then
-                       Current_Instrm%shift_correct=.false.
-                       exit
+                    if(index(L_case(kshift),"sigma") /= 0) then
+                       if(allocated(Current_Instrm%sigma_alphas)) deallocate(Current_Instrm%sigma_alphas)
+                       allocate(Current_Instrm%sigma_alphas(npz,npx))
+                       read(unit=ial,fmt=*)
+                       do j=1,npz
+                         read(unit=ial,fmt=*,iostat=ier) Current_Instrm%sigma_alphas(j,1:npx)
+                         if(ier /= 0) then
+                           Err_CFML%Ierr=1
+                           Err_CFML%flag=.true.
+                           Err_CFML%Msg="Error in file: "//trim(alpha_file)//", reading the sigma of efficiency of 2D-detector, sigma-efficiencies not applied!"
+                           return
+                         end if
+                       end do
+                       Current_Instrm%sigma_alpha_correct =.true.
+                    end if
+                  end if
+
+                  !Try to read pixel shifts
+                  if(Current_Instrm%sigma_alpha_correct) then !If sigmas have been read, read another line containing shifts
+                    read(unit=ial,fmt="(a)",iostat=ier) kshift !horizontal shifts
+                  else
+                    ier=0  !The previous line may be shifts
+                  end if
+                  if(ier == 0) then
+                    if(index(L_case(kshift),"shift") /= 0) then
+                      if(allocated(Current_Instrm%shifts)) deallocate(Current_Instrm%shifts)
+                      allocate(Current_Instrm%shifts(npx))
+                      Current_Instrm%shifts=0.0
+                      Current_Instrm%shift_correct=.true.
+                      read(unit=ial,fmt=*,iostat=ier) Current_Instrm%shifts(1:npx)
+                      if(ier /= 0) then
+                         Current_Instrm%shift_correct=.false.
+                         exit
+                      end if
                     end if
                   end if
                 else
@@ -3392,6 +3422,7 @@ Module CFML_ILL_Instrm_Data
                   return
 
                 end if
+
                 Current_Instrm%alpha_file=alpha_file
                 Current_Instrm%alpha_correct=.true.
 
@@ -3410,6 +3441,21 @@ Module CFML_ILL_Instrm_Data
                   end if
                 end do
                 Current_Instrm%alpha_correct=.true.
+
+            Case("DET_SIGMA_ALPHAS")
+                if(allocated(Current_Instrm%sigma_alphas)) deallocate(Current_Instrm%sigma_alphas)
+                allocate(Current_Instrm%sigma_alphas(npz,npx))
+
+                do j=1,npz
+                  read(unit=lun,fmt=*,iostat=ier) Current_Instrm%sigma_alphas(j,1:npx)
+                  if(ier /= 0) then
+                    Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the sigma of efficiencies of 2D-detector"
+                   return
+                  end if
+                end do
+                Current_Instrm%sigma_alpha_correct=.true.
 
             Case("DET_SHIFTS")
                 if(Current_Instrm%alpha_correct) then
@@ -6651,14 +6697,19 @@ Module CFML_ILL_Instrm_Data
 
           write(unit=ipr,fmt="(a,3f10.4)")        "DET_OFF ", Current_Instrm%det_offsets
 
+          forma="(16f8.4)"
           if(index(Current_Instrm%geom,"Laue") == 0 .and. Current_Instrm%np_vert < 513 .and. &
                    Current_Instrm%np_horiz < 513) then
             write(unit=ipr,fmt="(a)")             "DET_ALPHAS"
-            forma="(     f8.4)"
-            write(unit=forma(2:6),fmt="(i5)") Current_Instrm%np_horiz
             do i=1,Current_Instrm%np_vert
                write(unit=ipr,fmt=forma) Current_Instrm%alphas(i,1:Current_Instrm%np_horiz)
             end do
+            if(Current_Instrm%sigma_alpha_correct) then
+              write(unit=ipr,fmt="(a)")           "DET_SIGMA_ALPHAS"
+              do i=1,Current_Instrm%np_vert
+                 write(unit=ipr,fmt=forma) Current_Instrm%sigma_alphas(i,1:Current_Instrm%np_horiz)
+              end do
+            end if
             if(Current_Instrm%shift_correct) then
                write(unit=ipr,fmt="(a)") "DET_SHIFTS" !horizontal shifts
                write(unit=ipr,fmt="(12f10.4)") Current_Instrm%shifts(1:Current_Instrm%np_horiz)
