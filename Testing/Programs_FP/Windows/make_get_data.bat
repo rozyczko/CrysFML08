@@ -50,6 +50,7 @@ rem
 rem Update FullProf Distribution
 rem
    if exist %FULLPROF% copy get_data.exe %FULLPROF%
+   if exist %PROGCFML% copy get_data.exe %PROGCFML%\DistFPS_64b\get_data.exe    
 rem
 rem Clean several files
 rem
