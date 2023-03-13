@@ -37,18 +37,18 @@ rem Compiling the source files
     %_COMP% D2B_data_mod.f90        %OPT% %INCLUDE%
     %_COMP% D2B_int_mod.f90         %OPT% %INCLUDE%
     %_COMP% GetData_Globals.f90     %OPT% %INCLUDE%
-    %_COMP% get_data_nxs.f90        %OPT% %INCLUDE%
-    link /out:get_data_nxs.exe *.obj %liblink%
+    %_COMP% get_data.f90        %OPT% %INCLUDE%
+    link /out:get_data.exe *.obj %liblink%
 :FIN
 rem
 rem Compress executable
 rem
-   upx get_data_nxs.exe
+   upx get_data.exe
 rem   copy get_data.exe ..\..\DistFPS_64b
 rem
 rem Update FullProf Distribution
 rem
-   if exist %FULLPROF% copy get_data_nxs.exe %FULLPROF%
+   if exist %FULLPROF% copy get_data.exe %FULLPROF%
 rem
 rem Clean several files
 rem

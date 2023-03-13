@@ -228,6 +228,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
              end do
           end if
        end if
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_XYSig
 
@@ -312,6 +313,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
           end if
           j=j+10
        end do
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_FreeFormat
 
@@ -427,6 +429,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
              Write(unit=i_dat,fmt="(8F14.2)")  Pat%sigma(ini:ifin)
           end if
        end if
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_INSTRM5
 

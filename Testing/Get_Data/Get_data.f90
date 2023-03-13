@@ -8,7 +8,6 @@
  !!----
  !!---- GET_DATA PROGRAM
  !!----
-
  !!----
  !!---- Program Get_Data_nxs
  !!----
@@ -703,9 +702,9 @@
   Contains
 
     Subroutine Stop_Program()
-      !character(len=1) :: key
-      !write(unit=*,fmt="(/,a)") " => Press <enter> to finish "
-      !read(unit=*,fmt="(a)") key
+      character(len=1) :: key
+      write(unit=*,fmt="(/,a)") " => Press <enter> to finish "
+      read(unit=*,fmt="(a)") key
       stop
     End Subroutine Stop_Program
 

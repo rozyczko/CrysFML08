@@ -58,7 +58,7 @@ Module D2B_int_mod
     integer               :: np_horiz
     integer, dimension(3) :: dims
     real                  :: ga_D,nu_D,xmin,cgap, scale_fac,aver_mon
-    type(DiffPat_E_Type)  :: pow_pat
+    type(DiffPat_E_Type), public  :: pow_pat
 
     Public  :: Integrate_D2B_data
     logical :: is_virtual_detector_set
@@ -124,7 +124,6 @@ Module D2B_int_mod
                       write(*,'(8x,a)') 'Calibration will not be applied'
                       cfl%calibration = .false.
                   end if
-                  write(*,"(8f8.4)") cal%Effic(1,:)
               else
                   write(*,'(4x,a)') ' => Calibration generator: unknown'
                   write(*,'(8x,a)') 'Calibration will not be applied'
