@@ -12,11 +12,11 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
    !!
    Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)
       !---- Arguments ----!
-      Type(file_type),         intent(in)     :: ffile
-      integer,                 intent(in)     :: n_ini
-      integer,                 intent(in)     :: n_end
-      integer,                 intent(in)     :: Ip
-      type(RelationList_Type), intent(in out) :: Pat
+      Type(file_type),         intent(in)   :: ffile
+      integer,                 intent(in)   :: n_ini
+      integer,                 intent(in)   :: n_end
+      integer,                 intent(in)   :: Ip
+      type(GenParList_Type), intent(in out) :: Pat
 
       !---- Local Variables ----!
       integer           :: i,k
@@ -110,9 +110,9 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
    !!
    Module Subroutine ReadCode_FIX_PATT(String, Ip, Pat)
       !---- Arguments ----!
-      character(len=*),        intent(in)     :: String
-      integer,                 intent(in)     :: Ip
-      type(RelationList_Type), intent(in out) :: Pat
+      character(len=*),        intent(in)   :: String
+      integer,                 intent(in)   :: Ip
+      type(GenParList_Type), intent(in out) :: Pat
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -177,7 +177,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
       !---- Arguments ----!
       character(len=*),        intent(in)     :: String
       integer,                 intent(in)     :: Ip
-      type(RelationList_Type), intent(in out) :: Pat
+      type(GenParList_Type), intent(in out) :: Pat
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -241,7 +241,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
       character(len=*),              intent(in)     :: Keyword     ! VARY/FIX/....
       integer,                       intent(in)     :: NPar        ! Specific parameter U,V,W,...
       integer,                       intent(in)     :: IP
-      type(RelationList_Type),       intent(in out) :: Pat
+      type(GenParList_Type),       intent(in out) :: Pat
 
       !---- Local variables ----!
       integer          :: i
@@ -263,31 +263,31 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                case (1) ! U
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Pat,'U_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'U_PAT'//trim(car))
 
                case (2) ! V
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Pat,'V_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'V_PAT'//trim(car))
 
                case (3) ! W
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Pat,'W_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'W_PAT'//trim(car))
 
                case ( 4) ! UVW
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Pat,'U_PAT'//trim(car))
-                  call Fix_RelationList_Par(Pat,'V_PAT'//trim(car))
-                  call Fix_RelationList_Par(Pat,'W_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'U_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'V_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'W_PAT'//trim(car))
 
                case ( 5:16) ! BKG
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-4
                   car_n=adjustl(car_n)
-                  call Fix_RelationList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
 
                case (17) ! All BKG
                   write(car,fmt='(i3)') ip
@@ -295,7 +295,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,12
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Fix_RelationList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
+                     call Fix_GenParList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
                case (18:20) ! SC
@@ -303,7 +303,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-17
                   car_n=adjustl(car_n)
-                  call Fix_RelationList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
 
                case (21)
                   write(car,fmt='(i3)') ip
@@ -311,7 +311,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,3
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Fix_RelationList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
+                     call Fix_GenParList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
                case (22:24) ! EXTI
@@ -319,7 +319,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-21
                   car_n=adjustl(car_n)
-                  call Fix_RelationList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
+                  call Fix_GenParList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
 
                case (25)
                   write(car,fmt='(i3)') ip
@@ -327,7 +327,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,3
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Fix_RelationList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
+                     call Fix_GenParList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
             end select ! Npar
@@ -342,31 +342,31 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                case ( 1) ! U
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Pat,'U_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'U_PAT'//trim(car))
 
                case ( 2) ! V
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Pat,'V_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'V_PAT'//trim(car))
 
                case ( 3) ! U
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Pat,'W_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'W_PAT'//trim(car))
 
                case ( 4) ! UVW
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Pat,'U_PAT'//trim(car))
-                  call Vary_RelationList_Par(Pat,'V_PAT'//trim(car))
-                  call Vary_RelationList_Par(Pat,'W_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'U_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'V_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'W_PAT'//trim(car))
 
                case (5:16) ! BKG
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-4
                   car_n=adjustl(car_n)
-                  call Vary_RelationList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
 
                case (17)
                   write(car,fmt='(i3)') ip
@@ -374,7 +374,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,12
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Vary_RelationList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
+                     call Vary_GenParList_Par(Pat,'BKG'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
                case (18:20) ! SC
@@ -382,7 +382,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-17
                   car_n=adjustl(car_n)
-                  call Vary_RelationList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
 
                case (21)
                   write(car,fmt='(i3)') ip
@@ -390,7 +390,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,3
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Vary_RelationList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
+                     call Vary_GenParList_Par(Pat,'SC'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
                case (22:24) ! EXTI
@@ -398,7 +398,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   car=adjustl(car)
                   write(car_n,fmt='(i3)') Npar-21
                   car_n=adjustl(car_n)
-                  call Vary_RelationList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
+                  call Vary_GenParList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
 
                case (25)
                   write(car,fmt='(i3)') ip
@@ -406,7 +406,7 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   do i=1,3
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
-                     call Vary_RelationList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
+                     call Vary_GenParList_Par(Pat,'EXTI'//trim(car_n)//'_PAT'//trim(car))
                   end do
 
             end select ! Npar

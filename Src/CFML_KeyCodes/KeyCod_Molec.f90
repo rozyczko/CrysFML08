@@ -11,11 +11,11 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
    !!
    Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
       !---- Arguments ----!
-      Type(file_type),         intent(in)     :: ffile
-      integer,                 intent(in)     :: n_ini
-      integer,                 intent(in)     :: n_end
-      integer,                 intent(in)     :: Im
-      type(RelationList_Type), intent(inout)  :: M
+      Type(file_type),         intent(in)   :: ffile
+      integer,                 intent(in)   :: n_ini
+      integer,                 intent(in)   :: n_end
+      integer,                 intent(in)   :: Im
+      type(GenParList_Type), intent(in out) :: M
 
       !---- Local Variables ----!
       integer                 :: i, k
@@ -56,9 +56,9 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
    !!
    Module Subroutine ReadCode_FIX_MOL(String, Im, M)
       !---- Arguments ----!
-      character(len=*),        intent(in)    :: String
-      integer,                 intent(in)    :: Im
-      type(RelationList_Type), intent(inout) :: M
+      character(len=*),        intent(in)   :: String
+      integer,                 intent(in)   :: Im
+      type(GenParList_Type), intent(in out) :: M
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -123,7 +123,7 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
       !---- Arguments ----!
       character(len=*),        intent(in)    :: String
       integer,                 intent(in)    :: Im
-      type(RelationList_Type), intent(inout) :: M
+      type(GenParList_Type), intent(inout) :: M
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -231,10 +231,10 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
    !!
    Module Subroutine Set_RefCodes_MOL(Keyword, Npar,  Im, M)
       !---- Arguments ----!
-      character(len=*),              intent(in)     :: Keyword     ! VARY/FIX/....
-      integer,                       intent(in)     :: NPar        ! Specific parameter A,B,C,...
-      integer,                       intent(in)     :: Im
-      type(RelationList_Type),       intent(in out) :: M
+      character(len=*),              intent(in)   :: Keyword     ! VARY/FIX/....
+      integer,                       intent(in)   :: NPar        ! Specific parameter A,B,C,...
+      integer,                       intent(in)   :: Im
+      type(GenParList_Type),       intent(in out) :: M
 
       !---- Local variables ----!
       integer          :: i
@@ -256,86 +256,86 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
                case (1) ! XC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'XC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'XC_MOL'//trim(car))
 
                case (2) ! YC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'YC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'YC_MOL'//trim(car))
 
                case (3) ! ZC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'ZC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'ZC_MOL'//trim(car))
 
                case (4) ! CENTRE
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'XC_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'YC_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'ZC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'XC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'YC_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'ZC_MOL'//trim(car))
 
                case (5) ! THE
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'THE_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'THE_MOL'//trim(car))
 
                case (6) ! PHI
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'PHI_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'PHI_MOL'//trim(car))
 
                case (7) ! CHI
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'CHI_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'CHI_MOL'//trim(car))
 
                case (8) ! ORIENT
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'THE_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'PHI_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'CHI_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'THE_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'PHI_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'CHI_MOL'//trim(car))
 
                case (9) ! T
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'T_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'T_MOL'//trim(car))
 
                case (10) ! L
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'L_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'L_MOL'//trim(car))
 
                case (11) ! S
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (12) ! TL
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'L_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'L_MOL'//trim(car))
 
                case (13) ! LS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'L_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'L_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (14) ! TS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (15) ! TLS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Fix_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'L_MOL'//trim(car))
-                  call Fix_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'L_MOL'//trim(car))
+                  call Fix_GenParList_Par(M,'S_MOL'//trim(car))
 
             end select ! Npar
 
@@ -349,86 +349,86 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
                case (1) ! XC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'XC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'XC_MOL'//trim(car))
 
                case (2) ! YC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'YC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'YC_MOL'//trim(car))
 
                case (3) ! ZC
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'ZC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'ZC_MOL'//trim(car))
 
                case (4) ! CENT
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'XC_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'YC_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'ZC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'XC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'YC_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'ZC_MOL'//trim(car))
 
                case (5) ! THE
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'THE_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'THE_MOL'//trim(car))
 
                case (6) ! PHI
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'PHI_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'PHI_MOL'//trim(car))
 
                case (7) ! CHI
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'CHI_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'CHI_MOL'//trim(car))
 
                case (8) ! ORIENT
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'THE_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'PHI_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'CHI_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'THE_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'PHI_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'CHI_MOL'//trim(car))
 
                case (9) ! T
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'T_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'T_MOL'//trim(car))
 
                case (10) ! L
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'L_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'L_MOL'//trim(car))
 
                case (11) ! S
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (12) ! TL
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'L_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'L_MOL'//trim(car))
 
                case (13) ! LS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'L_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'L_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (14) ! TS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'S_MOL'//trim(car))
 
                case (15) ! TLS
                   write(car,fmt='(i3)') im
                   car=adjustl(car)
-                  call Vary_RelationList_Par(M,'T_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'L_MOL'//trim(car))
-                  call Vary_RelationList_Par(M,'S_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'T_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'L_MOL'//trim(car))
+                  call Vary_GenParList_Par(M,'S_MOL'//trim(car))
 
             end select ! Npar
 
