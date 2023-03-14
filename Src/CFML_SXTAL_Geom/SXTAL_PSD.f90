@@ -4,16 +4,16 @@
 
   Contains
 
-    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,Shifts,origin)
+    Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,shifts,origin)
 
-        ! Pixel numbering start by zero
+        ! Pixel numbering start by one
         !
         ! r_D contains the pixel coordinates in the detector
         ! reference system
         !
         ! r_L contains the pixel coordinates in the laboratory
-        ! reference system, when the detector is at gamma = 0
-        ! and nu = 0
+        ! reference system (detector with gamma = 0
+        ! and nu = 0)
         !
         ! conversion_type = 0: pixels to angles
         ! conversion_type = 1: angles to pixels
@@ -45,14 +45,14 @@
         call clear_error()
         diffractometer%np_horiz = diffractometer%np_horiz * f_virtual
         diffractometer%cgap = diffractometer%cgap / f_virtual
-        px_mid = diffractometer%np_horiz / 2.0
-        pz_mid = diffractometer%np_vert / 2.0
+        px_mid = diffractometer%np_horiz  / 2.0
+        pz_mid = diffractometer%np_vert   / 2.0
         px_ = px
         pz_ = pz
         if(present(shifts)) then
-          deltaX=diffractometer%shifts(nint(px)+1) !indices for pixels in the calling program start with 0
+          deltaX = diffractometer%shifts(nint(px)+1) !indices for pixels in the calling program start with 0
         else
-          deltaX=0.0
+          deltaX = 0.0
         end if
         if(present(origin)) then
           orig = origin
@@ -64,17 +64,14 @@
         if (conversion_type == 0) then ! pixels to angles
 
             ! Detector reference system: origin at the center of the detector
+            ! Use origin = 3 for calculations
             px_ = px
             pz_ = pz
-            if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ - 1
-            if (orig == 1 .or. orig == 2) px_ = diffractometer%np_horiz - px_ - 1
+            if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ + 1
+            if (orig == 1 .or. orig == 2) px_ = diffractometer%np_horiz - px_ + 1
             x_D = (px_ - px_mid) * diffractometer%cgap
             y_D = 0.0
             z_D = (pz_ - pz_mid) * diffractometer%agap
-            if (trim(blfr) == 'z-down') then
-               x_D = -x_D
-               z_D = -z_D
-            end if
 
             ! Cartesian coordinates in the laboratory system
             select case(diffractometer%ipsd)
@@ -89,8 +86,8 @@
                           diffractometer%det_offsets(2)
                     z_L = z_D + diffractometer%det_offsets(3)
                 case default ! Unknown detector
-                    Err_CFML%ierr=-1
-                    Err_CFML%Msg="Unknown detector"
+                    Err_CFML%ierr = -1
+                    Err_CFML%Msg = "Unknown detector"
                     return
             end select
 
@@ -111,8 +108,8 @@
                     x_D = radius * ga_P * to_rad - diffractometer%det_offsets(1) + deltaX
                     z_D = radius * tand(nu_P) - diffractometer%det_offsets(3)
                 case default ! Unknown detector
-                    Err_CFML%ierr=-1
-                    Err_CFML%Msg="Unknown detector"
+                    Err_CFML%ierr = -1
+                    Err_CFML%Msg = "Unknown detector"
                     return
             end select
 
@@ -121,14 +118,10 @@
             nu_P = nu_P + nu_D
 
             ! Compute pixels from detector coordinates
-            if (trim(blfr) == 'z-down') then
-               x_D = -x_D
-               z_D = -z_D
-            end if
             px = px_mid + x_D / diffractometer%cgap
             pz = pz_mid + z_D / diffractometer%agap
-            if (orig == 0 .or. orig == 1) pz = diffractometer%np_vert - pz - 1
-            if (orig == 1 .or. orig == 2) px = diffractometer%np_horiz - px - 1
+            if (orig == 0 .or. orig == 1) pz = diffractometer%np_vert - pz + 1
+            if (orig == 1 .or. orig == 2) px = diffractometer%np_horiz - px + 1
 
         end if
 
