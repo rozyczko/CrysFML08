@@ -9,6 +9,7 @@ COMP="ifort"
 DEBUG="N"
 ARCH="m64"
 HDF5_INSTALL=/usr/local/HDF_Group/HDF5/1.14.0
+ZLIB_DIR=/usr/lib/x86_64-linux-gnu/
 #
 # Arguments
 #
@@ -36,10 +37,11 @@ if [ $ARCH == "m32" ]; then
    VERS="Linux"
    SRC_NXS=$CRYSFML08/HDF5
 else
-   INC="-I$CRYSFML08/ifort64/LibC"
+   INC="-I$CRYSFML08/ifort64/LibC -I$HDF5_INSTALL/mod/static"
    LIB="-L$CRYSFML08/ifort64/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux64"
+   SRC_NXS=$CRYSFML08/HDF5
 fi
 if [ $DEBUG == "Y" ]; then
    OPT1="-c -g -heap-arrays -$ARCH"
@@ -62,7 +64,7 @@ $COMP $OPT1 D2B_data_mod.f90          $INC
 $COMP $OPT1 D2B_int_mod.f90           $INC
 $COMP $OPT1 GetData_Globals.f90       $INC
 $COMP $OPT1 Get_data.f90              $INC
-$COMP -$ARCH *.o -o get_data -static-intel $LIB  $LIBSTATIC  $HDF5_INSTALL/lib -L  $ZLIB_DIR -l hdf5_fortran -l hdf5_f90cstub -l hdf5  -l z
+$COMP -$ARCH *.o -o get_data -static-intel $LIB  $LIBSTATIC  -L $HDF5_INSTALL/lib -L  $ZLIB_DIR -l hdf5_fortran -l hdf5_f90cstub -l hdf5  -l z
 
 #
 # Final process
