@@ -8,6 +8,7 @@
 COMP="ifort"
 DEBUG="N"
 ARCH="m64"
+HDF5_INSTALL=/usr/local/HDF_Group/HDF5/1.14.0
 #
 # Arguments
 #
