@@ -793,7 +793,11 @@ module nexus_mod
 
         ! Counts
         if (present(raw)) then
-            call h5dopen_f(file_id,'entry0/data_scan/detector_data/raw_data',dset,hdferr)
+            if (index(nexus%instrument_name,'19') > -1) then
+                call h5dopen_f(file_id,'entry0/data_scan/detector_data/data_raw',dset,hdferr)
+            else
+                call h5dopen_f(file_id,'entry0/data_scan/detector_data/raw_data',dset,hdferr)
+            end if
         else
             call h5dopen_f(file_id,'entry0/data_scan/detector_data/data',dset,hdferr)
         end if
@@ -1312,10 +1316,12 @@ module nexus_mod
 
     end subroutine write_vnexus
 
-    subroutine write_simple_nexus(namef,nexus)
+    subroutine write_simple_nexus(namef,nexus,novirtual,raw)
         ! Arguments
-        character(len=*), intent(in) :: namef
-        type(nexus_type), intent(in) :: nexus
+        character(len=*), intent(in)  :: namef
+        type(nexus_type), intent(in)  :: nexus
+        logical, optional, intent(in) :: novirtual
+        logical, optional, intent(in) :: raw
 
         ! Local variables
         integer                        :: i,hdferr,filter_info,filter_info_both,nv,nh
@@ -1350,7 +1356,16 @@ module nexus_mod
             stop
         end if
 
-        inst_name = current_instrm%name_inst
+        if (trim(nexus%instrument_name) == '') then
+            inst_name = current_instrm%name_inst
+        else
+            inst_name = nexus%instrument_name
+        end if
+        if (trim(nexus%data_ordering) == '') then
+            data_ordering = current_instrm%data_ordering
+        else
+            data_ordering = nexus%data_ordering
+        end if
 
         ! Create the hdf5 file
         call h5fcreate_f(namef,H5F_ACC_TRUNC_F,filen,hdferr)
@@ -1402,7 +1417,7 @@ module nexus_mod
         ! Write instrument name
         dims_1D = 1
         !   Create file datatype
-        length = len(trim(current_instrm%name_inst))
+        length = len(trim(inst_name))
         call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
         call h5tset_size_f(filetype,length,hdferr)
         !   Create dataspace
@@ -1422,7 +1437,7 @@ module nexus_mod
         ! Write instrument name
         dims_1D = 1
         !   Create file datatype
-        length = len(trim(current_instrm%data_ordering))
+        length = len(trim(data_ordering))
         call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
         call h5tset_size_f(filetype,length,hdferr)
         !   Create dataspace
@@ -1435,7 +1450,6 @@ module nexus_mod
             call h5gopen_f(filen,'entry0/instrument/Det1',group,hdferr)
         end if
         call h5dcreate_f(group,'data_ordering',filetype,space,dset,hdferr)
-        data_ordering = current_instrm%data_ordering
         f_ptr = C_LOC(data_ordering(1:1))
         call h5dwrite_f(dset,filetype,f_ptr,hdferr)
         !   Close and release resources
@@ -1445,22 +1459,24 @@ module nexus_mod
         call h5tclose_f(filetype,hdferr)
 
         ! Write virtual cgap
-        dims_1D = 1
-        !   Create dataspace
-        call h5screate_simple_f(1,dims_1D,space,hdferr)
-        i = index(inst_name,'19')
-        if (i < 1) then
-            call h5gopen_f(filen,'entry0/instrument/Detector',group,hdferr)
-        else
-            call h5gopen_f(filen,'entry0/instrument/Det1',group,hdferr)
+        if (.not. present(novirtual)) then
+            dims_1D = 1
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            i = index(inst_name,'19')
+            if (i < 1) then
+                call h5gopen_f(filen,'entry0/instrument/Detector',group,hdferr)
+            else
+                call h5gopen_f(filen,'entry0/instrument/Det1',group,hdferr)
+            end if
+            call h5dcreate_f(group,'virtual_cgap',H5T_NATIVE_REAL,space,dset,hdferr)
+            !   Write the data to the dataset
+            call h5dwrite_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,dims_1D,hdferr)
+            !   Close and release resources
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
         end if
-        call h5dcreate_f(group,'virtual_cgap',H5T_NATIVE_REAL,space,dset,hdferr)
-        !   Write the data to the dataset
-        call h5dwrite_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,dims_1D,hdferr)
-        !   Close and release resources
-        call h5gclose_f(group,hdferr)
-        call h5dclose_f(dset,hdferr)
-        call h5sclose_f(space,hdferr)
 
         ! Write gamma and nu of the detector
         allocate(paths(2),val(2))
@@ -1496,7 +1512,16 @@ module nexus_mod
         call h5pset_chunk_f(dcpl,3,chunk_3D,hdferr)
         !
         call h5gopen_f(filen,'entry0/data_scan/detector_data',group,hdferr)
-        call h5dcreate_f(group,'data',H5T_NATIVE_INTEGER,space,dset,hdferr,dcpl)
+        if (present(raw)) then
+            i = index(inst_name,'19')
+            if (i < 1) then
+                call h5dcreate_f(group,'raw_data',H5T_NATIVE_INTEGER,space,dset,hdferr,dcpl)
+            else
+                call h5dcreate_f(group,'data_raw',H5T_NATIVE_INTEGER,space,dset,hdferr,dcpl)
+            end if
+        else
+            call h5dcreate_f(group,'data',H5T_NATIVE_INTEGER,space,dset,hdferr,dcpl)
+        end if
         !   Write the data to the dataset
         call h5dwrite_f(dset,H5T_NATIVE_INTEGER,nexus%counts,dims_3D,hdferr)
         !   Close and release resources
