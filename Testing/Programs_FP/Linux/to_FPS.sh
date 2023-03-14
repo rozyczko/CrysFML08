@@ -19,3 +19,7 @@ chmod +x make_tof_LM.sh
 # "#### nDataRed Program ####"
 chmod +x make_DataRed.sh
 ./make_DataRed.sh $COMP
+#
+# "#### Get_Data Program ####"
+chmod +x make_get_data.sh
+./make_get_data.sh $COMP

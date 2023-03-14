@@ -54,14 +54,14 @@ module D2B_data_mod
     real               :: ga_range_real
     real               :: diffpat_tsamp, diffpat_tset
     integer, dimension(:,:),   allocatable :: nsamples
-    real,    dimension(:,:,:), allocatable :: counts_virtual
+    real,    dimension(:,:,:), allocatable :: counts_virtual,sigma_counts_virtual
     real,    dimension(:,:),   allocatable :: calibration
     !logical :: pattern_allocated = .false.
     character(len=:), allocatable :: diffpat_Title, diffpat_info, diffpat_norm, diffpat_cal
 
     !Public global variables
     type(Calibration_Detector_Type),        public :: Cal
-    real,    dimension(:,:),   allocatable, public :: Data2D
+    real,    dimension(:,:),   allocatable, public :: Data2D, sData2D
     real,                                   public :: nu_D_virtual = 0.0
     real,                                   public :: ga_D_virtual
     type(diffractometer_type),              public :: virtual_instrm
@@ -161,14 +161,19 @@ module D2B_data_mod
     Subroutine allocate_virtual_arrays()
 
         if (allocated(Data2D)) deallocate(Data2D)
+        if (allocated(sData2D)) deallocate(sData2D)
         if (allocated(counts_virtual)) deallocate(counts_virtual)
+        if (allocated(sigma_counts_virtual)) deallocate(sigma_counts_virtual)
         if (allocated(nsamples)) deallocate(nsamples)
         ! Assign memory to arrays
         allocate(        Data2D(virtual_instrm%np_vert,virtual_instrm%np_horiz))
+        allocate(       sData2D(virtual_instrm%np_vert,virtual_instrm%np_horiz))
         allocate(counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,NSAMPLES_MAX))
+        allocate(sigma_counts_virtual(virtual_instrm%np_vert,virtual_instrm%np_horiz,NSAMPLES_MAX))
         allocate(      nsamples(virtual_instrm%np_vert,virtual_instrm%np_horiz))
-        Data2D(:,:) = 0.0
+        Data2D(:,:) = 0.0; sData2D(:,:)=0.0
         counts_virtual(:,:,:) = 0.0
+        sigma_counts_virtual(:,:,:) = 0.0
         nsamples(:,:) = 0
 
     End Subroutine allocate_virtual_arrays
@@ -210,13 +215,16 @@ module D2B_data_mod
                 do k = 1 , nsamples(i,j)
                     if (abs(counts_virtual(i,j,k) - ave) < dsigma) then
                         n = n + 1
-                        Data2D(i,j) = Data2D(i,j) + counts_virtual(i,j,k)
+                        Data2D(i,j)  =  Data2D(i,j) + counts_virtual(i,j,k)
+                        sData2D(i,j) = sData2D(i,j) + sigma_counts_virtual(i,j,k)
                     end if
                 end do
-                if (n > 0) Data2D(i,j) =  num_vc * Data2D(i,j)  / real(n)
+                if (n > 0) then
+                    Data2D(i,j) =  num_vc *  Data2D(i,j)  / real(n)
+                   sData2D(i,j) =  num_vc * sData2D(i,j)  / real(n)
+                end if
             end do
         end do
-        !where(Data2D > 0) Data2D = Data2D * 25
 
     End Subroutine average_virtual_counts
 
@@ -228,12 +236,13 @@ module D2B_data_mod
         logical,          intent(in) :: Apply  !Apply detector shifts if true
         ! Local variables
         integer :: i,j,k,ii,jj
-        real :: ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,fac
+        real :: ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,fac,alpha,s_alpha, Ints, s_Ints
 
         do k = 1 , nexus%nf
             ga_D = nexus%angles(4,k)
             nu_D = nexus%angles(7,k)
-            fac=cnorm/nexus%monitor(k) !This should be close to except if one of the scans is not completed
+            fac=cnorm/nexus%monitor(k) !This should be close tothe average count monitor except if one of the scans is not completed
+
             do j = 1 , nexus%nx
                 do i = 1 , nexus%nz
                     if(.not. Cal%Active(i,j)) cycle
@@ -251,8 +260,15 @@ module D2B_data_mod
                         if (ii > 0 .and. ii <= virtual_instrm%np_vert .and. jj > 0 .and. jj <= virtual_instrm%np_horiz) then
                             nsamples(ii,jj) = nsamples(ii,jj) + 1
                             if (nsamples(ii,jj) <= NSAMPLES_MAX) then
-                                counts_virtual(ii,jj,nsamples(ii,jj)) = &
-                                    counts_virtual(ii,jj,nsamples(ii,jj)) + nexus%counts(i,j,k) * fac * current_instrm%alphas(i,j)
+
+                               alpha=current_instrm%alphas(i,j); s_alpha=current_instrm%sigma_alphas(i,j)**2  !s_ are here variances
+                               Ints=nexus%counts(i,j,k); s_Ints=nexus%counts(i,j,k)
+
+                               counts_virtual(ii,jj,nsamples(ii,jj)) = counts_virtual(ii,jj,nsamples(ii,jj)) + fac *Ints *  alpha
+
+                                !Here, for the moment sigma is variance
+                               sigma_counts_virtual(ii,jj,nsamples(ii,jj)) = sigma_counts_virtual(ii,jj,nsamples(ii,jj)) + &
+                                                                              Ints * fac * (alpha*alpha + Ints * s_alpha)
                             else
                                 write(*,'(8x,a)') 'Warning! Nsamples reached its maximum allowed value!'
                                 nsamples(ii,jj) = NSAMPLES_MAX
@@ -384,7 +400,8 @@ module D2B_data_mod
                 tth = acosd(cnu(k)*cosgam)*sign(1.0,gam(i))
                 ith = nint((tth-pat%xmin) / pat%step) + 1
                 if (ith > 0 .and. ith <= Pat%npts) then
-                    pat%y(ith)     = pat%y(ith) + Data2D(k,i)
+                    pat%y(ith)  = pat%y(ith)  +  Data2D(k,i)
+                    pat%sigma(i)= pat%sigma(i)+ sData2D(k,i)
                     pat%nd(ith) = pat%nd(ith) + 1
                 end if
             end do
@@ -393,9 +410,8 @@ module D2B_data_mod
         ! Average
         do i = 1 , pat%npts
             fac = scale_fac / max(1,pat%nd(i))
-            pat%sigma(i) = sqrt(pat%y(i))
             pat%y(i)     = fac*pat%y(i)
-            pat%sigma(i) = fac*pat%sigma(i)
+            pat%sigma(i) = sqrt(fac*pat%sigma(i))
         end do
 
     End Subroutine get_powder_pattern
@@ -407,8 +423,10 @@ module D2B_data_mod
       real, dimension(size(Cal%PosX)) :: angles
 
       if(allocated(current_instrm%alphas)) deallocate(current_instrm%alphas)
+      if(allocated(current_instrm%sigma_alphas)) deallocate(current_instrm%sigma_alphas)
       if(allocated(current_instrm%shifts)) deallocate(current_instrm%shifts)
       allocate(current_instrm%alphas(current_instrm%np_vert,current_instrm%np_horiz))
+      allocate(current_instrm%sigma_alphas(current_instrm%np_vert,current_instrm%np_horiz))
       allocate(current_instrm%shifts(current_instrm%np_horiz))
 
       if(Cal%True_Eff) then
@@ -416,6 +434,7 @@ module D2B_data_mod
       else
         current_instrm%alphas=Cal%Effic
       end if
+      current_instrm%sigma_alphas = Cal%sEffic
       where(.not. Cal%Active) current_instrm%alphas=-1.0
       !Calculate the shifts of the detector pixels in mm
       do i=1,size(Cal%PosX)
@@ -423,6 +442,7 @@ module D2B_data_mod
         current_instrm%shifts(i)=angles(i)*current_instrm%dist_samp_detector
       end do
       current_instrm%alpha_correct=.true.
+      current_instrm%sigma_alpha_correct=.true.
       current_instrm%shift_correct=.true.
       !Testing
       open(newunit=lun,file="wtest_D2B.geom",status="replace",action="write",position="rewind")

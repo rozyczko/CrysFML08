@@ -28,4 +28,12 @@ rem
 @echo "                                           "
    call make_DataRed %1
 rem
+rem
+@echo "                                           "
+@echo "-------------------------------------------"
+@echo "        Building Get_Data                  "
+@echo "-------------------------------------------"
+@echo "                                           "
+   call make_get_data %1
+rem
 :END
