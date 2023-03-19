@@ -39,14 +39,29 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
    End Subroutine Allocate_Scattering_Species
 
    !!----
-   !!----  SUBROUTINE ADDITIONAL_SCATTERING_FACTORS
+   !!----  SUBROUTINE ADDITIONAL_SCATTERING_FACTORS (overloaded)
    !!----
    !!----  Subroutine constructing add_Scatt by reading fil of File_List_Type
    !!----  These values replace those read from database CFML_Scattering_Chemical_Tables
    !!----
    !!----  Created (JRC): October-2015
    !!----
-   Module Subroutine Additional_Scattering_Factors(Fil, Add_Scatt)
+   Module Subroutine Additional_Scattering_Factors_FLT(Fil, Add_Scatt)
+      !---- Arguments ----!
+      type(File_list_Type),          intent(in)  :: fil
+      Type(Scattering_Species_Type), intent(out) :: add_Scatt
+      !--- Local variables ---!
+      type(File_Type)  :: FT
+      integer :: i
+      FT%nlines=fil%nlines
+      allocate(FT%line(fil%nlines))
+      do i=1,fil%nlines
+        FT%line(i)%Str=trim(fil%line(i))
+      end do
+      call Additional_Scattering_Factors(FT, Add_Scatt)
+   End Subroutine Additional_Scattering_Factors_FLT
+
+   Module Subroutine Additional_Scattering_Factors_FT(Fil, Add_Scatt)
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: fil
       Type(Scattering_Species_Type), intent(out) :: add_Scatt
@@ -134,7 +149,7 @@ Submodule (CFML_Structure_Factors) SF_Scattering_Species
          add_Scatt%Num_species=0
       end if
 
-   End Subroutine Additional_Scattering_Factors
+   End Subroutine Additional_Scattering_Factors_FT
 
    !!----
    !!---- SUBROUTINE SET_FORM_FACTORS

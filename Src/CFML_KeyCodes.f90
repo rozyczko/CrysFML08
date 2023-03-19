@@ -123,7 +123,7 @@ Module CFML_KeyCodes
       character(len=40) :: Nam=" "
       character(len=30) :: Ext=" "
       integer           :: L=0            ! Code number
-      real(kind=cp)     :: M=0.0_cp       ! Multiplicator
+      real(kind=cp)     :: M=0.0_cp       ! Multiplier
       real(kind=cp)     :: Val=0.0_cp
       real(kind=cp)     :: Sig=0.0_cp
    End Type GenPar_Type
@@ -132,7 +132,7 @@ Module CFML_KeyCodes
    !!---- TYPE :: GenParList_Type
    !!----
    !!---- The user of this derived type must allocate and fill a type of this kind for his(her) own
-   !!---- his(her) own problem. An object of this type is needed to fill the V_vec and
+   !!---- his(her) own problem. An object of this type is needed to fill the Vec_RefPar and
    !!---- accompanying arrays.
    !!----
    !!---- Update: April - 2022
@@ -203,7 +203,7 @@ Module CFML_KeyCodes
    integer,           public, dimension(:)  , allocatable :: Vec_PointPar ! Vector of indices pointing to the parameter number
    real(kind=cp),     public, dimension(:,:), allocatable :: Vec_LimPar   ! Vector of Lower, Upper limits and Step for Parameters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefPar   ! Vector of refined parameters (values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STF refined paramaters
+   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STD of refined paramaters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
@@ -365,7 +365,7 @@ Module CFML_KeyCodes
          type(AtList_Type),           intent(in out) :: AtList
          integer,                     intent(in)     :: NAtm
          integer,                     intent(in)     :: Ind
-         class(SpG_Type),              intent(in)     :: Spg
+         class(SpG_Type),             intent(in)     :: Spg
          real(kind=cp), dimension(3), intent(in)     :: Bounds
          integer,                     intent(in)     :: Ic
       End Subroutine Vary_U_Atm
@@ -375,7 +375,7 @@ Module CFML_KeyCodes
          type(AtList_Type),           intent(in out) :: AtList
          integer,                     intent(in)     :: NAtm
          integer,                     intent(in)     :: Ind
-         class(SpG_Type),              intent(in)     :: Spg
+         class(SpG_Type),             intent(in)     :: Spg
          real(kind=cp), dimension(3), intent(in)     :: Bounds
          integer,                     intent(in)     :: Ic
       End Subroutine Vary_XYZ_Atm
@@ -445,7 +445,7 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Ip
-         type(GenParList_Type), intent(in out) :: Pat
+         type(GenParList_Type),   intent(in out) :: Pat
       End Subroutine Read_RefCodes_PATT
 
       Module Subroutine Split_RefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
@@ -461,7 +461,7 @@ Module CFML_KeyCodes
          !---- Arguments ----!
          character(len=*),        intent(in)     :: String
          integer,                 intent(in)     :: Ip
-         type(GenParList_Type), intent(in out) :: Pat
+         type(GenParList_Type),   intent(in out) :: Pat
       End Subroutine ReadCode_FIX_PATT
 
       Module Subroutine ReadCode_VARY_PATT(String, Ip, Pat)
@@ -491,7 +491,7 @@ Module CFML_KeyCodes
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: IP
-         type(GenParList_Type),       intent(in out) :: Pat
+         type(GenParList_Type),         intent(in out) :: Pat
       End Subroutine Set_RefCodes_PATT
 
       Module Subroutine Read_RefCodes_PHAS(ffile, n_ini, n_end, Ip, Ph)
@@ -500,7 +500,7 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Ip
-         type(GenParList_Type), intent(inout)  :: Ph
+         type(GenParList_Type),   intent(in out) :: Ph
       End Subroutine Read_RefCodes_PHAS
 
       Module Subroutine GPList_to_Cell(Ph, Ip, Cell)
@@ -538,7 +538,7 @@ Module CFML_KeyCodes
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: IP
-         type(GenParList_Type),       intent(in out) :: Ph
+         type(GenParList_Type),         intent(in out) :: Ph
       End Subroutine Set_RefCodes_PHAS
 
       Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
@@ -547,21 +547,21 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Im
-         type(GenParList_Type), intent(inout)  :: M
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine Read_RefCodes_MOL
 
       Module Subroutine ReadCode_FIX_MOL(String, Im, M)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Im
-         type(GenParList_Type), intent(inout) :: M
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Im
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine ReadCode_FIX_MOL
 
       Module Subroutine ReadCode_VARY_MOL(String, Im, M)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Im
-         type(GenParList_Type), intent(inout) :: M
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Im
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine ReadCode_VARY_MOL
 
       Module Subroutine Split_RefCod_MOL(String, Nc, Ikeys, IMol, Keys)
@@ -578,14 +578,14 @@ Module CFML_KeyCodes
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: Im
-         type(GenParList_Type),       intent(in out) :: M
+         type(GenParList_Type),         intent(in out) :: M
       End Subroutine Set_RefCodes_MOL
 
       Module Subroutine GPList_to_Molec(M, Im, Mol)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in)   :: M
-         integer,                 intent(in)   :: Im
-         type(Molecule_type),     intent(inout):: Mol
+         type(GenParList_Type),   intent(in)     :: M
+         integer,                 intent(in)     :: Im
+         type(Molecule_type),     intent(in out) :: Mol
       End Subroutine GPList_to_Molec
 
    End Interface

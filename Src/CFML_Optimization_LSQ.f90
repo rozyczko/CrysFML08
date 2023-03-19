@@ -247,7 +247,7 @@
 !!--..         Subroutine Levenberg_Marquardt_Fit(Model_Functn, m, c, Vect, chi2, calder, infout,residuals)
 !!--..            Integer,                     Intent(In)      :: m        !Number of observations
 !!--..            type(LSQ_conditions_type),   Intent(In Out)  :: c        !Conditions of refinement
-!!--..            real, dimension(:),          Intent(In Out)  :: Vect     !State vector like in CFML_Refcodes V_Vec
+!!--..            real, dimension(:),          Intent(In Out)  :: Vect     !State vector like in CFML_Refcodes Vec_RefPar
 !!--..            Real (Kind=cp),              Intent(out)     :: chi2     !final Chi2
 !!--..            logical,                     Intent(in)      :: calder   !logical (should be .true.) used only for purposes
 !!--..                                                                     !of making unambiguous the generic procedure

@@ -6,7 +6,7 @@ Module Ref_Gen
                                     SXTAL_Orient_type, Current_Orient, diffractometer_type, &
                                     Current_Instrm, Read_Current_Instrm, Update_Current_Instrm_UB,&
                                     Set_default_Instrument,Write_Current_Instrm_data
-    use CFML_Strings,         only: l_case, file_type
+    use CFML_Strings,         only: l_case, file_List_type
     use CFML_metrics,         only: Cell_G_Type,Set_Crystal_Cell, Write_Crystal_Cell,Zone_Axis_type, &
                                     Get_basis_from_uvw
     use CFML_SXTAL_Geom
@@ -35,7 +35,7 @@ Module Ref_Gen
         !---- Arguments ----!
         integer,                intent( in)    :: ipr
         type(Cell_G_Type),      intent(in out) :: cell
-        Type(File_Type),        intent( in)    :: file_dat
+        Type(file_List_type),   intent( in)    :: file_dat
         logical,                intent(out)    :: ok
         character(len=*),       intent(out)    :: mess
         integer,dimension(3),   intent(out)    :: ord
@@ -74,7 +74,7 @@ Module Ref_Gen
         if(present(opgiven)) opgiven=.false. !Initialise to false, put to .true. if ANGOR is provided
 
         do j=1,file_dat%nlines
-            line=adjustl(file_dat%line(j)%Str)
+            line=adjustl(file_dat%line(j))
             line=l_case(line)
             if (line(1:1) ==" ") cycle
             if (line(1:1) =="!") cycle
@@ -136,7 +136,7 @@ Module Ref_Gen
                     end if
 
                 case("instr")
-                    line=file_dat%line(j)%Str
+                    line=file_dat%line(j)
                     i=index(line,"!")
                     if(i /= 0) line=line(1:i-1)
                     i=index(trim(line)," ",back=.true.)
@@ -155,7 +155,7 @@ Module Ref_Gen
 
                 case("ubmat","ubmat1")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub(i,:)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub(i,:)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix in CFL file: "//trim(cfl_file)
                             return
@@ -168,7 +168,7 @@ Module Ref_Gen
 
                 case("ubmat2")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub_matrix(i,:,2)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub_matrix(i,:,2)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 2 in CFL file: "//trim(cfl_file)
                             return
@@ -178,7 +178,7 @@ Module Ref_Gen
 
                 case("ubmat3")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub_matrix(i,:,3)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub_matrix(i,:,3)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 3 in CFL file: "//trim(cfl_file)
                             return
@@ -188,7 +188,7 @@ Module Ref_Gen
 
                 case("ubmat4")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub_matrix(i,:,4)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub_matrix(i,:,4)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 4 in CFL file: "//trim(cfl_file)
                             return
@@ -198,7 +198,7 @@ Module Ref_Gen
 
                 case("ubmat5")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub_matrix(i,:,5)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub_matrix(i,:,5)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 5 in CFL file: "//trim(cfl_file)
                             return
@@ -208,7 +208,7 @@ Module Ref_Gen
 
                 case("ubmat6")
                     do i=1,3
-                        read(unit=file_dat%line(j+i)%Str,fmt=*,iostat=ier) ub_matrix(i,:,6)
+                        read(unit=file_dat%line(j+i),fmt=*,iostat=ier) ub_matrix(i,:,6)
                         if(ier /= 0 ) then
                             mess="Error reading the orientation matrix of twin 6 in CFL file: "//trim(cfl_file)
                             return
@@ -567,7 +567,7 @@ Program Sxtal_Ref_Gen
 
     use CFML_GlobalDeps
     use CFML_Maths,             only: sort,Linear_interpol,cross_product
-    use CFML_Strings,           only: file_type,cut_string,u_case,pack_string
+    use CFML_Strings,           only: file_List_type,cut_string,u_case,pack_string
     use CFML_gSpaceGroups,      only: SPG_type, Write_SpaceGroup_info, Set_SpaceGroup
     use CFML_Atoms,             only: AtList_Type, Write_Atom_List,MAtom_list_Type
     use CFML_metrics,           only: Cell_G_Type, Write_Crystal_Cell
@@ -588,7 +588,7 @@ Program Sxtal_Ref_Gen
 
     implicit none
 
-    type (file_type)            :: fich_cfl
+    type (file_List_type)       :: fich_cfl
     class(SPG_type), allocatable:: SpG
     type (SPG_type)             :: SpGT
     type (Atlist_Type)          :: A
@@ -703,7 +703,7 @@ Program Sxtal_Ref_Gen
         call finish()
     end if
 
-    call Read_Xtal_Structure(trim(cfl_file),Cell,SpG,A,FType=fich_cfl)
+    call Read_Xtal_Structure(trim(cfl_file),Cell,SpG,A,FileList=fich_cfl)
 
     call cpu_time(start)
 

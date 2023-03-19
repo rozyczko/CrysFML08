@@ -101,8 +101,8 @@ SubModule (CFML_Reflections) Refl_Generate
         imin=hlim(:,1)
         imax=hlim(:,2)
       else
-        imin=(/-hmax,-kmax,-lmax/)
-        imax=(/ hmax, kmax, lmax/)
+        imin=[-hmax,-kmax,-lmax]
+        imax=[ hmax, kmax, lmax]
       end if
       od=[1,2,3]
       if(present(seqindx)) then

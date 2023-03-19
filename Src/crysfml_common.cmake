@@ -419,16 +419,27 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
     endif()
 
-
 # CFML_kvec_symmetry
 file(GLOB SUBMOD_KVEC_SYMMETRY_SRC CFML_kvec_Symmetry/*.f90)
-set(KEYCODES_SRC CFML_kvec_Symmetry.f90
+set(KVECSYMM_SRC CFML_kvec_Symmetry.f90
                  ${SUBMOD_KVEC_SYMMETRY_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
-    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+    set_source_files_properties(${KVECSYMM_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
 else()
-    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+    set_source_files_properties(${KVECSYMM_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
+# CFML_KeyWords_Code_Parser
+file(GLOB SUBMOD_KWC_SRC CFML_KeyWords_Code_Parser/*.f90)
+set(KWCPARSER_SRC CFML_KeyWords_Code_Parser.f90
+                 ${SUBMOD_KWC_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${KWCPARSER_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${KWCPARSER_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
@@ -466,7 +477,8 @@ set(CRYSFML_COMMON_SRC
     ${SF_SRC}
     ${MOLECULES_SRC}
     ${KEYCODES_SRC}
-    ${KVEC_SYMMETRY})
+    ${KVECSYMM_SRC} 
+    ${KWCPARSER_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)

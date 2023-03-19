@@ -49,7 +49,7 @@ Module CFML_IOForm
                                      FindFMT, Init_FindFMT, String_Array_Type,       &
                                      File_type, Reading_File, Get_Transf,            &
                                      Get_Extension, Get_Datetime,Read_Fract,         &
-                                     Frac_Trans_2Dig, Pack_String
+                                     Frac_Trans_2Dig, Pack_String, File_List_type
 
    Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type, mAtom_Type, &
@@ -670,7 +670,7 @@ Module CFML_IOForm
     !!----
     !!---- 09/05/2020
     !!
-    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, MGp, mAtm, Mag_dom, IPhase, FType)
+    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, MGp, mAtm, Mag_dom, IPhase, FType, FileList)
        !---- Arguments ----!
        character(len=*),                    intent( in)     :: filenam    ! Name of the file
        class(Cell_G_Type),                  intent(out)     :: Cell       ! Cell object
@@ -681,8 +681,10 @@ Module CFML_IOForm
        type(Magnetic_Domain_type),optional, intent (out)    :: Mag_dom
        integer,                   optional, intent(in)      :: IPhase     ! Number of phase
        type(File_Type),           optional, intent(out)     :: FType      ! File type
+       type(File_list_Type),      optional, intent(out)     :: FileList   ! File list type
 
        !---- Local Variables ----!
+       integer :: i
        character(len=:), allocatable:: Ext
        type(File_Type) :: F
 
@@ -736,6 +738,13 @@ Module CFML_IOForm
 
        !> End
        if (present(FType)) FType=F
+       if(present(FileList)) then
+         FileList%nlines=F%nlines
+         allocate(FileList%line(F%nlines))
+         do i=1,F%nlines
+            FileList%line(i)=F%line(i)%Str
+         end do
+       end if
 
     End Subroutine Read_Xtal_Structure
 
