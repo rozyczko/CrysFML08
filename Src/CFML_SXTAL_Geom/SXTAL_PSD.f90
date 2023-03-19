@@ -7,6 +7,7 @@
     Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,shifts,origin)
 
         ! Pixel numbering start by one
+        ! The detector is assumed to be viewed from the crystal
         !
         ! r_D contains the pixel coordinates in the detector
         ! reference system
@@ -18,10 +19,10 @@
         ! conversion_type = 0: pixels to angles
         ! conversion_type = 1: angles to pixels
         !
-        ! origin = 0 : top    left
-        ! origin = 1 : top    right
-        ! origin = 2 : bottom right
-        ! origin = 3 : bottom left
+        ! origin for pixel numbering = 0 : top    left
+        ! origin for pixel numbering = 1 : top    right
+        ! origin for pixel numbering = 2 : bottom right
+        ! origin for pixel numbering = 3 : bottom left
 
         ! Arguments
         type(diffractometer_type), intent(in out) :: diffractometer
@@ -72,7 +73,10 @@
             x_D = (px_ - px_mid) * diffractometer%cgap
             y_D = 0.0
             z_D = (pz_ - pz_mid) * diffractometer%agap
-
+            if (trim(blfr) == 'z-down') then
+               x_D = -x_D
+               z_D = -z_D
+            end if
             ! Cartesian coordinates in the laboratory system
             select case(diffractometer%ipsd)
                 case(2) ! Flat detector
@@ -118,6 +122,11 @@
             nu_P = nu_P + nu_D
 
             ! Compute pixels from detector coordinates
+            ! Pixels from origin 3
+            if (trim(blfr) == 'z-down') then
+               x_D = -x_D
+               z_D = -z_D
+            end if
             px = px_mid + x_D / diffractometer%cgap
             pz = pz_mid + z_D / diffractometer%agap
             if (orig == 0 .or. orig == 1) pz = diffractometer%np_vert - pz + 1
