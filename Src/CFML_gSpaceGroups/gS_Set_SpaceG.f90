@@ -1253,6 +1253,10 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          else
             call Get_Generators(gList, d, l_gen, n_gen)
          end if
+         if(.not. allocated(l_gen)) then
+            allocate(l_gen(1))
+            l_gen="x,y,z"
+         end if
       else
          by_Gen=.true.
          allocate(l_gen(n_gen))
