@@ -1324,12 +1324,21 @@ module nexus_mod
         logical, optional, intent(in) :: raw
 
         ! Local variables
-        integer                        :: i,hdferr,filter_info,filter_info_both,nv,nh
+        integer, parameter             :: NVARS = 5
+        character(len=15), target      :: MODE='FOURCIRCLE_MODE'
+        integer                        :: i,hdferr,filter_info,filter_info_both,nv,nh,nf
         integer(HID_T)                 :: filen,filetype,group,subgroup,space,dset,dcpl ! handles
         integer(SIZE_T)                :: length
         integer(HSIZE_T), dimension(1) :: dims_1D
+        integer(HSIZE_T), dimension(2) :: dims_2D,chunk_2D
         integer(HSIZE_T), dimension(3) :: dims_3D,chunk_3D
+        integer(HSIZE_T), dimension(2) :: var_dims = (/8,5/)
+        integer(SIZE_T), dimension(5)  :: str_len = (/5,5,3,3,8/)
+        integer, dimension(NVARS)      :: scanned
         real, dimension(:), allocatable :: val
+        real, dimension(:,:), allocatable :: scanned_data
+        character(len=8), dimension(5), target :: &
+            var_names = (/"omega   ", "gamma   ", "chi     ", "phi     ","Monitor1"/)
         character(len=100), dimension(:), allocatable :: paths
         character(len=:), allocatable, target :: inst_name,data_ordering
         logical :: avail
@@ -1390,6 +1399,8 @@ module nexus_mod
             call h5gcreate_f(group,'Detector',subgroup,hdferr)
         else
             call h5gcreate_f(group,'Det1',subgroup,hdferr)
+            call h5gcreate_f(group,'SingleCrystalSettings',subgroup,hdferr)
+            call h5gclose_f(subgroup,hdferr)
         end if
         call h5gclose_f(subgroup,hdferr)
         call h5gcreate_f(group,'gamma',subgroup,hdferr)
@@ -1400,13 +1411,20 @@ module nexus_mod
         call h5gopen_f(filen,'entry0/data_scan',group,hdferr)
         call h5gcreate_f(group,'detector_data',subgroup,hdferr)
         call h5gclose_f(subgroup,hdferr)
+        call h5gcreate_f(group,'scanned_variables',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gclose_f(group,hdferr)
+        call h5gopen_f(filen,'entry0/data_scan/scanned_variables',group,hdferr)
+        call h5gcreate_f(group,'variables_names',subgroup,hdferr)
+        call h5gclose_f(subgroup,hdferr)
+        call h5gclose_f(group,hdferr)
 
         ! Write wavelength
         dims_1D = 1
         !   Create dataspace
         call h5screate_simple_f(1,dims_1D,space,hdferr)
-        call h5gopen_f(filen,'entry0/wavelength',group,hdferr)
-        call h5dcreate_f(group,'value',H5T_NATIVE_REAL,space,dset,hdferr)
+        call h5gopen_f(filen,'entry0/',group,hdferr)
+        call h5dcreate_f(group,'wavelength',H5T_NATIVE_REAL,space,dset,hdferr)
         !   Write the data to the dataset
         call h5dwrite_f(dset,H5T_NATIVE_REAL,nexus%wave,dims_1D,hdferr)
         !   Close and release resources
@@ -1476,6 +1494,101 @@ module nexus_mod
             call h5gclose_f(group,hdferr)
             call h5dclose_f(dset,hdferr)
             call h5sclose_f(space,hdferr)
+        else if (index(inst_name,'19') > -1) then
+            ! Write some additional information for D19
+            dims_1D = 5
+            scanned(1:4) = 0
+            scanned(5) = 1
+            if (nexus%manip == 1) then
+                scanned(2) = 1
+            else if (nexus%manip == 2) then
+                scanned(1) = 1
+                if (nexus%nbang == 2) scanned(2) = 1
+            else if (nexus%manip == 3) then
+                scanned(3) = 1
+            else if (nexus%manip == 4) then
+                scanned(4) = 1
+            end if
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            call h5gopen_f(filen,'entry0/data_scan/scanned_variables/variables_names',group,hdferr)
+            call h5dcreate_f(group,'scanned',H5T_NATIVE_INTEGER,space,dset,hdferr)
+            !   Write the data to the dataset
+            call h5dwrite_f(dset,H5T_NATIVE_INTEGER,scanned,dims_1D,hdferr)
+            !   Close and release resources
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
+            !   Create file datatype
+            !call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
+            !call h5tset_size_f(filetype,VARLEN,hdferr)
+            call h5tcopy_f(H5T_STRING,filetype,hdferr)
+            call H5Tset_strpad_f(filetype,H5T_STR_NULLPAD_F,hdferr)
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            !   Create the dataset and write the string data to it
+            call h5dcreate_f(group,'name',filetype,space,dset,hdferr)
+            !f_ptr = C_LOC(varnames(1)(1:1))
+            !call h5dwrite_f(dset,filetype,f_ptr,hdferr)
+            call h5dwrite_vl_f(dset,filetype,var_names,var_dims,str_len,hdferr,space)
+            !   Close and release resources
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
+            call h5tclose_f(filetype,hdferr)
+            allocate(scanned_data(nexus%nf,NVARS))
+            do i = 1 , nexus%nf
+                scanned_data(i,1) = nexus%angles(3,i) ! Omega
+                scanned_data(i,2) = nexus%angles(4,i) ! Gamma
+                scanned_data(i,3) = nexus%angles(2,i) ! Chi
+                scanned_data(i,4) = nexus%angles(1,i) ! Phi
+                scanned_data(i,5) = nexus%monitor(i)
+            end do
+            dims_2D = (/ nexus%nf,NVARS /)
+            chunk_2D = (/ NVARS, 1 /)
+            !   Create the dataset creation property list, add the gzip
+            !   compression filter and set the chunk size.
+            call h5pcreate_f(H5P_DATASET_CREATE_F,dcpl,hdferr)
+            call h5pset_deflate_f(dcpl,6,hdferr)
+            call h5pset_chunk_f(dcpl,2,chunk_2D,hdferr)
+            !   Create dataspace
+            call h5screate_simple_f(2,dims_2D,space,hdferr)
+            call h5gopen_f(filen,'entry0/data_scan/scanned_variables',group,hdferr)
+            call h5dcreate_f(group,'data',H5T_NATIVE_REAL,space,dset,hdferr,dcpl)
+            !   Write the data to the dataset
+            call h5dwrite_f(dset,H5T_NATIVE_REAL,scanned_data,dims_2D,hdferr)
+            !   Close and release resources
+            call h5pclose_f(dcpl,hdferr)
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
+            ! Write mode: we assume four circle
+            dims_1D = 1
+            !   Create file datatype
+            length = len(trim(MODE))
+            call h5tcopy_f(h5t_FORTRAN_S1,filetype,hdferr)
+            call h5tset_size_f(filetype,length,hdferr)
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            !   Create the dataset and write the string data to it
+            call h5gopen_f(filen,'entry0/instrument/SingleCrystalSettings',group,hdferr)
+            call h5dcreate_f(group,'mode_label',filetype,space,dset,hdferr)
+            f_ptr = C_LOC(MODE)
+            call h5dwrite_f(dset,filetype,f_ptr,hdferr)
+            !   Close and release resources
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
+            call h5tclose_f(filetype,hdferr)
+            !   Create dataspace
+            call h5screate_simple_f(1,dims_1D,space,hdferr)
+            call h5gopen_f(filen,'entry0/instrument/SingleCrystalSettings',group,hdferr)
+            call h5dcreate_f(group,'mode',H5T_NATIVE_INTEGER,space,dset,hdferr)
+            !   Write the data to the dataset
+            call h5dwrite_f(dset,H5T_NATIVE_INTEGER,1,dims_1D,hdferr)
+            !   Close and release resources
+            call h5gclose_f(group,hdferr)
+            call h5dclose_f(dset,hdferr)
+            call h5sclose_f(space,hdferr)
         end if
 
         ! Write gamma and nu of the detector
@@ -1499,9 +1612,10 @@ module nexus_mod
         end do
 
         ! Write counts
-        nv = nexus%nz !size(avcounts,1)
-        nh = nexus%nx !size(avcounts,2)
-        dims_3D = [nv,nh,1]
+        nv = size(nexus%counts,1)
+        nh = size(nexus%counts,2)
+        nf = size(nexus%counts,3)
+        dims_3D = [nv,nh,nf]
         chunk_3D = [nv,nh,1]
         !   Create dataspace
         call h5screate_simple_f(3,dims_3D,space,hdferr)
