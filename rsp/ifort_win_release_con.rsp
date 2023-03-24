@@ -1,4 +1,4 @@
 options install --prefix ifort_release
 options --compiler ifort
-options --flag "/static /heap-arrays /O3 /reentrancy:none"
+options --flag "/fpp /static /heap-arrays /O3 /reentrancy:none"
 options --profile release
