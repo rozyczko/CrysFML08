@@ -12,8 +12,8 @@ SubModule (CFML_Reflections)  Refl_Python_Wraps
     !!
     Module Subroutine Wrap_Refl_Type(for_var, dic_var)
         !---- Arguments ----!
-        class(refl_type), intent(in)   :: for_var
-        type(dict),      intent(inout) :: dic_var
+        class(refl_type), intent(in)    :: for_var
+        type(dict),       intent(inout) :: dic_var
 
         !---- Local Variables ----!
         integer :: ierror
@@ -51,13 +51,13 @@ SubModule (CFML_Reflections)  Refl_Python_Wraps
     End Subroutine Wrap_Refl_Type
 
     !!----
-    !!---- WRAP_ATLIST_TYPE
+    !!---- WRAP_REFLIST_TYPE
     !!----
     !!---- 24/03/2023
     !!
     Module Subroutine Wrap_Reflist_Type(for_var, dic_var)
         !---- Arguments ----!
-        type(reflist_type),  intent(in)    :: for_var
+        type(reflist_type),  intent(in)   :: for_var
         type(dict),         intent(inout) :: dic_var
 
         !---- Local Variables ----!
@@ -82,7 +82,7 @@ SubModule (CFML_Reflections)  Refl_Python_Wraps
         if (ierror /= 0) then
             err_cfml%flag = .true.
             err_cfml%ierr = -1
-            err_cfml%msg  = 'Wrap_Atlist_Type: Wrapping failed'
+            err_cfml%msg  = 'Wrap_Reflist_Type: Wrapping failed'
         end if
 
     end subroutine Wrap_Reflist_Type
