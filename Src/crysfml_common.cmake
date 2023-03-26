@@ -73,6 +73,17 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_Forpy
+set(Forpy_SRC CFML_Forpy.F90)
+
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${Forpy_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${Forpy_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 # CFML_Strings
 file(GLOB SUBMOD_STRINGS_SRC CFML_Strings/*.f90)
 set(STRINGS_SRC CFML_Strings.f90
@@ -445,6 +456,7 @@ endif()
 
 #  List of all the source files
 set(CRYSFML_COMMON_SRC
+    ${Forpy_SRC}
     ${GLOBAL_DEPS_SRC}
     ${MESSAGES_SRC}
     ${MATHS_SRC}
@@ -477,7 +489,7 @@ set(CRYSFML_COMMON_SRC
     ${SF_SRC}
     ${MOLECULES_SRC}
     ${KEYCODES_SRC}
-    ${KVECSYMM_SRC} 
+    ${KVECSYMM_SRC}
     ${KWCPARSER_SRC})
 
 # Build the library
