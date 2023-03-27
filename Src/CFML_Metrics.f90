@@ -130,7 +130,6 @@
     Use CFML_Maths,       only: Inverse_Matrix, Determ_V, Determ, Cross_Product, &
                                 Co_Linear, Sort, Co_Prime, Swap
     Use CFML_Strings,     only: U_Case, Get_Transf
-    Use Forpy_Mod, str_fp => str
 
     implicit none
 
@@ -153,7 +152,6 @@
               Niggli_Cell, &
               Read_Bin_Crystal_Cell, Set_Crystal_Cell, &
               Write_Crystal_Cell, Write_Bin_Crystal_Cell
-    public :: Wrap_Cell_Type
 
 
     !---- Definitions ----!
@@ -578,13 +576,6 @@
           type(cell_G_type),        intent(in)    :: c
           integer,                  intent(in)    :: index_range
        End Subroutine Calc_Paxes_Angles
-
-       Module Subroutine Wrap_Cell_Type(for_var, dic_var)
-         !---- Arguments ----!
-         class(cell_type), intent(in)    :: for_var
-         type(dict),       intent(inout) :: dic_var
-       End Subroutine Wrap_Cell_Type
-
 
     End Interface
 

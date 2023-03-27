@@ -44,23 +44,4 @@ SubModule (CFML_Messages) Con_Err_Message
 
    End Subroutine Error_Message
 
-    !!----
-    !!---- SET_PYTHON_ERROR_FLAG
-    !!----
-    !!----    Set python error flag to EXCEPTION_ERROR if CFML_Err%Flag
-    !!----    is different from zero. Raise a Python exception if raise is
-    !!----    given
-    !!----
-    !!---- 27/03/2023
-    !!
-    Module Subroutine Set_Python_Error_Flag(ierror,proc_name)
-        !---- Arguments ----!
-        Integer,          Intent(inout)        :: ierror    ! Python error flag
-        Character(Len=*), Intent(In), Optional :: proc_name ! Name of the calling procedure
-
-        if (err_cfml%flag) ierror = EXCEPTION_ERROR
-        if (present(proc_name)) call raise_exception(RuntimeError,proc_name//': '//trim(err_cfml%msg))
-
-    End Subroutine Set_Python_Error_Flag
-
 End SubModule Con_Err_Message

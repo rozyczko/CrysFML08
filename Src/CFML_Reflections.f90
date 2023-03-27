@@ -47,7 +47,6 @@ Module CFML_Reflections
    Use CFML_Metrics,                   only: Cell_G_Type
    Use CFML_Strings,                   only: l_case
    Use CFML_Rational
-   Use Forpy_Mod, str_fp => str
 
    !---- Variables ----!
    implicit none
@@ -62,7 +61,6 @@ Module CFML_Reflections
    public :: H_Equiv_List, H_Uni, Initialize_RefList, Gener_Reflections, Gener_Reflections_Shub, &
              Search_Extinctions, Hkl_Gen_Sxtal, &
              Write_Info_RefList, Init_Refl_Conditions
-   public :: Wrap_Refl_Type,Wrap_Reflist_Type
 
    !---- Parameters ----!
    real(kind=cp), parameter :: EPS_REF  = 0.0002_cp   ! Epsilon for comparisons within this module
@@ -409,18 +407,6 @@ Module CFML_Reflections
          type (RefList_Type),   intent(in out) :: Reflex
          logical,  optional,    intent(in)     :: Friedel
       End Subroutine Gener_Reflections_Shub
-
-      Module Subroutine Wrap_Refl_Type(for_var, dic_var)
-         !---- Arguments ----!
-         class(refl_type), intent(in)    :: for_var
-         type(dict),       intent(inout) :: dic_var
-      End Subroutine Wrap_Refl_Type
-
-      Module Subroutine Wrap_Reflist_Type(for_var, dic_var)
-         !---- Arguments ----!
-         type(reflist_type),  intent(in)    :: for_var
-         type(dict),          intent(inout) :: dic_var
-      End Subroutine Wrap_Reflist_Type
 
    End Interface
 

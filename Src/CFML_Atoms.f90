@@ -49,7 +49,6 @@
     Use CFML_Metrics,      only: Cell_G_Type
     Use CFML_Strings,      only: u_case,l_case
     Use CFML_gSpaceGroups, only: spg_type, apply_op, SuperSpaceGroup_Type, Get_moment_ctr, Get_TFourier_ctr
-    Use Forpy_Mod, str_fp => str
 
     !---- Variables ----!
     implicit none
@@ -61,7 +60,6 @@
               Write_Bin_atom_List, Write_Atom_List, Allocate_Atoms_Cell, Index_AtLab_on_AtList
     public :: Equiv_Atm, Wrt_Lab, Check_Symmetry_Constraints, Change_AtomList_Type, &
               AtList_To_Atm_Cell, Allocate_mAtom_list, deAllocate_mAtom_list
-    public :: Wrap_Atm_Type, Wrap_Atlist_Type
 
 
     !---- Parameters ----!
@@ -593,16 +591,6 @@
          type(Atom_Equiv_List_Type), intent(out):: Ate
          integer, optional,          intent(in) :: lun
        End Subroutine Set_Atom_Equiv_List
-
-       Module Subroutine Wrap_Atm_Type(for_var, dic_var)
-         class(atm_type), intent(in)    :: for_var
-         type(dict),      intent(inout) :: dic_var
-       End Subroutine Wrap_Atm_Type
-
-       Module Subroutine Wrap_Atlist_Type(for_var, dic_var)
-         type(atlist_type),  intent(in)    :: for_var
-         type(dict),         intent(inout) :: dic_var
-       End Subroutine Wrap_Atlist_Type
 
     End Interface
 
