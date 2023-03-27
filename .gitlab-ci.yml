@@ -29,7 +29,7 @@ docker_post_clean:
 #== MAKE SECTION
 #===============
 
-make:linux_gfortran:
+#make:linux_gfortran:
   stage: make
   script:
     - docker build --force-rm -t ci_crysfml_xenial_gfortran_f2008 -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_setup_F2008 .
@@ -53,7 +53,7 @@ make:linux_ifort:
     
 #===============
 
-make:macos_gfortran:
+#make:macos_gfortran:
   stage: make
   script:
     - BuildServer/Unix/build_F2008.sh gfortran
