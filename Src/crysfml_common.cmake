@@ -96,6 +96,18 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_VTK
+file(GLOB SUBMOD_VTK_SRC CFML_VTK/*.f90)
+set(VTK_SRC CFML_VTK.f90
+                ${SUBMOD_VTK_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${VTK_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${VTK_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 # CFML_Strings
 file(GLOB SUBMOD_STRINGS_SRC CFML_Strings/*.f90)
 set(STRINGS_SRC CFML_Strings.f90
