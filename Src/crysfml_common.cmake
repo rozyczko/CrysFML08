@@ -443,8 +443,8 @@ else()
 endif()
 
 # CFML_KeyWords_Code_Parser
-file(GLOB SUBMOD_KWC_SRC CFML_KeyWords_Code_Parser/*.f90)
-set(KWCPARSER_SRC CFML_KeyWords_Code_Parser.f90
+file(GLOB SUBMOD_KWC_SRC CFML_Keywords_Code_Parser/*.f90)
+set(KWCPARSER_SRC CFML_Keywords_Code_Parser.f90
                  ${SUBMOD_KWC_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${KWCPARSER_SRC}
