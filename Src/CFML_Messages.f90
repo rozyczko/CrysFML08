@@ -53,7 +53,6 @@
  Module CFML_Messages
     !---- Use Modules ----!
    Use CFML_GlobalDeps
-   Use Forpy_Mod, str_fp => str
 
     !---- Definitions ----!
     implicit none
