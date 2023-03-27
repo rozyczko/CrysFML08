@@ -130,7 +130,7 @@
     Use CFML_Maths,       only: Inverse_Matrix, Determ_V, Determ, Cross_Product, &
                                 Co_Linear, Sort, Co_Prime, Swap
     Use CFML_Strings,     only: U_Case, Get_Transf
-    Use Forpy_Mod
+    Use Forpy_Mod, str_fp => str
 
     implicit none
 

@@ -47,7 +47,7 @@ Module CFML_Reflections
    Use CFML_Metrics,                   only: Cell_G_Type
    Use CFML_Strings,                   only: l_case
    Use CFML_Rational
-   Use Forpy_Mod
+   Use Forpy_Mod, str_fp => str
 
    !---- Variables ----!
    implicit none

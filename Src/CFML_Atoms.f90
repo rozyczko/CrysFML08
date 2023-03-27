@@ -49,7 +49,7 @@
     Use CFML_Metrics,      only: Cell_G_Type
     Use CFML_Strings,      only: u_case,l_case
     Use CFML_gSpaceGroups, only: spg_type, apply_op, SuperSpaceGroup_Type, Get_moment_ctr, Get_TFourier_ctr
-    Use Forpy_Mod
+    Use Forpy_Mod, str_fp => str
 
     !---- Variables ----!
     implicit none

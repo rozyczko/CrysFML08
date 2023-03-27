@@ -52,12 +52,14 @@
 !!
  Module CFML_Messages
     !---- Use Modules ----!
+   Use CFML_GlobalDeps
+   Use Forpy_Mod, str_fp => str
 
     !---- Definitions ----!
     implicit none
 
     !---- List of public subroutines ----!
-    public :: Error_Message, Info_Message,  Print_Message, Wait_Message, Write_Scroll_Text
+    public :: Error_Message, Info_Message,  Print_Message, Set_Python_Error_Flag, Wait_Message, Write_Scroll_Text
 
     Interface
        Module Subroutine Error_Message(Mess, Iunit, Routine, Fatal)
@@ -78,6 +80,12 @@
           !---- Arguments ----!
           character(len=*),intent(in) ::  Mess
        End Subroutine Print_Message
+
+       Module Subroutine Set_Python_Error_Flag(ierror,proc_name)
+         !---- Arguments ----!
+         Integer,          Intent(inout)        :: ierror    ! Python error flag
+         Character(Len=*), Intent(in), Optional :: proc_name ! Name of the calling procedure
+       End Subroutine Set_Python_Error_Flag
 
        Module Subroutine Wait_Message(Mess)
           !---- Argument ----!
