@@ -74,13 +74,25 @@ else()
 endif()
 
 # CFML_Forpy
-set(Forpy_SRC CFML_Forpy.F90)
+set(Forpy_SRC Forpy.F90)
 
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${Forpy_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
 else()
     set_source_files_properties(${Forpy_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
+# CFML_Python
+file(GLOB SUBMOD_PYTHON_SRC CFML_Python/*.f90)
+set(PYTHON_SRC CFML_Python.f90
+                ${SUBMOD_PYTHON_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${PYTHON_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${PYTHON_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
