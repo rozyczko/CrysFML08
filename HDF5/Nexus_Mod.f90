@@ -1324,7 +1324,7 @@ module nexus_mod
         logical, optional, intent(in) :: raw
 
         ! Local variables
-        integer, parameter             :: NVARS = 5
+        integer, parameter             :: NVARS = 6
         character(len=15), target      :: MODE='FOURCIRCLE_MODE'
         integer                        :: i,hdferr,filter_info,filter_info_both,nv,nh,nf
         integer(HID_T)                 :: filen,filetype,group,subgroup,space,dset,dcpl ! handles
@@ -1332,13 +1332,13 @@ module nexus_mod
         integer(HSIZE_T), dimension(1) :: dims_1D
         integer(HSIZE_T), dimension(2) :: dims_2D,chunk_2D
         integer(HSIZE_T), dimension(3) :: dims_3D,chunk_3D
-        integer(HSIZE_T), dimension(2) :: var_dims = (/8,5/)
-        integer(SIZE_T), dimension(5)  :: str_len = (/5,5,3,3,8/)
+        integer(HSIZE_T), dimension(2) :: var_dims = (/14,6/)
+        integer(SIZE_T), dimension(NVARS)  :: str_len = (/5,5,3,3,8,14/)
         integer, dimension(NVARS)      :: scanned
         real, dimension(:), allocatable :: val
         real, dimension(:,:), allocatable :: scanned_data
-        character(len=8), dimension(5), target :: &
-            var_names = (/"omega   ", "gamma   ", "chi     ", "phi     ","Monitor1"/)
+        character(len=14), dimension(NVARS), target :: &
+            var_names = (/"omega         ", "gamma         ", "chi           ", "phi           ","Monitor1      ","AcquisitionSpy"/)
         character(len=100), dimension(:), allocatable :: paths
         character(len=:), allocatable, target :: inst_name,data_ordering
         logical :: avail
@@ -1496,9 +1496,10 @@ module nexus_mod
             call h5sclose_f(space,hdferr)
         else if (index(inst_name,'19') > -1) then
             ! Write some additional information for D19
-            dims_1D = 5
+            dims_1D = NVARS
             scanned(1:4) = 0
             scanned(5) = 1
+            scanned(6) = 1
             if (nexus%manip == 1) then
                 scanned(2) = 1
             else if (nexus%manip == 2) then
@@ -1542,6 +1543,7 @@ module nexus_mod
                 scanned_data(i,3) = nexus%angles(2,i) ! Chi
                 scanned_data(i,4) = nexus%angles(1,i) ! Phi
                 scanned_data(i,5) = nexus%monitor(i)
+                scanned_data(i,6) = nexus%timef(i)
             end do
             dims_2D = (/ nexus%nf,NVARS /)
             chunk_2D = (/ NVARS, 1 /)
