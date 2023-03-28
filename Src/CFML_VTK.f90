@@ -53,18 +53,19 @@ module CFML_VTK
 
         module subroutine scan_arrays(counts,th,vtk_points,vtk_cells,vtk_counts)
             !---- Arguments ----!
-            integer,         dimension(:,:,:), intent(in)  :: counts   ! Scan counts
-            integer,                           intent(in)  :: th       ! Threshold
-            integer,         dimension(:,:),   intent(out) :: vtk_points
-            integer(kind=8), dimension(:,:),   intent(out) :: vtk_cells
-            integer,         dimension(:),     intent(out) :: vtk_counts
+            integer,         dimension(:,:,:), intent(in)    :: counts   ! Scan counts
+            integer,                           intent(in)    :: th       ! Threshold
+            integer,         dimension(:,:),   intent(inout) :: vtk_points
+            integer(kind=8), dimension(:,:),   intent(inout) :: vtk_cells
+            integer,         dimension(:),     intent(inout) :: vtk_counts
         end subroutine scan_arrays
 
-        module subroutine scan_limits(counts,th,max_cnt)
+        module subroutine scan_limits(counts,th,max_cnt,npoints)
             !---- Arguments ----!
             integer, dimension(:,:,:), intent(in)  :: counts   ! Scan counts
             integer,                   intent(out) :: th       ! Threshold
             integer,                   intent(out) :: max_cnt  ! Maximum counts / pixel
+            integer,                   intent(out) :: npoints  ! Number of points in the range [th,max_cnt]
         end subroutine scan_limits
 
     end interface

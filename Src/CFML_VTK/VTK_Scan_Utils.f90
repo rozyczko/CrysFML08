@@ -15,11 +15,11 @@ submodule (CFML_VTK) VTK_Scan_Utils
     module subroutine scan_arrays(counts,th,vtk_points,vtk_cells,vtk_counts)
 
         ! Arguments
-        integer,         dimension(:,:,:), intent(in)  :: counts   ! Scan counts
-        integer,                           intent(in)  :: th       ! Threshold
-        integer,         dimension(:,:),   intent(out) :: vtk_points
-        integer(kind=8), dimension(:,:),   intent(out) :: vtk_cells
-        integer,         dimension(:),     intent(out) :: vtk_counts
+        integer,         dimension(:,:,:), intent(in)    :: counts     ! Scan counts
+        integer,                           intent(in)    :: th         ! Threshold
+        integer,         dimension(:,:),   intent(inout) :: vtk_points
+        integer(kind=8), dimension(:,:),   intent(inout) :: vtk_cells
+        integer,         dimension(:),     intent(inout) :: vtk_counts
 
         ! Local variables
         integer :: i,j,k,n
@@ -57,18 +57,18 @@ submodule (CFML_VTK) VTK_Scan_Utils
     !!----
     !!---- 27/03/2023
     !!
-    module subroutine scan_limits(counts,th,max_cnt)
+    module subroutine scan_limits(counts,th,max_cnt,npoints)
 
         ! Arguments
         integer, dimension(:,:,:), intent(in)  :: counts   ! Scan counts
         integer,                   intent(out) :: th       ! Threshold
         integer,                   intent(out) :: max_cnt  ! Maximum counts / pixel
+        integer,                   intent(out) :: npoints  ! Number of points in the range [th,max_cnt]
 
         ! Local variables
         integer, parameter :: MAX_NPOINTS = 3125000
         integer, parameter :: MAX_HISTO = 1000       ! Maximum number of counts / pixel for histogram calculation
         integer :: i,j,k,n
-        integer :: npoints
         integer, dimension(0:MAX_HISTO) :: histo
 
         histo(:) = 0

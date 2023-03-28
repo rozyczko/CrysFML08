@@ -514,7 +514,9 @@ set(CRYSFML_COMMON_SRC
     ${MOLECULES_SRC}
     ${KEYCODES_SRC}
     ${KVECSYMM_SRC}
-    ${KWCPARSER_SRC})
+    ${KWCPARSER_SRC}
+    ${VTK_SRC}
+    ${PYTHON_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)
