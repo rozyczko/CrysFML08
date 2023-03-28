@@ -15,11 +15,11 @@ submodule (CFML_VTK) VTK_Scan_Utils
     module subroutine scan_arrays(counts,th,vtk_points,vtk_cells,vtk_counts)
 
         ! Arguments
-        integer,         dimension(:,:,:), intent(in)    :: counts     ! Scan counts
+        integer(kind=4), dimension(:,:,:), intent(in)    :: counts     ! Scan counts
         integer,                           intent(in)    :: th         ! Threshold
-        integer,         dimension(:,:),   intent(inout) :: vtk_points
+        integer(kind=4), dimension(:,:),   intent(inout) :: vtk_points
         integer(kind=8), dimension(:,:),   intent(inout) :: vtk_cells
-        integer,         dimension(:),     intent(inout) :: vtk_counts
+        integer(kind=4), dimension(:),     intent(inout) :: vtk_counts
 
         ! Local variables
         integer :: i,j,k,n
@@ -60,10 +60,10 @@ submodule (CFML_VTK) VTK_Scan_Utils
     module subroutine scan_limits(counts,th,max_cnt,npoints)
 
         ! Arguments
-        integer, dimension(:,:,:), intent(in)  :: counts   ! Scan counts
-        integer,                   intent(out) :: th       ! Threshold
-        integer,                   intent(out) :: max_cnt  ! Maximum counts / pixel
-        integer,                   intent(out) :: npoints  ! Number of points in the range [th,max_cnt]
+        integer(kind=4), dimension(:,:,:), intent(in)  :: counts   ! Scan counts
+        integer,                           intent(out) :: th       ! Threshold
+        integer,                           intent(out) :: max_cnt  ! Maximum counts / pixel
+        integer,                           intent(out) :: npoints  ! Number of points in the range [th,max_cnt]
 
         ! Local variables
         integer, parameter :: MAX_NPOINTS = 3125000
