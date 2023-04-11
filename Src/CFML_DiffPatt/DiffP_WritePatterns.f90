@@ -195,8 +195,8 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
                 write(unit=i_dat,fmt="(a,2f8.4,i3,f8.5,a)") &
                       "INTER ", 1.0,1.0,0,0.0," <- internal multipliers for X, Y-Sigma, Interpol, StepIn"
              end if
-
-             write(unit=i_dat,fmt="(a,f12.2,i8)") "! MONITOR & N POINTS ", pat%monitor, npoi
+             write(unit=i_dat,fmt="(a)") "! INFO: "//trim(pat%filepath)
+             write(unit=i_dat,fmt="(a,f12.2,i8)") "! NORM. MONITOR & N-POINTS ", pat%monitor, npoi
        end select
 
        write(unit=i_dat,fmt="(a)") "! Scatt. Var., Profile Intensity, Standard Deviation "
@@ -228,6 +228,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
              end do
           end if
        end if
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_XYSig
 
@@ -312,6 +313,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
           end if
           j=j+10
        end do
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_FreeFormat
 
@@ -427,6 +429,7 @@ Submodule (CFML_DiffPatt) DiffP_WritePatterns
              Write(unit=i_dat,fmt="(8F14.2)")  Pat%sigma(ini:ifin)
           end if
        end if
+       flush(unit=i_dat)
        close(unit=i_dat)
     End Subroutine Write_Pattern_INSTRM5
 

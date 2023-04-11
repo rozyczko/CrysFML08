@@ -1,4 +1,4 @@
 options install --prefix ifort_release_win
 options --profile release
 options --compiler ifort
-options --flag "-I ../../wint/lib.i64"
+options --flag "-fpp -I ../../wint/lib.i64"

@@ -252,7 +252,7 @@
        real(kind=cp), dimension(3)     :: eval=    0.0   ! Eigen values in ascending order
        real(kind=cp), dimension(3)     :: evalesd= 0.0   ! Eigen values esds
        real(kind=cp), dimension(3,3)   :: evec=    0.0   ! Eigenvector components in same order: evec(1:3,i) holds the
-                                                         ! i’th vector components wrt Cartesian axes.
+                                                         ! ith vector components wrt Cartesian axes.
        real(kind=cp), dimension(3,3,2) :: cart_ang=0.0   ! Angles of eigenvectors to Cartesian axes cart_ang(1:3,i,1)
                                                          ! has the angles for the i'th eigenvector, cart_ang(1:3,i,2)
                                                          ! the esd
@@ -576,7 +576,6 @@
           type(cell_G_type),        intent(in)    :: c
           integer,                  intent(in)    :: index_range
        End Subroutine Calc_Paxes_Angles
-
 
     End Interface
 

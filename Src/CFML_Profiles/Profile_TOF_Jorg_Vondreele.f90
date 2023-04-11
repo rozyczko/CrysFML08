@@ -13,12 +13,12 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
    !!----
    !!---- 21/04/2019
    !!
-   Module Subroutine Tof_Jorgensen_Vondreele(Dt,Alfa,Beta,Gamma,Eta,Tof_Peak,Deriv)
+   Module Subroutine Tof_Jorgensen_Vondreele(Dt,Alfa,Beta,gamm,Eta,Tof_Peak,Deriv)
       !---- Arguments ----!
       real(kind=cp),             intent( in) :: dt       ! dt = TOF(channel i) -TOF(Bragg position)
       real(kind=cp),             intent( in) :: alfa     !  alfa  : units microsecs-1
       real(kind=cp),             intent( in) :: beta     !  beta  : units microsecs-1
-      real(kind=cp),             intent( in) :: gamma    !  gamma : units microsecs
+      real(kind=cp),             intent( in) :: gamm    !  gamm : units microsecs
       real(kind=cp),             intent( in) :: eta      !  eta   : mixing coefficient calculated using TCH
       real(kind=cp),             intent(out) :: tof_peak
       type(Deriv_TOF_Type), optional, intent(out) :: deriv    ! present if derivatives are to be calculated
@@ -32,7 +32,7 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
                          doml_t,doml_a,doml_b,doml_g,omega,omegb
       integer         :: i, udiv, vdiv
 
-      sigma=gamma*gamma*inv_8ln2
+      sigma=gamm*gamm*inv_8ln2
       u=0.5*alfa*(alfa*sigma+2.0*dt)
       v=0.5*beta*(beta*sigma-2.0*dt)
       !> To avoid pathological behaviour EXP(U) is calculated as
@@ -64,8 +64,8 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
       omeg=norm*(omega+omegb)    !Gaussian contribution
 
       if (lorcomp) then
-         z1=CMPLX( alfa*dt,0.5_dp*alfa*gamma,kind=dp)
-         z2=CMPLX(-beta*dt,0.5_dp*beta*gamma,kind=dp)
+         z1=CMPLX( alfa*dt,0.5_dp*alfa*gamm,kind=dp)
+         z2=CMPLX(-beta*dt,0.5_dp*beta*gamm,kind=dp)
          fz1=expi_e1(z1)                  ! exp(p).E1(p)
          fz2=expi_e1(z2)                  ! exp(q).E1(q)
          oml_a=-AIMAG(fz1)*two_over_pi    ! OmL,alfa
@@ -91,7 +91,7 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
          domg_t= 0.0           ! DOmG/Ddt
          domg_a= 0.0           ! DOmG/Dalfa
          domg_b= 0.0           ! DOmG/Dbeta
-         domg_g= 0.0           ! DOmG/Dgamma
+         domg_g= 0.0           ! DOmG/Dgamm
       else
          erfyp=erfc_deriv(real(y,kind=cp))         ! erfcc'(y)
          erfzp=erfc_deriv(real(z,kind=cp))         ! erfcc'(z)
@@ -107,8 +107,8 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
          domg_a = norm*(2.0_dp*omeg/a2+deno*(y*omega+0.5_dp*a))
          domg_b = norm*(2.0_dp*omeg/b2+deno*(z*omegb+0.5_dp*b))
 
-         !>Multiply by Dsigma/Dgamma=gamma/4ln2
-         domg_g = inv_8ln2 * norm * gamma * (a2*omega+b2*omegb+a*ca+b*cb)
+         !>Multiply by Dsigma/Dgamm=gamm/4ln2
+         domg_g = inv_8ln2 * norm * gamm * (a2*omega+b2*omegb+a*ca+b*cb)
       end if
 
       if (lorcomp) then
@@ -117,24 +117,24 @@ SubModule (CFML_Profiles) Profile_Tof_Jorg_Vondreele
          exper1=-REAL(fz1)*two_over_pi
          exper2=-REAL(fz2)*two_over_pi
          doml_t= norm*(alfa* oml_a - beta* oml_b)                               ! DOmL/Ddt
-         doml_a= norm*( 2.0_dp * omel/a2 + dt* oml_a + 0.5_dp * gamma * exper1) ! DOmL/Dalfa
-         doml_b= norm*( 2.0_dp * omel/b2 - dt* oml_b + 0.5_dp * gamma * exper2) ! DOmL/Dbeta
-         doml_g= 0.5 * norm * ( alfa*exper1 + beta*exper2 )                     ! DOmL/Dgamma
+         doml_a= norm*( 2.0_dp * omel/a2 + dt* oml_a + 0.5_dp * gamm * exper1) ! DOmL/Dalfa
+         doml_b= norm*( 2.0_dp * omel/b2 - dt* oml_b + 0.5_dp * gamm * exper2) ! DOmL/Dbeta
+         doml_g= 0.5 * norm * ( alfa*exper1 + beta*exper2 )                     ! DOmL/Dgamm
 
          ! Total derivatives
          deriv%dt    = one_e * domg_t + eta * doml_t
          deriv%alfa  = one_e * domg_a + eta * doml_a
          deriv%beta  = one_e * domg_b + eta * doml_b
-         deriv%gamma = one_e * domg_g + eta * doml_g
+         deriv%gamm = one_e * domg_g + eta * doml_g
          deriv%eta   = omel-omeg
       else
          deriv%dt    = domg_t
          deriv%alfa  = domg_a
          deriv%beta  = domg_b
-         deriv%gamma = domg_g
+         deriv%gamm = domg_g
          deriv%eta   = 0.0
       end if
-      deriv%sigma = deriv%gamma/(2.0_dp*inv_8ln2*gamma)
+      deriv%sigma = deriv%gamm/(2.0_dp*inv_8ln2*gamm)
 
    End Subroutine Tof_Jorgensen_Vondreele
 

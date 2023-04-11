@@ -29,20 +29,20 @@ done
 # Settings
 #
 if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML/ifort/LibC"
-   LIB="-L$CRYSFML/ifort/LibC"
+   INC="-I$CRYSFML08/ifort/LibC"
+   LIB="-L$CRYSFML08/ifort/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux"
 else
-   INC="-I$CRYSFML/ifort64/LibC"
-   LIB="-L$CRYSFML/ifort64/LibC"
+   INC="-I$CRYSFML08/ifort64/LibC"
+   LIB="-L$CRYSFML08/ifort64/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux64"
 fi
 if [ $DEBUG == "Y" ]; then
-   OPT1="-c -g -$ARCH"
+   OPT1="-c -g -$ARCH -heap-arrays"
 else
-   OPT1="-c -warn -$ARCH -O2 -qopt-report=0"
+   OPT1="-c -warn -$ARCH -O2 -qopt-report=0 -heap-arrays"
 fi
 #
 #

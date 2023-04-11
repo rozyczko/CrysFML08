@@ -5,63 +5,77 @@
 # Date: January 2021
 # ------------------------------
 # General Options
-COMP="ifort"
-DEBUG="N"
-ARCH="m64"
+compiler="ifort"
+debug="N"
 #
 # Arguments
 #
 for arg in "$@"
 do
-   case "$arg" in
-      "m32")
-         ARCH=$arg
+    case "$arg" in
+       "ifort")
+         compiler=$arg
          ;;
-      "m64")
-         ARCH=$arg
+      "gfortran")
+         compiler=$arg
          ;;
       "debug"*)
-         DEBUG="Y"
+         debug="Y"
          ;;
    esac
 done
 #
-# Settings
+# Intel compiler
 #
-if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML/ifort/LibC"
-   LIB="-L$CRYSFML/ifort/LibC"
-   LIBSTATIC="-lcrysfml"
-   VERS="Linux"
-else
-   INC="-I$CRYSFML/ifort64/LibC"
-   LIB="-L$CRYSFML/ifort64/LibC"
-   LIBSTATIC="-lcrysfml"
-   VERS="Linux64"
+if [ $compiler == "ifort" ]; then
+   inc="-I$CRYSFML08/ifort64/LibC -I$CRYSFML08/ifort64/ODR_sp"
+   lib="-L$CRYSFML08/ifort64/LibC -L$CRYSFML08/ifort64/ODR_sp"
+   mode="-static-intel"
+   if [ $debug == "Y" ]; then
+      opt1="-c -g -warn -arch x86_64 -heap-arrays"
+   else
+      opt1="-c -O2 -arch x86_64 -qopt-report=0 -heap-arrays"
+   fi
 fi
-if [ $DEBUG == "Y" ]; then
-   OPT1="-c -g -$ARCH"
-else
-   OPT1="-c -warn -$ARCH -O2 -qopt-report=0"
+
+#
+# GFortran compiler
+#
+if [ $compiler == "gfortran" ]; then
+   inc="-I$CRYSFML08/GFortran64/LibC -I$CRYSFML08/gfortran64/ODR_sp"
+   lib="-L$CRYSFML08/GFortran64/LibC -L$CRYSFML08/gfortran64/ODR_sp"
+   mode="-static-libgfortran"
+   if [ $debug == "Y" ]; then
+      opt1="-c -g -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
+   else
+      opt1="-c -O2 -arch x86_64 -ffree-line-length-none -fno-stack-arrays"
+   fi
 fi
 #
 #
 # Compilation Process
 #
-cd ../../XRfit
+cd ../../TOF-fit
 echo " ########################################################"
 echo " #### TOF_fit_LM   Program                     (1.0) ####"
 echo " #### JRC                              CopyLeft-2021 ####"
 echo " ########################################################"
-$COMP $OPT1 TOF_module_LM.f90 $INC
-$COMP $OPT1 TOF_fitting_LM.f90 $INC
-$COMP -$ARCH *.o -o TOF_fit_LM -static-intel $LIB  $LIBSTATIC
+$compiler $opt1 TOF_module_LM.f90 $inc
+$compiler $opt1 TOF_fitting_LM.f90 $inc
+$compiler -arch x86_64 *.o -o TOF_fit_LM $lib $mode -lcrysfml -lodr_sp
 #
 # Final process
 #
-upx TOF_fit_LM
-rm -rf *.o *.mod
-cp TOF_fit_LM $FULLPROF/.
-mv TOF_fit_LM $PROGCFML/DistFPS/$VERS/.
-cd ../Programs_FP/Linux
+rm -rf *.o *.mod *_genmod.f90
+
+if [ ! -d $PROGCFML/DistFPS/MacOS ]; then
+   mkdir $PROGCFML/DistFPS/MacOS
+fi
+mv TOF_fit_LM $PROGCFML/DistFPS/MacOS
+
+if [ -d $FULLPROF ]; then
+    cp TOF_fit_LM $FULLPROF/.
+fi
+
+cd ../Programs_FP/MacOS
 #

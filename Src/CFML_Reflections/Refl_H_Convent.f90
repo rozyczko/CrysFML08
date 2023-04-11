@@ -247,8 +247,8 @@ Submodule (CFML_Reflections) Refl_H_Convent
         imin=hlim(:,1)
         imax=hlim(:,2)
       else
-        imin=(/-hmax,-kmax,-lmax/)
-        imax=(/ hmax, kmax, lmax/)
+        imin=[-hmax,-kmax,-lmax]
+        imax=[ hmax, kmax, lmax]
       end if
       od=[3,2,1]
       if(present(ord)) od=ord

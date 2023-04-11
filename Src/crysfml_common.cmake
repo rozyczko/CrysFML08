@@ -73,6 +73,41 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
+# CFML_Forpy
+set(Forpy_SRC Forpy.F90)
+
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${Forpy_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${Forpy_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
+# CFML_Python
+file(GLOB SUBMOD_PYTHON_SRC CFML_Python/*.f90)
+set(PYTHON_SRC CFML_Python.f90
+                ${SUBMOD_PYTHON_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${PYTHON_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${PYTHON_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
+# CFML_VTK
+file(GLOB SUBMOD_VTK_SRC CFML_VTK/*.f90)
+set(VTK_SRC CFML_VTK.f90
+                ${SUBMOD_VTK_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${VTK_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${VTK_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
 # CFML_Strings
 file(GLOB SUBMOD_STRINGS_SRC CFML_Strings/*.f90)
 set(STRINGS_SRC CFML_Strings.f90
@@ -419,21 +454,33 @@ else()
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
     endif()
 
-
 # CFML_kvec_symmetry
 file(GLOB SUBMOD_KVEC_SYMMETRY_SRC CFML_kvec_Symmetry/*.f90)
-set(KEYCODES_SRC CFML_kvec_Symmetry.f90
+set(KVECSYMM_SRC CFML_kvec_Symmetry.f90
                  ${SUBMOD_KVEC_SYMMETRY_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
-    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+    set_source_files_properties(${KVECSYMM_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
 else()
-    set_source_files_properties(${KVEC_SYMMETRY_SRC}
+    set_source_files_properties(${KVECSYMM_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
+endif()
+
+# CFML_KeyWords_Code_Parser
+file(GLOB SUBMOD_KWC_SRC CFML_Keywords_Code_Parser/*.f90)
+set(KWCPARSER_SRC CFML_Keywords_Code_Parser.f90
+                 ${SUBMOD_KWC_SRC})
+if(${COMPILER_NAME} STREQUAL ifort)
+    set_source_files_properties(${KWCPARSER_SRC}
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+else()
+    set_source_files_properties(${KWCPARSER_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 
 #  List of all the source files
 set(CRYSFML_COMMON_SRC
+    ${Forpy_SRC}
     ${GLOBAL_DEPS_SRC}
     ${MESSAGES_SRC}
     ${MATHS_SRC}
@@ -466,7 +513,10 @@ set(CRYSFML_COMMON_SRC
     ${SF_SRC}
     ${MOLECULES_SRC}
     ${KEYCODES_SRC}
-    ${KVEC_SYMMETRY})
+    ${KVECSYMM_SRC}
+    ${KWCPARSER_SRC}
+    ${VTK_SRC}
+    ${PYTHON_SRC})
 
 # Build the library
 set(LIBRARY_NAME crysfml)
@@ -474,7 +524,7 @@ set(LIBRARY_NAME crysfml)
 add_library(${LIBRARY_NAME} STATIC ${CRYSFML_COMMON_SRC})
 
 # The directory where the CrysFML modules files will be stored.
-set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src08/crysfml_modules)
+set(CRYSFML_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/Src08/crysfml_modules CACHE INTERNAL "")
 
 # Sets the path where to place the mod files for the crysfml_common library.
 set_target_properties(${LIBRARY_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CRYSFML_MODULE_DIRECTORY})

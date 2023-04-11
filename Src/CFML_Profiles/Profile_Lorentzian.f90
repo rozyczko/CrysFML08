@@ -58,31 +58,31 @@ SubModule (CFML_Profiles) Profile_Lorentzian
    !!--++
    !!--++ LORENTZIAN
    !!--++
-   !!--++    Return value of Lorentzian at 'Pos' for peak at 'Pos0' and 'Gamma'
+   !!--++    Return value of Lorentzian at 'Pos' for peak at 'Pos0' and 'gamm'
    !!--++
    !!--++ 21/04/2019
    !!
-   Module Subroutine Prof_Lorentzian(Pos , Pos0 , Gamma , Dldt , Dldg, Lorentz )
+   Module Subroutine Prof_Lorentzian(Pos , Pos0 , gamm , Dldt , Dldg, Lorentz )
       !---- Arguments ----!
       real(kind=cp), intent(in) :: pos
       real(kind=cp), intent(in) :: pos0
-      real(kind=cp), intent(in) :: gamma
+      real(kind=cp), intent(in) :: gamm
       real(kind=cp), intent(out):: dldt        !is derivative of L wrt Pos0
-      real(kind=cp), intent(out):: dldg        !is derivative of L wrt Gamma
+      real(kind=cp), intent(out):: dldg        !is derivative of L wrt gamm
       real(kind=cp), intent(out):: lorentz
 
       !---- Local Variables ----!
       real(kind=cp), parameter  :: cl=2.0_cp/pi
-      real(kind=cp)             :: delp , denom, denom2, delp2, gamma2
+      real(kind=cp)             :: delp , denom, denom2, delp2, gamm2
 
       delp = pos - pos0
       delp2=delp*delp
-      gamma2=gamma*gamma
-      denom = 4.0 * delp2 + gamma2
+      gamm2=gamm*gamm
+      denom = 4.0 * delp2 + gamm2
       denom2=denom*denom
-      lorentz = cl * gamma / denom
-      dldt = 8.0 * cl * gamma * delp / denom2
-      dldg = cl * (4.0 * delp2 - gamma2) / denom2
+      lorentz = cl * gamm / denom
+      dldt = 8.0 * cl * gamm * delp / denom2
+      dldg = cl * (4.0 * delp2 - gamm2) / denom2
 
    End Subroutine Prof_Lorentzian
 

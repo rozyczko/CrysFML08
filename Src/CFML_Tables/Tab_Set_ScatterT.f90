@@ -718,7 +718,7 @@ SubModule (CFML_Scattering_Tables) TAB_Set_ScatterT
       Magnetic_Form(109) = Magnetic_Form_Type("JDY2", &
                                              (/  0.175586,  5.938148,  0.228867, 11.464046,  0.583298,  2.167554,  0.011186/) )
       Magnetic_Form(110) = Magnetic_Form_Type("JDY3", &
-                                             (/  0.146536, 12.639305,  0.375822,  5.511785,  0.515731,  2.090789,  0.093576/) )
+                                             (/  0.123500, 13.224000,  0.488130,  4.640900,  0.394310,  1.734500, -0.005998/) ) ! 0.093576/) )
       Magnetic_Form(111) = Magnetic_Form_Type("JHO2", &
                                              (/  0.023234,  0.703240,  0.270745,  9.993475,  0.677581,  2.521403,  0.027101/) )
       Magnetic_Form(112) = Magnetic_Form_Type("JHO2", &

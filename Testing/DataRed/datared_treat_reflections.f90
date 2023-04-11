@@ -178,7 +178,7 @@
          info=Get_h_Info(hh,SpG,cond%magnetic)
          R%Ref(i)%imag=info(4)
          if(cond%pure_nuc) then
-           R%Ref(i)%imag=3
+           R%Ref(i)%imag=0
            if(info(2) == 1) then
              write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
              rej=rej+1
@@ -231,9 +231,9 @@
                info=Get_h_Info(kk,SpG,cond%magnetic)
                R%Ref(j)%imag=info(4)
                if(cond%pure_nuc) then
-                  R%Ref(i)%imag=3
+                  R%Ref(j)%imag=0
                   if(info(2) == 1) then
-                    write(unit=irej,fmt=fm3) R%Ref(i)%h,R%Ref(i)%intens,R%Ref(i)%sigma,1,R%Ref(i)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
+                    write(unit=irej,fmt=fm3) R%Ref(j)%h,R%Ref(j)%intens,R%Ref(j)%sigma,1,R%Ref(j)%twtheta,0.0,0.0,0.0,"  <-- Forbidden reflection"
                     rej=rej+1
                     cycle
                   end if

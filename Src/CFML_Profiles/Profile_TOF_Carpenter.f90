@@ -13,13 +13,13 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
    !!----
    !!---- 21/04/2019
    !!
-   Module Subroutine Tof_Carpenter(Dt,D,Alfa,Beta,Gamma,Eta,Kappa,Tof_Theta,Tof_Peak,Deriv)
+   Module Subroutine Tof_Carpenter(Dt,D,Alfa,Beta,gamm,Eta,Kappa,Tof_Theta,Tof_Peak,Deriv)
       !---- Arguments ----!
       real(kind=cp),             intent( in) :: dt        ! dt = TOF(channel i) -TOF(Bragg position)
       real(kind=cp),             intent( in) :: d         ! d-spacing of the peak in A
       real(kind=cp),             intent( in) :: alfa      !  alfa  : units microsecs-1
       real(kind=cp),             intent( in) :: beta      !  beta  : units microsecs-1
-      real(kind=cp),             intent( in) :: gamma     !  gamma : units microsecs
+      real(kind=cp),             intent( in) :: gamm     !  gamm : units microsecs
       real(kind=cp),             intent( in) :: eta       !  eta   : mixing coefficient calculated using TCH
       real(kind=cp),             intent( in) :: kappa     ! Mixing coeficient of the Ikeda-Carpenter function
       real(kind=cp),             intent( in) :: tof_theta ! This is the value of 2sin(theta)
@@ -39,8 +39,8 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
                           expru,exprv,exprs,exprr,im_const,re_const
 
       !> Definitions of all parameters for the Gaussian part :
-      !> Define sigma with respect to gamma (sigma is the variance of sigma)
-      sigma=gamma*gamma*INV_8LN2
+      !> Define sigma with respect to gamm (sigma is the variance of sigma)
+      sigma=gamm*gamm*INV_8LN2
       lambda=d*tof_theta
       R=exp(-81.799_dp/(kappa*lambda*lambda))
       deno=SQRT(2.0_dp*sigma)
@@ -134,10 +134,10 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
       omg=(Nu*omg_u+Nv*omg_v+Ns*omg_s+Nr*omg_r) ! End of gaussian part of the function
 
       if (lorcomp) then
-         zs=CMPLX(-alfa*dt,0.5_dp*alfa*gamma,kind=dp)
+         zs=CMPLX(-alfa*dt,0.5_dp*alfa*gamm,kind=dp)
          zu=(1.0_dp-ki)*zs
          zv=(1.0_dp+ki)*zs
-         zr=CMPLX(-beta*dt,0.5_dp*beta*gamma,kind=dp)
+         zr=CMPLX(-beta*dt,0.5_dp*beta*gamm,kind=dp)
          fzu=expi_e1(zu)
          fzv=expi_e1(zv)
          fzs=expi_e1(zs)
@@ -163,7 +163,7 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
          domg_t= 0.0           ! DOmG/Ddt
          domg_a= 0.0           ! DOmG/Dalfa
          domg_b= 0.0           ! DOmG/Dbeta
-         domg_g= 0.0           ! DOmG/Dgamma
+         domg_g= 0.0           ! DOmG/Dgamm
          domg_k= 0.0           ! DOmG/Dkappa
       else
          dnuda=R*beta/xik/xik*(1-ki)  ! Partial derivatives of Nu,Nv,Ns and Nr /dalpha, dbeta
@@ -199,8 +199,8 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
          domg_a= dnuda*omg_u+dnvda*omg_v+dnsda*omg_s+dnrda*omg_r + &
                  deno*(Nu*(1-ki)*(y_u*omg_u+0.5_dp*a_u)+Nv*(1+ki)*(y_v*omg_v+0.5_dp*a_v)+Ns*(y_s*omg_s+0.5_dp*a_s))
          domg_b= dnudb*omg_u+dnvdb*omg_v+dnsdb*omg_s+dnrdb*omg_r+deno*Nr*(y_r*omg_r+0.5_dp*a_r)
-         domg_g= inv_8ln2*gamma*(Nu*alfa_min**2*omg_u+Nv*alfa_plu**2*omg_v+Ns*alfa**2*omg_s+Nr*beta**2*omg_r) + &
-                 2.0_dp*inv_8ln2*gamma*denoinv**3*(Nu*(alfa_min*sigma+dt)*a_u+Nv*(alfa_plu*sigma+dt)*a_v+          &
+         domg_g= inv_8ln2*gamm*(Nu*alfa_min**2*omg_u+Nv*alfa_plu**2*omg_v+Ns*alfa**2*omg_s+Nr*beta**2*omg_r) + &
+                 2.0_dp*inv_8ln2*gamm*denoinv**3*(Nu*(alfa_min*sigma+dt)*a_u+Nv*(alfa_plu*sigma+dt)*a_v+          &
                  Ns*(alfa*sigma+dt)*a_s+Nr*(beta*sigma+dt)*a_r)
          domg_k= 81.799_dp/kappa**2/lambda**2*R*(-alfa_min/xik*omg_u-alfa_plu/zik*omg_v+2.0_dp*alfa/yik*omg_s+     &
                  2.0_dp*alfa**2*beta*ki**2/xik/yik/zik*omg_r)
@@ -216,9 +216,9 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
          exprs=REAL(fzs)
          exprr=REAL(fzr)
          doml_t=-Nu*alfa_min*oml_u-Nv*alfa_plu*oml_v-Ns*alfa*oml_s-Nr*beta*oml_r-two_over_pi*im_const*(Nu+Nv+Ns+Nr)
-         doml_a=dnuda*oml_u+dnvda*oml_v+dnsda*oml_s+dnrda*oml_r+Nu*(1.0_dp-ki)*(-dt*oml_u-0.5_dp*two_over_pi*gamma*expru)+ &
-                Nv*(1.0+ki)*(-dt*oml_v-0.5*two_over_pi*gamma*exprv)+Ns*(-dt*oml_s-0.5_dp*two_over_pi*gamma*exprs)
-         doml_b=dnudb*oml_u+dnvdb*oml_v+dnsdb*oml_s+dnrdb*oml_r+Nr*(-dt*oml_r-0.5_dp*two_over_pi*gamma*exprr)
+         doml_a=dnuda*oml_u+dnvda*oml_v+dnsda*oml_s+dnrda*oml_r+Nu*(1.0_dp-ki)*(-dt*oml_u-0.5_dp*two_over_pi*gamm*expru)+ &
+                Nv*(1.0+ki)*(-dt*oml_v-0.5*two_over_pi*gamm*exprv)+Ns*(-dt*oml_s-0.5_dp*two_over_pi*gamm*exprs)
+         doml_b=dnudb*oml_u+dnvdb*oml_v+dnsdb*oml_s+dnrdb*oml_r+Nr*(-dt*oml_r-0.5_dp*two_over_pi*gamm*exprr)
          doml_g=0.5_dp*two_over_pi*(-Nu*alfa_plu*expru-Nv*alfa_min*exprv-Ns*alfa*exprs-Nr*beta*exprr+(Nu+Nv+Ns+Nr)*re_const)
          doml_k=81.799_dp/kappa**2/lambda**2*R*(-alfa_min/xik*oml_u-alfa_plu/zik*oml_v+2.0_dp*alfa/yik*oml_s+  &
                 2.0_dp*alfa**2*beta*ki**2/xik/yik/zik*oml_r)
@@ -228,7 +228,7 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
          deriv%dt    = norm*(one_e*domg_t+eta*doml_t)
          deriv%alfa  = tof_peak/alfa+norm*(one_e*domg_a+eta*doml_a)
          deriv%beta  = norm*(one_e*domg_b+eta*doml_b)
-         deriv%gamma = norm*(one_e*domg_g+eta*doml_g)
+         deriv%gamm = norm*(one_e*domg_g+eta*doml_g)
          deriv%kappa = norm*(one_e*domg_k+eta*doml_k)
          deriv%eta   = norm*(oml-omg)
 
@@ -237,11 +237,11 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
          deriv%dt    = norm*domg_t
          deriv%alfa  = tof_peak/alfa+norm*domg_a
          deriv%beta  = norm*domg_b
-         deriv%gamma = norm*domg_g
+         deriv%gamm = norm*domg_g
          deriv%kappa = norm*domg_k
          deriv%eta   = 0.0
       end if
-      deriv%sigma = deriv%gamma/(2.0_dp*inv_8ln2*gamma)
+      deriv%sigma = deriv%gamm/(2.0_dp*inv_8ln2*gamm)
 
    End Subroutine Tof_Carpenter
 

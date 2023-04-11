@@ -295,8 +295,10 @@ SubModule (CFML_DiffPatt) DiffP_ReadPatt_XYSIG
             close(unit=i_dat)
             return
          end if
-         if (i > 10 .and. ABS(pat%x(i)) < EPS1 .AND. pat%y(i) < EPS1 .AND.  pat%sigma(i) < EPS1) exit
-
+         if (i > 10 .and. ABS(pat%x(i)) < EPS1 .AND. pat%y(i) < EPS1 .AND.  pat%sigma(i) < EPS1) then
+            i=i-1
+            exit
+         end if
          pat%x(i)=pat%x(i)*fac_x
          pat%y(i)=pat%y(i)*fac_y
 
@@ -315,7 +317,7 @@ SubModule (CFML_DiffPatt) DiffP_ReadPatt_XYSIG
          end if
       end do
 
-      ntt=i-1
+      ntt=i
       pat%xmin=pat%x(1)
       pat%xmax=pat%x(ntt)
       cnorm=cnorm/real(ntt)

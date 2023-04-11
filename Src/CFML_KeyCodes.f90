@@ -61,12 +61,12 @@ Module CFML_KeyCodes
    !---- List of public Functions ----!
 
    !---- List of public Subroutines ----!
-   public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_RelationList,   &
-             Del_RefCode_ATM, Del_RefCode_RelationList, &
+   public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_GenParList,   &
+             Del_RefCode_ATM, Del_RefCode_GenParList, &
              Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
-             Read_RefCodes_PHAS, RList_to_Cell, Read_RefCodes_MOL, RList_to_Molec, &
+             Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
 
@@ -115,28 +115,32 @@ Module CFML_KeyCodes
 
    !!----
    !!---- TYPE :: RELATION_TYPE
-   !!--..
+   !!----
+   !!----
    !!----
    !!---- Update: April - 2022
-   Type, public :: Relation_Type
-      character(len=40) :: Name=" "
+   Type, public :: GenPar_Type
+      character(len=40) :: Nam=" "
       character(len=30) :: Ext=" "
       integer           :: L=0            ! Code number
-      real(kind=cp)     :: M=0.0_cp       ! Multiplicator
+      real(kind=cp)     :: M=0.0_cp       ! Multiplier
       real(kind=cp)     :: Val=0.0_cp
       real(kind=cp)     :: Sig=0.0_cp
-   End Type Relation_Type
+   End Type GenPar_Type
 
    !!----
-   !!---- TYPE :: RELATIONLIST_TYPE
-   !!--..
+   !!---- TYPE :: GenParList_Type
+   !!----
+   !!---- The user of this derived type must allocate and fill a type of this kind for his(her) own
+   !!---- his(her) own problem. An object of this type is needed to fill the Vec_RefPar and
+   !!---- accompanying arrays.
    !!----
    !!---- Update: April - 2022
-   Type, public :: RelationList_Type
-      integer                                        :: ND_MAX=0 ! Number of Dimension of Par when it was created
-      integer                                        :: NPar=0   ! Current number of Parameters
-      type(Relation_Type), allocatable, dimension(:) :: Par
-   End Type RelationList_Type
+   Type, public :: GenParList_Type
+      integer                                      :: ND_MAX=0 ! Number of Dimension of Par when it was created
+      integer                                      :: NPar=0   ! Current number of Parameters
+      type(GenPar_Type), allocatable, dimension(:) :: Par
+   End Type GenParList_Type
 
 
    !---- Parameters ----!
@@ -199,7 +203,7 @@ Module CFML_KeyCodes
    integer,           public, dimension(:)  , allocatable :: Vec_PointPar ! Vector of indices pointing to the parameter number
    real(kind=cp),     public, dimension(:,:), allocatable :: Vec_LimPar   ! Vector of Lower, Upper limits and Step for Parameters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefPar   ! Vector of refined parameters (values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of standard deviations of refined paramaters
+   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STD of refined paramaters
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
@@ -223,11 +227,11 @@ Module CFML_KeyCodes
          integer, optional,intent(out) :: NTfix
       End Subroutine Allocate_Restraints_Vec
 
-      Module Subroutine Allocate_RelationList(NDMax, R)
+      Module Subroutine Allocate_GenParList(NDMax, R)
          !---- Arguments ----!
          integer,                 intent(in)     :: NDMax
-         type(RelationList_Type), intent(in out) :: R
-      End Subroutine Allocate_RelationList
+         type(GenParList_Type), intent(in out) :: R
+      End Subroutine Allocate_GenParList
 
       Module Subroutine Allocate_VecRef(N)
          !---- Arguments ----!
@@ -245,11 +249,11 @@ Module CFML_KeyCodes
          integer,           intent(in)     :: NPar
       End Subroutine Del_RefCode_Atm
 
-      Module Subroutine Del_RefCode_RelationList(R, NPar)
+      Module Subroutine Del_RefCode_GenParList(R, NPar)
          !---- Arguments ----!
-         type(RelationList_Type), intent(in out) :: R
+         type(GenParList_Type), intent(in out) :: R
          integer,                 intent(in)     :: NPar
-      End Subroutine Del_RefCode_RelationList
+      End Subroutine Del_RefCode_GenParList
 
       Module Subroutine Fill_RefCodes_Atm(Keyword, Npar, Bounds, Ic, Natm, Spg, AtList)
          !---- Arguments ----!
@@ -361,7 +365,7 @@ Module CFML_KeyCodes
          type(AtList_Type),           intent(in out) :: AtList
          integer,                     intent(in)     :: NAtm
          integer,                     intent(in)     :: Ind
-         class(SpG_Type),              intent(in)     :: Spg
+         class(SpG_Type),             intent(in)     :: Spg
          real(kind=cp), dimension(3), intent(in)     :: Bounds
          integer,                     intent(in)     :: Ic
       End Subroutine Vary_U_Atm
@@ -371,7 +375,7 @@ Module CFML_KeyCodes
          type(AtList_Type),           intent(in out) :: AtList
          integer,                     intent(in)     :: NAtm
          integer,                     intent(in)     :: Ind
-         class(SpG_Type),              intent(in)     :: Spg
+         class(SpG_Type),             intent(in)     :: Spg
          real(kind=cp), dimension(3), intent(in)     :: Bounds
          integer,                     intent(in)     :: Ic
       End Subroutine Vary_XYZ_Atm
@@ -441,7 +445,7 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Ip
-         type(RelationList_Type), intent(in out) :: Pat
+         type(GenParList_Type),   intent(in out) :: Pat
       End Subroutine Read_RefCodes_PATT
 
       Module Subroutine Split_RefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
@@ -457,37 +461,37 @@ Module CFML_KeyCodes
          !---- Arguments ----!
          character(len=*),        intent(in)     :: String
          integer,                 intent(in)     :: Ip
-         type(RelationList_Type), intent(in out) :: Pat
+         type(GenParList_Type),   intent(in out) :: Pat
       End Subroutine ReadCode_FIX_PATT
 
       Module Subroutine ReadCode_VARY_PATT(String, Ip, Pat)
          !---- Arguments ----!
          character(len=*),        intent(in)     :: String
          integer,                 intent(in)     :: Ip
-         type(RelationList_Type), intent(in out) :: Pat
+         type(GenParList_Type), intent(in out) :: Pat
       End Subroutine ReadCode_VARY_PATT
 
-      Module Subroutine FIX_RelationList_Par(R, CodeNam)
+      Module Subroutine FIX_GenParList_Par(R, CodeNam)
          !---- Arguments ----!
-         type(RelationList_Type), intent(in out) :: R
+         type(GenParList_Type), intent(in out) :: R
          character(len=*),        intent(in)     :: CodeNam
-      End Subroutine FIX_RelationList_Par
+      End Subroutine FIX_GenParList_Par
 
-      Module Subroutine VARY_RelationList_Par(R, CodeNam, Value, Sig, Mult)
+      Module Subroutine VARY_GenParList_Par(R, CodeNam, Value, Sig, Mult)
          !---- Arguments ----!
-         type(RelationList_Type), intent(in out) :: R
+         type(GenParList_Type), intent(in out) :: R
          character(len=*),        intent(in)     :: CodeNam
          real(kind=cp), optional, intent(in)     :: Value
          real(kind=cp), optional, intent(in)     :: Sig
          real(kind=cp), optional, intent(in)     :: Mult
-      End Subroutine VARY_RelationList_Par
+      End Subroutine VARY_GenParList_Par
 
       Module Subroutine Set_RefCodes_PATT(Keyword, Npar,  IP, Pat)
          !---- Arguments ----!
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: IP
-         type(RelationList_Type),       intent(in out) :: Pat
+         type(GenParList_Type),         intent(in out) :: Pat
       End Subroutine Set_RefCodes_PATT
 
       Module Subroutine Read_RefCodes_PHAS(ffile, n_ini, n_end, Ip, Ph)
@@ -496,28 +500,28 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Ip
-         type(RelationList_Type), intent(inout)  :: Ph
+         type(GenParList_Type),   intent(in out) :: Ph
       End Subroutine Read_RefCodes_PHAS
 
-      Module Subroutine RList_to_Cell(Ph, Ip, Cell)
+      Module Subroutine GPList_to_Cell(Ph, Ip, Cell)
          !---- Arguments ----!
-         type(RelationList_Type), intent(in)   :: Ph
+         type(GenParList_Type), intent(in)   :: Ph
          integer,                 intent(in)   :: Ip
          class(cell_Type),        intent(inout):: Cell
-      End Subroutine RList_to_Cell
+      End Subroutine GPList_to_Cell
 
       Module Subroutine ReadCode_FIX_PHAS(String, Ip, Ph)
          !---- Arguments ----!
          character(len=*),        intent(in)    :: String
          integer,                 intent(in)    :: Ip
-         type(RelationList_Type), intent(inout) :: Ph
+         type(GenParList_Type), intent(inout) :: Ph
       End Subroutine ReadCode_FIX_PHAS
 
       Module Subroutine ReadCode_VARY_PHAS(String, Ip, Ph)
          !---- Arguments ----!
          character(len=*),        intent(in)    :: String
          integer,                 intent(in)    :: Ip
-         type(RelationList_Type), intent(inout) :: Ph
+         type(GenParList_Type), intent(inout) :: Ph
       End Subroutine ReadCode_VARY_PHAS
 
       Module Subroutine Split_RefCod_PHAS(String, Nc, Ikeys, IPhas, Keys)
@@ -534,7 +538,7 @@ Module CFML_KeyCodes
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: IP
-         type(RelationList_Type),       intent(in out) :: Ph
+         type(GenParList_Type),         intent(in out) :: Ph
       End Subroutine Set_RefCodes_PHAS
 
       Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
@@ -543,21 +547,21 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Im
-         type(RelationList_Type), intent(inout)  :: M
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine Read_RefCodes_MOL
 
       Module Subroutine ReadCode_FIX_MOL(String, Im, M)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Im
-         type(RelationList_Type), intent(inout) :: M
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Im
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine ReadCode_FIX_MOL
 
       Module Subroutine ReadCode_VARY_MOL(String, Im, M)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Im
-         type(RelationList_Type), intent(inout) :: M
+         character(len=*),        intent(in)     :: String
+         integer,                 intent(in)     :: Im
+         type(GenParList_Type),   intent(in out) :: M
       End Subroutine ReadCode_VARY_MOL
 
       Module Subroutine Split_RefCod_MOL(String, Nc, Ikeys, IMol, Keys)
@@ -574,15 +578,15 @@ Module CFML_KeyCodes
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: Im
-         type(RelationList_Type),       intent(in out) :: M
+         type(GenParList_Type),         intent(in out) :: M
       End Subroutine Set_RefCodes_MOL
 
-      Module Subroutine RList_to_Molec(M, Im, Mol)
+      Module Subroutine GPList_to_Molec(M, Im, Mol)
          !---- Arguments ----!
-         type(RelationList_Type), intent(in)   :: M
-         integer,                 intent(in)   :: Im
-         type(Molecule_type),     intent(inout):: Mol
-      End Subroutine RList_to_Molec
+         type(GenParList_Type),   intent(in)     :: M
+         integer,                 intent(in)     :: Im
+         type(Molecule_type),     intent(in out) :: Mol
+      End Subroutine GPList_to_Molec
 
    End Interface
 

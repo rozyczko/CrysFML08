@@ -50,28 +50,37 @@
     private
 
     !---- List of public functions ----!
-    public :: Equal_Sets_Text, &
-              Frac_Trans_1Dig, Frac_Trans_2Dig, &
-              Get_DateTime, Get_Dirname, Get_Extension, Get_Filename, &
-              Get_Mat_From_Symb, Get_Vec_From_String, &
-              L_Case, U_Case, &
-              NumCol_from_NumFmt, &
-              Pack_String, &
-              Read_Fract, &
-              Number_Lines, Reading_File, &
+    public :: Equal_Sets_Text, Frac_Trans_1Dig, Frac_Trans_2Dig,          &
+              Get_DateTime, Get_Dirname, Get_Extension, Get_Filename,     &
+              Get_Mat_From_Symb, Get_Vec_From_String,L_Case, U_Case,      &
+              NumCol_from_NumFmt, Pack_String, Read_Fract,Number_Lines,   &
               Set_Symb_From_Mat, String_Count, Strip_String, String_Real, &
-              String_Fraction_1Dig, String_Fraction_2Dig, String_NumStd
+              String_Fraction_1Dig, String_Fraction_2Dig, String_NumStd,  &
+              Reading_File, File_To_FileList
 
 
     !---- List of public subroutines ----!
-    public :: Cut_string, &
-              FindFMT, &
-              Get_Separator_Pos, Get_Substring_Positions, Get_Words, &
-              Get_Num, Get_NumStd, Get_Transf, &
-              Init_FindFmt, Inc_LineNum, &
-              Reading_Lines, Read_Key_Str, Read_Key_StrVal, Read_Key_Value, &
-              Read_Key_ValueSTD, &
-              Sort_Strings, SubString_Replace
+    public :: Cut_string, FindFMT, &
+              Get_Separator_Pos, Get_Substring_Positions, Get_Words,      &
+              Get_Num, Get_NumStd, Get_Transf, Init_FindFmt, Inc_LineNum, &
+              Reading_Lines, Read_Key_Str,Read_Key_StrVal,Read_Key_Value, &
+              Read_Key_ValueSTD, Sort_Strings, SubString_Replace
+
+
+    !!----
+    !!---- TYPE :: FILE_LIST_TYPE
+    !!--..
+    !!---- Type,public :: File_List_Type
+    !!----    integer                                       :: nlines ! Number of lines in the file
+    !!----    character(len=256), allocatable, dimension(:) :: line   ! Content of the lines
+    !!---- End Type file_type
+    !!----
+    !!---- Updated: February - 2005, November 2012, February 2020 (moved from CFML_IO_FORM)
+    !!
+    Type, public :: File_List_Type
+       integer                                       :: nlines=0   ! Number of lines
+       character(len=256), dimension(:), allocatable :: line       ! Strings containing the lines of the file
+    End Type File_List_Type
 
 
     Type, public :: String_Array_Type          !Type for handling allocatable arrays of allocatable strings
@@ -82,9 +91,9 @@
     !!---- TYPE :: FILE_TYPE
     !!--..
     !!---- Type,public :: File_Type
-    !!----    character(len=:),   allocatable               :: Fname  ! Original name of the file
-    !!----    integer                                       :: nlines ! Number of lines in the file
-    !!----    character(len=256), allocatable, dimension(:) :: line   ! Content of the lines
+    !!----    character(len=:),   allocatable                    :: Fname  ! Original name of the file
+    !!----    integer                                            :: nlines ! Number of lines in the file
+    !!----    Type(String_Array_Type), dimension(:), allocatable :: line     ! Content of the lines
     !!---- End Type file_type
     !!----
     !!---- Updated: February - 2005, November 2012, February 2020 (moved from CFML_IO_FORM)
@@ -94,6 +103,7 @@
        integer                                            :: nlines=0   ! Number of lines
        Type(String_Array_Type), dimension(:), allocatable :: line       ! Strings containing the lines of the file
     End Type File_Type
+
 
 
     !--------------------!
@@ -463,7 +473,7 @@
        if (.not. info) then
           err_cfml%ierr=1
           Err_CFML%flag=.true.
-          err_cfml%msg="The file"//trim(filename)//" does not exist "
+          err_cfml%msg="The file: "//trim(filename)//" does not exist "
           return
        end if
 
@@ -486,7 +496,7 @@
        if(nlines == 0) then
           err_cfml%ierr=1
           Err_CFML%flag=.true.
-          err_cfml%msg="The file"//trim(filename)//" contains no lines ! "
+          err_cfml%msg="The file: "//trim(filename)//" contains no lines ! "
           return
        end if
        rewind(unit=lun)
@@ -526,7 +536,7 @@
        if (.not. info) then
           err_cfml%ierr=1
           Err_CFML%flag=.true.
-          err_cfml%msg="The file"//trim(filename)//" does not exist "
+          err_cfml%msg="The file: "//trim(filename)//" does not exist "
           return
        end if
 
@@ -583,7 +593,7 @@
        if (.not. info) then
           err_cfml%ierr=1
           Err_CFML%flag=.true.
-          err_cfml%msg="Number_lines@STRINGS: The file"//trim(filename)//" does not exist "
+          err_cfml%msg="Number_lines@STRINGS: The file: "//trim(filename)//" does not exist "
           return
        end if
 
@@ -615,6 +625,38 @@
 
     End Function Number_Lines
 
+    !!----
+    !!---- Function File_To_FileList(File_dat,File_list)
+    !!----   character(len=*),     intent( in) :: file_dat  !Input data file
+    !!----   type(file_list_type), intent(out) :: file_list !File list structure
+    !!----
+    !!----    Charge an external file to an object of File_List_Type.
+    !!----
+    !!---- Update: March - 2023
+    !!
+    Function File_To_FileList(File_dat) result(File_list)
+       !---- Arguments ----!
+       character(len=*),      intent( in) :: file_dat
+       type(file_list_type)               :: file_list
 
+       !---- Local Variables ----!
+       integer                           :: nlines
+
+       !---- Number of Lines in the input file ----!
+       nlines=Number_Lines(trim(File_dat))
+
+       if (nlines == 0) then
+          err_cfml%ierr=1
+          err_CFML%Flag=.true.
+          err_CFML%Msg="The file "//trim(File_dat)//" contains nothing"
+          return
+       else
+          file_list%nlines=nlines
+          if (allocated(file_list%line)) deallocate(file_list%line)
+          allocate(file_list%line(nlines))
+          call reading_Lines(trim(File_dat),nlines,file_list%line)
+       end if
+
+    End Function File_To_FileList
 
  End Module CFML_Strings

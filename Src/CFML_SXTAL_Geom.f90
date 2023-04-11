@@ -52,7 +52,7 @@
 !!--..    program To_F90, by Alan Miller.
 !!--..    Date: 2005-03-06  Time: 22:07:48
 !!--..
-!!--..    The persons that, to my knowledge have contributed to maintain these procedures
+!!--..    The persons that, to my knowledge, have contributed to maintain these procedures
 !!--..    in some way are: R.F.D Stansfield, A. Barthelemy, Garry McIntyre, John Allibon,
 !!--..    S.A. Mason, M.Thomas and Alain Filhol
 !!--..
@@ -82,8 +82,8 @@
 !!--..    The reciprocal Cartesian Frame used by Busing-Levy has "x" along a*
 !!--..    "y" in the (a*,b*) plane and "z" perpendicular to that plane. The
 !!--..    matrix passing from (h,k,l) in r.l.u. to the cartesian frame is
-!!--..           | a*   b*.cos(gamma*)   c*.cos(beta*)            |
-!!--..    [B] =  | 0    b*.sin(gamma*)  -c*.sin(beta*).cos(alpha) |
+!!--..           | a*   b*.cos(gamm*)   c*.cos(beta*)            |
+!!--..    [B] =  | 0    b*.sin(gamm*)  -c*.sin(beta*).cos(alpha) |
 !!--..           ! 0          0          1/c                      |
 !!--..
 !!--..        [hc] = [B] [h]
@@ -189,6 +189,7 @@
 !!----       EQUATORIAL_CHI_PHI
 !!----       FIXDNU
 !!----       FLAT_CONE_VERTDET
+!!----       GANU_FROM_XZ
 !!----       GENB
 !!----       GENUB
 !!----       GET_ANGS_NB
@@ -231,8 +232,9 @@
                                       Rot_Gibbs_Matrix
     Use CFML_Geom,              Only: Get_OmegaChiPhi, Get_Matrix_moving_v_to_u,&
                                       Get_Anglen_Axis_From_Rotmat, Set_Rotation_Matrix
-    Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm,SXTAL_Numor_type
-    Use CFML_Strings,           Only: file_type
+    Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm, SXTAL_Numor_type, &
+                                      Diffractometer_Type
+    Use CFML_Strings,           Only: file_type,l_case
 
     !---- Variables ----!
     Implicit None
@@ -246,11 +248,11 @@
     Public :: Angs_4C_bisecting, Equatorial_Chi_Phi, Get_dspacing_theta,                        &
               Get_GaOmNu_frChiPhi, Chi_mat, Phi_mat, Psi_mat, Get_Angs_NB,                      &
               Calc_Om_Chi_Phi, Calc_Psi, d19psd, dspace, fixdnu, Normal_Beam_Angles,            &
-              s4cnb, snb4c, Flat_Cone_vertDet, Get_WaveGaNu_frZ4, normal, refvec, sxdpsd,       &
-              triple, z3frz1, z2frz1, z1frfc, z1frnb, z1frmd, z1frz4, z1frz3, z1frz2, z4frgn,   &
-              z4frz1, calang, genb, genub, cell_fr_UB, set_psd, get_z1_from_pixel,              &
+              s4cnb, snb4c, Flat_Cone_vertDet, ganu_from_xz, Get_WaveGaNu_frZ4, normal, refvec, &
+              sxdpsd, triple, z3frz1, z2frz1, z1frfc, z1frnb, z1frmd, z1frz4, z1frz3, z1frz2,   &
+              z4frgn, z4frz1, calang, genb, genub, cell_fr_UB, set_psd, get_z1_from_pixel,      &
               Get_z1_D9angls, psd_convert, Get_UB_from_uvw_hkl_omega, Get_UB_from_hkl_hkl_omega,&
-              Get_FlatCone_Angles_D10, Read_Twinlaw, Write_Twinlaw
+              Get_FlatCone_Angles_D10, Read_Twinlaw, Write_Twinlaw, psd_convert_old
 
 
     !---- Definitions ----!
@@ -685,13 +687,44 @@
          real(kind=cp), dimension(4)               :: angl_4C
       End Function snb4c
 
-      ! End SubModule (CFML_Geometry_SXTAL) SXTAL_Angles
-
-      ! SubModule (CFML_Geometry_SXTAL) SXTAL_PSD
-
-      Module Subroutine psd_convert(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+      Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,blfr,ga_P,nu_P,f_virtual)
          !---- Arguments ----!
-         Integer, Intent(In)               :: mpsd
+         real,                  intent(in)  :: px                 ! x coordinate, in pixels
+         real,                  intent(in)  :: pz                 ! z coordinate, in pixels
+         real,                  intent(in)  :: ga_D               ! gamma angle of the center of the detector, in degrees
+         real,                  intent(in)  :: nu_D               ! nu    angle of the center of the detector, in degrees
+         integer,               intent(in)  :: ipsd               ! detector type
+         integer, dimension(2), intent(in)  :: npix               ! number of horizontal and vertical pixels
+         real,    dimension(2), intent(in)  :: pisi               ! horizontal and vertical pixel sizes
+         real,                  intent(in)  :: dist_samp_detector ! sample detector distance
+         real,    dimension(3), intent(in)  :: det_offsets        ! x, y and z detector offsets
+         integer,               intent(in)  :: origin             ! origin for numbering pixels
+         integer,               intent(in)  :: blfr               ! Busing-Levy frame
+         real,                  intent(out) :: ga_P               ! Gamma value of the reflection
+         real,                  intent(out) :: nu_P               ! Nu value of the reflection
+         integer, optional,     intent(in)  :: f_virtual          ! stretching factor for virtual detectors
+      End Subroutine ganu_from_xz
+
+      Module Subroutine psd_convert(diffractometer,f_virtual,conversion_type,ga_D,nu_D,px,pz,x_D,z_D,ga_P,nu_P,Shifts,origin)
+         !---- Arguments ----!
+        type(diffractometer_type), intent(in out) :: diffractometer
+        integer,                   intent(in)     :: f_virtual
+        integer,                   intent(in)     :: conversion_type
+        real(kind=cp),             intent(in)     :: ga_D
+        real(kind=cp),             intent(in)     :: nu_D
+        real(kind=cp),             intent(in out) :: px ! pixel x
+        real(kind=cp),             intent(in out) :: pz ! pixel z
+        real(kind=cp),             intent(in out) :: x_D
+        real(kind=cp),             intent(in out) :: z_D
+        real(kind=cp),             intent(in out) :: ga_P
+        real(kind=cp),             intent(in out) :: nu_P
+        logical, optional,         intent(in)     :: Shifts
+        integer, optional,         intent(in)     :: origin
+      End Subroutine psd_convert
+
+      Module Subroutine psd_convert_old(mpsd,gamm,gamp,nup,xobs,zobs,cath,anod)
+         !---- Arguments ----!
+         Integer,          Intent(In)      :: mpsd
          real(kind=cp),    Intent(In)      :: gamm
          real(kind=cp),    Intent(In Out)  :: gamp
          real(kind=cp),    Intent(In Out)  :: nup
@@ -699,7 +732,7 @@
          real(kind=cp),    Intent(Out)     :: zobs
          real(kind=cp),    Intent(in Out)  :: cath
          real(kind=cp),    Intent(in Out)  :: anod
-      End Subroutine psd_convert
+      End Subroutine psd_convert_old
 
       Module Subroutine d19psd(mpsd,ga,nu,cath,anod)
          !---- Arguments ----!

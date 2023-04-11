@@ -50,12 +50,12 @@ SubModule (CFML_Profiles) Profile_Hat
       if (x < -hw .or. x > hw) then
          h_val=0.0_cp
          if (present(dpar)) then
-            dpar(1:2) = (/0.0_cp,0.0_cp/)
+            dpar(1:2) = [0.0_cp,0.0_cp]
          end if
       else
          h_val =1.0/par(1)
          if (present(dpar)) then
-            dpar(1:2) = (/0.0_cp,-1.0_cp/(par(1)*par(1))/)
+            dpar(1:2) = [0.0_cp,-1.0_cp/(par(1)*par(1))]
          end if
       end if
 

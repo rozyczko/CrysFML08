@@ -501,7 +501,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,2)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV2_C@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV2_C@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix
@@ -536,7 +536,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,2)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV2_R@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV2_R@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix
@@ -568,7 +568,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,3)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV3_C@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV3_C@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix
@@ -607,7 +607,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,3)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV3_R@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV3_R@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix
@@ -646,7 +646,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,4)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV4_C@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV4_C@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix
@@ -718,7 +718,7 @@ Submodule (CFML_Maths) Maths_Inverse_Matrix
        det=determ(A,4)
        if (abs(det) <= epss) then
           Err_CFML%Ierr=1
-          Err_CFML%MSG="MATINV4_R@MATHS: Determinant was zero!"
+          Err_CFML%MSG="MATINV4_R@MATHS: Determinant is zero, singular matrix!"
        end if
 
        !> Calculate the inverse determinant of the matrix

@@ -18,7 +18,8 @@ SubModule (CFML_IOForm) Format_fst
 
       !---- Local variables ----!
       integer  :: i, n_ini, n_end, npos
-      Type(File_Type) :: struct, magstr
+      Type(File_Type) :: struct
+      Type(File_list_Type) :: magstr
       character(len=:), allocatable :: line
 
       npos=fst%nlines
@@ -58,20 +59,21 @@ SubModule (CFML_IOForm) Format_fst
       end do
 
       if(npos < fst%nlines) then
-         magstr%Fname="Magnetic_Part_of_FST_file"
+         !magstr%Fname="Magnetic_Part_of_FST_file"
          magstr%nlines=fst%nlines-npos
          allocate(magstr%line(magstr%nlines))
-         magstr%line(1:magstr%nlines)=fst%line(npos+1:fst%nlines)
-
          do i=1,magstr%nlines
-           magstr%line(i)%str=adjustl(magstr%line(i)%str)
-           line=l_case(magstr%line(i)%str)
+           magstr%line(i)=fst%line(npos+i)%Str
+         end do
+         do i=1,magstr%nlines
+           magstr%line(i)=adjustl(magstr%line(i))
+           line=l_case(magstr%line(i))
            n_ini=index(line,"scale")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:) = " "
+           if( n_ini /= 0) magstr%line(i)(n_ini:) = " "
            n_ini=index(line,"nodisplay")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:n_ini+8) = " "
+           if( n_ini /= 0) magstr%line(i)(n_ini:n_ini+8) = " "
            n_ini=index(line,"color")
-           if( n_ini /= 0) magstr%line(i)%str(n_ini:) = " "
+           if( n_ini /= 0) magstr%line(i)(n_ini:) = " "
          end do
 
          !Attempt to read the magnetic part to construct the magnetic atoms and the MagSymm_k_Type object MGp

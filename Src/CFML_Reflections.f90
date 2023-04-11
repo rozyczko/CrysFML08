@@ -134,15 +134,27 @@ Module CFML_Reflections
        Module Procedure H_S_real
    End Interface H_S
 
+   Interface H_Equal
+       Module Procedure H_Equal_Int
+       Module Procedure H_Equal_real
+   End Interface H_Equal
+
 
    !---- Interface Zone ----!
    Interface
-      Module Function H_Equal(H,K) Result (Info)
+      Module Function H_Equal_Int(H,K) Result (Info)
          !---- Arguments ----!
          integer, dimension(:), intent(in) :: H
          integer, dimension(:), intent(in) :: K
          logical                           :: info
-      End Function H_Equal
+      End Function H_Equal_Int
+
+      Module Function H_Equal_Real(H,K) Result (Info)
+         !---- Arguments ----!
+         real(kind=cp), dimension(:), intent(in) :: H
+         real(kind=cp), dimension(:), intent(in) :: K
+         logical                                 :: info
+      End Function H_Equal_Real
 
       Module Function H_Absent(H, SpG) Result(Info)
          !---- Arguments ----!

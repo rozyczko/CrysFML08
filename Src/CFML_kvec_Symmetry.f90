@@ -58,7 +58,7 @@
 !!--++                                       symmetry_symbol, get_stabilizer
 !!--++    Use CFML_Strings,            only: u_case, l_case, Frac_Trans_1Dig, Get_Separator_Pos,Pack_String, &
 !!--++                                       Frac_Trans_2Dig, Get_Mat_From_Symb,       &
-!!--++                                       Get_Transf, file_type, string_fraction_2Dig
+!!--++                                       Get_Transf, file_list_type, string_fraction_2Dig
 !!--++    Use CFML_Atoms,              only: Allocate_mAtom_list, mAtom_List_Type
 !!--++    Use CFML_Scattering_Tables,  only: Set_Magnetic_Form, Remove_Magnetic_Form, num_mag_form, &
 !!--++                                       Magnetic_Form
@@ -106,7 +106,7 @@
                                      symmetry_symbol, get_stabilizer
   Use CFML_Strings,            only: u_case, l_case, Frac_Trans_1Dig, Get_Separator_Pos,Pack_String, &
                                      Frac_Trans_2Dig, Get_Mat_From_Symb,       &
-                                     Get_Transf, file_type, string_fraction_2Dig
+                                     Get_Transf, file_list_type, string_fraction_2Dig
   Use CFML_Atoms,              only: Allocate_mAtom_list, mAtom_List_Type
   Use CFML_Scattering_Tables,  only: Set_Magnetic_Form, Remove_Magnetic_Form, num_mag_form, &
                                      Magnetic_Form
@@ -119,11 +119,11 @@
   private
 
   !---- List of public functions ----!
-  public :: ApplyMSO, veclength
+  public :: ApplyMSO, ApplySO,veclength
 
   !---- List of public subroutines ----!
   public :: Readn_Set_Magnetic_Kv_Structure, Write_Magnetic_Structure, &
-            Init_MagSymm_k_Type,Calc_Induced_Sk,Latsym
+            Init_MagSymm_k_Type,Calc_Induced_Sk,Latsym,Get_SymSymb,Read_Xsym
 
   !---- Definitions ----!
 
@@ -406,7 +406,7 @@
 
     Module Subroutine Readn_Set_Magnetic_Kv_Structure(file_cfl,n_ini,n_end,MGp,Am,Mag_dom,Cell)
        !---- Arguments ----!
-       type(file_type),                     intent (in)     :: file_cfl
+       type(file_list_type),                intent (in)     :: file_cfl
        integer,                             intent (in out) :: n_ini, n_end
        type(MagSymm_k_Type),                intent (out)    :: MGp
        type(mAtom_List_Type),               intent (out)    :: Am

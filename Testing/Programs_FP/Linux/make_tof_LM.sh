@@ -29,14 +29,17 @@ done
 # Settings
 #
 if [ $ARCH == "m32" ]; then
-   INC="-I$CRYSFML/ifort/LibC"
-   LIB="-L$CRYSFML/ifort/LibC"
+   INC="-I$CRYSFML08/ifort/LibC"
+   LIB="-L$CRYSFML08/ifort/LibC"
    LIBSTATIC="-lcrysfml"
    VERS="Linux"
 else
-   INC="-I$CRYSFML/ifort64/LibC"
-   LIB="-L$CRYSFML/ifort64/LibC"
+   INC="-I$CRYSFML08/ifort64/LibC"
+   INCODR="-I$CRYSFML08/ifort64/ODR_sp"
+   LIB="-L$CRYSFML08/ifort64/LibC"
+   LIBODR="-L$CRYSFML08/ifort64/ODR_sp"
    LIBSTATIC="-lcrysfml"
+   LIBSTATIC_ODR="-lodr_sp"
    VERS="Linux64"
 fi
 if [ $DEBUG == "Y" ]; then
@@ -48,14 +51,14 @@ fi
 #
 # Compilation Process
 #
-cd ../../XRfit
+cd ../../TOF-fit
 echo " ########################################################"
 echo " #### TOF_fit_LM   Program                     (1.0) ####"
 echo " #### JRC                              CopyLeft-2021 ####"
 echo " ########################################################"
-$COMP $OPT1 TOF_module_LM.f90 $INC
-$COMP $OPT1 TOF_fitting_LM.f90 $INC
-$COMP -$ARCH *.o -o TOF_fit_LM -static-intel $LIB  $LIBSTATIC
+$COMP $OPT1 TOF_module_LM.f90 $INCODR $INC
+$COMP $OPT1 TOF_fitting_LM.f90 $INCODR $INC
+$COMP -$ARCH *.o -o TOF_fit_LM -static-intel $LIBODR $LIBSTATIC_ODR $LIB  $LIBSTATIC
 #
 # Final process
 #

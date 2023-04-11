@@ -57,17 +57,17 @@ SubModule (CFML_Profiles) Profile_Gaussian
 
    !!--++
    !!--++ GAUSSIAN
-   !!--++    Return value of Gaussian at 'Pos' for peak at 'Pos0' and 'Gamma'
+   !!--++    Return value of Gaussian at 'Pos' for peak at 'Pos0' and 'gamm'
    !!--++
    !!--++ 21/04/2019
    !!
-   Module Subroutine Prof_Gaussian(Pos , Pos0 , Gamma , Dgdt , Dgdg, Gauss )
+   Module Subroutine Prof_Gaussian(Pos , Pos0 , gamm , Dgdt , Dgdg, Gauss )
       !---- Arguments ----!
       real(kind=cp), intent(in)  :: pos
       real(kind=cp), intent(in)  :: pos0
-      real(kind=cp), intent(in)  :: gamma
+      real(kind=cp), intent(in)  :: gamm
       real(kind=cp), intent(out) :: dgdt       !is derivative of G wrt Pos0
-      real(kind=cp), intent(out) :: dgdg       !is derivative of G wrt Gamma
+      real(kind=cp), intent(out) :: dgdg       !is derivative of G wrt gamm
       real(kind=cp), intent(out) :: gauss
 
       !---- Local Variables ----!
@@ -76,15 +76,15 @@ SubModule (CFML_Profiles) Profile_Gaussian
       real(kind=cp)              ::  delp , ex
 
       delp = pos - pos0
-      if (abs(delp)/gamma > 6.0 ) then
+      if (abs(delp)/gamm > 6.0 ) then
          Gauss = 0.0
          dgdt = 0.0
          dgdg = 0.0
       else
-         ex=(delp * c /gamma)**2
-         Gauss = cg * exp(-ex)/gamma
-         dgdg = Gauss * ( -1.0 + 2.0 * ex) / gamma
-         dgdt = 2.0 * c*c * delp * Gauss/(gamma*gamma)
+         ex=(delp * c /gamm)**2
+         Gauss = cg * exp(-ex)/gamm
+         dgdg = Gauss * ( -1.0 + 2.0 * ex) / gamm
+         dgdt = 2.0 * c*c * delp * Gauss/(gamm*gamm)
       end if
 
    End Subroutine Prof_Gaussian

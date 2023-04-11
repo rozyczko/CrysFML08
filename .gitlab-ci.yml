@@ -29,16 +29,16 @@ docker_post_clean:
 #== MAKE SECTION
 #===============
 
-make:linux_gfortran:
-  stage: make
-  script:
-    - docker build --force-rm -t ci_crysfml_xenial_gfortran_f2008 -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_setup_F2008 .
-    - docker build --force-rm --no-cache -t ci_crysfml_xenial_gfortran_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_build_F2008 --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} .
-    - docker run -i -v${PWD}:/artifacts/ ci_crysfml_xenial_gfortran_build
-  tags:
-    - docker
-    - sci
-    - ubuntu
+#make:linux_gfortran:
+#  stage: make
+#  script:
+#    - docker build --force-rm -t ci_crysfml_xenial_gfortran_f2008 -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_setup_F2008 .
+#    - docker build --force-rm --no-cache -t ci_crysfml_xenial_gfortran_build -f ${CI_PROJECT_DIR}/BuildServer/Docker/Dockerfile_xenial_gfortran_build_F2008 --build-arg CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA} --build-arg CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME} .
+#    - docker run -i -v${PWD}:/artifacts/ ci_crysfml_xenial_gfortran_build
+#  tags:
+#    - docker
+#    - sci
+#    - ubuntu
 
 make:linux_ifort:
   stage: make
@@ -53,17 +53,18 @@ make:linux_ifort:
     
 #===============
 
-make:macos_gfortran:
-  stage: make
-  script:
-    - BuildServer/Unix/build_F2008.sh gfortran
-  tags:
-    - sci
-    - osx-10.13
+#make:macos_gfortran:
+#  stage: make
+#  script:
+#    - BuildServer/Unix/build_F2008.sh gfortran
+#  tags:
+#    - sci
+#    - osx-10.13
     
 make:macos_ifort:
   stage: make
   script:
+    - source /opt/intel/oneapi/setvars.sh
     - BuildServer/Unix/build_F2008.sh ifort
   tags:
     - sci

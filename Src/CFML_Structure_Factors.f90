@@ -43,7 +43,7 @@ Module CFML_Structure_Factors
 
     !---- Use Modules ----!
     Use CFML_GlobalDeps,                  only: CP, DP, TPI, err_cfml, clear_error
-    Use CFML_Strings,                     only: L_Case, U_Case, File_Type
+    Use CFML_Strings,                     only: L_Case, U_Case, File_Type, File_list_Type
     Use CFML_Atoms,                       only: AtList_type, Atm_Ref_Type, ModAtm_Ref_Type
     Use CFML_gSpaceGroups,                only: Spg_Type
     Use CFML_Metrics,                     only: Cell_G_Type
@@ -150,6 +150,11 @@ Module CFML_Structure_Factors
        Module Procedure Write_Structure_Factors_Mag
     End Interface Write_Structure_Factors
 
+    Interface Additional_Scattering_Factors
+       Module Procedure Additional_Scattering_Factors_FT
+       Module Procedure Additional_Scattering_Factors_FLT
+    End Interface Additional_Scattering_Factors
+
     !---- Interface Zone ----!
     Interface
 
@@ -231,11 +236,17 @@ Module CFML_Structure_Factors
           type(Scattering_Species_Type), intent(out) :: Scf
        End Subroutine Allocate_Scattering_Species
 
-       Module Subroutine Additional_Scattering_Factors(Fil, Add_Scatt)
+       Module Subroutine Additional_Scattering_Factors_FT(Fil, Add_Scatt)
           !---- Arguments ----!
           type(File_Type),               intent(in)  :: fil
           Type(Scattering_Species_Type), intent(out) :: add_Scatt
-       End Subroutine Additional_Scattering_Factors
+       End Subroutine Additional_Scattering_Factors_FT
+
+       Module Subroutine Additional_Scattering_Factors_FLT(Fil, Add_Scatt)
+          !---- Arguments ----!
+          type(File_list_Type),          intent(in)  :: fil
+          Type(Scattering_Species_Type), intent(out) :: add_Scatt
+       End Subroutine Additional_Scattering_Factors_FLT
 
        Module Subroutine Init_Structure_Factors(Reflex, Atm, Grp, Mode, Lambda, Lun)
           !---Arguments ---!

@@ -88,7 +88,7 @@ SubModule (CFML_Profiles) Profile_Tof_Jorgensen
          deriv%alfa  = norm*(2.0_dp*omeg/a2+deno*(y*omega+0.5_dp*a))
          deriv%beta  = norm*(2.0_dp*omeg/b2+deno*(z*omegb+0.5_dp*b))
          deriv%sigma = 0.5_dp*norm*(a2*omega+b2*omegb+a*ca+b*cb)
-         deriv%gamma = 2.0_dp*deriv%sigma*sqrt(sigma*inv_8ln2)
+         deriv%gamm = 2.0_dp*deriv%sigma*sqrt(sigma*inv_8ln2)
       end if
 
    End Subroutine Tof_Jorgensen

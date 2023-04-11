@@ -46,8 +46,8 @@
 !!--..    The reciprocal Cartesian Frame used by Busing-Levy has "x" along a*
 !!--..    "y" in the (a*,b*) plane and "z" perpendicular to that plane. The
 !!--..    matrix passing from (h,k,l) in r.l.u. to the cartesian frames is
-!!--..             | a*   b*.cos(gamma*)   c*.cos(beta*)            |
-!!--..      [B] =  | 0    b*.sin(gamma*)  -c*.sin(beta*).cos(alpha) |
+!!--..             | a*   b*.cos(gamm*)   c*.cos(beta*)            |
+!!--..      [B] =  | 0    b*.sin(gamm*)  -c*.sin(beta*).cos(alpha) |
 !!--..             ! 0          0          1/c                      |
 !!--..
 !!--..          [hc] = [B] [h]
@@ -145,8 +145,6 @@
 !!--++    CURRENT_INSTRM_SET                [Private]
 !!----    CURRENT_ORIENT
 !!----    CYCLE_NUMBER
-!!----    ERR_ILLDATA
-!!----    ERR_ILLDATA_MESS
 !!--++    GOT_ILL_DATA_DIRECTORY            [Private]
 !!--++    GOT_ILL_TEMP_DIRECTORY            [Private]
 !!----    ILL_DATA_DIRECTORY
@@ -182,7 +180,6 @@
 !!----       GET_COUNTS
 !!----       GET_NEXT_YEARCYCLE
 !!----       GET_SINGLE_FRAME_2D
-!!----       INIT_ERR_ILLDATA
 !!--++       INIT_POWDER_NUMOR               [Overloaded]
 !!--++       INIT_SXTAL_NUMOR                [Overloaded]
 !!----       INITIALIZE_DATA_DIRECTORY
@@ -254,7 +251,7 @@ Module CFML_ILL_Instrm_Data
              Initialize_Data_Directory, Get_Absolute_Data_Path, Get_Next_YearCycle,              &
              Write_Generic_Numor, Set_Instrm_Geometry_Directory, Write_Numor_Info,               &
              Define_Uncompress_Program, PowderNumors_To_DiffPattern, Write_HeaderInfo_Numor,     &
-             Read_Calibration_File, Initialize_Numor, Init_Err_ILLData, Get_Counts,              &
+             Read_Calibration_File, Initialize_Numor, Get_Counts,              &
              Write_HeaderInfo_SXTAL_Numor,Write_SXTAL_Numor
 
    !---- Private Subroutines ----!
@@ -327,23 +324,31 @@ Module CFML_ILL_Instrm_Data
    !!---- TYPE :: CALIBRATION_DETECTOR_TYPE
    !!--..
    !!---- Type, public :: Calibration_Detector_Type
-   !!----   character(len=12)                            :: Name_Instrm       ! Instrument Name
-   !!----   integer                                      :: NDet              ! Number of Detectors
-   !!----   integer                                      :: NPointsDet        ! Number of Points by Detector
-   !!----   real(kind=cp), dimension(:), allocatable     :: PosX              ! Relative Positions of each Detector
-   !!----   real(kind=cp), dimension(:,:), allocatable   :: Effic             ! Efficiency of each point detector (NpointsDetect,NDect)
-   !!----   logical,       dimension(:,:), allocatable   :: Active            ! Flag for active detector or not
+   !!----   character(len=12)                            :: Name_Instrm  ! Instrument Name
+   !!----   integer                                      :: NDet         ! Number of Detectors
+   !!----   integer                                      :: NPointsDet   ! Number of Points by Detector
+   !!----   logical                                      :: Pos_read     ! True if PosX have been allocated and read
+   !!----   logical                                      :: True_Eff     ! True if the content of Effic are really efficiencies, otherwise they are Inv_Eff
+   !!----   real(kind=cp), dimension(:),   allocatable   :: PosX         ! Relative Positions of each Detector
+   !!----   real(kind=cp), dimension(:,:), allocatable   :: Effic        ! Efficiency of each point detector (NpointsDetect,NDect)
+   !!----   real(kind=cp), dimension(:),   allocatable   :: sPosX        ! Standard deviation of Relative Positions for each Detector
+   !!----   real(kind=cp), dimension(:,:), allocatable   :: sEffic       ! Standard deviation of Efficiency for each point detector (NpointsDetect,NDect)
+   !!----   logical,       dimension(:,:), allocatable   :: Active       ! Flag for active detector or not
    !!---- End Type Calibration_Detector_Type
    !!----
    !!---- Update: April - 2009
    !!
    Type, public :: Calibration_Detector_Type
-      character(len=12)                            :: Name_Instrm      ! Instrument Name
-      integer                                      :: NDet             ! Number of Detectors
-      integer                                      :: NPointsDet       ! Number of Points per Detector
-      real(kind=cp), dimension(:), allocatable     :: PosX             ! Relative Positions of each Detector
-      real(kind=cp), dimension(:,:), allocatable   :: Effic            ! Efficiency of each point detector (NpointsDetect,NDect)
-      logical,       dimension(:,:), allocatable   :: Active           ! Flag for active points on detector
+      character(len=12)                            :: Name_Instrm  ! Instrument Name
+      integer                                      :: NDet         ! Number of Detectors
+      integer                                      :: NPointsDet   ! Number of Points per Detector
+      logical                                      :: Pos_read     ! True if PosX have been allocated and read
+      logical                                      :: True_Eff     ! True if the content of Effic are really efficiencies, otherwise they are Inv_Eff
+      real(kind=cp), dimension(:),   allocatable   :: PosX         ! Relative Positions of each Detector
+      real(kind=cp), dimension(:,:), allocatable   :: Effic        ! Efficiency of each point detector (NpointsDetect,NDect)
+      real(kind=cp), dimension(:),   allocatable   :: sPosX        ! Standard deviation of Relative Positions for each Detector
+      real(kind=cp), dimension(:,:), allocatable   :: sEffic       ! Standard deviation of Efficiency for each point detector (NpointsDetect,NDect)
+      logical,       dimension(:,:), allocatable   :: Active       ! Flag for active points on detector
    End Type Calibration_Detector_Type
 
    !!----
@@ -372,7 +377,7 @@ Module CFML_ILL_Instrm_Data
    !!----    logical                                   :: tilted               ! True if RD /= I
    !!----    real(kind=cp), dimension(3,3)             :: RD                   ! Rotation matrix giving the orientation of the D-frame w.r.t. the L-frame
                                                                                ! RD= Rx(tiltz_d) Ry(tilty_d) Rz(tiltz_d)  or with the permutation given by r_order
-   !!----    real(kind=cp)                             :: ga_d,nu_d            ! Angles gamma and nu of the detector centre
+   !!----    real(kind=cp)                             :: ga_d,nu_d            ! Angles gamm and nu of the detector centre
    !!----    real(kind=cp)                             :: tiltx_d=0.0          ! Tilt of the flat detector around x-axis (normally = nu_d)
    !!----    real(kind=cp)                             :: tilty_d=0.0          ! Tilt of the flat detector around y-axis (normally = 0)
    !!----    real(kind=cp)                             :: tiltz_d=0.0          ! Tilt of the flat detector around z-axis (normally = 0)
@@ -382,8 +387,8 @@ Module CFML_ILL_Instrm_Data
    !!----    real(kind=cp),dimension(3)                :: e2                   ! Components of e2 in {i,j,k}
    !!----    real(kind=cp),dimension(3)                :: e3                   ! Components of e3 in {i,j,k}
    !!----    logical                                   :: gnxz_limited         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-   !!----    real(kind=cp)                             :: gap_min,gap_max      ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-   !!----    real(kind=cp)                             :: gan_min,gan_max      ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+   !!----    real(kind=cp)                             :: gap_min,gap_max      ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+   !!----    real(kind=cp)                             :: gan_min,gan_max      ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
    !!----    real(kind=cp)                             :: nu_min,nu_max
    !!----    real(kind=cp)                             :: d_min                !Resolution limit ... if not given d_min= 2/L_min
    !!----    real(kind=cp)                             :: x_min,x_max          !in mm
@@ -404,12 +409,14 @@ Module CFML_ILL_Instrm_Data
    !!----    real(kind=cp),dimension(:,:,:),allocatable:: range_time           !Curves for calculating the velocitiy of angular motors (2,np,15)
    !!----    logical                                   :: alpha_correct        !True if alpha correction is to be applied
    !!----    real(kind=cp),dimension(:,:), allocatable :: alphas               !Efficiency corrections for each pixel
+   !!----    logical                                   :: shift_correct        !True if shifts correction is to be applied
+   !!----    real(kind=cp),dimension(:),   allocatable :: shifts               !Horizontal Shift correction in mm of the vertical tubes
    !!----    character(len=512)                        :: alpha_file           !Name of the alpha file
    !!----    logical                                   :: resol_given          !True if the resolution curve has been provided
    !!----    integer                                   :: nGa,nNu              !Dimensions of the matrix ReSurf
-   !!----    real(kind=cp),dimension(:,:),  allocatable:: ReSurf               !Resolution surface in gamma-Nu space: ReSurf(Nu,Ga)
+   !!----    real(kind=cp),dimension(:,:),  allocatable:: ReSurf               !Resolution surface in gamm-Nu space: ReSurf(Nu,Ga)
    !!----                                                                      !ReSurf(1,1): multiplicative factor to be applied to the widths
-   !!----                                                                      !ReSurf(1,2:nGa): Values of detector Gammas
+   !!----                                                                      !ReSurf(1,2:nGa): Values of detector gamms
    !!----                                                                      !ReSurf(2:nNu,1): Values of detector Nus
    !!----                                                                      !ReSurf(Nu,Ga)  : (Nu >1, Ga >1) Values of the expected FWHM in degrees
    !!---- End Type diffractometer_type
@@ -440,7 +447,7 @@ Module CFML_ILL_Instrm_Data
       logical                                    :: tilted               ! True if RD /= I
       real(kind=cp), dimension(3,3)              :: RD                   ! Rotation matrix giving the orientation of the D-frame w.r.t. the L-frame
                                                                          ! RD= Rx(tiltz_d) Ry(tilty_d) Rz(tiltz_d)  or with the permutation given by r_order
-      real(kind=cp)                              :: ga_d,nu_d            ! Angles gamma and nu of the detector centre
+      real(kind=cp)                              :: ga_d,nu_d            ! Angles gamm and nu of the detector centre
       real(kind=cp)                              :: tiltx_d=0.0          ! Tilt of the flat detector around x-axis (normally = nu_d)
       real(kind=cp)                              :: tilty_d=0.0          ! Tilt of the flat detector around y-axis (normally = 0)
       real(kind=cp)                              :: tiltz_d=0.0          ! Tilt of the flat detector around z-axis (normally = 0)
@@ -450,8 +457,8 @@ Module CFML_ILL_Instrm_Data
       real(kind=cp),dimension(3)                 :: e2                   ! Components of e2 in {i,j,k}
       real(kind=cp),dimension(3)                 :: e3                   ! Components of e3 in {i,j,k}
       logical                                    :: gnxz_limited         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-      real(kind=cp)                              :: gap_min,gap_max      ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      real(kind=cp)                              :: gan_min,gan_max      ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+      real(kind=cp)                              :: gap_min,gap_max      ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      real(kind=cp)                              :: gan_min,gan_max      ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
       real(kind=cp)                              :: nu_min,nu_max        ! minimum admissible nu  and maximum admissible nu
       real(kind=cp)                              :: d_min                ! Resolution limit ... if not given d_min= 2/L_min
       real(kind=cp)                              :: x_min,x_max          ! in mm
@@ -470,13 +477,17 @@ Module CFML_ILL_Instrm_Data
       logical                                    :: rangtim              !If .true. range_time has been set
       real(kind=cp),dimension(:,:,:),allocatable :: range_time           !Curves for calculating the velocitiy of angular motors (2,np,15)
       real(kind=cp),dimension(:,:),  allocatable :: alphas               !Efficiency corrections for each pixel
+      real(kind=cp),dimension(:,:),  allocatable :: sigma_alphas         !Estimated error of Efficiency corrections for each pixel
+      logical                                    :: shift_correct        !True if shifts correction is to be applied
+      real(kind=cp),dimension(:),   allocatable  :: shifts               !Horizontal Shift corrections for vertical tube in mm
       logical                                    :: alpha_correct        !True if alpha correction is to be applied
+      logical                                    :: sigma_alpha_correct  !True if the sigma of alpha correction have been provided
       character(len=512)                         :: alpha_file           !Name of the alpha file
       logical                                    :: resol_given          !True if the resolution curve has been provided
       integer                                    :: nGa,nNu              !Dimensions of the matrix ReSurf
-      real(kind=cp),dimension(:,:),  allocatable :: ReSurf               !Resolution surface in gamma-Nu space: ReSurf(Nu,Ga)
+      real(kind=cp),dimension(:,:),  allocatable :: ReSurf               !Resolution surface in gamm-Nu space: ReSurf(Nu,Ga)
                                                                          !ReSurf(1,1): multiplicative factor to be applied to the widths
-                                                                         !ReSurf(1,2:nGa): Values of detector Gammas
+                                                                         !ReSurf(1,2:nGa): Values of detector gamms
                                                                          !ReSurf(2:nNu,1): Values of detector Nus
                                                                          !ReSurf(Nu,Ga)  : (Nu >1, Ga >1) Values of the expected FWHM in degrees
    End Type diffractometer_type
@@ -624,7 +635,7 @@ Module CFML_ILL_Instrm_Data
    !!----    character(len=12)                          :: Instrm      ! Instrument name
    !!----    character(len=32)                          :: title       !
    !!----    character(len=8)                           :: Scantype    ! omega, phi, etc...
-   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
    !!----    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
    !!----    real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
    !!----    real(kind=cp)                              :: time        ! Total time: sum times of each frame
@@ -652,7 +663,7 @@ Module CFML_ILL_Instrm_Data
       character(len=12)                          :: Instrm      ! Instrument name
       character(len=32)                          :: title       !
       character(len=8)                           :: Scantype    ! omega, phi, etc...
-      real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+      real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
       real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
       real(kind=cp)                              :: monitor     ! Average monitor Sum(Monitors)/nframes
       real(kind=cp)                              :: time        ! Total time: sum times of each frame
@@ -681,7 +692,7 @@ Module CFML_ILL_Instrm_Data
    !!----    character(len=8)                           :: Scantype    ! omega, phi, etc...
    !!----    real(kind=cp), dimension(3)                :: hmin        ! or h,k,l for omega-scans
    !!----    real(kind=cp), dimension(3)                :: hmax        !
-   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamma), psi
+   !!----    real(kind=cp), dimension(5)                :: angles      ! Angles: phi, chi, omega, 2theta(gamm), psi
    !!----    real(kind=cp), dimension(3,3)              :: UB          ! UB-matrix
    !!----    real(kind=cp), dimension(3)                :: dh          ! delta_h, delta_k, delta_l
    !!----    real(kind=cp), dimension(3)                :: scans       ! scan start, scan step, scan width
@@ -715,7 +726,7 @@ Module CFML_ILL_Instrm_Data
       character(len=8)                           :: Scantype        ! omega, phi, etc...
       real(kind=cp), dimension(3)                :: hmin            ! The hkls min
       real(kind=cp), dimension(3)                :: hmax            ! The hkls max
-      real(kind=cp), dimension(5)                :: angles          ! Angles: phi, chi, omega, 2theta(gamma), psi
+      real(kind=cp), dimension(5)                :: angles          ! Angles: phi, chi, omega, 2theta(gamm), psi
       real(kind=cp), dimension(3,3)              :: UB              ! UB-matrix
       real(kind=cp), dimension(3)                :: dh              ! delta_h, delta_k, delta_l
       real(kind=cp), dimension(3)                :: scans           ! scan start, scan step, scan width
@@ -802,27 +813,6 @@ Module CFML_ILL_Instrm_Data
    !!---- Update: April - 2008
    !!
    integer, public  ::  cycle_number
-
-   !!----
-   !!---- ERR_ILLDATA
-   !!----    logical, public:: ERR_ILLData
-   !!----
-   !!----    logical variable to taking the value .true. if an error in the module
-   !!----    ILL_INSTRM_DATA occurs.
-   !!----
-   !!---- Update: April - 2008
-   !!
-   logical, public :: ERR_ILLData=.false.
-
-   !!----
-   !!---- ERR_ILLDATA_MESS
-   !!----    character(len=150), public:: ERR_ILLData_Mess
-   !!----
-   !!----    String containing information about the last error
-   !!----
-   !!---- Update: April - 2008
-   !!
-   character(len=150), public :: ERR_ILLData_Mess=" "
 
    !!--++
    !!--++ GOT_ILL_DATA_DIRECTORY
@@ -1134,12 +1124,12 @@ Module CFML_ILL_Instrm_Data
 
 
         !> Init
-        call init_err_illdata()
+        call clear_error()
 
         if (N <=0) then
            Err_CFML%Ierr=1
            Err_CFML%flag=.true.
-           err_illdata_mess=' Number of Numors in the List was zero!'
+           Err_CFML%Msg=' Number of Numors in the List was zero!'
           return
         end if
 
@@ -1147,7 +1137,7 @@ Module CFML_ILL_Instrm_Data
         if (num <=0) then
            Err_CFML%Ierr=1
            Err_CFML%flag=.true.
-           err_illdata_mess=' Number of active Numors in the List was zero!'
+           Err_CFML%Msg=' Number of active Numors in the List was zero!'
           return
         end if
 
@@ -1350,14 +1340,15 @@ Module CFML_ILL_Instrm_Data
         integer      :: i,num
         real(kind=cp):: a,w,diff
 
-        call init_err_illdata()
+        call clear_error()
 
         !> Init Numor
         call initialize_numor(numor)
 
         if (N <=0) then
            Err_CFML%Ierr=1
-           err_illdata_mess=' Number of Numors in the List was zero!'
+           Err_CFML%Flag=.true.
+           Err_CFML%Msg=' Number of Numors in the List was zero!'
           return
         end if
 
@@ -1382,7 +1373,7 @@ Module CFML_ILL_Instrm_Data
         if (.not. adding) then
            Err_CFML%Ierr=1
            Err_CFML%flag=.true.
-           err_illdata_mess='Impossible to add the numors selected. Not all Numors have the same Wavelength!'
+           Err_CFML%Msg='Impossible to add the numors selected. Not all Numors have the same Wavelength!'
            return
         end if
 
@@ -1406,7 +1397,7 @@ Module CFML_ILL_Instrm_Data
         if (.not. adding) then
            Err_CFML%Ierr=1
            Err_CFML%flag=.true.
-           err_illdata_mess='Impossible to add the numors selected. Not all Numors have the same initial Angle!'
+           Err_CFML%Msg='Impossible to add the numors selected. Not all Numors have the same initial Angle!'
            return
         end if
 
@@ -1477,19 +1468,20 @@ Module CFML_ILL_Instrm_Data
         real(kind=cp)  :: fac,x1,x2,xmin,xmax,step,yfc, cnorm, tim
 
         !> Init
-        call init_err_illdata()
+        call clear_error()
 
         if (N <=0) then
            Err_CFML%Ierr=1
            Err_CFML%flag=.true.
-           err_illdata_mess=' Number of Numors in the List was zero!'
+           Err_CFML%Msg=' Number of Numors in the List was zero!'
           return
         end if
 
         num=count(actlist .eqv. .true.)
         if (num <=0) then
            Err_CFML%Ierr=1
-           err_illdata_mess=' Number of active Numors in the List was zero!'
+           Err_CFML%Flag=.true.
+           Err_CFML%Msg=' Number of active Numors in the List was zero!'
           return
         end if
 
@@ -1758,7 +1750,7 @@ Module CFML_ILL_Instrm_Data
        logical           :: info
 
        ! The error flags are initialized.
-       call init_err_illdata()
+       call clear_error()
 
        ! The header and frame counters are initialized.
        header_size = 0
@@ -1772,8 +1764,9 @@ Module CFML_ILL_Instrm_Data
 
        ! If the input file does not exist, stop here.
        if (.not. info) then
-           err_illdata = .true.
-           err_illdata_mess = " The file "//trim(filename)//" does not exist."
+           err_CFML%Ierr = 1
+           Err_CFML%Flag=.true.
+           Err_CFML%Msg = " The file "//trim(filename)//" does not exist."
            return
        end if
 
@@ -1801,8 +1794,8 @@ Module CFML_ILL_Instrm_Data
 
        ! If the header block is empty, stops here. A numor must have a header.
        if (header_size == 0) then
-           err_illdata = .true.
-           err_illdata_mess = " "//trim(filename)//" has no header."
+           err_CFML%Flag = .true.
+           Err_CFML%Msg = " "//trim(filename)//" has no header."
            return
        end if
 
@@ -1823,8 +1816,8 @@ Module CFML_ILL_Instrm_Data
 
        ! If the frame block is empty, stops here. A numor must have at least one frame.
        if (frame_size == 1) then
-           err_illdata = .true.
-           err_illdata_mess = " "//trim(filename)//" has no frame."
+           err_CFML%Flag = .true.
+           Err_CFML%Msg = " "//trim(filename)//" has no frame."
            return
        end if
 
@@ -2034,11 +2027,11 @@ Module CFML_ILL_Instrm_Data
         ! Ideally the data needs to be put into 'icnt' from the samples point of view
         ! Instead of machine name, a number can be provided in order to read the pixels
         ! in a particular way.
-        ! 1: Column by column with zero at high nu, high gamma (e.g. D19 banana)
-        ! 2: Row by Row with zero at high nu, high gamma (e.g. D9 and D10)
-        ! 3: Row wire by Row with zero at high nu, low gamma (e.g. D19 bidim?)
-        ! 4: Column by column with zero at low nu, low gamma (e.g. D19 bidim on DB21)
-        ! 5: Row by Row wire with zero at high nu, low gamma (e.g. D19 bidim on DB21)
+        ! 1: Column by column with zero at high nu, high gamm (e.g. D19 banana)
+        ! 2: Row by Row with zero at high nu, high gamm (e.g. D9 and D10)
+        ! 3: Row wire by Row with zero at high nu, low gamm (e.g. D19 bidim?)
+        ! 4: Column by column with zero at low nu, low gamm (e.g. D19 bidim on DB21)
+        ! 5: Row by Row wire with zero at high nu, low gamm (e.g. D19 bidim on DB21)
 
         select case(l_case(trim(machineName)))
             case('d9','d10')
@@ -2057,7 +2050,7 @@ Module CFML_ILL_Instrm_Data
                     end do
                 end do
             case('d19_vb')
-                ERR_ILLData_Mess= 'Can''t read D19 Vertical Banana Detector data!'
+                Err_CFML%Msg= 'Can''t read D19 Vertical Banana Detector data!'
                 Err_CFML%Ierr=1
                 Err_CFML%flag=.true.
                 return
@@ -2070,7 +2063,7 @@ Module CFML_ILL_Instrm_Data
                 !end do
                 icnt=reshape(nint(snum%counts(:,np)),(/xsize,ysize/))
             case default
-                ERR_ILLData_Mess= 'Error in Get_Counts: Unknown machine!'
+                Err_CFML%Msg= 'Error in Get_Counts: Unknown machine!'
                 Err_CFML%Ierr=1
                 Err_CFML%flag=.true.
                 return
@@ -2107,11 +2100,11 @@ Module CFML_ILL_Instrm_Data
         ! Ideally the data needs to be put into 'icnt' from the samples point of view
         ! Instead of machine name, a number can be provided in order to read the pixels
         ! in a particular way.
-        ! 1: Column by column with zero at high nu, high gamma (e.g. D19 banana)
-        ! 2: Row by Row with zero at high nu, high gamma (e.g. D9 and D10)
-        ! 3: Row wire by Row with zero at high nu, low gamma (e.g. D19 bidim?)
-        ! 4: Column by column with zero at low nu, low gamma (e.g. D19 bidim on DB21)
-        ! 5: Row by Row wire with zero at high nu, low gamma (e.g. D19 bidim on DB21)
+        ! 1: Column by column with zero at high nu, high gamm (e.g. D19 banana)
+        ! 2: Row by Row with zero at high nu, high gamm (e.g. D9 and D10)
+        ! 3: Row wire by Row with zero at high nu, low gamm (e.g. D19 bidim?)
+        ! 4: Column by column with zero at low nu, low gamm (e.g. D19 bidim on DB21)
+        ! 5: Row by Row wire with zero at high nu, low gamm (e.g. D19 bidim on DB21)
 
         select case(l_case(trim(machineName)))
             case('d9','d10')
@@ -2130,8 +2123,9 @@ Module CFML_ILL_Instrm_Data
                     end do
                 end do
             case('d19_vb')
-                ERR_ILLData_Mess= 'Can''t read D19 Vertical Banana Detector data!'
+                Err_CFML%Msg= 'Can''t read D19 Vertical Banana Detector data!'
                 Err_CFML%Ierr=1
+                Err_CFML%Flag=.true.
                 return
             case ('d19_hb','d19','db21','d16','1')
                 !do ix=1,xsize
@@ -2140,9 +2134,9 @@ Module CFML_ILL_Instrm_Data
                 !        cnt(ix,iy) = snum%counts(idx,np)
                 !    end do
                 !end do
-                cnt=reshape(snum%counts(:,np),(/xsize,ysize/))
+                cnt=reshape(snum%counts(:,np),[xsize,ysize])
             case default
-                ERR_ILLData_Mess= 'Error in Get_Counts: Unknown machine!'
+                Err_CFML%Msg= 'Error in Get_Counts: Unknown machine!'
                 Err_CFML%Ierr=1
                 Err_CFML%flag=.true.
                 return
@@ -2239,7 +2233,7 @@ Module CFML_ILL_Instrm_Data
        Select Case(iord)
 
          Case(1)   ! D19
-           ! Read vertical-wire by vertical-wire, with zero at high nu, high gamma.
+           ! Read vertical-wire by vertical-wire, with zero at high nu, high gamm.
            ! D19 Banana
            ncat =  Current_instrm%np_vert
            nano =  Current_instrm%np_horiz
@@ -2252,7 +2246,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(2)   ! D9/D10
-           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamma?
+           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamm?
            ! D9, D10
            ncat =  Current_instrm%np_vert
            nano =  Current_instrm%np_horiz
@@ -2265,7 +2259,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(3)   ! D19-Flat
-           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamma.
+           ! Read horizontal-wire by horizontal-wire, with zero at high nu, high gamm.
            ! D19 flat detector (but we reverse IA because of the funny different
            ! conversion for flat and curved detectors in subroutine d19amd.
            ncat =  Current_instrm%np_vert
@@ -2279,7 +2273,7 @@ Module CFML_ILL_Instrm_Data
            end do
 
          Case(4)   ! ID20-trial
-           ! Read vertical-wire by vertical-wire, with zero at low nu, high gamma.
+           ! Read vertical-wire by vertical-wire, with zero at low nu, high gamm.
            ! ID20 flat detector (but we reverse IA because of the funny different
            ! conversion for flat and curved detectors in subroutine d19amd).
            ncat =  Current_instrm%np_vert
@@ -2299,20 +2293,6 @@ Module CFML_ILL_Instrm_Data
        end if
 
     End Subroutine Get_Single_Frame_2D
-
-    !!----
-    !!---- Subroutine Init_Err_ILL()
-    !!----
-    !!----    Initialize the errors flags in ILLData
-    !!----
-    !!---- Update: 25/03/2011
-    !!
-    Subroutine Init_Err_ILLData()
-
-       ERR_ILLData=.false.
-       ERR_ILLData_Mess=" "
-
-    End Subroutine Init_Err_ILLData
 
     !!----
     !!---- Subroutine Init_Powder_Numor(Numor,NBAng, NBData, NFrames)
@@ -2343,6 +2323,7 @@ Module CFML_ILL_Instrm_Data
         Numor%time=0.0
         Numor%wave=0.0
         Numor%conditions=0.0
+        Numor%ICDesc=0
 
         Numor%nbdata=0
         Numor%nbang=0
@@ -2357,7 +2338,7 @@ Module CFML_ILL_Instrm_Data
         if (present(nframes)) then
            if (present(nbang)) then
               if (nframes > 0 .and. nbang > 0) then
-                 allocate(Numor%tmc_ang(nbang,nframes))
+                 allocate(Numor%tmc_ang(3+nbang,nframes))
                  Numor%tmc_ang=0.0
               end if
            end if
@@ -2400,24 +2381,24 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%np_vert=0                    !number of pixels in vertical direction
       Current_Instrm%np_horiz=0                   !number of pixels in horizontal direction
       Current_Instrm%tilted=.false.               ! True if RD /= I
-      Current_Instrm%RD=reshape((/1.0,0.0,0.0, & ! Rotation matrix giving the orientation of the D-frame
+      Current_Instrm%RD=reshape([1.0,0.0,0.0, & ! Rotation matrix giving the orientation of the D-frame
                                   0.0,1.0,0.0, & ! w.r.t. the L-frame
-                                  0.0,0.0,1.0/),(/3,3/))
-      Current_Instrm%ga_d=0.0                     ! Angles gamma and nu of the detector centre
-      Current_Instrm%nu_d=0.0                     ! Angles gamma and nu of the detector centre
+                                  0.0,0.0,1.0],[3,3])
+      Current_Instrm%ga_d=0.0                     ! Angles gamm and nu of the detector centre
+      Current_Instrm%nu_d=0.0                     ! Angles gamm and nu of the detector centre
       Current_Instrm%tiltx_d=0.0                  ! Tilt of the flat detector around x-axis (normally = nu_d)
       Current_Instrm%tilty_d=0.0                  ! Tilt of the flat detector around y-axis (normally = 0)
       Current_Instrm%tiltz_d=0.0                  ! Tilt of the flat detector around z-axis (normally = 0)
       Current_Instrm%igeom=0                      ! 1: Bisecting (PSI=0),2: Bisecting - HiCHI, 3: Normal beam, 4:Parallel (PSI=90)
       Current_Instrm%ipsd=0                       ! 1: Flat,2: Vertically Curved detector (used in D19amd), 3:
-      Current_Instrm%e1=(/1.0,0.0,0.0/)           ! Components of e1 in {i,j,k}
-      Current_Instrm%e2=(/0.0,1.0,0.0/)           ! Components of e2 in {i,j,k}
-      Current_Instrm%e3=(/0.0,0.0,1.0/)           ! Components of e3 in {i,j,k}
+      Current_Instrm%e1=[1.0,0.0,0.0]            ! Components of e1 in {i,j,k}
+      Current_Instrm%e2=[0.0,1.0,0.0]            ! Components of e2 in {i,j,k}
+      Current_Instrm%e3=[0.0,0.0,1.0]            ! Components of e3 in {i,j,k}
       Current_Instrm%gnxz_limited=.false.         ! The limits in gamm, nu, x and z accessible in the detector have been provided
-      Current_Instrm%gap_min=0.0                  ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      Current_Instrm%gap_max=140.0                ! gamma minimum , gamma  maximun  (Positive values) | This change is needed due to odd
-      Current_Instrm%gan_min=0.0                  ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
-      Current_Instrm%gan_max=0.0                  ! gamma minimum , gamma  maximun  (Negative values) | positions of flat detectors.
+      Current_Instrm%gap_min=0.0                  ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      Current_Instrm%gap_max=140.0                ! gamm minimum , gamm  maximun  (Positive values) | This change is needed due to odd
+      Current_Instrm%gan_min=0.0                  ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
+      Current_Instrm%gan_max=0.0                  ! gamm minimum , gamm  maximun  (Negative values) | positions of flat detectors.
       Current_Instrm%nu_min=-15.0                 ! minimum admissible nu  and maximum admissible nu
       Current_Instrm%nu_max=15.0                  ! minimum admissible nu  and maximum admissible nu
       Current_Instrm%d_min=0.5                    ! Resolution limit ... if not given d_min= 2/L_min
@@ -2438,6 +2419,8 @@ Module CFML_ILL_Instrm_Data
       Current_Instrm%det_offsets=0.0              !Offsets X,Y,Z of the detector centre (roD)
       Current_Instrm%rangtim=.false.
       Current_Instrm%alpha_correct=.false.        !Alpha correction not applied
+      Current_Instrm%sigma_alpha_correct=.false.  !Sigmas of Alpha correction not applied
+      Current_Instrm%shift_correct=.false.        !Shifts correction not applied
       Current_Instrm%resol_given=.false.          !Resolution curve not given
       Current_Instrm%alpha_file=" "
     End Subroutine Init_Current_Instrument
@@ -2783,7 +2766,7 @@ Module CFML_ILL_Instrm_Data
     !!----    type(Powder_Numor_Type),dimension(:),      intent(in)  :: PNumors    ! Powder Numors Vector
     !!----    integer,                                   intent(in)  :: N          ! Number of Numors
     !!----    logical,dimension(:),                      intent(in)  :: ActList    ! Active list for Numors
-    !!----    type (DiffPat_E_Type),           intent(out) :: Pat        ! Pattern Diffraction
+    !!----    type (DiffPat_E_Type),                     intent(out) :: Pat        ! Pattern Diffraction
     !!----    real(kind=cp), optional,                   intent(in)  :: VNorm      ! Normalization value
     !!----    type(calibration_detector_type), optional, intent(in)  :: Cal        ! Calibration Information
     !!----    logical, optional,                         intent(in)  :: angcor,perm
@@ -2798,7 +2781,7 @@ Module CFML_ILL_Instrm_Data
        type(Powder_Numor_Type),dimension(:),      intent(in)  :: PNumors    ! Powder Numors Vector
        integer,                                   intent(in)  :: N          ! Number of Numors
        logical,dimension(:),                      intent(in)  :: ActList    ! Active list for Numors
-       type (DiffPat_E_Type),           intent(out) :: Pat        ! Pattern Diffraction
+       type (DiffPat_E_Type),                     intent(out) :: Pat        ! Diffraction Pattern
        real(kind=cp), optional,                   intent(in)  :: VNorm      ! Normalization value
        integer, optional ,                        intent(in)  :: Detect     ! Select a particular detector (for D4)
        type(calibration_detector_type), optional, intent(in)  :: Cal        ! Calibration Information
@@ -2812,13 +2795,13 @@ Module CFML_ILL_Instrm_Data
        type(POWDER_Numor_type) :: PPNum
 
        !> Initialize
-       call Init_Err_ILLData()
+       call clear_error()
 
        !> Init
        if (N <=0) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
-          err_illdata_mess=' Number of Numors in the List was zero!'
+          Err_CFML%Msg=' Number of Numors in the List was zero!'
           return
        end if
 
@@ -2826,7 +2809,7 @@ Module CFML_ILL_Instrm_Data
        if (num <=0) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
-          err_illdata_mess=' Number of active Numors in the List was zero!'
+          Err_CFML%Msg=' Number of active Numors in the List was zero!'
           return
        end if
 
@@ -2842,7 +2825,7 @@ Module CFML_ILL_Instrm_Data
        if (len_trim(inst) <=0) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
-          err_illdata_mess=' The Instrument name for the first active numor was empty!'
+          Err_CFML%Msg=' The Instrument name for the first active numor was empty!'
           return
        end if
 
@@ -2962,7 +2945,7 @@ Module CFML_ILL_Instrm_Data
        integer, dimension(10) :: ivet
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
 
        nchars =0
        charline=' '
@@ -2974,7 +2957,7 @@ Module CFML_ILL_Instrm_Data
        if (line(1:10) /= 'AAAAAAAAAA') then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
-          err_illdata_mess=' A bad Block A-Type has been found'
+          Err_CFML%Msg=' A bad Block A-Type has been found'
           return
        end if
 
@@ -2991,7 +2974,7 @@ Module CFML_ILL_Instrm_Data
              if (j > n_end) then
                 Err_CFML%Ierr=1
                 Err_CFML%flag=.true.
-                err_illdata_mess=' Impossible to read a line for this block!'
+                Err_CFML%Msg=' Impossible to read a line for this block!'
                 exit
              end if
              text_ill(i)=trim(filevar(j))
@@ -3017,7 +3000,7 @@ Module CFML_ILL_Instrm_Data
     !!----    of the current instrument are written. The global Current_Instrm
     !!----    variable is filled after returning from this subroutine.
     !!----    In case of error the subroutine puts Err_CFML%Ierr=1
-    !!----    and fills the error message variable ERR_ILLData_Mess.
+    !!----    and fills the error message variable Err_CFML%Msg.
     !!----
     !!---- Update: March - 2005
     !!
@@ -3028,7 +3011,7 @@ Module CFML_ILL_Instrm_Data
        !---- Local variables ----!
        character(len=120)             :: line
        character(len=512)             :: alpha_file
-       character(len=20)              :: keyv
+       character(len=20)              :: keyv, kshift
        integer                        :: i, j, lun, ier,npx,npz, n1,n2,n3,ial
        real(kind=cp), dimension(3,3)  :: set, ub
        real(kind=cp)                  :: wave
@@ -3042,7 +3025,7 @@ Module CFML_ILL_Instrm_Data
        if (ier /= 0) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
-          ERR_ILLData_Mess="Error opening the file: "//trim(filenam)
+          Err_CFML%Msg="Error opening the file: "//trim(filenam)
           return
        end if
 
@@ -3102,7 +3085,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the type of detector (ipsd)"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the type of detector (ipsd)"
                   return
                 end if
 
@@ -3111,7 +3094,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the distance sample-detector"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the distance sample-detector"
                   return
                 end if
 
@@ -3120,7 +3103,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the wavelength"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the wavelength"
                   return
                 else
                   Current_Instrm%wave_min=Current_Instrm%wave
@@ -3133,7 +3116,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the wavelength limits"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the wavelength limits"
                   return
                 end if
                 wave=0.5*(Current_Instrm%wave_max-Current_Instrm%wave_min)
@@ -3144,7 +3127,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the dimensions of the detector"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the dimensions of the detector"
                   return
                 end if
                 npx = Current_Instrm%np_horiz
@@ -3155,17 +3138,17 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess=&
+                  Err_CFML%Msg=&
                   "Error in file: "//trim(filenam)//", reading the gaps between anodes and between cathodes"
                   return
                 end if
 
-            Case("GN_CENTRE","GAMMA_NU_CENTRE")
+            Case("GN_CENTRE","gamm_NU_CENTRE")
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%ga_d, Current_Instrm%nu_d
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading Gamma and Nu of detector centre"
+                  Err_CFML%Msg= "Error in file: "//trim(filenam)//", reading gamm and Nu of detector centre"
                   return
                 end if
 
@@ -3177,7 +3160,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the Tilt Angles"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the Tilt Angles"
                   return
                 end if
                 if (abs(Current_Instrm%Tiltx_d) > 0.0001 .or. abs(Current_Instrm%Tilty_d) > 0.0001  &
@@ -3189,7 +3172,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the resolution d_min value"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the resolution d_min value"
                   return
                 end if
 
@@ -3198,7 +3181,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(positive) limits"
+                  Err_CFML%Msg= "Error in file: "//trim(filenam)//", reading the gamm(positive) limits"
                   return
                 end if
                 g_lim= .true.
@@ -3209,7 +3192,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Gamma(negative) limits"
+                  Err_CFML%Msg= "Error in file: "//trim(filenam)//", reading the gamm(negative) limits"
                   return
                 end if
                 g_lim= .true.
@@ -3219,7 +3202,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess= "Error in file: "//trim(filenam)//", reading the Nu limits"
+                  Err_CFML%Msg= "Error in file: "//trim(filenam)//", reading the Nu limits"
                   return
                 end if
                 n_lim= .true.
@@ -3229,7 +3212,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the X limits"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the X limits"
                   return
                 end if
                 x_lim = .true.
@@ -3239,7 +3222,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the Z limits"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the Z limits"
                   return
                 end if
                 z_lim = .true.
@@ -3250,7 +3233,7 @@ Module CFML_ILL_Instrm_Data
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
                     Err_CFML%flag=.true.
-                    ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the UB-matrix"
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the UB-matrix"
                     return
                   end if
                 end do
@@ -3261,7 +3244,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the setting vectors"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the setting vectors"
                   return
                 end if
                 set(:,1)=Current_Instrm%e1
@@ -3281,7 +3264,7 @@ Module CFML_ILL_Instrm_Data
                 if(n1 == 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", Number of angular motors missing!"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", Number of angular motors missing!"
                   return
                 end if
                 do j=1,n1
@@ -3290,7 +3273,7 @@ Module CFML_ILL_Instrm_Data
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
                     Err_CFML%flag=.true.
-                    ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the angular names, limits, offsets and velocities"
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the angular names, limits, offsets and velocities"
                     return
                   end if
                 end do
@@ -3299,7 +3282,7 @@ Module CFML_ILL_Instrm_Data
                 if(n2 == 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", Number of displacement motors missing!"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", Number of displacement motors missing!"
                   return
                 end if
                 do j=1,n2
@@ -3308,7 +3291,7 @@ Module CFML_ILL_Instrm_Data
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
                     Err_CFML%flag=.true.
-                    ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the displacement limits"
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the displacement limits"
                     return
                   end if
                 end do
@@ -3318,7 +3301,7 @@ Module CFML_ILL_Instrm_Data
                 if(ier /= 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading the detector offsets"
+                  Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the detector offsets"
                   return
                 end if
 
@@ -3326,7 +3309,7 @@ Module CFML_ILL_Instrm_Data
                 if(n1 == 0) then
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error in file: "//trim(filenam)// &
+                  Err_CFML%Msg="Error in file: "//trim(filenam)// &
                       ", the number of angular motors is needed before giving range_time values"
                   return
                 end if
@@ -3340,7 +3323,7 @@ Module CFML_ILL_Instrm_Data
                     if(ier /= 0) then
                       Err_CFML%Ierr=1
                       Err_CFML%flag=.true.
-                      ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading section of pairs range - time"
+                      Err_CFML%Msg="Error in file: "//trim(filenam)//", reading section of pairs range - time"
                       return
                     end if
                     line=adjustl(line)
@@ -3352,7 +3335,7 @@ Module CFML_ILL_Instrm_Data
                   if(ier /= 0) then
                     Err_CFML%Ierr=1
                     Err_CFML%flag=.true.
-                    ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading name of motor and number of pairs range - time"
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading name of motor and number of pairs range - time"
                     return
                   end if
                   do i=1,n3
@@ -3360,7 +3343,7 @@ Module CFML_ILL_Instrm_Data
                      if(ier /= 0) then
                       Err_CFML%Ierr=1
                       Err_CFML%flag=.true.
-                      ERR_ILLData_Mess="Error in file: "//trim(filenam)//", reading pairs range - time for motor: "//trim(line)
+                      Err_CFML%Msg="Error in file: "//trim(filenam)//", reading pairs range - time for motor: "//trim(line)
                       return
                      end if
                   end do
@@ -3376,26 +3359,70 @@ Module CFML_ILL_Instrm_Data
                   if (ier /= 0) then
                      Err_CFML%Ierr=1
                      Err_CFML%flag=.true.
-                     ERR_ILLData_Mess="Error opening the file: "//trim(alpha_file)
+                     Err_CFML%Msg="Error opening the file: "//trim(alpha_file)
                      return
                   end if
                   if(allocated(Current_Instrm%alphas)) deallocate(Current_Instrm%alphas)
                   allocate(Current_Instrm%alphas(npz,npx))
+                  read(unit=ial,fmt=*)
                   do j=1,npz
                     read(unit=ial,fmt=*,iostat=ier) Current_Instrm%alphas(j,1:npx)
                     if(ier /= 0) then
                       Err_CFML%Ierr=1
                       Err_CFML%flag=.true.
-                      ERR_ILLData_Mess="Error in file: "//trim(alpha_file)//", reading the efficiency of 2D-detector"
+                      Err_CFML%Msg="Error in file: "//trim(alpha_file)//", reading the efficiency of 2D-detector, efficiencies not applied!"
                       return
                     end if
                   end do
+
+                  !Try to read sigma of alphase
+                  read(unit=ial,fmt="(a)",iostat=ier) kshift !sigma of alphas
+                  if(ier == 0) then
+                    if(index(L_case(kshift),"sigma") /= 0) then
+                       if(allocated(Current_Instrm%sigma_alphas)) deallocate(Current_Instrm%sigma_alphas)
+                       allocate(Current_Instrm%sigma_alphas(npz,npx))
+                       read(unit=ial,fmt=*)
+                       do j=1,npz
+                         read(unit=ial,fmt=*,iostat=ier) Current_Instrm%sigma_alphas(j,1:npx)
+                         if(ier /= 0) then
+                           Err_CFML%Ierr=1
+                           Err_CFML%flag=.true.
+                           Err_CFML%Msg="Error in file: "//trim(alpha_file)//", reading the sigma of efficiency of 2D-detector, sigma-efficiencies not applied!"
+                           return
+                         end if
+                       end do
+                       Current_Instrm%sigma_alpha_correct =.true.
+                    end if
+                  end if
+
+                  !Try to read pixel shifts
+                  if(Current_Instrm%sigma_alpha_correct) then !If sigmas have been read, read another line containing shifts
+                    read(unit=ial,fmt="(a)",iostat=ier) kshift !horizontal shifts
+                  else
+                    ier=0  !The previous line may be shifts
+                  end if
+                  if(ier == 0) then
+                    if(index(L_case(kshift),"shift") /= 0) then
+                      if(allocated(Current_Instrm%shifts)) deallocate(Current_Instrm%shifts)
+                      allocate(Current_Instrm%shifts(npx))
+                      Current_Instrm%shifts=0.0
+                      Current_Instrm%shift_correct=.true.
+                      read(unit=ial,fmt=*,iostat=ier) Current_Instrm%shifts(1:npx)
+                      if(ier /= 0) then
+                         Current_Instrm%shift_correct=.false.
+                         exit
+                      end if
+                    end if
+                  end if
                 else
+
                   Err_CFML%Ierr=1
                   Err_CFML%flag=.true.
-                  ERR_ILLData_Mess="Error the alpha file: "//trim(alpha_file)//", does not exist!"
+                  Err_CFML%Msg="Error the alpha file: "//trim(alpha_file)//", does not exist!"
                   return
+
                 end if
+
                 Current_Instrm%alpha_file=alpha_file
                 Current_Instrm%alpha_correct=.true.
 
@@ -3414,6 +3441,36 @@ Module CFML_ILL_Instrm_Data
                   end if
                 end do
                 Current_Instrm%alpha_correct=.true.
+
+            Case("DET_SIGMA_ALPHAS")
+                if(allocated(Current_Instrm%sigma_alphas)) deallocate(Current_Instrm%sigma_alphas)
+                allocate(Current_Instrm%sigma_alphas(npz,npx))
+
+                do j=1,npz
+                  read(unit=lun,fmt=*,iostat=ier) Current_Instrm%sigma_alphas(j,1:npx)
+                  if(ier /= 0) then
+                    Err_CFML%Ierr=1
+                    Err_CFML%flag=.true.
+                    Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the sigma of efficiencies of 2D-detector"
+                   return
+                  end if
+                end do
+                Current_Instrm%sigma_alpha_correct=.true.
+
+            Case("DET_SHIFTS")
+                if(Current_Instrm%alpha_correct) then
+                   if(allocated(Current_Instrm%shifts)) deallocate(Current_Instrm%shifts)
+                   allocate(Current_Instrm%shifts(npx))
+                   read(unit=lun,fmt=*,iostat=ier) kshift
+                   read(unit=lun,fmt=*,iostat=ier) Current_Instrm%shifts(1:npx)
+                   if(ier /= 0) then
+                     Err_CFML%Ierr=1
+                     Err_CFML%flag=.true.
+                     Err_CFML%Msg="Error in file: "//trim(filenam)//", reading the pixel-shifts of 2D-detector"
+                    return
+                   end if
+                   Current_Instrm%shift_correct=.true.
+                end if
 
             Case("RESOLUTION_SURFACE")
                 read(unit=line(i+1:),fmt=*,iostat=ier) Current_Instrm%nNu, Current_Instrm%nGa
@@ -3473,7 +3530,7 @@ Module CFML_ILL_Instrm_Data
        real(kind=cp), dimension(5) :: vet
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
        nval_f=0
        ntext=0
 
@@ -3544,7 +3601,7 @@ Module CFML_ILL_Instrm_Data
        integer, dimension(10) :: ivet
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
 
        nval_i=0
        ntext=0
@@ -3615,7 +3672,7 @@ Module CFML_ILL_Instrm_Data
        integer, dimension(8)  :: ivet
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
 
        nval_i=0
        ntext=0
@@ -3688,7 +3745,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: numor,idum
        integer                                      :: i,j
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines=Number_Lines(fileinfo)
@@ -3706,7 +3763,7 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D1A
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,1,2,0,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,1,2,0,0],7)) then
           Err_CFML%Ierr=1
           Err_CFML%flag=.true.
           Err_CFML%Msg='This numor does not correspond with D1A Format'
@@ -3814,7 +3871,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: numor,idum
        logical                                      :: new_form, very_old,old
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
@@ -3836,11 +3893,11 @@ Module CFML_ILL_Instrm_Data
        new_form = .false.; very_old=.false.; old=.false.
 
                                     !R A S F I J V
-       if (equal_vector(n_keytypes,(/1,2,1,2,2,0,0/),7)) then
+       if (equal_vector(n_keytypes,[1,2,1,2,2,0,0],7)) then
            new_form = .true.
-       else if (equal_vector(n_keytypes,(/1,2,1,1,2,0,0/),7)) then
+       else if (equal_vector(n_keytypes,[1,2,1,1,2,0,0],7)) then
            old=.true.
-       else if (equal_vector(n_keytypes,(/1,2,1,2,1,0,0/),7)) then
+       else if (equal_vector(n_keytypes,[1,2,1,2,1,0,0],7)) then
            very_old=.true.
        else
            Err_CFML%Ierr=1
@@ -3905,7 +3962,7 @@ Module CFML_ILL_Instrm_Data
        if (nval_f > 0 .and. very_old ) then
           n%monitor=rvalues(1)
           n%time=rvalues(2)
-          n%scans(1)=rvalues(3)        ! Initial 2theta
+          n%scans(1)=rvalues(3)             ! Initial 2theta
           n%conditions(1:3)=rvalues(15:17)  ! Temp-s, Temp-r, Temp-sample
           n%wave=rvalues(18)  !Not sure
           !write(*,*) " Monitor, time, 2theta_zero, T-set T-reg, T-samp"
@@ -3925,10 +3982,6 @@ Module CFML_ILL_Instrm_Data
          allocate(n%counts(n%nbdata,n%nframes))
          n%counts=0.0
 
-         if (allocated(n%tmc_ang)) deallocate(n%tmc_ang)
-         allocate(n%tmc_ang(n%nbang+4,n%nframes))
-         n%tmc_ang=0.0
-
          ! Loading Frames
          n%monitor=0.0
          n%time=0.0
@@ -3936,6 +3989,10 @@ Module CFML_ILL_Instrm_Data
          !Time/Monitor/Counts/Angles
          call read_F_keyType(filevar,nl_keytypes(4,2,1),nl_keytypes(4,2,2))
          if (nval_f > 0 ) then
+            !write(*,*) " Allocating tmc_ang with ",n%nbang+nval_f,""
+            if (allocated(n%tmc_ang)) deallocate(n%tmc_ang)
+            allocate(n%tmc_ang(n%nbang+nval_f,n%nframes))
+            n%tmc_ang=0.0
             n%tmc_ang(1,1)=rvalues(1)*0.001 ! Time (s)
             n%tmc_ang(2:3,1)=rvalues(2:3)   ! Monitor and Total Counts
             n%tmc_ang(4:nval_f,1)=rvalues(4:nval_f)*0.001  ! Angles in degrees
@@ -4022,7 +4079,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: i,nlines
        integer                                      :: numor,idum
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
@@ -4166,7 +4223,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: numor,idum
        integer                                      :: npos, npos1,npos2
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
@@ -4294,7 +4351,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: numor,idum
        logical                                      :: check_qscan
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
@@ -4398,12 +4455,12 @@ Module CFML_ILL_Instrm_Data
                 case (5)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamma omega?)
+                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamm omega?)
 
                 case (6:)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamma, omega, Chi,phi, psi?
+                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamm, omega, Chi,phi, psi?
                    check_qscan=.true.
 
                 case default
@@ -4462,7 +4519,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: numor,idum
        logical                                      :: check_qscan
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
@@ -4485,6 +4542,7 @@ Module CFML_ILL_Instrm_Data
        call read_A_keyType(filevar,nl_keytypes(2,1,1),nl_keytypes(2,1,2),idum,line)
        if (index(line(1:4),'D10') <= 0) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg='This numor does not correspond with D10 Format'
           return
        end if
@@ -4570,18 +4628,19 @@ Module CFML_ILL_Instrm_Data
                 case (5)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamma omega?)
+                   n%tmc_ang(4:5,i)=rvalues(4:5)*0.001  ! Angle (gamm omega?)
 
                 case (6:)
                    n%tmc_ang(1,i)=rvalues(1)*0.001      ! Time (s)
                    n%tmc_ang(2:3,i)=rvalues(2:3)        ! Monitor and total counts
-                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamma, omega, Chi,phi, psi?
+                   n%tmc_ang(4:nval_f,i)=rvalues(4:nval_f)*0.001  ! Angles: gamm, omega, Chi,phi, psi?
                    check_qscan=.true.
 
                 case default
                    write(unit=car,fmt='(i5)') i
                    car=adjustl(car)
                    Err_CFML%Ierr=1
+                   Err_CFML%Flag=.true.
                    write(unit=Err_CFML%Msg,fmt="(a,i6.6)")'Problem reading Time, Monitor, Counts, Angles' &
                                     //' parameters in the Frame: '//trim(car)//", Numor:",n%numor
                    return
@@ -4594,6 +4653,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') i
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%Flag=.true.
              Err_CFML%Msg='Problem reading Counts in the Frame: '//trim(car)
              return
           end if
@@ -4630,7 +4690,7 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: i,nlines
        integer                                      :: numor,idum
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines=Number_Lines(fileinfo)
@@ -4789,7 +4849,7 @@ Module CFML_ILL_Instrm_Data
        logical                                      :: info
 
        ! The error flags are initialized.
-       call init_err_illdata()
+       call clear_error()
 
        ! Flag used for inquiring the input file.
        info=.false.
@@ -4799,7 +4859,8 @@ Module CFML_ILL_Instrm_Data
 
        ! If the input file does not exist, stop here.
        if (.not. info) then
-           err_illdata = .true.
+           err_CFML%Flag = .true.
+           err_CFML%Ierr = 1
            Err_CFML%Msg = " The file "//trim(filename)//" does not exist."
            return
        end if
@@ -4826,7 +4887,7 @@ Module CFML_ILL_Instrm_Data
           ! Define the number of lines of the header and frame blocks.
           call define_numor_header_frame_size(trim(filename),n%header_size,n%frame_size)
           ! If an error occured, stop here.
-          if (err_illdata) return
+          if (err_CFML%Flag) return
 
           ! Allocating a character array for storing the header block line by line.
           if (allocated(filevar)) deallocate(filevar)
@@ -4917,7 +4978,8 @@ Module CFML_ILL_Instrm_Data
 
           ! If none of the selected frame fall in [1,nframes], stops here.
           if (n_selected_frames <= 0) then
-             err_illdata = .true.
+             Err_CFML%Ierr = 1
+             Err_CFML%Flag = .true.
              Err_CFML%Msg = " Invalid frames selection."
              return
           end if
@@ -4929,7 +4991,7 @@ Module CFML_ILL_Instrm_Data
        ! Case where no frame selection was provided by the user. All the frames will be included in the numor structure.
        else
           allocate(n%selected_frames(n%nframes))
-          n%selected_frames = (/(i, i=1,n%nframes)/)
+          n%selected_frames = [(i, i=1,n%nframes)]
           n_selected_frames = n%nframes
        end if
 
@@ -5009,6 +5071,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') n%selected_frames(i)
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%Flag=.true.
              write(unit=Err_CFML%Msg,fmt="(a,i6.6)")'Problem reading Time, Monitor, Counts, Angles' &
                     //' parameters in the Frame: '//trim(car)//", Numor:",n%numor
              return
@@ -5022,6 +5085,7 @@ Module CFML_ILL_Instrm_Data
              write(unit=car,fmt='(i5)') n%selected_frames(i)
              car=adjustl(car)
              Err_CFML%Ierr=1
+             Err_CFML%Flag=.true.
              Err_CFML%Msg='Problem reading Counts in the Frame: '//trim(car)
              return
           end if
@@ -5059,12 +5123,13 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: nlines
        integer                                      :: i,j,numor,idum,nl
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg=' Problems trying to read the numor for D20 Instrument in file '//trim(fileinfo)
           return
        end if
@@ -5076,8 +5141,9 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D20
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,6,0,1,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,6,0,1,0],7)) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg='This numor: '//trim(fileinfo)//' does not correspond with D20 Format'
           return
        end if
@@ -5321,12 +5387,13 @@ Module CFML_ILL_Instrm_Data
        integer                                      :: nlines
        integer                                      :: i,j,numor,idum
 
-       err_illdata=.false.
+       call clear_error()
 
        ! Detecting numor
        nlines= Number_Lines(fileinfo)
        if (nlines <=0) then
-          Err_CFML%Ierr=1
+          Err_CFML%Ierr = 1
+          Err_CFML%Flag = .true.
           Err_CFML%Msg=' Problems trying to read the numor for D20 Instrument in file '//trim(fileinfo)
           return
        end if
@@ -5338,8 +5405,9 @@ Module CFML_ILL_Instrm_Data
 
        ! Check format for D20
        call Number_KeyTypes_on_File(filevar,nlines)
-       if (.not. equal_vector(n_keytypes,(/1,2,1,6,0,1,0/),7)) then
+       if (.not. equal_vector(n_keytypes,[1,2,1,6,0,1,0],7)) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg='This numor: '//trim(fileinfo)//' does not correspond with D20 Format'
           return
        end if
@@ -5466,9 +5534,7 @@ Module CFML_ILL_Instrm_Data
        integer                :: n
 
        ! Initialize
-       ERR_ILLData=.false.
-       Err_CFML%Msg= ' '
-
+       call clear_error()
        ! Check
        if (len_trim(PathNumor) <= 0 .or. len_trim(Instrument) <=0 ) return
        instr=u_case(adjustl(Instrument))
@@ -5487,6 +5553,7 @@ Module CFML_ILL_Instrm_Data
        n=index(filename,'.Z')
        if (n > 0) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg= " Numor file is compressed. Please uncompress the numor before to use this routine"
           return
        end if
@@ -5517,6 +5584,7 @@ Module CFML_ILL_Instrm_Data
 
           case default
              Err_CFML%Ierr=1
+             Err_CFML%Flag=.true.
              Err_CFML%Msg= " Not Implemented for the Powder Instrument name: "//trim(instrument)
        end select
 
@@ -5557,9 +5625,7 @@ Module CFML_ILL_Instrm_Data
        !write (*,*)  ' Read_SXTAL_Numor instrument ',instrument
 
        ! Initialize
-       ERR_ILLData=.false.
-       Err_CFML%Msg= ' '
-
+       call clear_error()
        ! Check
        if (len_trim(filename) <= 0 .or. len_trim(instrument) <=0 ) return
        instr=u_case(adjustl(instrument))
@@ -5568,6 +5634,7 @@ Module CFML_ILL_Instrm_Data
        n = index(filename,'.Z',back=.true.)
        if (n > 0) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag = .true.
           Err_CFML%Msg= " Numor file is compressed. Please uncompress the numor before to use this routine"
           return
        end if
@@ -5594,6 +5661,7 @@ Module CFML_ILL_Instrm_Data
              call Read_Numor_D19(trim(filename),num,frames)
           case default
              Err_CFML%Ierr=1
+             Err_CFML%Flag=.true.
              Err_CFML%Msg= " Not Implemented for the SXTAL Instrument name: "//trim(instrument)
        end select
 
@@ -5634,7 +5702,7 @@ Module CFML_ILL_Instrm_Data
        integer, dimension(10) :: ivet
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
 
        nrun =0
        nvers=0
@@ -5645,6 +5713,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'RRRRRRRRRR') then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg=' A bad Block R-Type has been found'
           return
        end if
@@ -5662,6 +5731,7 @@ Module CFML_ILL_Instrm_Data
              j=(n_ini+1)+i
              if (j > n_end) then
                 Err_CFML%Ierr=1
+                Err_CFML%Flag=.true.
                 Err_CFML%Msg='  Impossible to read a line for this block!'
                 exit
              end if
@@ -5701,7 +5771,7 @@ Module CFML_ILL_Instrm_Data
        integer, dimension(10) :: ivet
 
        ! Init output variables
-       err_illdata=.false.
+       call clear_error()
 
        ispec=0
        nrest=0
@@ -5715,6 +5785,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'SSSSSSSSSS') then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg=' A bad Block S-Type has been found'
           return
        end if
@@ -5735,6 +5806,7 @@ Module CFML_ILL_Instrm_Data
              j=(n_ini+1)+i
              if (j > n_end) then
                 Err_CFML%Ierr=1
+                Err_CFML%Flag=.true.
                 Err_CFML%Msg=' Impossible to read a line for this block!'
                 exit
              end if
@@ -5763,7 +5835,7 @@ Module CFML_ILL_Instrm_Data
        integer                :: i,j
 
        ! Init output values
-       err_illdata=.false.
+       call clear_error()
        ntext=0
        if (allocated(text_ill)) deallocate(text_ill)
 
@@ -5771,6 +5843,7 @@ Module CFML_ILL_Instrm_Data
        line=filevar(n_ini)
        if (line(1:10) /= 'VVVVVVVVVV') then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg=' A bad Block V-Type has been found'
           return
        end if
@@ -5812,7 +5885,7 @@ Module CFML_ILL_Instrm_Data
        !real(kind=cp)                 :: det
        real(kind=cp), dimension(3,3) :: mat
 
-       Current_Orient%conv=reshape( (/1.0,0.0,0.0,  0.0,1.0,0.0,  0.0,0.0,1.0/),(/3,3/))
+       Current_Orient%conv=reshape( [1.0,0.0,0.0,  0.0,1.0,0.0,  0.0,0.0,1.0],[3,3])
 
        if (present(setting)) then
           mat=matmul(setting,ub)  !check that point
@@ -5855,9 +5928,9 @@ Module CFML_ILL_Instrm_Data
        Current_Instrm%ang_Limits=0.0
        Current_Instrm%disp_names=" "
        Current_Instrm%ang_names=" "
-       Current_Instrm%e1=(/1.0,0.0,0.0/)
-       Current_Instrm%e2=(/0.0,1.0,0.0/)
-       Current_Instrm%e3=(/0.0,0.0,1.0/)
+       Current_Instrm%e1=[1.0,0.0,0.0]
+       Current_Instrm%e2=[0.0,1.0,0.0]
+       Current_Instrm%e3=[0.0,0.0,1.0]
        if(present(typ)) then
          Current_Instrm%info= "Default Laue diffractrometer"
          Current_Instrm%name_inst= "LaueDiff"
@@ -5880,8 +5953,8 @@ Module CFML_ILL_Instrm_Data
          npz = 1980
          Current_Instrm%agap=0
          Current_Instrm%cgap=0
-         Current_Instrm%ang_names(1) ="Gamma"
-         Current_Instrm%ang_Limits(1,1:2)=(/2.0,175.0/)
+         Current_Instrm%ang_names(1) ="gamm"
+         Current_Instrm%ang_Limits(1,1:2)=[2.0,175.0]
        else
          Current_Instrm%info= "Default 4-cercles diffractrometer"
          Current_Instrm%name_inst= "4C-Diff"
@@ -5898,27 +5971,30 @@ Module CFML_ILL_Instrm_Data
          Current_Instrm%agap=2
          Current_Instrm%cgap=2
          Current_Instrm%ang_names(1) ="2Theta"
-         Current_Instrm%ang_Limits(1,1:2)=(/2.0,130.0/)
+         Current_Instrm%ang_Limits(1,1:2)=[2.0,130.0]
        end if
        Current_Instrm%BL_frame="z-up"
        Current_Instrm%dist_units = "mm"
        Current_Instrm%angl_units = "deg"
        Current_Instrm%detector_type = "Flat_rect"
        Current_Instrm%ipsd=2          !Flat detector
-       ub=reshape((/-0.0989455,   0.0671905,  -0.1005396, &
-                     0.0045075,  -0.1487497,  -0.0642365, &
-                    -0.1588914,  -0.0460609,   0.0607861/),(/3,3/))
+       ub=reshape([-0.0989455,   0.0671905,  -0.1005396, &
+                    0.0045075,  -0.1487497,  -0.0642365, &
+                   -0.1588914,  -0.0460609,   0.0607861],[3,3])
        Current_Instrm%num_ang=4
        Current_Instrm%num_disp=0
        Current_Instrm%ang_names(2) ="Omega"
        Current_Instrm%ang_names(3) ="Chi"
        Current_Instrm%ang_names(4) ="Phi"
-       Current_Instrm%ang_Limits(2,1:2)=(/1.0,49.0/)
-       Current_Instrm%ang_Limits(3,1:2)=(/77.0,202.0/)
-       Current_Instrm%ang_Limits(4,1:2)=(/-180.0,180.0/)
+       Current_Instrm%ang_Limits(2,1:2)=[1.0,49.0]
+       Current_Instrm%ang_Limits(3,1:2)=[77.0,202.0]
+       Current_Instrm%ang_Limits(4,1:2)=[-180.0,180.0]
        if (allocated(Current_Instrm%alphas)) deallocate(Current_Instrm%alphas)
-       allocate(Current_Instrm%alphas(npx,npz))
+       allocate(Current_Instrm%alphas(npz,npx))
        Current_Instrm%alphas(:,:)=1.0
+       if (allocated(Current_Instrm%shifts)) deallocate(Current_Instrm%shifts)
+       allocate(Current_Instrm%shifts(npx))
+       Current_Instrm%shifts(:)=0.0
        call Set_Current_Orient(wave,ub)
        Current_Instrm_set=.true.
 
@@ -5943,7 +6019,7 @@ Module CFML_ILL_Instrm_Data
        integer            :: i
 
        !> Initialize
-       Err_ILLData=.false.
+       call clear_error()
        Err_CFML%Msg=' '
 
        if (len_trim(filedir) == 0) then
@@ -5963,6 +6039,7 @@ Module CFML_ILL_Instrm_Data
        !> Check that the directory exist, otherwise rise an error condition
        if (.not. directory_exists(trim(ILL_data_directory))) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg="The ILL directory: '"//trim(ILL_data_directory)//"' doesn't exist"
           got_ILL_data_directory=.false.
        else
@@ -6002,7 +6079,7 @@ Module CFML_ILL_Instrm_Data
        character(len=5) :: yearcycle
 
        ! Initialize
-       ERR_ILLData=.false.
+       call clear_error()
        Err_CFML%Msg=""
 
        ! If a working directory is given as an argument, then use it directly as the instrument
@@ -6014,6 +6091,7 @@ Module CFML_ILL_Instrm_Data
               if (Instrm_directory(i:i) /= ops_sep) Instrm_directory=trim(Instrm_directory)//ops_sep
            else
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg="Provided working directory string is empty"
               return
            end if
@@ -6034,11 +6112,13 @@ Module CFML_ILL_Instrm_Data
                  end if
               else
                  Err_CFML%Ierr=1
+                 Err_CFML%Flag=.true.
                  Err_CFML%Msg="An instrument name must be at least provided"
                  return
               end if
            else
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg="A working directory or an instrument name must be at least provided."
               return
            end if
@@ -6049,6 +6129,7 @@ Module CFML_ILL_Instrm_Data
        Instrm_directory_set=directory_exists(trim(Instrm_directory))
        if (.not. Instrm_directory_set) then
           Err_CFML%Ierr=1
+          Err_CFML%Flag=.true.
           Err_CFML%Msg="The INSTRM directory: '"//trim(Instrm_directory)//"' doesn't exist"
           Instrm_directory = " "
        end if
@@ -6084,11 +6165,12 @@ Module CFML_ILL_Instrm_Data
            if (Instrm_Geometry_Directory(i:i) /= ops_sep) Instrm_Geometry_Directory=trim(Instrm_Geometry_Directory)//ops_sep
            !---- check that the directory exist, ----!
            !---- otherwise raise an error condition ----!
-           ERR_ILLData=.false.
+           call clear_error()
            Err_CFML%Msg=" "
            Instrm_Geometry_directory_set=directory_exists(trim(Instrm_Geometry_Directory))
            if (.not. Instrm_Geometry_directory_set) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=&
               "The INSTRM Geometry directory doesn't exist, current directory assumed"
               Instrm_Geometry_Directory = " "
@@ -6323,6 +6405,7 @@ Module CFML_ILL_Instrm_Data
 
        if(.not. Current_Instrm_set) then
          Err_CFML%Ierr=1
+         Err_CFML%Flag=.true.
          Err_CFML%Msg=" Current Instrument not set! (call subroutine: Read_Current_Instrm) "
          return
        end if
@@ -6330,6 +6413,7 @@ Module CFML_ILL_Instrm_Data
        nlines = Number_Lines(filenam)
        if(nlines == 0) then
          Err_CFML%Ierr=1
+         Err_CFML%Flag=.true.
          Err_CFML%Msg="Error opening the file: "//trim(filenam)//" => ZERO lines found!"
          return
        end if
@@ -6340,6 +6424,7 @@ Module CFML_ILL_Instrm_Data
        open(newunit=lun,file=trim(filenam),status="old", action="read", position="rewind",iostat=ier)
        if(ier /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%Flag=.true.
          Err_CFML%Msg="Error opening the file: "//trim(filenam)
          return
        end if
@@ -6347,6 +6432,7 @@ Module CFML_ILL_Instrm_Data
        open(newunit=lun_out,file=trim(filenam)//".bak",status="replace", action="write",iostat=ier)
        if(ier /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%Flag=.true.
          Err_CFML%Msg="Error opening the backup file: "//trim(filenam)//".bak"
          return
        end if
@@ -6409,6 +6495,7 @@ Module CFML_ILL_Instrm_Data
        open(newunit=lun,file=trim(filenam),status="replace", action="write",iostat=ier)
        if(ier /= 0) then
          Err_CFML%Ierr=1
+         Err_CFML%Flag=.true.
          Err_CFML%Msg="Error updating the file: "//trim(filenam)
          return
        end if
@@ -6417,6 +6504,7 @@ Module CFML_ILL_Instrm_Data
           write(unit=lun,fmt="(a)",iostat=ier) file_lines(i)
           if(ier /= 0) then
             Err_CFML%Ierr=1
+            Err_CFML%Flag=.true.
             write(unit=Err_CFML%Msg,fmt="(a,i4)")"Error updating the file: "//trim(filenam)//" at line:",i
             exit
           end if
@@ -6609,14 +6697,23 @@ Module CFML_ILL_Instrm_Data
 
           write(unit=ipr,fmt="(a,3f10.4)")        "DET_OFF ", Current_Instrm%det_offsets
 
+          forma="(16f8.4)"
           if(index(Current_Instrm%geom,"Laue") == 0 .and. Current_Instrm%np_vert < 513 .and. &
                    Current_Instrm%np_horiz < 513) then
             write(unit=ipr,fmt="(a)")             "DET_ALPHAS"
-            forma="(     f8.4)"
-            write(unit=forma(2:6),fmt="(i5)") Current_Instrm%np_horiz
             do i=1,Current_Instrm%np_vert
                write(unit=ipr,fmt=forma) Current_Instrm%alphas(i,1:Current_Instrm%np_horiz)
             end do
+            if(Current_Instrm%sigma_alpha_correct) then
+              write(unit=ipr,fmt="(a)")           "DET_SIGMA_ALPHAS"
+              do i=1,Current_Instrm%np_vert
+                 write(unit=ipr,fmt=forma) Current_Instrm%sigma_alphas(i,1:Current_Instrm%np_horiz)
+              end do
+            end if
+            if(Current_Instrm%shift_correct) then
+               write(unit=ipr,fmt="(a)") "DET_SHIFTS" !horizontal shifts
+               write(unit=ipr,fmt="(12f10.4)") Current_Instrm%shifts(1:Current_Instrm%np_horiz)
+            end if
           end if
        end if
 
@@ -6806,7 +6903,7 @@ Module CFML_ILL_Instrm_Data
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_PHI: ", Num%angles(1)
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_CHI: ", Num%angles(2)
        write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_OMEGA: ", Num%angles(3)
-       write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_GAMMA: ", Num%angles(4)
+       write(unit=ipr,fmt="(a,f14.3)") "    ANGLE_gamm: ", Num%angles(4)
        write(unit=ipr,fmt="(a,f14.3)") "      ANGLE_PSI: ", Num%angles(5)
        write(unit=ipr,fmt="(a,f14.3)") "     SCAN_START: ", Num%scans(1)
        write(unit=ipr,fmt="(a,f14.3)") "     SCAN_STEP : ", Num%scans(2)
@@ -6938,7 +7035,7 @@ Module CFML_ILL_Instrm_Data
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_PHI: ", Num%angles(1)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_CHI: ", Num%angles(2)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_OMEGA: ", Num%angles(3)," "//Current_Instrm%angl_units
-       write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_GAMMA: ", Num%angles(4)," "//Current_Instrm%angl_units
+       write(unit=ipr,fmt="(a,f14.3,a)") "    ANGLE_gamm: ", Num%angles(4)," "//Current_Instrm%angl_units
        write(unit=ipr,fmt="(a,f14.3,a)") "      ANGLE_PSI: ", Num%angles(5)," "//Current_Instrm%angl_units
        if (Num%Scantype == "phi") then
           write(unit=ipr,fmt="(a,f14.3,a)") "     SCAN_START: ", Num%scans(1) ," r.l.u."
@@ -7013,8 +7110,7 @@ Module CFML_ILL_Instrm_Data
 
         !---- Local Variables ----!
 
-        err_illdata=.false.
-        Err_CFML%Msg=' '
+        call clear_error()
 
         select case (u_case(trim(Instrm)))
            case ('D1A')
@@ -7031,6 +7127,7 @@ Module CFML_ILL_Instrm_Data
 
            case default
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading Calibration File for '//trim(Instrm)//' Instrument'
         end select
 
@@ -7057,7 +7154,7 @@ Module CFML_ILL_Instrm_Data
         real(kind=cp), dimension(25)                  :: vet
 
         ! Init
-        err_illdata=.false.
+        call clear_error()
         Err_CFML%Msg=' '
 
         set_calibration_detector=.false.
@@ -7066,6 +7163,7 @@ Module CFML_ILL_Instrm_Data
         nlines = Number_Lines(FileCal)
         if (nlines <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Calibration File for D1A Instrument'
            return
         end if
@@ -7090,23 +7188,25 @@ Module CFML_ILL_Instrm_Data
         Cal%Active=.true.
         Cal%PosX=0.0
         Cal%Effic=1.0
-
+        Cal%Pos_read=.false.
         ! First line is not considered
 
         ! Second line is the relative position: Last to First
         call get_num(filevar(2), vet,ivet,iv)
         if (iv /= 25) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Positions of Detectors for D1A Instrument'
            deallocate(filevar)
            return
         end if
         Cal%PosX=vet
-
+        Cal%Pos_read=.true.
         ! Efficiency of each detector
         call get_num(filevar(3), vet,ivet,iv)
         if (iv /= 25) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Efficiency values for Detectors of D1A Instrument'
            deallocate(filevar)
            return
@@ -7128,9 +7228,9 @@ Module CFML_ILL_Instrm_Data
     !!--++    character(len=*), intent(in)                 :: FileCal    ! Path+Filename of Calibration File
     !!--++    type(calibration_detector_type), intent(out) :: Cal        ! Calibration Detector Object
     !!--++
-    !!--++ Load the Calibration parameters for a D2B Instrument
+    !!--++ Load the Calibration parameters for a D2B Instrument. This corresponds to LAMP way of storing calibration
     !!--++
-    !!--++ 17/03/2011
+    !!--++ 17/03/2011 updated 21/02/2023
     !!
     Subroutine Read_Calibration_File_D2B(FileCal,Cal)
         !---- Arguments ----!
@@ -7139,14 +7239,14 @@ Module CFML_ILL_Instrm_Data
 
         !---- Local Variables ----!
         character(len=512), dimension(:), allocatable :: filevar
+        character(len=512)                            :: line
         integer                                       :: i,iv,ini,j,nlines,k, k1,k2
         integer, dimension(6)                         :: ivet
         real(kind=cp), dimension(6)                   :: vet
         real(kind=cp), dimension(128)                 :: eff
 
         ! Init
-        err_illdata=.false.
-        Err_CFML%Msg=' '
+        call clear_error()
 
         set_calibration_detector=.false.
 
@@ -7154,6 +7254,7 @@ Module CFML_ILL_Instrm_Data
         nlines = Number_Lines(FileCal)
         if (nlines <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Calibration File for D2B Instrument'
            return
         end if
@@ -7192,11 +7293,8 @@ Module CFML_ILL_Instrm_Data
         end do
         if (ini == 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Angles positions for Detectors in D2B Instrument'
-           deallocate(filevar)
-           deallocate(Cal%Active)
-           deallocate(Cal%PosX)
-           deallocate(Cal%Effic)
            return
         end if
 
@@ -7206,17 +7304,15 @@ Module CFML_ILL_Instrm_Data
            call get_num(filevar(i), vet,ivet,iv)
            if (iv <= 0) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading Angles positions for Detectors in D2B Instrument'
-              deallocate(filevar)
-              deallocate(Cal%Active)
-              deallocate(Cal%PosX)
-              deallocate(Cal%Effic)
               return
            end if
            Cal%PosX(j+1:j+iv)=vet(1:iv)
            j=j+iv
            if (j == Cal%NDet) exit
         end do
+        Cal%Pos_read=.true.
 
         !>                                                      T1      T2      T3      T4
         !> Active zone.                                        128      129    128     129
@@ -7232,26 +7328,29 @@ Module CFML_ILL_Instrm_Data
         end do
         if (ini == 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Zones values for Detectors in D2B Instrument'
-           deallocate(filevar)
-           deallocate(Cal%Active)
-           deallocate(Cal%PosX)
-           deallocate(Cal%Effic)
            return
         end if
 
         ini=ini+1
         j=0   ! Number of Detector
-        do i=ini,nlines
-           call get_num(filevar(i), vet,ivet,iv)
+        do i=ini,ini+64 !nlines
+           line=filevar(i)
+           k=index(line,"*")
+           if(k /= 0) line=line(1:k-1)
+           call get_num(line, vet,ivet,iv)
            if (iv /= 4) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading active zones for Detectors in D2B Instrument'
               exit
            end if
+           ivet=ivet+1
 
            if (ivet(1) < 1 .or. ivet(2) > 128 .or. ivet(3) < 129 .or. ivet(4) > 256) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading active zones for Detectors in D2B Instrument'
               exit
            end if
@@ -7268,13 +7367,7 @@ Module CFML_ILL_Instrm_Data
            if (j == Cal%NDet) exit
         end do
 
-        if(err_illdata) then
-           deallocate(filevar)
-           deallocate(Cal%Active)
-           deallocate(Cal%PosX)
-           deallocate(Cal%Effic)
-           return
-        end if
+        if(Err_CFML%Ierr == 1) return
 
         ! Efficiency of each detector
         ini=0
@@ -7286,11 +7379,8 @@ Module CFML_ILL_Instrm_Data
         end do
         if (ini == 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D2B Instrument'
-           deallocate(filevar)
-           deallocate(Cal%Active)
-           deallocate(Cal%PosX)
-           deallocate(Cal%Effic)
            return
         end if
 
@@ -7302,6 +7392,7 @@ Module CFML_ILL_Instrm_Data
            call get_num(filevar(i), vet,ivet,iv)
            if (iv <= 0) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D2B Instrument'
               exit
            end if
@@ -7326,6 +7417,7 @@ Module CFML_ILL_Instrm_Data
 
               case default
                  Err_CFML%Ierr=1
+                 Err_CFML%Flag=.true.
                  Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D2B Instrument'
                  exit
            end select
@@ -7333,23 +7425,21 @@ Module CFML_ILL_Instrm_Data
            if (j == Cal%NDet) exit
         end do
 
-        if(err_illdata) then
-           deallocate(filevar)
-           deallocate(Cal%Active)
-           deallocate(Cal%PosX)
-           deallocate(Cal%Effic)
-           return
-        end if
+        if(Err_CFML%Ierr == 1) return
 
-        ! Check Mask for Point Detectors from Effic values
+        ! Check Mask for Point Detectors from Effic values and put real efficiencies
         do j=1,Cal%NDet
            do i=1, Cal%NPointsDet
-              if (Cal%Effic(i,j) < 0.0) Cal%Active(i,j)=.false.
+              if (Cal%Effic(i,j) <= 0.0) then
+                 Cal%Active(i,j)=.false.
+              else
+                 Cal%Effic(i,j)=1.0/Cal%Effic(i,j)  !The read data are inverse of efficiencies
+              end if
            end do
         end do
+        where(.not. Cal%Active) Cal%Effic=-1.0
 
         set_calibration_detector =.true.
-        deallocate(filevar)
 
     End Subroutine Read_Calibration_File_D2B
 
@@ -7372,14 +7462,14 @@ Module CFML_ILL_Instrm_Data
         integer                                :: i,j,lun, ier
 
         ! Init
-        err_illdata=.false.
-        Err_CFML%Msg=' '
-
+        call clear_error()
         set_calibration_detector=.false.
+        Cal%Pos_read=.false.
 
         open(newunit=lun,file=trim(FileCal),status='old',action="read",position="rewind",iostat=ier)
         if (ier /= 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Calibration File: '//trim(FileCal)//', for D20 Instrument'
            return
         end if
@@ -7389,6 +7479,7 @@ Module CFML_ILL_Instrm_Data
         read(unit=txt(i:j),fmt=*,iostat=ier) Cal%NDet
         if(ier /= 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problem reading the number of points of the D20 detector in calibration file: '//trim(FileCal)
            return
         end if
@@ -7413,12 +7504,15 @@ Module CFML_ILL_Instrm_Data
         read(unit=lun,fmt=*,iostat=ier) Cal%PosX(1:Cal%NDet)
         if(ier /= 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problem reading cell positions of D20 detector in calibration file: '//trim(FileCal)
            return
         end if
+        Cal%Pos_read=.true.
         read(unit=lun,fmt=*,iostat=ier) Cal%Effic(1,1:Cal%NDet)
         if(ier /= 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problem reading efficiencies of D20 detector in calibration file: '//trim(FileCal)
            return
         end if
@@ -7457,8 +7551,7 @@ Module CFML_ILL_Instrm_Data
         real(kind=cp), dimension(6)                   :: vet
 
         ! Init
-        err_illdata=.false.
-        Err_CFML%Msg=' '
+        call clear_error()
 
         set_calibration_detector=.false.
 
@@ -7466,6 +7559,7 @@ Module CFML_ILL_Instrm_Data
         nlines = Number_Lines(FileCal)
         if (nlines <=0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Calibration File for D4 Instrument'
            return
         end if
@@ -7490,6 +7584,7 @@ Module CFML_ILL_Instrm_Data
         Cal%Active=.true.
         Cal%PosX=0.0
         Cal%Effic=1.0
+        Cal%Pos_read=.false.
 
         ! Angle Position
         ini=0
@@ -7501,6 +7596,7 @@ Module CFML_ILL_Instrm_Data
         end do
         if (ini == 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Angles positions for Detectors in D4 Instrument'
            deallocate(filevar)
            deallocate(Cal%Active)
@@ -7523,6 +7619,7 @@ Module CFML_ILL_Instrm_Data
 
               case default
                  Err_CFML%Ierr=1
+                 Err_CFML%Flag=.true.
                  Err_CFML%Msg=' Problems reading Angles positions for Detectors in D4 Instrument'
                  deallocate(filevar)
                  deallocate(Cal%Active)
@@ -7532,6 +7629,7 @@ Module CFML_ILL_Instrm_Data
            end select
            if (j == Cal%NDet) exit
         end do
+        Cal%Pos_read=.true.
 
         ! Efficiency of each detector
         ini=0
@@ -7543,6 +7641,7 @@ Module CFML_ILL_Instrm_Data
         end do
         if (ini == 0) then
            Err_CFML%Ierr=1
+           Err_CFML%Flag=.true.
            Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D4 Instrument'
            deallocate(filevar)
            deallocate(Cal%Active)
@@ -7559,6 +7658,7 @@ Module CFML_ILL_Instrm_Data
            call get_num(line, vet,ivet,iv)
            if (iv <= 0) then
               Err_CFML%Ierr=1
+              Err_CFML%Flag=.true.
               Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D4 Instrument'
               deallocate(filevar)
               deallocate(Cal%Active)
@@ -7574,6 +7674,7 @@ Module CFML_ILL_Instrm_Data
 
               case default
                  Err_CFML%Ierr=1
+                 Err_CFML%Flag=.true.
                  Err_CFML%Msg=' Problems reading Efficiencies values for Detectors in D4 Instrument'
                  deallocate(filevar)
                  deallocate(Cal%Active)

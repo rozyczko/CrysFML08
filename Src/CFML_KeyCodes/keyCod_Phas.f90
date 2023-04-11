@@ -15,7 +15,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       integer,                 intent(in)     :: n_ini
       integer,                 intent(in)     :: n_end
       integer,                 intent(in)     :: Ip
-      type(RelationList_Type), intent(inout)  :: Ph
+      type(GenParList_Type), intent(inout)  :: Ph
 
       !---- Local Variables ----!
       integer                 :: i, k
@@ -58,7 +58,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       !---- Arguments ----!
       character(len=*),        intent(in)    :: String
       integer,                 intent(in)    :: Ip
-      type(RelationList_Type), intent(inout) :: Ph
+      type(GenParList_Type), intent(inout) :: Ph
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -123,7 +123,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       !---- Arguments ----!
       character(len=*),        intent(in)    :: String
       integer,                 intent(in)    :: Ip
-      type(RelationList_Type), intent(inout) :: Ph
+      type(GenParList_Type), intent(inout) :: Ph
 
       !---- Local Variables ----!
       integer, parameter :: NMAX_GEN = 20
@@ -234,7 +234,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=*),              intent(in)     :: Keyword     ! VARY/FIX/....
       integer,                       intent(in)     :: NPar        ! Specific parameter A,B,C,...
       integer,                       intent(in)     :: IP
-      type(RelationList_Type),       intent(in out) :: Ph
+      type(GenParList_Type),       intent(in out) :: Ph
 
       !---- Local variables ----!
       integer          :: i
@@ -256,42 +256,42 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                case (1) ! A
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'A_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'A_PHAS'//trim(car))
 
                case (2) ! B
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'B_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'B_PHAS'//trim(car))
 
                case (3) ! C
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'C_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'C_PHAS'//trim(car))
 
                case (4) ! ALP
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'ALP_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'ALP_PHAS'//trim(car))
 
                case (5) ! BET
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'BET_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'BET_PHAS'//trim(car))
 
                case (6) ! GAM
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Fix_RelationList_Par(Ph,'GAM_PHAS'//trim(car))
+                  call Fix_GenParList_Par(Ph,'GAM_PHAS'//trim(car))
 
                case (7) ! CELL
                 write(car,fmt='(i3)') ip
                 car=adjustl(car)
-                call Fix_RelationList_Par(Ph,'A_PHAS'//trim(car))
-                call Fix_RelationList_Par(Ph,'B_PHAS'//trim(car))
-                call Fix_RelationList_Par(Ph,'C_PHAS'//trim(car))
-                call Fix_RelationList_Par(Ph,'ALP_PHAS'//trim(car))
-                call Fix_RelationList_Par(Ph,'BET_PHAS'//trim(car))
-                call Fix_RelationList_Par(Ph,'GAM_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'A_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'B_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'C_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'ALP_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'BET_PHAS'//trim(car))
+                call Fix_GenParList_Par(Ph,'GAM_PHAS'//trim(car))
 
             end select ! Npar
 
@@ -305,42 +305,42 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                case (1) ! A
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'A_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'A_PHAS'//trim(car))
 
                case (2) ! B
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'B_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'B_PHAS'//trim(car))
 
                case ( 3) ! C
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'C_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'C_PHAS'//trim(car))
 
                case (4)
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'ALP_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'ALP_PHAS'//trim(car))
 
                case (5)
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'BET_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'BET_PHAS'//trim(car))
 
                case (6)
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'GAM_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'GAM_PHAS'//trim(car))
 
                case (7)
                   write(car,fmt='(i3)') ip
                   car=adjustl(car)
-                  call Vary_RelationList_Par(Ph,'A_PHAS'//trim(car))
-                  call Vary_RelationList_Par(Ph,'B_PHAS'//trim(car))
-                  call Vary_RelationList_Par(Ph,'C_PHAS'//trim(car))
-                  call Vary_RelationList_Par(Ph,'ALP_PHAS'//trim(car))
-                  call Vary_RelationList_Par(Ph,'BET_PHAS'//trim(car))
-                  call Vary_RelationList_Par(Ph,'GAM_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'A_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'B_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'C_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'ALP_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'BET_PHAS'//trim(car))
+                  call Vary_GenParList_Par(Ph,'GAM_PHAS'//trim(car))
 
             end select ! Npar
 

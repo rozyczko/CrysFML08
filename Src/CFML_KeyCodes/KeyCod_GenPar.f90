@@ -1,24 +1,24 @@
 !!
-Submodule (CFML_KeyCodes) KeyCod_Relat
+Submodule (CFML_KeyCodes) KeyCod_GenPar
    implicit none
 
    Contains
 
    !!----
-   !!---- SUBROUTINE Allocate_RelationsType
+   !!---- SUBROUTINE Allocate_GenParList
    !!----
    !!----
    !!---- Update: 13/05/2022
    !!
-   Module Subroutine Allocate_RelationList(NDMax, R)
+   Module Subroutine Allocate_GenParList(NDMax, R)
       !---- Arguments ----!
-      integer,                 intent(in)     :: NDMax
-      type(RelationList_Type), intent(in out) :: R
+      integer,               intent(in)     :: NDMax
+      type(GenParList_Type), intent(in out) :: R
 
       !---- Local Arguments ----!
       integer :: i
 
-      if (NDMax ==0) then
+      if (NDMax == 0) then
          R%ND_Max=0
          R%NPar=0
          if (allocated(R%Par)) deallocate(R%Par)
@@ -31,7 +31,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
       !> Initialize
       do i=1,NDMax
-         R%Par(i)%Name=" "
+         R%Par(i)%Nam=" "
          R%Par(i)%Ext=" "
          R%Par(i)%L=0
          R%Par(i)%M=0.0_cp
@@ -41,19 +41,19 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
       R%NPar=0
 
-   End Subroutine Allocate_RelationList
+   End Subroutine Allocate_GenParList
 
    !!--++
-   !!--++ Subroutine Del_RefCode_RelationList
+   !!--++ Subroutine Del_RefCode_GenParList
    !!--++
-   !!--++    Delete the number of Refinable Parameter (NPar) on the RelationList type
+   !!--++    Delete the number of Refinable Parameter (NPar) on the GenParList type
    !!--++
    !!--++ Update: May - 2022
    !!
-   Module Subroutine Del_RefCode_RelationList(R, NPar)
+   Module Subroutine Del_RefCode_GenParList(R, NPar)
       !---- Arguments ----!
-      type(RelationList_Type), intent(in out) :: R
-      integer,                 intent(in)     :: NPar
+      type(GenParList_Type), intent(in out) :: R
+      integer,                 intent(in)   :: NPar
 
       !---- Local Variables ----!
       logical :: deleted
@@ -84,17 +84,17 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
       !> Updating Vec_Vectors
       if (deleted) call Del_Element_in_VRef(NPar)
 
-   End Subroutine Del_RefCode_RelationList
+   End Subroutine Del_RefCode_GenParList
 
    !!--++
-   !!--++ SUBROUTINE FIX_RELATIONLIST_PAR
+   !!--++ SUBROUTINE FIX_GenParList_PAR
    !!--++
    !!--++
    !!--++ Update: May - 2022
    !!
-   Module Subroutine FIX_RelationList_Par(R, CodeNam)
+   Module Subroutine FIX_GenParList_Par(R, CodeNam)
       !---- Arguments ----!
-      type(RelationList_Type), intent(in out) :: R
+      type(GenParList_Type), intent(in out) :: R
       character(len=*),        intent(in)     :: CodeNam
 
       !---- Local Variables ----!
@@ -106,25 +106,25 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
       !>
       do i=1,R%NPar
-         if (trim(u_case(CodeNam)) /= trim(u_case(R%Par(i)%Name)) ) cycle
+         if (trim(u_case(CodeNam)) /= trim(u_case(R%Par(i)%Nam)) ) cycle
 
          if (R%Par(i)%L /=0) then
             nc=R%Par(i)%L
-            call Del_RefCode_RelationList(R,nc)
+            call Del_RefCode_GenParList(R,nc)
          end if
       end do
 
-   End Subroutine FIX_RelationList_Par
+   End Subroutine FIX_GenParList_Par
 
    !!--++
-   !!--++ SUBROUTINE VARY_RELATIONLIST_PAR
+   !!--++ SUBROUTINE VARY_GenParList_PAR
    !!--++
    !!--++
    !!--++ Update: May - 2022
    !!
-   Module Subroutine VARY_RelationList_Par(R, CodeNam, Value, Sig, Mult)
+   Module Subroutine VARY_GenParList_Par(R, CodeNam, Value, Sig, Mult)
       !---- Arguments ----!
-      type(RelationList_Type), intent(in out) :: R
+      type(GenParList_Type), intent(in out) :: R
       character(len=*),        intent(in)     :: CodeNam
       real(kind=cp), optional, intent(in)     :: Value
       real(kind=cp), optional, intent(in)     :: Sig
@@ -142,7 +142,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
       !>
       is_new=.true.
       do i=1,R%NPar
-         if (trim(u_case(CodeNam)) /= trim(u_case(R%Par(i)%Name)) ) cycle
+         if (trim(u_case(CodeNam)) /= trim(u_case(R%Par(i)%Nam)) ) cycle
          is_new=.false.
          exit
       end do
@@ -165,7 +165,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
          i=R%Npar+1
          j=NP_Ref+1
 
-         R%Par(i)%Name=trim(Codenam)
+         R%Par(i)%Nam=trim(Codenam)
          R%Par(i)%L=j
          R%Par(i)%M=m
          R%Par(i)%Val=v
@@ -182,17 +182,17 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
          NP_Ref=j
       end if
 
-   End Subroutine VARY_RelationList_Par
+   End Subroutine VARY_GenParList_Par
 
    !!----
-   !!---- SUBROUTINE RList_to_Cell
+   !!---- SUBROUTINE GPList_to_Cell
    !!----
    !!----
    !!---- Update: 19/05/22
    !!
-   Module Subroutine RList_to_Cell(Ph, Ip, Cell)
+   Module Subroutine GPList_to_Cell(Ph, Ip, Cell)
       !---- Arguments ----!
-      type(RelationList_Type), intent(in)   :: Ph
+      type(GenParList_Type), intent(in)   :: Ph
       integer,                 intent(in)   :: Ip
       class(cell_Type),        intent(inout):: Cell
 
@@ -203,7 +203,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
       select type (Cell)
          type is (Cell_LS_Type)
             do i=1,Ph%Npar
-               ccc=trim(Ph%Par(i)%Name)
+               ccc=trim(Ph%Par(i)%Nam)
                npos=index(ccc,'PHAS')
                call get_num(ccc(npos+4:),vet,ivet,iv)
                if (ivet(1) /= ip) cycle
@@ -224,7 +224,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
          type is (Cell_GLS_Type)
             do i=1,Ph%Npar
-               ccc=trim(Ph%Par(i)%Name)
+               ccc=trim(Ph%Par(i)%Nam)
                npos=index(ccc,'PHAS')
                call get_num(ccc(npos+4:),vet,ivet,iv)
                if (ivet(1) /= ip) cycle
@@ -244,17 +244,17 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
             end do
       end select
 
-   End Subroutine RList_to_Cell
+   End Subroutine GPList_to_Cell
 
    !!----
-   !!---- SUBROUTINE RList_to_Molec
+   !!---- SUBROUTINE GPList_to_Molec
    !!----
    !!----
    !!---- Update: may - 2022
    !!
-   Module Subroutine RList_to_Molec(M, Im, Mol)
+   Module Subroutine GPList_to_Molec(M, Im, Mol)
       !---- Arguments ----!
-      type(RelationList_Type), intent(in)   :: M
+      type(GenParList_Type), intent(in)   :: M
       integer,                 intent(in)   :: Im
       type(Molecule_type),     intent(inout):: Mol
 
@@ -263,7 +263,7 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
       integer           :: i,j,npos,iv
 
       do i=1,M%Npar
-         ccc=trim(M%Par(i)%Name)
+         ccc=trim(M%Par(i)%Nam)
          npos=index(ccc,'MOL')
          call get_num(ccc(npos+3:),vet,ivet,iv)
          if (ivet(1) /= im) cycle
@@ -284,6 +284,6 @@ Submodule (CFML_KeyCodes) KeyCod_Relat
 
       end do
 
-   End Subroutine RList_to_Molec
+   End Subroutine GPList_to_Molec
 
-End SubModule KeyCod_Relat
+End SubModule KeyCod_GenPar

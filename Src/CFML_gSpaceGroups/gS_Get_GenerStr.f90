@@ -20,13 +20,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_GenerStr
       logical, optional,                           intent(out) :: time_given
 
       !--- Local variables ---!
-      character(len=:), allocatable :: symbol, ListGen
-      integer, dimension(40)        :: Pos
-      integer                       :: i,j,k,np
-      logical                       :: timerev_provided
+      character(len=:),                allocatable :: symbol, ListGen
+      character(len=60), dimension(:), allocatable :: gen_aux
+      integer, dimension(40)                       :: Pos
+      integer                                      :: i,j,k,np,ngg
+      logical                                      :: timerev_provided
 
       !> Init
-      ngen=0
+      ngg=0
 
       !> Determine the dimension from the generatorList (first operator)
       ListGen=trim(StrGen)//"  "
@@ -53,41 +54,44 @@ SubModule (CFML_gSpaceGroups) gS_Get_GenerStr
          Pos(np)=len_trim(ListGen)+2 !add artificially a position for ";"
       end if
       if (len_trim(ListGen(Pos(np)+1:)) == 0) then
-         ngen=np  !final ;
+         ngg=np  !final ;
       else
-         ngen=np+1
+         ngg=np+1
       end if
-      allocate(gen(ngen))
+      allocate(gen_aux(ngg))
 
       !> Obtaining generators
       j=1
       do i=1, np
          k=pos(i)
-         gen(i)=ListGen(j:k-1)
+         gen_aux(i)=ListGen(j:k-1)
          j = k + 1
       end do
-      if (ngen > np) then
-         gen(ngen)=ListGen(j:)
-         i=index(gen(ngen),";")
-         if (i /= 0) gen(ngen)(i:i) = " "
+      if (ngg > np) then
+         gen_aux(ngg)=ListGen(j:)
+         i=index(gen_aux(ngg),";")
+         if (i /= 0) gen_aux(ngg)(i:i) = " "
       end if
 
       !> Time reversal
       timerev_provided=.false.
-      do i=1,ngen
-         call Get_Separator_Pos(gen(i),",",pos,np)
+      do i=1,ngg
+         call Get_Separator_Pos(gen_aux(i),",",pos,np)
          if (np < d-1) cycle
          timerev_provided=.true.
       end do
 
       !> Add time inversion in those operators that have not been Read
       if (timerev_provided) then
-         do i=1,ngen
-            call Get_Separator_Pos(gen(i),",",pos,np)
-            if (np < d-1) gen(i)=trim(gen(i))//",1"
+         do i=1,ngg
+            call Get_Separator_Pos(gen_aux(i),",",pos,np)
+            if (np < d-1) gen_aux(i)=trim(gen_aux(i))//",+1"
          end do
       end if
       if(present(time_given)) time_given=timerev_provided
+
+      call Check_Gener(Gen_aux, Gen)
+      ngen=size(Gen)
 
    End Subroutine Get_Generators_from_Str
 

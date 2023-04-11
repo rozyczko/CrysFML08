@@ -52,6 +52,7 @@
 !!
  Module CFML_Messages
     !---- Use Modules ----!
+   Use CFML_GlobalDeps
 
     !---- Definitions ----!
     implicit none

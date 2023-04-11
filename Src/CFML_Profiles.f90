@@ -90,7 +90,7 @@ Module CFML_Profiles
        real(kind=cp) :: beta  =0.0_cp   ! omega_b  DOmega/Dbeta
        real(kind=cp) :: dt    =0.0_cp   ! omega_t  DOmega/Ddt      (dt=TOFi-TOF(Bragg))
        real(kind=cp) :: sigma =0.0_cp   ! omega_s  DOmega/Dsigma   (for tof_Jorgensen function)
-       real(kind=cp) :: gamma =0.0_cp   ! omega_g  DOmega/Dgamma   (for tof_Jorgensen_VonDreele function)
+       real(kind=cp) :: gamm =0.0_cp   ! omega_g  DOmega/Dgamm   (for tof_Jorgensen_VonDreele function)
        real(kind=cp) :: eta   =0.0_cp   ! omega_e  DOmega/Deta                     "
        real(kind=cp) :: kappa =0.0_cp   ! omega_e  DOmega/kappa    (for tof_Carpenter function)
     End Type Deriv_TOF_Type
@@ -217,12 +217,12 @@ Module CFML_Profiles
           real(kind=cp), optional,dimension(:),intent(out):: dpar
        End Subroutine Split_Pseudovoigt_Der
 
-       Module Subroutine PsVoigtian(Twoth , Twoth0 , Eta , Gamma, Dprdt , Dprdg , Dprde, PsVoigt )
+       Module Subroutine PsVoigtian(Twoth , Twoth0 , Eta , Gamm, Dprdt , Dprdg , Dprde, PsVoigt )
           !---- Arguments ----!
           real(kind=cp), intent(in)  :: twoth
           real(kind=cp), intent(in)  :: twoth0
           real(kind=cp), intent(in)  :: eta
-          real(kind=cp), intent(in)  :: gamma
+          real(kind=cp), intent(in)  :: gamm
           real(kind=cp), intent(out) :: dprdt
           real(kind=cp), intent(out) :: dprdg
           real(kind=cp), intent(out) :: dprde
@@ -246,11 +246,11 @@ Module CFML_Profiles
           !---- Arguments ----!
        End Subroutine Init_Prof_Val
 
-       Module Subroutine Prof_Val( eta, gamma, asym1, asym2, twoth, twoth0, dprdt, dprdg,  &
+       Module Subroutine Prof_Val( eta, gamm, asym1, asym2, twoth, twoth0, dprdt, dprdg,  &
                                    dprde , dprds , dprdd , profval, use_asym, use_hps)
           !---- Arguments ----!
           real(kind=cp),   Intent(In)    :: eta
-          real(kind=cp),   Intent(In)    :: gamma
+          real(kind=cp),   Intent(In)    :: gamm
           real(kind=cp),   Intent(In)    :: asym1
           real(kind=cp),   Intent(In)    :: asym2
           real(kind=cp),   Intent(In)    :: twoth
@@ -280,11 +280,11 @@ Module CFML_Profiles
           real(kind=cp), optional,dimension(:),intent(out):: dpar
        End Subroutine Gaussian_Der
 
-       Module Subroutine Prof_Gaussian(Pos , Pos0 , Gamma , Dgdt , Dgdg, Gauss )
+       Module Subroutine Prof_Gaussian(Pos , Pos0 , Gamm , Dgdt , Dgdg, Gauss )
           !---- Arguments ----!
           real(kind=cp), intent(in)  :: pos
           real(kind=cp), intent(in)  :: pos0
-          real(kind=cp), intent(in)  :: gamma
+          real(kind=cp), intent(in)  :: gamm
           real(kind=cp), intent(out) :: dgdt
           real(kind=cp), intent(out) :: dgdg
           real(kind=cp), intent(out) :: gauss
@@ -297,11 +297,11 @@ Module CFML_Profiles
           real(kind=cp)                          :: lor_val
        End Function Lorentzian
 
-       Module Subroutine Prof_Lorentzian(Pos , Pos0 , Gamma , Dldt , Dldg, Lorentz )
+       Module Subroutine Prof_Lorentzian(Pos , Pos0 , Gamm, Dldt , Dldg, Lorentz )
           !---- Arguments ----!
           real(kind=cp), intent(in) :: pos
           real(kind=cp), intent(in) :: pos0
-          real(kind=cp), intent(in) :: gamma
+          real(kind=cp), intent(in) :: gamm
           real(kind=cp), intent(out):: dldt
           real(kind=cp), intent(out):: dldg
           real(kind=cp), intent(out):: lorentz
@@ -315,13 +315,13 @@ Module CFML_Profiles
           real(kind=cp), optional, dimension(:),intent(out):: dpar
        End Subroutine Lorentzian_Der
 
-       Module Subroutine Tof_Carpenter(Dt,D,Alfa,Beta,Gamma,Eta,Kappa,Tof_Theta,Tof_Peak,Deriv)
+       Module Subroutine Tof_Carpenter(Dt,D,Alfa,Beta,Gamm,Eta,Kappa,Tof_Theta,Tof_Peak,Deriv)
           !---- Arguments ----!
           real(kind=cp),             intent( in) :: dt
           real(kind=cp),             intent( in) :: d
           real(kind=cp),             intent( in) :: alfa
           real(kind=cp),             intent( in) :: beta
-          real(kind=cp),             intent( in) :: gamma
+          real(kind=cp),             intent( in) :: gamm
           real(kind=cp),             intent( in) :: eta
           real(kind=cp),             intent( in) :: kappa
           real(kind=cp),             intent( in) :: tof_theta
@@ -339,12 +339,12 @@ Module CFML_Profiles
           type(Deriv_TOF_Type), optional, intent(out)  :: deriv
        End Subroutine Tof_Jorgensen
 
-       Module Subroutine Tof_Jorgensen_Vondreele(Dt,Alfa,Beta,Gamma,Eta,Tof_Peak,Deriv)
+       Module Subroutine Tof_Jorgensen_Vondreele(Dt,Alfa,Beta,Gamm,Eta,Tof_Peak,Deriv)
           !---- Arguments ----!
           real(kind=cp),             intent( in) :: dt
           real(kind=cp),             intent( in) :: alfa
           real(kind=cp),             intent( in) :: beta
-          real(kind=cp),             intent( in) :: gamma
+          real(kind=cp),             intent( in) :: gamm
           real(kind=cp),             intent( in) :: eta
           real(kind=cp),             intent(out) :: tof_peak
           type(Deriv_TOF_Type), optional, intent(out) :: deriv

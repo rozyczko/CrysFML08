@@ -6,7 +6,7 @@ Module Ref_Gen
                                     SXTAL_Orient_type, Current_Orient, diffractometer_type, &
                                     Current_Instrm, Read_Current_Instrm, Update_Current_Instrm_UB,&
                                     Set_default_Instrument,Write_Current_Instrm_data
-    use CFML_Strings,         only: l_case, file_type
+    use CFML_Strings,         only: l_case, file_List_type
     use CFML_metrics,         only: Cell_G_Type,Set_Crystal_Cell, Write_Crystal_Cell,Zone_Axis_type, &
                                     Get_basis_from_uvw
     use CFML_SXTAL_Geom
@@ -35,7 +35,7 @@ Module Ref_Gen
         !---- Arguments ----!
         integer,                intent( in)    :: ipr
         type(Cell_G_Type),      intent(in out) :: cell
-        Type(File_Type),        intent( in)    :: file_dat
+        Type(file_List_type),   intent( in)    :: file_dat
         logical,                intent(out)    :: ok
         character(len=*),       intent(out)    :: mess
         integer,dimension(3),   intent(out)    :: ord
@@ -567,7 +567,7 @@ Program Sxtal_Ref_Gen
 
     use CFML_GlobalDeps
     use CFML_Maths,             only: sort,Linear_interpol,cross_product
-    use CFML_Strings,           only: file_type,cut_string,u_case,pack_string
+    use CFML_Strings,           only: file_List_type,cut_string,u_case,pack_string
     use CFML_gSpaceGroups,      only: SPG_type, Write_SpaceGroup_info, Set_SpaceGroup
     use CFML_Atoms,             only: AtList_Type, Write_Atom_List,MAtom_list_Type
     use CFML_metrics,           only: Cell_G_Type, Write_Crystal_Cell
@@ -578,8 +578,7 @@ Program Sxtal_Ref_Gen
                                       Init_Structure_Factors,Calc_General_StrFactor,&
                                       Scattering_Species_Type, Allocate_Scattering_Species, &
                                       Additional_Scattering_Factors, Set_Form_Factors
-    use CFML_ILL_Instrm_data,   only: Err_ILLdata_Mess, Err_ILLdata, &
-                                      SXTAL_Orient_type, Current_Orient, diffractometer_type, &
+    use CFML_ILL_Instrm_data,   only: SXTAL_Orient_type, Current_Orient, diffractometer_type, &
                                       Current_Instrm, Write_Current_Instrm_data
     use CFML_SXTAL_Geom
     use CFML_kvec_Symmetry
@@ -589,7 +588,7 @@ Program Sxtal_Ref_Gen
 
     implicit none
 
-    type (file_type)            :: fich_cfl
+    type (file_List_type)       :: fich_cfl
     class(SPG_type), allocatable:: SpG
     type (SPG_type)             :: SpGT
     type (Atlist_Type)          :: A
@@ -704,7 +703,7 @@ Program Sxtal_Ref_Gen
         call finish()
     end if
 
-    call Read_Xtal_Structure(trim(cfl_file),Cell,SpG,A,FType=fich_cfl)
+    call Read_Xtal_Structure(trim(cfl_file),Cell,SpG,A,FileList=fich_cfl)
 
     call cpu_time(start)
 
@@ -750,7 +749,7 @@ Program Sxtal_Ref_Gen
 
         if(.not. ok) then
             write(unit=*,fmt="(a)") "Error in read_sxtal_geom -> Mess: "//trim(mess)
-            if(Err_ILLdata) write(unit=*,fmt="(a)") " ILL_data: "//trim(Err_ILLdata_Mess)
+            if(Err_CFML%Flag) write(unit=*,fmt="(a)") " ILL_data: "//trim(Err_CFML%Msg)
             call finish()
         end if
 

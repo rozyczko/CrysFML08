@@ -54,13 +54,13 @@ rem > Compilation
 rem > Go to the proper directory
 cd ..\..\Hall_Symbols
    if [%_COMP%]==[ifort] (
-      ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML%\%DIRECTORY%\LibC
-      ifort /exe:MHall *.obj  %CRYSFML%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
+      ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
+      ifort /exe:MHall *.obj  %CRYSFML08%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
    )
 rem   
    if [%_COMP%]==[gfortran] (
-      gfortran -c MHall.f90           %OPT1% -I%CRYSFML%\%DIRECTORY%\LibC
-      gfortran -o MHall.exe *.o -L%CRYSFML%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c MHall.f90           %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
+      gfortran -o MHall.exe *.o -L%CRYSFML08%\%DIRECTORY%\LibC -lcrysfml
    )
 rem   
    if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe  

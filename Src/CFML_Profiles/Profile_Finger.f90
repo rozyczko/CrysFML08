@@ -70,17 +70,17 @@ SubModule (CFML_Profiles) Profile_Finger
    !!----
    !!---- 21/04/2019
    !!
-   Module Subroutine Prof_Val( eta, gamma, asym1, asym2, twoth, twoth0, dprdt, dprdg,  &
+   Module Subroutine Prof_Val( eta, gamm, asym1, asym2, twoth, twoth0, dprdt, dprdg,  &
                         dprde , dprds , dprdd , profval, use_asym, use_hps)
       !---- Arguments ----!
       real(kind=cp),   Intent(In)    :: eta              ! mixing coefficient between Gaussian and Lorentzian
-      real(kind=cp),   Intent(In)    :: gamma            ! FWHM
+      real(kind=cp),   Intent(In)    :: gamm            ! FWHM
       real(kind=cp),   Intent(In)    :: asym1            ! s_l source width/detector distance or D_L+S_L if  use_hps is true
       real(kind=cp),   Intent(In)    :: asym2            ! d_l detector width/detector distance or D_L-S_L if  use_hps is true
       real(kind=cp),   Intent(In)    :: twoth            ! point at which to evaluate the profile
       real(kind=cp),   Intent(In)    :: twoth0           ! two_theta value for peak
       real(kind=cp),   Intent(Out)   :: dprdt            ! derivative of profile wrt TwoTH0
-      real(kind=cp),   Intent(Out)   :: dprdg            ! derivative of profile wrt Gamma
+      real(kind=cp),   Intent(Out)   :: dprdg            ! derivative of profile wrt gamm
       real(kind=cp),   Intent(Out)   :: dprde            ! derivative of profile wrt Eta
       real(kind=cp),   Intent(Out)   :: dprds            ! derivative of profile wrt asym1
       real(kind=cp),   Intent(Out)   :: dprdd            ! derivative of profile wrt asym2
@@ -123,7 +123,7 @@ SubModule (CFML_Profiles) Profile_Finger
 
       !> First simple calculation of Pseudo-Voigt if asymmetry is not used
       if (.not. use_asym .or. abs(twoth0-90.0) < 0.4) then
-         call Psvoigtian(twoth,twoth0,eta,gamma,dprdt,dprdg,dprde,tmp)
+         call Psvoigtian(twoth,twoth0,eta,gamm,dprdt,dprdg,dprde,tmp)
          profval = tmp
          dprds = 0.0_cp
          dprdd = 0.0_cp
@@ -286,7 +286,7 @@ SubModule (CFML_Profiles) Profile_Finger
                g = (-1.0 + apb * f) * rcosdelta
             End If
 
-            call Psvoigtian(twoth-delta+twoth0,twoth0,eta,gamma,dprdt,dprdg,dprde,tmp)
+            call Psvoigtian(twoth-delta+twoth0,twoth0,eta,gamm,dprdt,dprdg,dprde,tmp)
             sumwg = sumwg + wp(k+it) * g
             sumwrg = sumwrg + wp(k+it) * g * tmp
             If ( Abs(cosdelta) > Abs(coseinfl)) Then
