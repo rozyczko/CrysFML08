@@ -1051,6 +1051,7 @@ module nexus_mod
         else ! Virtual detector?
 
             call h5dopen_f(file_id,'entry0/instrument/Detector/virtual_cgap',dset,hdferr)
+            if (hdferr == -1) call h5dopen_f(file_id,'entry0/instrument/Det1/virtual_cgap',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,scalar,hdferr)
             if (hdferr /= -1) then
                 call h5dclose_f(dset,hdferr)
