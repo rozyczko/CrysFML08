@@ -4,7 +4,7 @@ Program MagRef
  use CFML_Atoms,                    only: Atlist_type, Write_Atom_List, MAtom_list_Type
  use CFML_metrics,                  only: Cell_G_Type, Write_Crystal_Cell
  use CFML_Reflections,              only: H_s
- use CFML_Strings,                  only: file_type
+ use CFML_Strings,                  only: file_type, file_list_type
  use CFML_IOForm,                   only: Read_Xtal_Structure
  use CFML_Propagation_vectors,      only: K_Equiv_Minus_K
  use CFML_kvec_Symmetry
@@ -13,6 +13,7 @@ Program MagRef
  implicit none
 
  type (file_type)            :: fich_cfl
+ type (file_list_type)       :: fichL_cfl
  class(SPG_type), allocatable:: SpG
  type (MagSymm_k_Type)       :: MGp
  type (Atlist_type)          :: A
@@ -82,9 +83,12 @@ Program MagRef
      write(unit=*,fmt="(/,a)") "    =========================="
      write(unit=*,fmt="( a )") "    Text of the input CFL file"
      write(unit=*,fmt="(a,/)") "    =========================="
+     fichL_cfl%nlines=fich_cfl%nlines
+     allocate(fichL_cfl%line(fich_cfl%nlines))
      do i=1,fich_cfl%nlines
-       write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%str
-       write(unit=*,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%str
+       write(unit=lun,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str
+       write(unit=*,fmt="(a,i5,a)") " Line:",i,"  "//fich_cfl%line(i)%Str
+       fichL_cfl%line(i)=fich_cfl%line(i)%Str
      end do
 
 
@@ -94,7 +98,7 @@ Program MagRef
 
        n_ini=1
        n_end=fich_cfl%nlines
-       call Readn_Set_Magnetic_Kv_Structure(fich_cfl,n_ini,n_end,MGp,Am)
+       call Readn_Set_Magnetic_Kv_Structure(fichL_cfl,n_ini,n_end,MGp,Am)
        if(err_CFML%flag) then
          write(unit=*,fmt="(a)") "   "//err_CFML%Msg
          stop
