@@ -174,14 +174,15 @@
  Module CFML_Keywords_Code_Parser
     !---- Modules ----!
     Use CFML_Rational
-    Use CFML_GlobalDeps,                only: cp, clear_error, Err_CFML
-    Use CFML_Maths,                     only: Sort
-    Use CFML_Strings,                   only: Cut_string, U_Case, L_Case, Get_words, Get_Num, File_List_Type
-    Use CFML_gSpaceGroups,              only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
-                                              Get_OP_from_Symb, Symmetry_symbol,Read_Symtrans_Code
-    Use CFML_Atoms,                     only: AtList_Type, mAtom_list_Type, Atm_Std_Type,Atm_Ref_Type, ModAtm_Ref_Type
-    Use CFML_Molecules,                 only: Molecule_Type, MolCrystal_Type
-    Use CFML_kvec_Symmetry,             only: Get_SymSymb, Read_Xsym, MagSymm_k_Type, Magnetic_Domain_type
+    Use CFML_GlobalDeps,    only: cp, clear_error, Err_CFML
+    Use CFML_Maths,         only: Sort
+    Use CFML_Strings,       only: Cut_string, U_Case, L_Case, Get_words, Get_Num, File_List_Type
+    Use CFML_gSpaceGroups,  only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
+                                  Get_OP_from_Symb, Symmetry_symbol,Read_Symtrans_Code,       &
+                                  Get_AtomPos_CTR,Get_AtomBet_CTR, Get_Moment_CTR, Get_TFourier_CTR
+    Use CFML_Atoms,         only: AtList_Type, mAtom_list_Type, Atm_Std_Type,Atm_Ref_Type, ModAtm_Ref_Type
+    Use CFML_Molecules,     only: Molecule_Type, MolCrystal_Type
+    Use CFML_kvec_Symmetry, only: Get_SymSymb, Read_Xsym, MagSymm_k_Type, Magnetic_Domain_type
 
     !---- Variables ----!
     implicit none
@@ -206,7 +207,6 @@
                Fill_RefCodes,Fill_RefGCodes,     &
                Fill_RefCodes_FAtom, Fill_RefCodes_FmAtom, Fill_RefCodes_Molcrys,                &
                Fill_RefCodes_Molec, Fill_RefCodes_Magdom,  &
-               Get_AtomBet_Ctr, Get_Atompos_Ctr,                                                &
                Get_ConCodes_Line, &
                Get_ConCodes_Line_FAtom, Get_ConCodes_Line_FmAtom, Get_ConCodes_Line_Molcrys,    &
                Get_ConCodes_Line_Molec, Get_ConCodes_Line_Magdom, &
@@ -842,29 +842,6 @@
           type(AtList_Type),    intent(in out) :: FAtom
        End Subroutine Get_ConCodes_Line_FAtom
 
-       Module Subroutine Get_Atombet_Ctr(X,Betas,Spgr,Codini,Icodes,Multip,Ord,Ss,Ipr)
-          real(kind=cp), dimension(3),             intent(in    ) :: X
-          real(kind=cp), dimension(6),             intent(in out) :: Betas
-          type(SPG_Type),                          intent(in    ) :: Spgr
-          Integer,                                 intent(in out) :: Codini
-          Integer, dimension(6),                   intent(in out) :: Icodes
-          real(kind=cp), dimension(6),             intent(in out) :: Multip
-          integer,                       optional, intent(in    ) :: Ord
-          integer, dimension(:),         optional, intent(in    ) :: Ss
-          integer,                       optional, intent(in    ) :: Ipr
-       End Subroutine Get_Atombet_Ctr
-
-       Module Subroutine Get_Atompos_Ctr(X,Spgr,Codini,ICodes,Multip,Ord,Ss,Att,Ipr)
-          real(kind=cp), dimension(3),            intent(in)     :: X
-          type(SPG_Type),                 intent(in)     :: Spgr
-          Integer,                                intent(in out) :: Codini
-          Integer,       dimension(3),            intent(in out) :: ICodes
-          real(kind=cp), dimension(3),            intent(in out) :: Multip
-          integer,                       optional,intent(in)     :: Ord
-          integer, dimension(:),         optional,intent(in)     :: Ss
-          real(kind=cp), dimension(:,:), optional,intent(in)     :: Att
-          integer,                       optional,intent(in)     :: Ipr
-       End Subroutine Get_Atompos_Ctr
 
        Module Subroutine Get_ConCodes_Line_FmAtom(Line,ik,FmAtom)
           !---- Arguments ----!

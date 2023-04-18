@@ -73,11 +73,11 @@ Program KeyCodes
    !type(AtList_Type),   dimension(NMAX_ATLIS) :: At
    !type(molecule_type), dimension(NMAX_MOLE)  :: Mol
 
-   type(RelationList_Type)          :: RelG
+   type(GenParList_Type)          :: RelG
 
-   type(RelationList_Type)          :: RPat
-   type(RelationList_Type)          :: RPhas
-   type(RelationList_Type)          :: RMol
+   type(GenParList_Type)          :: RPat
+   type(GenParList_Type)          :: RPhas
+   type(GenParList_Type)          :: RMol
 
 
    !---- Variables ----!
@@ -362,7 +362,7 @@ Program KeyCodes
          end if
 
          !> Allocating Relations
-         call Allocate_RelationList(100,RelG)
+         call Allocate_GenParList(100,RelG)
 
          !> No Blocks => 1 Phase
 
@@ -375,9 +375,9 @@ Program KeyCodes
 
 
       !> Allocating Relation List for Non atomic parameters
-       call Allocate_RelationList(50,RPat)   ! 18 Parameters for Pattern
-       call Allocate_RelationList(50,RPhas)  ! 6  Parameters for Phase
-       call Allocate_RelationList(50,RMol)   ! 6  Parameters for Phase
+       call Allocate_GenParList(50,RPat)   ! 18 Parameters for Pattern
+       call Allocate_GenParList(50,RPhas)  ! 6  Parameters for Phase
+       call Allocate_GenParList(50,RMol)   ! 6  Parameters for Phase
 
       !> Doing space for Refinement vectors
       !> add parameters according to the number of atoms in each phase
@@ -414,7 +414,7 @@ Program KeyCodes
                write(unit=lun,fmt="(a,/)") " "
 
                call Read_RefCodes_PHAS(ffile, IB_Phas(1,ip),IB_Phas(2,ip), Ip, RPhas)
-               call RList_to_Cell(RPhas, ip, Ph(icyc)%Cell)
+               call GPList_to_Cell(RPhas, ip, Ph(icyc)%Cell)
 
                if (icyc == NB_Phas) exit
             end do

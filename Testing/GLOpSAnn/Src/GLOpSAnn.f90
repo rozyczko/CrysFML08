@@ -321,6 +321,10 @@ Program Global_Optimization_Xtal_structures
      call Write_Info_RefCodes(A,Spg,lun)
      call Write_Info_RefCodes(A,Spg)
 
+     !------------------------------  Testing refinement codes
+     !  STOP
+     !------------------------------
+
      !--- Look for FP_Studio commands
      fst_cmd=" "
      do i=1,fich_cfl%nlines

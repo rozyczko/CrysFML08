@@ -227,7 +227,7 @@ Submodule (CFML_Keywords_Code_Parser) KWC_RefCodes
        call clear_error()
        nlong=len_trim(line)
 
-       if (nlong ==0) then
+       if (nlong == 0) then
           !---- Default Values ----!
           do i=1,FAtom%natoms
              call Fill_RefCodes(Keyv,Dire,i,0,0.0_cp,0.0_cp,0.0_cp,0,Fatom,Spg)
