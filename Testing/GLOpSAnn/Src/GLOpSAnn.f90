@@ -1,7 +1,6 @@
 Module GLS_glopsann
    use CFML_GlobalDeps,                only: cp
    use CFML_Metrics,                   only: Cell_G_Type
-
    use CFML_Strings,                   only: u_case, file_list_type
    use CFML_Simulated_Annealing,       only: State_Vector_Type
    implicit none
@@ -84,6 +83,7 @@ End Module GLS_glopsann
 !!----
 Program Global_Optimization_Xtal_structures
    !---- Use Modules ----!
+   use CFML_Rational,                  only: assignment (=)
    use CFML_GlobalDeps,                only: Err_CFML
    use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_info
    use CFML_strings,                   only: u_case,file_list_type, File_To_FileList
@@ -110,7 +110,7 @@ Program Global_Optimization_Xtal_structures
                                              Weight_Sim,iwgt
    use GLS_cost_functions,             only: Cell,A,A_Clone,Ac,SpG,hkl,Oh,Icost,wcost,Err_cost,Err_Mess_cost, &
                                              General_Cost_function, readn_set_costfunctpars, write_costfunctpars, &
-                                             Write_FinalCost,wavel,diff_mode,anti_bump, Write_PRF
+                                             Write_FinalCost,wavel,diff_mode,anti_bump, Write_PRF, Mat, trr
    use GLS_glopsann
 
    implicit none
@@ -132,8 +132,8 @@ Program Global_Optimization_Xtal_structures
    character(len=140),dimension(200)  :: info_lines=" "     ! Information lines to be output in solution files
    integer                            :: lun=1,ifst=2, ier,i,j,k, n, i_cfl,ninfo=0,i_best
    integer, dimension(:),allocatable  :: i_bvs
-   real                               :: start,fin, mindspc, maxsintl, within, costop, costmax, thr
-   integer                            :: narg, num_p
+   real(kind=cp)                      :: start,fin, mindspc, maxsintl, within, costop, costmax, thr
+   integer                            :: narg, num_p, d
    Logical                            :: esta, arggiven=.false., ref_within=.false.,&
                                          fst_out=.false., local_opt=.false., rest_file=.false., local_ref=.false.
 
@@ -191,6 +191,16 @@ Program Global_Optimization_Xtal_structures
      call Write_Crystal_Cell(Cell,lun)
      call Write_SpaceGroup_Info(SpG,lun)
      call Write_Atom_List(A,Iunit=lun)
+
+     !Convert to integer/real the operators of the group for calculating distances
+     if(allocated(Mat)) deallocate(Mat)
+     if(allocated(trr)) deallocate(trr)
+     allocate(Mat(3,3,SpG%Multip), trr(3,SpG%Multip))
+     d=SpG%d
+     do i=1,SpG%Multip
+       Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+       trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+     End do
 
      np_max= A%natoms*11  ! x,y,z,biso,occ,betas
      call allocate_vparam(np_max)
@@ -871,18 +881,19 @@ Program Global_Optimization_Xtal_structures
 End Program Global_Optimization_Xtal_structures
 
     !!----       Subroutine Write_FST(fst_file,v,cost)
-    !!----          character(len=*),     intent(in):: fst_file
-    !!----          real,dimension(:),    intent(in):: v
-    !!----          real,                 intent(in):: cost
+    !!----          character(len=*),           intent(in):: fst_file
+    !!----          real(kind=cp),dimension(:), intent(in):: v
+    !!----          real(kind=cp),              intent(in):: cost
     !!----       End Subroutine Write_FST
 Subroutine Write_FST(fst_file,v,cost)
    !---- Arguments ----!
-   Use CFML_Keywords_Code_Parser,  only:  VState_to_AtomsPar
-   use GLS_cost_functions,         only:  Cell,A,SpG
+   Use CFML_GlobalDeps,            only: cp
+   Use CFML_Keywords_Code_Parser,  only: VState_to_AtomsPar
+   use GLS_cost_functions,         only: Cell,A,SpG
 
    character(len=*),               intent(in) :: fst_file
-   real,dimension(:),              intent(in) :: v
-   real,                           intent(in) :: cost
+   real(kind=cp),dimension(:),     intent(in) :: v
+   real(kind=cp),                  intent(in) :: cost
 
    !----- Local variables -----!
    integer :: lun,i,nc, ier

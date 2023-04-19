@@ -16,7 +16,7 @@
 
     logical,             public ::    err_observ=.false.
     character (len=256), public ::    err_mess_observ="  "
-    Real, save,          public ::    SumGobs, ScaleFact=1.0, wavel_int
+    Real(kind=cp), save, public ::    SumGobs, ScaleFact=1.0, wavel_int
     Integer,             public ::    Nselr=0, iwgt=0
     Logical,             public ::    Weight_Sim=.false.
     logical,             public ::    fullprof_int=.false.
@@ -112,11 +112,11 @@
       logical,             intent (in)  :: Friedel
       type(RefList_Type),  intent (out) :: Rf
       !--- Local Variables ---!
-      integer :: ier, nref, i,j,nlines,i_hkl, itemp
-      real    :: a1,a2,a3
-      integer, allocatable,dimension(:,:) :: hkl
-      integer, allocatable,dimension(  :) :: ic
-      real,    allocatable,dimension(  :) :: sv,fobs,sigma
+      integer          :: ier, nref, i,j,nlines,i_hkl, itemp
+      real(kind=cp)    :: a1,a2,a3
+      integer,       allocatable,dimension(:,:) :: hkl
+      integer,       allocatable,dimension(  :) :: ic
+      real(kind=cp), allocatable,dimension(  :) :: sv,fobs,sigma
       character(len=132) :: line
 
 
@@ -242,13 +242,13 @@
       type(RefList_Type),          intent (out) :: Rf  !Independent reflections
       !--- Local Variables ---!
       integer :: ier, i,j,nlines,i_hkl,icod, nover, itemp, nri, iobs,nr,n
-      integer, dimension(3)               :: h
-      integer, allocatable,dimension(  :) :: ic
-      integer, allocatable,dimension(:,:) :: hov
-      integer, allocatable,dimension(:,:) :: hkl
-      integer, allocatable,dimension(:,:) :: point
-      real,    allocatable,dimension(  :) :: sv,sq
-      real                                :: fobs,sigma
+      integer,       dimension(3)               :: h
+      integer,       allocatable,dimension(  :) :: ic
+      integer,       allocatable,dimension(:,:) :: hov
+      integer,       allocatable,dimension(:,:) :: hkl
+      integer,       allocatable,dimension(:,:) :: point
+      real(kind=cp), allocatable,dimension(  :) :: sv,sq
+      real(kind=cp)                             :: fobs,sigma
       type(Observation_List_Type):: O
 
 
@@ -442,8 +442,8 @@
        type(RefList_Type),         intent(in) :: Reflex
        Character(len=*), optional, intent(in) :: Mode
        !---- Local Variables ----!
-       integer :: i
-       real    :: delta, Rfact
+       integer       :: i
+       real(kind=cp) :: delta, Rfact
 
        If(present(mode)) then
          Select Case (mode(1:3))
@@ -495,8 +495,8 @@
        type(RefList_Type),           intent(in) :: Reflex
        Character(len=*), optional,   intent(in) :: Mode
        !---- Local Variables ----!
-       integer :: i,j,k,n
-       real    :: delta, Rfact, over, sumcal, suma, obs, sobs
+       integer       :: i,j,k,n
+       real(kind=cp) :: delta, Rfact, over, sumcal, suma, obs, sobs
 
        If(present(mode)) then
          Select Case (mode(1:3))
