@@ -62,12 +62,12 @@
        call clear_error()
        if (vs%npar == 0) then
           Err_CFML%Ierr=1
-          Err_CFML%Msg=" Zero parameters for the vector state: PROVIDE a number > 0 for variable: NPAR"
+          Err_CFML%Msg=" Zero parameters (vs%npar = 0) for the vector state: Check VARY instructions!"
           return
        end if
        if (c%nm_cycl <= 1) then
           Err_CFML%Ierr=1
-          Err_CFML%Msg=" Too small value for the number of MCcycles/Temp : PROVIDE a number > 1 for variable: NM_CYCL"
+          Err_CFML%Msg=" Too small value for the number of MCcycles/Temp : PROVIDE a number > 10*Npar for variable: NM_CYCL"
           return
        end if
 
@@ -117,12 +117,12 @@
        call clear_error()
        if (vs%npar == 0) then
           Err_CFML%Ierr=1
-          Err_CFML%Msg=" Zero parameters for the vector state: PROVIDE a number > 0 for variable: NPAR"
+          Err_CFML%Msg=" Zero parameters (vs%npar = 0) for the vector state: Check VARY instructions "
           return
        end if
        if (c%nm_cycl <= 1) then
           Err_CFML%Ierr=1
-          Err_CFML%Msg=" Too small value for the number of MCcycles/Temp : PROVIDE a number > 1 for variable: NM_CYCL"
+          Err_CFML%Msg=" Too small value for the number of MCcycles/Temp : PROVIDE a number > 10*Npar for variable: NM_CYCL"
           return
        end if
 
@@ -185,7 +185,7 @@
     !!----
     !!---- Update: April - 2005
     !!
-    Module Subroutine Set_SimAnn_Cond(file_list,c)
+    Module Subroutine Set_SimAnn_Cond_FT(file_list,c)
        !---- Arguments ----!
        type(file_type),             intent( in)  :: file_list
        type(SimAnn_Conditions_type),intent(out)  :: c
@@ -273,7 +273,98 @@
           end if
        end if
 
-    End Subroutine Set_SimAnn_Cond
+    End Subroutine Set_SimAnn_Cond_FT
+
+    Module Subroutine Set_SimAnn_Cond_FLT(file_list,c)
+       !---- Arguments ----!
+       type(file_list_type),        intent( in)  :: file_list
+       type(SimAnn_Conditions_type),intent(out)  :: c
+
+       !--- Local Variables ---!
+       integer           :: i,j,k,ier
+       logical           :: notset,tempar,algor,noinst
+       character(len=80) :: line
+
+       notset=.true.
+       tempar=.false.
+       algor =.false.
+
+       c%t_ini=5.0      ! Initial temperature
+       c%anneal=0.9     ! Kirpactrick factor for Annealing
+       c%accept=0.01    ! Minimum percentage of accepted configurations
+       c%threshold=0.0  ! Maximun value of an acceptable cost function
+       c%initconfig=0   ! Flag determining if the first configuration is random or read
+       c%nalgor=0    ! Flag determining if the Corana algorithm is selected (0) or not (/=0)
+       c%nm_cycl=0   ! Number of Cycles per temp  in SA searchs
+       c%num_temps=1 ! Maximum number of temperatures in SA
+       c%num_therm=0 ! Number of thermalization cycles in SA
+       c%num_conf=1  ! Number of paralell configurations in SA
+       c%Cost_function_name=" Unnamed Cost Function"
+       c%seed=0      ! If different from zero, holds the seed for random number generator
+
+       do_read: do i=1,file_list%nlines
+         if(file_list%line(i)(1:7) == "SIM_ANN") then
+
+           do j=i+1,file_list%nlines
+              line=u_case(file_list%line(j))
+
+              Select Case (line(1:7))
+
+                 Case("COSTNAM")
+                    k=index(line,"!")
+                    if( k == 0) then
+                      k=len_trim(file_list%line(j))
+                    else
+                      k=k-1
+                    end if
+                    c%Cost_function_name=adjustl(file_list%line(j)(8:k))
+
+                 Case("THRESHO")
+                    read(unit=line(10:),fmt=*,iostat=ier) c%threshold
+                    if(ier /= 0) c%threshold=25.0
+
+                 Case("TEMPARM")
+                    read(unit=line(8:),fmt=*,iostat=ier) c%T_ini,c%anneal,c%num_temps
+                    if(ier /= 0) exit do_read
+                    tempar=.true.
+
+                 Case("ALGOR_T")
+                    read(unit=line(8:),fmt=*,iostat=ier) c%nalgor,c%num_conf,c%nm_cycl, c%num_therm, c%accept
+                    if(ier /= 0) exit do_read
+                    algor=.true.
+
+                 Case("SEEDVAL")
+                    read(unit=line(8:),fmt=*,iostat=ier) c%seed
+                    if(ier /= 0) c%seed=0
+
+                 Case("INITCON")
+                    line = adjustl(line(8:))
+                    if(line(1:3) /= "RAN") c%initconfig = 1
+
+              End Select
+              if(tempar .and. algor) notset=.false.
+           end do
+           exit do_read
+         end if
+         noinst=.true.
+       end do do_read
+
+       if (notset) then
+          Err_CFML%Ierr=1
+          if (noinst) then
+             Err_CFML%Msg=" => No Simulated Annealing conditions in input file "
+          else if(.not. tempar) then
+             Err_CFML%Msg=&
+             " => Unable to set Simulated Annealing conditions (Error in line: TemParM T_ini anneal num_temps num_therm)"
+          else if(.not. algor) then
+             Err_CFML%Msg= &
+             " => Unable to set Simulated Annealing conditions (Error in line: Algor_T  nalgor  num_conf  nm_cycl   num_therm)"
+          else
+             Err_CFML%Msg=" Unable to set Simulated Annealing conditions (Error in CFL file) "
+          end if
+       end if
+
+    End Subroutine Set_SimAnn_Cond_FLT
 
     !!----
     !!---- Module Subroutine Set_SimAnn_MStateV(n,nsol,Con,Bounds,VNam,Vec,vs,cod)

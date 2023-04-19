@@ -128,7 +128,7 @@ Submodule (CFML_Keywords_Code_Parser) KWC_ReadCodes
                       case default
                          Keyv=0
                    end select
-                   if (Keyv /=0) call Cut_string(dire(k),nlong)
+                   if (Keyv /= 0) call Cut_string(dire(k),nlong)
                    call get_refcodes_line(Keyv,"var",dire(k),fatom,spg)
                    if (Err_CFML%Flag) return
                 end do

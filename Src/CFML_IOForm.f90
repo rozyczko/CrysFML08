@@ -247,12 +247,13 @@ Module CFML_IOForm
          class(Cell_G_Type), optional, intent(in) :: Cell
       End Subroutine Write_CFL_Atoms
 
-      Module Subroutine Write_CFL_File(Lun,Cell, SpG, Atm, Title)
-          integer,                       intent(in)    :: lun
-          class(Cell_G_Type),            intent(in)    :: Cell
-          class(SpG_Type)  ,             intent(in)    :: SpG
-          Type(AtList_Type), optional,   intent(in)    :: Atm
-          character(len=*),  optional,   intent(in)    :: Title
+      Module Subroutine Write_CFL_File(Lun,Cell, SpG, Atm, Title,info_lines)
+          integer,                               intent(in)    :: lun
+          class(Cell_G_Type),                    intent(in)    :: Cell
+          class(SpG_Type)  ,                     intent(in)    :: SpG
+          Type(AtList_Type), optional,           intent(in)    :: Atm
+          character(len=*),  optional,           intent(in)    :: Title
+          character(len=*),dimension(:),optional,intent(in)    :: info_lines
       End Subroutine Write_CFL_File
 
       Module Subroutine Get_CIF_NPhases(cif, NPhas, PhasesName, IPhas)
@@ -441,11 +442,12 @@ Module CFML_IOForm
          type(atlist_type),       intent(in) :: atmList
       End Subroutine Write_SHX_Template
 
-      Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Nphase, CFrame, Job_Info)
+      Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Atm_typ, Nphase, CFrame, Job_Info)
          type(File_Type),               intent(in)  :: cfl
          class(Cell_Type),              intent(out) :: Cell
          class(SpG_Type), allocatable,  intent(out) :: SpG
          Type(AtList_Type),             intent(out) :: Atmlist
+         character(len=*),    optional, intent(in)  :: Atm_typ
          Integer,             optional, intent(in)  :: Nphase
          character(len=*),    optional, intent(in)  :: CFrame
          Type(Job_Info_type), optional, intent(out) :: Job_Info
@@ -670,18 +672,19 @@ Module CFML_IOForm
     !!----
     !!---- 09/05/2020
     !!
-    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, MGp, mAtm, Mag_dom, IPhase, FType, FileList)
+    Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, Atm_typ, MGp, mAtm, Mag_dom, IPhase, FType, FileList)
        !---- Arguments ----!
-       character(len=*),                    intent( in)     :: filenam    ! Name of the file
-       class(Cell_G_Type),                  intent(out)     :: Cell       ! Cell object
-       class(SpG_Type),        allocatable, intent(out)     :: SpG        ! Space Group object
-       type(Atlist_type),                   intent(out)     :: Atm        ! Atom List object
-       type(MagSymm_k_Type),      optional, intent (out)    :: MGp
-       type(mAtom_List_Type),     optional, intent (out)    :: mAtm
-       type(Magnetic_Domain_type),optional, intent (out)    :: Mag_dom
-       integer,                   optional, intent(in)      :: IPhase     ! Number of phase
-       type(File_Type),           optional, intent(out)     :: FType      ! File type
-       type(File_list_Type),      optional, intent(out)     :: FileList   ! File list type
+       character(len=*),                    intent( in)  :: filenam    ! Name of the file
+       class(Cell_G_Type),                  intent(out)  :: Cell       ! Cell object
+       class(SpG_Type),        allocatable, intent(out)  :: SpG        ! Space Group object
+       type(Atlist_type),                   intent(out)  :: Atm        ! Atom List object
+       character(len=*),          optional, intent(in)   :: Atm_typ    ! Type of atoms
+       type(MagSymm_k_Type),      optional, intent(out)  :: MGp
+       type(mAtom_List_Type),     optional, intent(out)  :: mAtm
+       type(Magnetic_Domain_type),optional, intent(out)  :: Mag_dom
+       integer,                   optional, intent(in)   :: IPhase     ! Number of phase
+       type(File_Type),           optional, intent(out)  :: FType      ! File type
+       type(File_list_Type),      optional, intent(out)  :: FileList   ! File list type
 
        !---- Local Variables ----!
        integer :: i
@@ -707,9 +710,17 @@ Module CFML_IOForm
        select case (trim(u_case(ext)))
           case ('CFL')
              if (present(IPhase)) then
-                call Read_XTal_CFL(f, Cell, SpG, Atm, NPhase=IPhase)
+                if(present(Atm_typ)) then
+                   call Read_XTal_CFL(f, Cell, SpG, Atm, Atm_typ, NPhase=IPhase)
+                else
+                   call Read_XTal_CFL(f, Cell, SpG, Atm, NPhase=IPhase)
+                end if
              else
-                call Read_XTal_CFL(f, Cell, SpG, Atm)  !SpG is allocated inside the subroutine
+                if(present(Atm_typ)) then
+                  call Read_XTal_CFL(f, Cell, SpG, Atm, Atm_typ)  !SpG is allocated inside the subroutine
+                else
+                  call Read_XTal_CFL(f, Cell, SpG, Atm)  !SpG is allocated inside the subroutine
+                end if
              end if
           case ('CIF')
              allocate(SpG_Type :: SpG)

@@ -2,7 +2,7 @@
 # It is better to comment the part corresponding to executables in order to construct
 # the library totally independent of the programs using it.
 #
-name = "CrysFML2008"
+name = "CrysFML08"
 version = "0.1.0"
 license = "LGPL"
 author = "Juan Rodriguez-Carvajal, Javier Gonzalez-Platas, Nebil A. Katcho"

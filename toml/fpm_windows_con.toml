@@ -199,10 +199,10 @@ main="Simple_calc_Mag_powder.f90"
 ##
 ## Structures_GlobalOptimization
 ##
-#[[executable]]
-#name="GLOpSAnn"
-#source-dir="Testing/Structures_GlobalOptimization/Src"
-#main="GLOpSAnn.f90"
+[[executable]]
+name="nGLOpSAnn"
+source-dir="Testing/GLOpSAnn/Src"
+main="GLOpSAnn.f90"
 #
 #
 #

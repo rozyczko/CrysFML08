@@ -765,14 +765,14 @@ SubModule (CFML_IOForm) Format_CFL
    !!----
    !!---- 08/05/2020
    !!
-   Module Subroutine Write_CFL_File(Lun,Cell, SpG, Atm, Title)
+   Module Subroutine Write_CFL_File(Lun,Cell, SpG, Atm, Title,info_lines)
       !---- Arguments ----!
-      integer,                     intent(in)    :: lun
-      class(Cell_G_Type),          intent(in)    :: Cell
-      class(SpG_Type),             intent(in)    :: SpG
-      Type(AtList_Type), optional, intent(in)    :: Atm
-      character(len=*),  optional, intent(in)    :: Title
-
+      integer,                               intent(in)    :: lun
+      class(Cell_G_Type),                    intent(in)    :: Cell
+      class(SpG_Type),                       intent(in)    :: SpG
+      Type(AtList_Type), optional,           intent(in)    :: Atm
+      character(len=*),  optional,           intent(in)    :: Title
+      character(len=*),dimension(:),optional,intent(in)    :: info_lines
       !----- Local variables -----!
       integer                         :: j
       real(kind=cp), dimension(6)     :: a,sa
@@ -807,6 +807,15 @@ SubModule (CFML_IOForm) Format_CFL
          call Write_CFL_Atoms(Atm,Lun,cell)
          write(unit=lun,fmt='(a)')" "
       end if
+      if(present(info_lines)) then
+        j=0
+        write(unit=lun,fmt="(a)") "!"
+        do
+         j=j+1
+         write(unit=lun,fmt="(a)") trim(info_lines(j))
+         if(u_case(info_lines(j)(1:14)) == "END_INFO_LINES" .or. j > 100) exit
+        end do
+      end if
 
    End Subroutine Write_CFL_File
 
@@ -817,12 +826,13 @@ SubModule (CFML_IOForm) Format_CFL
    !!--++
    !!--++ 10/05/2020
    !!
-   Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Nphase, CFrame, Job_Info)
+   Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Atm_Typ, Nphase, CFrame, Job_Info)
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: cfl
       class(Cell_Type),              intent(out) :: Cell
       class(SpG_Type), allocatable,  intent(out) :: SpG
       Type(AtList_Type),             intent(out) :: Atmlist
+      character(len=*),    optional, intent(in)  :: Atm_Typ
       Integer,             optional, intent(in)  :: Nphase   ! Select the Phase to read
       character(len=*),    optional, intent(in)  :: CFrame
       Type(Job_Info_type), optional, intent(out) :: Job_Info
@@ -907,27 +917,30 @@ SubModule (CFML_IOForm) Format_CFL
 
       if(SpG%d == 4) set_ModAtm_std=.false.
 
-      if ((.not. set_moment) .and. (.not. set_ModAtm_std)) then
-         !> Type of Atoms: Atm_std
-         call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
-
-      else if (set_moment .and. (.not. set_ModAtm_std)) then
-         !> Type of Atoms: Atm_std
-         call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
-
-      else if (set_moment .and. set_ModAtm_std) then
-         !> Type of Atoms: ModAtm_std
-         call read_cfl_kvectors(cfl,kvec,n_ini,n_end)
-         if (err_CFML%Ierr ==1) return
-         call read_cfl_Atoms(cfl,AtmList,'ModAtm_std_type',Kvec%nk,n_ini,n_end)
-
+      if(present(Atm_Typ)) then
+        call read_cfl_Atoms(cfl,AtmList,Atm_Typ,0,n_ini,n_end)
       else
-         !> Type of atoms not defined
-         err_CFML%Ierr=1
-         err_CFML%Msg="Read_XTal_CFL: Impossible to define the type of Atoms. Please, check it!"
-         return
-      end if
+         if ((.not. set_moment) .and. (.not. set_ModAtm_std)) then
+            !> Type of Atoms: Atm_std
+            call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
 
+         else if (set_moment .and. (.not. set_ModAtm_std)) then
+            !> Type of Atoms: Atm_std
+            call read_cfl_Atoms(cfl,AtmList,'Atm_std_type',0,n_ini,n_end)
+
+         else if (set_moment .and. set_ModAtm_std) then
+            !> Type of Atoms: ModAtm_std
+            call read_cfl_kvectors(cfl,kvec,n_ini,n_end)
+            if (err_CFML%Ierr ==1) return
+            call read_cfl_Atoms(cfl,AtmList,'ModAtm_std_type',Kvec%nk,n_ini,n_end)
+
+         else
+            !> Type of atoms not defined
+            err_CFML%Ierr=1
+            err_CFML%Msg="Read_XTal_CFL: Impossible to define the type of Atoms. Please, check it!"
+            return
+         end if
+      end if
       if (allocated(xvet)) deallocate(xvet)
       Select Type (SpG)
          type is (SuperSpaceGroup_Type)
