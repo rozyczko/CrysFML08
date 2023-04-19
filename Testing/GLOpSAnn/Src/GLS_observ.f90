@@ -127,7 +127,6 @@
         err_mess_observ="  Error opening the file: "//trim(file_hkl)
         return
       end if
-      write(*,*)  "  Logical unit ", i_hkl
       Fullprof_int=.false.
       i=index(file_hkl,".int")
       if(i /= 0) Fullprof_int=.true.

@@ -220,7 +220,7 @@ Program MagPolar3D
 
        !  Set nuclear form factorsfor all the atoms
        !  in the structure
-       call Init_Calc_hkl_StrFactors(A,"NUC",wave,lun)
+       call Init_Calc_hkl_StrFactors(A,SpG,"NUC",wave,lun)
 
       do
 

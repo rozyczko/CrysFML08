@@ -593,9 +593,9 @@
       real(kind=cp),dimension(:),    intent( in):: v
       real(kind=cp),                 intent(out):: cost
       !---- Local variables ----!
-      integer :: i,ic, nlist=1, numv
+      integer               :: i,ic, nlist=1, numv
       integer, dimension(1) :: List
-      logical :: tdist_called
+      logical               :: tdist_called
 
 
 
@@ -756,7 +756,6 @@
          end do
       end if
 
-      return
     End Subroutine General_Cost_function
 
 

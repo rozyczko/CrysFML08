@@ -13,6 +13,7 @@ Module GLS_glopsann
       type(file_list_type),    intent(in)  :: fcfl
       type(file_list_type),    intent(out) :: fvarfix
       !---- local variables ----!
+      integer, parameter :: nfix=40
       integer :: i,j,jj,k
       character(len=256)           :: line
       character(len=6)             :: label, scatt
@@ -55,6 +56,14 @@ Module GLS_glopsann
           write(unit=fvarfix%line(j), fmt="(a,2f10.4,2i4)")  "VARY "//" y_"//trim(label), low(2),high(2),0,0
           j=j+1
           write(unit=fvarfix%line(j), fmt="(a,2f10.4,2i4)")  "VARY "//" z_"//trim(label), low(3),high(3),0,0
+        end if
+      end do
+
+      do i=1,fcfl%nlines
+        line=adjustl(fcfl%line(i))
+        if(u_case(line(1:3)) == "FIX" .or. u_case(line(1:5)) == "EQUAL") then
+          j=j+1
+          fvarfix%line(j)=trim(line)
         end if
       end do
       fvarfix%nlines=j
@@ -169,14 +178,14 @@ Program Global_Optimization_Xtal_structures
 
    open(unit=lun,file=trim(filcod)//".out", status="replace",action="write")
     write(unit=lun,fmt="(/,/,6(a,/))")                                                 &
-     "                                         G L O P S A N N"                      , &
+     "                                         G L O p S A n n"                      , &
      "                     ------ Global Optimization by Simulated Annealing ------" , &
      "                             ------  of Crystal Structures  ------"            , &
-     "                                 ---- Version 1.0 May-2020 ----"                               , &
+     "                               ---- Version 1.2 April-2023 ----"                               , &
      "    ****************************************************************************************"  , &
      "    * Optimizes X-tal structures against combined cost functions described in a *.CFL file *"  , &
      "    ****************************************************************************************"  , &
-     "                  (JRC - ILL - Created in December-2008, Updated in May 2020 )"
+     "                  (JRC - ILL - Created in December-2008, Updated in April 2023 )"
 
    inquire(file=trim(filcod)//".cfl",exist=esta)
    if( .not. esta) then
@@ -329,7 +338,6 @@ Program Global_Optimization_Xtal_structures
      end if
 
      call Write_Info_RefCodes(A,Spg,lun)
-     call Write_Info_RefCodes(A,Spg)
 
      !------------------------------  Testing refinement codes
      !  STOP

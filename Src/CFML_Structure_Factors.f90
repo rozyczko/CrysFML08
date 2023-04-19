@@ -62,8 +62,7 @@ Module CFML_Structure_Factors
     public :: Additional_Scattering_Factors, Allocate_Scattering_Species, &
               Calc_General_StrFactor, Calc_hkl_StrFactor, Calc_StrFactor, &
               Init_Structure_Factors, Init_Calc_hkl_StrFactors, Init_Calc_StrFactors, &
-              Modify_SF, Magnetic_Structure_Factors, &
-              Set_Form_Factors, Structure_Factors,  &
+              Modify_SF, Magnetic_Structure_Factors, Set_Form_Factors, Structure_Factors, &
               Write_Structure_Factors, Write_Structure_Factors_Mag
 
     !---- Definitions ----!
@@ -85,7 +84,7 @@ Module CFML_Structure_Factors
     !!----
     !!---- TYPE, PUBLIC :: Scattering_Species_Type
     !!----
-    !!----     Type encapsulting scattering factors for neutrons and X-rays.
+    !!----     Type encapsulating scattering factors for neutrons and X-rays.
     !!----     Constructed by calling Set_Form_Factors
     !!----
     Type, Public :: Scattering_Species_Type
@@ -123,11 +122,11 @@ Module CFML_Structure_Factors
        Type(Strf_Type), dimension(:),allocatable :: Strf
     End Type  StrfList_Type
 
-    logical, private :: SF_Initialized=.false.                        ! Variable indicating if the module has been initialized
+    logical, private :: SF_Initialized=.false.   ! Variable indicating if the module has been initialized
 
     integer,                                    private :: NSpecies=0 ! Number of chemical species for X-rays scattering form factors
-    integer,       dimension(:),   allocatable, private :: P_A        ! Integer pointer from atoms to species. Dim=N_atoms
-
+    integer, dimension(:),         allocatable, private :: P_A    ! Integer pointer from atoms to species. Dim=N_atoms
+    integer, dimension(:,:,:),     allocatable, private :: opMat  ! Matrices of the symmetry operators
     real(kind=cp), dimension(:,:), allocatable, private :: AF0    ! Array for Atomic Factor. Dim=(Natoms,NRef)
     real(kind=cp), dimension(:),   allocatable, private :: AFP    ! Array for real part of anomalous scattering form factor. Dim=(Natoms)
     real(kind=cp), dimension(:),   allocatable, private :: AFPP   ! Array for imaginary part of anomalous scattering form factor. Dim=(Natoms)
@@ -139,6 +138,7 @@ Module CFML_Structure_Factors
     real(kind=cp), dimension(  :), allocatable, private :: FF_Z   ! Array for X-rays scattering form factors. Dim=(NSpecies)
     real(kind=cp), dimension(:,:), allocatable, private :: HT     ! Array for HT Calculations. Dim(Natoms, NRef)
     real(kind=cp), dimension(:,:), allocatable, private :: TH     ! Array for TH Calculations. Dim(Natoms, NRef)
+    real(kind=cp), dimension(:,:), allocatable, private :: optr   ! Associated translations of symmetry operators
 
 
     type(HR_Type), dimension(:,:), allocatable, private :: HR     ! Array for HR Calculations. Dim=(Natoms, Nref)
@@ -268,9 +268,10 @@ Module CFML_Structure_Factors
           integer,          optional, intent(in) :: lun
        End Subroutine Init_Calc_StrFactors
 
-       Module Subroutine Init_Calc_hkl_StrFactors(Atm, Mode, Lambda, Lun)
+       Module Subroutine Init_Calc_hkl_StrFactors(Atm, Grp, Mode, Lambda, Lun)
           !---Arguments ---!
           type(AtList_type),           intent(in) :: Atm
+          type(SpG_type),              intent(in) :: Grp
           character(len=*),  optional, intent(in) :: Mode
           real(kind=cp),     optional, intent(in) :: lambda
           integer,           optional, intent(in) :: lun
