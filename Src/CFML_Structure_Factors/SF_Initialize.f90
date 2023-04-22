@@ -23,22 +23,14 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       !--- Local variables ---!
       integer :: Natm, Multr
-      integer :: ierr,i
+      integer :: ierr
 
       !> Init
       call clear_error()
 
       Natm = Atm%natoms
       Multr= Grp%Numops
-
-      ! Private symetry operators to accelerate calculations
-      if(allocated(opMat)) deallocate(opMat)
-      if(allocated(opTr)) deallocate(opTr)
-      allocate(opMat(3,3,Grp%Multip),opTr(3,Grp%Multip))
-      do i=1,Grp%Multip
-        opMat(:,:,i)= Grp%Op(i)%Mat(1:3,1:3)
-         opTr(:,i)  = Grp%Op(i)%Mat(1:3,4)
-      End do
+      if(.not. init_symOP) call SF_init_opMatTr(Grp)
 
       !> Scattering factor tables
       if (allocated(AF0)) deallocate(AF0)
@@ -201,7 +193,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       integer,           optional, intent(in) :: lun
 
       !--- Local variables ---!
-      integer :: Natm,i
+      integer :: Natm
       integer :: ierr
       character(len=3) :: tipo
 
@@ -213,15 +205,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       tipo=U_Case(tipo)
       Natm = Atm%natoms
-
-      ! Private symetry operators to accelerate calculations
-      if(allocated(opMat)) deallocate(opMat)
-      if(allocated(opTr)) deallocate(opTr)
-      allocate(opMat(3,3,Grp%Multip),opTr(3,Grp%Multip))
-      do i=1,Grp%Multip
-        opMat(:,:,i)= Grp%Op(i)%Mat(1:3,1:3)
-         opTr(:,i)  = Grp%Op(i)%Mat(1:3,4)
-      End do
+      if(.not. init_symOP) call SF_init_opMatTr(Grp)
 
       !> Anomalous Scattering factor tables
       if (allocated(AFP)) deallocate(AFP)

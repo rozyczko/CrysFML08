@@ -158,14 +158,14 @@ Program Global_Optimization_Xtal_structures
     end if
 
     write (unit=*,fmt="(/,/,7(a,/))")                                                  &
-     "                                         G L O P S A N N"                      , &
-     "                     ------ Global Optimization by Simulated Annealing ------" , &
-     "                             ------  of Crystal Structures  ------"            , &
-     "                                ---- Version 1.0 May-2020 ----"                             , &
+     "                                       G L O p S A n n"                      , &
+     "                   ------ Global Optimization by Simulated Annealing ------" , &
+     "                           ------  of Crystal Structures  ------"            , &
+     "                             ---- Version 1.2 April-2023 ----"                               , &
      "    ****************************************************************************************"  , &
      "    * Optimizes X-tal structures against combined cost functions described in a *.CFL file *"  , &
      "    ****************************************************************************************"  , &
-     "                  (JRC - ILL - Created in December-2008, Updated in May 2020 )"
+     "             ( JRC/NAK - ILL - Created in December-2008, last update in April-2023 )"
    write (unit=*,fmt=*) " "
 
    if(.not. arggiven) then
@@ -178,14 +178,14 @@ Program Global_Optimization_Xtal_structures
 
    open(unit=lun,file=trim(filcod)//".out", status="replace",action="write")
     write(unit=lun,fmt="(/,/,6(a,/))")                                                 &
-     "                                         G L O p S A n n"                      , &
-     "                     ------ Global Optimization by Simulated Annealing ------" , &
-     "                             ------  of Crystal Structures  ------"            , &
-     "                               ---- Version 1.2 April-2023 ----"                               , &
+     "                                       G L O p S A n n"                      , &
+     "                   ------ Global Optimization by Simulated Annealing ------" , &
+     "                           ------  of Crystal Structures  ------"            , &
+     "                             ---- Version 1.2 April-2023 ----"                               , &
      "    ****************************************************************************************"  , &
      "    * Optimizes X-tal structures against combined cost functions described in a *.CFL file *"  , &
      "    ****************************************************************************************"  , &
-     "                  (JRC - ILL - Created in December-2008, Updated in April 2023 )"
+     "             ( JRC/NAK - ILL - Created in December-2008, last update in April-2023 )"
 
    inquire(file=trim(filcod)//".cfl",exist=esta)
    if( .not. esta) then
@@ -743,7 +743,7 @@ Program Global_Optimization_Xtal_structures
    end if
 
    close(unit=lun)
-   !call Close_GLOpSAnn()
+   call Close_GLOpSAnn()
 
    Contains
 

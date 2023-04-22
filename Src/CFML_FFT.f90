@@ -80,7 +80,7 @@
 !!--..    Optional Parameters:
 !!--..
 !!--..    dim      One dimensional integer array, containing the dimensions to be
-!!--..             transformed. Default is (/1,...,N/) with N being the rank of
+!!--..             transformed. Default is [1,...,N] with N being the rank of
 !!--..             array, i.e. complete transform. dim can restrict transformation
 !!--..             to a subset of available dimensions. Its size must not exceed the
 !!--..             rank of array or the size of shape respectivly.
@@ -103,7 +103,7 @@
 !!--..             scaled by sqrt(L*M*N), while call fftn(A, SHAPE(A)) will do
 !!--..             the same in place.
 !!--..
-!!--..             result = fft(A, dim=(/1,3/)) will transform with respect to
+!!--..             result = fft(A, dim=[1,3]) will transform with respect to
 !!--..             the first and the third dimension, scaled by sqrt(L*N).
 !!--..
 !!--..             result = fft(fft(A), inv=.true.) should (approximately)
@@ -171,7 +171,7 @@ Module CFML_FFT
    private
 
    !---- List of public functions ----!
-   public :: Convol, Convol_Peaks, &
+   public :: Convol, Convol_Peaks, direct_convol, &
              FFT, F_FFT
 
    !---- List of public subroutines ----!
@@ -1200,5 +1200,39 @@ Module CFML_FFT
        end if
 
     end function convol_peaks
+
+    Pure Function direct_convol(sig, kern) result(convolve)
+        real(kind=cp), dimension(:),  intent(in) :: sig, kern !sig is the signal array, kern is the impulse array
+        real(kind=cp), dimension(:), allocatable :: convolve, y
+        integer :: kernsiz , sigsiz
+        integer :: i,j,k
+
+        sigsiz = size(sig)    ! kernel size should be smaller or equal than signal size
+        kernsiz = size(kern)
+
+        allocate(y(sigsiz), convolve(sigsiz))
+        !last part
+        do i=kernsiz,sigsiz
+            y(i) = 0.0
+            j=i
+            do k=1,kernsiz
+                y(i) = y(i) + sig(j)*kern(k)
+                j = j-1
+            end do
+        end do
+
+        !first part
+        do i=1,kernsiz
+            y(i) = 0.0
+            j=i
+            k=1
+            do while (j > 0)
+                y(i) = y(i) + sig(j)*kern(k)
+                j = j-1
+                k = k+1
+            end do
+        end do
+        convolve = y
+    End Function direct_convol
 
  end module cfml_fft

@@ -372,7 +372,7 @@
           else
              !Construction of the Atom_Conf_List variable "Ac"
              call Allocate_Atoms_Conf_list(A%natoms,Ac)
-             Ac%atom=A%atom
+             Ac%atom(1:A%natoms)=A%atom
              Call Species_on_List(Ac,Spg%Multip,tol)
              if(Err_CFML%Ierr /= 0) then
                err_cost=.true.

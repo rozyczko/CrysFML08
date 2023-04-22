@@ -63,7 +63,8 @@ Module CFML_Structure_Factors
               Calc_General_StrFactor, Calc_hkl_StrFactor, Calc_StrFactor, &
               Init_Structure_Factors, Init_Calc_hkl_StrFactors, Init_Calc_StrFactors, &
               Modify_SF, Magnetic_Structure_Factors, Set_Form_Factors, Structure_Factors, &
-              Write_Structure_Factors, Write_Structure_Factors_Mag
+              Write_Structure_Factors, Write_Structure_Factors_Mag, &
+              SF_init_opMatTr, SF_Clear_init_symOp
 
     !---- Definitions ----!
 
@@ -126,7 +127,6 @@ Module CFML_Structure_Factors
 
     integer,                                    private :: NSpecies=0 ! Number of chemical species for X-rays scattering form factors
     integer, dimension(:),         allocatable, private :: P_A    ! Integer pointer from atoms to species. Dim=N_atoms
-    integer, dimension(:,:,:),     allocatable, private :: opMat  ! Matrices of the symmetry operators
     real(kind=cp), dimension(:,:), allocatable, private :: AF0    ! Array for Atomic Factor. Dim=(Natoms,NRef)
     real(kind=cp), dimension(:),   allocatable, private :: AFP    ! Array for real part of anomalous scattering form factor. Dim=(Natoms)
     real(kind=cp), dimension(:),   allocatable, private :: AFPP   ! Array for imaginary part of anomalous scattering form factor. Dim=(Natoms)
@@ -138,7 +138,10 @@ Module CFML_Structure_Factors
     real(kind=cp), dimension(  :), allocatable, private :: FF_Z   ! Array for X-rays scattering form factors. Dim=(NSpecies)
     real(kind=cp), dimension(:,:), allocatable, private :: HT     ! Array for HT Calculations. Dim(Natoms, NRef)
     real(kind=cp), dimension(:,:), allocatable, private :: TH     ! Array for TH Calculations. Dim(Natoms, NRef)
+    ! Private symmetry operators
     real(kind=cp), dimension(:,:), allocatable, private :: optr   ! Associated translations of symmetry operators
+    integer, dimension(:,:,:),     allocatable, private :: opMat  ! Matrices of the symmetry operators
+    logical, private :: init_symOp=.false.
 
 
     type(HR_Type), dimension(:,:), allocatable, private :: HR     ! Array for HR Calculations. Dim=(Natoms, Nref)
@@ -395,6 +398,29 @@ Module CFML_Structure_Factors
        End Subroutine Calc_Mag_Structure_Factor
 
    End Interface
+
+   contains
+
+      Subroutine SF_init_opMatTr(SpG)
+        class(SPG_Type), intent(in) :: SpG
+        integer :: i
+        if(.not. init_symOp) then
+           ! Private symetry operators to accelerate calculations
+           if(allocated(opMat)) deallocate(opMat)
+           if(allocated(opTr))  deallocate(opTr)
+           allocate(opMat(3,3,SpG%Multip),opTr(3,SpG%Multip))
+           do i=1,SpG%Multip
+             opMat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+              opTr(:,i)  = SpG%Op(i)%Mat(1:3,4)
+           End do
+           init_symOp=.true.
+        end if
+      End Subroutine SF_init_opMatTr
+
+      Subroutine SF_Clear_init_symOp()
+        init_symOp=.false.
+      End Subroutine SF_Clear_init_symOp
+
 
 End Module CFML_Structure_Factors
 

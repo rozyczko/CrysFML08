@@ -70,7 +70,8 @@
               Deallocate_Coordination_Type, Deallocate_Point_List, Distance_and_Sigma, Get_Euler_From_Fract, &
               Get_PhiTheChi, P1_Dist, Print_Distances, Set_Orbits_InList, Set_TDist_Coordination, &
               Get_Transf_List, Set_TDist_Partial_Coordination, Get_Anglen_Axis_From_RotMat, Get_Matrix_moving_v_to_u, &
-              Get_OmegaChiPhi, Set_Rotation_Matrix, Set_New_AsymUnit,Angle_and_Sigma, Torsion_and_Sigma
+              Get_OmegaChiPhi, Set_Rotation_Matrix, Set_New_AsymUnit,Angle_and_Sigma, Torsion_and_Sigma, &
+              Clear_init_symOp
 
     !---- List of public overloaded procedures: subroutines ----!
 
@@ -113,10 +114,12 @@
     real(kind=cp), parameter, private :: epsi=0.001  ! Epsilon for roughly comparing distances
 
     !---- Variables ----!
-    type(Coordination_Type), public :: coord_info    ! Coordination Information
+    type(Coordination_Type),                    public  :: coord_info    ! Coordination Information
+    real(kind=cp), dimension(:,:), allocatable, private :: optr   ! Associated translations of symmetry operators
+    integer, dimension(:,:,:),     allocatable, private :: opMat  ! Matrices of the symmetry operators
+    logical, private :: init_symOp=.false.
 
-
-    !---- Overlapp Zone ----!
+    !---- Overload Zone ----!
     Interface  Angle_Dihedral
        Module Procedure Angle_Dihedral_Ijkn
        Module Procedure Angle_Dihedral_Uvw
@@ -416,5 +419,27 @@
       End Subroutine Torsion_and_Sigma
 
     End interface
+
+    contains
+
+      Subroutine init_opMatTr(SpG)
+        class(SPG_Type), intent(in) :: SpG
+        integer :: i
+        if(.not. init_symOp) then
+           ! Private symetry operators to accelerate calculations
+           if(allocated(opMat)) deallocate(opMat)
+           if(allocated(opTr))  deallocate(opTr)
+           allocate(opMat(3,3,SpG%Multip),opTr(3,SpG%Multip))
+           do i=1,SpG%Multip
+             opMat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+              opTr(:,i)  = SpG%Op(i)%Mat(1:3,4)
+           End do
+           init_symOp=.true.
+        end if
+      End Subroutine init_opMatTr
+
+      Subroutine Clear_init_symOp()
+        init_symOp=.false.
+      End Subroutine Clear_init_symOp
 
  End Module CFML_Geom

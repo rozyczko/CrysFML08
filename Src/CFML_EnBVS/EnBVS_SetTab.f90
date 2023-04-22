@@ -623,7 +623,7 @@
     !!----
     !!---- Update: March - 2005, December 2014, January 2015
     !!
-    Module Subroutine Species_on_List(A,MulG, tol, covalent,softbvs)
+    Module Subroutine Species_on_List(A, MulG, tol, covalent,softbvs)
        !---- Arguments ----!
        type (Atoms_Conf_List_Type), intent(in out) :: A
        Integer, optional,           intent(in)     :: MulG

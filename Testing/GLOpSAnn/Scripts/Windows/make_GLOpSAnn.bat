@@ -59,4 +59,3 @@ rem if exist %PROGCFML%  move GLOpSAnn.exe %PROGCFML%\DistFPS_64b\.
 rem if exist %PROGCFML%  copy ..\Docs\GLOpSAnn.pdf %PROGCFML%\DistFPS\Docs\.
 :FIN
    del *.obj *.mod *.o *.map *.bak *.exe > nul
-cd ..\Scripts\Windows

@@ -741,7 +741,7 @@
        !> Init
        iv=0
        ivet=0; vet=0.0
-
+       call Clear_Error()
        resto=u_case(Str)
        do
           ioper=0
@@ -876,7 +876,7 @@
        !> Init
        value=0.0_cp; std=0.0_cp
        ic=0
-
+       call Clear_Error()
        !> Initial Checks
        if (len_trim(Str) == 0) then
           err_cfml%ierr=1
