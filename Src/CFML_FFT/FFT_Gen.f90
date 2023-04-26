@@ -52,11 +52,11 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
 
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = ierr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2) /))
+       ft = reshape(work, [ size(array, 1), size(array, 2) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -88,11 +88,11 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
 
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = ierr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2), size(array, 3) /))
+       ft = reshape(work, [ size(array, 1), size(array, 2), size(array, 3) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -124,11 +124,11 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = ierr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2), size(array, 3), &
-                             size(array, 4) /))
+       ft = reshape(work, [ size(array, 1), size(array, 2), size(array, 3), &
+                             size(array, 4) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -162,12 +162,12 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
 
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = IErr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2), size(array, 3), &
-                             size(array, 4), size(array, 5) /))
+       ft = reshape(work, [ size(array, 1), size(array, 2), size(array, 3), &
+                             size(array, 4), size(array, 5) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -200,12 +200,12 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
 
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = ierr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2), size(array, 3), &
-                             size(array, 4), size(array, 5), size(array, 6) /))
+       ft = reshape(work, [ size(array, 1), size(array, 2), size(array, 3), &
+                             size(array, 4), size(array, 5), size(array, 6) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -238,12 +238,12 @@ Submodule (CFML_FFT) FFT_Gen
        complex(fftkind), dimension(:), allocatable :: work
 
        allocate( work(size(array)) )
-       work = reshape(array, (/ size(array) /))
+       work = reshape(array, [ size(array) ])
        ierr=0
        call fftn(work, shape(array), dim, inv, stat = IErr)
-       ft = reshape(work, (/ size(array, 1), size(array, 2), size(array, 3), &
+       ft = reshape(work, [ size(array, 1), size(array, 2), size(array, 3), &
                              size(array, 4), size(array, 5), size(array, 6), &
-                             size(array, 7) /))
+                             size(array, 7) ])
 
        if (allocated(work)) deallocate(work)
        if (ierr /=0) then
@@ -286,7 +286,7 @@ Submodule (CFML_FFT) FFT_Gen
           d(1:ndim) = dim(1:ndim)
        else
           ndim = size(d)
-          d = (/(i, i = 1, size(d))/)
+          d = [(i, i = 1, size(d))]
        end if
        ntotal = product(shape)
        scal = sqrt(1.0_fftkind / product(shape(d(1:ndim))))

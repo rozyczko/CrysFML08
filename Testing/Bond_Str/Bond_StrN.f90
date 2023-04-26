@@ -896,8 +896,8 @@ Program Bond_Str
    Subroutine Calc_Distortion_IVTON(At, Spg, Cell, Model_Vi,Iunit)
       !---- Arguments ----!
       type (Atoms_Conf_list_Type), intent(in)  :: At
-      type (Spg_Type),       intent(in)  :: Spg
-      type (Cell_G_Type),    intent(in)  :: Cell
+      type (Spg_Type),             intent(in)  :: Spg
+      type (Cell_G_Type),          intent(in)  :: Cell
       integer,                     intent(in)  :: Model_Vi
       integer, optional,           intent(in)  :: Iunit
 

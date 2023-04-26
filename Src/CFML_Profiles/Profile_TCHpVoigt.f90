@@ -42,7 +42,7 @@ SubModule (CFML_Profiles) Profile_TCHpVoigt
     !!---- SUBROUTINE TCH_PVOIGT_DER
     !!----
     !!----  Pv_Val is the value of the function for the argument x
-    !!----  Par=(/HG,HL/)  and Dpar(1:3)=(/derx,derHG,derHL/)
+    !!----  Par=[HG,HL]  and Dpar(1:3)=[derx,derHG,derHL]
     !!----
     !!---- Update: April - 2009
     !!
@@ -98,7 +98,7 @@ SubModule (CFML_Profiles) Profile_TCHpVoigt
 
           derHG= derH * dhdhg + derEta * detag  !Chain rule
           derHL= derH * dhdhl + derEta * detal
-          dpar(1:3)=(/derx,derHG,derHL/)
+          dpar(1:3)=[derx,derHG,derHL]
        end if
 
     End Subroutine TCH_pVoigt_Der

@@ -30,6 +30,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       Natm = Atm%natoms
       Multr= Grp%Numops
+      if(.not. init_symOP) call SF_init_opMatTr(Grp)
 
       !> Scattering factor tables
       if (allocated(AF0)) deallocate(AF0)
@@ -183,9 +184,10 @@ Submodule (CFML_Structure_Factors) SF_Initialize
    !!----
    !!---- Update: April - 2022
    !!
-   Module Subroutine Init_Calc_hkl_StrFactors(Atm, Mode, Lambda, Lun)
+   Module Subroutine Init_Calc_hkl_StrFactors(Atm, Grp, Mode, Lambda, Lun)
       !---Arguments ---!
       type(AtList_type),           intent(in) :: Atm
+      type(SpG_type),              intent(in) :: Grp
       character(len=*),  optional, intent(in) :: Mode
       real(kind=cp),     optional, intent(in) :: lambda
       integer,           optional, intent(in) :: lun
@@ -203,6 +205,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       tipo=U_Case(tipo)
       Natm = Atm%natoms
+      if(.not. init_symOP) call SF_init_opMatTr(Grp)
 
       !> Anomalous Scattering factor tables
       if (allocated(AFP)) deallocate(AFP)

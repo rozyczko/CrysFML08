@@ -25,8 +25,8 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
       do j=1,reflex%nref
          do i=1,grp%NumOps
-            Mat=grp%op(i)%Mat(1:3,1:3)
-            t=grp%op(i)%Mat(1:3,4)
+            Mat=opMat(:,:,i)    !grp%op(i)%Mat(1:3,1:3)
+            t=opTr(:,i)         !grp%op(i)%Mat(1:3,4)
             hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
             ht(i,j)=dot_product(real(reflex%ref(j)%h),t)
          end do

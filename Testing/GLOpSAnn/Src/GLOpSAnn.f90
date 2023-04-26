@@ -1,7 +1,6 @@
 Module GLS_glopsann
    use CFML_GlobalDeps,                only: cp
    use CFML_Metrics,                   only: Cell_G_Type
-
    use CFML_Strings,                   only: u_case, file_list_type
    use CFML_Simulated_Annealing,       only: State_Vector_Type
    implicit none
@@ -14,6 +13,7 @@ Module GLS_glopsann
       type(file_list_type),    intent(in)  :: fcfl
       type(file_list_type),    intent(out) :: fvarfix
       !---- local variables ----!
+      integer, parameter :: nfix=40
       integer :: i,j,jj,k
       character(len=256)           :: line
       character(len=6)             :: label, scatt
@@ -58,6 +58,14 @@ Module GLS_glopsann
           write(unit=fvarfix%line(j), fmt="(a,2f10.4,2i4)")  "VARY "//" z_"//trim(label), low(3),high(3),0,0
         end if
       end do
+
+      do i=1,fcfl%nlines
+        line=adjustl(fcfl%line(i))
+        if(u_case(line(1:3)) == "FIX" .or. u_case(line(1:5)) == "EQUAL") then
+          j=j+1
+          fvarfix%line(j)=trim(line)
+        end if
+      end do
       fvarfix%nlines=j
 
     End Subroutine expand_vary_fix
@@ -84,6 +92,7 @@ End Module GLS_glopsann
 !!----
 Program Global_Optimization_Xtal_structures
    !---- Use Modules ----!
+   use CFML_Rational,                  only: assignment (=)
    use CFML_GlobalDeps,                only: Err_CFML
    use CFML_gSpaceGroups,              only: SPG_Type, Write_SpaceGroup_info
    use CFML_strings,                   only: u_case,file_list_type, File_To_FileList
@@ -110,7 +119,7 @@ Program Global_Optimization_Xtal_structures
                                              Weight_Sim,iwgt
    use GLS_cost_functions,             only: Cell,A,A_Clone,Ac,SpG,hkl,Oh,Icost,wcost,Err_cost,Err_Mess_cost, &
                                              General_Cost_function, readn_set_costfunctpars, write_costfunctpars, &
-                                             Write_FinalCost,wavel,diff_mode,anti_bump, Write_PRF
+                                             Write_FinalCost,wavel,diff_mode,anti_bump, Write_PRF, Mat, trr
    use GLS_glopsann
 
    implicit none
@@ -132,8 +141,8 @@ Program Global_Optimization_Xtal_structures
    character(len=140),dimension(200)  :: info_lines=" "     ! Information lines to be output in solution files
    integer                            :: lun=1,ifst=2, ier,i,j,k, n, i_cfl,ninfo=0,i_best
    integer, dimension(:),allocatable  :: i_bvs
-   real                               :: start,fin, mindspc, maxsintl, within, costop, costmax, thr
-   integer                            :: narg, num_p
+   real(kind=cp)                      :: start,fin, mindspc, maxsintl, within, costop, costmax, thr, tims,timm
+   integer                            :: narg, num_p, d, itick1,count_rate, itick2
    Logical                            :: esta, arggiven=.false., ref_within=.false.,&
                                          fst_out=.false., local_opt=.false., rest_file=.false., local_ref=.false.
 
@@ -147,16 +156,17 @@ Program Global_Optimization_Xtal_structures
             i=index(filcod,".cfl")
             if(i /= 0) filcod=filcod(1:i-1)
     end if
+    call system_clock(count_rate=count_rate)
 
     write (unit=*,fmt="(/,/,7(a,/))")                                                  &
-     "                                         G L O P S A N N"                      , &
-     "                     ------ Global Optimization by Simulated Annealing ------" , &
-     "                             ------  of Crystal Structures  ------"            , &
-     "                                ---- Version 1.0 May-2020 ----"                             , &
+     "                                       G L O p S A n n"                      , &
+     "                   ------ Global Optimization by Simulated Annealing ------" , &
+     "                           ------  of Crystal Structures  ------"            , &
+     "                             ---- Version 1.2 April-2023 ----"                               , &
      "    ****************************************************************************************"  , &
      "    * Optimizes X-tal structures against combined cost functions described in a *.CFL file *"  , &
      "    ****************************************************************************************"  , &
-     "                  (JRC - ILL - Created in December-2008, Updated in May 2020 )"
+     "             ( JRC/NAK - ILL - Created in December-2008, last update in April-2023 )"
    write (unit=*,fmt=*) " "
 
    if(.not. arggiven) then
@@ -169,14 +179,14 @@ Program Global_Optimization_Xtal_structures
 
    open(unit=lun,file=trim(filcod)//".out", status="replace",action="write")
     write(unit=lun,fmt="(/,/,6(a,/))")                                                 &
-     "                                         G L O P S A N N"                      , &
-     "                     ------ Global Optimization by Simulated Annealing ------" , &
-     "                             ------  of Crystal Structures  ------"            , &
-     "                                 ---- Version 1.0 May-2020 ----"                               , &
+     "                                       G L O p S A n n"                      , &
+     "                   ------ Global Optimization by Simulated Annealing ------" , &
+     "                           ------  of Crystal Structures  ------"            , &
+     "                             ---- Version 1.2 April-2023 ----"                               , &
      "    ****************************************************************************************"  , &
      "    * Optimizes X-tal structures against combined cost functions described in a *.CFL file *"  , &
      "    ****************************************************************************************"  , &
-     "                  (JRC - ILL - Created in December-2008, Updated in May 2020 )"
+     "             ( JRC/NAK - ILL - Created in December-2008, last update in April-2023 )"
 
    inquire(file=trim(filcod)//".cfl",exist=esta)
    if( .not. esta) then
@@ -191,6 +201,16 @@ Program Global_Optimization_Xtal_structures
      call Write_Crystal_Cell(Cell,lun)
      call Write_SpaceGroup_Info(SpG,lun)
      call Write_Atom_List(A,Iunit=lun)
+
+     !Convert to integer/real the operators of the group for calculating distances
+     if(allocated(Mat)) deallocate(Mat)
+     if(allocated(trr)) deallocate(trr)
+     allocate(Mat(3,3,SpG%Multip), trr(3,SpG%Multip))
+     d=SpG%d
+     do i=1,SpG%Multip
+       Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+       trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+     End do
 
      np_max= A%natoms*11  ! x,y,z,biso,occ,betas
      call allocate_vparam(np_max)
@@ -218,6 +238,7 @@ Program Global_Optimization_Xtal_structures
          info_lines(ninfo)= adjustl(fich_cfl%line(i))
          do
            ninfo=ninfo+1
+           if(ninfo > 200) exit
            j=i+ninfo-1
            if(j > fich_cfl%nlines) then
              ninfo=ninfo-1
@@ -319,7 +340,6 @@ Program Global_Optimization_Xtal_structures
      end if
 
      call Write_Info_RefCodes(A,Spg,lun)
-     call Write_Info_RefCodes(A,Spg)
 
      !------------------------------  Testing refinement codes
      !  STOP
@@ -503,7 +523,8 @@ Program Global_Optimization_Xtal_structures
      End if !Icost(1) == 1 .or. Icost(7) == 1 .or. Icost(10) == 1 .or. Icost(11) == 1
 
      call cpu_time(start)
-
+     call system_clock(itick1)
+     n=NP_Refi
      if(local_ref) then
        allocate(v_av(NP_Refi),v_sig(NP_Refi))
        v_av=0.0_cp; v_sig=0.0_cp
@@ -511,7 +532,6 @@ Program Global_Optimization_Xtal_structures
        write(unit=lun,fmt="(a,i5,a)")   "=  Local Refinement using UNIRANDI for ",num_p," initial random configurations ="
        write(unit=lun,fmt="(a,/)")      "============================================================================"
 
-       n=NP_Refi
        call random_seed()
        !do i=1,n
        !   write(*,"(2f8.4,a,f9.5)") V_Bounds(1:2,i),"   "//V_Name(i), V_Vec(i)
@@ -565,7 +585,11 @@ Program Global_Optimization_Xtal_structures
 
         write(unit=line,fmt="(a,f12.2)") "  Configuration found by Local_Refinement,  cost=",costop
         open(newunit=i_cfl,file=trim(filcod)//"_ref.cfl",status="replace",action="write")
-        call Write_CFL_File(i_cfl,Cell,SpG,A,line,info_lines)
+        if(ninfo > 0) then
+           call Write_CFL_File(i_cfl,Cell,SpG,A,line,info_lines)
+        else
+           call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+        end if
         call flush(i_cfl)
         close(unit=i_cfl)
         write(unit=*,fmt="(a)") "  The file "//trim(filcod)//"_ref.cfl"//"  has been written!"
@@ -606,7 +630,11 @@ Program Global_Optimization_Xtal_structures
 
              write(unit=line,fmt="(a,f12.2)") "  Best Configuration found by Simanneal_Gen,  cost=",vs%cost
              open(newunit=i_cfl,file=trim(filcod)//"_sol.cfl",status="replace",action="write")
-             call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+             if(ninfo > 0) then
+               call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+             else
+               call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line)
+             end if
              call flush(i_cfl)
              close(unit=i_cfl)
 
@@ -717,15 +745,23 @@ Program Global_Optimization_Xtal_structures
      write(unit=*,fmt="(a)") " Normal End of: PROGRAM FOR OPTIMIZING X-TAL STRUCTURES "
      write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".out"
      call cpu_time(fin)
+     call system_clock(itick2)
      write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", fin-start," seconds"
      write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60.0," minutes"
-     write(unit=lun,fmt="(/,a,f10.2,a)")  "  CPU-Time: ", fin-start," seconds"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60," Minutes"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60/60," Hours"
+     tims=(itick2-itick1)/real(count_rate)
+     timm=tims/60.0
+     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",tims ," seconds"
+     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",timm," minutes"
+     write(unit=lun,fmt="(/,a,f10.2,a)")  "    CPU-Time: ", fin-start," seconds"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60," minutes"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60/60," hours"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",tims ," seconds"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm," minutes"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm/60.0," hours"
    end if
 
    close(unit=lun)
-   !call Close_GLOpSAnn()
+   call Close_GLOpSAnn()
 
    Contains
 
@@ -871,18 +907,19 @@ Program Global_Optimization_Xtal_structures
 End Program Global_Optimization_Xtal_structures
 
     !!----       Subroutine Write_FST(fst_file,v,cost)
-    !!----          character(len=*),     intent(in):: fst_file
-    !!----          real,dimension(:),    intent(in):: v
-    !!----          real,                 intent(in):: cost
+    !!----          character(len=*),           intent(in):: fst_file
+    !!----          real(kind=cp),dimension(:), intent(in):: v
+    !!----          real(kind=cp),              intent(in):: cost
     !!----       End Subroutine Write_FST
 Subroutine Write_FST(fst_file,v,cost)
    !---- Arguments ----!
-   Use CFML_Keywords_Code_Parser,  only:  VState_to_AtomsPar
-   use GLS_cost_functions,         only:  Cell,A,SpG
+   Use CFML_GlobalDeps,            only: cp
+   Use CFML_Keywords_Code_Parser,  only: VState_to_AtomsPar
+   use GLS_cost_functions,         only: Cell,A,SpG
 
    character(len=*),               intent(in) :: fst_file
-   real,dimension(:),              intent(in) :: v
-   real,                           intent(in) :: cost
+   real(kind=cp),dimension(:),     intent(in) :: v
+   real(kind=cp),                  intent(in) :: cost
 
    !----- Local variables -----!
    integer :: lun,i,nc, ier

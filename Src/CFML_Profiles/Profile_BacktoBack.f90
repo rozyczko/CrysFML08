@@ -55,7 +55,7 @@ SubModule (CFML_Profiles) Profile_BacktoBack
             derX=bb_val*alfa
             derAlf=bb_val*(2.0*N/beta/beta+x)    !df/da= dN/da*exp(a*x)+Nexp(a*x)*(x)= (2N/bet**2+x)* f
             derBet=bb_val* 2.0*N/alfa/alfa       !df/db= dN/db * exp(-a*x) = 2N/alf**2 *f
-            dpar(1:3) = (/derX,derAlf,derBet/)
+            dpar(1:3) = [derX,derAlf,derBet]
          end if
       else
          bb_val =  N*exp(-beta*x)
@@ -63,7 +63,7 @@ SubModule (CFML_Profiles) Profile_BacktoBack
             derX=bb_val*beta
             derAlf=bb_val*2.0*N/beta/beta      !df/da= dN/da*exp(-b*x)= 2N/bet**2 * f
             derBet=bb_val*(2.0*N/alfa/alfa-x)  !df/db= dN/db * exp(-b*x)+Nexp(-b*x)*(-x) = (2N/alf**2 -x) *f
-            dpar(1:3) = (/derX,derAlf,derBet/)
+            dpar(1:3) = [derX,derAlf,derBet]
          end if
       end if
 

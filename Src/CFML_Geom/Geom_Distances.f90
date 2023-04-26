@@ -164,14 +164,16 @@
        real(kind=cp), allocatable,dimension(:,:) :: uu
        real(kind=cp), dimension(3,0:Spg%Num_lat) :: ltr
        real(kind=cp), allocatable,dimension(:,:) :: bcoo
-       real(kind=cp), dimension(3,SpG%Multip)    :: trr
-       integer,       dimension(3,3,SpG%Multip)  :: Mat
+       !real(kind=cp), dimension(3,SpG%Multip)    :: trr
+       !integer,       dimension(3,3,SpG%Multip)  :: Mat
 
-       d=SpG%d
-       do i=1,SpG%Multip
-         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
-         trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
-       End do
+       !d=SpG%d
+       !do i=1,SpG%Multip
+       !  Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+       !  trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       !End do
+       if(.not. init_symOP) call init_opMatTr(SpG)
+
        ltr=0.0
        if(Spg%Num_lat > 0) then
           ltr(:,1:Spg%Num_lat)=Spg%Lat_tr(1:3,1:Spg%Num_lat)
@@ -240,7 +242,7 @@
              uu(:,lk)=xo(:)
              nam1=a%atom(k)%lab
              do j=1,npeq
-                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
+                xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)
@@ -409,15 +411,15 @@
        character (len=132), dimension(:), allocatable :: cif_dist_text
        character (len=132), dimension(:), allocatable :: cif_angl_text
        !-----------------------------------------------------------------------------------
-       real(kind=cp), dimension(3,SpG%Multip)    :: trr
-       integer,       dimension(3,3,SpG%Multip)  :: Mat
-
-       d=SpG%d
-       do i=1,SpG%Multip
-         Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
-         trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
-       End do
-
+       !real(kind=cp), dimension(3,SpG%Multip)    :: trr
+       !integer,       dimension(3,3,SpG%Multip)  :: Mat
+       !
+       !d=SpG%d
+       !do i=1,SpG%Multip
+       !  Mat(:,:,i)= SpG%Op(i)%Mat(1:3,1:3)
+       !  trr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       !End do
+       if(.not. init_symOP) call init_opMatTr(SpG)
        iprin=.false.
        if (present(lun)) then
           if (lun > 0) iprin=.true.
@@ -469,7 +471,7 @@
           i1=1
           i2=36
           do j=1,Spg%multip
-             rot=nint(Spg%Op(j)%Mat(1:3,1:3))
+             rot=OpMat(:,:,j)
              Itnum(j)=searchop(rot,i1,i2)
           end do
           if (allocated(const_text)) deallocate(const_text)
@@ -555,7 +557,7 @@
              End Select
              ss(:)=x_std(:,k)
              do j=1,Spg%Multip
-                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
+                xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do_i3:do i3=ic1(3),ic2(3)
@@ -600,7 +602,7 @@
                             if(present(lun_cons) .and. dd <= rest_d) then
                               esta=.false.
                               write(unit=line,fmt="(a4,tr2,a4,i5,3f10.5,tr5,2f7.4)") A%atom(i)%lab ,A%atom(k)%lab ,&
-                                     Itnum(j), tn+trr(:,j) ,dd, sdd
+                                     Itnum(j), tn+opTr(:,j) ,dd, sdd
                               if(num_const == 0) then
                                 const_text(1)=line(1:132)
                                 num_const=1
@@ -677,7 +679,7 @@
              if (present(lun_cons)) then
                ip=Coord_Info%N_sym(j,i)
                itnum1=itnum(ip)
-               tr1(:)=trcoo(:,j)+ trr(:,ip)  !real(Spg%Op(Coord_Info%N_sym(j,i))%Mat(1:3,4))
+               tr1(:)=trcoo(:,j)+ opTr(:,ip)  !real(Spg%Op(Coord_Info%N_sym(j,i))%Mat(1:3,4))
              end if
              do k=j+1,Coord_Info%Coord_Num(i)
                 if (Coord_Info%Dist(k,i) < epsi .OR. Coord_Info%Dist(k,i) > dangl) cycle
@@ -694,7 +696,7 @@
                 if (present(lun_cons)) then
                   ip=Coord_Info%N_sym(k,i)
                   itnum2=itnum(ip)
-                  tr2(:)=trcoo(:,k)+ trr(:,ip) !real(Spg%Op(Coord_Info%N_sym(k,i))%Mat(1:3,4))
+                  tr2(:)=trcoo(:,k)+ opTr(:,ip) !real(Spg%Op(Coord_Info%N_sym(k,i))%Mat(1:3,4))
                   !tr2(:)=trcoo(:,k)+trr(:,Coord_Info%N_sym(k,i))
                 end if
                 x1(:)=bcoo(:,k)
@@ -1237,15 +1239,16 @@
        real(kind=cp),    dimension(3)    :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                     :: T,dd
        real(kind=cp),    dimension(3,A%Natoms*Spg%multip) :: uu
-       real(kind=cp),    dimension(3,SpG%Multip)          :: trr
        real(kind=cp),    dimension(3,0:SpG%Num_Lat)       :: Lat_tr
-       integer,          dimension(3,3,SpG%Multip)        :: Mat
-
-       d=SpG%d
-       do i=1,SpG%Multip
-         Mat(:,:,i) = SpG%Op(i)%Mat(1:3,1:3)
-           trr(:,i) = SpG%Op(i)%Mat(1:3,d)
-       End do
+       !real(kind=cp),    dimension(3,SpG%Multip)          :: trr
+       !integer,          dimension(3,3,SpG%Multip)        :: Mat
+       !
+       !d=SpG%d
+       !do i=1,SpG%Multip
+       !  Mat(:,:,i) = SpG%Op(i)%Mat(1:3,1:3)
+       !    trr(:,i) = SpG%Op(i)%Mat(1:3,d)
+       !End do
+       if(.not. init_symOP) call init_opMatTr(SpG)
        Lat_tr=0.0
        Lat_tr(:,1:SpG%Num_Lat)  = real(SpG%Lat_tr(1:3,1:SpG%Num_Lat))
        qd(:)=1.0/cell%rcell(:)
@@ -1287,7 +1290,7 @@
              nam1=a%atom(k)%lab
              do j=1,npeq
                 !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+trr(:,j)
+                xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do i3=ic1(3),ic2(3)

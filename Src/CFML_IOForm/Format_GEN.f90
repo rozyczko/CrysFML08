@@ -70,7 +70,7 @@ SubModule (CFML_IOForm) Format_GEN
        magmom=" "
        if (iv /= 0) then
           magmom=trim(line(iv+7:))  ! magmon should contain magnetic moment
-          line=line(:iv-1)    ! Line after removing "Moment:" and infor
+          line=line(:iv-1)          ! Line after removing "Moment:" and infor
        end if
 
        !> Atom Label

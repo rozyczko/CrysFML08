@@ -9,6 +9,7 @@ option(MINGW_HDF_TRICK "Help building with MinGW" OFF)
 option(ARCH32 "32 or 64 bit architecture" OFF)
 option(HEAP_ARRAYS "Put arrays in heap instead of stack (only for Windows ifort)" OFF)
 option(PYTHON_API "Build Python API" OFF)
+option(QPARALLEL "qparallel option for Ifort on Windows" ON)
 
 if(DEFINED CMAKE_Fortran_COMPILER)
     set(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER} CACHE STRING "The Fortran compiler. One of 'ifort' or 'gfortran'.")

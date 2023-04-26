@@ -69,6 +69,7 @@ SubModule (CFML_Reflections) Refl_Init_Reflist
                select type (r)
                  class is (SRefl_Type)
                     do i=1,n
+                       r(i)%iph  =1
                        r(i)%Fo   =0.0_cp
                        r(i)%Fc   =0.0_cp
                        r(i)%sFo  =0.0_cp

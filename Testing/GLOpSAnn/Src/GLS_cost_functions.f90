@@ -34,7 +34,7 @@
   !!----
   !!----
   Module GLS_cost_functions
-      use CFML_GlobalDeps,                only: Err_CFML
+      use CFML_GlobalDeps,                only: Err_CFML,cp
       Use CFML_gSpaceGroups,              only: SPG_Type, Apply_OP, Read_SymTrans_Code
       Use CFML_Geom,                      only: distance,angle_uv,Angle_dihedral, Set_tdist_coordination,&
                                                 allocate_coordination_type, coord_info, Set_TDist_Partial_Coordination
@@ -73,19 +73,22 @@
       type(Observation_List_Type),    public :: Oh
       Integer, parameter,             public :: N_costf=11
       Integer,dimension(0:N_costf),   public :: Icost
-      real,   dimension(0:N_costf),   public :: Wcost
-      real,   dimension(0:N_costf),   public :: P_cost !Partial cost
+      real(kind=cp),   dimension(0:N_costf),   public :: Wcost
+      real(kind=cp),   dimension(0:N_costf),   public :: P_cost !Partial cost
+      real(kind=cp), public, dimension(:,:),   allocatable  :: trr
+      integer,       public, dimension(:,:,:), allocatable  :: Mat
+
 
       integer,         public :: Max_Coor
-      real,            public :: Dmax,wavel
-      real                    :: coord_T
+      real(kind=cp),   public :: Dmax,wavel
+      real(kind=cp)           :: coord_T
       character(len=3),public :: diff_mode="NUC"   ! XRA for x-rays, ELE for electrons
 
       Type, public :: anti_bump_type
         integer                                     :: nrel
         character(len=2), dimension(:), allocatable :: sp1     !Chemical species 1
         character(len=2), dimension(:), allocatable :: sp2     !Chemical species 2
-        real,             dimension(:), allocatable :: damin   !Minimal distances inter-species
+        real(kind=cp),    dimension(:), allocatable :: damin   !Minimal distances inter-species
         integer,          dimension(:), allocatable :: power   !power of the potential (damin/d)**power
       End Type anti_bump_type
 
@@ -98,7 +101,7 @@
        Type(file_list_type),   intent( in)  :: file_dat
        !---- Local variables ----!
        character(len=132)   :: line
-       real                 :: w,tol
+       real(kind=cp)        :: w,tol
        integer              :: i,ier,j,nrel
        logical              :: coordone
 
@@ -369,7 +372,7 @@
           else
              !Construction of the Atom_Conf_List variable "Ac"
              call Allocate_Atoms_Conf_list(A%natoms,Ac)
-             Ac%atom=A%atom
+             Ac%atom(1:A%natoms)=A%atom
              Call Species_on_List(Ac,Spg%Multip,tol)
              if(Err_CFML%Ierr /= 0) then
                err_cost=.true.
@@ -574,8 +577,8 @@
     End Subroutine Write_FinalCost
 
     !!---- Subroutine General_Cost_function(v,cost)
-    !!----  real,dimension(:),    intent( in):: v
-    !!----  real,                 intent(out):: cost
+    !!----  real(kind=cp),dimension(:),    intent( in):: v
+    !!----  real(kind=cp),                 intent(out):: cost
     !!----
     !!----  This is the subroutine playing the role of cost function passed
     !!----  to the Simulated Annealing procedure (either mono or multi configurational)
@@ -587,12 +590,12 @@
     !!----  Updated: December 2014
     !!----
     Subroutine General_Cost_function(v,cost)
-      real,dimension(:),    intent( in):: v
-      real,                 intent(out):: cost
+      real(kind=cp),dimension(:),    intent( in):: v
+      real(kind=cp),                 intent(out):: cost
       !---- Local variables ----!
-      integer :: i,ic, nlist=1, numv
+      integer               :: i,ic, nlist=1, numv
       integer, dimension(1) :: List
-      logical :: tdist_called
+      logical               :: tdist_called
 
 
 
@@ -753,16 +756,15 @@
          end do
       end if
 
-      return
     End Subroutine General_Cost_function
 
 
 
     Subroutine Cost_F2obsF2cal(cost)
-       real,                 intent(out):: cost
+       real(kind=cp),   intent(out):: cost
        !---- Local variables ----!
-       integer              :: i,n
-       real                 :: delta,sumcal
+       integer        :: i,n
+       real(kind=cp)  :: delta,sumcal
 
        n=hkl%Nref
        Select Type (R => hkl%ref)
@@ -781,10 +783,10 @@
     End Subroutine Cost_F2obsF2cal
 
     Subroutine Cost_FobsFcal(cost)
-       real,                 intent(out):: cost
+       real(kind=cp),  intent(out):: cost
        !---- Local variables ----!
-       integer              :: i,n
-       real                 :: delta,sumcal
+       integer        :: i,n
+       real(kind=cp)  :: delta,sumcal
 
        n=hkl%Nref
        Select Type (R => hkl%ref)
@@ -803,10 +805,10 @@
     End Subroutine Cost_FobsFcal
 
     Subroutine Cost_FoFc_Powder(cost)
-       real,                 intent(out):: cost
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer              :: i,j,n
-       real                 :: delta,sumcal,over
+       integer      :: i,j,n
+       real(kind=cp):: delta,sumcal,over
 
        n=hkl%Nref
        Select Type (R => hkl%ref)
@@ -831,10 +833,10 @@
 
 
     Subroutine Cost_Powder_Profile(cost)
-       real,                 intent(out):: cost
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer  :: i,j,nn
-       real     :: delt,fcal,scalef,ww,pw
+       integer       :: i,j,nn
+       real(kind=cp) :: delt,fcal,scalef,ww,pw
 
        fcal=0.0
        Select Type (R => hkl%ref)
@@ -906,12 +908,12 @@
 
 
     Subroutine Cost_Dis_Rest_Partial(List,cost)
-       integer,   intent(in) :: List
-       real,      intent(out):: cost
+       integer,       intent(in) :: List
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,tr
+       integer                     :: i, nop, i1,i2
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,tr
 
        cost=0.0
        do i=1,NP_Rest_Dis
@@ -921,7 +923,8 @@
               x1=A%Atom(i1)%x
               x2=A%Atom(i2)%x
               call Read_SymTrans_Code(dis_rest(i)%stcode,nop,tr)
-              x2=Apply_OP(SpG%OP(nop),x2)+tr
+              !x2=Apply_OP(SpG%OP(nop),x2)+tr
+              x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
               Dis_rest(i)%dcalc=distance(x1,x2,cell)
           end if
           delta=Dis_rest(i)%dobs-Dis_rest(i)%dcalc
@@ -929,14 +932,13 @@
           cost= cost+delta*delta*w
        end do
 
-       return
     End Subroutine Cost_Dis_Rest_Partial
 
     Subroutine Cost_Coordination(cost)
-       real,      intent(out):: cost
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer :: i
-       real    :: delta
+       integer          :: i
+       real(kind=cp)    :: delta
 
        cost=0.0
        do i=1,Ac%natoms
@@ -949,10 +951,10 @@
     End Subroutine Cost_Coordination
 
     Subroutine Cost_Dist_Min(cost)
-       real,      intent(out):: cost
+       real(kind=cp),      intent(out):: cost
        !---- Local variables ----!
-       integer :: i,j,k, icm
-       real    :: d
+       integer            :: i,j,k, icm
+       real(kind=cp)      :: d
        character(len=2)   :: ch1,ch2
 
        cost=0.0
@@ -974,11 +976,11 @@
     End Subroutine Cost_Dist_Min
 
     Subroutine Cost_Dis_Rest(cost)
-       real,      intent(out):: cost
+       real(kind=cp),      intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,tr
+       integer                     :: i, nop, i1,i2
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,tr
 
        cost=0.0
        do i=1,NP_Rest_Dis
@@ -987,7 +989,8 @@
           x1=A%Atom(i1)%x
           x2=A%Atom(i2)%x
           call Read_SymTrans_Code(dis_rest(i)%stcode,nop,tr)
-          x2=Apply_OP(SpG%OP(nop),x2)+tr
+          !x2=Apply_OP(SpG%OP(nop),x2)+tr
+          x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
           Dis_rest(i)%dcalc=distance(x1,x2,cell)
           delta=(Dis_rest(i)%dobs-Dis_rest(i)%dcalc)/Dis_rest(i)%dobs
           w= 1.0/(Dis_rest(i)%sigma*Dis_rest(i)%sigma)
@@ -997,12 +1000,12 @@
     End Subroutine Cost_Dis_Rest
 
     Subroutine Cost_Ang_Rest_Partial(List,cost)
-       integer,   intent(in) :: List
-       real,      intent(out):: cost
+       integer,       intent(in) :: List
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2,i3
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,x3,tr
+       integer                     :: i, nop, i1,i2,i3
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,x3,tr
 
        cost=0.0
 
@@ -1014,10 +1017,12 @@
               x1=A%Atom(i1)%x
               x2=A%Atom(i2)%x
               call Read_SymTrans_Code(ang_rest(i)%stcode(1),nop,tr)
-              x2=Apply_OP(SpG%OP(nop),x2)+tr
+              !x2=Apply_OP(SpG%OP(nop),x2)+tr
+              x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
               x3=A%Atom(i3)%x
               call Read_SymTrans_Code(ang_rest(i)%stcode(2),nop,tr)
-              x3=Apply_OP(SpG%OP(nop),x3)+tr
+              !x3=Apply_OP(SpG%OP(nop),x3)+tr
+              x3=matmul(Mat(:,:,nop),x3)+ trr(:,nop) + tr
               Ang_rest(i)%Acalc=Angle_UV(x1-x2,x3-x2,cell%GD)
           end if
           delta=Ang_rest(i)%Aobs-Ang_rest(i)%Acalc
@@ -1028,11 +1033,11 @@
     End Subroutine Cost_Ang_Rest_Partial
 
     Subroutine Cost_Ang_Rest(cost)
-       real,      intent(out):: cost
+       real(kind=cp),      intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2,i3
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,x3,tr
+       integer                     :: i, nop, i1,i2,i3
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,x3,tr
 
        cost=0.0
 
@@ -1043,10 +1048,12 @@
           x1=A%Atom(i1)%x
           x2=A%Atom(i2)%x
           call Read_SymTrans_Code(ang_rest(i)%stcode(1),nop,tr)
-          x2=Apply_OP(SpG%OP(nop),x2)+tr
+          !x2=Apply_OP(SpG%OP(nop),x2)+tr
+          x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
           x3=A%Atom(i3)%x
           call Read_SymTrans_Code(ang_rest(i)%stcode(2),nop,tr)
-          x3=Apply_OP(SpG%OP(nop),x3)+tr
+          !x3=Apply_OP(SpG%OP(nop),x3)+tr
+          x3=matmul(Mat(:,:,nop),x3)+ trr(:,nop) + tr
           Ang_rest(i)%Acalc=Angle_UV(x1-x2,x3-x2,cell%GD)
           delta=(Ang_rest(i)%Aobs-Ang_rest(i)%Acalc)/Ang_rest(i)%Aobs
           w= 1.0/(Ang_rest(i)%sigma*Ang_rest(i)%sigma)
@@ -1056,12 +1063,12 @@
     End Subroutine Cost_Ang_Rest
 
     Subroutine Cost_Tor_Rest_Partial(List,cost)
-       integer,   intent(in) :: List
-       real,      intent(out):: cost
+       integer,       intent(in) :: List
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2,i3,i4
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,x3,x4,tr
+       integer                     :: i, nop, i1,i2,i3,i4
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,x3,x4,tr
 
        cost=0.0
 
@@ -1074,16 +1081,18 @@
               x1=A%Atom(i1)%x
               x2=A%Atom(i2)%x
               call Read_SymTrans_Code(tor_rest(i)%stcode(1),nop,tr)
-              x2=Apply_OP(SpG%OP(nop),x2)+tr
+              !x2=Apply_OP(SpG%OP(nop),x2)+tr
+              x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
 
               x3=A%Atom(i3)%x
               call Read_SymTrans_Code(tor_rest(i)%stcode(2),nop,tr)
-              x3=Apply_OP(SpG%OP(nop),x3)+tr
+              !x3=Apply_OP(SpG%OP(nop),x3)+tr
+              x3=matmul(Mat(:,:,nop),x3)+ trr(:,nop) + tr
 
               x4=A%Atom(i3)%x
               call Read_SymTrans_Code(tor_rest(i)%stcode(3),nop,tr)
-              x4=Apply_OP(SpG%OP(nop),x4)+tr
-
+              !x4=Apply_OP(SpG%OP(nop),x4)+tr
+              x4=matmul(Mat(:,:,nop),x4)+ trr(:,nop) + tr
               x1=matmul(Cell%Cr_Orth_cel,x1)
               x2=matmul(Cell%Cr_Orth_cel,x2)
               x3=matmul(Cell%Cr_Orth_cel,x3)
@@ -1099,11 +1108,11 @@
     End Subroutine Cost_Tor_Rest_Partial
 
     Subroutine Cost_Tor_Rest(cost)
-       real,      intent(out):: cost
+       real(kind=cp), intent(out):: cost
        !---- Local variables ----!
-       integer :: i, nop, i1,i2,i3,i4
-       real    :: w, delta
-       real, dimension(3) :: x1,x2,x3,x4,tr
+       integer                     :: i, nop, i1,i2,i3,i4
+       real(kind=cp)               :: w, delta
+       real(kind=cp), dimension(3) :: x1,x2,x3,x4,tr
 
        cost=0.0
 
@@ -1115,12 +1124,12 @@
           x1=A%Atom(i1)%x
           x2=A%Atom(i2)%x
           call Read_SymTrans_Code(tor_rest(i)%stcode(1),nop,tr)
-          x2=Apply_OP(SpG%OP(nop),x2)+tr
-
+          !x2=Apply_OP(SpG%OP(nop),x2)+tr
+          x2=matmul(Mat(:,:,nop),x2)+ trr(:,nop) + tr
           x3=A%Atom(i3)%x
           call Read_SymTrans_Code(tor_rest(i)%stcode(2),nop,tr)
-          x3=Apply_OP(SpG%OP(nop),x3)+tr
-
+          !x3=Apply_OP(SpG%OP(nop),x3)+tr
+          x3=matmul(Mat(:,:,nop),x3)+ trr(:,nop) + tr
           x4=A%Atom(i3)%x
           call Read_SymTrans_Code(tor_rest(i)%stcode(3),nop,tr)
           x4=Apply_OP(SpG%OP(nop),x4)+tr
@@ -1143,9 +1152,9 @@
        !-----------------------------------------------
        !   L o c a l   V a r i a b l e s
        !-----------------------------------------------
-       integer ::  i, iposr, ihkl, irc,nphase,ideltr, i_prf
-       real    :: twtet, dd, scl,yymi,yyma,t1,t2
-       character (len=1)   :: tb
+       integer           :: i, iposr, ihkl, irc,nphase,ideltr, i_prf
+       real(kind=cp)     :: twtet, dd, scl,yymi,yyma,t1,t2
+       character (len=1) :: tb
        character (len=50)  :: forma1
        !-----------------------------------------------
        !check for very high values of intensities and rescal everything in such a case

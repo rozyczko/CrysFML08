@@ -347,8 +347,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          scosr=0.0_cp
          ssinr=0.0_cp
          do k=1,grp%NumOps
-            Mat=grp%op(k)%Mat(1:3,1:3)
-            t=grp%op(k)%Mat(1:3,4)
+            Mat=opMat(:,:,k)    !grp%op(k)%Mat(1:3,1:3)
+            t=opTr(:,k)         !grp%op(k)%Mat(1:3,4)
             h=matmul(hn,Mat)
             arg=tpi*(dot_product(h,Atm%atom(i)%x)+ dot_product(hn,t))
             anis=1.0_cp
@@ -492,8 +492,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             drs(:,i)=0.0_cp
             drc(:,i)=0.0_cp
             do k=1,grp%NumOps
-               Mat=grp%op(k)%Mat(1:3,1:3)
-               t=grp%op(k)%Mat(1:3,4)
+               Mat=opMat(:,:,k)    !grp%op(k)%Mat(1:3,1:3)
+               t=opTr(:,k)         !grp%op(k)%Mat(1:3,4)
                h=matmul(real(hn),Mat)
                hnt=dot_product(real(hn),t)
                arg=TPI*(dot_product(h,Atm%atom(i)%x)+hnt)
@@ -541,8 +541,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
             drs(:,i)=0.0_cp
             drc(:,i)=0.0_cp
             do k=1,grp%NumOps
-               Mat=grp%op(k)%Mat(1:3,1:3)
-               t=grp%op(k)%Mat(1:3,4)
+               Mat=opMat(:,:,k)    !grp%op(k)%Mat(1:3,1:3)
+               t=opTr(:,k)         !grp%op(k)%Mat(1:3,4)
                h=matmul(real(hn),Mat)
                hnt=dot_product(real(hn),t)
                arg=TPI*(dot_product(h,Atm%atom(i)%x)+hnt)
@@ -981,6 +981,8 @@ Submodule (CFML_Structure_Factors) SF_Calculations
       integer                                   :: i
       Type(Scattering_Species_Type)             :: Scf
 
+      !Check initialization of private symmetry operators
+      if(.not. init_symOP) call SF_init_opMatTr(Grp)
       !call Gener_Reflections_Shub(Cell, Grp, Smax, Reflex)
       call Gener_Reflections(Cell, 0.0, smax, Reflex, Grp, MagExt=.true.,unique=.true.,Friedel=.true.,Ref_typ="Refl")
 
@@ -1103,10 +1105,9 @@ Submodule (CFML_Structure_Factors) SF_Calculations
          !>   Fm=(Ax,Ay,Az)+i(Bx,By,Bz) --->  aa(I),bb(I), I=1,2,3 for x,y,z
          SMcos=0.0; SMsin=0.0
 
-         do ir=1,Grp%Multip   ! Loop over symmetry operators
-            sm=grp%op(ir)%Mat(1:3,1:3)
-            t=grp%op(ir)%Mat(1:3,4)
-
+         do ir=1,Grp%Multip      ! Loop over symmetry operators
+            sm=opMat(:,:,ir)     !grp%op(ir)%Mat(1:3,1:3)
+            t=opTr(:,ir)         !grp%op(ir)%Mat(1:3,4)
             x=dot_product(t,hnn)
             h=matmul(hnn,sm)
             arg=x+dot_product(h,xi(1:3))
