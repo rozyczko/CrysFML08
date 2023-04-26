@@ -6,13 +6,14 @@ SubModule (CFML_Reflections) Refl_Generate
    Contains
    !!----
    !!
-   !!---- Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,order,Unique,seqindx,mag_only,Friedel,Ref_typ,kout)
+   !!---- Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,iphase,MagExt,kinfo,order,Unique,seqindx,mag_only,Friedel,Ref_typ,kout)
    !!----    !---- Arguments ----!
    !!----    class(Cell_G_Type),                intent(in)     :: Cell     !Unit ceUniquel object
    !!----    real(kind=cp),                     intent(in)     :: Slmin    !Minimum SinTheta/Lambda
    !!----    real(kind=cp),                     intent(in)     :: Slmax    !Maximum SinTheta/Lambda
    !!----    type(RefList_Type),                intent(in out) :: Reflex   !Reflection List
    !!----    class(Spg_Type) ,        optional, intent(in)     :: SpG      !General Space Group
+   !!----    integer,                 optional, intent(in)     :: iphase   !Number of the current phase (if absent, a single phase is considered)
    !!----    logical,                 optional, intent(in)     :: MagExt   !Magnetic extinctions taken into account if true
    !!----    type(kvect_info_type),   optional, intent(in)     :: Kinfo    !Modulation vector information
    !!----    logical,                 optional, intent(in)     :: Order    !If true the reflections are ordered by increasing sinTheta/Lambda
@@ -27,15 +28,16 @@ SubModule (CFML_Reflections) Refl_Generate
    !!----    Calculate reflections between the sin_theta/lambda shells defined by (Slmin,Slmax)
    !!----    The output is not ordered if order or Unique is not present. Valid for all type of space groups.
    !!----
-   !!----  21/06/2019, Updated 03/06/2022
+   !!----  21/06/2019, Updated 24/04/2023
    !!----
-   Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
+   Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,iphase,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
       !---- Arguments ----!
       class(Cell_G_Type),                intent(in)     :: Cell
       real(kind=cp),                     intent(in)     :: Slmin
       real(kind=cp),                     intent(in)     :: Slmax
       type(RefList_Type),                intent(in out) :: Reflex
       class(Spg_Type) ,        optional, intent(in)     :: SpG
+      integer,                 optional, intent(in)     :: iphase
       logical,                 optional, intent(in)     :: MagExt
       type(kvect_info_type),   optional, intent(in)     :: Kinfo
       logical,                 optional, intent(in)     :: Order
@@ -308,10 +310,18 @@ SubModule (CFML_Reflections) Refl_Generate
         call Initialize_RefList(Num_ref, reflex, 'Refl', Dd)
       end if
 
+      if(present(iphase)) then
+        Select Type(r => reflex%ref)
+           class is (Srefl_type)
+             r(1:Num_ref)%iph=iphase
+        End Select
+      end if
+
+
       do i=1,num_ref
          reflex%ref(i)%h = hkl(:,i)
          if(dd > 3) then
-           kk               = abs(hkl(4:3+nk,i))
+           kk = abs(hkl(4:3+nk,i))
            reflex%ref(i)%pcoeff = 0
            do n=1,kinf%nq
               if (equal_vector(kk(1:nk),abs(kinf%q_coeff(1:nk,n))))  then
@@ -320,11 +330,11 @@ SubModule (CFML_Reflections) Refl_Generate
               end if
            end do
          end if
-         reflex%ref(i)%s      = sv(i)
+         reflex%ref(i)%s = sv(i)
          if (present(SpG)) then
             reflex%ref(i)%mult = h_mult(reflex%ref(i)%h,SpG,Frd)
          else
-           reflex%ref(i)%mult = 1
+            reflex%ref(i)%mult = 1
          end if
          reflex%ref(i)%imag = indtyp(i)
       end do

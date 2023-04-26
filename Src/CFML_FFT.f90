@@ -1201,38 +1201,29 @@ Module CFML_FFT
 
     end function convol_peaks
 
-    Pure Function direct_convol(sig, kern) result(convolve)
-        real(kind=cp), dimension(:),  intent(in) :: sig, kern !sig is the signal array, kern is the impulse array
-        real(kind=cp), dimension(:), allocatable :: convolve, y
-        integer :: kernsiz , sigsiz
-        integer :: i,j,k
+    !!---- DIRECT_CONVOL
+    !!---- Direct convolution: the signal(f) and kernel(g) should be centred in the middle of the arrays
+    !!---- The working array "y" allows a straightforward calculation of the convolution without shifting of the result.
+    !!---- The final "convol" result represents the central part (n-points) of "y"
+    Pure Function direct_convol(f, g) result(convol)
+        real(kind=cp), dimension(:),  intent(in) :: f, g !f is the signal array, g is the impulse array
+        real(kind=cp), dimension(:), allocatable :: convol, y
+        integer :: n , m, ini
+        integer :: i,j
 
-        sigsiz = size(sig)    ! kernel size should be smaller or equal than signal size
-        kernsiz = size(kern)
+        n = size(f)
+        m = size(g)
 
-        allocate(y(sigsiz), convolve(sigsiz))
-        !last part
-        do i=kernsiz,sigsiz
-            y(i) = 0.0
-            j=i
-            do k=1,kernsiz
-                y(i) = y(i) + sig(j)*kern(k)
-                j = j-1
-            end do
+        allocate(y(n+m-1),convol(n))
+        y=0.0
+        do i=1,n
+          do j=1,m
+            y(i+j-1)=y(i+j-1)+f(i)*g(j)
+          end do
         end do
+        ini=n/2
+        convol(1:n)=y(ini+1:ini+n)
 
-        !first part
-        do i=1,kernsiz
-            y(i) = 0.0
-            j=i
-            k=1
-            do while (j > 0)
-                y(i) = y(i) + sig(j)*kern(k)
-                j = j-1
-                k = k+1
-            end do
-        end do
-        convolve = y
     End Function direct_convol
 
  end module cfml_fft

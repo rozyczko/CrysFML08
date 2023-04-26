@@ -67,7 +67,7 @@ set(MATHS_SRC CFML_Maths.f90
               ${SUBMOD_RANDOM_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${MATHS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${MATHS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -126,7 +126,7 @@ set(RATIONAL_SRC CFML_Rational.f90
                 ${SUBMOD_RATIONAL_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${RATIONAL_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${RATIONAL_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -138,7 +138,7 @@ set(METRICS_SRC CFML_Metrics.f90
                 ${SUBMOD_METRICS_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${METRICS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${METRICS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -210,14 +210,14 @@ set(PROFILES_1_SRC CFML_Profiles.f90
 set(PROFILES_2_SRC CFML_Profiles/Profile_Init_ProfVal.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PROFILES_1_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${PROFILES_1_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
 endif()
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PROFILES_2_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS0} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS0} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${PROFILES_2_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS0}")
@@ -229,7 +229,7 @@ set(DIFFPATT_SRC CFML_Diffpatt.f90
                  ${SUBMOD_DIFFPATT_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${DIFFPATT_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${DIFFPATT_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -239,7 +239,7 @@ endif()
 set(BCKPEAKS_SRC CFML_BckPeaks.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${BCKPEAKS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${BCKPEAKS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -251,7 +251,7 @@ set(EXTINCORR_SRC CFML_ExtinCorr.f90
                   ${SUBMOD_EXTINCORR_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${EXTINCORR_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${EXTINCORR_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -275,7 +275,7 @@ set(ATOMS_SRC CFML_Atoms.f90
               ${SUBMOD_ATOMS_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${ATOMS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${ATOMS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -287,7 +287,7 @@ set(REFLECTIONS_SRC CFML_Reflections.f90
                  ${SUBMOD_REFLECTIONS_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${REFLECTIONS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${REFLECTIONS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -297,7 +297,7 @@ endif()
 set(PROPAGK_SRC CFML_Propagation_Vectors.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PROPAGK_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${PROPAGK_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -308,7 +308,7 @@ file(GLOB SUBMOD_IOFORM_SRC CFML_IOForm/*.f90)
 set(IOFORM_SRC CFML_IOForm.f90 ${SUBMOD_IOFORM_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${IOFORM_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${IOFORM_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -320,7 +320,7 @@ set(GEOM_SRC CFML_Geom.f90
                  ${SUBMOD_GEOM_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${GEOM_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${GEOM_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -332,7 +332,7 @@ set(MAPS_SRC CFML_Maps.f90
                  ${SUBMOD_MAPS_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${MAPS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${MAPS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -344,7 +344,7 @@ set(OPT_SRC CFML_Optimization.f90
                  ${SUBMOD_OPT_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${OPT_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${OPT_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -356,7 +356,7 @@ set(OPT_LSQ_SRC CFML_Optimization_LSQ.f90
                  ${SUBMOD_OPT_LSQ_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${OPT_LSQ_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${OPT_LSQ_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -368,7 +368,7 @@ set(OPT_SAN_SRC CFML_Simulated_Annealing.f90
                  ${SUBMOD_OPT_SAN_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${OPT_SAN_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${OPT_SAN_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -378,7 +378,7 @@ endif()
 set(Export_VTK_SRC CFML_Export_VTK.f90)
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${Export_VTK_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${Export_VTK_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -389,7 +389,7 @@ set(EnBVS_SRC CFML_EnBVS.f90
                  ${SUBMOD_EnBVS_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${EnBVS_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${EnBVS_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -412,7 +412,7 @@ set(SXTALgeom_SRC CFML_SXTAL_Geom.f90
                  ${SUBMOD_SXTALgeom_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${SXTALgeom_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${SXTALgeom_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -424,7 +424,7 @@ set(SF_SRC CFML_Structure_Factors.f90
                  ${SUBMOD_SF_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${SF_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${SF_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -436,7 +436,7 @@ set(MOLECULES_SRC CFML_Molecules.f90
                  ${SUBMOD_MOLECULES_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${MOLECULES_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${MOLECULES_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -448,7 +448,7 @@ set(KEYCODES_SRC CFML_KeyCodes.f90
                  ${SUBMOD_KEYCODES_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${KEYCODES_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${KEYCODES_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -460,7 +460,7 @@ set(KVECSYMM_SRC CFML_kvec_Symmetry.f90
                  ${SUBMOD_KVEC_SYMMETRY_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${KVECSYMM_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${KVECSYMM_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")
@@ -472,7 +472,7 @@ set(KWCPARSER_SRC CFML_Keywords_Code_Parser.f90
                  ${SUBMOD_KWC_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${KWCPARSER_SRC}
-        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS2}")
+        PROPERTIES COMPILE_FLAGS "${OPT_FLAGS} ${OPT_FLAGS1} ${OPT_FLAGS3}")
 else()
     set_source_files_properties(${KWCPARSER_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGSC} ${OPT_FLAGS1}")

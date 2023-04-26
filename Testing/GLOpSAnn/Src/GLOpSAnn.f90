@@ -141,8 +141,8 @@ Program Global_Optimization_Xtal_structures
    character(len=140),dimension(200)  :: info_lines=" "     ! Information lines to be output in solution files
    integer                            :: lun=1,ifst=2, ier,i,j,k, n, i_cfl,ninfo=0,i_best
    integer, dimension(:),allocatable  :: i_bvs
-   real(kind=cp)                      :: start,fin, mindspc, maxsintl, within, costop, costmax, thr
-   integer                            :: narg, num_p, d
+   real(kind=cp)                      :: start,fin, mindspc, maxsintl, within, costop, costmax, thr, tims,timm
+   integer                            :: narg, num_p, d, itick1,count_rate, itick2
    Logical                            :: esta, arggiven=.false., ref_within=.false.,&
                                          fst_out=.false., local_opt=.false., rest_file=.false., local_ref=.false.
 
@@ -156,6 +156,7 @@ Program Global_Optimization_Xtal_structures
             i=index(filcod,".cfl")
             if(i /= 0) filcod=filcod(1:i-1)
     end if
+    call system_clock(count_rate=count_rate)
 
     write (unit=*,fmt="(/,/,7(a,/))")                                                  &
      "                                       G L O p S A n n"                      , &
@@ -237,6 +238,7 @@ Program Global_Optimization_Xtal_structures
          info_lines(ninfo)= adjustl(fich_cfl%line(i))
          do
            ninfo=ninfo+1
+           if(ninfo > 200) exit
            j=i+ninfo-1
            if(j > fich_cfl%nlines) then
              ninfo=ninfo-1
@@ -521,7 +523,8 @@ Program Global_Optimization_Xtal_structures
      End if !Icost(1) == 1 .or. Icost(7) == 1 .or. Icost(10) == 1 .or. Icost(11) == 1
 
      call cpu_time(start)
-
+     call system_clock(itick1)
+     n=NP_Refi
      if(local_ref) then
        allocate(v_av(NP_Refi),v_sig(NP_Refi))
        v_av=0.0_cp; v_sig=0.0_cp
@@ -529,7 +532,6 @@ Program Global_Optimization_Xtal_structures
        write(unit=lun,fmt="(a,i5,a)")   "=  Local Refinement using UNIRANDI for ",num_p," initial random configurations ="
        write(unit=lun,fmt="(a,/)")      "============================================================================"
 
-       n=NP_Refi
        call random_seed()
        !do i=1,n
        !   write(*,"(2f8.4,a,f9.5)") V_Bounds(1:2,i),"   "//V_Name(i), V_Vec(i)
@@ -583,7 +585,11 @@ Program Global_Optimization_Xtal_structures
 
         write(unit=line,fmt="(a,f12.2)") "  Configuration found by Local_Refinement,  cost=",costop
         open(newunit=i_cfl,file=trim(filcod)//"_ref.cfl",status="replace",action="write")
-        call Write_CFL_File(i_cfl,Cell,SpG,A,line,info_lines)
+        if(ninfo > 0) then
+           call Write_CFL_File(i_cfl,Cell,SpG,A,line,info_lines)
+        else
+           call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+        end if
         call flush(i_cfl)
         close(unit=i_cfl)
         write(unit=*,fmt="(a)") "  The file "//trim(filcod)//"_ref.cfl"//"  has been written!"
@@ -624,7 +630,11 @@ Program Global_Optimization_Xtal_structures
 
              write(unit=line,fmt="(a,f12.2)") "  Best Configuration found by Simanneal_Gen,  cost=",vs%cost
              open(newunit=i_cfl,file=trim(filcod)//"_sol.cfl",status="replace",action="write")
-             call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+             if(ninfo > 0) then
+               call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line,info_lines)
+             else
+               call Write_CFL_File(i_cfl,Cell,SpG,A_Clone,line)
+             end if
              call flush(i_cfl)
              close(unit=i_cfl)
 
@@ -735,11 +745,19 @@ Program Global_Optimization_Xtal_structures
      write(unit=*,fmt="(a)") " Normal End of: PROGRAM FOR OPTIMIZING X-TAL STRUCTURES "
      write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".out"
      call cpu_time(fin)
+     call system_clock(itick2)
      write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", fin-start," seconds"
      write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60.0," minutes"
-     write(unit=lun,fmt="(/,a,f10.2,a)")  "  CPU-Time: ", fin-start," seconds"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60," Minutes"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60/60," Hours"
+     tims=(itick2-itick1)/real(count_rate)
+     timm=tims/60.0
+     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",tims ," seconds"
+     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",timm," minutes"
+     write(unit=lun,fmt="(/,a,f10.2,a)")  "    CPU-Time: ", fin-start," seconds"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60," minutes"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60/60," hours"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",tims ," seconds"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm," minutes"
+     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm/60.0," hours"
    end if
 
    close(unit=lun)
