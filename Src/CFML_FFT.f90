@@ -80,7 +80,7 @@
 !!--..    Optional Parameters:
 !!--..
 !!--..    dim      One dimensional integer array, containing the dimensions to be
-!!--..             transformed. Default is (/1,...,N/) with N being the rank of
+!!--..             transformed. Default is [1,...,N] with N being the rank of
 !!--..             array, i.e. complete transform. dim can restrict transformation
 !!--..             to a subset of available dimensions. Its size must not exceed the
 !!--..             rank of array or the size of shape respectivly.
@@ -103,7 +103,7 @@
 !!--..             scaled by sqrt(L*M*N), while call fftn(A, SHAPE(A)) will do
 !!--..             the same in place.
 !!--..
-!!--..             result = fft(A, dim=(/1,3/)) will transform with respect to
+!!--..             result = fft(A, dim=[1,3]) will transform with respect to
 !!--..             the first and the third dimension, scaled by sqrt(L*N).
 !!--..
 !!--..             result = fft(fft(A), inv=.true.) should (approximately)
@@ -171,7 +171,7 @@ Module CFML_FFT
    private
 
    !---- List of public functions ----!
-   public :: Convol, Convol_Peaks, &
+   public :: Convol, Convol_Peaks, direct_convol, &
              FFT, F_FFT
 
    !---- List of public subroutines ----!
@@ -1200,5 +1200,30 @@ Module CFML_FFT
        end if
 
     end function convol_peaks
+
+    !!---- DIRECT_CONVOL
+    !!---- Direct convolution: the signal(f) and kernel(g) should be centred in the middle of the arrays
+    !!---- The working array "y" allows a straightforward calculation of the convolution without shifting of the result.
+    !!---- The final "convol" result represents the central part (n-points) of "y"
+    Pure Function direct_convol(f, g) result(convol)
+        real(kind=cp), dimension(:),  intent(in) :: f, g !f is the signal array, g is the impulse array
+        real(kind=cp), dimension(:), allocatable :: convol, y
+        integer :: n , m, ini
+        integer :: i,j
+
+        n = size(f)
+        m = size(g)
+
+        allocate(y(n+m-1),convol(n))
+        y=0.0
+        do i=1,n
+          do j=1,m
+            y(i+j-1)=y(i+j-1)+f(i)*g(j)
+          end do
+        end do
+        ini=n/2
+        convol(1:n)=y(ini+1:ini+n)
+
+    End Function direct_convol
 
  end module cfml_fft

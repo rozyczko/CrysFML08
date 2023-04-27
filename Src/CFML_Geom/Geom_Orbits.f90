@@ -304,6 +304,7 @@
        !--- Local variables ---!
        integer                                  :: i,j,norb,nt,d
        real(kind=cp), dimension(3)              :: x,xx,v
+
        real(kind=cp), dimension(3,SpG%Multip)   :: tr
        integer,       dimension(3,3,SpG%Multip) :: Mat
        d=SpG%d

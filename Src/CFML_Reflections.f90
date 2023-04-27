@@ -84,13 +84,14 @@ Module CFML_Reflections
    !!--..
    !!
    Type, public, extends(Refl_Type) :: SRefl_Type
-      real(kind=cp)        :: Fo    =0.0_cp  ! Observed Structure Factor
-      real(kind=cp)        :: Fc    =0.0_cp  ! Calculated Structure Factor
-      real(kind=cp)        :: SFo   =0.0_cp  ! Sigma of  Fo
-      real(kind=cp)        :: Phase =0.0_cp  ! Phase in degrees
-      real(kind=cp)        :: A     =0.0_cp  ! real part of the Structure Factor
-      real(kind=cp)        :: B     =0.0_cp  ! Imaginary part of the Structure Factor
-      real(kind=cp)        :: W     =1.0_cp  ! Weight factor
+      integer              :: iph   = 1        ! Indicator for the number of the crystallographic phase
+      real(kind=cp)        :: Fo    = 0.0_cp  ! Observed Structure Factor
+      real(kind=cp)        :: Fc    = 0.0_cp  ! Calculated Structure Factor
+      real(kind=cp)        :: SFo   = 0.0_cp  ! Sigma of  Fo
+      real(kind=cp)        :: Phase = 0.0_cp  ! Phase in degrees
+      real(kind=cp)        :: A     = 0.0_cp  ! real part of the Structure Factor
+      real(kind=cp)        :: B     = 0.0_cp  ! Imaginary part of the Structure Factor
+      real(kind=cp)        :: W     = 1.0_cp  ! Weight factor
    End Type SRefl_Type
 
    !!----
@@ -298,13 +299,14 @@ Module CFML_Reflections
          integer, dimension(3)               :: k
       End Function Get_Asymm_Unit_H
 
-      Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
+      Module Subroutine Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,iphase,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
          !---- Arguments ----!
          class(Cell_G_Type),                intent(in)     :: Cell
          real(kind=cp),                     intent(in)     :: Slmin
          real(kind=cp),                     intent(in)     :: Slmax
          type(RefList_Type),                intent(in out) :: Reflex
          class(Spg_Type) ,        optional, intent(in)     :: SpG
+         integer,                 optional, intent(in)     :: iphase
          logical,                 optional, intent(in)     :: MagExt
          type(kvect_info_type),   optional, intent(in)     :: Kinfo
          logical,                 optional, intent(in)     :: Order

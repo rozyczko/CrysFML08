@@ -1,4 +1,4 @@
-  Litvin   BNS      BNS          OG         OG            INT     INT                      MHall            Explicit Generators 
+ Litvin   BNS      BNS          OG         OG            INT    INT                       MHall             Explicit Generators 
  Number  Number   Symbol      Number      Symbol       Number  Symbol                     Symbol            Separated by ";"    
      1   1.1      P1           1.1.1       P1               1  P1                         P 1                  x,y,z,1
      2   1.2      P11'         1.2.2       P11'             2  P11'                       P 1'                 x,y,z,-1

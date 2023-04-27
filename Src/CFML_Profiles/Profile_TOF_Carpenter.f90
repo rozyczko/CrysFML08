@@ -19,7 +19,7 @@ SubModule (CFML_Profiles) Profile_Tof_Carpenter
       real(kind=cp),             intent( in) :: d         ! d-spacing of the peak in A
       real(kind=cp),             intent( in) :: alfa      !  alfa  : units microsecs-1
       real(kind=cp),             intent( in) :: beta      !  beta  : units microsecs-1
-      real(kind=cp),             intent( in) :: gamm     !  gamm : units microsecs
+      real(kind=cp),             intent( in) :: gamm      !  gamm  : units microsecs
       real(kind=cp),             intent( in) :: eta       !  eta   : mixing coefficient calculated using TCH
       real(kind=cp),             intent( in) :: kappa     ! Mixing coeficient of the Ikeda-Carpenter function
       real(kind=cp),             intent( in) :: tof_theta ! This is the value of 2sin(theta)

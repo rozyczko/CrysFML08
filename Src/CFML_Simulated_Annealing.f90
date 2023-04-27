@@ -89,7 +89,7 @@
     !---- Use Files ----!
     Use CFML_GlobalDeps,       only: Cp, Err_CFML, clear_error
     use CFML_Messages,         mess => write_scroll_text
-    use CFML_Strings,          only: u_case, File_Type
+    use CFML_Strings,          only: u_case, File_Type, file_list_type
 
     !---- Variables ----!
     implicit none
@@ -240,6 +240,11 @@
       character(len=15),dimension(np_SAN) :: nampar  !name of parameters of the model
     End Type State_Vector_Type
 
+    Interface Set_SimAnn_Cond
+       Module Procedure Set_SimAnn_Cond_FT
+       Module Procedure Set_SimAnn_Cond_FLT
+    End Interface Set_SimAnn_Cond
+
     Interface
 
       Module Subroutine Boundary_Cond(n,x,low,high,bound)
@@ -308,11 +313,17 @@
          End Interface
       End Subroutine SAnn_Opt_MultiConf
 
-      Module Subroutine Set_SimAnn_Cond(file_list,c)
+      Module Subroutine Set_SimAnn_Cond_FT(file_list,c)
          !---- Arguments ----!
          type(File_Type),             intent( in)  :: file_list
          type(SimAnn_Conditions_type),intent(out)  :: c
-      End Subroutine Set_SimAnn_Cond
+      End Subroutine Set_SimAnn_Cond_FT
+
+      Module Subroutine Set_SimAnn_Cond_FLT(file_list,c)
+         !---- Arguments ----!
+         type(File_List_Type),        intent( in)  :: file_list
+         type(SimAnn_Conditions_type),intent(out)  :: c
+      End Subroutine Set_SimAnn_Cond_FLT
 
       Module Subroutine Set_SimAnn_MStateV(n,nsol,Con,Bounds,VNam,Vec,vs,cod)
          !---- Arguments ----!

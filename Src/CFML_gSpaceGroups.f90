@@ -67,13 +67,13 @@ Module CFML_gSpaceGroups
     public :: operator (==)
 
     !---- List of public functions and subroutines ----!
-    public :: Apply_OP, Symmetry_Symbol, Change_Setting_Generators, Get_MagPG_from_BNS,&
-              Get_Crystal_System, Get_Dimension_SymmOP, Get_Hall_from_Generators,      &
-              Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,           &
-              Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                &
-              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                 &
-              Inverse_OP, Get_Orbit, Get_moment_ctr, Get_TFourier_Ctr,                 &
-              ISO_to_jones_notation, Get_Symb_from_Rational_Mat
+    public :: Apply_OP, Symmetry_Symbol, Change_Setting_Generators, Get_MagPG_from_BNS,  &
+              Get_Crystal_System, Get_Dimension_SymmOP, Get_Hall_from_Generators,        &
+              Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,             &
+              Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                  &
+              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                   &
+              Inverse_OP, Get_Orbit, Get_Moment_ctr, Get_TFourier_Ctr, Get_AtomBet_CTR,  &
+              Get_AtomPos_CTR,ISO_to_jones_notation, Get_Symb_from_Rational_Mat
 
     public :: Allocate_OP, Allocate_SpaceGroup, Allocate_KVector, Change_Setting_SpaceG, &
               Get_Cosets, Get_Generators, Get_Laue_PG, Get_Magnetic_Lattice,             &
@@ -349,6 +349,32 @@ Module CFML_gSpaceGroups
           integer,                          intent(out) :: n
        End Subroutine Get_A_Matrix_Shub
 
+       Module Subroutine Get_AtomBet_CTR(X, Betas, Spgr, Codini, Icodes, Multip, Ord, Ss, Ipr)
+          !---- Arguments ----!
+          real(kind=cp), dimension(3),             intent(in    ) :: X
+          real(kind=cp), dimension(6),             intent(in out) :: Betas
+          type(SpG_type),                          intent(in    ) :: Spgr
+          integer,                                 intent(in out) :: Codini
+          integer, dimension(6),                   intent(in out) :: Icodes
+          real(kind=cp), dimension(6),             intent(in out) :: Multip
+          integer,                       optional, intent(in    ) :: Ord
+          integer, dimension(:),         optional, intent(in    ) :: Ss
+          integer,                       optional, intent(in    ) :: Ipr
+       End Subroutine Get_AtomBet_CTR
+
+       Module Subroutine Get_AtomPos_CTR(X, Spgr, Codini, ICodes, Multip, Ord, Ss, Att,Ipr)
+          !---- Arguments ----!
+          real(kind=cp), dimension(3),            intent(in)     :: X
+          type(SpG_type),                         intent(in)     :: Spgr
+          integer,                                intent(in out) :: Codini
+          integer,       dimension(3),            intent(in out) :: ICodes
+          real(kind=cp), dimension(3),            intent(in out) :: Multip
+          integer,                       optional,intent(in)     :: Ord
+          integer, dimension(:),         optional,intent(in)     :: Ss
+          real(kind=cp), dimension(:,:), optional,intent(in)     :: Att
+          integer,                       optional,intent(in)     :: Ipr
+       End Subroutine Get_AtomPos_CTR
+
        Module Subroutine Get_Cosets(G,H, cosets)
           !---- Arguments ----!
           class(Spg_Type),                     intent(in)  :: G
@@ -487,7 +513,7 @@ Module CFML_gSpaceGroups
           type(rational), dimension(3,3)              :: Mp
        End Function Get_Mp_Matrix
 
-       Module Subroutine Get_moment_ctr(xnr,moment,Spg,codini,codes,ord,ss,att,Ipr,ctr_code)
+       Module Subroutine Get_Moment_CTR(xnr,moment,Spg,codini,codes,ord,ss,att,Ipr,ctr_code)
           real(kind=cp), dimension(3),            intent(in)     :: xnr
           real(kind=cp), dimension(:),            intent(in out) :: moment
           class(SpG_type),                        intent(in)     :: Spg
@@ -498,7 +524,7 @@ Module CFML_gSpaceGroups
           real(kind=cp), dimension(:,:), optional,intent(in)     :: att
           integer,                       optional,intent(in)     :: Ipr
           character(len=*),              optional,intent(out)    :: ctr_code
-       End Subroutine Get_moment_ctr
+       End Subroutine Get_Moment_CTR
 
        Module Subroutine Get_Multip_OP_Table(Op,Table)
           !---- Arguments ----!
@@ -726,7 +752,7 @@ Module CFML_gSpaceGroups
           type(spg_type), intent(in out) :: G
        End Subroutine Identify_PointGroup
 
-       Module Subroutine Get_TFourier_ctr(xnr,TFourier,codes,SpG,codini,mode,ord,ss,att,Ipr,ctr_code)
+       Module Subroutine Get_TFourier_CTR(xnr,TFourier,codes,SpG,codini,mode,ord,ss,att,Ipr,ctr_code)
           real(kind=cp), dimension(3),            intent(in)     :: xnr
           real(kind=cp), dimension(:,:),          intent(in out) :: TFourier
           real(kind=cp), dimension(:,:),          intent(in out) :: codes
@@ -738,7 +764,7 @@ Module CFML_gSpaceGroups
           real(kind=cp), dimension(:,:), optional,intent(in)     :: att
           integer,                       optional,intent(in)     :: Ipr
           character(len=*),dimension(:), optional,intent(out)    :: ctr_code
-       End Subroutine Get_TFourier_ctr
+       End Subroutine Get_TFourier_CTR
 
        Module Subroutine Identify_Crystal_System(G)
           !---- Arguments ----!

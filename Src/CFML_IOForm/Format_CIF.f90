@@ -458,25 +458,28 @@ SubModule (CFML_IOForm) Format_CIF
       character(len=20),dimension(15)     :: label
       character(len=:),allocatable        :: aux_label
       integer                             :: i, j, n, nc, iv, First, nl,npos,ja_ini
-      integer, dimension(12)              :: lugar   !   1 -> label
-                                                     !   2 -> Symbol
-                                                     ! 3-5 -> coordinates
-                                                     !   6 -> occupancy
-                                                     !   7 -> Uequi
-                                                     !   8 -> Biso
-                                                     !   9 -> Multiplicity of the site
-                                                     !  10 -> Wyckoff label letter
-                                                     !  11 -> Oxidation number
-                                                     !  12 -> SymmForm
-      real(kind=cp), dimension(1)     :: vet1,vet2
-      !integer,       dimension(1)     :: ivet
+      integer, dimension(14)              :: lugar   !   1 -> label: _atom_site_label
+                                                     !   2 -> _atom_site_type_symbol
+                                                     ! 3-5 -> coordinates: _atom_site_fract_x,..y,..z
+                                                     !   6 -> occupancy: _atom_site_occupancy
+                                                     !   7 -> Uequi,Biso:_atom_site_U_iso_or_equiv, _atom_site_B_iso_or_equiv
+                                                     !   8 -> adp_type:  _atom_site_adp_type, _atom_site_thermal_displace_type
+                                                     !   9 -> Multiplicity of the site: _atom_site_symmetry_multiplicity
+                                                     !  10 -> Wyckoff label letter:'_atom_site_Wyckoff_symbol','_atom_site_Wyckoff_label'
+                                                     !  11 -> Oxidation number:'_atom_site_oxidation_number'
+                                                     !  12 -> SymmForm:'_atom_site_fract_symmform'
+                                                     !  13 -> Hydrogens:'_atom_site_attached_hydrogens'
+                                                     !  14 -> Calc flag: '_atom_site_calc_flag'
 
-      type(atlist_type)               :: Atm
+      real(kind=cp), dimension(1)    :: vet1,vet2
+      !integer,       dimension(1)   :: ivet
 
-      type (atm_type)                 :: atm1
-      type (atm_std_type)             :: atm2
-      type (ModAtm_std_type)          :: atm3
-      type (atm_ref_type)             :: atm4
+      type(atlist_type)              :: Atm
+
+      type(atm_type)                 :: atm1
+      type(atm_std_type)             :: atm2
+      type(ModAtm_std_type)          :: atm3
+      type(atm_ref_type)             :: atm4
 
       !class(atm_type), allocatable    :: atm5
 
@@ -565,7 +568,7 @@ SubModule (CFML_IOForm) Format_CIF
             case ('_atom_site_U_iso_or_equiv','_atom_site_B_iso_or_equiv')
                j=j+1
                lugar(7)=j
-            case ('_atom_site_adp_type')
+            case ('_atom_site_adp_type','_atom_site_thermal_displace_type')
                j=j+1
                lugar(8)=j
             case ('_atom_site_symmetry_multiplicity')
@@ -580,6 +583,12 @@ SubModule (CFML_IOForm) Format_CIF
             case ('_atom_site_fract_symmform')
                j=j+1
                lugar(12)=j
+            case ('_atom_site_attached_hydrogens')
+               j=j+1
+               lugar(13)=j
+            case ('_atom_site_calc_flag')
+               j=j+1
+               lugar(14)=j
          end select
       end do
 
@@ -636,7 +645,17 @@ SubModule (CFML_IOForm) Format_CIF
 
          !> _atom_site_type_symbol
          if (lugar(2) /= 0) then
-            atm%atom(n)%SfacSymb=label(lugar(2))(1:4)
+            aux_label=label(lugar(2))(1:4)
+            iv=len_trim(aux_label)
+            if(iv /= 0) then
+              if(aux_label(iv:iv) == "+") then
+                aux_label=aux_label(1:iv-2)//"+"//aux_label(iv-1:iv-1)
+              end if
+              if(aux_label(iv:iv) == "-") then
+                aux_label=aux_label(1:iv-2)//"-"//aux_label(iv-1:iv-1)
+              end if
+            end if
+            atm%atom(n)%SfacSymb=aux_label
             if (index(DIGCAR, label(lugar(2))(2:2)) /= 0 ) then
                atm%atom(n)%chemSymb=u_case(label(lugar(2))(1:1))
             else
@@ -835,7 +854,19 @@ SubModule (CFML_IOForm) Format_CIF
               return
            end if
            j=j+1
-           if(lugar(1) /= 0)  atm%atom(j)%SfacSymb = label(lugar(1))
+           if(lugar(1) /= 0)  then
+              aux_label=label(lugar(1))
+              iv=len_trim(aux_label)
+              if(iv /= 0) then
+                if(aux_label(iv:iv) == "+") then
+                  aux_label=aux_label(1:iv-2)//"+"//aux_label(iv-1:iv-1)
+                end if
+                if(aux_label(iv:iv) == "-") then
+                  aux_label=aux_label(1:iv-2)//"-"//aux_label(iv-1:iv-1)
+                end if
+              end if
+              atm%atom(n)%SfacSymb=aux_label
+           end if
            if(lugar(2) /= 0)  then
              read(unit=label(lugar(2)),fmt=*) atm%atom(j)%charge
            end if

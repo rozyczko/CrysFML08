@@ -27,7 +27,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
      logical                          :: Debug=.false.
 
      integer                          :: i,j,k,n,nc,iv
-     character(len=40)                :: car,str
+     character(len=:), allocatable    :: car,str
 
      !> Init
      Ind=0
@@ -39,13 +39,14 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
      i=N_ini
      do while(i <= N_end)
         line=adjustl(ffile%line(i)%str)
-
-        !> No comments, No blank lines
-        if (line(1:1) =='!') then
+        !> No blank lines
+        if (len_trim(line) ==0 ) then
            i=i+1
            cycle
         end if
-        if (line(1:1) ==' ') then
+
+        !> No comments
+        if (line(1:1) =='!') then
            i=i+1
            cycle
         end if
@@ -119,8 +120,8 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
       !> Determine the zone of commands in the file
       do i=1,ffile%nlines
          line=adjustl(ffile%line(i)%str)
+         if(len_trim(line) == 0) cycle
          if (line(1:1) =='!') cycle
-         if (line(1:1) ==' ') cycle
 
          j=index(line,'!')
          if (j > 0) line=line(:j-1)

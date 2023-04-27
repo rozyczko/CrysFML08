@@ -310,10 +310,10 @@ Submodule (CFML_Keywords_Code_Parser) KWC_FillCodes_FAtm
                   case (1)  ! Keyv=1  XYZ -> Vary all coordinates of atom na
                      !---- XYZ ----!
                      do j=1,3
-                        if ( atom(na)%l_x(j) ==0) then
+                        if ( atom(na)%l_x(j) == 0) then
                             atom(na)%m_x(j)=1.0
-                           call get_atompos_ctr( atom(na)%x, Spg, np_refi,   &
-                                                 atom(na)%l_x,  atom(na)%m_x)
+                            call get_atompos_ctr( atom(na)%x, Spg, np_refi,   &
+                                                  atom(na)%l_x, atom(na)%m_x)!, Ipr=6)
                            if ( atom(na)%l_x(j) == np_refi) then
                               V_Vec(np_refi)= atom(na)%x(j)
                               V_Name(np_refi)=trim(code_nam(j))//trim( atom(na)%lab)

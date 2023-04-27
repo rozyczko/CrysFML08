@@ -48,8 +48,9 @@ Module CFML_KeyCodes
    Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, ModAtm_Std_Type, &
                                 Atm_Ref_Type, ModAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
    Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
-   Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP, &
-                                Get_OP_from_Symb, Symmetry_symbol
+   Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP,         &
+                                Get_OP_from_Symb, Symmetry_symbol, Get_AtomBet_CTR, Get_AtomPos_CTR,&
+                                Get_Moment_CTR, Get_TFourier_CTR
    use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
    use CFML_Molecules,    only: Molecule_type
    Use CFML_Rational
@@ -146,7 +147,7 @@ Module CFML_KeyCodes
    !---- Parameters ----!
    integer, private, parameter :: NKEY_ATM =14      ! Number of Keywords for Atoms
    integer, private, parameter :: NKEY_MATM=25      ! Number of Keywords for Magnetic atoms
-   integer, private, parameter :: NKEY_MOL =15       ! Number of Keywords for Molecule
+   integer, private, parameter :: NKEY_MOL =15      ! Number of Keywords for Molecule
    integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
    integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
    integer, private, parameter :: NKEY_PATT=25      ! Number of Keywords for Patterns
@@ -184,7 +185,7 @@ Module CFML_KeyCodes
    !-------------------!
 
    !---- Private ----!
-   character(len=132), private                :: line=" "
+   character(len=:),   private, allocatable   :: line
    character(len=40),  private, dimension(40) :: dire=" "
    integer,            private, dimension(10) :: ivet=0
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
@@ -286,31 +287,6 @@ Module CFML_KeyCodes
          integer,           intent(in)     :: Ind
       End Subroutine Fix_XYZ_Atm
 
-      Module Subroutine Get_AtomBet_CTR(X, Betas, Spgr, Codini, Icodes, Multip, Ord, Ss, Ipr)
-         !---- Arguments ----!
-         real(kind=cp), dimension(3),             intent(in    ) :: X
-         real(kind=cp), dimension(6),             intent(in out) :: Betas
-         type(SpG_type),                          intent(in    ) :: Spgr
-         integer,                                 intent(in out) :: Codini
-         integer, dimension(6),                   intent(in out) :: Icodes
-         real(kind=cp), dimension(6),             intent(in out) :: Multip
-         integer,                       optional, intent(in    ) :: Ord
-         integer, dimension(:),         optional, intent(in    ) :: Ss
-         integer,                       optional, intent(in    ) :: Ipr
-      End Subroutine Get_AtomBet_CTR
-
-      Module Subroutine Get_AtomPos_CTR(X, Spgr, Codini, ICodes, Multip, Ord, Ss, Att,Ipr)
-         !---- Arguments ----!
-         real(kind=cp), dimension(3),            intent(in)     :: X
-         type(SpG_type),                         intent(in)     :: Spgr
-         integer,                                intent(in out) :: Codini
-         integer,       dimension(3),            intent(in out) :: ICodes
-         real(kind=cp), dimension(3),            intent(in out) :: Multip
-         integer,                       optional,intent(in)     :: Ord
-         integer, dimension(:),         optional,intent(in)     :: Ss
-         real(kind=cp), dimension(:,:), optional,intent(in)     :: Att
-         integer,                       optional,intent(in)     :: Ipr
-      End Subroutine Get_AtomPos_CTR
 
       Module Subroutine Get_AFIX_Line(String, AtList, IPhase)
          !---- Arguments ----!

@@ -34,14 +34,14 @@ call %INTEL%\setvars.bat
 set  FULLPROF=c:\FullProf_Suite
 set  LAUESUITE=c:\Esmeralda_Laue_Suite
 set  SXTALSOFT=c:\ILL_Git\SXtalSoft
-set  CRYSFML=c:\ILL_Git\CrysFML08
-set  CRYSFML_LIB=%CRYSFML%\ifort64\LibC
-set  WCRYSFML_LIB=%CRYSFML%\ifort64\LibW
+set  CRYSFML08=c:\ILL_Git\CrysFML08
+set  CRYSFML08_LIB=%CRYSFML08%\ifort64\LibC
+set  WCRYSFML08_LIB=%CRYSFML08%\ifort64\LibW
 set  CRYSFML_DB=%FULLPROF%\Databases
 set  PROGCFML=c:\ILL_Git\ProgCFML
 set  ESMERALDA=c:\ILL_Git\Esmeralda
 set  INCLUDE=%INCLUDE%;%MINGW%\include
-set  LIB=%LIB%;%CRYSFML%\ifort64\LibC;%CRYSFML%\ifort64\LibW;c:\wint\lib.i64;%INTEL_LIB%;%MINGW%\lib
+set  LIB=%LIB%;%CRYSFML08%\ifort64\LibC;%CRYSFML08%\ifort64\LibW;c:\wint\lib.i64;%INTEL_LIB%;%MINGW%\lib
 set  PATH=%PATH%;%FULLPROF%;%LAUESUITE%;C:\Program Files\CMake\bin;c:\wint\bin;%MINGW%\bin
 set  PATH=%PATH%;%INTEL_BIN%;%INTEL_LIB%;%REDIST%;C:\Program Files\Notepad++
 set  TARGET_ARCH=intel64
@@ -79,37 +79,37 @@ Concrete examples (by default the compiler is ifort):
 
 To be run in an environment with intel 64bits (putting the option ARCH32=ON, we obtain the generation for 32 bits) :
 -----------------------------------------------------------------------OK for release
-cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
 cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
-cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
-cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_Fortran_COMPILER_FORCED=ON -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_Fortran_COMPILER_FORCED=ON -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
-cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D PYTHON_API=ON -D ARCH32=OFF -D -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_py -D CRYSFML_PREFIX=LibC ..\..\.
+cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D PYTHON_API=ON -D ARCH32=OFF -D -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_py -D CRYSFML_PREFIX=LibC ..\..\.
 -----------------------------------------------------------------------OK for debug
 
-Building CrysFML only for console mode  
-======================================
+Building CrysFML08 only for console mode  
+========================================
 # Console Only for ifx (oneAPI) in debug mode
-cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifx -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifx_debug -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifx -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifx_debug -D CRYSFML_PREFIX=LibC  ..\..\.
 
 # Console Only for ifx (oneAPI) in release mode
-cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_Fortran_COMPILER=ifx -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifx -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_Fortran_COMPILER=ifx -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifx -D CRYSFML_PREFIX=LibC  ..\..\.
 
 # Console Only for Ifort in debug mode
-cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64_debug -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "NMake Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_debug -D CRYSFML_PREFIX=LibC  ..\..\.
 # Console Only for Ifort in release mode
-cmake -G "NMake Makefiles"  -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "NMake Makefiles"  -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
 
 # Console Only for Ifort in release mode HDF5
-cmake -G "NMake Makefiles"  -D USE_HDF=ON -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "NMake Makefiles"  -D USE_HDF=ON -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64 -D CRYSFML_PREFIX=LibC  ..\..\.
 
 # Console Only for gfortran in debug mode
-cmake -G "MinGW Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran64_debug -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "MinGW Makefiles"  -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\gfortran64_debug -D CRYSFML_PREFIX=LibC  ..\..\.
 # Console Only for gfortran in release mode
-cmake -G "MinGW Makefiles"  -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran64_release -D CRYSFML_PREFIX=LibC ..\..\.
+cmake -G "MinGW Makefiles"  -D ARCH32=OFF GUI=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_Fortran_COMPILER=gfortran -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\gfortran64_release -D CRYSFML_PREFIX=LibC ..\..\.
 
  
 Example for SXTALSOFT on Windows
@@ -125,8 +125,8 @@ WARNING: When you get in troubles you have to remove completely all files and di
 examples for gfortran:
 ======================
 64-bits gfortran
-cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -DGUI=OFF -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran -D CRYSFML_PREFIX=LibC ..\..\.
-cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -DGUI=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran_debug -D CRYSFML_PREFIX=LibC  ..\..\.
+cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -DGUI=OFF -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\gfortran -D CRYSFML_PREFIX=LibC ..\..\.
+cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -DGUI=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\gfortran_debug -D CRYSFML_PREFIX=LibC  ..\..\.
 
  - Once the above steps worked properly the only thing to do is execute the command:
    "nmake install" or in the case of "MinGW Makefiles" execute the command: "mingw32-make install"
@@ -137,10 +137,10 @@ cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -DG
 
 
 For building a series of program based on CrysFML we have to set the environment variables telling to cmake where the lib is.
-Examples CRYSFML_LIB=c:\CrysFML\ifort\LibC
-         WCRYSFML_LIB=c:\CrysFML\ifort\LibW
+Examples CRYSFML08_LIB=%CRYSFML08%\ifort\LibC
+         WCRYSFML08_LIB=%CRYSFML08%\ifort\LibW
 
-    or better:  LIB=%LIB%;c:\CrysFML\ifort\LibC;c:\CrysFML\ifort\LibW
+    or better:  LIB=%LIB%;%CRYSFML08%\ifort\LibC;%CRYSFML08%\ifort\LibW
 
 For installing the programs in a particular place we have to invoke
   cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%PROGCFML%\DistFPS  -DGUI=ON      ..\..\.
@@ -228,14 +228,14 @@ The following generators are available on this platform:
 
  The following works provided that ifort is in the path:
  ======================================================
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML/GFortran64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$CRYSFML/GFortran64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML08/GFortran64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$CRYSFML08/GFortran64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
 
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML/ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$CRYSFML/ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML08/ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=ON -D ARCH32=OFF -DCMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$CRYSFML08/ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
 
 For cases in which Linux is embeded in Windows (no winteracter)
-cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML/Linux_gfortran -D CRYSFML_PREFIX=LibC  ../../.
+cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML08/Linux_gfortran -D CRYSFML_PREFIX=LibC  ../../.
 
  make -j4 -l4
  install
@@ -243,8 +243,8 @@ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH3
  However Winteracter is not found ....
 
  For working only with console programs:
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML/ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
- cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML/GFortran -D CRYSFML_PREFIX=LibC ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML08/ifort64 -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ../../.
+ cmake -G "Unix Makefiles" -D CMAKE_Fortran_COMPILER=gfortran -D GUI=OFF -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=$CRYSFML08/GFortran -D CRYSFML_PREFIX=LibC ../../.
 
  To get Winteracter working do:
  ------------------------------

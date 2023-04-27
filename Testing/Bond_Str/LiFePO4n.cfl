@@ -11,6 +11,8 @@ Atom O1   O-2    0.0971(3)     0.25000       0.7430(7)     0.91(7)       0.50000
 Atom O2   O-2    0.4570(3)     0.25000       0.2065(6)     0.91(7)       0.50000
 Atom O3   O-2    0.1655(2)     0.0464(4)     0.2845(4)     0.91(7)       1.00000
 !   Bond_STR instructions 
-!   Nx, Ny, Nz, Species, Dmax, Delta(eV): Values within Emin+delta are counted for fractional volume estimation
-BVEL 103  60  47    LI+1     8.0    2
-PERCOLATION   4
+RESTRAINTS 
+RESTR_FILE   CFML_Restraints.tpcr
+RESTDA      2.500  95.000
+DMAX  3.200 0.000                                                                                                                      
+TOL    30.000                                                                                                                          

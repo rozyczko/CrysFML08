@@ -10,7 +10,7 @@
     !!----    real(kind=cp),      intent(in)   :: dangl    !  In -> Max. distance for angle calculations
     !!----    type (Cell_G_Type), intent(in)   :: Cell     !  In -> Object of Crytal_Cell_Type
     !!----    Class(SpG_Type),    intent(in)   :: SpG      !  In -> Object of SpG_Type
-    !!----    type (AtList_Type), intent(in)    :: A        !  In -> Object of AtList_Type
+    !!----    type (AtList_Type), intent(in)   :: A        !  In -> Object of AtList_Type
     !!----
     !!----    Subroutine to calculate distances, below the prescribed distance "dmax"
     !!----    Sets up the coordination type: Coord_Info for each atom in the asymmetric unit
@@ -36,14 +36,17 @@
        real(kind=cp), dimension(3)             :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                           :: T,dd
        real(kind=cp), dimension(3,max_coor)    :: uu
-       real(kind=cp), dimension(3,SpG%Multip)  :: tr
-       integer,       dimension(3,3,SpG%Multip):: Mat
 
-       d=SpG%d
-       do i=1,SpG%Multip
-         Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
-          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
-       End do
+       !real(kind=cp), dimension(3,SpG%Multip)  :: tr  !Replaced by a call to init_opMatTr
+       !integer,       dimension(3,3,SpG%Multip):: Mat
+       !
+       !d=SpG%d
+       !do i=1,SpG%Multip
+       !  Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
+       !   tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       !End do
+
+       if(.not. init_symOP) call init_opMatTr(SpG)
 
        qd(:)=1.0/cell%rcell(:)
        ic2(:)= int(dmax/cell%cell(:))+1
@@ -57,7 +60,7 @@
              uu(:,lk)=xo(:)
              do j=1,Spg%Multip
                 !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-                xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
+                xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
                 do i1=ic1(1),ic2(1)
                    do i2=ic1(2),ic2(2)
                       do_i3:do i3=ic1(3),ic2(3)
@@ -132,14 +135,15 @@
        real(kind=cp), dimension(3)             :: xx,x1,xo,Tn,xr, QD
        real(kind=cp)                           :: T,dd
        real(kind=cp), dimension(3,max_coor)    :: uu
-       real(kind=cp), dimension(3,SpG%Multip)  :: tr
-       integer,       dimension(3,3,SpG%Multip):: Mat
-
-       d=SpG%d
-       do i=1,SpG%Multip
-         Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
-          tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
-       End do
+       !real(kind=cp), dimension(3,SpG%Multip)  :: tr
+       !integer,       dimension(3,3,SpG%Multip):: Mat
+       !
+       !d=SpG%d
+       !do i=1,SpG%Multip
+       !  Mat(:,:,i) =SpG%Op(i)%Mat(1:3,1:3)
+       !   tr(:,i)  = SpG%Op(i)%Mat(1:3,d)
+       !End do
+       if(.not. init_symOP) call init_opMatTr(SpG)
 
        po=0; pn=0
        po(List)=1 !This atom has a modified coordination sphere
@@ -161,7 +165,7 @@
           uu(:,lk)=xo(:)
           do j=1,Spg%Multip
              !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-             xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
+             xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
              do i1=ic1(1),ic2(1)
                 do i2=ic1(2),ic2(2)
                    do_i3:do i3=ic1(3),ic2(3)
@@ -215,7 +219,7 @@
             uu(:,lk)=xo(:)
             do j=1,Spg%Multip
                !xx=Apply_OP(Spg%Op(j),a%atom(k)%x)
-               xx=Matmul(Mat(:,:,j),a%atom(k)%x)+tr(:,j)
+               xx=Matmul(opMat(:,:,j),a%atom(k)%x)+opTr(:,j)
                do i1=ic1(1),ic2(1)
                   do i2=ic1(2),ic2(2)
                      do_inter:do i3=ic1(3),ic2(3)

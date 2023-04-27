@@ -51,9 +51,10 @@
 
        !--- Local Variables ---!
        character (len=256)                         :: messag, strings
-       integer                                     :: i, j, k, neval, ncf, ntp, naver, jj, survive, jopt, minut !, last
+       integer                                     :: i, j, k, neval, ncf, ntp, naver, jj, survive, jopt, &
+                                                      minut,itick1,itick2,count_rate  !, last
        real(kind=cp)                               :: temp, ep, ener, costop, half_init_avstp, sumdel,sumsig, &
-                                                      prob, rav, rati, plage, stepav, random, tini,tf, sec !, shift
+                                                      prob, rav, rati, plage, stepav, random, tini,tf,minuts,sec !, shift
        integer, parameter                          :: i_conf=99
        integer, dimension(1)                       :: seed
        logical, dimension(np_CONF)                 :: dead
@@ -159,7 +160,10 @@
        neval=0
        nacp=0
        costav(:)=0.0
-       call cpu_time(tini)
+       !call cpu_time(tini)
+       call system_clock(count_rate=count_rate)
+       call system_clock(itick1)
+       tini=itick1/real(count_rate)
        do ntp=1,c%num_temps     ! Global DO for changing temperature
             naj(:)   =0
            cost(:)   =0.0
@@ -169,12 +173,15 @@
           temp=c%anneal*Temp  ! Current temperature
 
           strings=" "
-          call cpu_time(tf)
-          sec=(tf-tini)/60.0
-          minut=int(sec)
-          sec=(sec-real(minut))*60.0
-          write(unit=strings,fmt="(a,f9.5,a,i5,a,i8,a,i5,a,f8.4,a)") "  => New Temp:",temp,"  NT: ",ntp, &
-               "       Number of function evaluations:",neval,"         Cumulated CPU-time: ",minut," minutes",sec," seconds"
+          !call cpu_time(tf)   ! minutos=(tf-tini)/60  min=int(minutos)  minutos-min=
+          call system_clock(itick2)
+          tf=itick2/real(count_rate)
+          sec=tf-tini
+          minuts=sec/60.0
+          minut=int(minuts)
+          sec=(minuts-real(minut))*60.0
+          write(unit=strings,fmt="(a,f9.5,a,i5,a,i8,a,i6,a,f8.3,a)") "  => New Temp:",temp,"  NT: ",ntp, &
+               "       Number of function evaluations:",neval,"         Cumulated CPU-time: ",minut," minutes -> ",sec," seconds"
           call mess(strings)
           write(unit=ipr,fmt="(/,a)") trim(strings)
 
@@ -489,9 +496,10 @@
 
        !--- Local Variables ---!
        character (len=256)                         :: messag, strings
-       integer                                     :: i, j, k, neval, ncf, ntp, naver, jj, survive, jopt, minut  !, last
+       integer                                     :: i, j, k, neval, ncf, ntp, naver, jj, survive, jopt, &
+                                                      minut,itick1,itick2,count_rate  !, last
        real(kind=cp)                               :: temp, ep, ener, costop, half_init_avstp, sumdel,sumsig, &
-                                                      prob, rav, rati, plage, stepav, random,tini,tf,sec !, shift
+                                                      prob, rav, rati, plage, stepav, random,tini,tf,minuts,sec !, shift
        integer, parameter                          :: i_conf=99
        integer,          dimension(1)              :: seed
        logical,          dimension(np_CONF)        :: dead
@@ -597,7 +605,10 @@
        neval=0
        nacp=0
        costav(:)=0.0
-       call cpu_time(tini)
+       !call cpu_time(tini)
+       call system_clock(count_rate=count_rate)
+       call system_clock(itick1)
+       tini=itick1/real(count_rate)
        do ntp=1,c%num_temps     ! Global DO for changing temperature
             naj(:)   =0
            cost(:)   =0.0
@@ -607,12 +618,15 @@
           temp=c%anneal*Temp  ! Current temperature
 
           strings=" "
-          call cpu_time(tf)
-          sec=(tf-tini)/60.0
-          minut=int(sec)
-          sec=(sec-real(minut))*60.0
-          write(unit=strings,fmt="(a,f9.5,a,i5,a,i8,a,i5,a,f8.4,a)") "  => New Temp:",temp,"  NT: ",ntp, &
-               "       Number of function evaluations:",neval,"         Cumulated CPU-time: ",minut," minutes",sec," seconds"
+          !call cpu_time(tf)   ! minutos=(tf-tini)/60  min=int(minutos)  minutos-min=
+          call system_clock(itick2)
+          tf=itick2/real(count_rate)
+          sec=tf-tini
+          minuts=sec/60.0
+          minut=int(minuts)
+          sec=(minuts-real(minut))*60.0
+          write(unit=strings,fmt="(a,f9.5,a,i5,a,i8,a,i6,a,f8.3,a)") "  => New Temp:",temp,"  NT: ",ntp, &
+               "       Number of function evaluations:",neval,"         Cumulated CPU-time: ",minut," minutes -> ",sec," seconds"
           call mess(strings)
           write(unit=ipr,fmt="(/,a)") trim(strings)
 

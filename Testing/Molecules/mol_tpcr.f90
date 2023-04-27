@@ -9,7 +9,7 @@
     !---- Use Modules ----!
     Use CFML_GlobalDeps
     Use CFML_Molecules
-    Use CFML_Strings 
+    Use CFML_Strings
     use CFML_Metrics
     use CFML_Geom
 
@@ -33,7 +33,7 @@
 
     type(Cell_G_Type)                  :: celda
     logical                            :: cell_read=.false.
-    
+
     type(file_type)                    :: fdat
 
  Contains
@@ -95,7 +95,7 @@
 
        return
     End Subroutine Getinfo_Command
-    
+
     !!----
     !!---- SUBROUTINE LOAD_DATA
     !!----
@@ -107,46 +107,46 @@
        integer, dimension(30) :: pt_mol
 
        fdat = reading_file(trim(fildat))
-       
+
        open(unit=jfilout, file=filout, status='replace',action="write")
        i=index(fildat,".",back=.true.)
        file_cfl=fildat(1:i-1)//"_fc.cfl"
        open(unit=i_cfl,file=file_cfl,status="replace",action="write")
-       
+
        !> Detect number of molecules into file
        pt_mol=0
        nmol=0
        do i=1,fdat%nlines
-          line=u_case(fdat%line(i)%Str)
+          line=u_case(fdat%line(i)%str)
           if (line(1:1) =='!') cycle
           if (index(line,'MOLE') > 0) then
              nmol=nmol+1
              pt_mol(nmol)=i
-          end if  
-       end do  
+          end if
+       end do
 
        do n=1,nmol
           if (n > 10) exit
           n_ini=pt_mol(n)
           n_end=pt_mol(n+1)-1
           if (n_end <=0) n_end=fdat%nlines
-          
-          
-          call ReadInfo_Molecule(Fdat, Mol(n), n_ini, n_end)  
+
+
+          call ReadInfo_Molecule(Fdat, Mol(n), n_ini, n_end)
           if (err_CFML%IErr /= 0) then
              write(unit=*,fmt="(a)") "  Error in read_molecule: "//trim(ERR_CFML%Msg)
              exit
           end if
-          
-          
-          !> Search for three points (fractional coordinates)  defining a Cartesian 
+
+
+          !> Search for three points (fractional coordinates)  defining a Cartesian
           !> frame up to the next molecule
           do i=n_ini, n_end
-             line=adjustl(fdat%line(i)%Str)
+             line=adjustl(fdat%line(i)%str)
              if (line(1:1) == '!') cycle
              lline=l_case(line)
              if (lline(1:9) /= "xyz_frame") cycle
-             
+
              read(unit=line(10:),fmt=*,iostat=ier) x1(:,nmol),x2(:,nmol),x3(:,nmol)
              if (ier == 0) then
                 fracFrame_read(nmol)=.true.
@@ -154,10 +154,10 @@
              end if
           end do
        end do
-       
+
        !> Search for a unit cell for all molecules
        do i=1, fdat%nlines
-          line=adjustl(fdat%line(i)%Str)
+          line=adjustl(fdat%line(i)%str)
           lline=l_case(line)
           if (lline(1:4) /= "cell") cycle
 
@@ -168,9 +168,9 @@
              cell_read=.true.
           end if
        end do
-       
+
     End Subroutine Load_Data
-    
+
     !!----
     !!---- SUBROUTINE CLOSE_FILES
     !!----
@@ -192,10 +192,10 @@
     Subroutine write_tpcr(ier)
        !---- Arguments ----!
        integer, intent (in) :: ier
-       
+
        !---- Local Variables ----!
        integer :: i,j
-       
+
        if (ier /= 2) then
           WRITE(unit=jfilout,fmt='(/a/)')' => Spherical internal coordinates r,the,phi'
           WRITE(unit=jfilout,fmt='(a)')'!Atom Typ       x        y        z         B      Occ       P6     THETA     PHI  Spc'
@@ -211,7 +211,7 @@
                   moln%I_Coor(:,i),(0.0,j=9,11)
           end do
        end if
-       
+
        if (ier /= 3) then
           WRITE(unit=jfilout,fmt='(/a/)')' => Cartesian internal coordinates xc,yc,zc'
           WRITE(unit=jfilout,fmt='(a)')'!Atom Typ       x        y        z         B      Occ       P6     THETA     PHI  Spc'
@@ -227,7 +227,7 @@
                    molc%I_Coor(:,i),(0.0,j=9,11)
            end do
        end if
-       
+
        if (ier /= 4) then
           WRITE(unit=jfilout,fmt='(/a/)')' => Z-matrix type: distance - bond angle - torsion angle'
           WRITE(unit=jfilout,fmt='(a)')'!Atom Typ       x        y        z         B      Occ       P6     THETA     PHI  Spc'
@@ -243,16 +243,16 @@
                   molz%I_Coor(:,i),(0.0,j=9,11)
           end do
        end if
-       
+
     End Subroutine write_tpcr
-    
+
     !!----
     !!---- SUBROUTINE WRITE_TCFL
     !!----
     Subroutine write_tcfl(k)
        !---- Arguments ----!
        integer, intent(in) :: k
-       
+
        !---- Local Variables ----!
        integer           :: i,j
        character(len=10) :: lab,chem_prev
@@ -266,14 +266,14 @@
           write(unit=i_cfl,fmt="(a)")        "!"
           write(unit=i_cfl,fmt="(a)")        "box  -0.25 1.25 -0.25 1.25  -0.1 1.1"
        end if
-        
+
        j=1
        i=1
        write(unit=lab,fmt="(a,i3)") trim(molc%AtSymb(i))//mol(k)%Name_mol(1:1), j
        lab=pack_string(lab)
        WRITE(unit=i_cfl,fmt='(a,a4,2X,5F9.5)') &
             "Atom  "//lab, molc%AtSymb(i), molF%I_Coor(:,i), molc%U_iso(i), molc%Occ(i)
-       
+
        chem_prev=molc%AtSymb(i)
        do i=2,molc%natoms
           if (chem_prev /= molc%AtSymb(i)) then
@@ -323,22 +323,22 @@
              mol(i)%orient(2)= theta
              mol(i)%orient(3)= chi
              mol(i)%xcentre(:)= x3(:,i)+tr
-             EuM = Set_euler_matrix(Mol(i)%rot_type, phi,theta,chi) 
+             EuM = Set_euler_matrix(Mol(i)%rot_type, phi,theta,chi)
              Mol(i)%Euler=matmul(Rot,EuM)
              Mol(i)%is_EulerMat=.true.
-             
+
              call WriteInfo_molecule(mol(i),jfilout)
-             
+
              ier=0
              select case (mol(i)%coor_type)
 
                 case("F")
                    call init_molecule(molF,mol(i)%Natoms)
                    molF=mol(i)
-                   
+
                    call fractional_to_spherical(mol(i),celda,moln)
                    if (err_CFML%Ierr /=0) ier=2
-                   
+
                    call spherical_to_cartesian(moln,molc)
                    if (err_CFML%Ierr /=0) ier=3
 
@@ -348,26 +348,26 @@
                Case("C")
                    call init_molecule(molc,mol(i)%Natoms)
                    molc=mol(i)
-                   
+
                    call cartesian_to_spherical(mol(i),moln)
                    if (err_CFML%Ierr /=0) ier=2
 
                    call cartesian_to_fractional(mol(i),celda,molF)
                    if (err_CFML%Ierr /=0) ier=1
-                   
+
                    call cartesian_to_Zmatrix(mol(i),molz)
                    if (err_CFML%Ierr /=0) ier=4
 
                Case("S")
                    call init_molecule(moln,mol(i)%Natoms)
                    moln=mol(i)
-                   
+
                    call spherical_to_fractional(mol(i),celda,molF)
                    if (err_CFML%Ierr /=0) ier=1
 
                    call spherical_to_cartesian(mol(i),molc)
                    if (err_CFML%Ierr /=0) ier=3
-                   
+
                    call spherical_to_Zmatrix(mol(i),NMol=molz)
                    if (err_CFML%Ierr /=0) ier=4
 
@@ -377,7 +377,7 @@
 
                    call Zmatrix_to_spherical(mol(i),moln)
                    if (err_CFML%Ierr /=0) ier=2
-                   
+
                    call Zmatrix_to_fractional(mol(i),celda,molF)
                    if (err_CFML%Ierr /=0) ier=1
 
@@ -408,13 +408,13 @@
                 write(unit=*,fmt=*) " => Transformation to Z-matrix of molecule #",i
                 call fractional_to_Cartesian(mol(i),celda,molc)
                 call fractional_to_Zmatrix(mol(i),celda,molz)
-                
+
                 call init_molecule(molF,mol(i)%Natoms)
                 molF=mol(i)
                 call writeinfo_molecule(molF,jfilout)
                 call writeinfo_molecule(molc,jfilout)
                 call writeinfo_molecule(molz,jfilout)
-             
+
              else
                write(unit=*,fmt=*) " => Transformation from Z-matrix to cartesian of molecule #",i
                call init_molecule(molz,mol(i)%Natoms)
@@ -425,7 +425,7 @@
                call writeinfo_molecule(moln,jfilout)
                call writeinfo_molecule(molc,jfilout)
              end if
-             
+
           end if
 
        end do
@@ -450,14 +450,14 @@
     !> Command Line
     call getinfo_command()
 
-    !> Load Data 
+    !> Load Data
     if (.not. ierror) call load_data()
     if (nmol==0) then
        write(unit=*,fmt=*) " => No molecule is loaded!... program interrupted!"
        if (err_CFML%Ierr /=0) write(unit=*,fmt=*) trim(Err_CFML%Msg)
        stop
     end if
-    
+
     if (.not. cell_read) then
        write(unit=*,fmt="(a)") " => No cell given!"
     end if
@@ -474,16 +474,16 @@
     write(unit=*,fmt="(a)") "                  (JRC -- ILL version: April 2022)"
     write(unit=*,fmt="(a)") "                  "
     write(unit=*,fmt="(a,i2)") " => Number of molecules read: ",nmol
-    
+
     do i=1,nmol
        write(unit=*,fmt="(a,i2,a)") "        Name of molecule #",i,": "//trim(mol(i)%name_mol)
        write(unit=*,fmt="(a,a)")    "        Type of coordinates : ", trim(mol(i)%coor_type)
     end do
-    
+
     if (.not. ierror) call calculation()
     write(unit=*,fmt="(a)") " => Program finished ... see output file: "//trim(filout)
     write(unit=*,fmt="(a)") " => CFL file with fractional coordinates: "//trim(file_cfl)
-    
+
     !> Closing Files
     call Close_files()
 

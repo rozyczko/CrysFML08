@@ -14,8 +14,10 @@ Atom O4  O-2   0.3678(2)    0.0566(1)  0.2633(2)    0.77     1.0
 
 !   Commands
 COMMANDS
-  vary xyz P O
-  vary uiso_O1 x_O2 y_O3
-  fix x_O1
-END COMMANDS
+ %Phase NiFePO5
+   vary xyz P O
+   vary uiso_O1 x_O2 y_O3
+   fix x_O1
+ %End_Phase
+END_COMMANDS
 
