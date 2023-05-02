@@ -796,8 +796,8 @@ Program Sxtal_Ref_Gen
                 call Hkl_gen_sxtal(cell,SpG,stlmin,stlmax,hkl,ord)
             end if
         else
-            !call Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
-            call Gener_Reflections(Cell,stlmin,stlmax,hkl,SpG,.true.,Ref_typ="SRefl")
+            !call Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,IPhase,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
+            call Gener_Reflections(Cell,stlmin,stlmax,hkl,SpG,1,.true.,Ref_typ="SRefl")
         end if
         nr_resol=hkl%nref
         !Calculation of Structure factors for neutron scattering
