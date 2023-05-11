@@ -72,7 +72,7 @@
                                                                                     "AS-3","H-1 ",&
                                                                                     "O-1 ","SE-1"]
 
-    character(len=*), parameter, public, dimension(0:35) :: REF_BVS = [                      &
+    character(len=*), parameter, public, dimension(0:36) :: REF_BVS = [                      &
          "Unknown                                                                         ", &  !0
          "Brown and Altermatt, (1985), Acta Cryst. B41, 244-247 (empirical)               ", &  !1
          "Brese and O'Keeffe, (1991), Acta Cryst. B47, 192-197 (extrapolated)             ", &  !2
@@ -108,7 +108,8 @@
          "J.Rodriguez-Carvajal, Private communication                                     ", &  !32
          "S. Adams and R. Prasada Rao, (2011) Phys. Status Solidi A 208, No. 8, 1746-1753 ", &  !33
          "S. Adams (2013),  Structure and Bonding (eds. Brown & Poeppelmeier) 158, 91-128 ", &  !34
-         "Adams S, Moretsky O and Canadell E (2004) Solid State Ionics 168, 281-290       "]    !35
+         "Adams S, Moretsky O and Canadell E (2004) Solid State Ionics 168, 281-290       ", &  !35
+         "Haomin Chen and Stefan Adams (2017) IUCrJ 4, 614-625                            "]    !36
 
     real(kind=cp), parameter, public, dimension(BVEL_ANIONS_N) :: BVEL_ANIONS_RION = [1.40]             ! Radii Ionic for Anions in BVEL
     real(kind=cp), parameter, public, dimension(BVS_ANIONS_N)  :: BVS_ANIONS_RION  = [1.40,1.19,1.67, & ! Ionic Radii for Anions
