@@ -24,7 +24,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
       integer,                       intent(out) :: N_Id        ! Number of ID
 
      !---- Local Arguments ----!
-     logical                          :: Debug=.false.
+     logical                          :: Debug=.true.
 
      integer                          :: i,j,k,n,nc,iv
      integer, dimension(3)            :: ivet
@@ -93,17 +93,16 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
            if (j <= 0) cycle
 
            !> Max dimension for Ind and ID_Str. Pay attention
-           Ind(1)=i+1
-           Ind(2)=n-1
+           Ind(1)=i
+           Ind(2)=n
 
-           i=n
            exit
         end do
-        i=i+1
+        exit
      end do
 
      !> Debug information
-     if (Debug) then
+     if (Debug .and. any(ind /=0)) then
         write(unit=*,fmt='(a)') ' '
         write(unit=*,fmt='(a)') ' '//trim(car)//': '//trim(strname)
         write(unit=*,fmt='(a, i5)') '    Num. ID: ',N_Id
@@ -149,7 +148,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
          if (n_Ini == 0) then
             j=index(u_case(line),'COMMANDS')
             if (j > 0) then
-               n_ini=i+1
+               n_ini=i
                cycle
             end if
          end if
@@ -158,7 +157,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
          if (n_ini > 0 .and. i >= n_ini) then
             j=index(u_case(line),'END_COMMANDS')
             if (j > 0) then
-               n_End=i-1
+               n_End=i
                exit
             end if
          end if

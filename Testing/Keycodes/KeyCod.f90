@@ -20,10 +20,22 @@ Program KeyCodes
    !---- Variables from CFML ----!
    implicit none
 
+   Type :: BlockInfo_Type
+      character(len=60)             :: StrName=" "
+      character(len=10)             :: BlName=" "  ! Command, Phase, Pattern, Molec, Atoms....
+      integer                       :: IBl=-1      !     0      1        2      3      4
+      integer, dimension(2)         :: Nl =0       ! Ini/End line
+   End Type BlockInfo_Type
+
    logical                          :: Debug=.true.
+
+
+
 
    logical                          :: ZoneCommand=.false.
    integer, dimension(2)            :: ZComm =0
+
+   integer, parameter               :: NB_MAX=100       ! Maximum number of blocks
 
    integer, parameter               :: NMAX_PHAS =10
    integer, parameter               :: NMAX_PATT =10
@@ -31,6 +43,8 @@ Program KeyCodes
    integer, parameter               :: NMAX_ATLIS=10
 
    type(File_type)                  :: Ffile
+
+
 
     type :: Phase_Type
        character(len=:),      allocatable :: phas_name
@@ -88,7 +102,7 @@ Program KeyCodes
    character(len=2)                :: ans
    character(len=40)               :: str
 
-   integer                         :: i, j, k, narg, lun, nphases, npatterns
+   integer                         :: i, j, k, narg, lun, nblocks, nphases, npatterns
    integer                         :: n_ini, n_end
 
    real(kind=cp)                   :: T_ini,T_fin, T_Time
@@ -104,32 +118,19 @@ Program KeyCodes
    integer                         :: Npar,ip,im,icyc
 
    !---- Types ----!
-   Type :: Bl_Type
-      character(len=40)     :: Name=" "
-      character(len=10)     :: Type=" "  ! Phase, Pattern, Molecule, ....
-      integer               :: IType=-1  !    0      1        2
-      integer, dimension(2) :: Line=0    ! start, end
-   End Type Bl_Type
+   type(BlockInfo_Type)                    :: Bl_Comm
+   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Phas
+   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Patt
 
-   Type :: Block_Info_Type
-      type(Bl_type)                            :: Block
-      integer                                  :: N_SBlocks
-      type(Bl_type), dimension(:), allocatable :: SBlock
-   End Type Block_Info_Type
+   integer                                :: NB_Comm, NB_Phas, NB_Patt, NB_Mol, NB_Atm, NB_Tot, N_Id
+   integer, dimension(2)                  :: Ind
 
-   integer, parameter                     :: NB_MAX=50
-   integer                                :: NB_Phas, NB_Patt, NB_Mol, NB_Atm, NB_Tot
-   integer, dimension(2,NB_MAX)           :: Ind
-   integer, dimension(2,NMAX_PATT)        :: ib_Patt
+   character(len=60)                      :: StrName
+
    integer, dimension(2,NMAX_MOLE)        :: Ib_Mol
    integer, dimension(2,NMAX_ATLIS)       :: Ib_Atm
    integer, dimension(2,NMAX_PHAS)        :: Ib_Phas
    character(len=40), dimension(4,NB_MAX) :: ID_Str
-
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Phases
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Patterns
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Molec
-   type(Block_Info_Type), dimension(NB_MAX) :: Block_Atm
 
 
    !> Init
@@ -185,19 +186,79 @@ Program KeyCodes
       stop
    end if
 
+   !> Determine a Command Zone
+   NB_Comm=0
+   call Get_ZoneCommands(ffile, N_Ini, N_End)
+   if (n_ini> 0 .and. n_end >= n_ini) then
+      Bl_Comm%Nl(1)=n_ini
+      Bl_Comm%Nl(2)=n_end
+      Bl_Comm%IBl=0
+      Bl_Comm%BlName='COMMAND'
+      NB_Comm=1
+   end if
+
    !> Determine the number of Phases
    nphases=0
-   do i = 1 , ffile%nlines
-      line = adjustl(ffile%line(i)%str)
-      if (l_case(line(1:6)) == "phase_")  nphases = nphases + 1
+   i=1
+   n_end=ffile%nlines
+
+   do while (i < ffile%nlines)
+      !> Exclude zone
+      if (NB_Comm > 0) then
+         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
+         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
+            i=Bl_Comm%Nl(2)+1
+            n_end=ffile%nlines
+         end if
+      end if
+
+      call Get_Block_KEY('PHASE', ffile, i, n_end, Ind, StrName, N_Id)
+
+      if (Err_CFML%IErr /= 0) then
+         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                   "Phase Block have a index line zero!"
+         stop
+      end if
+      if (all(ind == 0)) exit
+
+      print*,'N_id', n_id
+
+      select case (N_Id)
+         case (0)
+            if (nphases ==0) then
+               nphases=1
+
+               Bl_Phas(1)%StrName=trim(StrName)
+               Bl_Phas(1)%BlName='PHASE'
+               Bl_Phas(1)%IBl=1
+               Bl_Phas(1)%Nl=Ind
+            else
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Phase Block defined as 1!"
+               stop
+            end if
+
+         case (1:NB_MAX)
+            if (Bl_Phas(N_id)%IBl == 1) then
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Phase Block defined with the same identificator!"
+               stop
+            end if
+
+            Bl_Phas(N_id)%StrName=trim(StrName)
+            Bl_Phas(N_id)%BlName='PHASE'
+            Bl_Phas(N_id)%IBl=1
+            Bl_Phas(N_id)%Nl=Ind
+
+            nphases=nphases+1
+      end select
+
+      i=ind(2)+1
+      cycle
    end do
-   if (nphases == 0) then
-      write(*,"(a)") ' No phase_ command found in the CFL file'
-      write(*,"(a)") ' Assuming a single phase'
-      nphases=1
-   else
-      write(*,'(a,i4)') 'Number of phases: ', nphases
-   end if
+
+   print*,'Numero de fases: ',nphases
+
 
    !> Determine the number of Patterns
    npatterns=0
@@ -205,19 +266,7 @@ Program KeyCodes
       line = adjustl(ffile%line(i)%str)
       if (l_case(line(1:8)) == "pattern_")  npatterns = npatterns + 1
    end do
-   if (npatterns == 0) then
-      write(*,"(a)") ' No pattern_ command found in the CFL file'
-   else
-      write(*,'(a,i4)') 'Number of patterns: ', npatterns
-   end if
 
-   !> Determine a Command Zone
-   call Get_ZoneCommands(ffile, N_Ini, N_End)
-   if (n_ini==0 .or. n_end==0) then
-      write(*,"(a)") ' No command zone was found in the CFL file'
-   else
-      write(*,'(a)') 'There is a Command zone'
-   end if
 
    !   !> Create a Log File
    !   if (debug) then
