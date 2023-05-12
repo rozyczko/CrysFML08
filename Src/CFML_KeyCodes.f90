@@ -404,15 +404,15 @@ Module CFML_KeyCodes
          integer,            intent(out) :: n_end
       End Subroutine Get_ZoneCommands
 
-      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nb, Ind, ID_Str)
+      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
          !---- Arguments ----!
          character(len=*),              intent(in)  :: Key
          Type(file_type),               intent(in)  :: ffile
          integer,                       intent(in)  :: n_ini
          integer,                       intent(in)  :: n_end
-         integer,                       intent(out) :: Nb
-         integer, dimension(:,:),       intent(out) :: Ind
-         character(len=*),dimension(:), intent(out) :: ID_Str
+         integer, dimension(2),         intent(out) :: Ind
+         character(len=*),              intent(out) :: StrName
+         integer,                       intent(out) :: N_Id
       End Subroutine Get_Block_KEY
 
       Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)

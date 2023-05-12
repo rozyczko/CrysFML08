@@ -13,32 +13,35 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
    !!----
    !!---- Update: 12/05/2022
    !!
-   Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nb, Ind, ID_Str)
+   Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
       !---- Arguments ----!
-      character(len=*),              intent(in)  :: Key         ! 'Pattern','Molec',....
+      character(len=*),              intent(in)  :: Key         ! 'Pattern','Phase',....
       Type(file_type),               intent(in)  :: ffile
       integer,                       intent(in)  :: n_ini
       integer,                       intent(in)  :: n_end
-      integer,                       intent(out) :: Nb          ! Number of blocks
-      integer, dimension(:,:),       intent(out) :: Ind         ! 1:Start; 2: End
-      character(len=*),dimension(:), intent(out) :: ID_Str      ! String identification
+      integer, dimension(2),         intent(out) :: Ind         ! Start; End
+      character(len=*),              intent(out) :: StrName     ! String identification
+      integer,                       intent(out) :: N_Id        ! Number of ID
 
      !---- Local Arguments ----!
      logical                          :: Debug=.false.
 
      integer                          :: i,j,k,n,nc,iv
-     character(len=:), allocatable    :: car,str
+     integer, dimension(3)            :: ivet
+     character(len=:), allocatable    :: car, str
+     real, dimension(3)               :: vet
 
      !> Init
      Ind=0
-     ID_Str=' '
+     StrName=' '
+     N_Id=0
 
      car=u_case(trim(key))
-     k=0
 
      i=N_ini
      do while(i <= N_end)
         line=adjustl(ffile%line(i)%str)
+
         !> No blank lines
         if (len_trim(line) ==0 ) then
            i=i+1
@@ -58,36 +61,40 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
         if (j > 0) line=line(:j-1)
 
         !> Block type
-        j=index(u_case(line),'%'//trim(car))
+        j=index(u_case(line), trim(car)//'_')
         if (j <=0) then
            i=i+1
            cycle
         end if
 
-        call cut_string(line)
-
         !> Identification String
-        call get_words(line, dire, nc)
-        if ( nc /= 1) then
-           call set_error(-1, " You have to give an identification name in Block definition")
-           return
-        end if
+        j=index(u_case(line), '_')
+        call get_words(line(j+1:), dire, nc)
+        select case (nc)
+           case (1)
+              strname=adjustl(dire(1))
 
-        str=adjustl(dire(1))
+           case (2)
+              strname=adjustl(dire(1))
+              call get_num(dire(2), vet, ivet, iv)
+              if (iv ==1) N_Id=ivet(1)
+
+           case default
+              call set_error(-1, " Error in the format of the Block definition")
+              return
+        end select
 
         do n=i+1,n_end
            line=adjustl(ffile%line(n)%str)
            if (line(1:1) =='!') cycle
            if (line(1:1) ==' ') cycle
 
-           j=index(u_case(line),'%END_'//trim(car))
+           j=index(u_case(line),'END_'//trim(car)//'_'//trim(u_case(strname)))
            if (j <= 0) cycle
 
            !> Max dimension for Ind and ID_Str. Pay attention
-           k=k+1
-           Ind(1,k)=i+1
-           Ind(2,k)=n-1
-           ID_Str(k)=adjustl(str)
+           Ind(1)=i+1
+           Ind(2)=n-1
 
            i=n
            exit
@@ -95,7 +102,16 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
         i=i+1
      end do
 
-     Nb = k
+     !> Debug information
+     if (Debug) then
+        write(unit=*,fmt='(a)') ' '
+        write(unit=*,fmt='(a)') ' '//trim(car)//': '//trim(strname)
+        write(unit=*,fmt='(a, i5)') '    Num. ID: ',N_Id
+        write(unit=*,fmt='(a, i5)') ' Start line: ',ind(1)
+        write(unit=*,fmt='(a, i5)') '   End line: ',ind(2)
+        write(unit=*,fmt='(a)') ' '
+     end if
+
 
   End Subroutine Get_Block_Key
 
@@ -131,7 +147,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
          !> N_ini point the next line into Command zone
          if (n_Ini == 0) then
-            j=index(u_case(line),'COMMAND')
+            j=index(u_case(line),'COMMANDS')
             if (j > 0) then
                n_ini=i+1
                cycle
@@ -140,7 +156,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
 
          !> N_end point the previous line from end Command zone
          if (n_ini > 0 .and. i >= n_ini) then
-            j=index(u_case(line),'END_COMM')
+            j=index(u_case(line),'END_COMMANDS')
             if (j > 0) then
                n_End=i-1
                exit
