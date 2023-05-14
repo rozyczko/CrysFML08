@@ -33,11 +33,41 @@ END_BlockName_StringIdentification
 ~~~
 
 ## ***Pattern Block***
+
+Subblocks allowed within this one
+
+~~~
+  BACKGD  
+  option1 N1
+  ...
+  ...  
+  option2 N2   
+  ...  
+  ...  
+  END_BACKGD
+~~~
+~~~
+  EXCLUDE_REGIONS   
+  ...  
+  ...  
+  END_EXCLUDE_REGIONS
+~~~
+
+
+
 | Directive |Options                   | Observations                        |
 |:--------- |:------------------------ |:----------------------------------- |
+| Backgd...End_Backgd | |
+| Regions...End_Regions | |
 | Patt_Type | Neutrons / X-rays  | |    
 |           | Powder / Integrated_Intensities| |
 |           | CW / TOF           | |
 | Zero      | |
 | Sycos     | |
 | Sysin     | |
+| Pow_File     | |
+| Hkl_File     | |
+| Irf_File     | |
+| Profile_Function     | |
+| Lambda     | |
+| Range | |
