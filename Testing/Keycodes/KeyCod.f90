@@ -186,7 +186,9 @@ Program KeyCodes
       stop
    end if
 
+   !> ------------------------ 
    !> Determine a Command Zone
+   !> ------------------------
    NB_Comm=0
    call Get_ZoneCommands(ffile, N_Ini, N_End)
    if (n_ini> 0 .and. n_end >= n_ini) then
@@ -197,7 +199,9 @@ Program KeyCodes
       NB_Comm=1
    end if
 
+   !> ------------------------------
    !> Determine the number of Phases
+   !> ------------------------------
    nphases=0
    i=1
    n_end=ffile%nlines
@@ -220,8 +224,6 @@ Program KeyCodes
          stop
       end if
       if (all(ind == 0)) exit
-
-      print*,'N_id', n_id
 
       select case (N_Id)
          case (0)
@@ -259,13 +261,68 @@ Program KeyCodes
 
    print*,'Numero de fases: ',nphases
 
-
+   !> --------------------------------
    !> Determine the number of Patterns
+   !> --------------------------------
    npatterns=0
-   do i = 1 , ffile%nlines
-      line = adjustl(ffile%line(i)%str)
-      if (l_case(line(1:8)) == "pattern_")  npatterns = npatterns + 1
+   i=1
+   n_end=ffile%nlines
+
+   do while (i < ffile%nlines)
+      !> Exclude zone
+      if (NB_Comm > 0) then
+         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
+         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
+            i=Bl_Comm%Nl(2)+1
+            n_end=ffile%nlines
+         end if
+      end if
+
+      call Get_Block_KEY('PATTERN', ffile, i, n_end, Ind, StrName, N_Id)
+
+      if (Err_CFML%IErr /= 0) then
+         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                   "Pattern Block have a index line zero!"
+         stop
+      end if
+      if (all(ind == 0)) exit
+
+      select case (N_Id)
+         case (0)
+            if (npatterns ==0) then
+               npatterns=1
+
+               Bl_Patt(1)%StrName=trim(StrName)
+               Bl_Patt(1)%BlName='PATTERN'
+               Bl_Patt(1)%IBl=2
+               Bl_Patt(1)%Nl=Ind
+            else
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Pattern Block defined as 1!"
+               stop
+            end if
+
+         case (1:NB_MAX)
+            if (Bl_Patt(N_id)%IBl == 2) then
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Pattern Block defined with the same identificator!"
+               stop
+            end if
+
+            Bl_Patt(N_id)%StrName=trim(StrName)
+            Bl_Patt(N_id)%BlName='PATTERN'
+            Bl_Patt(N_id)%IBl=2
+            Bl_Patt(N_id)%Nl=Ind
+
+            npatterns=npatterns+1
+      end select
+
+      i=ind(2)+1
+      cycle
    end do
+
+   print*,'Numero de Patterns: ',npatterns
+   
 
 
    !   !> Create a Log File
