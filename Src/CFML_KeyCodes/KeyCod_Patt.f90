@@ -5,6 +5,48 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
    Contains
 
    !!----
+   !!---- SUBROUTINE READ_EXCLUDEREG_PATT
+   !!----
+   !!----
+   !!---- Update: 12/05/2022
+   !!
+   Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
+      !---- Arguments ----!
+      Type(file_type),         intent(in)    :: ffile
+      integer,                 intent(in)    :: n_ini
+      integer,                 intent(in)    :: n_end
+      integer,                 intent(in)    :: Ip
+
+      !---- Local Variables ----!
+      integer               :: j, iv
+      integer, dimension(2) :: Ind
+
+      !> Init
+      call clear_error()
+
+      call Get_SubBlock_KEY('EXCLUDED_REGIONS', ffile, n_ini, n_end, Ind)
+
+      if (all(Ind > 0)) then
+         do j=Ind(1)+1, Ind(2)-1
+            line=adjustl(ffile%line(j)%str)
+            if (line(1:1) ==" ") cycle
+            if (line(1:1) =="!") cycle
+            call Get_Num(line, vet, ivet, iv)
+            if (iv /=2) then
+               call set_error(1,'Wrong format for Exclude regions interval: '//trim(line))
+               return
+            end if
+
+            NP_exreg=NP_exreg+1
+            Vec_ExReg(NP_exreg)%ipat=Ip
+            Vec_ExReg(NP_exreg)%V_ini=vet(1)
+            Vec_ExReg(NP_exreg)%V_end=vet(2)
+         end do
+      end if
+
+   End Subroutine Read_ExcludeReg_PATT
+
+   !!----
    !!---- SUBROUTINE READ_REFCODES_PATT
    !!----
    !!----

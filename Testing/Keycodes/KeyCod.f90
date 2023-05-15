@@ -103,7 +103,7 @@ Program KeyCodes
    character(len=40)               :: str
 
    integer                         :: i, j, k, narg, lun, nblocks, nphases, npatterns
-   integer                         :: n_ini, n_end
+   integer                         :: n_ini, n_end, iv
 
    real(kind=cp)                   :: T_ini,T_fin, T_Time
 
@@ -131,6 +131,10 @@ Program KeyCodes
    integer, dimension(2,NMAX_ATLIS)       :: Ib_Atm
    integer, dimension(2,NMAX_PHAS)        :: Ib_Phas
    character(len=40), dimension(4,NB_MAX) :: ID_Str
+
+   !> Exclude regions
+   integer, parameter :: MAX_EXREG=100
+   integer, parameter :: MAX_VGEN= 500
 
 
    !> Init
@@ -186,7 +190,7 @@ Program KeyCodes
       stop
    end if
 
-   !> ------------------------ 
+   !> ------------------------
    !> Determine a Command Zone
    !> ------------------------
    NB_Comm=0
@@ -322,7 +326,45 @@ Program KeyCodes
    end do
 
    print*,'Numero de Patterns: ',npatterns
-   
+
+   !> ----------------------
+   !> ---- PATTERN ZONE ----
+   !> ----------------------
+
+   !> Exclude Regions
+   if (allocated(Vec_ExReg)) deallocate(Vec_ExReg)
+   allocate (Vec_ExReg(MAX_EXREG))
+
+   do i=1,npatterns
+      call Read_ExcludeReg_PATT(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
+      call WriteInfo_ExcludedRegions(i)
+   end do
+
+   !> Background points
+   if (allocated(Vec_General)) deallocate(Vec_General)
+   allocate (Vec_General(MAX_VGEN))
+
+   do i=1,npatterns
+      call Subroutine Get_SubBlock_KEY('BACKGD', ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), Ind)
+      if (all(Ind ==0)) cycle
+
+      do j=ind(1)+1, ind(2)-1
+         line = adjustl(ffile%line(j)%str)
+         if (line(1:1) ==' ') cycle
+         if (line(1:1) =='!') cycle
+
+         k=index(line,'!')
+         if (k > 0) line=line(:k-1)
+         k=index(line,'#')
+         if (k > 0) line=line(:k-1)
+
+
+
+      end do
+
+
+   end do
+
 
 
    !   !> Create a Log File

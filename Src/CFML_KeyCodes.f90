@@ -65,11 +65,14 @@ Module CFML_KeyCodes
    public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_GenParList,   &
              Del_RefCode_ATM, Del_RefCode_GenParList, &
              Fill_RefCodes_Atm,  &
-             Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
+             Get_AFIX_Line, Get_Block_KEY, Get_SubBlock_KEY, Get_DFIX_Line, Get_TFIX_Line, &
+             Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
+             Read_ExcludeReg_PATT, &
              Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
-             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
+             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints, &
+             WriteInfo_ExcludedRegions
 
 
    !---- Definitions ----!
@@ -143,6 +146,27 @@ Module CFML_KeyCodes
       type(GenPar_Type), allocatable, dimension(:) :: Par
    End Type GenParList_Type
 
+   !!----
+   !!---- TYPE :: EXCLUDE_REGIONS_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: Exclude_Regions_Type
+      integer                       :: IPat =0        ! Pattern identification
+      real(kind=cp)                 :: V_Ini =0.0_cp
+      real(kind=cp)                 :: V_End =0.0_cp
+   End Type Exclude_Regions_Type
+
+   !!----
+   !!---- TYPE :: GENVEC_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: GenVec_Type
+      integer                       :: Ic =0        ! Code identificator
+      real(kind=cp),dimension(4)    :: V  =0.0_cp
+   End Type GenVec_Type
+
 
    !---- Parameters ----!
    integer, private, parameter :: NKEY_ATM =14      ! Number of Keywords for Atoms
@@ -191,6 +215,10 @@ Module CFML_KeyCodes
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
 
    !---- Public ----!
+   integer, public :: NP_ExReg=0     ! Number of Exclude Regions
+   integer, public :: NP_GenV =0     ! Number of General vector
+
+
    integer, public :: NP_Constr  =0  ! Number of Constraints relations
 
    integer, public :: NP_Ref_Max =0  ! Number of Maximum refinable Parameters
@@ -208,6 +236,9 @@ Module CFML_KeyCodes
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
+
+   type(Exclude_Regions_Type),    public, dimension(:), allocatable :: Vec_ExReg  ! Vector of Excluded regions
+   type(GenVec_Type),             public, dimension(:), allocatable :: Vec_General! Vector for General purposes
 
    type(Angle_Restraint_Type),    public, dimension(:), allocatable :: Ang_Rest     ! Relations for Angle restraints
    type(Distance_Restraint_Type), public, dimension(:), allocatable :: Dis_Rest     ! Relations for Distance restraints
@@ -361,6 +392,12 @@ Module CFML_KeyCodes
          integer, optional,   intent(in) :: Iunit
       End Subroutine WriteInfo_RefParams
 
+      Module Subroutine WriteInfo_ExcludedRegions(Ip, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: Ip
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine WriteInfo_ExcludedRegions
+
       Module Subroutine WriteInfo_Restraints(AtList, Calc, Iunit)
          !---- Arguments ----!
          type(AtList_Type), intent(in) :: AtList
@@ -373,6 +410,14 @@ Module CFML_KeyCodes
          type(AtList_Type), intent(in) :: AtList
          integer, optional, intent(in) :: Iunit
       End Subroutine WriteInfo_Constraints
+
+      Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: Ip
+      End Subroutine Read_ExcludeReg_PATT
 
       Module Subroutine Read_RefCodes_ATM(ffile, n_ini, n_end, Spg, Atlist)
          !---- Arguments ----!
@@ -414,6 +459,15 @@ Module CFML_KeyCodes
          character(len=*),              intent(out) :: StrName
          integer,                       intent(out) :: N_Id
       End Subroutine Get_Block_KEY
+
+      Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind)
+         !---- Arguments ----!
+         character(len=*),      intent(in)  :: key
+         Type(file_type),       intent(in)  :: ffile
+         integer,               intent(in)  :: n_ini
+         integer,               intent(in)  :: n_end
+         integer, dimension(2), intent(out) :: Ind
+      End Subroutine Get_SubBlock_KEY
 
       Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)
          !---- Arguments ----!

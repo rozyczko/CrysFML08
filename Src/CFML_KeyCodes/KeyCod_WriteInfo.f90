@@ -4,6 +4,44 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
 
    Contains
    !!----
+   !!---- Subroutine WriteInfo_ExcludedRegions
+   !!----
+   !!----    Write the information about Excluded Regions in file associated with
+   !!----    logical unit "iunit".
+   !!----    If no argument is passed the standard output (iunit=6) is used
+   !!----
+   !!---- Update: May - 2023
+   !!
+   Module Subroutine WriteInfo_ExcludedRegions(Ip, Iunit)
+      !---- Arguments ----!
+      integer,             intent(in) :: Ip
+      integer, optional,   intent(in) :: Iunit
+
+      !---- Local variables ----!
+      integer :: i,j,lun
+
+      lun=6
+      if (present(iunit)) lun=iunit
+
+      if (NP_ExReg <= 0) return
+      if (.not. any(Vec_ExReg%IPat == Ip)) return
+
+      write(unit=lun, fmt="(a)") " "
+      write(unit=lun, fmt="(a,i4)") " Excluded Regions for Pattern: ",Ip
+      write(unit=lun, fmt="(a)") " "
+      write(unit=lun, fmt="(a,a)")"  Region             Start          End"
+
+      j=0
+      do i=1,NP_ExReg
+         if (Vec_ExReg(i)%IPat /= Ip) cycle
+         j=j+1
+         write(unit=lun,fmt="(i6,5x,2f15.3)") j, Vec_ExReg(i)%V_ini, Vec_ExReg(i)%V_end
+      end do
+
+   End Subroutine WriteInfo_ExcludedRegions
+
+
+   !!----
    !!---- Subroutine WriteInfo_RefParams
    !!----
    !!----    Write the information about Refinement parameters in file associated with

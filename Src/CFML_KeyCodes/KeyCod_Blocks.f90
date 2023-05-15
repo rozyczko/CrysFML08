@@ -27,9 +27,7 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
      logical                          :: Debug=.true.
 
      integer                          :: i,j,k,n,nc,iv
-     integer, dimension(3)            :: ivet
      character(len=:), allocatable    :: car, str
-     real, dimension(3)               :: vet
 
      !> Init
      Ind=0
@@ -171,5 +169,61 @@ Submodule (CFML_KeyCodes) KeyCod_Blocks
       end if
 
    End Subroutine Get_ZoneCommands
+
+   !!----
+   !!---- SUBROUTINE GET_SUBBLOCK
+   !!----
+   !!---- Date: 15/05/2023
+   !!
+   Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind)
+      !---- Arguments ----!
+      character(len=*),      intent(in)  :: key
+      Type(file_type),       intent(in)  :: ffile
+      integer,               intent(in)  :: n_ini
+      integer,               intent(in)  :: n_end
+      integer, dimension(2), intent(out) :: Ind
+
+      !---- Local Variables ----!
+      character(len=:), allocatable    :: car
+      integer                          :: i,j
+      logical                          :: Debug =.false.
+
+
+      !> Init
+      Ind=0
+      car=u_case(trim(key))
+
+      !> Determine the zone of Background in the file
+      do i=n_ini, n_end
+         line=adjustl(ffile%line(i)%str)
+         if(len_trim(line) == 0) cycle
+         if (line(1:1) =='!') cycle
+
+         j=index(line,'!')
+         if (j > 0) line=line(:j-1)
+
+         j=index(line,'#')
+         if (j > 0) line=line(:j-1)
+
+         !> N_ini point the next line into Command zone
+         if (Ind(1) == 0) then
+            j=index(u_case(line),trim(car))
+            if (j > 0) then
+               Ind(1)=i
+               cycle
+            end if
+         end if
+
+         !> N_end point the previous line from end Command zone
+         if (Ind(1) > 0 .and. i >= Ind(1)) then
+            j=index(u_case(line),'END_'//trim(car))
+            if (j > 0) then
+               ind(2)=i
+               exit
+            end if
+         end if
+      end do
+
+   End Subroutine Get_SubBlock_KEY
 
 End SubModule KeyCod_Blocks
