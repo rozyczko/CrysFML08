@@ -102,8 +102,8 @@ Program KeyCodes
    character(len=2)                :: ans
    character(len=40)               :: str
 
-   integer                         :: i, j, k, narg, lun, nblocks, nphases, npatterns
-   integer                         :: n_ini, n_end, iv
+   integer                         :: i, j, k, kk, narg, lun, nblocks, nphases, npatterns
+   integer                         :: n_ini, n_end, iv,ic, nt
 
    real(kind=cp)                   :: T_ini,T_fin, T_Time
 
@@ -348,9 +348,10 @@ Program KeyCodes
    do i=1,npatterns
       call Get_SubBlock_KEY('BACKGD', ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), Ind)
       if (all(Ind ==0)) cycle
-
-      j=ind(1)+1 
-      do while(j <= ind(2)-1)
+      
+      j=ind(1) 
+      do while(j <= ind(2)-2)
+         j=j+1
          line = adjustl(ffile%line(j)%str)
          if (line(1:1) ==' ') cycle
          if (line(1:1) =='!') cycle
@@ -365,12 +366,12 @@ Program KeyCodes
             ! error
          end if
          
-         select case (u_case(trim(dire(1)))))
+         select case (trim(u_case(dire(1))))
             case ('LINEAR_INTERPOLATION')
                select case (iv)
                   case (1)
-                     j=j+1
-                     do while(j <= ind(2)-1)
+                     do while(j <= ind(2)-2)
+                        j=j+1            
                         line = adjustl(ffile%line(j)%str)
                         if (line(1:1) ==' ') cycle
                         if (line(1:1) =='!') cycle
@@ -385,16 +386,18 @@ Program KeyCodes
                            ! error
                         end if
                         NP_backgd=NP_backgd+1
-                        Vec_backgd(NP_backgd)%Str='LIN'
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='LINEAR'
                         Vec_Backgd(NP_backgd)%V=vet(1:ic)
-                        j=j+1
                      end do   
-                     
+
                   case (2)
                      call get_num(dire(2),vet,ivet,ic)
-                     j=j+1
+                     nt=ivet(1)
                      kk=0
-                     do while(j <= ind(2)-1)
+                     
+                     do while(j <= ind(2)-2)
+                        j=j+1
                         line = adjustl(ffile%line(j)%str)
                         if (line(1:1) ==' ') cycle
                         if (line(1:1) =='!') cycle
@@ -409,11 +412,11 @@ Program KeyCodes
                            ! error
                         end if
                         NP_backgd=NP_backgd+1
-                        Vec_backgd(NP_backgd)%Str='LIN'
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='LINEAR'
                         Vec_Backgd(NP_backgd)%V=vet(1:ic)
                         kk=kk+1
-                        if (kk ==ivet(1)) exit
-                        j=j+1
+                        if (kk ==nt) exit
                      end do 
                      
                   case default
@@ -423,7 +426,54 @@ Program KeyCodes
             case ('SPLINE_INTERPOLATION')
                select case (iv)
                   case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1            
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 .or. ic > 4) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='SPLINE'
+                        Vec_Backgd(NP_backgd)%V=vet(1:ic)
+                     end do
+                     
                   case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+                     
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 .or. ic > 4) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='SPLINE'
+                        Vec_Backgd(NP_backgd)%V=vet(1:ic)
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do 
                   case default
                      ! Error
                end select
@@ -431,7 +481,38 @@ Program KeyCodes
             case ('POLYNOMIAL')
                select case (iv)
                   case (1)
+                     ! Error
                   case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+                     
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 ) then
+                           ! error
+                        end if
+                        do k=1,ic
+                           kk=kk+1 
+                           NP_backgd=NP_backgd+1
+                           Vec_backgd(NP_backgd)%Ic=i
+                           Vec_backgd(NP_backgd)%Str='POLYNOM'
+                           Vec_Backgd(NP_backgd)%V(1)=vet(kk)
+                        end do   
+                        
+                        if (kk ==nt) exit
+                     end do 
+                     
                   case default
                      ! Error
                end select
@@ -439,7 +520,38 @@ Program KeyCodes
             case ('CHEBYCHEV')
                select case (iv)
                   case (1)
+                     ! Error
                   case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+                     
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 ) then
+                           ! error
+                        end if
+                        do k=1,ic
+                           kk=kk+1 
+                           NP_backgd=NP_backgd+1
+                           Vec_backgd(NP_backgd)%Ic=i
+                           Vec_backgd(NP_backgd)%Str='CHEBYCHEV'
+                           Vec_Backgd(NP_backgd)%V(1)=vet(kk)
+                        end do   
+                        
+                        if (kk ==nt) exit
+                     end do 
+                     
                   case default
                      ! Error
                end select
@@ -447,7 +559,55 @@ Program KeyCodes
             case ('PEAKS_PVOIGT')
                select case (iv)
                   case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1            
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=3) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='PEAKS_PVOIGT'
+                        Vec_Backgd(NP_backgd)%V(1:3)=vet(1:3)
+                     end do
+                  
                   case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+                     
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=3) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=i
+                        Vec_backgd(NP_backgd)%Str='PEAKS_PVOIGT'
+                        Vec_Backgd(NP_backgd)%V(1:3)=vet(1:3)
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do 
+                     
                   case default
                      ! Error
                end select
@@ -456,7 +616,6 @@ Program KeyCodes
                ! Error
          end select   
          
-
       end do
    end do ! npatterns
 
