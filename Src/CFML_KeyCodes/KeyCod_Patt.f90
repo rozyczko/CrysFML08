@@ -38,9 +38,8 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
             end if
 
             NP_exreg=NP_exreg+1
-            Vec_ExReg(NP_exreg)%ipat=Ip
-            Vec_ExReg(NP_exreg)%V_ini=vet(1)
-            Vec_ExReg(NP_exreg)%V_end=vet(2)
+            Vec_ExReg(NP_exreg)%ic=Ip
+            Vec_ExReg(NP_exreg)%V(1:2)=vet(1:2)
          end do
       end if
 

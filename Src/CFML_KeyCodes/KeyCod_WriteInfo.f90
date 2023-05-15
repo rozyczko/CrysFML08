@@ -24,7 +24,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
       if (present(iunit)) lun=iunit
 
       if (NP_ExReg <= 0) return
-      if (.not. any(Vec_ExReg%IPat == Ip)) return
+      if (.not. any(Vec_ExReg%Ic == Ip)) return
 
       write(unit=lun, fmt="(a)") " "
       write(unit=lun, fmt="(a,i4)") " Excluded Regions for Pattern: ",Ip
@@ -33,9 +33,9 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
 
       j=0
       do i=1,NP_ExReg
-         if (Vec_ExReg(i)%IPat /= Ip) cycle
+         if (Vec_ExReg(i)%Ic /= Ip) cycle
          j=j+1
-         write(unit=lun,fmt="(i6,5x,2f15.3)") j, Vec_ExReg(i)%V_ini, Vec_ExReg(i)%V_end
+         write(unit=lun,fmt="(i6,5x,2f15.3)") j, Vec_ExReg(i)%V(1:2)
       end do
 
    End Subroutine WriteInfo_ExcludedRegions

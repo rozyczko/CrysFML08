@@ -146,17 +146,7 @@ Module CFML_KeyCodes
       type(GenPar_Type), allocatable, dimension(:) :: Par
    End Type GenParList_Type
 
-   !!----
-   !!---- TYPE :: EXCLUDE_REGIONS_TYPE
-   !!--..
-   !!----
-   !!---- Update: May - 2023
-   Type, public :: Exclude_Regions_Type
-      integer                       :: IPat =0        ! Pattern identification
-      real(kind=cp)                 :: V_Ini =0.0_cp
-      real(kind=cp)                 :: V_End =0.0_cp
-   End Type Exclude_Regions_Type
-
+   
    !!----
    !!---- TYPE :: GENVEC_TYPE
    !!--..
@@ -164,6 +154,7 @@ Module CFML_KeyCodes
    !!---- Update: May - 2023
    Type, public :: GenVec_Type
       integer                       :: Ic =0        ! Code identificator
+      character(len=60)             :: Str=' '
       real(kind=cp),dimension(4)    :: V  =0.0_cp
    End Type GenVec_Type
 
@@ -215,8 +206,8 @@ Module CFML_KeyCodes
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
 
    !---- Public ----!
-   integer, public :: NP_ExReg=0     ! Number of Exclude Regions
-   integer, public :: NP_GenV =0     ! Number of General vector
+   integer, public :: NP_ExReg =0     ! Number of Exclude Regions
+   integer, public :: NP_Backgd=0     ! Number of Background
 
 
    integer, public :: NP_Constr  =0  ! Number of Constraints relations
@@ -237,8 +228,8 @@ Module CFML_KeyCodes
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
 
-   type(Exclude_Regions_Type),    public, dimension(:), allocatable :: Vec_ExReg  ! Vector of Excluded regions
-   type(GenVec_Type),             public, dimension(:), allocatable :: Vec_General! Vector for General purposes
+   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_ExReg    ! Vector of Excluded regions
+   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_Backgd   ! Vector for General purposes
 
    type(Angle_Restraint_Type),    public, dimension(:), allocatable :: Ang_Rest     ! Relations for Angle restraints
    type(Distance_Restraint_Type), public, dimension(:), allocatable :: Dis_Rest     ! Relations for Distance restraints

@@ -134,7 +134,7 @@ Program KeyCodes
 
    !> Exclude regions
    integer, parameter :: MAX_EXREG=100
-   integer, parameter :: MAX_VGEN= 500
+   integer, parameter :: MAX_BCKGD= 500
 
 
    !> Init
@@ -341,14 +341,16 @@ Program KeyCodes
    end do
 
    !> Background points
-   if (allocated(Vec_General)) deallocate(Vec_General)
-   allocate (Vec_General(MAX_VGEN))
+   if (allocated(Vec_Backgd)) deallocate(Vec_Backgd)
+   allocate (Vec_Backgd(MAX_BCKGD))
 
+   NP_backgd=0
    do i=1,npatterns
-      call Subroutine Get_SubBlock_KEY('BACKGD', ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), Ind)
+      call Get_SubBlock_KEY('BACKGD', ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), Ind)
       if (all(Ind ==0)) cycle
 
-      do j=ind(1)+1, ind(2)-1
+      j=ind(1)+1 
+      do while(j <= ind(2)-1)
          line = adjustl(ffile%line(j)%str)
          if (line(1:1) ==' ') cycle
          if (line(1:1) =='!') cycle
@@ -357,13 +359,106 @@ Program KeyCodes
          if (k > 0) line=line(:k-1)
          k=index(line,'#')
          if (k > 0) line=line(:k-1)
+         
+         call Get_words(line,dire,iv)
+         if (iv < 1 .or. iv > 2) then
+            ! error
+         end if
+         
+         select case (u_case(trim(dire(1)))))
+            case ('LINEAR_INTERPOLATION')
+               select case (iv)
+                  case (1)
+                     j=j+1
+                     do while(j <= ind(2)-1)
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
 
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 .or. ic > 4) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Str='LIN'
+                        Vec_Backgd(NP_backgd)%V=vet(1:ic)
+                        j=j+1
+                     end do   
+                     
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     j=j+1
+                     kk=0
+                     do while(j <= ind(2)-1)
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
 
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+                        
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 .or. ic > 4) then
+                           ! error
+                        end if
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Str='LIN'
+                        Vec_Backgd(NP_backgd)%V=vet(1:ic)
+                        kk=kk+1
+                        if (kk ==ivet(1)) exit
+                        j=j+1
+                     end do 
+                     
+                  case default
+                     ! Error
+               end select
+               
+            case ('SPLINE_INTERPOLATION')
+               select case (iv)
+                  case (1)
+                  case (2)
+                  case default
+                     ! Error
+               end select
+               
+            case ('POLYNOMIAL')
+               select case (iv)
+                  case (1)
+                  case (2)
+                  case default
+                     ! Error
+               end select
+               
+            case ('CHEBYCHEV')
+               select case (iv)
+                  case (1)
+                  case (2)
+                  case default
+                     ! Error
+               end select
+               
+            case ('PEAKS_PVOIGT')
+               select case (iv)
+                  case (1)
+                  case (2)
+                  case default
+                     ! Error
+               end select
+               
+            case default
+               ! Error
+         end select   
+         
 
       end do
-
-
-   end do
+   end do ! npatterns
 
 
 
