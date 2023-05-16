@@ -8,7 +8,404 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
    !!---- SUBROUTINE READ_EXCLUDEREG_PATT
    !!----
    !!----
-   !!---- Update: 12/05/2022
+   !!---- Update: 12/05/2023
+   !!
+   Module Subroutine Read_Background_PATT(ffile, n_ini, n_end, Ip)
+      !---- Arguments ----!
+      Type(file_type),         intent(in)    :: ffile
+      integer,                 intent(in)    :: n_ini
+      integer,                 intent(in)    :: n_end
+      integer,                 intent(in)    :: Ip
+
+      !---- Local Variables ----!
+      integer, dimension(2) :: Ind
+      integer               :: j, k, iv, ic, nt, kk
+
+      !> Init
+      call clear_error()
+
+      call Get_SubBlock_KEY('BACKGD', ffile, n_ini, n_end, Ind)
+      if (all(Ind ==0)) return
+
+      j=ind(1)
+      do while(j <= ind(2)-2)
+         j=j+1
+         line = adjustl(ffile%line(j)%str)
+         if (line(1:1) ==' ') cycle
+         if (line(1:1) =='!') cycle
+         if (len_trim(line) == 0) cycle
+
+         k=index(line,'!')
+         if (k > 0) line=line(:k-1)
+         k=index(line,'#')
+         if (k > 0) line=line(:k-1)
+
+         !> Read the model of Background
+         call Get_words(line, dire, iv)
+         if (iv < 1 .or. iv > 2) then
+            call set_error(1,'Wrong format for Background model into BACKGD zone')
+            return
+         end if
+
+         !> Models for Background considerations
+         select case (trim(u_case(dire(1))))
+            case ('LINEAR_INTERPOLATION')
+               select case (iv)
+                  case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic < 2 .or. ic > 4) then
+                            call set_error(1,'Wrong format for linear interpolation points in '//trim(line))
+                            return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='LINEAR'
+                        Vec_Backgd(NP_backgd)%V(1:ic)=vet(1:ic)
+                     end do
+
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic < 2 .or. ic > 4) then
+                           call set_error(1,'Wrong format for linear interpolation points in '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='LINEAR'
+                        Vec_Backgd(NP_backgd)%V(1:ic)=vet(1:ic)
+
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do
+
+               end select
+
+            case ('SPLINE_INTERPOLATION')
+               select case (iv)
+                  case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic < 2 .or. ic > 4) then
+                           call set_error(1,'Wrong format for spline interpolation points in '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='SPLINE'
+                        Vec_Backgd(NP_backgd)%V(1:ic)=vet(1:ic)
+                     end do
+
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic < 2 .or. ic > 4) then
+                           call set_error(1,'Wrong format for spline interpolation points in '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='SPLINE'
+                        Vec_Backgd(NP_backgd)%V(1:ic)=vet(1:ic)
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do
+
+               end select
+
+            case ('POLYNOMIAL')
+               select case (iv)
+                  case (1)
+                     call set_error(1,'Wrong format for Polynomial model into BACKGD zone')
+                     return
+
+                  case (2)
+                     call get_num(dire(2), vet, ivet, ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic == 0 ) then
+                           call set_error(1,'Problem reading coefficients for polynomial background: '//trim(line))
+                           return
+                        end if
+                        do k=1,ic
+                           kk=kk+1
+                           NP_backgd=NP_backgd+1
+                           Vec_backgd(NP_backgd)%Ic=Ip
+                           Vec_backgd(NP_backgd)%Str='POLYNOM'
+                           Vec_Backgd(NP_backgd)%V(1)=vet(kk)
+                        end do
+
+                        if (kk ==nt) exit
+                     end do
+                     if (kk /= nt) then
+                        call set_error(1,'The number of coefficients read is not correct!')
+                        return
+                     end if
+
+               end select
+
+            case ('CHEBYCHEV')
+               select case (iv)
+                  case (1)
+                     call set_error(1,'Wrong format for Chebychev polynomial model into BACKGD zone')
+                     return
+
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call get_num(line, vet, ivet, ic)
+                        if (ic ==0 ) then
+                           call set_error(1,'Problem reading coefficients for chebychev background: '//trim(line))
+                           return
+                        end if
+                        do k=1,ic
+                           kk=kk+1
+                           NP_backgd=NP_backgd+1
+                           Vec_backgd(NP_backgd)%Ic=Ip
+                           Vec_backgd(NP_backgd)%Str='CHEBYCHEV'
+                           Vec_Backgd(NP_backgd)%V(1)=vet(kk)
+                        end do
+
+                        if (kk ==nt) exit
+                     end do
+                     if (kk /= nt) then
+                        call set_error(1,'The number of coefficients read is not correct!')
+                        return
+                     end if
+
+               end select
+
+            case ('PEAKS_PVOIGT')
+               select case (iv)
+                  case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call cut_string(line)
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=3) then
+                           call set_error(1,'Wrong number of values for Peaks_pvoigt definitions: '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='PKS_PVOIGT'
+                        Vec_Backgd(NP_backgd)%V(1:3)=vet(1:3)
+                     end do
+
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call cut_string(line)
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=3) then
+                           call set_error(1,'Wrong number of values for Peaks_pvoigt definitions: '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='PKS_PVOIGT'
+                        Vec_Backgd(NP_backgd)%V(1:3)=vet(1:3)
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do
+                     if (kk /= nt) then
+                        call set_error(1,'The number of peaks pvoights read are not correct!')
+                        return
+                     end if
+
+               end select
+
+            case ('PEAKS_SPLIT_PVOIGT')
+               select case (iv)
+                  case (1)
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call cut_string(line)
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=4) then
+                           call set_error(1,'Wrong number of values for Peaks_pvoigt definitions: '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='PKS_SPLITPVOIGT'
+                        Vec_Backgd(NP_backgd)%V=vet(1:4)
+                     end do
+
+                  case (2)
+                     call get_num(dire(2),vet,ivet,ic)
+                     nt=ivet(1)
+                     kk=0
+
+                     do while(j <= ind(2)-2)
+                        j=j+1
+                        line = adjustl(ffile%line(j)%str)
+                        if (line(1:1) ==' ') cycle
+                        if (line(1:1) =='!') cycle
+                        if (len_trim(line) == 0) cycle
+
+                        k=index(line,'!')
+                        if (k > 0) line=line(:k-1)
+                        k=index(line,'#')
+                        if (k > 0) line=line(:k-1)
+
+                        call cut_string(line)
+                        call get_num(line, vet, ivet, ic)
+                        if (ic /=4) then
+                           call set_error(1,'Wrong number of values for Peaks_pvoigt definitions: '//trim(line))
+                           return
+                        end if
+
+                        NP_backgd=NP_backgd+1
+                        Vec_backgd(NP_backgd)%Ic=Ip
+                        Vec_backgd(NP_backgd)%Str='PKS_SPLITPVOIGT'
+                        Vec_Backgd(NP_backgd)%V=vet(1:4)
+                        kk=kk+1
+                        if (kk ==nt) exit
+                     end do
+                     if (kk /= nt) then
+                        call set_error(1,'The number of peaks split pvoights read are not correct!')
+                        return
+                     end if
+
+               end select
+
+            case default
+               call set_error(1,'The method for Background determination is not implemented!')
+               return
+         end select
+
+      end do
+
+   End Subroutine Read_Background_PATT
+
+   !!----
+   !!---- SUBROUTINE READ_EXCLUDEREG_PATT
+   !!----
+   !!----
+   !!---- Update: 12/05/2023
    !!
    Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
       !---- Arguments ----!
@@ -25,23 +422,24 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
       call clear_error()
 
       call Get_SubBlock_KEY('EXCLUDED_REGIONS', ffile, n_ini, n_end, Ind)
+      if (all(Ind ==0)) return
 
-      if (all(Ind > 0)) then
-         do j=Ind(1)+1, Ind(2)-1
-            line=adjustl(ffile%line(j)%str)
-            if (line(1:1) ==" ") cycle
-            if (line(1:1) =="!") cycle
-            call Get_Num(line, vet, ivet, iv)
-            if (iv /=2) then
-               call set_error(1,'Wrong format for Exclude regions interval: '//trim(line))
-               return
-            end if
+      do j=Ind(1)+1, Ind(2)-1
+         line=adjustl(ffile%line(j)%str)
+         if (line(1:1) ==" ") cycle
+         if (line(1:1) =="!") cycle
+         if (len_trim(line) == 0) cycle
 
-            NP_exreg=NP_exreg+1
-            Vec_ExReg(NP_exreg)%ic=Ip
-            Vec_ExReg(NP_exreg)%V(1:2)=vet(1:2)
-         end do
-      end if
+         call Get_Num(line, vet, ivet, iv)
+         if (iv /=2) then
+            call set_error(1,'Wrong format for Exclude regions interval: '//trim(line))
+            return
+         end if
+
+         NP_exreg=NP_exreg+1
+         Vec_ExReg(NP_exreg)%ic=Ip
+         Vec_ExReg(NP_exreg)%V(1:2)=vet(1:2)
+      end do
 
    End Subroutine Read_ExcludeReg_PATT
 
@@ -70,6 +468,8 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
          line=adjustl(ffile%line(i)%str)
          if (line(1:1) ==" ") cycle
          if (line(1:1) =="!") cycle
+         if (len_trim(line) == 0) cycle
+
          k=index(line,"!")
          if( k /= 0) line=line(:k-1)
 

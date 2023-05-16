@@ -3,6 +3,187 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    implicit none
 
    Contains
+
+   !!----
+   !!---- Subroutine WriteInfo_Backgd_Block
+   !!----
+   !!----    Write the information about Background Blocks in file associated with
+   !!----    logical unit "iunit".
+   !!----    If no argument is passed the standard output (iunit=6) is used
+   !!----
+   !!---- Update: May - 2023
+   !!
+   Module Subroutine WriteInfo_Backgd_Block(Ip, Iunit)
+      !---- Arguments ----!
+      integer,             intent(in) :: Ip
+      integer, optional,   intent(in) :: Iunit
+
+      !---- Local variables ----!
+      integer :: lun
+      integer :: i,j
+      logical :: info
+      character(len=3) :: car
+
+      lun=6
+      if (present(iunit)) lun=iunit
+
+      if (NP_Backgd <= 0) return
+      if (.not. any(Vec_Backgd%Ic == Ip)) return
+
+      write(unit=lun, fmt="(a)") " "
+      write(unit=lun, fmt="(a,i4)") " Background Definition for Pattern: ",Ip
+      write(unit=lun, fmt="(a)") " "
+
+      !> Linear Interpolation
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='LINEAR') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") " Background points using linear interpolation"
+         write(unit=lun, fmt="(a)") " --------------------------------------------"
+         write(unit=lun, fmt="(a)") " "
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='LINEAR') then
+               write(unit=lun, fmt="(2f12.3)") vec_backgd(i)%V(1:2)
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+      !> Spline Interpolation
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='SPLINE') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") " Background points using Spline interpolation"
+         write(unit=lun, fmt="(a)") " --------------------------------------------"
+         write(unit=lun, fmt="(a)") " "
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='SPLINE') then
+               write(unit=lun, fmt="(2f12.3)") vec_backgd(i)%V(1:2)
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+      !> Polynomial
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='POLYNOM') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") " Background polynomial coefficients"
+         write(unit=lun, fmt="(a)") " ----------------------------------"
+         write(unit=lun, fmt="(a)") " "
+
+         line=' Coeff: '
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='POLYNOM') then
+                line = trim(line)//'  '//String_Real(vec_backgd(i)%V(1),10)
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "//trim(line)
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+      !> Chebychev
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='CHEBYCHEV') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") " Background Chebychev coefficients"
+         write(unit=lun, fmt="(a)") " ----------------------------------"
+         write(unit=lun, fmt="(a)") " "
+
+         line=' Coeff: '
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='CHEBYCHEV') then
+                line = trim(line)//'  '//String_Real(vec_backgd(i)%V(1),10)
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "//trim(line)
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+      !> Peaks_pVoigt
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='PKS_PVOIGT') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") "          Peaks pVoigt parameters"
+         write(unit=lun, fmt="(a)") " ----------------------------------------------"
+         write(unit=lun, fmt="(a)") "   !        Position    Intensity      FWHM"
+
+         j=0
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='PKS_PVOIGT') then
+               j=j+1
+               write(car,fmt='(i3)') j
+               car=adjustl(car)
+               write(unit=lun, fmt="(a,5x,f8.3, f12.3, 4x,f8.3)") " peak"//trim(car),vec_backgd(i)%V(1:3)
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+      !> Peaks_Split_pVoigt
+      info=.false.
+      do i=1, NP_backgd
+         if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='PKS_SPLITPVOIGT') then
+            info=.true.
+            exit
+         end if
+      end do
+
+      if (info) then
+         write(unit=lun, fmt="(a)") " "
+         write(unit=lun, fmt="(a)") "        Peaks Split pVoigt parameters"
+         write(unit=lun, fmt="(a)") " ----------------------------------------------"
+         write(unit=lun, fmt="(a)") "    !       Position         Intensity    Left-FWHM   Right-FWHM"
+
+         j=0
+         do i=1, NP_backgd
+            if (Vec_backgd(i)%Ic ==Ip .and. vec_backgd(i)%Str=='PKS_SPLITPVOIGT') then
+               j=j+1
+               write(car,fmt='(i3)') j
+               car=adjustl(car)
+               write(unit=lun, fmt="(a,5x,f8.3,7x,f12.3, f10.2, 2x, f10.2)") " peak"//trim(car),vec_backgd(i)%V
+            end if
+         end do
+         write(unit=lun, fmt="(a)") " "
+      end if
+
+   End Subroutine WriteInfo_Backgd_Block
+
    !!----
    !!---- Subroutine WriteInfo_ExcludedRegions
    !!----

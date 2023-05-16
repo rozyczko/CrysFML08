@@ -47,7 +47,7 @@ Module CFML_KeyCodes
    Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error, Err_CFML
    Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, ModAtm_Std_Type, &
                                 Atm_Ref_Type, ModAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
-   Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
+   Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case, String_Real
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP,         &
                                 Get_OP_from_Symb, Symmetry_symbol, Get_AtomBet_CTR, Get_AtomPos_CTR,&
                                 Get_Moment_CTR, Get_TFourier_CTR
@@ -68,11 +68,11 @@ Module CFML_KeyCodes
              Get_AFIX_Line, Get_Block_KEY, Get_SubBlock_KEY, Get_DFIX_Line, Get_TFIX_Line, &
              Get_ZoneCommands, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
-             Read_ExcludeReg_PATT, &
+             Read_ExcludeReg_PATT, Read_Background_PATT, &
              Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
              WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints, &
-             WriteInfo_ExcludedRegions
+             WriteInfo_ExcludedRegions, WriteInfo_Backgd_Block
 
 
    !---- Definitions ----!
@@ -146,7 +146,7 @@ Module CFML_KeyCodes
       type(GenPar_Type), allocatable, dimension(:) :: Par
    End Type GenParList_Type
 
-   
+
    !!----
    !!---- TYPE :: GENVEC_TYPE
    !!--..
@@ -383,6 +383,12 @@ Module CFML_KeyCodes
          integer, optional,   intent(in) :: Iunit
       End Subroutine WriteInfo_RefParams
 
+      Module Subroutine WriteInfo_Backgd_Block(Ip, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: Ip
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine WriteInfo_Backgd_Block
+
       Module Subroutine WriteInfo_ExcludedRegions(Ip, Iunit)
          !---- Arguments ----!
          integer,             intent(in) :: Ip
@@ -401,6 +407,14 @@ Module CFML_KeyCodes
          type(AtList_Type), intent(in) :: AtList
          integer, optional, intent(in) :: Iunit
       End Subroutine WriteInfo_Constraints
+
+      Module Subroutine Read_Background_PATT(ffile, n_ini, n_end, Ip)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: Ip
+      End Subroutine Read_Background_PATT
 
       Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
          !---- Arguments ----!
