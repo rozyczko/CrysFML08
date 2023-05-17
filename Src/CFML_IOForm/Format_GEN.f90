@@ -25,10 +25,9 @@ SubModule (CFML_IOForm) Format_GEN
        real(kind=cp), dimension (10)     :: vet1
        real(kind=cp), dimension (10)     :: vet2
 
-       character(len=len(str))           :: line
        character(len=132), dimension(1)  :: filevar
        character(len=40)                 :: magmom
-       character(len=4)                  :: dire
+       character(len=4)                  :: direc
        character(len=6)                  :: label
 
        !> Init
@@ -41,17 +40,17 @@ SubModule (CFML_IOForm) Format_GEN
 
        ! Look for the item "Utyp" if we want to use Uiso instead of Biso
        iv= index(line,"Utyp")
-       if( iv /= 0) then
-         atm%Utype="u_ij"
-         line(iv:iv+3)=" "
+       if ( iv /= 0) then
+          atm%Utype="u_ij"
+          line(iv:iv+3)=" "
        else
-         atm%Utype="b_ij"
+          atm%Utype="b_ij"
        end if
 
 
        !> Cut ATOM Directive
-       call cut_string(line,nlong1,dire)
-       if (u_case(dire) /= "ATOM") then
+       call cut_string(line,nlong1,direc)
+       if (u_case(direc) /= "ATOM") then
           Err_CFML%IErr=1  ! Error
           Err_CFML%Msg=" Error reading the ATOM keyword"
           return
@@ -175,8 +174,7 @@ SubModule (CFML_IOForm) Format_GEN
        character(len=*),            optional, intent(in)  :: CFrame
 
        !---- Local variables -----!
-       character(len=len(str))              :: line
-       character(len=4)                     :: dire
+       character(len=4)                     :: direc
        character(len=132), dimension(1)     :: filevar
        integer                              :: nlong1,n,iv
        real(kind=cp), dimension (6)         :: vet1,vet2
@@ -190,8 +188,8 @@ SubModule (CFML_IOForm) Format_GEN
        !> Copy
        line=str
 
-       call cut_string(line,nlong1,dire)
-       if (u_case(dire) /= "CELL") then
+       call cut_string(line,nlong1,direc)
+       if (u_case(direc) /= "CELL") then
           Err_CFML%IErr=1  ! Error
           Err_CFML%Msg=" Error reading the CELL keyword"
           return
@@ -235,8 +233,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !---- Local variables -----!
        integer                              :: iv,nlong1,n
-       character(len=len(str))              :: line
-       character(len=20)                    :: dire
+       character(len=20)                    :: direc
        character(len=len(str)), dimension(1):: linec
        real(kind=cp), dimension (6)         :: vet1,vet2
 
@@ -247,8 +244,8 @@ SubModule (CFML_IOForm) Format_GEN
        line=adjustl(trim(str))
 
        !> Cut UTherm Directive
-       call cut_string(line,nlong1,dire)
-       select case (trim(U_case(dire)))
+       call cut_string(line,nlong1,direc)
+       select case (trim(U_case(direc)))
           case ('U_IJ')
              Atm%UType='u_ij'
 
@@ -295,8 +292,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !---- Local variables -----!
        integer                              :: iv,nlong1,n
-       character(len=len(str))              :: line
-       character(len=20)                    :: dire
+       character(len=20)                    :: direc
        character(len=len(str)), dimension(1):: linec
        real(kind=cp), dimension (6)         :: vet1,vet2
 
@@ -307,8 +303,8 @@ SubModule (CFML_IOForm) Format_GEN
        line=adjustl(trim(str))
 
        !> Cut Moment Directive
-       call cut_string(line,nlong1,dire)
-       if (trim(u_case(dire)) /= "MOMENT") then
+       call cut_string(line,nlong1,direc)
+       if (trim(u_case(direc)) /= "MOMENT") then
           Err_CFML%IErr=1  ! Error
           Err_CFML%Msg=" Error reading the Moment parameters"
           return
@@ -348,7 +344,7 @@ SubModule (CFML_IOForm) Format_GEN
        integer,               intent(in)      :: nt  !number of the amplitude
 
        !---- Local variables -----!
-       character(len=len(str)), dimension(1):: line
+       character(len=len(str)), dimension(1):: linec
        real(kind=cp), dimension (12)        :: vet1,vet2
        integer                              :: iv,n,nq,ier
 
@@ -356,13 +352,13 @@ SubModule (CFML_IOForm) Format_GEN
        call clear_error()
 
        !> Copy
-       line(1)=str
+       linec(1)=str
 
        !> Cut first word
-       call Cut_String(line(1))
+       call Cut_String(linec(1))
 
        !> Read Nq
-       read(unit=line(1),fmt=*,iostat=ier) nq
+       read(unit=linec(1),fmt=*,iostat=ier) nq
        if (ier /= 0) then
           Err_CFML%Ierr=1
           Err_CFML%Msg="Error reading the Q_coeff number in modulation amplitude line: "//trim(Ulabel)
@@ -370,11 +366,11 @@ SubModule (CFML_IOForm) Format_GEN
        end if
 
        !> Cut Nq
-       call Cut_String(line(1))
+       call Cut_String(linec(1))
 
-       line(1)=trim(Ulabel)//" "//trim(line(1))
+       linec(1)=trim(Ulabel)//" "//trim(linec(1))
        n=1
-       call Read_Key_ValueSTD(line, n, n,trim(Ulabel),vet1,vet2,iv)
+       call Read_Key_ValueSTD(linec, n, n,trim(Ulabel),vet1,vet2,iv)
 
        Select Case(trim(u_case(Ulabel)))
           case("O_CS")
@@ -436,9 +432,7 @@ SubModule (CFML_IOForm) Format_GEN
 
        !---- Local Variables ----!
        integer                              :: iv, n
-       integer, dimension(3)                :: ivet
        character(len=len(str)), dimension(1):: linec
-       real(kind=cp),           dimension(3):: vet
 
        !> Init
        call clear_error()
@@ -491,7 +485,6 @@ SubModule (CFML_IOForm) Format_GEN
        !---- Local Variables ----!
        integer, parameter       :: NDIR=2
        integer, dimension(NDIR) :: ind
-       character(len=len(str))  :: line
 
        !> Init
        call clear_error()
@@ -540,8 +533,6 @@ SubModule (CFML_IOForm) Format_GEN
 
        !---- Local Variables ----!
        integer                     :: iv, n
-       integer,       dimension(2) :: ivet
-       real(kind=cp), dimension(2) :: vet
        character(len=len(str)), dimension(1):: linec
 
        !> Init
@@ -597,8 +588,6 @@ SubModule (CFML_IOForm) Format_GEN
 
        !---- Local Variables ----!
        integer                      :: iv,n
-       integer,       dimension(12) :: ivet
-       real(kind=cp), dimension(12) :: vet
        character(len=len(str)), dimension(1) :: linec
        character(len=80)                     :: transf_key
 
@@ -643,8 +632,10 @@ SubModule (CFML_IOForm) Format_GEN
        !---- Arguments ----!
        character(len=*), intent(in):: label   ! Input string containing oxidation state
        integer                     :: q
-       !local variables
+
+       !---- local variables ----!
        integer :: iv,n,ier
+
        q=0
        iv=index(label,"+")
        select case(iv)

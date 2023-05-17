@@ -49,7 +49,8 @@ Module CFML_IOForm
                                      FindFMT, Init_FindFMT, String_Array_Type,       &
                                      File_type, Reading_File, Get_Transf,            &
                                      Get_Extension, Get_Datetime,Read_Fract,         &
-                                     Frac_Trans_2Dig, Pack_String, File_List_type
+                                     Frac_Trans_2Dig, Pack_String, File_List_type,   &
+                                     String_Real
 
    Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type, mAtom_Type, &
@@ -81,8 +82,11 @@ Module CFML_IOForm
 
    !---- Public subroutines ----!
 
-   public :: Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
-             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File
+   public :: Get_ZoneCommands, Get_Block_KEY, Get_SubBlock_KEY, &
+             Read_ExcludeReg_PATT, Read_Background_PATT, &
+             Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
+             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
+             WriteInfo_ExcludedRegions, WriteInfo_Backgd_Block
 
    !--------------------!
    !---- PARAMETERS ----!
@@ -128,6 +132,49 @@ Module CFML_IOForm
       real(kind=cp)      ,dimension(:), allocatable :: dtt1,dtt2              ! d-to-TOF coefficients
    End Type Job_Info_type
 
+   !!----
+   !!---- TYPE :: GENVEC_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: GenVec_Type
+      integer                       :: Ic =0        ! Code identificator
+      character(len=60)             :: Str=' '
+      real(kind=cp),dimension(4)    :: V  =0.0_cp
+   End Type GenVec_Type
+
+   !!----
+   !!---- TYPE :: BLOCKINFO_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: BlockInfo_Type
+      character(len=60)             :: StrName=" "
+      character(len=10)             :: BlName=" "  ! Command, Phase, Pattern, Molec, Atoms....
+      integer                       :: IBl=-1      !     0      1        2      3      4
+      integer, dimension(2)         :: Nl =0       ! Ini/End line
+   End Type BlockInfo_Type
+
+
+   !-------------------!
+   !---- Variables ----!
+   !-------------------!
+
+   !---- Private ----!
+   character(len=:),   private, allocatable   :: line
+   character(len=60),  private, dimension(40) :: dire=" "
+   integer,            private, dimension(15) :: ivet=0
+   real(kind=cp),      private, dimension(15) :: vet=0.0_cp
+
+
+   !---- Public ----!
+   integer, public :: NP_ExReg =0     ! Number of Exclude Regions
+   integer, public :: NP_Backgd=0     ! Number of Background
+
+   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_ExReg    ! Vector of Excluded regions
+   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_Backgd   ! Vector for General purposes
+
+
    !---- Overloaded Zone ----!
    !Interface Readn_Set_Xtal_Structure
    !   Module Procedure Readn_Set_Xtal_Structure_Split  ! For Cell, Spg, A types
@@ -136,6 +183,62 @@ Module CFML_IOForm
 
    !---- Interface zone ----!
    Interface
+      Module Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
+         !---- Arguments ----!
+         Type(file_type),    intent(in)  :: ffile
+         integer,            intent(out) :: n_ini
+         integer,            intent(out) :: n_end
+      End Subroutine Get_ZoneCommands
+
+      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
+         !---- Arguments ----!
+         character(len=*),              intent(in)  :: Key
+         Type(file_type),               intent(in)  :: ffile
+         integer,                       intent(in)  :: n_ini
+         integer,                       intent(in)  :: n_end
+         integer, dimension(2),         intent(out) :: Ind
+         character(len=*),              intent(out) :: StrName
+         integer,                       intent(out) :: N_Id
+      End Subroutine Get_Block_KEY
+
+      Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind)
+         !---- Arguments ----!
+         character(len=*),      intent(in)  :: key
+         Type(file_type),       intent(in)  :: ffile
+         integer,               intent(in)  :: n_ini
+         integer,               intent(in)  :: n_end
+         integer, dimension(2), intent(out) :: Ind
+      End Subroutine Get_SubBlock_KEY
+
+      Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: Ip
+      End Subroutine Read_ExcludeReg_PATT
+
+      Module Subroutine Read_Background_PATT(ffile, n_ini, n_end, Ip)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: Ip
+      End Subroutine Read_Background_PATT
+
+      Module Subroutine WriteInfo_Backgd_Block(Ip, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: Ip
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine WriteInfo_Backgd_Block
+
+      Module Subroutine WriteInfo_ExcludedRegions(Ip, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: Ip
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine WriteInfo_ExcludedRegions
+
+
       Module Function Get_NElem_Loop(cif, keyword, i_ini,i_end) Result(N)
          type(File_Type),   intent(in) :: cif
          character(len=*),  intent(in) :: keyword

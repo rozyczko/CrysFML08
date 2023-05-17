@@ -8,29 +8,19 @@ Program KeyCodes
    Use CFML_Strings,      only: File_Type, U_Case, Cut_String, Get_Words, &
                                 Get_Num, Reading_File, l_case
    use CFML_gSpaceGroups, only: SpG_Type, Write_SpaceGroup_Info
-   use CFML_IOForm,       only: Read_Xtal_Structure, Read_CFL_Cell
    use CFML_Metrics,      only: Cell_GLS_Type, Write_Crystal_Cell
    use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
                                 ModAtm_Std_Type, ModAtm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
    use CFML_Molecules,    only: Molecule_type
 
+   use CFML_IOForm
    use CFML_KeyCodes
 
    !---- Variables from CFML ----!
    implicit none
 
-   Type :: BlockInfo_Type
-      character(len=60)             :: StrName=" "
-      character(len=10)             :: BlName=" "  ! Command, Phase, Pattern, Molec, Atoms....
-      integer                       :: IBl=-1      !     0      1        2      3      4
-      integer, dimension(2)         :: Nl =0       ! Ini/End line
-   End Type BlockInfo_Type
-
    logical                          :: Debug=.true.
-
-
-
 
    logical                          :: ZoneCommand=.false.
    integer, dimension(2)            :: ZComm =0
