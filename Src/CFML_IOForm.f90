@@ -83,10 +83,10 @@ Module CFML_IOForm
    !---- Public subroutines ----!
 
    public :: Get_ZoneCommands, Get_Block_KEY, Get_SubBlock_KEY, &
-             Read_ExcludeReg_PATT, Read_Background_PATT, &
+             ReadBlock_ExcludeReg, ReadBlock_Backgd, &
              Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
              Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
-             WriteInfo_ExcludedRegions, WriteInfo_Backgd_Block
+             Write_InfoBlock_ExcludedRegions, Write_InfoBlock_Backgd
 
    !--------------------!
    !---- PARAMETERS ----!
@@ -133,17 +133,6 @@ Module CFML_IOForm
    End Type Job_Info_type
 
    !!----
-   !!---- TYPE :: GENVEC_TYPE
-   !!--..
-   !!----
-   !!---- Update: May - 2023
-   Type, public :: GenVec_Type
-      integer                       :: Ic =0        ! Code identificator
-      character(len=60)             :: Str=' '
-      real(kind=cp),dimension(4)    :: V  =0.0_cp
-   End Type GenVec_Type
-
-   !!----
    !!---- TYPE :: BLOCKINFO_TYPE
    !!--..
    !!----
@@ -154,6 +143,18 @@ Module CFML_IOForm
       integer                       :: IBl=-1      !     0      1        2      3      4
       integer, dimension(2)         :: Nl =0       ! Ini/End line
    End Type BlockInfo_Type
+
+   !!----
+   !!---- TYPE :: GENVEC_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: GenVec_Type
+      character(len=60)             :: Str=" "      ! Generic string (Use for directives)
+      integer                       :: NPar=0       ! Number of parameters
+      integer, dimension (10)       :: IV  =0       ! Integer values
+      real(kind=cp),dimension(10)   :: RV  =0.0_cp  ! Real values
+   End Type GenVec_Type
 
 
    !-------------------!
@@ -168,11 +169,13 @@ Module CFML_IOForm
 
 
    !---- Public ----!
-   integer, public :: NP_ExReg =0     ! Number of Exclude Regions
+   integer, public :: NP_Direc =0     ! Number of Directives
    integer, public :: NP_Backgd=0     ! Number of Background
+   integer, public :: NP_ExReg =0     ! Number of Exclude Regions
 
-   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_ExReg    ! Vector of Excluded regions
-   type(GenVec_Type), public, dimension(:)  , allocatable :: Vec_Backgd   ! Vector for General purposes
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Direc    ! Vector of Directives
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_ExReg    ! Vector of Excluded regions
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Backgd   ! Vector for Background definitions
 
 
    !---- Overloaded Zone ----!
@@ -210,33 +213,33 @@ Module CFML_IOForm
          integer, dimension(2), intent(out) :: Ind
       End Subroutine Get_SubBlock_KEY
 
-      Module Subroutine Read_ExcludeReg_PATT(ffile, n_ini, n_end, Ip)
+      Module Subroutine ReadBlock_ExcludeReg(ffile, n_ini, n_end, IPatt)
          !---- Arguments ----!
          Type(file_type),         intent(in)    :: ffile
          integer,                 intent(in)    :: n_ini
          integer,                 intent(in)    :: n_end
-         integer,                 intent(in)    :: Ip
-      End Subroutine Read_ExcludeReg_PATT
+         integer,                 intent(in)    :: IPatt
+      End Subroutine ReadBlock_ExcludeReg
 
-      Module Subroutine Read_Background_PATT(ffile, n_ini, n_end, Ip)
+      Module Subroutine ReadBlock_Backgd(ffile, n_ini, n_end, IPatt)
          !---- Arguments ----!
          Type(file_type),         intent(in)    :: ffile
          integer,                 intent(in)    :: n_ini
          integer,                 intent(in)    :: n_end
-         integer,                 intent(in)    :: Ip
-      End Subroutine Read_Background_PATT
+         integer,                 intent(in)    :: IPatt
+      End Subroutine ReadBlock_Backgd
 
-      Module Subroutine WriteInfo_Backgd_Block(Ip, Iunit)
+      Module Subroutine Write_InfoBlock_Backgd(IPatt, Iunit)
          !---- Arguments ----!
-         integer,             intent(in) :: Ip
+         integer,             intent(in) :: IPatt
          integer, optional,   intent(in) :: Iunit
-      End Subroutine WriteInfo_Backgd_Block
+      End Subroutine Write_InfoBlock_Backgd
 
-      Module Subroutine WriteInfo_ExcludedRegions(Ip, Iunit)
+      Module Subroutine Write_InfoBlock_ExcludedRegions(IPatt, Iunit)
          !---- Arguments ----!
-         integer,             intent(in) :: Ip
+         integer,             intent(in) :: IPatt
          integer, optional,   intent(in) :: Iunit
-      End Subroutine WriteInfo_ExcludedRegions
+      End Subroutine Write_InfoBlock_ExcludedRegions
 
 
       Module Function Get_NElem_Loop(cif, keyword, i_ini,i_end) Result(N)

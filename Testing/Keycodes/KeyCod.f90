@@ -17,114 +17,95 @@ Program KeyCodes
    use CFML_IOForm
    use CFML_KeyCodes
 
-   !---- Variables from CFML ----!
+   !---- Variables ----!
    implicit none
 
-   logical                          :: Debug=.true.
+   integer, parameter :: NB_MAX=100       ! Maximum number of blocks
+   integer, parameter :: MAX_EXREG=100
+   integer, parameter :: MAX_BCKGD= 500
 
-   logical                          :: ZoneCommand=.false.
-   integer, dimension(2)            :: ZComm =0
+   integer, parameter :: NMAX_PHAS =10
+   integer, parameter :: NMAX_PATT =10
+   integer, parameter :: NMAX_MOLE =10
+   integer, parameter :: NMAX_ATLIS=10
 
-   integer, parameter               :: NB_MAX=100       ! Maximum number of blocks
-
-   integer, parameter               :: NMAX_PHAS =10
-   integer, parameter               :: NMAX_PATT =10
-   integer, parameter               :: NMAX_MOLE =10
-   integer, parameter               :: NMAX_ATLIS=10
-
-   type(File_type)                  :: Ffile
-
-
-
-    type :: Phase_Type
+   type :: Phase_Type
        character(len=:),      allocatable :: phas_name
        logical, dimension(:), allocatable :: patt_contrib ! Contribution to patterns
        type(Cell_GLS_Type)                :: Cell         ! Cell object
        class(SpG_Type),       allocatable :: SpG          ! Space Group object
        type(Atlist_Type)                  :: Atm          ! Atom List object
-    end type Phase_Type
+   end type Phase_Type
 
-    type, extends(Phase_Type) :: PowderPhase_Type
-       real(kind=cp) :: iso_size, Gauss_iso_size_frac
-       real(kind=cp) :: miso_size, mGauss_iso_size_frac
-       integer       :: Liso_size, LGauss_iso_size_frac
-       real(kind=cp) :: iso_strain, Lorent_iso_strain_frac
-       real(kind=cp) :: miso_strain, mLorent_iso_strain_frac
-       integer       :: Liso_strain, LLorent_iso_strain_frac
-       integer       :: aniso_size_model
-       integer       :: aniso_strain_model
-       real(kind=cp), dimension(:),  allocatable :: aniso_size, aniso_strain
-       real(kind=cp), dimension(:),  allocatable :: maniso_size, maniso_strain
-       integer,       dimension(:),  allocatable :: Laniso_size, Laniso_strain
-    end type PowderPhase_Type
+   type, extends(Phase_Type) :: PowderPhase_Type
+      real(kind=cp) :: iso_size, Gauss_iso_size_frac
+      real(kind=cp) :: miso_size, mGauss_iso_size_frac
+      integer       :: Liso_size, LGauss_iso_size_frac
+      real(kind=cp) :: iso_strain, Lorent_iso_strain_frac
+      real(kind=cp) :: miso_strain, mLorent_iso_strain_frac
+      integer       :: Liso_strain, LLorent_iso_strain_frac
+      integer       :: aniso_size_model
+      integer       :: aniso_strain_model
+      real(kind=cp), dimension(:),  allocatable :: aniso_size, aniso_strain
+      real(kind=cp), dimension(:),  allocatable :: maniso_size, maniso_strain
+      integer,       dimension(:),  allocatable :: Laniso_size, Laniso_strain
+   end type PowderPhase_Type
 
-    Type, extends(Phase_Type) :: MolPhase_Type
-       integer                                              :: N_Mol=0          ! Number of Molecules
-       integer                                              :: N_Species=0      ! Number of species
-       type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
-    End type MolPhase_Type
+   Type, extends(Phase_Type) :: MolPhase_Type
+      integer                                              :: N_Mol=0          ! Number of Molecules
+      integer                                              :: N_Species=0      ! Number of species
+      type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
+   End type MolPhase_Type
 
-    Type, extends(PowderPhase_Type) :: PowderMolPhase_Type
-       integer                                              :: N_Mol=0          ! Number of Molecules
-       integer                                              :: N_Species=0      ! Number of species
-       type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
-    End type PowderMolPhase_Type
+   Type, extends(PowderPhase_Type) :: PowderMolPhase_Type
+      integer                                              :: N_Mol=0          ! Number of Molecules
+      integer                                              :: N_Species=0      ! Number of species
+      type(Molecule_type),     allocatable, dimension(  :) :: Mol              ! Molecules
+   End type PowderMolPhase_Type
 
-    type(Phase_Type), dimension(:), allocatable :: Ph
 
-   !class(SPG_Type),     dimension(:), allocatable  :: SpGr
-   !type(Cell_GLS_Type), dimension(NMAX_PHAS)  :: Cell
-   !type(AtList_Type),   dimension(NMAX_ATLIS) :: At
-   !type(molecule_type), dimension(NMAX_MOLE)  :: Mol
+   type(File_type)                :: Ffile
 
    type(GenParList_Type)          :: RelG
-
    type(GenParList_Type)          :: RPat
    type(GenParList_Type)          :: RPhas
    type(GenParList_Type)          :: RMol
+   type(Phase_Type), dimension(:), allocatable :: Ph
+
+   type(BlockInfo_Type)                    :: Bl_Comm
+   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Phas
+   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Patt
 
 
-   !---- Variables ----!
+   logical                         :: ZoneCommand=.false.
+
    logical                         :: arg_given=.false.
    logical                         :: existe=.false.
 
    character(len=256)              :: filcod
    character(len=2)                :: ans
    character(len=40)               :: str
+   character(len=150)              :: line
+   character(len=3)                :: ktype
+   character(len=60)               :: StrName
+   character(len=40), dimension(10):: dire
+   character(len=40), dimension(4,NB_MAX) :: ID_Str
 
    integer                         :: i, j, k, kk, narg, lun, nblocks, nphases, npatterns
    integer                         :: n_ini, n_end, iv,ic, nt
-
-   real(kind=cp)                   :: T_ini,T_fin, T_Time
-
-   character(len=150)              :: line
-   character(len=3)                :: ktype
-   character(len=40), dimension(10):: dire
-   integer, dimension(10)          :: ivet
-   real(kind=cp), dimension(10)    :: vet
-
-
-
    integer                         :: Npar,ip,im,icyc
-
-   !---- Types ----!
-   type(BlockInfo_Type)                    :: Bl_Comm
-   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Phas
-   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Patt
-
-   integer                                :: NB_Comm, NB_Phas, NB_Patt, NB_Mol, NB_Atm, NB_Tot, N_Id
-   integer, dimension(2)                  :: Ind
-
-   character(len=60)                      :: StrName
-
+   integer                         :: NB_Comm, NB_Phas, NB_Patt, NB_Mol, NB_Atm, NB_Tot, N_Id
+   integer, dimension(2)           :: Ind, ZComm =0
+   integer, dimension(10)          :: ivet
    integer, dimension(2,NMAX_MOLE)        :: Ib_Mol
    integer, dimension(2,NMAX_ATLIS)       :: Ib_Atm
    integer, dimension(2,NMAX_PHAS)        :: Ib_Phas
-   character(len=40), dimension(4,NB_MAX) :: ID_Str
 
-   !> Exclude regions
-   integer, parameter :: MAX_EXREG=100
-   integer, parameter :: MAX_BCKGD= 500
+   real(kind=cp)                   :: T_ini,T_fin, T_Time
+   real(kind=cp), dimension(10)    :: vet
+
+
+   logical                          :: Debug=.true.
 
 
    !> Init
@@ -180,9 +161,7 @@ Program KeyCodes
       stop
    end if
 
-   !> ------------------------
-   !> Determine a Command Zone
-   !> ------------------------
+   !> Is there a Command Zone
    NB_Comm=0
    call Get_ZoneCommands(ffile, N_Ini, N_End)
    if (n_ini> 0 .and. n_end >= n_ini) then
@@ -193,9 +172,7 @@ Program KeyCodes
       NB_Comm=1
    end if
 
-   !> ------------------------------
    !> Determine the number of Phases
-   !> ------------------------------
    nphases=0
    i=1
    n_end=ffile%nlines
@@ -250,7 +227,6 @@ Program KeyCodes
       end select
 
       i=ind(2)+1
-      cycle
    end do
 
    print*,'Numero de fases: ',nphases
@@ -327,8 +303,8 @@ Program KeyCodes
 
 
    do i=1,npatterns
-      call Read_ExcludeReg_PATT(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
-      call WriteInfo_ExcludedRegions(i)
+      call ReadBlock_ExcludeReg(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
+      call Write_InfoBlock_ExcludedRegions(i)
    end do
 
    !> Background points
@@ -336,8 +312,8 @@ Program KeyCodes
    allocate (Vec_Backgd(MAX_BCKGD))
 
    do i=1,npatterns
-      call Read_Background_PATT(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
-      call WriteInfo_Backgd_Block(i)
+      call ReadBlock_Backgd(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
+      call Write_InfoBlock_Backgd(i)
    end do ! npatterns
 
 
@@ -760,6 +736,94 @@ Program KeyCodes
    !   if (B%N_SBlocks > 0) write(unit=io, fmt='(a)') ' '
    !
    !End Subroutine WriteInfo_Block
+
+Contains
+
+   !!----
+   !!---- SUBROUTINE GET_ZONECOMMANDS
+   !!----
+   !!---- Date: 11/05/2022
+   !!
+   Subroutine Get_ZonePhases(ffile, N_Ini, N_End, NPhas, Phas, Ex_Ind)
+      !---- Arguments ----!
+      Type(file_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: n_ini
+      integer,                            intent(in)     :: n_end
+      integer,                            intent(out)    :: NPhas
+      type(BlockInfo_Type), dimension(:), intent(in out) :: Phas
+      integer, dimension(2), optional,    intent(in)     :: Ex_ind
+
+
+      !---- Local Variables ----!
+      integer               :: i, j
+      integer, dimension(2) :: Ind
+      logical               :: exclusion=.false.
+
+      !> Init
+      NPhas=0
+      Ind=0
+      if (present(Ex_Ind)) then
+         exclusion=.true.
+         Ind=Ex_ind
+      end if
+
+      i=1
+   n_end=ffile%nlines
+
+   do while (i < ffile%nlines)
+      !> Exclude zone
+      if (NB_Comm > 0) then
+         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
+         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
+            i=Bl_Comm%Nl(2)+1
+            n_end=ffile%nlines
+         end if
+      end if
+
+      call Get_Block_KEY('PHASE', ffile, i, n_end, Ind, StrName, N_Id)
+
+      if (Err_CFML%IErr /= 0) then
+         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                   "Phase Block have a index line zero!"
+         stop
+      end if
+      if (all(ind == 0)) exit
+
+      select case (N_Id)
+         case (0)
+            if (nphases ==0) then
+               nphases=1
+
+               Bl_Phas(1)%StrName=trim(StrName)
+               Bl_Phas(1)%BlName='PHASE'
+               Bl_Phas(1)%IBl=1
+               Bl_Phas(1)%Nl=Ind
+            else
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Phase Block defined as 1!"
+               stop
+            end if
+
+         case (1:NB_MAX)
+            if (Bl_Phas(N_id)%IBl == 1) then
+               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
+                                         "There is a previous Phase Block defined with the same identificator!"
+               stop
+            end if
+
+            Bl_Phas(N_id)%StrName=trim(StrName)
+            Bl_Phas(N_id)%BlName='PHASE'
+            Bl_Phas(N_id)%IBl=1
+            Bl_Phas(N_id)%Nl=Ind
+
+            nphases=nphases+1
+      end select
+
+      i=ind(2)+1
+   end do
+
+
+   End Subroutine Get_ZonePhases
 
 End Program KeyCodes
 
