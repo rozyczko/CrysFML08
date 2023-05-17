@@ -176,120 +176,23 @@ Program KeyCodes
    nphases=0
    i=1
    n_end=ffile%nlines
-
-   do while (i < ffile%nlines)
-      !> Exclude zone
-      if (NB_Comm > 0) then
-         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
-         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
-            i=Bl_Comm%Nl(2)+1
-            n_end=ffile%nlines
-         end if
-      end if
-
-      call Get_Block_KEY('PHASE', ffile, i, n_end, Ind, StrName, N_Id)
-
-      if (Err_CFML%IErr /= 0) then
-         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                   "Phase Block have a index line zero!"
-         stop
-      end if
-      if (all(ind == 0)) exit
-
-      select case (N_Id)
-         case (0)
-            if (nphases ==0) then
-               nphases=1
-
-               Bl_Phas(1)%StrName=trim(StrName)
-               Bl_Phas(1)%BlName='PHASE'
-               Bl_Phas(1)%IBl=1
-               Bl_Phas(1)%Nl=Ind
-            else
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Phase Block defined as 1!"
-               stop
-            end if
-
-         case (1:NB_MAX)
-            if (Bl_Phas(N_id)%IBl == 1) then
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Phase Block defined with the same identificator!"
-               stop
-            end if
-
-            Bl_Phas(N_id)%StrName=trim(StrName)
-            Bl_Phas(N_id)%BlName='PHASE'
-            Bl_Phas(N_id)%IBl=1
-            Bl_Phas(N_id)%Nl=Ind
-
-            nphases=nphases+1
-      end select
-
-      i=ind(2)+1
-   end do
+   if (NB_Comm > 0) then
+      call Get_ZonePhases(ffile, i, ffile%nlines, nphases, BL_Phas, Bl_Comm%Nl)
+   else
+      call Get_ZonePhases(ffile, i, ffile%nlines, nphases, BL_Phas)
+   end if   
 
    print*,'Numero de fases: ',nphases
 
-   !> --------------------------------
    !> Determine the number of Patterns
-   !> --------------------------------
    npatterns=0
    i=1
    n_end=ffile%nlines
-
-   do while (i < ffile%nlines)
-      !> Exclude zone
-      if (NB_Comm > 0) then
-         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
-         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
-            i=Bl_Comm%Nl(2)+1
-            n_end=ffile%nlines
-         end if
-      end if
-
-      call Get_Block_KEY('PATTERN', ffile, i, n_end, Ind, StrName, N_Id)
-
-      if (Err_CFML%IErr /= 0) then
-         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                   "Pattern Block have a index line zero!"
-         stop
-      end if
-      if (all(ind == 0)) exit
-
-      select case (N_Id)
-         case (0)
-            if (npatterns ==0) then
-               npatterns=1
-
-               Bl_Patt(1)%StrName=trim(StrName)
-               Bl_Patt(1)%BlName='PATTERN'
-               Bl_Patt(1)%IBl=2
-               Bl_Patt(1)%Nl=Ind
-            else
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Pattern Block defined as 1!"
-               stop
-            end if
-
-         case (1:NB_MAX)
-            if (Bl_Patt(N_id)%IBl == 2) then
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Pattern Block defined with the same identificator!"
-               stop
-            end if
-
-            Bl_Patt(N_id)%StrName=trim(StrName)
-            Bl_Patt(N_id)%BlName='PATTERN'
-            Bl_Patt(N_id)%IBl=2
-            Bl_Patt(N_id)%Nl=Ind
-
-            npatterns=npatterns+1
-      end select
-
-      i=ind(2)+1
-      cycle
-   end do
+   if (NB_Comm > 0) then
+      call Get_ZonePatterns(ffile, i, ffile%nlines, npatterns, BL_Patt, Bl_Comm%Nl)
+   else
+      call Get_ZonePhases(ffile, i, ffile%nlines, npatterns, BL_Patt)
+   end if 
 
    print*,'Numero de Patterns: ',npatterns
 
@@ -740,7 +643,7 @@ Program KeyCodes
 Contains
 
    !!----
-   !!---- SUBROUTINE GET_ZONECOMMANDS
+   !!---- SUBROUTINE GET_ZONEPHASES
    !!----
    !!---- Date: 11/05/2022
    !!
@@ -755,76 +658,155 @@ Contains
 
 
       !---- Local Variables ----!
-      integer               :: i, j
-      integer, dimension(2) :: Ind
+      integer               :: i, j, n_fin
+      integer, dimension(2) :: Ind, Indx
       logical               :: exclusion=.false.
 
       !> Init
       NPhas=0
-      Ind=0
+      Indx=0
       if (present(Ex_Ind)) then
          exclusion=.true.
-         Ind=Ex_ind
+         Indx=Ex_ind
       end if
 
       i=N_ini
-      !n_end=ffile%nlines
+      n_fin=ffile%nlines
 
       do while (i < ffile%nlines)
          !> Exclude zone
          if (exclusion) then
+            if (i < Indx(1)-1) n_fin=Indx(1)-1
+            if (i >=Indx(1) .and. i <=Indx(2)) then
+               n_fin=ffile%nlines
+               i=Indx(2)+1
+               cycle
+            end if   
          end if
-            if (i < Ind(1)-1) n_end=Bl_Comm%Nl(1)-1
-         if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
-            i=Bl_Comm%Nl(2)+1
-            n_end=ffile%nlines
-         end if
-      end if
+         
+         call Get_Block_KEY('PHASE', ffile, i, n_fin, Ind, StrName, N_Id)
 
-      call Get_Block_KEY('PHASE', ffile, i, n_end, Ind, StrName, N_Id)
+         if (Err_CFML%IErr /= 0) return
+         if (all(ind == 0)) then
+            i=i+1
+            cycle
+         end if   
 
-      if (Err_CFML%IErr /= 0) then
-         write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                   "Phase Block have a index line zero!"
-         stop
-      end if
-      if (all(ind == 0)) exit
+         select case (N_Id)
+            case (0)
+               if (NPhas ==0) then
+                  NPhas=1
 
-      select case (N_Id)
-         case (0)
-            if (nphases ==0) then
-               nphases=1
+                  Phas(1)%StrName=trim(StrName)
+                  Phas(1)%BlName='PHASE'
+                  Phas(1)%IBl=1
+                  Phas(1)%Nl=Ind
+               else
+                  call set_error(1,'There is a previous Phase block defined as 1!')
+                  return
+               end if
 
-               Bl_Phas(1)%StrName=trim(StrName)
-               Bl_Phas(1)%BlName='PHASE'
-               Bl_Phas(1)%IBl=1
-               Bl_Phas(1)%Nl=Ind
-            else
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Phase Block defined as 1!"
-               stop
-            end if
+            case (1:NB_MAX)
+               if (Phas(N_id)%IBl == 1) then
+                  call set_error(1,'There is a previous Phase Block defined with the same identificator!')
+                  return
+               end if
 
-         case (1:NB_MAX)
-            if (Bl_Phas(N_id)%IBl == 1) then
-               write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error. "// &
-                                         "There is a previous Phase Block defined with the same identificator!"
-               stop
-            end if
+               Phas(N_id)%StrName=trim(StrName)
+               Phas(N_id)%BlName='PHASE'
+               Phas(N_id)%IBl=1
+               Phas(N_id)%Nl=Ind
 
-            Bl_Phas(N_id)%StrName=trim(StrName)
-            Bl_Phas(N_id)%BlName='PHASE'
-            Bl_Phas(N_id)%IBl=1
-            Bl_Phas(N_id)%Nl=Ind
+               NPhas=NPhas+1
+         end select
 
-            nphases=nphases+1
-      end select
-
-      i=ind(2)+1
-   end do
-
+         i=ind(2)+1
+      end do
 
    End Subroutine Get_ZonePhases
+   
+   !!----
+   !!---- SUBROUTINE GET_ZONEPATTERNS
+   !!----
+   !!---- Date: 11/05/2022
+   !!
+   Subroutine Get_ZonePatterns(ffile, N_Ini, N_End, NPatt, Patt, Ex_Ind)
+      !---- Arguments ----!
+      Type(file_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: n_ini
+      integer,                            intent(in)     :: n_end
+      integer,                            intent(out)    :: NPatt
+      type(BlockInfo_Type), dimension(:), intent(in out) :: Patt
+      integer, dimension(2), optional,    intent(in)     :: Ex_ind
+
+
+      !---- Local Variables ----!
+      integer               :: i, j, n_fin
+      integer, dimension(2) :: Ind, Indx
+      logical               :: exclusion=.false.
+
+      !> Init
+      NPatt=0
+      Indx=0
+      if (present(Ex_Ind)) then
+         exclusion=.true.
+         Indx=Ex_ind
+      end if
+
+      i=N_ini
+      n_fin=ffile%nlines
+
+      do while (i < ffile%nlines)
+         !> Exclude zone
+         if (exclusion) then
+            if (i < Indx(1)-1) n_fin=Indx(1)-1
+            if (i >=Indx(1) .and. i <=Indx(2)) then
+               n_fin=ffile%nlines
+               i=Indx(2)+1
+               cycle
+            end if   
+         end if
+         
+         call Get_Block_KEY('PATTERN', ffile, i, n_fin, Ind, StrName, N_Id)
+
+         if (Err_CFML%IErr /= 0) return
+         if (all(ind == 0)) then
+            i=i+1
+            cycle
+         end if   
+
+         select case (N_Id)
+            case (0)
+               if (NPatt ==0) then
+                  NPatt=1
+
+                  Patt(1)%StrName=trim(StrName)
+                  Patt(1)%BlName='PATTERN'
+                  Patt(1)%IBl=2
+                  Patt(1)%Nl=Ind
+               else
+                  call set_error(1,'There is a previous Pattern block defined as 1!')
+                  return
+               end if
+
+            case (1:NB_MAX)
+               if (Patt(N_id)%IBl == 1) then
+                  call set_error(1,'There is a previous Pattern Block defined with the same identificator!')
+                  return
+               end if
+
+               Patt(N_id)%StrName=trim(StrName)
+               Patt(N_id)%BlName='PATTERN'
+               Patt(N_id)%IBl=2
+               Patt(N_id)%Nl=Ind
+
+               NPatt=NPatt+1
+         end select
+
+         i=ind(2)+1
+      end do
+
+   End Subroutine Get_ZonePatterns
 
 End Program KeyCodes
 
