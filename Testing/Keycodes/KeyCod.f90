@@ -767,13 +767,14 @@ Contains
          Ind=Ex_ind
       end if
 
-      i=1
-   n_end=ffile%nlines
+      i=N_ini
+      !n_end=ffile%nlines
 
-   do while (i < ffile%nlines)
-      !> Exclude zone
-      if (NB_Comm > 0) then
-         if (i < Bl_Comm%Nl(1)-1) n_end=Bl_Comm%Nl(1)-1
+      do while (i < ffile%nlines)
+         !> Exclude zone
+         if (exclusion) then
+         end if
+            if (i < Ind(1)-1) n_end=Bl_Comm%Nl(1)-1
          if (i >= Bl_Comm%Nl(1) .and. i <= Bl_Comm%Nl(2)) then
             i=Bl_Comm%Nl(2)+1
             n_end=ffile%nlines
