@@ -93,10 +93,10 @@ END_PHASE_LeBail
 !======================================================
 PATTERN_NeutronCW  1
   Patt_Type   Neutrons Powder CW
-  Zero  0.021    sycos 0.0    sysin 0.0
+  Zero  0.021;    sycos 0.0;    sysin 0.0
   !!!  UVWX    1.689272  -1.090878 0.343690  0.00
   Profile_function  TCH_pVoigt
-  Format_file: xys !Panalytical_formats, xye, Socabim, old_d1a, g41,  etc.
+  Format_file xys !Panalytical_formats, xye, Socabim, old_d1a, g41,  etc.
   POWFILE  Neutron_pattern.xys
   RANGE   10.00        0.1      90.00
   LAMBDA    2.524
@@ -135,9 +135,9 @@ END_PATTERN_SXtalNeutrons
 PATTERN_NeutronTOF  3
   Patt_Type   Neutrons Powder TOF
   Profile_function  TCH_convol_Back2BackExp
-  Zero  21.021    dtt1  321410.0    dtt2 0.0  dtt_1OverQ 0.0
-  sigm2   231.689272  sigm1 -1.090878 sigm0 0.343690
-  gam2  0.0  gam1 12.22 gam0 0.0
+  Zero  21.021;    dtt1  321410.0;    dtt2 0.0;  dtt_1OverQ 0.0
+  sigm2   231.689272;  sigm1 -1.090878; sigm0 0.343690
+  gam2  0.0;  gam1 12.22; gam0 0.0
 
   POWFILE  Neutron_pattern.xys
   RANGE   21130.00        4.55     521346.0    !Initial_val  step  Final_val
@@ -162,10 +162,10 @@ END_PATTERN_NeutronTOF
 !=============================================
 PATTERN_myXray 4
   Patt_Type   X-rays Powder
-  Zero  0.0021    sycos 0.0    sysin 0.0
+  Zero  0.0021;    sycos 0.0;    sysin 0.0
   UVWX    0.089272  -0.010878 0.043690  0.00
   Profile_function  TCH_pVoigt
-  SD_SL  0.021`  0.0
+  SD_SL  0.021  0.0
   POWFILE  X-ray_pattern.xys
   RANGE   10.00        0.1      90.00
   LAMBDA    1.5056  1.5444

@@ -50,7 +50,7 @@ Module CFML_IOForm
                                      File_type, Reading_File, Get_Transf,            &
                                      Get_Extension, Get_Datetime,Read_Fract,         &
                                      Frac_Trans_2Dig, Pack_String, File_List_type,   &
-                                     String_Real
+                                     String_Real, String_Count
 
    Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type, mAtom_Type, &
@@ -82,8 +82,9 @@ Module CFML_IOForm
 
    !---- Public subroutines ----!
 
-   public :: Get_ZoneCommands, Get_Block_KEY, Get_SubBlock_KEY, &
-             ReadBlock_ExcludeReg, ReadBlock_Backgd, &
+   public :: Get_Block_Commands, Get_Block_KEY, Get_SubBlock_KEY, Get_Block_Phases, &
+             Get_Block_Patterns, Read_Block_Instructions, &
+             Read_Block_ExcludeReg, Read_Block_Backgd, &
              Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
              Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
              Write_InfoBlock_ExcludedRegions, Write_InfoBlock_Backgd
@@ -93,6 +94,7 @@ Module CFML_IOForm
    !--------------------!
    character(len=*), parameter :: DIGCAR="0123456789+-"  ! Digit character and signs
    integer,          parameter :: MAX_PHASES=30          ! Number of Maximum Phases
+   integer,          parameter :: MAX_PATTERNS=500       ! Number of Maximum Phases
    real(kind=cp),    parameter :: EPSV=0.0001_cp         ! Small real value to be used for decisions
 
 
@@ -150,10 +152,11 @@ Module CFML_IOForm
    !!----
    !!---- Update: May - 2023
    Type, public :: GenVec_Type
-      character(len=60)             :: Str=" "      ! Generic string (Use for directives)
-      integer                       :: NPar=0       ! Number of parameters
-      integer, dimension (10)       :: IV  =0       ! Integer values
-      real(kind=cp),dimension(10)   :: RV  =0.0_cp  ! Real values
+      character(len=60)                 :: Str=" "      ! Generic string (Use for directives)
+      integer                           :: NPar=0       ! Number of parameters
+      integer,           dimension(15)  :: IV  =0       ! Integer values
+      real(kind=cp),     dimension(15)  :: RV  =0.0_cp  ! Real values
+      character(len=40), dimension(15)  :: CV  =' '     ! Words
    End Type GenVec_Type
 
 
@@ -169,11 +172,11 @@ Module CFML_IOForm
 
 
    !---- Public ----!
-   integer, public :: NP_Direc =0     ! Number of Directives
+   integer, public :: NP_Instr =0     ! Number of Directives
    integer, public :: NP_Backgd=0     ! Number of Background
    integer, public :: NP_ExReg =0     ! Number of Exclude Regions
 
-   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Direc    ! Vector of Directives
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Instr    ! Vector of Instructions
    type(GenVec_Type), public, dimension(:), allocatable :: Vec_ExReg    ! Vector of Excluded regions
    type(GenVec_Type), public, dimension(:), allocatable :: Vec_Backgd   ! Vector for Background definitions
 
@@ -186,12 +189,32 @@ Module CFML_IOForm
 
    !---- Interface zone ----!
    Interface
-      Module Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
+      Module Subroutine Get_Block_Commands(ffile, N_Ini, N_End)
          !---- Arguments ----!
          Type(file_type),    intent(in)  :: ffile
          integer,            intent(out) :: n_ini
          integer,            intent(out) :: n_end
-      End Subroutine Get_ZoneCommands
+      End Subroutine Get_Block_Commands
+
+      Module Subroutine Get_Block_Patterns(ffile, N_Ini, N_End, NPatt, Patt, Ex_Ind)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NPatt
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Patt
+         integer, dimension(2), optional,    intent(in)     :: Ex_ind
+      End Subroutine Get_Block_Patterns
+
+      Module Subroutine Get_Block_Phases(ffile, N_Ini, N_End, NPhas, Phas, Ex_Ind)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NPhas
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Phas
+         integer, dimension(2), optional,    intent(in)     :: Ex_ind
+      End Subroutine Get_Block_Phases
 
       Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
          !---- Arguments ----!
@@ -213,21 +236,29 @@ Module CFML_IOForm
          integer, dimension(2), intent(out) :: Ind
       End Subroutine Get_SubBlock_KEY
 
-      Module Subroutine ReadBlock_ExcludeReg(ffile, n_ini, n_end, IPatt)
+      Module Subroutine Read_Block_ExcludeReg(ffile, n_ini, n_end, IPatt)
          !---- Arguments ----!
          Type(file_type),         intent(in)    :: ffile
          integer,                 intent(in)    :: n_ini
          integer,                 intent(in)    :: n_end
          integer,                 intent(in)    :: IPatt
-      End Subroutine ReadBlock_ExcludeReg
+      End Subroutine Read_Block_ExcludeReg
 
-      Module Subroutine ReadBlock_Backgd(ffile, n_ini, n_end, IPatt)
+      Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end)
+         !---- Arguments ----!
+         type(File_type), intent(in) :: Ffile
+         integer,         intent(in) :: N_ini
+         integer,         intent(in) :: N_end
+      End Subroutine Read_Block_Instructions
+
+      Module Subroutine Read_Block_Backgd(ffile, n_ini, n_end, IPatt)
          !---- Arguments ----!
          Type(file_type),         intent(in)    :: ffile
          integer,                 intent(in)    :: n_ini
          integer,                 intent(in)    :: n_end
          integer,                 intent(in)    :: IPatt
-      End Subroutine ReadBlock_Backgd
+      End Subroutine Read_Block_Backgd
+
 
       Module Subroutine Write_InfoBlock_Backgd(IPatt, Iunit)
          !---- Arguments ----!

@@ -113,7 +113,7 @@ Submodule (CFML_IOForm) Format_Blocks
    !!----
    !!---- Date: 11/05/2022
    !!
-   Module Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
+   Module Subroutine Get_Block_Commands(ffile, N_Ini, N_End)
       !---- Arguments ----!
       Type(file_type),    intent(in)  :: ffile
       integer,            intent(out) :: n_ini
@@ -155,7 +155,7 @@ Submodule (CFML_IOForm) Format_Blocks
          end if
       end do
 
-   End Subroutine Get_ZoneCommands
+   End Subroutine Get_Block_Commands
 
    !!----
    !!---- SUBROUTINE GET_SUBBLOCK
@@ -220,7 +220,7 @@ Submodule (CFML_IOForm) Format_Blocks
    !!----
    !!---- Update: 12/05/2023
    !!
-   Module Subroutine ReadBlock_ExcludeReg(ffile, n_ini, n_end, IPatt)
+   Module Subroutine Read_Block_ExcludeReg(ffile, n_ini, n_end, IPatt)
       !---- Arguments ----!
       Type(file_type),         intent(in)    :: ffile
       integer,                 intent(in)    :: n_ini
@@ -260,7 +260,7 @@ Submodule (CFML_IOForm) Format_Blocks
          Vec_ExReg(NP_exreg)%RV(1:2)=vet(1:2)        ! Min-Max limits
       end do
 
-   End Subroutine ReadBlock_ExcludeReg
+   End Subroutine Read_Block_ExcludeReg
 
    !!----
    !!---- SUBROUTINE READBLOCK_BACKGD
@@ -268,7 +268,7 @@ Submodule (CFML_IOForm) Format_Blocks
    !!----
    !!---- Update: 12/05/2023
    !!
-   Module Subroutine ReadBlock_Backgd(ffile, n_ini, n_end, IPatt)
+   Module Subroutine Read_Block_Backgd(ffile, n_ini, n_end, IPatt)
       !---- Arguments ----!
       Type(file_type),         intent(in)    :: ffile
       integer,                 intent(in)    :: n_ini
@@ -664,7 +664,279 @@ Submodule (CFML_IOForm) Format_Blocks
          end select
       end do
 
-   End Subroutine ReadBlock_Backgd
+   End Subroutine Read_Block_Backgd
+
+   !!----
+   !!---- SUBROUTINE READBLOCK_INSTRUCTIONS
+   !!----
+   !!----
+   !!---- Update: 12/05/2023
+   !!
+   Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end)
+      !---- Arguments ----!
+      type(File_type), intent(in) :: Ffile
+      integer,         intent(in) :: N_ini
+      integer,         intent(in) :: N_end
+
+      !---- Local Variables ----!
+      logical :: exc_reg, exc_bck
+      integer :: i,j, ic, iv
+      integer, dimension(2) :: Ind1, Ind2
+      character(len=:),  allocatable   :: linec
+
+
+      !> Init
+      Ind1=0; Ind2=0
+      call clear_error()
+
+      !> Exclude regions
+      exc_reg=.false.
+      call Get_SubBlock_KEY('EXCLUDED_REGIONS', ffile, n_ini, n_end, Ind1)
+      if (all(ind1 >0)) exc_reg=.true.
+
+      !> BackGD
+      exc_bck=.false.
+      call Get_SubBlock_KEY('BACKGD', ffile, n_ini, n_end, Ind2)
+      if (all(ind2 >0)) exc_bck=.true.
+
+      !> Main bucle
+      i=n_ini+1
+      do while (i <= n_end-1)
+         !> Exclusion zones
+         if (exc_reg) then
+            if (i >= ind1(1) .and. i <= ind1(2)) then
+               i=ind1(2)+1
+               cycle
+            end if
+         end if
+
+         if (exc_bck) then
+            if (i >= ind2(1) .and. i <= ind2(2)) then
+               i=ind2(2)+1
+               cycle
+            end if
+         end if
+
+         line=adjustl(ffile%line(i)%str)
+
+         if (len_trim(line) == 0) then
+            i=i+1
+            cycle
+         end if
+
+         if (line(1:1) =="!") then
+            i=i+1
+            cycle
+         end if
+
+         j=index(line,'!')
+         if (j > 0) line=line(:j-1)
+         j=index(line,'#')
+         if (j > 0) line=line(:j-1)
+
+         do while(len_trim(line) > 0)
+            j=index(line,';')
+            if (j > 0) then
+               linec=line(:j-1)
+               line=line(j+1:)
+            else
+               linec=trim(line)
+               line=''
+            end if
+
+            call get_words(linec, dire, ic)
+            if (ic < 1 .or. ic > 15) then
+               call set_error(1,'The directive has a wrong number of parameters! '//trim(linec))
+               return
+            end if
+
+            NP_Instr=NP_Instr+1
+            Vec_Instr(NP_Instr)%Str=trim(u_case(dire(1)))
+            Vec_Instr(NP_Instr)%NPar=ic-1
+            do j=2,ic
+               call get_num(dire(j),vet,ivet,iv)
+               if (iv <=0) then
+                  Vec_Instr(NP_Instr)%CV(j-1)=trim(dire(j))
+               else
+                  Vec_Instr(NP_Instr)%IV(j-1)=ivet(1)
+                  Vec_Instr(NP_Instr)%RV(j-1)=vet(1)
+               end if
+            end do
+
+         end do
+
+         i=i+1
+      end do
+
+   End Subroutine Read_Block_Instructions
+
+   !!----
+   !!---- SUBROUTINE GET_ZONEPATTERNS
+   !!----
+   !!---- Date: 11/05/2022
+   !!
+   Module Subroutine Get_Block_Patterns(ffile, N_Ini, N_End, NPatt, Patt, Ex_Ind)
+      !---- Arguments ----!
+      Type(file_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: n_ini
+      integer,                            intent(in)     :: n_end
+      integer,                            intent(out)    :: NPatt
+      type(BlockInfo_Type), dimension(:), intent(in out) :: Patt
+      integer, dimension(2), optional,    intent(in)     :: Ex_ind
+
+
+      !---- Local Variables ----!
+      character(len=60)     :: StrName
+      integer               :: i, j, n_fin, N_id
+      integer, dimension(2) :: Ind, Indx
+      logical               :: exclusion=.false.
+
+      !> Init
+      NPatt=0
+      Indx=0
+      if (present(Ex_Ind)) then
+         exclusion=.true.
+         Indx=Ex_ind
+      end if
+
+      i=N_ini
+      n_fin=ffile%nlines
+
+      do while (i < ffile%nlines)
+         !> Exclude zone
+         if (exclusion) then
+            if (i < Indx(1)-1) n_fin=Indx(1)-1
+            if (i >=Indx(1) .and. i <=Indx(2)) then
+               n_fin=ffile%nlines
+               i=Indx(2)+1
+               cycle
+            end if
+         end if
+
+         call Get_Block_KEY('PATTERN', ffile, i, n_fin, Ind, StrName, N_Id)
+
+         if (Err_CFML%IErr /= 0) return
+         if (all(ind == 0)) then
+            i=i+1
+            cycle
+         end if
+
+         select case (N_Id)
+            case (0)
+               if (NPatt ==0) then
+                  NPatt=1
+
+                  Patt(1)%StrName=trim(StrName)
+                  Patt(1)%BlName='PATTERN'
+                  Patt(1)%IBl=2
+                  Patt(1)%Nl=Ind
+               else
+                  call set_error(1,'There is a previous Pattern block defined as 1!')
+                  return
+               end if
+
+            case (1:MAX_PATTERNS)
+               if (Patt(N_id)%IBl == 1) then
+                  call set_error(1,'There is a previous Pattern Block defined with the same identificator!')
+                  return
+               end if
+
+               Patt(N_id)%StrName=trim(StrName)
+               Patt(N_id)%BlName='PATTERN'
+               Patt(N_id)%IBl=2
+               Patt(N_id)%Nl=Ind
+
+               NPatt=NPatt+1
+         end select
+
+         i=ind(2)+1
+      end do
+
+   End Subroutine Get_Block_Patterns
+
+   !!----
+   !!---- SUBROUTINE GET_ZONEPHASES
+   !!----
+   !!---- Date: 11/05/2022
+   !!
+   Module Subroutine Get_Block_Phases(ffile, N_Ini, N_End, NPhas, Phas, Ex_Ind)
+      !---- Arguments ----!
+      Type(file_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: n_ini
+      integer,                            intent(in)     :: n_end
+      integer,                            intent(out)    :: NPhas
+      type(BlockInfo_Type), dimension(:), intent(in out) :: Phas
+      integer, dimension(2), optional,    intent(in)     :: Ex_ind
+
+
+      !---- Local Variables ----!
+      character(len=60)     :: StrName
+      integer               :: i, j, n_fin, N_Id
+      integer, dimension(2) :: Ind, Indx
+      logical               :: exclusion=.false.
+
+      !> Init
+      NPhas=0
+      Indx=0
+      if (present(Ex_Ind)) then
+         exclusion=.true.
+         Indx=Ex_ind
+      end if
+
+      i=N_ini
+      n_fin=ffile%nlines
+
+      do while (i < ffile%nlines)
+         !> Exclude zone
+         if (exclusion) then
+            if (i < Indx(1)-1) n_fin=Indx(1)-1
+            if (i >=Indx(1) .and. i <=Indx(2)) then
+               n_fin=ffile%nlines
+               i=Indx(2)+1
+               cycle
+            end if
+         end if
+
+         call Get_Block_KEY('PHASE', ffile, i, n_fin, Ind, StrName, N_Id)
+
+         if (Err_CFML%IErr /= 0) return
+         if (all(ind == 0)) then
+            i=i+1
+            cycle
+         end if
+
+         select case (N_Id)
+            case (0)
+               if (NPhas ==0) then
+                  NPhas=1
+
+                  Phas(1)%StrName=trim(StrName)
+                  Phas(1)%BlName='PHASE'
+                  Phas(1)%IBl=1
+                  Phas(1)%Nl=Ind
+               else
+                  call set_error(1,'There is a previous Phase block defined as 1!')
+                  return
+               end if
+
+            case (1:MAX_PHASES)
+               if (Phas(N_id)%IBl == 1) then
+                  call set_error(1,'There is a previous Phase Block defined with the same identificator!')
+                  return
+               end if
+
+               Phas(N_id)%StrName=trim(StrName)
+               Phas(N_id)%BlName='PHASE'
+               Phas(N_id)%IBl=1
+               Phas(N_id)%Nl=Ind
+
+               NPhas=NPhas+1
+         end select
+
+         i=ind(2)+1
+      end do
+
+   End Subroutine Get_Block_Phases
 
    !!----
    !!---- Subroutine Write_InfoBlock_Backgd
