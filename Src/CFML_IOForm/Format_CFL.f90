@@ -25,8 +25,8 @@ SubModule (CFML_IOForm) Format_CFL
       integer, optional,    intent(in)     :: i_ini, i_end
 
       !---- Local variables -----!
-      character(len=:),   allocatable   :: line,mom_comp
-      character(len=:),   allocatable   :: dire
+      character(len=:),   allocatable   :: mom_comp
+      character(len=:),   allocatable   :: direc
       integer                           :: i, j, na, npos, n_oc, n_mc,n_dc,n_uc
       integer                           :: j_ini, j_end
       ! --- Debugging variables
@@ -95,9 +95,9 @@ SubModule (CFML_IOForm) Format_CFL
          if(len_trim(line) < 4) then
            cycle
          else
-           dire=adjustl(u_case(line(1:4)))
+           direc=adjustl(u_case(line(1:4)))
          end if
-         if (trim(dire) /= "ATOM") cycle
+         if (trim(direc) /= "ATOM") cycle
 
          na=na+1
          call read_atom(line, Atmlist%atom(na))  ! Utype is read now in the line
@@ -294,7 +294,7 @@ SubModule (CFML_IOForm) Format_CFL
       !---- Local Variables ----!
       integer                      :: i,j,ier,nk,nq,iv
       integer                      :: j_ini, j_end
-      character(len=:),allocatable :: uline,line
+      character(len=:),allocatable :: uline
 
       !> Init
       call clear_error()
@@ -417,7 +417,7 @@ SubModule (CFML_IOForm) Format_CFL
       !--- Local Variables ---!
       integer                           :: i,j,ngen,nk,nq,iv,ier,d,dr,Mult
       integer                           :: j_ini, j_end
-      character(len=:),     allocatable :: line,uline,setting,strcode
+      character(len=:),     allocatable :: uline,setting,strcode
       character(len=40), dimension(192) :: gen
       logical                           :: change_setting
 
@@ -839,7 +839,6 @@ SubModule (CFML_IOForm) Format_CFL
 
       !---- Local variables ----!
       logical                          :: set_moment, set_ModAtm_std
-      character(len=132)               :: line
       integer, dimension(MAX_PHASES)   :: ip
       integer                          :: i, j,nt_phases, iph, n_ini, n_end
       integer                          :: k
@@ -1023,7 +1022,7 @@ SubModule (CFML_IOForm) Format_CFL
       integer                           :: i,nphas, ncmd,n_pat,ier, j
       integer, dimension(i_end-i_ini+1) :: ip,ic,ipt
       real(kind=sp)                     :: a1,a2,a3,a4,a5
-      character(len=120)                :: line, fmtfields, fmtformat
+      character(len=120)                :: fmtfields, fmtformat
 
       !> Init
       if (cfl%nlines <=0) then

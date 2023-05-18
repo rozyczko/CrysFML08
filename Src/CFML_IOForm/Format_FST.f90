@@ -20,7 +20,6 @@ SubModule (CFML_IOForm) Format_fst
       integer  :: i, n_ini, n_end, npos
       Type(File_Type) :: struct
       Type(File_list_Type) :: magstr
-      character(len=:), allocatable :: line
 
       npos=fst%nlines
       do i=1, fst%nlines

@@ -5,7 +5,6 @@ SubModule (CFML_IOForm) Format_CIF
    implicit none
 
    !---- Local Variables ----!
-   character(len=132)            :: line
    character(len=:), allocatable :: str
    integer                       :: j_ini, j_end
 
@@ -1343,8 +1342,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                    :: i,nl,iv,npos
-      integer,dimension(1)       :: ivet
-      real(kind=cp), dimension(1):: vet
+      !integer,dimension(1)       :: ivet
+      !real(kind=cp), dimension(1):: vet
 
       !> Init
       wave=0.0_cp
@@ -1405,8 +1404,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                     :: i,nl,npos,iv
-      integer,dimension(1)        :: ivet
-      real(kind=cp), dimension(1) :: vet
+      !integer,dimension(1)        :: ivet
+      !real(kind=cp), dimension(1) :: vet
 
       !> Init
       z=0.0_cp
@@ -1565,8 +1564,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       integer                     :: i,nl,iv,npos
       integer                     :: np1,np2,nlabel,nlong
-      integer,       dimension(1) :: ivet
-      real(kind=cp), dimension(1) :: vet
+      !integer,       dimension(1) :: ivet
+      !real(kind=cp), dimension(1) :: vet
 
       !> Init
       n_elem_type = 0
@@ -1793,8 +1792,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                       :: i,iv,nl,npos
-      integer, dimension(1)         :: ivet
-      real(kind=cp),dimension(1)    :: vet
+      !integer, dimension(1)         :: ivet
+      !real(kind=cp),dimension(1)    :: vet
 
       !> Init
       it=0
@@ -3003,7 +3002,7 @@ SubModule (CFML_IOForm) Format_CIF
       integer                        :: i, iph, nt_phases, it, n_ini,n_end
       integer, dimension(MAX_PHASES) :: ip
 
-      real(kind=cp),dimension(6):: vet !,vet2
+      !real(kind=cp),dimension(6):: vet !,vet2
       real(kind=cp)             :: val
 
       !> Init
