@@ -244,11 +244,12 @@ Module CFML_IOForm
          integer,                 intent(in)    :: IPatt
       End Subroutine Read_Block_ExcludeReg
 
-      Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end)
+      Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end, LSymm)
          !---- Arguments ----!
-         type(File_type), intent(in) :: Ffile
-         integer,         intent(in) :: N_ini
-         integer,         intent(in) :: N_end
+         type(File_type), intent(in)   :: Ffile
+         integer,         intent(in)   :: N_ini
+         integer,         intent(in)   :: N_end
+         logical, optional, intent(in) :: LSymm
       End Subroutine Read_Block_Instructions
 
       Module Subroutine Read_Block_Backgd(ffile, n_ini, n_end, IPatt)

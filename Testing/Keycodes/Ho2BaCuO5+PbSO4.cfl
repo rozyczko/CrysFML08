@@ -59,8 +59,8 @@ PHASE_Ho2BaCuO5   1
      domain_fracts 0.12  0.48  0.24  0.26
 
 
-  Iso_SIZE    950  Iso_SIZE_GaussFract 0.11
-  Iso_STRAIN  0.2  Iso_STRAIN_LorentzFract 0.23
+  Iso_SIZE    950;  Iso_SIZE_GaussFract 0.11
+  Iso_STRAIN  0.2;  Iso_STRAIN_LorentzFract 0.23
 
 END_PHASE_Ho2BaCuO5
 
@@ -77,7 +77,7 @@ PHASE_PbSO4   2
 
    Contributes_to_patterns  1  4
    ScaleFactors  0.1211  0.23
-   Iso_SIZE    450  Iso_SIZE_GaussFract 0.11
+   Iso_SIZE    450;  Iso_SIZE_GaussFract 0.11
 
 END_PHASE_PbSO4
 
@@ -87,7 +87,7 @@ PHASE_LeBail   3  !If there is no atom the phase is treated automatically in LeB
    Cell 3.478356   3.478356   6.957969  90.000000  90.000000  90.000000
    SPGR  P 4/m m m
    Contributes_to_patterns  1  4
-   Iso_SIZE    450  Iso_SIZE_GaussFract 0.11
+   Iso_SIZE    450;  Iso_SIZE_GaussFract 0.11
 
 END_PHASE_LeBail
 !======================================================

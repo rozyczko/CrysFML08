@@ -672,21 +672,26 @@ Submodule (CFML_IOForm) Format_Blocks
    !!----
    !!---- Update: 12/05/2023
    !!
-   Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end)
+   Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end, LSymm)
       !---- Arguments ----!
-      type(File_type), intent(in) :: Ffile
-      integer,         intent(in) :: N_ini
-      integer,         intent(in) :: N_end
+      type(File_type),   intent(in) :: Ffile
+      integer,           intent(in) :: N_ini
+      integer,           intent(in) :: N_end
+      logical, optional, intent(in) :: LSymm
 
       !---- Local Variables ----!
-      logical :: exc_reg, exc_bck
-      integer :: i,j, ic, iv
-      integer, dimension(2) :: Ind1, Ind2
+      logical                          :: exc_reg, exc_bck, exc_symm
+      integer                          :: i, j, k, kk, ic, iv
+      integer, dimension(2)            :: Ind1, Ind2
+      character(len=10)                :: str
       character(len=:),  allocatable   :: linec
 
 
       !> Init
       Ind1=0; Ind2=0
+      exc_symm=.false.
+      if (present(lsymm)) exc_symm=lsymm
+      
       call clear_error()
 
       !> Exclude regions
@@ -733,6 +738,72 @@ Submodule (CFML_IOForm) Format_Blocks
          if (j > 0) line=line(:j-1)
          j=index(line,'#')
          if (j > 0) line=line(:j-1)
+         
+         if (exc_symm) then
+            !> Special cases on symmetry / space groups
+            linec = line
+            call cut_string(linec, ic, str)
+            str=adjustl(u_case(str))
+            j=string_count(linec,';')
+            
+            select case (trim(str))
+               case ('SPG','SSPG','MSSPG','SPGR','SHUB')
+                  select case (j)
+                     case(0)
+                        NP_Instr=NP_Instr+1
+                        Vec_Instr(NP_Instr)%Str=trim(str)
+                        Vec_Instr(NP_Instr)%NPar=1
+                        Vec_Instr(NP_Instr)%CV(1)=trim(linec)
+               
+                     case(1)
+                        NP_Instr=NP_Instr+1
+                        Vec_Instr(NP_Instr)%Str=trim(str)
+                        Vec_Instr(NP_Instr)%NPar=1
+                        Vec_Instr(NP_Instr)%CV(1)=trim(linec)
+                        
+                     case default
+                        call set_error(1,'Format not defined! ->'//trim(str)//' '//trim(linec))
+                        return
+                  end select
+                  
+                  i=i+1
+                  cycle
+                  
+               case ('GEN','SYMM','GENERATORS') 
+                  select case (j)
+                     case(0)
+                        NP_Instr=NP_Instr+1
+                        Vec_Instr(NP_Instr)%Str=trim(str)
+                        Vec_Instr(NP_Instr)%NPar=1
+                        Vec_Instr(NP_Instr)%CV(1)=trim(linec)
+                        
+                     case(1:)
+                        NP_Instr=NP_Instr+1
+                        Vec_Instr(NP_Instr)%Str=trim(str)
+                        kk=0
+                        do while(len_trim(linec) > 0)
+                           k=index(linec,';')
+                           if (k > 0) then
+                              kk=kk+1
+                              Vec_Instr(NP_Instr)%CV(kk)=linec(:k-1)
+                              linec=linec(k+1:)
+                              
+                           else
+                              kk=kk+1
+                              Vec_Instr(NP_Instr)%CV(kk)=linec
+                              linec=''
+                           end if
+                        end do
+                        
+                     case default
+                        call set_error(1,'Format not defined! ->'//trim(str)//' '//trim(line))
+                        return
+                  end select 
+                  
+                  i=i+1
+                  cycle                  
+            end select
+         end if
 
          do while(len_trim(line) > 0)
             j=index(line,';')

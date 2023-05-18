@@ -212,16 +212,33 @@ Program KeyCodes
    !> ----------------------
 
    do i=1,npatterns
-      !call Read_Block_ExcludeReg(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
-      !call Read_Block_Backgd(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
+      call Read_Block_ExcludeReg(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
+      call Read_Block_Backgd(ffile, Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2), i)
       call Read_Block_Instructions(ffile,Bl_Patt(i)%Nl(1), Bl_Patt(i)%Nl(2))
    end do
 
-   call write_info_Instructions(1,NP_Instr)
    do i=1,npatterns
       call Write_InfoBlock_ExcludedRegions(i)
       call Write_InfoBlock_Backgd(i)
    end do ! npatterns
+   
+   print*,'----------------------'
+   print*,'---- PATTERN ZONE ----'
+   print*,'----------------------'
+   call write_info_Instructions(1,NP_Instr)
+   
+   !> --------------------
+   !> ---- PHASE ZONE ----
+   !> --------------------
+   Nt = Np_Instr
+   do i=1,nphases
+      call Read_Block_Instructions(ffile,Bl_Phas(i)%Nl(1), Bl_Phas(i)%Nl(2),.true.)
+   end do
+   print*,' '
+   print*,'--------------------'
+   print*,'---- PHASE ZONE ----'
+   print*,'--------------------'
+   call write_info_Instructions(nt+1,NP_Instr)
 
 
 
