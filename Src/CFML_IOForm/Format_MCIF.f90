@@ -771,7 +771,6 @@ SubModule (CFML_IOForm) Format_MCIF
       logical                                      :: found, is_new
       character(len=40), dimension(:), allocatable :: dire
       integer, dimension(15)                       :: lugar
-      integer, dimension(3)                        :: ivet
       integer                                      :: i, j, k,nl, np, nt,ic, iv, npos
       integer                                      :: i1,i2,i3
       integer                                      :: j_ini, j_end
@@ -1072,7 +1071,6 @@ SubModule (CFML_IOForm) Format_MCIF
       logical                                      :: found
       character(len=40), dimension(:), allocatable :: dire
       integer, dimension(15)                       :: lugar
-      integer, dimension(3)                        :: ivet
       integer                                      :: i, j, k,nl, np, nq, ic, iv, npos
       integer                                      :: j_ini, j_end
       integer                                      :: i1,i2
@@ -1462,12 +1460,10 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       logical                :: found
       integer, dimension( 2) :: lugar   !   1:id, 2: kxkykz
-      integer, dimension(3)  :: ivet
       integer                :: j_ini, j_end
       integer                :: i,j,nl,iv,npos
       integer                :: np1,np2
 
-      real(kind=cp),     dimension(3) :: vet
       character(len=20), dimension(3) :: cvet
 
       !> Init
@@ -1620,11 +1616,9 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       logical                         :: found
       integer, dimension(4)           :: lugar   !   1:id, 2: x, 3: y, 4:z
-      character(len=40), dimension(4) :: dire
-      integer, dimension(3)           :: ivet
       integer                         :: j_ini, j_end
       integer                         :: i,j,k,nl,iv,np,npos,ic
-      real(kind=cp),     dimension(3) :: vet,vet2,xv,xv_std
+      real(kind=cp),     dimension(3) :: vet2,xv,xv_std
 
       Type(Kvect_Info_Type)           :: Kv
 
@@ -1821,12 +1815,10 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       logical                          :: found
       integer, dimension(8)            :: lugar
-      character(len=40), dimension(10) :: dire
       integer, dimension(10)           :: ivet
       integer                          :: i,j,k,nq,nl,nk,iv,np, npos,ic
       integer                          :: j_ini, j_end
       integer                          :: k1,k2
-      real(kind=cp), dimension(10)     :: vet
 
       Type(Kvect_Info_Type)            :: Kv
 
@@ -2772,7 +2764,6 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !---- Local Variables ----!
       logical                                      :: found
-      character(len=80), dimension(3)              :: dire
       integer                                      :: j_ini, j_end
       integer                                      :: i,j,iv,np,nl,ic, npos
       integer,       dimension(3)                  :: lugar
@@ -2904,7 +2895,6 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !---- Local Variables ----!
       logical                                      :: found
-      character(len=80), dimension(3)              :: dire
       integer                                      :: j_ini, j_end
       integer                                      :: i,j,iv,np,nl,ic,npos
       integer,       dimension(2)                  :: lugar
@@ -3033,7 +3023,6 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !---- Local Variables ----!
       logical                                      :: found
-      character(len=80), dimension(3)              :: dire
       integer                                      :: j_ini, j_end, npos
       integer                                      :: i,j,iv,np,nl,ic
       integer,       dimension(3)                  :: lugar
@@ -3164,7 +3153,6 @@ SubModule (CFML_IOForm) Format_MCIF
 
       !---- Local Variables ----!
       logical                                      :: found
-      character(len=80), dimension(3)              :: dire
       integer                                      :: j_ini, j_end
       integer                                      :: i,j,iv,np,nl,ic,npos
       integer,       dimension(3)                  :: lugar
@@ -3288,10 +3276,7 @@ SubModule (CFML_IOForm) Format_MCIF
       integer, optional,     intent(in)    :: i_ini,i_end
 
       !---- Local Variables ----!
-      !character(len=1)            :: car
-      !integer                     :: i,iv,np,npos
       integer                     :: j_ini, j_end
-      !integer,       dimension(1) :: ivet
 
       !> Init
       call clear_error()
@@ -3321,8 +3306,6 @@ SubModule (CFML_IOForm) Format_MCIF
       !---- Local Variables ----!
       integer                     :: i,iv,npos
       integer                     :: j_ini, j_end
-      integer,       dimension(1) :: ivet
-      real(kind=cp), dimension(1) :: vet
 
       !> Init
       call clear_error()
@@ -3521,8 +3504,6 @@ SubModule (CFML_IOForm) Format_MCIF
       class(SpG_Type),  intent(in) :: Spg
 
       !---- Local Variables ----!
-      !integer                         :: i, j
-      !character(len=40), dimension(3) :: text
 
       !> Moment
       write(unit=Ipr,fmt="(a)") "loop_"

@@ -29,6 +29,8 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
          line=adjustl(ffile%line(i)%str)
          if (line(1:1) ==" ") cycle
          if (line(1:1) =="!") cycle
+         if (len_trim(line) == 0) cycle
+
          k=index(line,"!")
          if( k /= 0) line=line(:k-1)
 

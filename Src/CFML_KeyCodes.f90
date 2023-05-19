@@ -65,7 +65,7 @@ Module CFML_KeyCodes
    public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_GenParList,   &
              Del_RefCode_ATM, Del_RefCode_GenParList, &
              Fill_RefCodes_Atm,  &
-             Get_AFIX_Line, Get_Block_KEY, Get_DFIX_Line, Get_TFIX_Line, Get_ZoneCommands, &
+             Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
              Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
@@ -142,6 +142,7 @@ Module CFML_KeyCodes
       integer                                      :: NPar=0   ! Current number of Parameters
       type(GenPar_Type), allocatable, dimension(:) :: Par
    End Type GenParList_Type
+
 
 
    !---- Parameters ----!
@@ -396,24 +397,6 @@ Module CFML_KeyCodes
          type(AtList_Type),  intent(in out) :: AtList
          class (SpG_type),   intent(in)     :: Spg
       End Subroutine ReadCode_VARY_ATM
-
-      Module Subroutine Get_ZoneCommands(ffile, N_Ini, N_End)
-         !---- Arguments ----!
-         Type(file_type),    intent(in)  :: ffile
-         integer,            intent(out) :: n_ini
-         integer,            intent(out) :: n_end
-      End Subroutine Get_ZoneCommands
-
-      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Nb, Ind, ID_Str)
-         !---- Arguments ----!
-         character(len=*),              intent(in)  :: Key
-         Type(file_type),               intent(in)  :: ffile
-         integer,                       intent(in)  :: n_ini
-         integer,                       intent(in)  :: n_end
-         integer,                       intent(out) :: Nb
-         integer, dimension(:,:),       intent(out) :: Ind
-         character(len=*),dimension(:), intent(out) :: ID_Str
-      End Subroutine Get_Block_KEY
 
       Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)
          !---- Arguments ----!

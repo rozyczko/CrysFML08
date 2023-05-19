@@ -23,13 +23,10 @@ SubModule (CFML_IOForm) Format_SHX
       !---- Local Variables ----!
       logical                         :: flag_atm
       character(len=30),dimension(20) :: label
-      character(len=80)               :: line
       character(len=2)                :: el
       integer                         :: i, j, n, nc, iv
 
       real(kind=cp)                   :: x, p, u
-      real(kind=cp), dimension(15)    :: vet
-      integer,       dimension(15)    :: ivet
 
       type(atlist_type)               :: At
 
@@ -316,12 +313,9 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local Variables ----!
       integer                      :: i,iv,z_shx
-      integer,       dimension(10) :: ivet
-      real(kind=cp), dimension(10) :: vet
       real(kind=cp)                :: lambda_shx
       real(kind=cp), dimension(6)  :: vcell
       real(kind=cp), dimension(6)  :: std
-      character(len=80)            :: line
 
       !> Init
       call clear_error()
@@ -389,10 +383,8 @@ SubModule (CFML_IOForm) Format_SHX
       real(kind=cp), dimension(:),    intent(out)   :: fvar
 
       !---- Local  variables ----!
-      character(len=80)            :: line
+      !character(len=80)            :: line
       integer                      :: i,iv
-      integer,       dimension(15) :: ivet
-      real(kind=cp), dimension(15) :: vet
 
       !> Init
       call clear_error()
@@ -439,9 +431,6 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local Variables ----!
       integer                      :: i,iv
-      integer,       dimension(10) :: ivet
-      real(kind=cp), dimension(10) :: vet
-      character(len=80)            :: line
 
       !> Init
       Wave=0.0_cp
@@ -487,9 +476,6 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local Variables ----!
       integer                      :: i,iv
-      integer,       dimension(10) :: ivet
-      real(kind=cp), dimension(10) :: vet
-      character(len=80)            :: line
 
       !> Init
       Z=0.0_cp
@@ -534,7 +520,6 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local vartiables ----!
       integer           :: i
-      character(len=80) :: line
 
       !> Init
       Title=" "
@@ -577,9 +562,6 @@ SubModule (CFML_IOForm) Format_SHX
 
       !---- Local Variables ----!
       integer                     :: i,iv
-      integer,       dimension(2) :: ivet
-      real(kind=cp), dimension(2) :: vet
-      character(len=80)           :: line
 
 
       !> Init
@@ -621,10 +603,7 @@ SubModule (CFML_IOForm) Format_SHX
       real(kind=cp),    dimension(:), optional, intent(out)     :: n_elem
 
       !---- Local  variables ----!
-      character(len=80)             :: line
       integer                       :: i,iv
-      integer,       dimension(15)  :: ivet
-      real(kind=cp), dimension(15)  :: vet
 
       !> Init
       call clear_error()
@@ -689,7 +668,6 @@ SubModule (CFML_IOForm) Format_SHX
       character(len=*), dimension(:),intent(out) :: oper_symm
 
       !---- Local variables ----!
-      character(len=80) :: line
       integer           :: i
 
       !> Init
@@ -878,7 +856,6 @@ SubModule (CFML_IOForm) Format_SHX
       character(len=2),  dimension(15)  :: elem_atm
       integer                           :: i, nl, noper
       integer                           :: n_elem_atm, n_fvar
-      real(kind=cp), dimension(6)       :: vet
       real(kind=cp), dimension(10)      :: fvar
 
       !> Init
