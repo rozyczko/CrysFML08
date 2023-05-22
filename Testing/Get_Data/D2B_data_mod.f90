@@ -95,8 +95,11 @@ module D2B_data_mod
        ga_D_min = min(nex(1)%angles(4,nex(1)%nf),nex(1)%angles(4,1))
        ga_D_max = max(nex(1)%angles(4,nex(1)%nf),nex(1)%angles(4,1))
 
-       cnorm=sum(nex(:)%monitor(1))/real(nscans)
-
+        cnorm=0.0
+        do i=1,nscans
+         cnorm=cnorm+nex(i)%monitor(1) 
+        end do
+        cnorm=cnorm/nscans
        do i = 2 , nscans
           dga_i      = abs(nex(i)%angles(4,nex(i)%nf)-nex(i)%angles(4,1)) / (nex(i)%nf - 1)
           ga_D_min_i = min(nex(i)%angles(4,nex(i)%nf),nex(i)%angles(4,1))
