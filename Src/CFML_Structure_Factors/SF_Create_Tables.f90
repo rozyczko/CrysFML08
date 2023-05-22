@@ -165,15 +165,23 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          else
             symbcar=l_case(atm%atom(i)%SfacSymb)
          end if
-         do j=1, NUM_XRAY_FORM
-            if (symbcar /= Xray_form(j)%Symb) cycle
-            ix(i)=j
-            if(any(jx == j) ) exit
-            n=n+1
-            jx(n)=j
-            ia(n)=i
-            exit
-         end do
+         do_repeat: do k=1,2
+            do j=1, NUM_XRAY_FORM
+               if (symbcar /= Xray_form(j)%Symb) cycle
+               ix(i)=j
+               if(any(jx == j) ) exit
+               n=n+1
+               jx(n)=j
+               ia(n)=i
+               exit do_repeat
+            end do
+            if (ix(i) == 0) then
+               symbcar=l_case(atm%atom(i)%ChemSymb)
+               cycle do_repeat
+            else
+               exit
+            end if
+         end do do_repeat
       end do
 
       if (present(lun)) then
@@ -181,7 +189,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          write(unit=lun,fmt="(a,/)") "  =============================================================================="
       end if
 
-      if (any(ix==0)) then
+      if (any(ix == 0)) then
          err_CFML%IErr=1
          Err_CFML%flag=.true.
          Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
@@ -235,7 +243,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       integer,       optional, intent(in) :: lun
 
       !---- Local Variables ----!
-      character(len=4)               :: symbcar
+      character(len=4)               :: symbcar,symban
       integer                        :: i,j, k,n,L
       integer, dimension(atm%natoms) :: ix,jx,ia
       real(kind=cp)                  :: dmin,d
@@ -256,15 +264,23 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          else
             symbcar=l_case(atm%atom(i)%SfacSymb)
          end if
-         do j=1,NUM_XRAY_FORM
-            if (symbcar /= Xray_form(j)%Symb) cycle
-            ix(i)=j
-            if(any(jx == j) ) exit
-            n=n+1
-            jx(n)=j
-            ia(n)=i
-            exit
-         end do
+         do_repeat: do k=1,2
+            do j=1, NUM_XRAY_FORM
+               if (symbcar /= Xray_form(j)%Symb) cycle
+               ix(i)=j
+               if(any(jx == j) ) exit
+               n=n+1
+               jx(n)=j
+               ia(n)=i
+               exit do_repeat
+            end do
+            if (ix(i) == 0) then
+               symbcar=l_case(atm%atom(i)%ChemSymb)
+               cycle do_repeat
+            else
+               exit
+            end if
+         end do do_repeat
       end do
 
       if (present(lun)) then
@@ -288,9 +304,9 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
 
          !> Found Species on Anomalous_ScFac
          do i=1,atm%natoms
-            symbcar=l_case(atm%atom(i)%chemsymb)
+            symban=l_case(atm%atom(i)%chemsymb)
             do j=1,Num_Delta_Fp
-               if (symbcar /= Anomalous_ScFac(j)%Symb) cycle
+               if (symban /= Anomalous_ScFac(j)%Symb) cycle
                afp(i)=Anomalous_ScFac(j)%fp(k)
                afpp(i)=Anomalous_ScFac(j)%fpp(k)
                exit
@@ -305,7 +321,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          end if
       end if
 
-      if (any(ix==0)) then
+      if (any(ix == 0)) then
          err_CFML%Ierr=1
          Err_CFML%flag=.true.
          Err_CFML%Msg="The Species "//trim(symbcar)//" was not found!"
@@ -449,15 +465,23 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          else
            symbcar=l_case(atm%atom(i)%SfacSymb)
          end if
-         do j=1,NUM_XRAY_FORM
-            if (symbcar /= Xray_form(j)%Symb) cycle
-            ix(i)=j
-            if(any(jx == j) ) exit
-            n=n+1
-            jx(n)=j
-            ia(n)=i
-            exit
-         end do
+         do_repeat: do k=1,2
+            do j=1, NUM_XRAY_FORM
+               if (symbcar /= Xray_form(j)%Symb) cycle
+               ix(i)=j
+               if(any(jx == j) ) exit
+               n=n+1
+               jx(n)=j
+               ia(n)=i
+               exit do_repeat
+            end do
+            if (ix(i) == 0) then
+               symbcar=l_case(atm%atom(i)%ChemSymb)
+               cycle do_repeat
+            else
+               exit
+            end if
+         end do do_repeat
       end do
 
       if (any(ix==0)) then

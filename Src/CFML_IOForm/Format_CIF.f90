@@ -5,7 +5,6 @@ SubModule (CFML_IOForm) Format_CIF
    implicit none
 
    !---- Local Variables ----!
-   character(len=132)            :: line
    character(len=:), allocatable :: str
    integer                       :: j_ini, j_end
 
@@ -454,7 +453,7 @@ SubModule (CFML_IOForm) Format_CIF
       integer, optional,  intent(in)  :: i_ini, i_end
 
       !---- Local Variables ----!
-      logical                             :: ssg, aniso_found, atom_type_found
+      logical                             :: ssg, aniso_found, atom_type_found, betas, bth
       character(len=20),dimension(15)     :: label
       character(len=:),allocatable        :: aux_label
       integer                             :: i, j, n, nc, iv, First, nl,npos,ja_ini
@@ -492,6 +491,7 @@ SubModule (CFML_IOForm) Format_CIF
       end if
       aniso_found=.false.
       atom_type_found=.false.
+      betas=.false.; bth=.false.
       j_ini=1; j_end=cif%nlines
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
@@ -785,6 +785,9 @@ SubModule (CFML_IOForm) Format_CIF
                case('bani')
                   atm%atom(n)%utype="B_ij"
                   atm%atom(n)%thtype='ani'
+               case('beta')
+                  atm%atom(n)%utype="Beta"
+                  atm%atom(n)%thtype='ani'
             end select
          end if
       end do
@@ -912,38 +915,44 @@ SubModule (CFML_IOForm) Format_CIF
         j=0
         do i=j_ini,j_end
            line=adjustl(cif%line(i)%str)
-
            if (len_trim(line) <= 0) cycle
            if (line(1:1) == '#') cycle
-           if (line(1:5) /='_atom') exit
-
+           if (line(1:5) /='_atom') then
+             j_ini=i
+             exit
+           end if
+           if(index(line,"beta") /= 0) betas=.true.
+           if(index(line,"_B_") /= 0)  bth=.true.
            select case (trim(line))
               case ('_atom_site_aniso_label')
                  j=j+1
                  lugar(1)=j
-              case ('_atom_site_aniso_U_11','_atom_site_aniso_B_11')
+              case ('_atom_site_aniso_type_symbol')
                  j=j+1
                  lugar(2)=j
-              case ('_atom_site_aniso_U_22','_atom_site_aniso_B_22')
+              case ('_atom_site_aniso_U_11','_atom_site_aniso_B_11',"_atom_site_aniso_beta_11")
                  j=j+1
                  lugar(3)=j
-              case ('_atom_site_aniso_U_33','_atom_site_aniso_B_33')
+              case ('_atom_site_aniso_U_22','_atom_site_aniso_B_22',"_atom_site_aniso_beta_22")
                  j=j+1
                  lugar(4)=j
-              case ('_atom_site_aniso_U_23','_atom_site_aniso_B_23')
+              case ('_atom_site_aniso_U_33','_atom_site_aniso_B_33',"_atom_site_aniso_beta_33")
                  j=j+1
                  lugar(5)=j
-              case ('_atom_site_aniso_U_13','_atom_site_aniso_B_13')
+              case ('_atom_site_aniso_U_12','_atom_site_aniso_B_12',"_atom_site_aniso_beta_12")
                  j=j+1
                  lugar(6)=j
-              case ('_atom_site_aniso_U_12','_atom_site_aniso_B_12')
+              case ('_atom_site_aniso_U_13','_atom_site_aniso_B_13',"_atom_site_aniso_beta_13")
                  j=j+1
                  lugar(7)=j
+              case ('_atom_site_aniso_U_23','_atom_site_aniso_B_23',"_atom_site_aniso_beta_23")
+                 j=j+1
+                 lugar(8)=j
            end select
         end do
 
         !> reading anisotropic thermal parameters
-        j_ini=i
+        !j_ini=i  !it has been assigned before exiting from the previous loop
         do i=j_ini, j_end
            line=adjustl(cif%line(i)%str)
 
@@ -961,16 +970,18 @@ SubModule (CFML_IOForm) Format_CIF
 
            do j=1,n
               !> Found anisotropic atoms
+              !write(*,*) i,trim(line)
               if (trim(label(lugar(1))) /= trim(atm%atom(j)%lab)) cycle
 
-              if (atm%atom(j)%thtype /='ani') then
-                 err_CFML%Ierr=1
-                 err_CFML%Msg="Read_CIF_Atom: Something is wrong in Anisotropic thermal parameters!"
-                 return
-              end if
+              !if (atm%atom(j)%thtype /= 'ani') then  !This has been suppressed because
+              !   err_CFML%Ierr=1                     ! atm%atom(j)%thtype may be not assigned in the
+              !                                       ! _atom_site_ loop.
+              !   err_CFML%Msg="Read_CIF_Atom: Something is wrong in Anisotropic thermal parameters!"
+              !   return
+              !end if
 
               !> _atom_site_aniso_U_11
-              call get_numstd(label(lugar(2)),vet1,vet2,iv)
+              call get_numstd(label(lugar(3)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(1)    =vet1(1)
@@ -980,7 +991,7 @@ SubModule (CFML_IOForm) Format_CIF
               end select
 
               !> _atom_site_aniso_U_22
-              call get_numstd(label(lugar(3)),vet1,vet2,iv)
+              call get_numstd(label(lugar(4)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(2)    =vet1(1)
@@ -990,7 +1001,7 @@ SubModule (CFML_IOForm) Format_CIF
               end select
 
               !> _atom_site_aniso_U_33
-              call get_numstd(label(lugar(4)),vet1,vet2,iv)
+              call get_numstd(label(lugar(5)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(3)    =vet1(1)
@@ -1000,7 +1011,7 @@ SubModule (CFML_IOForm) Format_CIF
               end select
 
               !> _atom_site_aniso_U_12
-              call get_numstd(label(lugar(7)),vet1,vet2,iv)
+              call get_numstd(label(lugar(6)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(4)    =vet1(1)
@@ -1010,7 +1021,7 @@ SubModule (CFML_IOForm) Format_CIF
               end select
 
               !> _atom_site_aniso_U_13
-              call get_numstd(label(lugar(6)),vet1,vet2,iv)
+              call get_numstd(label(lugar(7)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(5)    =vet1(1)
@@ -1020,7 +1031,7 @@ SubModule (CFML_IOForm) Format_CIF
               end select
 
               !> _atom_site_aniso_U_23
-              call get_numstd(label(lugar(5)),vet1,vet2,iv)
+              call get_numstd(label(lugar(8)),vet1,vet2,iv)
               select type (at => atm%atom)
                  type is (atm_type)
                     at(j)%u(6)    =vet1(1)
@@ -1028,6 +1039,10 @@ SubModule (CFML_IOForm) Format_CIF
                     at(j)%u(6)    =vet1(1)
                     at(j)%u_std(6)=vet2(1)
               end select
+
+              atm%atom(j)%thtype = 'ani'
+              if(betas) atm%atom(j)%Utype = 'Beta'
+              if(bth) atm%atom(j)%Utype = 'B_ij'
            end do
 
         end do
@@ -1327,8 +1342,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                    :: i,nl,iv,npos
-      integer,dimension(1)       :: ivet
-      real(kind=cp), dimension(1):: vet
+      !integer,dimension(1)       :: ivet
+      !real(kind=cp), dimension(1):: vet
 
       !> Init
       wave=0.0_cp
@@ -1389,8 +1404,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                     :: i,nl,npos,iv
-      integer,dimension(1)        :: ivet
-      real(kind=cp), dimension(1) :: vet
+      !integer,dimension(1)        :: ivet
+      !real(kind=cp), dimension(1) :: vet
 
       !> Init
       z=0.0_cp
@@ -1549,8 +1564,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       integer                     :: i,nl,iv,npos
       integer                     :: np1,np2,nlabel,nlong
-      integer,       dimension(1) :: ivet
-      real(kind=cp), dimension(1) :: vet
+      !integer,       dimension(1) :: ivet
+      !real(kind=cp), dimension(1) :: vet
 
       !> Init
       n_elem_type = 0
@@ -1777,8 +1792,8 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                       :: i,iv,nl,npos
-      integer, dimension(1)         :: ivet
-      real(kind=cp),dimension(1)    :: vet
+      !integer, dimension(1)         :: ivet
+      !real(kind=cp),dimension(1)    :: vet
 
       !> Init
       it=0
@@ -2987,7 +3002,7 @@ SubModule (CFML_IOForm) Format_CIF
       integer                        :: i, iph, nt_phases, it, n_ini,n_end
       integer, dimension(MAX_PHASES) :: ip
 
-      real(kind=cp),dimension(6):: vet !,vet2
+      !real(kind=cp),dimension(6):: vet !,vet2
       real(kind=cp)             :: val
 
       !> Init
