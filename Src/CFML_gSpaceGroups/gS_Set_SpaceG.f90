@@ -1380,9 +1380,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
       !---- Arguments ----!
-      character(len=*),          intent(in) :: str
-      Class(SpG_Type),           intent(out):: SpG
-      logical, optional,         intent(in) :: Setting_Search
+      character(len=*),            intent(in) :: str
+      Class(SpG_Type), allocatable,intent(out):: SpG
+      logical, optional,           intent(in) :: Setting_Search
       !--- Local Variables ---!
       !character(len=:),allocatable :: sett, strs,aux
       character(len=len(str)) :: sett, strs,aux
@@ -1397,7 +1397,8 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
        set_given=.false.
        !Strip the input string to remove eventual SPGR, SSPG, SPG, GEN, Generators, etc
        i=index(strs," ")
-       call Init_SpaceGroup(SpG)
+
+       write(*,*) "  Strs: "//trim(Strs)
        if(i /= 0) then
          aux=u_case(strs(1:i-1))
          Select Case(aux)
@@ -1407,15 +1408,24 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                 else
                     strs=adjustl(strs(i:))
                 end if
+                allocate(SpG_Type :: SpG)
+                call Init_SpaceGroup(SpG)
             Case("SSG","SUPER","SSPG")
                 if(index(strs(i:),"sup") == 0) then
                     strs=adjustl(strs(i:))//"  sup"
                 else
                     strs=adjustl(strs(i:))
                 end if
-            Case("HALL","SPGR","SPACEG", &
+                allocate(SuperSpaceGroup_Type :: SpG)
+                call Init_SpaceGroup(SpG)
+            Case("HALL","SPGR","SPACEG","MHALL", &
                  "GEN","GENR","SYMM","GENLIST","GENERATORS","LIST")
                   strs=adjustl(strs(i:))
+                  if(trim(aux) == "SPGR" .or. trim(aux) == "SPACEG" .or. trim(aux) == "HALL" .or. trim(aux) == "MHALL") then
+                    Mode="Symb"
+                    allocate(SpG_Type :: SpG)
+                    call Init_SpaceGroup(SpG)
+                  end if
           End Select
        end if
        read(unit=strs,fmt=*,iostat=ier) num_group
@@ -1484,7 +1494,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
              call Set_SpaceGroup(Strs,Mode,SpG)
            end if
          Case default
+           write(*,*) "  Strs: "//trim(Strs)
            call Set_SpaceGroup(Strs,SpG)
+           if(Err_CFML%Ierr /= 0) then
+              write(*,*) "ERROR: "//trim(Err_CFML%Msg)
+           end if
            if(set_given) then
              call Change_Setting_SpaceG(sett,SpG)
            end if

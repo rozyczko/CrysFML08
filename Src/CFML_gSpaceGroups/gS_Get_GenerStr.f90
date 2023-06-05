@@ -111,7 +111,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_GenerStr
         if(index(items(i),"'") /= 0) then
           items(i) = trim(adjustl(items(i)(2:j-1)))//",-1;"
         else
-          items(i) = trim(adjustl(items(i)(2:j-1)))//",1;"
+          items(i) = trim(adjustl(items(i)(2:j-1)))//",+1;"
         end if
         loc_str=trim(loc_str)//items(i)
       end do

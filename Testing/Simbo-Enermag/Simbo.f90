@@ -51,23 +51,27 @@
                                                              1.0,-1.0, 1.0 ],[3,3])
     real, dimension(3,3),public :: M_coor, M_basis
 
+    integer, public :: i_mcm=3, i_exc=4
+
     contains
 
-   Subroutine Exchange_Paths(lun,iprin,dmax,dbond,angm,angn,directex1,directex2,Cell,SpG,Ac,spaths)
-     integer,                  intent(in)       :: lun
-     logical,                  intent(in)       :: iprin
-     real,                     intent(in)       :: dmax
-     real,                     intent(in)       :: dbond,angm,angn,directex1,directex2
-     type (Cell_G_Type),       intent(in)       :: Cell
-     type (SPG_Type),          intent(in)       :: SpG
-     type (Atm_Cell_Type),     intent(in out)   :: Ac
+   Subroutine Exchange_Paths(lun,iprin,nx,excl,d_ex,dmax,dbond,angm,angn,directex1,directex2,Cell,SpG,Ac,spaths)
+     integer,                              intent(in)     :: lun,nx
+     logical,                              intent(in)     :: iprin
+     character(len=*), dimension(:,:),     intent(in)     :: excl
+     real,             dimension(:),       intent(in)     :: d_ex
+     real,                                 intent(in)     :: dmax
+     real,                                 intent(in)     :: dbond,angm,angn,directex1,directex2
+     type (Cell_G_Type),                   intent(in)     :: Cell
+     type (SPG_Type),                      intent(in)     :: SpG
+     type (Atm_Cell_Type),                 intent(in out) :: Ac
      type (SE_Connection), dimension (:,:),intent(in out) :: spaths
      !-- Local Variables --!
      integer, dimension(Ac%nat) :: ind_mag
      integer                    :: i,j,k,ki,kk,ji,jk,nsij,nssij
      integer                    :: n_mag,im,km
      real, dimension(3)         :: vm,vmp,va,vap,vmmp,vma,vmpap,vaap
-     real                       :: d2, ang, ang1,ang2, ang3, dis,dir1,dir2
+     real                       :: d2, ang, ang1,ang2, ang3, dis,dir1,dir2,dist
      character (len=60)         :: tangl
      character (len=40)         :: translat
 
@@ -162,24 +166,28 @@
        end do
        vm=MATMUL(Cell%Cr_Orth_cel,Ac%xyz(:,i))   !cartesian coordinates of atom i (M)
 
-       do j=1,Ac%neighb(i)                       !loop over the neighbours of atom i
-        k=Ac%neighb_atom(j,i)                    !k is the index in Ac of the j neighbour of i
-        if(Ac%moment(k) < 0.01) cycle            !Select magnetic atom k (M') connected to i (M)
-        !now k is a magnetic atom
-        !Determine the number of the magnetic atom
-        do km=1,n_mag
-         if(ind_mag(km) == k) exit !km gets the correct value
-        end do
+       doj: do j=1,Ac%neighb(i)                   !loop over the neighbours of atom i
+         k=Ac%neighb_atom(j,i)                    !k is the index in Ac of the j neighbour of i
+         if(Ac%moment(k) < 0.01) cycle doj        !Select magnetic atom k (M') connected to i (M)
+         !Determine the number of the magnetic atom
+         do km=1,n_mag
+          if(ind_mag(km) == k) exit !km gets the correct value
+         end do
 
-        !We will construct the matrix element (im,km) with all superexchange paths
-        vmp=MATMUL(Cell%Cr_Orth_cel,Ac%xyz(:,k)+Ac%trans(:,j,i))   !cartesian coordinates of atom j (M')
-        vmmp=vmp-vm                    !interatomic vector between magnetic atoms in cartesian components
-        translat= Frac_Trans_1Dig(Ac%trans(:,j,i))
-        !translation of the atom "k" w.r.t to that situated within the reference cell
-        translat=Pack_String(translat)
+         !now k is a non-excluded magnetic atom
 
+         !We will construct the matrix element (im,km) with all superexchange paths
+         vmp=MATMUL(Cell%Cr_Orth_cel,Ac%xyz(:,k)+Ac%trans(:,j,i))   !cartesian coordinates of atom j (M')
+         vmmp=vmp-vm                    !interatomic vector between magnetic atoms in cartesian components
+         translat= Frac_Trans_1Dig(Ac%trans(:,j,i))
+         !translation of the atom "k" w.r.t to that situated within the reference cell
+         translat=Pack_String(translat)
+         if(nx > 0) then
+            dist=sqrt(dot_product(vmmp,vmmp))
+            if(exclude(i,k,nx,excl,d_ex,Ac,dist)) cycle doj
+         end if
 
-        !look for non-magnetic atoms connected to i and k
+         !look for non-magnetic atoms connected to i and k
          do ji=1,Ac%neighb(i)
            ki=Ac%neighb_atom(ji,i)    !non-magnetic atom (anion A) connected to i (M)
            if(Ac%moment(ki)> 0.01 .or. Ac%charge(ki) > 0.0 ) cycle    !discard cations
@@ -216,7 +224,8 @@
             end if
             if(dot_PRODUCT(vmpap,vmpap) > d2) cycle
 
-             vaap=vap-va
+
+            vaap=vap-va
 
             if(negligible(SUM( abs(vaap(:)) )) ) then  !Eventual super-exchange path
                                         !                             A=A'
@@ -344,7 +353,7 @@
             spaths(im,km)%DE(spaths(im,km)%nd)%dist=sqrt(dis)
          end if
 
-       end do   !j magnetic neighbours of i
+       end do  doj  !j magnetic neighbours of i
      end do !i
 
      if(iprin) then
@@ -422,8 +431,35 @@
 
      end if  !iprin
 
-     return
    End Subroutine Exchange_Paths
+
+
+   Function exclude(i,k,nx,excl,d_ex,Ac,dist) result (exclud)
+     integer,                          intent(in) :: i,k,nx
+     character(len=*), dimension(:,:), intent(in) :: excl
+     real,             dimension(:),   intent(in) :: d_ex
+     type (Atm_Cell_Type),             intent(in) :: Ac
+     real,                             intent(in) :: dist
+     logical :: exclud
+
+     integer :: n
+
+     exclud=.false.
+     if(nx > 0) then
+       !write(*,"(a,f8.4)") " Distance i-k: ",dist
+       do n=1,nx
+         !write(*,"(i3,a,f8.4)") n," "//trim(Ac%Lab(i))//" "//trim(Ac%Lab(k))//" -> "//trim(excl(1,n))//" "//trim(excl(2,n)), d_ex(n)
+         if((index(trim(Ac%Lab(i)),trim(excl(1,n))) /= 0 .and. index(trim(Ac%Lab(k)),trim(excl(2,n))) /= 0 .and. &
+              dist > d_ex(n) ) .or. &
+            (index(trim(Ac%Lab(k)),trim(excl(1,n))) /= 0 .and. index(trim(Ac%Lab(i)),trim(excl(2,n))) /= 0) .and. &
+              dist > d_ex(n) ) then
+                !write(*,*) " => Excluded interaction!"
+                exclud=.true.
+                exit
+         end if
+       end do
+     end if
+   End Function exclude
 
    Subroutine Print_AC(Ac,d1,d2,lun)
      type (Atm_Cell_Type),   intent(in)   :: Ac
@@ -691,14 +727,14 @@
     DO im=1,n_mag
 
       tot_neigh=sum(nterms(im,:))
-      write(unit=3,fmt="(a)")"!Site Neighb   Dsing_Anis      Dir                Name        x         y         z"
+      write(unit=i_mcm,fmt="(a)")"!Site Neighb   Dsing_Anis      Dir                Name        x         y         z"
       pos=Matmul(M_coor,Acm%xyz(:,im))
-      write(unit=3,fmt="(i4,i5,i10,Tr6,3i4,a,a6,3f10.5)")im,tot_neigh,0,0,0,0,"          :: ",Acm%Lab(im), pos
-      write(unit=3,fmt="(a)")"!    Nav   Av  Bv  Cv        J"
+      write(unit=i_mcm,fmt="(i4,i5,i10,Tr6,3i4,a,a6,3f10.5)")im,tot_neigh,0,0,0,0,"          :: ",Acm%Lab(im), pos
+      write(unit=i_mcm,fmt="(a)")"!    Nav   Av  Bv  Cv        J"
 
       DO km=1,n_mag
 
-        write(unit=4,fmt="(2i4,i5)") im,km,nterms(im,km)
+        write(unit=i_exc,fmt="(2i4,i5)") im,km,nterms(im,km)
         write(unit=lun,fmt="(/,a,3(i3,a),/)") " => J(",im,",",km,")[K]   (",nterms(im,km), " terms)"
 
         Do nt=1,nterms(im,km)
@@ -722,14 +758,15 @@
           !write(*,"(a,2i3,a,i3,a)") " => Element: (",im,km,") -> Term: ",nt,"  Trans:"//transla
           call Get_Expo(transla,expo)
           call Get_vect(transla,vect)
+          !write(*,"(a,3f8.4)") " Expo: "//trim(expo)//"   Vect: ",vect
          !  read(1,"(5x,3f9.5,f10.3,3x,2a)")  &  !Enermag
          !      (trans(m,i,j,nt),m=1,3),exch,jota,name_jota
-          write(unit=4,fmt="(a,3f9.5,f10.3,a,a,f8.4)") "     ",vect,&
+          write(unit=i_exc,fmt="(a,3f9.5,f10.3,a,a,f8.4)") "     ",vect,&
                         jota(im,km,nt)%valj,"   -> ",trim(text)//" --> dist=", jota(im,km,nt)%dist
           write(unit=lun,fmt="(a,a,a,f8.4,a,a,a)")  &
                   "    Rn=", transla," dist=",jota(im,km,nt)%dist," --> ",jota(im,km,nt)%J,expo
           vect=Matmul(M_coor,vect)
-          write(unit=3,fmt="(a,i3,a,3i4,a,f10.4,a)") "     ", &
+          write(unit=i_mcm,fmt="(a,i3,a,3i4,a,f10.4,a)") "     ", &
                       km," ",nint(vect),"  ",jota(im,km,nt)%valj,"    "//jota(im,km,nt)%J
         end do
 
@@ -738,28 +775,27 @@
    ! Write file *.mcm for MCMAG
 
       !IF(nlat == 1) THEN
-      !  open(unit=3,file=outfil(1:ln)//".mcm",status="replace",action="write",position="rewind")
-      !  write(unit=3,fmt="(a)")title
-      !  write(unit=3,fmt="(a)")" File created by program SIMBO"
-      !  write(unit=3,fmt="(a,i4,a,i3)")" ",-Acm%nat,"   0 ",Acm%nat
+      !  open(unit=i_mcm,file=outfil(1:ln)//".mcm",status="replace",action="write",position="rewind")
+      !  write(unit=i_mcm,fmt="(a)")title
+      !  write(unit=i_mcm,fmt="(a)")" File created by program SIMBO"
+      !  write(unit=i_mcm,fmt="(a,i4,a,i3)")" ",-Acm%nat,"   0 ",Acm%nat
       !  DO i=1,Acm%nat
-      !    write(unit=3,fmt="(a,i3,a,i3,a,a6)")" ",i," ",Acm%neighb(i),"   ",Acm%Lab(i)
+      !    write(unit=i_mcm,fmt="(a,i3,a,i3,a,a6)")" ",i," ",Acm%neighb(i),"   ",Acm%Lab(i)
       !    DO k=1,Acm%neighb(i)
       !       j=indg(i,k)
       !       n=jin(i,j)
       !       if(n == 0) cycle
       !      ! n=jin(i,k)
-      !      write(unit=3,fmt="(a,i3,a,3i4,a,f9.4)") "     ", &
+      !      write(unit=i_mcm,fmt="(a,i3,a,3i4,a,f9.4)") "     ", &
       !             Acm%neighb_atom(i,j)," ",INT(Acm%trans(:,i,j)),"  ",valj(n)
       !    END DO
       !  END DO
-      !  write(unit=3,fmt="(a,i3,a)")"  1 ",Acm%nat,"  1.00"
-      !  write(unit=3,fmt="(a,6f11.5)")" ", cell%cell,cell%ang
+      !  write(unit=i_mcm,fmt="(a,i3,a)")"  1 ",Acm%nat,"  1.00"
+      !  write(unit=i_mcm,fmt="(a,6f11.5)")" ", cell%cell,cell%ang
       !END IF
 
 ! END Write file *.mcm for MCMAG
 
-    return
    End Subroutine construct_jxch
 
   End Module Simbo_mod
@@ -768,7 +804,7 @@
    use CFML_GlobalDeps,     only: Clear_Error, Err_CFML
    use CFML_Maths,          only: negligible, Inverse_Matrix, Set_Eps_Math
    use CFML_gSpaceGroups,   only: SPG_Type, Set_SpaceGroup, Write_SpaceGroup_Info
-   use CFML_Strings,        only: l_case,u_case,Pack_String, Frac_Trans_1Dig,number_lines,File_Type
+   use CFML_Strings,        only: l_case,u_case,Pack_String, Frac_Trans_1Dig,number_lines,File_Type,get_words
    use CFML_Geom,           only: Allocate_Coordination_Type,calc_dist_angle
    use CFML_Atoms
    use CFML_Metrics
@@ -782,7 +818,7 @@
    integer, parameter    :: max_magt=96
    type (Cell_G_Type)    :: Cell, Celln
    class (SPG_Type),allocatable :: Spg
-   type (SPG_Type) :: gP1
+   type (SPG_Type)       :: gP1
    type (AtList_Type)    :: A       !Original list of atoms in the asymmetric unit
    type (AtList_Type)    :: Ap      !List of atoms inside a primitive cell
    type (Atm_Cell_Type)  :: Acm, Ac !Magnetic atoms and all atoms inside a primitive cell
@@ -790,14 +826,16 @@
    !type (Job_Info_type):: Job_Info
    type (File_Type)    :: File_inp
    character(len=1)    :: ans
-   character(len=20)   :: sp1
-   character(len=80)   :: title
+   character(len=20)   :: sp1,line
+   character(len=20), dimension(2,10)   :: excl_pairs=" "
+   character(len=20), dimension(10)     :: dire
+   character(len=80)   :: title="  "
    character(len=256)  :: infil,outfil,texto
    integer, parameter  :: lun1=1,lun2=6,lun=2
-   integer :: i, j, numops, ln, nmag, lr, max_coord, L
+   integer :: i, j, numops, ln, nmag, lr, max_coord, L, n,nw, ier
    integer, dimension(:), allocatable :: ptr
    integer, dimension(10) :: nif
-   real, dimension(10)  :: mom
+   real, dimension(10)  :: mom, d_excl=0.0
    character(len=4), dimension(10) :: scf=" "
    real  :: dmax=6.0, & !Maximum distance for distance calculations
             dangl=0.0,& !Maximun distance for angle calculations
@@ -878,6 +916,7 @@
        exit
      end if
    end do
+   if(len_trim(title) == 0) Title="Output of the Simbo Program"
    write(unit=lun,fmt="(a,a,/)") " => TITLE: ",trim(title)
    call Write_Crystal_Cell(Cell,lun)
    call Write_SpaceGroup_Info(SpG,lun)
@@ -910,6 +949,45 @@
       write(unit=*,fmt="(a)") "    the magnetic atoms are not on the top of the list"
       write(unit=*,fmt="(a)") " => Please reorder the input file putting on top magnetic atoms"
       stop
+   end if
+
+   write(unit=*,fmt="(/,a,/)") " => List of detected magnetic atoms:"
+   write(unit=*,fmt="(a)") " Label  Type     x       y       z      occ     Biso  moment  Charge"
+   do i=1,A%natoms
+      if(A%atom(i)%mom > 0.01 ) then
+        write(unit=texto,fmt="(a,a4,a,a5,5f8.4,f8.3,i8)")" ", A%atom(i)%lab,"  ",&
+        A%atom(i)%ChemSymb,A%atom(i)%x,A%atom(i)%occ,A%atom(i)%U_iso,A%atom(i)%mom,A%atom(i)%charge
+        write(unit=*, fmt="(a)") trim(texto)
+      end if
+   end do
+   write(unit=*,fmt="(a)", advance="no")" => Exclude some interactions ? "
+   read(unit=*,fmt="(a)") ans
+   n=0 !number of pairs to exclude
+   if(ans == "Y" .or. ans == "y") then
+     i=0
+     do
+       i=i+1
+       write(unit=*,fmt="(a,i2,a)",advance="no") " => Give the pair #",i," and the distance to exclude (eg. Fe1 Fe2 4.32): "
+       read(unit=*,fmt="(a)") line
+       if(len_trim(line) == 0) then
+         n=i-1
+         exit
+       end if
+       call Get_words(line,dire,nw)
+       if(nw < 3) then
+         write(unit=*,fmt="(a)") " => Error in giving two labels and distance for excluding interactions !"
+         i=i-1
+         cycle
+       end if
+       excl_pairs(1,i)=dire(1)
+       excl_pairs(2,i)=dire(2)
+       read(dire(3),*,iostat=ier) d_excl(i)
+       if(ier /= 0) then
+          write(unit=*,fmt="(a)") " => Warning! The distance for excluding interactions of pair " &
+                       //trim(dire(1))//"  "//trim(dire(2))//" has been fixed to 3 angstroms!"
+          d_excl(i)=3.0
+       end if
+     end do
    end if
 
    write(unit=*,fmt="(a,f9.3)")" => Maximum bond-distance (Dmax)                       : ",dmax
@@ -1007,7 +1085,7 @@
    read(unit=*,fmt="(a)") ans
    if(ans == "y" .or. ans == "Y") iprin=.true.
    if(.not. negligible(dbond)) &
-       call Exchange_Paths(lun,iprin,dmax,dbond,angm,angn,directex1,directex2,Cell,gP1,Ac,spaths)
+       call Exchange_Paths(lun,iprin,n,excl_pairs,d_excl,dmax,dbond,angm,angn,directex1,directex2,Cell,gP1,Ac,spaths)
    !Call deAllocate_Atoms_Cell(Ac)    !From Ac we have conserved only "spaths"
    call Allocate_Atoms_Cell(0,0,0.0,Ac)
    Call Allocate_Atoms_Cell(nmag, 1, dmax, Acm)
@@ -1041,21 +1119,21 @@
    !  Write terms of the Fourier transform of the exchange interactions
    !  Write also the information to the file *.exc(unit=4) and MCMAG
 
-   open(unit=4,file=trim(outfil)//".exc",status="replace",action="write",position="rewind")
-   write(unit=4,fmt="(a)") title
-   write(unit=4,fmt="(i4,f8.4)")Acm%nat,dmax
-   write(unit=4,fmt="(a)") SpG%SPG_Symb
-   write(unit=4,fmt="(3f8.4,3f8.3)") cell%cell,cell%ang
+   open(unit=i_exc,file=trim(outfil)//".exc",status="replace",action="write",position="rewind")
+   write(unit=i_exc,fmt="(a)") title
+   write(unit=i_exc,fmt="(i4,f8.4)")Acm%nat,dmax
+   write(unit=i_exc,fmt="(a)") SpG%SPG_Symb
+   write(unit=i_exc,fmt="(3f8.4,3f8.3)") cell%cell,cell%ang
    DO i=1,Acm%nat
-     write(unit=4,fmt="(a6,a,4f9.5)")Acm%Lab(i)," ",Acm%xyz(:,i),Acm%moment(i)
+     write(unit=i_exc,fmt="(a6,a,4f9.5)")Acm%Lab(i)," ",Acm%xyz(:,i),Acm%moment(i)
    END DO
    ! Write file *.mcm for MCMAG
-   open(unit=3,file=trim(outfil)//".mcm",status="replace",action="write",position="rewind")
-   write(unit=3,fmt="(a)")  title
-   write(unit=3,fmt="(a)")" Template File created by program SIMBO for MCMAG (Isotropic Interactions)"
-   write(unit=3,fmt="(a)")"!The file should be modified to adapt it to the user needs."
-   write(unit=3,fmt="(a)")"!NA(sites)  JCod    Z"
-   write(unit=3,fmt="(3i7)")-Acm%nat,0,Acm%nat
+   open(unit=i_mcm,file=trim(outfil)//".mcm",status="replace",action="write",position="rewind")
+   write(unit=i_mcm,fmt="(a)")  title
+   write(unit=i_mcm,fmt="(a)")" Template File created by program SIMBO for MCMAG (Isotropic Interactions)"
+   write(unit=i_mcm,fmt="(a)")"!The file should be modified to adapt it to the user needs."
+   write(unit=i_mcm,fmt="(a)")"!NA(sites)  JCod    Z"
+   write(unit=i_mcm,fmt="(3i7)")-Acm%nat,0,Acm%nat
    !Calculation for McMag
    Select Case(SpG%SPG_Symb(1:1))
       case("A")
@@ -1071,9 +1149,9 @@
       case("F")
         M_coor=M_F
       case default
-        M_coor=reshape((/ 1.0, 0.0, 0.0, &
+        M_coor=reshape( [ 1.0, 0.0, 0.0, &
                           0.0, 1.0, 0.0, &
-                          0.0, 0.0, 1.0 /),(/3,3/))
+                          0.0, 0.0, 1.0 ],[3,3])
    End Select
    M_basis=transpose(Inverse_Matrix(M_coor))
    call Change_Setting_Cell(Cell,M_basis,Celln)
@@ -1081,48 +1159,48 @@
 
    Call construct_jxch(lun,nmag,spaths,Acm)
 
-   write(unit=3,fmt="(a)")  "!   Ni    Nf   Spin     ScattFact"
+   write(unit=i_mcm,fmt="(a)")  "!   Ni    Nf   Spin     ScattFact"
    do i=1,L
-      write(unit=3,fmt="(2i6,f8.4,tr6,a)") nif(i),nif(i+1)-1,mom(i),scf(i)
+      write(unit=i_mcm,fmt="(2i6,f8.4,tr6,a)") nif(i),nif(i+1)-1,mom(i),scf(i)
    end do
-   write(unit=3,fmt="(a)") "!    Primitive unit cell  "
-   write(unit=3,fmt="(a)") "!     a          b          c        alpha       beta      gamma   "
+   write(unit=i_mcm,fmt="(a)") "!    Primitive unit cell  "
+   write(unit=i_mcm,fmt="(a)") "!     a          b          c        alpha       beta      gamma   "
 
-   write(unit=3,fmt="(6f11.5)")celln%cell,celln%ang
-   write(unit=3,fmt="(a)") "!"
-   write(unit=3,fmt="(a)") "!  The conditions below should be adapted to the problem by the user "
-   write(unit=3,fmt="(a)") "!"
-   write(unit=3,fmt="(a)") "SpinModel    Heisenberg "
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "Title  Simulation of classical Spins:"//trim(title)
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!  Simulation box "
-   write(unit=3,fmt="(a)") "Ncells    3 3 3   "
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!  Initial configuration (R,I) "
-   write(unit=3,fmt="(a)") "InitConf  R "
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "! boundary conditions (Free,Periodic,Mixed)"
-   write(unit=3,fmt="(a)") "Boundary  Periodic"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "! Scaling (sample,cell,site,mole)"
-   write(unit=3,fmt="(a)") "Scale     cell"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!  Sites for output during simulation"
-   write(unit=3,fmt="(a)") "Sites   1 2 3"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!         T_ini   Coef  T_final"
-   write(unit=3,fmt="(a)") "schedule    500   0.95    0.5"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!  Magnetic Field"
-   write(unit=3,fmt="(a)") "hfield    0  0  0  1"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "!  Number of MC cycles and thermalization"
-   write(unit=3,fmt="(a)") "mcyc   5000  500"
-   write(unit=3,fmt="(a)") "  "
-   write(unit=3,fmt="(a)") "print  E"
-   write(unit=3,fmt="(a)") "averages"
-   write(unit=3,fmt="(a)") "cryst   1  1 0 0"
+   write(unit=i_mcm,fmt="(6f11.5)")celln%cell,celln%ang
+   write(unit=i_mcm,fmt="(a)") "!"
+   write(unit=i_mcm,fmt="(a)") "!  The conditions below should be adapted to the problem by the user "
+   write(unit=i_mcm,fmt="(a)") "!"
+   write(unit=i_mcm,fmt="(a)") "SpinModel    Heisenberg "
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "Title  Simulation of classical Spins:"//trim(title)
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!  Simulation box "
+   write(unit=i_mcm,fmt="(a)") "Ncells    3 3 3   "
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!  Initial configuration (R,I) "
+   write(unit=i_mcm,fmt="(a)") "InitConf  R "
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "! boundary conditions (Free,Periodic,Mixed)"
+   write(unit=i_mcm,fmt="(a)") "Boundary  Periodic"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "! Scaling (sample,cell,site,mole)"
+   write(unit=i_mcm,fmt="(a)") "Scale     cell"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!  Sites for output during simulation"
+   write(unit=i_mcm,fmt="(a)") "Sites   1 2 3"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!         T_ini   Coef  T_final"
+   write(unit=i_mcm,fmt="(a)") "schedule    500   0.95    0.5"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!  Magnetic Field"
+   write(unit=i_mcm,fmt="(a)") "hfield    0  0  0  1"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "!  Number of MC cycles and thermalization"
+   write(unit=i_mcm,fmt="(a)") "mcyc   5000  500"
+   write(unit=i_mcm,fmt="(a)") "  "
+   write(unit=i_mcm,fmt="(a)") "print  E"
+   write(unit=i_mcm,fmt="(a)") "averages"
+   write(unit=i_mcm,fmt="(a)") "cryst   1  1 0 0"
 
    close(unit=3)
 
@@ -1142,7 +1220,5 @@
    write(unit=*,fmt="(2a)") "                     ",outfil(1:lr)//".nei"
    write(unit=*,fmt="(2a)") "                     ",outfil(1:lr)//".exc -> input for ENERMAG"
    write(unit=*,fmt="(2a)") "                     ",outfil(1:lr)//".mcm -> input for MCMAG"
-
-   stop
 
   End Program Simbo

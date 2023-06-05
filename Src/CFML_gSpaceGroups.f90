@@ -985,9 +985,9 @@ Module CFML_gSpaceGroups
 
        Module Subroutine Set_gSpG_from_string(str,SpG,Setting_Search)
           !---- Arguments ----!
-          character(len=*),          intent(in) :: str
-          Class(SpG_Type),           intent(out):: SpG
-          logical, optional,         intent(in) :: Setting_Search
+          character(len=*),           intent(in) :: str
+          Class(SpG_Type),allocatable,intent(out):: SpG
+          logical, optional,          intent(in) :: Setting_Search
        End Subroutine Set_gSpG_from_string
 
        !Module Subroutine Set_SpaceGroup_symb(Str, SpaceG, NGen, Gen)

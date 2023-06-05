@@ -22,15 +22,15 @@ rem
 rem
 rem ****---- Intel Compiler ----****
 :IFORT
-   ifort /c Sup_Exc.f90 /O2 /nologo /heap-arrays:100 /I%CRYSFML%\ifort_release\include
-   ifort /c Simbo.f90   /O2 /nologo /heap-arrays:100 /I%CRYSFML%\ifort_release\include
-   link /subsystem:console  /out:Simbo.exe *.obj %CRYSFML%\ifort_release\lib\libCrysFML08.a
+   ifort /c Sup_Exc.f90 /O2 /nologo /heap-arrays:100 /I%CRYSFML08%\ifort_release\include
+   ifort /c Simbo.f90   /O2 /nologo /heap-arrays:100 /I%CRYSFML08%\ifort_release\include
+   link /subsystem:console  /out:Simbo.exe *.obj %CRYSFML08%\ifort_release\lib\libCrysFML08.a
    goto END
 rem
 :IFORTD
-   ifort /c Sup_Exc.f90 /debug:full /check /check:noarg_temp_created  /traceback  /nologo  /heap-arrays:100 /I%CRYSFML%\ifort_debug\include 
-   ifort /c Simbo.f90   /debug:full /check /check:noarg_temp_created  /traceback  /nologo  /heap-arrays:100 /I%CRYSFML%\ifort_debug\include
-   link /subsystem:console /out:Simbo.exe *.obj %CRYSFML%\ifort_debug\lib\libCrysFML08.a
+   ifort /c Sup_Exc.f90 /debug:full /check /check:noarg_temp_created  /traceback  /nologo  /heap-arrays:100 /I%CRYSFML08%\ifort_debug\include 
+   ifort /c Simbo.f90   /debug:full /check /check:noarg_temp_created  /traceback  /nologo  /heap-arrays:100 /I%CRYSFML08%\ifort_debug\include
+   link /subsystem:console /out:Simbo.exe *.obj %CRYSFML08%\ifort_debug\lib\libCrysFML08.a
    goto END
 rem
 rem **---- GFORTRAN Compiler ----**
@@ -46,7 +46,7 @@ rem  or if you want to conserve the object files
 rem  Compression of executable
 rem        upx Simbo.exe
 rem  Move the excutable to a directory in the Path
-rem        if exist %FULLPROF% move Simbo.exe %FULLPROF% > nul
+        if exist %FULLPROF% move Simbo.exe %FULLPROF% > nul
 rem  Remove unnecessary files
         del *.obj *.mod *.o *.map *.bak > nul
 :FIN

@@ -101,10 +101,10 @@
       call Set_SpaceGroup(spgr,grp_espacial)
       call Allocate_Atom_List(2,atomos,"Atm_Type",0)
       atomos%atom(1)%lab='Fe'
-      atomos%atom(1)%x=(/0.5,0.5,0.5/)
+      atomos%atom(1)%x=[0.5,0.5,0.5]
       atomos%atom(1)%occ=1.0
       atomos%atom(2)%lab='Co'
-      atomos%atom(2)%x=(/0.0,0.0,0.0/)
+      atomos%atom(2)%x=[0.0,0.0,0.0]
       atomos%atom(2)%occ=1.0
 
 
@@ -336,7 +336,7 @@
 
       !---- Definition of variables ----!
       integer :: i,j,k
-  !!! Complementary variables for Fourier compatibility
+      !!! Complementary variables for Fourier compatibility
       character (len=150) :: fildat   ! Data file
       character (len=150) :: filbin   ! Fourier binary file
       character (len=150) :: filhkl   ! Reflections file

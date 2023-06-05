@@ -48,7 +48,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Oper
       real(kind=cp)            :: suma
 
       !> Init
-      symb=" "
+      symb="                                                        "
 
       npos=1
       do i=1,3
@@ -62,7 +62,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Oper
                      select case (car(1:2))
                         case ("-1")
                            car(2:)=car(3:)//"  "
-                         case ("+1")
+                        case ("+1")
                            car=car(3:)//"  "
                      end select
                   else
@@ -80,12 +80,12 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Oper
                select case (j)
                   case (1)
                      k=index(car(1:np),"/")
-                     if ( k /= 0) then
-                        if (car(k-1:k-1) == "1") then
-                           car(k-1:k-1) = "x"
-                           symb(npos:)=car(1:np)
+                     if( k /= 0) then
+                        if(car(k-1:k-1) == "1") then
+                          car(k-1:k-1) = "x"
+                          symb(npos:)=car(1:np)
                         else
-                           symb(npos:)=car(1:k-1)//"x"//car(k:np)
+                          symb(npos:)=car(1:k-1)//"x"//car(k:np)
                         end if
                      else
                         symb(npos:)=car(1:np)//"x"
@@ -174,7 +174,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Symb_Oper
       integer                         :: i,j
 
       !> Init
-      symb=" "
+      symb="                                                                    "
 
       do i=1,3
          sym(i)=" "

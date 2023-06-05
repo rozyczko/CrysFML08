@@ -73,6 +73,9 @@
               Get_OmegaChiPhi, Set_Rotation_Matrix, Set_New_AsymUnit,Angle_and_Sigma, Torsion_and_Sigma, &
               Clear_init_symOp
 
+    public :: init_opMatTr !These procedures should be private but Gfortran fails in constructing programs using
+                           !private procedures accessed by public procedures in submodules.
+
     !---- List of public overloaded procedures: subroutines ----!
 
     !---- List of private functions ----!
@@ -196,7 +199,7 @@
       Pure Module Function Distance_Fr_dp(X0,X1,Celda) Result(Dis)
          !---- Arguments ----!
          real(kind=dp), dimension(3), intent(in) :: x0,x1
-         type (Cell_G_Type),    intent(in) :: Celda
+         type (Cell_G_Type),          intent(in) :: Celda
          real(kind=dp)                           :: dis
       End Function Distance_Fr_dp
 
@@ -274,7 +277,7 @@
          !---- Arguments ----!
          real(kind=cp),         intent(in)   :: Dmax, Dangl
          type (Cell_G_Type),    intent(in)   :: Cell
-         Class(SpG_Type), intent(in)   :: SpG
+         Class(SpG_Type),       intent(in)   :: SpG
          type (AtList_Type),    intent(in)   :: A
          integer, optional,     intent(in)   :: lun
       End Subroutine Calc_Dist_Angle
@@ -283,7 +286,7 @@
          !---- Arguments ----!
          real(kind=cp),             intent(in)   :: dmax, dangl
          type (Cell_G_Type),        intent(in)   :: Cell
-         Class(SpG_Type),     intent(in)   :: SpG
+         Class(SpG_Type),           intent(in)   :: SpG
          type (AtList_Type),        intent(in)   :: A
          integer, optional,         intent(in)   :: lun
          integer, optional,         intent(in)   :: lun_cons
@@ -302,7 +305,7 @@
 
       Module Subroutine Distance_and_Sigma(Cellp,DerM,x0,x1,s0,s1,dis,s)
          !---- Arguments ----!
-         Type(Cell_G_Type),         intent(in)  :: Cellp         ! Cell object
+         Type(Cell_G_Type),               intent(in)  :: Cellp         ! Cell object
          real(kind=cp), dimension(3,3,6), intent(in)  :: DerM          ! Matrix of derivatives of Cellp%Cr_Orth_cel
          real(kind=cp), dimension(3),     intent(in)  :: x0,x1,s0,s1   ! Two points in fractional coordinates and sigmas
          real(kind=cp),                   intent(out) :: dis,s         ! Distance and sigma
@@ -360,7 +363,7 @@
          !---- Arguments ----!
          real(kind=cp),         intent(in)       :: dmax
          type (Cell_G_Type),    intent(in)       :: Cell
-         Class(SpG_Type), intent(in)       :: SpG
+         Class(SpG_Type),       intent(in)       :: SpG
          type (Atm_Cell_Type),  intent(in out)   :: Ac
          integer, optional,     intent(in)       :: lun
       End Subroutine P1_Dist
@@ -370,24 +373,24 @@
          integer,               intent(in)   :: lun
          real(kind=cp),         intent(in)   :: dmax
          type (Cell_G_Type),    intent(in)   :: Cell
-         Class(SpG_Type), intent(in)   :: SpG
+         Class(SpG_Type),       intent(in)   :: SpG
          type (AtList_Type),    intent(in)   :: A
       End Subroutine Print_Distances
 
       Module Subroutine Set_New_AsymUnit(SpGn,Ate,Mat,orig,A_n,matkind,debug)
-         Class(SpG_Type) ,        intent(in    ) :: SpGn
-         type (Atom_Equiv_List_Type),   intent(in    ) :: Ate !In old group
-         real(kind=cp), dimension (3,3),intent(in    ) :: Mat
-         real(kind=cp), dimension (  3),intent(in    ) :: orig
-         type (AtList_Type),            intent(out   ) :: A_n
-         character (len=*), optional,   intent(in    ) :: matkind
-         character (len=*), optional,   intent(in    ) :: debug
+         Class(SpG_Type) ,              intent(in ) :: SpGn
+         type (Atom_Equiv_List_Type),   intent(in ) :: Ate !In old group
+         real(kind=cp), dimension (3,3),intent(in ) :: Mat
+         real(kind=cp), dimension (  3),intent(in ) :: orig
+         type (AtList_Type),            intent(out) :: A_n
+         character (len=*), optional,   intent(in ) :: matkind
+         character (len=*), optional,   intent(in ) :: debug
       End Subroutine Set_New_AsymUnit
 
 
       Module Subroutine Set_Orbits_Inlist(Spg,Pl)
          !---- Arguments ----!
-         Class(SpG_Type),  intent(in)     :: SpG
+         Class(SpG_Type),        intent(in)     :: SpG
          type(point_list_type),  intent(in out) :: pl
       End Subroutine Set_Orbits_Inlist
 
@@ -396,7 +399,7 @@
          integer,                  intent(in)   :: max_coor
          real(kind=cp),            intent(in)   :: dmax
          type (cell_G_Type),       intent(in)   :: Cell
-         Class(SpG_Type),    intent(in)   :: SpG
+         Class(SpG_Type),          intent(in)   :: SpG
          type (AtList_Type),       intent(in)   :: A
       End Subroutine Set_TDist_Coordination
 
@@ -406,7 +409,7 @@
          integer,              intent(in)   :: max_coor
          real(kind=cp),        intent(in)   :: dmax
          type (Cell_G_Type),   intent(in)   :: Cell
-         Class(SpG_Type),intent(in)   :: SpG
+         Class(SpG_Type),      intent(in)   :: SpG
          type (AtList_Type),   intent(in)   :: A
       End Subroutine Set_TDist_Partial_Coordination
 

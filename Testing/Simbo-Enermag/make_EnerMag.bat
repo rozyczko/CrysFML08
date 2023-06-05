@@ -15,14 +15,21 @@ rem
 :CONT
    if x%1 == xgfortran  goto GFOR
    if x%1 == xifort     goto IFORT
+   if x%1 == xifortd     goto IFORTD
    echo    Unknown compiler!
    goto FIN
 rem
 rem ****---- Intel Compiler ----****
 :IFORT
-   ifort /c Sup_Exc.f90 /O2 /nologo /I%CRYSFML%\ifort_release\include
-   ifort /c EnerMag.f90   /O2 /nologo /I%CRYSFML%\ifort_release\include
-   link /subsystem:console /stack:64000000 /out:EnerMag.exe *.obj %CRYSFML%\ifort_release\lib\libcrysfml08.a
+   ifort /c Sup_Exc.f90 /O2 /nologo /I%CRYSFML08%\ifort_release\include
+   ifort /c EnerMag.f90   /O2 /nologo /I%CRYSFML08%\ifort_release\include
+   link /subsystem:console /stack:64000000 /out:EnerMag.exe *.obj %CRYSFML08%\ifort_release\lib\libcrysfml08.a
+   goto END
+rem
+:IFORTD
+   ifort /c Sup_Exc.f90 /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /I%CRYSFML08%\ifort_debug\include
+   ifort /c EnerMag.f90   /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /I%CRYSFML08%\ifort_debug\include
+   link /subsystem:console /stack:64000000 /out:EnerMag.exe *.obj %CRYSFML08%\ifort_debug\lib\libcrysfml08.a
    goto END
 rem
 rem **---- GFORTRAN Compiler ----**
@@ -39,7 +46,7 @@ rem  or if you want to conserve the object files
 rem  Compression of executable
         upx EnerMag.exe
 rem  Move the excutable to a directory in the Path
-rem        if exist %FULLPROF% move EnerMag.exe %FULLPROF% > nul
+        if exist %FULLPROF% move EnerMag.exe %FULLPROF% > nul
 rem  Remove unnecessary files
         del *.obj *.mod *.o *.map *.bak > nul
 :FIN
