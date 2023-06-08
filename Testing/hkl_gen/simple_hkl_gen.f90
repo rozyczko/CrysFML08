@@ -226,10 +226,10 @@ Program Test_HKL_GEN
       write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag)"
       write(unit=i_out,fmt="(a,/)") " ==========================================================================="
       if(nk /= 0) then
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,Ref_typ=Ref_typ,kout=kinfo)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag,Ref_typ=Ref_typ,kout=kinfo)
         call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
       else
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,Ref_typ=Ref_typ)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag,Ref_typ=Ref_typ)
         call Write_Info_RefList(reflections, i_out)
       end if
 
@@ -237,10 +237,10 @@ Program Test_HKL_GEN
      write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag,order=.true.)"
      write(unit=i_out,fmt="(a,/)") " ========================================================================================"
      if(nk /= 0) then
-       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,order=.true.,Ref_typ=Ref_typ,kout=kinfo)
+       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag,order=.true.,Ref_typ=Ref_typ,kout=kinfo)
        call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
      else
-       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag,order=.true.,Ref_typ=Ref_typ)
+       call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag,order=.true.,Ref_typ=Ref_typ)
        call Write_Info_RefList(reflections, i_out)
      end if
 
@@ -248,10 +248,10 @@ Program Test_HKL_GEN
      write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag,Unique=.true.)"
      write(unit=i_out,fmt="(a,/)") " ========================================================================================="
      if(nk /= 0) then
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Unique=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, Unique=.true.,Ref_typ=Ref_typ,kout=kinfo)
         call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
      else
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Unique=.true.,Ref_typ=Ref_typ)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, Unique=.true.,Ref_typ=Ref_typ)
         call Write_Info_RefList(reflections, i_out)
      end if
 
@@ -259,10 +259,10 @@ Program Test_HKL_GEN
      write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Slmin,Slmax,Reflex,SpG,Mag, Friedel=.true.)"
      write(unit=i_out,fmt="(a,/)") " ==========================================================================================="
      if(nk /= 0) then
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
         call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
      else
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, Friedel=.true.,Ref_typ=Ref_typ)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, Friedel=.true.,Ref_typ=Ref_typ)
         call Write_Info_RefList(reflections, i_out)
      end if
 
@@ -270,10 +270,10 @@ Program Test_HKL_GEN
      write(unit=i_out,fmt="(a)")   " GENERATION OF REFLECTIONS WITH INTERFACE: (Cell,Sintlmax,Mag,Reflex,SpG,order=.true.,Friedel=.true.)"
      write(unit=i_out,fmt="(a,/)") " ===================================================================================================="
      if(nk /= 0) then
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ,kout=kinfo)
         call Write_Info_RefList(reflections, i_out,kinfo=kinfo)
      else
-        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ)
+        call Gener_Reflections(Cell,0.0,sintlmax,reflections,grp_espacial,1,Mag, order=.true., Friedel=.true.,Ref_typ=Ref_typ)
         call Write_Info_RefList(reflections, i_out)
      end if
 

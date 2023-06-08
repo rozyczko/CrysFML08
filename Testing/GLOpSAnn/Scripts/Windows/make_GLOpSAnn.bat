@@ -21,9 +21,9 @@ rem
    goto END
 rem ****---- Intel Compiler ----****
 :IFORT
-   ifort /c %SRCD%\GLS_observ.f90            /O3 /Qparallel /nologo /heap-arrays /I%CRYSFML08%\ifort64\LibC
-   ifort /c %SRCD%\GLS_cost_functions.f90    /O3 /Qparallel /nologo /heap-arrays /I%CRYSFML08%\ifort64\LibC
-   ifort /c %SRCD%\GLOpSAnn.f90              /O3 /Qparallel /nologo /heap-arrays /I%CRYSFML08%\ifort64\LibC
+   ifort /c %SRCD%\GLS_observ.f90            /O3 /Qparallel /nologo  /I%CRYSFML08%\ifort64\LibC
+   ifort /c %SRCD%\GLS_cost_functions.f90    /O3 /Qparallel /nologo  /I%CRYSFML08%\ifort64\LibC
+   ifort /c %SRCD%\GLOpSAnn.f90              /O3 /Qparallel /nologo  /I%CRYSFML08%\ifort64\LibC
    ifort /exe:GLOpSAnn *.obj  %CRYSFML08%\ifort64\LibC\CrysFML.lib /link /stack:64000000
 rem   ifort  /exe:GLOpSAnn.exe *.obj  C:\CrysFML\ifort64\LibC\CrysFML.lib
    goto END

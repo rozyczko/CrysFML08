@@ -746,18 +746,18 @@ Program Global_Optimization_Xtal_structures
      write(unit=*,fmt="(a)") " Results in File: "//trim(filcod)//".out"
      call cpu_time(fin)
      call system_clock(itick2)
-     write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", fin-start," seconds"
-     write(unit=*,fmt="(a,f10.2,a)")  "  CPU-Time: ", (fin-start)/60.0," minutes"
+     write(unit=*,fmt="(a,f10.2,a)")  "  Single Thread CPU-Time: ", fin-start," seconds"
+     write(unit=*,fmt="(a,f10.2,a)")  "  Single Thread CPU-Time: ", (fin-start)/60.0," minutes"
      tims=(itick2-itick1)/real(count_rate)
      timm=tims/60.0
-     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",tims ," seconds"
-     write(unit=*,fmt="(a,f10.2,a)")  "  CLOCK-Time: ",timm," minutes"
-     write(unit=lun,fmt="(/,a,f10.2,a)")  "    CPU-Time: ", fin-start," seconds"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60," minutes"
-     write(unit=lun,fmt="(  a,f10.2,a)")  "    CPU-Time: ", (fin-start)/60/60," hours"
-     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",tims ," seconds"
-     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm," minutes"
-     write(unit=lun,fmt="(a,f10.2,a)")    "  CLOCK-Time: ",timm/60.0," hours"
+     write(unit=*,fmt="(a,f10.2,a)")  "      Elapsed CLOCK-Time: ",tims ," seconds"
+     write(unit=*,fmt="(a,f10.2,a)")  "      Elapsed CLOCK-Time: ",timm," minutes"
+
+     write(unit=lun,fmt="(/,a,f10.2,a)")  "  Single Thread CPU-Time: ", fin-start," seconds"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "  Single Thread CPU-Time: ", (fin-start)/60," Minutes"
+     write(unit=lun,fmt="(  a,f10.2,a)")  "  Single Thread CPU-Time: ", (fin-start)/60/60," Hours"
+     write(unit=lun,fmt="(a,f10.2,a)")    "      Elapsed CLOCK-Time: ",tims ," seconds"
+     write(unit=lun,fmt="(a,f10.2,a)")    "      Elapsed CLOCK-Time: ",timm," minutes"
    end if
 
    close(unit=lun)
