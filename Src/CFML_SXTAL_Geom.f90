@@ -687,7 +687,7 @@
          real(kind=cp), dimension(4)               :: angl_4C
       End Function snb4c
 
-      Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,blfr,ga_P,nu_P,f_virtual)
+      Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,ga_P,nu_P,f_virtual)
          !---- Arguments ----!
          real,                  intent(in)  :: px                 ! x coordinate, in pixels
          real,                  intent(in)  :: pz                 ! z coordinate, in pixels
@@ -699,7 +699,6 @@
          real,                  intent(in)  :: dist_samp_detector ! sample detector distance
          real,    dimension(3), intent(in)  :: det_offsets        ! x, y and z detector offsets
          integer,               intent(in)  :: origin             ! origin for numbering pixels
-         integer,               intent(in)  :: blfr               ! Busing-Levy frame
          real,                  intent(out) :: ga_P               ! Gamma value of the reflection
          real,                  intent(out) :: nu_P               ! Nu value of the reflection
          integer, optional,     intent(in)  :: f_virtual          ! stretching factor for virtual detectors
