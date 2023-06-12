@@ -707,7 +707,9 @@
           end do
           if (present(output_file)) then
               write(unit=u_out,fmt='(a)') ' => Best UB matrix found:'
-              write(unit=u_out,fmt=*) ub(1,1,1),ub(1,2,1),ub(1,3,1)
+              do i = 1 , 3
+                  write(unit=u_out,fmt='(6x,3f14.8)') ub(i,1:3,1)
+              end do
               write(unit=u_out,fmt='(4x,a,f8.3)') 'R-Fac: ',rfac(1)
           end if
       end if
