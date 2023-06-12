@@ -401,4 +401,319 @@
        tv(:,3)=v3(:)
     End Subroutine triple
 
+    Module Subroutine ubfrqcel(spg_id,q_user,cell_user,ub,rfac,nq_max_user,npairs_max_user,nubs_max_user,angle_min_user,rtol_user,rfac_max_user,output_file)
+      !---- Arguments ----!
+      character(len=*),                       intent(in)  :: spg_id          ! space group (number, symbol...)
+      real,    dimension(:,:),                intent(in)  :: q_user          ! scattering vectors (3,nq)
+      real,    dimension(6),                  intent(in)  :: cell_user       ! cell parameters
+      real,    dimension(:,:,:), allocatable, intent(out) :: ub              ! returned ubs
+      real,    dimension(:),     allocatable, intent(out) :: rfac            ! rfactors for returned ubs
+      integer, optional,                      intent(in)  :: nq_max_user     ! maximum number of q-vectors
+      integer, optional,                      intent(in)  :: npairs_max_user ! maximum number of pairs to be tested
+      integer, optional,                      intent(in)  :: nubs_max_user   ! maximum number of ubs returned
+      real,    optional,                      intent(in)  :: angle_min_user  ! minimum angle between pairs of reflections
+      real,    optional,                      intent(in)  :: rtol_user       ! tolerance in reciprocal space
+      real,    optional,                      intent(in)  :: rfac_max_user   ! maximum allowed value for R-factor
+      character(len=*), optional,             intent(in)  :: output_file     ! full path of the output file
+      !---- Local parameters ----!
+      integer, parameter :: nq_max_default = 20
+      integer, parameter :: npairs_max_default = 3
+      integer, parameter :: nubs_max_default = 20
+      real,    parameter :: angle_min_default = 40.0
+      real,    parameter :: rtol_default = 0.2
+      real,    parameter :: rfac_max_default = 0.2
+      real,    parameter :: epsil = 0.00001
+
+      !---- Local variables ----!
+      integer :: u_out = 11
+      integer :: i,j,k,ii,jj,kk,ll,m,n,ip,io
+      integer :: nq,nq_user,nq_max,npairs_max,nubs_max,ncandidates,npairs,nubs
+      integer, dimension(:), allocatable :: indx
+      integer, dimension(:,:), allocatable :: candidates,pairs
+      real :: angle,angle_min,rtol,rfac_max,rfac_i,stlmin,stlmax
+      real, dimension(3) :: h,h1,h1c,h2,h2c
+      real, dimension(4) :: dhkl
+      real, dimension(3,3) :: ub_i,ub_inv
+      real, dimension(:),     allocatable :: rfac_aux ! rfactors for returned ubs
+      real, dimension(:),     allocatable :: s,s_user ! sin(theta) / lambda
+      real, dimension(:,:),   allocatable :: q        ! returned ubs
+      real, dimension(:,:,:), allocatable :: ub_aux   ! returned ubs
+      logical :: is_new
+      type(cell_g_type) :: cell
+      type(spg_type) :: spg
+      type(reflist_type) :: hkl
+
+      ! Initialize error variable
+      call clear_error()
+
+      ! Set parameters
+      if (present(nq_max_user)) then
+          nq_max = nq_max_user
+      else
+          nq_max = nq_max_default
+      end if
+      if (present(npairs_max_user)) then
+          npairs_max = npairs_max_user
+      else
+          npairs_max = npairs_max_default
+      end if
+      if (present(nubs_max_user)) then
+          nubs_max = nubs_max_user
+      else
+          nubs_max = nubs_max_default
+      end if
+      if (present(angle_min_user)) then
+          angle_min = angle_min_user
+      else
+          angle_min = angle_min_default
+      end if
+      if (present(rtol_user)) then
+          rtol = rtol_user
+      else
+          rtol = rtol_default
+      end if
+      if (present(rfac_max_user)) then
+          rfac_max = rfac_max_user
+      else
+          rfac_max = rfac_max_default
+      end if
+      if (present(output_file)) then
+          if (output_file == 'stdout') then
+              u_out = 6
+          else
+              open(unit=u_out,file=output_file,status='unknown',iostat=io)
+              if (io /= 0) then
+                  err_cfml%ierr = -1
+                  err_cfml%flag = .true.
+                  err_cfml%msg = 'ubfrqcel: Cannot open output file '//trim(output_file)
+                  if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Error:  At least two reflections must be given'
+                  return
+              end if
+          end if
+          write(unit=u_out,fmt='(a)') ' => Input parameters:'
+          write(unit=u_out,fmt='(4x,a,1x,6f10.4)') 'CELL =',cell_user(6)
+          write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NQMAX =',     nq_max,     '! Maximum number of q-vectors used in the search'
+          write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NPAIRS_MAX =',npairs_max, '! Maximum number of reflections pairs to be tested'
+          write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NUBS_MAX =',  nubs_max,   '! Maximum number of ub-matrices'
+          write(unit=u_out,fmt='(4x,a12,1x,f8.4,1x,a)') 'ANGLE_MIN =', angle_min,  '! Minimum angle between selected pairs'
+          write(unit=u_out,fmt='(4x,a12,1x,f8.4,1x,a)') 'RTOL =',      rtol,       '! Indexing tolerance in reciprocal space'
+          write(unit=u_out,fmt='(4x,a12,1x,f8.4,1x,a)') 'RFAC_MAX =',  rfac_max,   '! Maximum allowed R-factor'
+          write(unit=u_out,fmt='(/,a)') ' => Units:'
+          write(unit=u_out,fmt='(4x,a)') 'Length: angstrom'
+          write(unit=u_out,fmt='(4x,a)') 'Angle:  degrees'
+      end if
+
+      ! Allocation
+      allocate(ub_aux(3,3,nubs_max))
+      allocate(rfac_aux(nubs_max))
+
+      ! Check that at least 2 reflectionss have been given, built q-array and set stlmin and stlmax
+      if (present(output_file)) write(unit=u_out,fmt='(/,a)') ' => Building q and s arrays'
+      nq_user = size(q_user,2)
+      if (nq_user < 2) then
+          err_cfml%ierr = -1
+          err_cfml%flag = .true.
+          err_cfml%msg = 'ubfrqcel: At least two reflections must be given'
+          if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Error:  At least two reflections must be given'
+          return
+      end if
+      allocate(indx(nq_user),s_user(nq_user))
+      do i = 1 , nq_user
+          s_user(i) = sqrt(q_user(1,i)**2 + q_user(2,i)**2  + q_user(3,i)**2) * 0.5
+      end do
+      indx = sort(s_user,nq_user)
+      if (nq_user > nq_max) then
+          nq = nq_max
+      else
+          nq = nq_user
+      end if
+      allocate(q(3,nq),s(nq))
+      do i = 1 , nq
+          q(:,i) = q_user(:,indx(i))
+          s(i) = s_user(indx(i))
+      end do
+      deallocate(indx)
+      stlmin = s(1) - rtol
+      stlmax = s(nq) + rtol
+      if (present(output_file)) then
+          write(unit=u_out,fmt='(4x,a)') 'List of scattering vectors that will be used in the search'
+          write(unit=u_out,fmt='(4x,a6,3a12,4x,a21)') 'N','q_x','q_y','q_z','s = sin(theta)/lambda'
+          do i = 1 , nq
+              write(unit=u_out,fmt='(4x,i6,3f12.6,4x,f21.6)') i,q(:,i),s(i)
+          end do
+      end if
+
+      ! Generate reflections
+      if (present(output_file)) write(unit=u_out,fmt='(/,a)') ' => Generating reflections'
+      call set_crystal_cell(cell_user(1:3),cell_user(4:6),cell)
+      if (err_cfml%ierr == 0) call set_spacegroup(spg_id,spg)
+      if (err_cfml%ierr == 0) call hkl_gen_sxtal(cell,spg,stlmin,stlmax,hkl)
+      if (present(output_file)) then
+          if (err_cfml%ierr == 0) then
+              write(unit=u_out,fmt='(4x,a)') 'Space group: P 1'
+              write(unit=u_out,fmt='(4x,a,1x,i6)') 'Number of generated reflections:',hkl%nref
+          else
+              write(unit=u_out,fmt='(4x,2a)') 'Error: ',trim(err_cfml%msg)
+          end if
+      end if
+
+      ! Set reflections that can be indexed within rtol
+      if (err_cfml%ierr == 0) then
+          if (present(output_file)) write(unit=u_out,fmt='(/,a)') ' => Setting candidates'
+          ! Candidates stores for each q-vector, the reflections in hkl that can index it
+          ncandidates = 0
+          allocate(candidates(0:hkl%nref,1:nq))
+          do i = 1 , nq
+              candidates(0,i) = 0 ! Column zero stores the number of reflections that can index q-vector i
+              do j = 1 , hkl%nref
+                  if (abs(s(i) - hkl%ref(j)%s) > rtol) cycle
+                  ! Reflection j is candidate for q vector i
+                  candidates(0,i) = candidates(0,i) + 1
+                  candidates(candidates(0,i),i) = j
+              end do
+              if (candidates(0,i) > 0) ncandidates = ncandidates + 1
+          end do
+          if (ncandidates < 2) then
+              err_cfml%ierr = -1
+              err_cfml%flag = .true.
+              err_cfml%msg = 'ubfrqcel: Number of indexed reflections is less than two. UB matrix cannot be determined.'
+              if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Error: Number of indexed reflections is less than two. UB matrix cannot be determined.'
+              return
+          end if
+          if (present(output_file)) then
+              write(unit=u_out,fmt='(4x,a)') 'List of reflections that can be indexed: '
+              write(unit=u_out,fmt='(4x,a6,4a12,3a6,a12)') 'N','q_x','q_y','q_z','s','H','K','L','s'
+              do i = 1 , nq
+                  if (candidates(0,i) > 0) then
+                      write(unit=u_out,fmt='(4x,i6,4f12.6)') i,q(:,i),s(i)
+                      do j = 1 , candidates(0,i)
+                          k = candidates(j,i)
+                          write(unit=u_out,fmt='(58x,3i6,f12.6)') hkl%ref(k)%h,hkl%ref(k)%s
+                      end do
+                  end if
+              end do
+          end if
+      end if
+
+      ! Select pairs of reflections
+      if (err_cfml%ierr == 0) then
+          if (present(output_file)) write(unit=u_out,fmt='(/,a)') ' => Selecting pairs'
+          allocate(pairs(2,npairs_max))
+          npairs = 0
+          do i = 1, nq
+              if (candidates(0,i) > 0) then
+                  pairs(1,npairs+1) = i
+                  do j = i + 1 , nq
+                      if (candidates(0,j) > 0) then
+                          ! Angle between i,j must be > angle_pair
+                          angle = acosd(dot_product(q(1:3,i),q(1:3,j)) / (4 * s(i) * s(j)))
+                          if (angle > angle_min) then
+                              pairs(2,npairs+1) = j
+                              npairs = npairs + 1
+                              exit
+                          end if
+                      end if
+                  end do
+                  if (npairs == npairs_max) then
+                      if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Maximum number of pairs reached.'
+                      exit
+                  end if
+              end if
+          end do
+          if (npairs == 0) then
+              err_cfml%ierr = -1
+              err_cfml%flag = .true.
+              err_cfml%msg = 'ubfrqcel: No valid pair found for testing cell'
+              if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Error: No valid pair found for testing cell.'
+              return
+          end if
+      end if
+
+      ! Test pairs
+      if (err_cfml%ierr == 0) then
+          if (present(output_file)) write(unit=u_out,fmt='(/,a)') ' => Testing pairs'
+          nubs = 0
+          do ip = 1 , npairs
+              i = pairs(1,ip)
+              j = pairs(2,ip)
+              if (present(output_file)) write(unit=u_out,fmt='(4x,a,i3,1x,i3)') 'Pair',i,j
+              do n = 1 , candidates(0,i)
+                  h1 = hkl%ref(candidates(n,i))%h  ! Miller index
+                  h1c = q(1:3,i)                   ! h1 in cartesian coordinates
+                  do m = 1 , candidates(0,j)
+                      h2  = hkl%ref(candidates(m,j))%h ! Miller index
+                      h2c = q(1:3,j)                   ! h2 in cartesian coordinates
+                      ub_i = GenUB(cell%BL_M,h1,h2,h1c,h2c)
+                      if (err_cfml%ierr /= 0) then
+                          call clear_error()
+                          cycle
+                      end if
+                      ub_inv = invert(ub_i)
+                      ! Compute rfac
+                      rfac_i = 0.0
+                      do ii = 1 , nq
+                          h = matmul(ub_inv,q(1:3,ii))
+                          dhkl(1:3) = abs(h - nint(h))
+                          dhkl(4) = sqrt(dhkl(1)**2 + dhkl(2)**2+dhkl(3)**2)
+                          rfac_i = rfac_i + dhkl(4)
+                      end do
+                      rfac_i = rfac_i / nq
+                      if (rfac_i < rfac_max) then
+                          ! Check if the UB matrix is new
+                          is_new = .true.
+                          do ll = 1 , nubs
+                              if (is_new) then
+                                  is_new = .false.
+                                  do jj = 1 , 3
+                                      do kk = 1 , 3
+                                        if (abs(ub_i(jj,kk)-ub_aux(jj,kk,ll)) > epsil) is_new = .true.
+                                      end do
+                                  end do
+                              end if
+                          end do
+                          if (is_new) then
+                              if (nubs < nubs_max) then
+                                  nubs = nubs + 1
+                                  ub_aux(:,:,nubs) = ub_i(:,:)
+                                  rfac_aux(nubs) = rfac_i
+                              else
+                                  k = maxloc(rfac_aux,1)
+                                  if (rfac_i < rfac_aux(k)) then
+                                      ub_aux(:,:,k) = ub_i(:,:)
+                                      rfac_aux(k) = rfac_i
+                                  end if
+                              end if
+                          end if
+                      end if
+                  end do
+              end do
+          end do
+          if (nubs == 0) then
+              err_cfml%ierr = -1
+              err_cfml%flag = .true.
+              err_cfml%msg = 'ubfrqcel: No UB-matrix found. Increase rtol or rfac.'
+              if (present(output_file)) write(unit=u_out,fmt='(4x,a)') 'Error: No UB-matrix found. Increase rtol or rfac.'
+              return
+          end if
+      end if
+
+      ! Order cells according to rfac
+      if (err_cfml%ierr == 0) then
+          allocate(indx(nubs),rfac(nubs),ub(3,3,nubs))
+          indx = sort(rfac_aux(1:nubs),nubs)
+          do i = 1 , nubs
+              rfac(i) = rfac_aux(indx(i))
+              ub(:,:,i) = ub_aux(:,:,indx(i))
+          end do
+          if (present(output_file)) then
+              write(unit=u_out,fmt='(a)') ' => Best UB matrix found:'
+              write(unit=u_out,fmt=*) ub(1,1,1),ub(1,2,1),ub(1,3,1)
+              write(unit=u_out,fmt='(4x,a,f8.3)') 'R-Fac: ',rfac(1)
+          end if
+      end if
+
+      if (present(output_file)) close(unit=u_out)
+
+  end subroutine ubfrqcel
+
  End SubModule SXTAL_UB

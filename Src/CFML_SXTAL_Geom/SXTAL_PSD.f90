@@ -121,9 +121,9 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
          pz_ = pz
          if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ + 1
          if (orig == 1 .or. orig == 2) px_ = diffractometer%np_horiz - px_ + 1
-         x_D = (px_ - px_mid) * diffractometer%cgap
+         x_D = (px_ - 0.5 - px_mid) * diffractometer%cgap
          y_D = 0.0
-         z_D = (pz_ - pz_mid) * diffractometer%agap
+         z_D = (pz_ - 0.5 - pz_mid) * diffractometer%agap
          ! Cartesian coordinates in the laboratory system
          select case(diffractometer%ipsd)
                case(2) ! Flat detector
