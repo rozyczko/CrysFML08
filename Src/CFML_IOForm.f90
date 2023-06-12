@@ -83,7 +83,8 @@ Module CFML_IOForm
    !---- Public subroutines ----!
 
    public :: Get_Block_Commands, Get_Block_KEY, Get_SubBlock_KEY, Get_Block_Phases, &
-             Get_Block_Patterns, Read_Block_Instructions, &
+             Get_Block_Patterns, Read_Block_Instructions, Get_Blocks_Filetype, &
+             Get_SubBlock_CommPatterns, Get_SubBlock_CommPhases, &
              Read_Block_ExcludeReg, Read_Block_Backgd, &
              Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
              Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
@@ -189,6 +190,23 @@ Module CFML_IOForm
 
    !---- Interface zone ----!
    Interface
+      Module Subroutine Get_Blocks_Filetype(ffile, NComm, Bl_Comm, NPatt, Bl_Patt, &
+                                         NPhas, Bl_Phas, NCPatt, BlC_Patt, NCPhas, BlC_Phas)
+         !---- Arguments ----!
+         type(File_type),                               intent(in)  :: ffile
+         integer,                            optional,  intent(out) :: NComm
+         type(BlockInfo_Type),               optional,  intent(out) :: Bl_Comm
+         integer,                            optional,  intent(out) :: NPatt
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Patt
+         integer,                            optional,  intent(out) :: NPhas
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Phas
+         integer,                            optional,  intent(out) :: NCPatt
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Patt
+         integer,                            optional,  intent(out) :: NCPhas
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Phas
+
+      End Subroutine Get_Blocks_Filetype
+
       Module Subroutine Get_Block_Commands(ffile, N_Ini, N_End)
          !---- Arguments ----!
          Type(file_type),    intent(in)  :: ffile
@@ -227,13 +245,14 @@ Module CFML_IOForm
          integer,                       intent(out) :: N_Id
       End Subroutine Get_Block_KEY
 
-      Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind)
+      Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind, StrName)
          !---- Arguments ----!
-         character(len=*),      intent(in)  :: key
-         Type(file_type),       intent(in)  :: ffile
-         integer,               intent(in)  :: n_ini
-         integer,               intent(in)  :: n_end
-         integer, dimension(2), intent(out) :: Ind
+         character(len=*),                intent(in)  :: key
+         Type(file_type),                 intent(in)  :: ffile
+         integer,                         intent(in)  :: n_ini
+         integer,                         intent(in)  :: n_end
+         integer, dimension(2),           intent(out) :: Ind
+         character(len=*),      optional, intent(out) :: StrName
       End Subroutine Get_SubBlock_KEY
 
       Module Subroutine Read_Block_ExcludeReg(ffile, n_ini, n_end, IPatt)
@@ -797,6 +816,24 @@ Module CFML_IOForm
          integer,          intent(in) :: Ipr
          class (Spg_type), intent(in) :: Spg
       End Subroutine Write_MCIF_Spg
+
+      Module Subroutine Get_SubBlock_CommPatterns(ffile, N_ini, N_end, Bl_Patt, NPatt, C_Patt)
+         type(File_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: N_ini
+         integer,                            intent(in)     :: N_end
+         type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Patt
+         integer,                            intent(out)    :: Npatt
+         type(BlockInfo_Type), dimension(:), intent(in out) :: C_Patt
+      End Subroutine Get_SubBlock_CommPatterns
+
+      Module Subroutine Get_SubBlock_CommPhases(ffile, N_ini, N_end, Bl_Phas, NPhas, C_Phas)
+         type(File_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: N_ini
+         integer,                            intent(in)     :: N_end
+         type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Phas
+         integer,                            intent(out)    :: Nphas
+         type(BlockInfo_Type), dimension(:), intent(in out) :: C_Phas
+      End Subroutine Get_SubBlock_CommPhases
 
     End Interface
 

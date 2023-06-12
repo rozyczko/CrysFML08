@@ -7,6 +7,11 @@ Submodule (CFML_IOForm) Format_Blocks
    !!----
    !!---- SUBROUTINE GET_BLOCK_KEY
    !!----
+   !!---- BLOCK definition:
+   !!----     KEY_StringName Number
+   !!----     ....
+   !!----     ....
+   !!----     END_KEY_StringName
    !!----
    !!---- Update: 17/05/2023
    !!
@@ -21,8 +26,8 @@ Submodule (CFML_IOForm) Format_Blocks
       integer,                       intent(out) :: N_Id        ! Number of ID
 
      !---- Local Arguments ----!
-     integer                          :: i, j, k, n, nc, iv
-     character(len=:), allocatable    :: car, str
+     integer                          :: i, j, n, nc, iv
+     character(len=:), allocatable    :: car
 
      logical                          :: Debug=.false.
 
@@ -81,6 +86,7 @@ Submodule (CFML_IOForm) Format_Blocks
 
         do n=i+1,n_end
            line=adjustl(ffile%line(n)%str)
+           if (len_trim(line) <= 0) cycle
            if (line(1:1) =='!') cycle
            if (line(1:1) ==' ') cycle
 
@@ -128,7 +134,7 @@ Submodule (CFML_IOForm) Format_Blocks
       !> Determine the zone of commands in the file
       do i=1,ffile%nlines
          line=adjustl(ffile%line(i)%str)
-         if(len_trim(line) == 0) cycle
+         if (len_trim(line) == 0) cycle
          if (line(1:1) =='!') cycle
 
          j=index(line,'!')
@@ -139,10 +145,8 @@ Submodule (CFML_IOForm) Format_Blocks
          !> N_ini point the next line into Command zone
          if (n_Ini == 0) then
             j=index(u_case(line),'COMMANDS')
-            if (j > 0) then
-               n_ini=i
-               cycle
-            end if
+            if (j > 0) n_ini=i
+            cycle
          end if
 
          !> N_end point the previous line from end Command zone
@@ -155,30 +159,41 @@ Submodule (CFML_IOForm) Format_Blocks
          end if
       end do
 
+      !> Check error
+      if (n_ini > 0 .and. n_end ==0) then
+         call set_error(1, "Error in Commands...End_Commands Block definition!")
+      end if
+
    End Subroutine Get_Block_Commands
 
    !!----
    !!---- SUBROUTINE GET_SUBBLOCK
    !!----
+   !!---- SUBBLOCK definition:
+   !!---- It is a block into a Block
+   !!----     KEY_StringName
+   !!----     ....
+   !!----     ....
+   !!----     END_KEY_StringName
+   !!----
    !!---- Date: 15/05/2023
    !!
-   Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind)
+   Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind, StrName)
       !---- Arguments ----!
-      character(len=*),      intent(in)  :: key
-      Type(file_type),       intent(in)  :: ffile
-      integer,               intent(in)  :: n_ini
-      integer,               intent(in)  :: n_end
-      integer, dimension(2), intent(out) :: Ind
+      character(len=*),           intent(in)  :: key
+      Type(file_type),            intent(in)  :: ffile
+      integer,                    intent(in)  :: n_ini
+      integer,                    intent(in)  :: n_end
+      integer, dimension(2),      intent(out) :: Ind
+      character(len=*), optional, intent(out) :: StrName
 
       !---- Local Variables ----!
       character(len=:), allocatable    :: car
       integer                          :: i,j
 
-      logical                          :: Debug =.false.
-
-
       !> Init
       Ind=0
+      StrName=' '
       car=u_case(trim(key))
 
       !> Determine the zone of Background in the file
@@ -210,6 +225,13 @@ Submodule (CFML_IOForm) Format_Blocks
             end if
          end if
       end do
+
+      if (present(StrName) .and. ind(1) > 0) then
+         line=adjustl(ffile%line(ind(1))%str)
+         j=index(line,'_')
+         StrName=' '
+         if (j > 0) StrName=line(j+1:)
+      end if
 
    End Subroutine Get_SubBlock_KEY
 
@@ -691,7 +713,7 @@ Submodule (CFML_IOForm) Format_Blocks
       Ind1=0; Ind2=0
       exc_symm=.false.
       if (present(lsymm)) exc_symm=lsymm
-      
+
       call clear_error()
 
       !> Exclude regions
@@ -738,14 +760,14 @@ Submodule (CFML_IOForm) Format_Blocks
          if (j > 0) line=line(:j-1)
          j=index(line,'#')
          if (j > 0) line=line(:j-1)
-         
+
          if (exc_symm) then
             !> Special cases on symmetry / space groups
             linec = line
             call cut_string(linec, ic, str)
             str=adjustl(u_case(str))
             j=string_count(linec,';')
-            
+
             select case (trim(str))
                case ('SPG','SSPG','MSSPG','SPGR','SHUB')
                   select case (j)
@@ -754,29 +776,29 @@ Submodule (CFML_IOForm) Format_Blocks
                         Vec_Instr(NP_Instr)%Str=trim(str)
                         Vec_Instr(NP_Instr)%NPar=1
                         Vec_Instr(NP_Instr)%CV(1)=trim(linec)
-               
+
                      case(1)
                         NP_Instr=NP_Instr+1
                         Vec_Instr(NP_Instr)%Str=trim(str)
                         Vec_Instr(NP_Instr)%NPar=1
                         Vec_Instr(NP_Instr)%CV(1)=trim(linec)
-                        
+
                      case default
                         call set_error(1,'Format not defined! ->'//trim(str)//' '//trim(linec))
                         return
                   end select
-                  
+
                   i=i+1
                   cycle
-                  
-               case ('GEN','SYMM','GENERATORS') 
+
+               case ('GEN','SYMM','GENERATORS')
                   select case (j)
                      case(0)
                         NP_Instr=NP_Instr+1
                         Vec_Instr(NP_Instr)%Str=trim(str)
                         Vec_Instr(NP_Instr)%NPar=1
                         Vec_Instr(NP_Instr)%CV(1)=trim(linec)
-                        
+
                      case(1:)
                         NP_Instr=NP_Instr+1
                         Vec_Instr(NP_Instr)%Str=trim(str)
@@ -787,21 +809,21 @@ Submodule (CFML_IOForm) Format_Blocks
                               kk=kk+1
                               Vec_Instr(NP_Instr)%CV(kk)=linec(:k-1)
                               linec=linec(k+1:)
-                              
+
                            else
                               kk=kk+1
                               Vec_Instr(NP_Instr)%CV(kk)=linec
                               linec=''
                            end if
                         end do
-                        
+
                      case default
                         call set_error(1,'Format not defined! ->'//trim(str)//' '//trim(line))
                         return
-                  end select 
-                  
+                  end select
+
                   i=i+1
-                  cycle                  
+                  cycle
             end select
          end if
 
@@ -858,7 +880,7 @@ Submodule (CFML_IOForm) Format_Blocks
 
       !---- Local Variables ----!
       character(len=60)     :: StrName
-      integer               :: i, j, n_fin, N_id
+      integer               :: i, n_fin, N_id
       integer, dimension(2) :: Ind, Indx
       logical               :: exclusion=.false.
 
@@ -871,9 +893,9 @@ Submodule (CFML_IOForm) Format_Blocks
       end if
 
       i=N_ini
-      n_fin=ffile%nlines
+      n_fin=N_end
 
-      do while (i < ffile%nlines)
+      do while (i < N_end)
          !> Exclude zone
          if (exclusion) then
             if (i < Indx(1)-1) n_fin=Indx(1)-1
@@ -885,8 +907,8 @@ Submodule (CFML_IOForm) Format_Blocks
          end if
 
          call Get_Block_KEY('PATTERN', ffile, i, n_fin, Ind, StrName, N_Id)
-
          if (Err_CFML%IErr /= 0) return
+
          if (all(ind == 0)) then
             i=i+1
             cycle
@@ -942,7 +964,7 @@ Submodule (CFML_IOForm) Format_Blocks
 
       !---- Local Variables ----!
       character(len=60)     :: StrName
-      integer               :: i, j, n_fin, N_Id
+      integer               :: i, n_fin, N_Id
       integer, dimension(2) :: Ind, Indx
       logical               :: exclusion=.false.
 
@@ -955,9 +977,9 @@ Submodule (CFML_IOForm) Format_Blocks
       end if
 
       i=N_ini
-      n_fin=ffile%nlines
+      n_fin=N_end
 
-      do while (i < ffile%nlines)
+      do while (i < N_end)
          !> Exclude zone
          if (exclusion) then
             if (i < Indx(1)-1) n_fin=Indx(1)-1
@@ -1240,5 +1262,208 @@ Submodule (CFML_IOForm) Format_Blocks
       end do
 
    End Subroutine Write_InfoBlock_ExcludedRegions
+
+   !!----
+   !!---- SUBROUTINE Get_SubBlock_CommPatterns
+   !!----
+   !!----    Determine the zone of Pattern Blocks into a Command Zone
+   !!----
+   !!---- Update: June - 2023
+   !!
+   Module Subroutine Get_SubBlock_CommPatterns(ffile, N_ini, N_end, Bl_Patt, NPatt, C_Patt)
+      !---- Arguments ----!
+      type(File_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: N_ini
+      integer,                            intent(in)     :: N_end
+      type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Patt
+      integer,                            intent(out)    :: Npatt
+      type(BlockInfo_Type), dimension(:), intent(in out) :: C_Patt
+
+      !---- Local Variables ----!
+      integer               :: i, iv
+      integer, dimension(2) :: ind
+      character(len=60)     :: StrName
+
+      !> Init
+      NPatt=0
+
+      i=N_ini
+
+      do while(i < n_end)
+         call Get_SubBlock_KEY('PATTERN', ffile, i, n_end, Ind, StrName)
+         if (all(ind > 0)) then
+            NPatt=NPatt+1
+
+            call get_num(strName, vet, ivet, iv)
+            if (iv > 0) then
+               C_Patt(NPatt)%StrName=Bl_Patt(ivet(1))%StrName
+            else
+               C_Patt(NPatt)%StrName=trim(StrName)
+            end if
+            call clear_error()
+
+            C_Patt(NPatt)%BlName='COM_PATTERN'
+            C_Patt(NPatt)%IBl=2
+            C_Patt(NPatt)%Nl=Ind
+
+            i=Ind(2)+1
+
+         else
+            exit
+         end if
+      end do
+
+   End Subroutine Get_SubBlock_CommPatterns
+
+   !!----
+   !!---- SUBROUTINE Get_SubBlock_CommPhases
+   !!----
+   !!----    Determine the zone of Pattern Blocks into a Command Zone
+   !!----
+   !!---- Update: June - 2023
+   !!
+   Module Subroutine Get_SubBlock_CommPhases(ffile, N_ini, N_end, Bl_Phas, NPhas, C_Phas)
+      !---- Arguments ----!
+      type(File_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: N_ini
+      integer,                            intent(in)     :: N_end
+      type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Phas
+      integer,                            intent(out)    :: Nphas
+      type(BlockInfo_Type), dimension(:), intent(in out) :: C_Phas
+
+      !---- Local Variables ----!
+      integer               :: i, iv
+      integer, dimension(2) :: ind
+      character(len=60)     :: StrName
+
+      !> Init
+      NPhas=0
+
+      i=N_ini
+
+      do while(i < n_end)
+         call Get_SubBlock_KEY('PHASE', ffile, i, n_end, Ind, StrName)
+         if (all(ind > 0)) then
+            NPhas=NPhas+1
+
+            call get_num(strName, vet, ivet, iv)
+            if (iv > 0) then
+               C_Phas(NPhas)%StrName=Bl_Phas(ivet(1))%StrName
+            else
+               C_Phas(NPhas)%StrName=trim(StrName)
+            end if
+            call clear_error()
+
+            C_Phas(NPhas)%BlName='COM_PHASE'
+            C_Phas(NPhas)%IBl=1
+            C_Phas(NPhas)%Nl=Ind
+
+            i=Ind(2)+1
+
+         else
+            exit
+         end if
+      end do
+   End Subroutine Get_SubBlock_CommPhases
+
+   !!----
+   !!---- SUBROUTINE Get_Blocks_Filetype
+   !!----
+   !!----
+   !!---- June - 2023
+   !!----
+   Module Subroutine Get_Blocks_Filetype(ffile, NComm, Bl_Comm, NPatt, Bl_Patt, &
+                                         NPhas, Bl_Phas, NCPatt, BlC_Patt, NCPhas, BlC_Phas)
+      !---- Arguments ----!
+      type(File_type),                               intent(in)  :: ffile
+      integer,                            optional,  intent(out) :: NComm    ! Number of Commands zone
+      type(BlockInfo_Type),               optional,  intent(out) :: Bl_Comm  ! Command block info
+      integer,                            optional,  intent(out) :: NPatt    ! Number of Patterns zone
+      type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Patt  ! Patterns block info
+      integer,                            optional,  intent(out) :: NPhas    ! Number of Phases zone
+      type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Phas  ! Phases block info
+      integer,                            optional,  intent(out) :: NCPatt   ! Number of Patterns into Commands zone
+      type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Patt ! Patterns block info
+      integer,                            optional,  intent(out) :: NCPhas   ! Number of Phases into Commands zone
+      type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Phas ! Phases block info
+
+      !---- Local Variables ----!
+      integer              :: n_ini, n_end, nbc
+      type(BlockInfo_Type) :: BC
+
+      !> Init
+      call clear_error()
+
+      nbc=0
+
+      call Get_Block_Commands(ffile, N_Ini, N_End)
+      if (Err_CFML%IErr /= 0) return
+
+      if (n_ini > 0 .and. n_end >= n_ini) then
+         BC%Nl(1)=n_ini
+         BC%Nl(2)=n_end
+         BC%IBl=0
+         BC%BlName='COMMAND'
+         Nbc=1
+      end if
+
+      !> Command Zone
+      if (present(NComm) .and. present(Bl_Comm)) then
+         NComm=0
+         if (nbc > 0) then
+            Bl_Comm= BC
+            NComm=1
+         end if
+      end if
+
+      !> Patterns Zone
+      if (present(NPatt) .and. present(Bl_Patt)) then
+         NPatt=0
+
+         n_ini=1
+         n_end=ffile%nlines
+         if (Nbc > 0) then
+            call Get_Block_Patterns(ffile, n_ini, n_end, NPatt, Bl_Patt, BC%Nl)
+         else
+            call Get_Block_Patterns(ffile, n_ini, n_end, NPatt, Bl_Patt)
+         end if
+      end if
+
+      !> Phases Zone
+      if (present(NPhas) .and. present(Bl_Phas)) then
+         NPhas=0
+
+         n_ini=1
+         n_end=ffile%nlines
+         if (Nbc > 0) then
+            call Get_Block_Phases(ffile, n_ini, n_end, NPhas, Bl_Phas, BC%Nl)
+         else
+            call Get_Block_Phases(ffile, n_ini, n_end, NPhas, Bl_Phas)
+         end if
+      end if
+
+      !> Patterns sublocks into Command zone
+      if (present(NCPatt) .and. present(BlC_Patt) .and. present(Bl_Patt)) then
+         NCPatt=0
+
+         if (nbc > 0) then
+            n_ini=BC%Nl(1)
+            n_end=BC%Nl(2)
+            call Get_SubBlock_CommPatterns(ffile, N_ini, N_end, Bl_Patt, NCPatt, BlC_Patt)
+         end if
+      end if
+
+      !> Phases sublocks into Command zone
+      if (present(NCPhas) .and. present(BlC_Phas) .and. present(Bl_Phas)) then
+         NCPhas=0
+
+         if (nbc > 0) then
+            n_ini=BC%Nl(1)
+            n_end=BC%Nl(2)
+            call Get_SubBlock_CommPhases(ffile, N_ini, N_end, Bl_Phas, NCPhas, BlC_Phas)
+         end if
+      end if
+
+   End Subroutine Get_Blocks_FileType
 
 End SubModule Format_Blocks

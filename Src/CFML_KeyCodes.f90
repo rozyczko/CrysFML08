@@ -46,13 +46,16 @@ Module CFML_KeyCodes
    !---- Use Modules ----!
    Use CFML_GlobalDeps,   only: CP, Clear_error, Set_Error, Err_CFML
    Use CFML_Atoms,        only: MAX_MOD, AtList_Type, Atm_Type, Atm_Std_Type, ModAtm_Std_Type, &
-                                Atm_Ref_Type, ModAtm_Ref_Type, Index_AtLab_on_AtList, Change_AtomList_Type
-   Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case
+                                Atm_Ref_Type, ModAtm_Ref_Type, Index_AtLab_on_AtList,          &
+                                Change_AtomList_Type
+   Use CFML_Strings,      only: File_Type, Get_Num, Cut_String, Get_Words, U_Case, Get_Separator_Pos
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP,         &
                                 Get_OP_from_Symb, Symmetry_symbol, Get_AtomBet_CTR, Get_AtomPos_CTR,&
                                 Get_Moment_CTR, Get_TFourier_CTR
    use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
    use CFML_Molecules,    only: Molecule_type
+
+   Use CFML_Scattering_Tables, only: Get_Chem_Symb
    Use CFML_Rational
 
    Implicit none
@@ -60,59 +63,54 @@ Module CFML_KeyCodes
    private
 
    !---- List of public Functions ----!
+   public :: Index_GPList
 
    !---- List of public Subroutines ----!
-   public :: Allocate_VecRef, Allocate_Restraints_Vec, Allocate_GenParList,   &
-             Del_RefCode_ATM, Del_RefCode_GenParList, &
+   public :: Allocate_VecRef, Allocate_Restraints_List, Allocate_GPList,   &
+             Del_RefCode_ATM, Del_RefCode_GPList, &
              Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
              Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
+             GPList_to_AtmList, Get_InfoKey_StrPhas, Get_InfoKey_StrPatt,&
              Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
-             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints
+             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints, &
+             WriteInfo_GPList, GPList_from_AtmList, GPList_from_Cell, Set_KeyConstr_Cell, &
+             Update_GPList_Code, ReadCode_EQUAL_PHAS, ReadCode_EQUAL_PATT, &
+             Read_Restraints_PHAS
 
 
    !---- Definitions ----!
 
    !!----
-   !!---- TYPE :: ANGLE_RESTRAINT_TYPE
+   !!---- TYPE :: RESTRAINT_TYPE
+   !!--..
+   !!--.. For distance, set the dimension (Iph, P, Code): 2
+   !!--..        angle, set the dimension (Iph, P, Code): 3
+   !!--..      torsion, set the dimension (Iph, P, Code): 4
+   !!--..
    !!--..
    !!---- April - 2022
-   Type, public :: Angle_Restraint_Type
-      integer                       :: IPh =0         ! Phase identification
-      real(kind=cp)                 :: Obs =0.0_cp
-      real(kind=cp)                 :: Cal =0.0_cp
-      real(kind=cp)                 :: Sig =0.0_cp
-      integer,dimension(3)          :: P   =0
-      character(len=8),dimension(2) :: Code=" "
-   End Type Angle_Restraint_Type
+   Type, public :: Restraint_Type
+      real(kind=cp)                  :: Obs = 0.0_cp
+      real(kind=cp)                  :: Cal = 0.0_cp
+      real(kind=cp)                  :: Sig = 0.0_cp
+      integer,          dimension(4) :: IPh = 0  ! Phase identification
+      integer,          dimension(4) :: P   = 0  ! Pointer vector
+      character(len=15),dimension(3) :: Code=' ' ! Code
+   End Type Restraint_Type
 
    !!----
-   !!---- TYPE :: DISTANCE_RESTRAINT_TYPE
-   !!--..
-   !!---- Update: April - 2022
-   Type, public :: Distance_Restraint_Type
-      integer              :: IPh =0             ! Phase identification
-      real(kind=cp)        :: Obs =0.0_cp
-      real(kind=cp)        :: Cal =0.0_cp
-      real(kind=cp)        :: Sig =0.0_cp
-      integer,dimension(2) :: P   =0
-      character(len=8)     :: Code=" "
-   End Type Distance_Restraint_Type
-
    !!----
-   !!---- TYPE :: TORSION_RESTRAINT_TYPE
-   !!--..
    !!----
-   !!---- Update: April - 2022
-   Type, public :: Torsion_Restraint_Type
-      integer                       :: IPh =0        ! Phase identification
-      real(kind=cp)                 :: Obs =0.0_cp
-      real(kind=cp)                 :: Cal =0.0_cp
-      real(kind=cp)                 :: Sig =0.0_cp
-      integer,dimension(4)          :: P   =0
-      character(len=8),dimension(3) :: Code=" "
-   End Type Torsion_Restraint_Type
+   !!----
+   !!----
+   !!
+   Type, public :: RestList_Type
+      integer                                         :: ND_MAX=0 ! Number of Dimension of Par when it was created
+      integer                                         :: NRel=0      ! Current number of Parameters
+      type(Restraint_Type), allocatable, dimension(:) :: RT
+   End Type RestList_Type
 
    !!----
    !!---- TYPE :: RELATION_TYPE
@@ -121,12 +119,15 @@ Module CFML_KeyCodes
    !!----
    !!---- Update: April - 2022
    Type, public :: GenPar_Type
-      character(len=40) :: Nam=" "
-      character(len=30) :: Ext=" "
-      integer           :: L=0            ! Code number
-      real(kind=cp)     :: M=0.0_cp       ! Multiplier
-      real(kind=cp)     :: Val=0.0_cp
-      real(kind=cp)     :: Sig=0.0_cp
+      integer, dimension(2)       :: Ip=0           !(1): Pattern, (2): Phase
+      character(len=60)           :: Nam=" "
+      character(len=60)           :: Ext=" "
+      integer                     :: L=0            ! Code number
+      real(kind=cp)               :: M=0.0_cp       ! Multiplier
+      real(kind=cp)               :: Val=0.0_cp     ! Values
+      real(kind=cp)               :: Sig=0.0_cp     ! Sig values
+      real(kind=cp), dimension(2) :: Vlim=0.0_cp    ! Lower/Upper limits
+      logical                     :: Bcond=.false.  ! Boundary condition
    End Type GenPar_Type
 
    !!----
@@ -146,40 +147,39 @@ Module CFML_KeyCodes
 
 
    !---- Parameters ----!
-   integer, private, parameter :: NKEY_ATM =14      ! Number of Keywords for Atoms
-   integer, private, parameter :: NKEY_MATM=25      ! Number of Keywords for Magnetic atoms
-   integer, private, parameter :: NKEY_MOL =15      ! Number of Keywords for Molecule
-   integer, private, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
-   integer, private, parameter :: NKEY_PHAS=7       ! Number of Keywords for Phases
-   integer, private, parameter :: NKEY_PATT=25      ! Number of Keywords for Patterns
+   integer, public, parameter :: NKEY_PHAS=52      ! Number of Keywords for Phases
+   integer, public, parameter :: NKEY_PATT=42      ! Number of Keywords for Patterns
+   !integer, public, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
 
 
-   character(len=*), dimension(NKEY_ATM), public, parameter :: KEY_ATM=[                      &
-                     "X    ", "Y    ", "Z    ", "XYZ  ", "OCC  ",                             &
-                     "UISO ", "U    ", "U11  ", "U22  ", "U33  ", "U12  ", "U13  ", "U23  ",  &
-                     "ALL  "]
-
-   character(len=*), dimension(NKEY_MATM), public, parameter :: KEY_MATM=[ &
-                     "RX   ", "RY   ", "RZ   ", "IX   ", "IY   ", "IZ   ", &
-                     "RM   ", "RPHI ", "RTHE ", "IM   ", "IPHI ", "ITHE ", &
-                     "MAGPH",                                              &
-                     "C1   ", "C2   ", "C3   ", "C4   ", "C5   ", "C6   ", &
-                     "C7   ", "C8   ", "C9   ", "C10  ", "C11  ", "C12  "]
-
-   character(len=*), dimension(NKEY_MOL), public, parameter :: KEY_MOL=[ &
-                     "XC    ", "YC    ", "ZC    ", "CENTRE",             &
-                     "THE   ", "PHI   ", "CHI   ", "ORIENT",             &
-                     "T     ", "L     ", "S     ", "TL    ", "LS    ", "TS    ", "TLS   "]
-
-   character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[          &
-                     "A    ", "B    ", "C    ", "ALP  ", "BET  ", "GAM  ", "CELL "]
+   character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[ &
+                     "A     ", "B     ", "C     ",                         &
+                     "ALPHA ", "BETA  ", "GAMMA ", "CELL  ",               &
+                     "X     ", "Y     ", "Z     ", "XYZ   ", "OCC   ",     &
+                     "UISO  ", "U     ", "U11   ", "U22   ", "U33   ",     &
+                     "U12   ", "U13   ", "U23   ",                         &
+                     "RX    ", "RY    ", "RZ    ",                         &
+                     "IX    ", "IY    ", "IZ    ",                         &
+                     "RM    ", "RPHI  ", "RTHE  ",                         &
+                     "IM    ", "IPHI  ", "ITHE  ", "MAGPH ",               &
+                     "XC    ", "YC    ", "ZC    ", "CENTRE",               &
+                     "THE   ", "PHI   ", "CHI   ", "ORIENT",               &
+                     "T     ", "L     ", "S     ", "TL    ",               &
+                     "LS    ", "TS    ", "TLS   ",                         &
+                     "SIZE  ", "STRAIN", "SCALE ", "ALL   "]
 
    character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
-                     "U    ", "V    ", "W    ", "UVW  ",                            &
-                     "BKG1 ", "BKG2 ", "BKG3 ", "BKG4 ", "BKG5 ", "BKG6 ", "BKG7 ", &
-                     "BKG8 ", "BKG9 ", "BKG10", "BKG11", "BKG12", "BKG  ",          &
-                     "SC1  ", "SC2  ", "SC3  ", "SC   ",                            &
-                     "EXTI1", "EXTI2", "EXTI3", "EXTI "]
+                     "U     ", "V     ", "W     ", "UVW   ",               &
+                     "BKG1  ", "BKG2  ", "BKG3  ", "BKG4  ", "BKG5  ",     &
+                     "BKG6  ", "BKG7  ", "BKG8  ", "BKG9  ", "BKG10 ",     &
+                     "BKG11 ", "BKG12 ", "BKG   ",                         &
+                     "SC1   ", "SC2   ", "SC3   ", "SC    ",               &
+                     "EXTI1 ", "EXTI2 ", "EXTI3 ", "EXTI  ",               &
+                     "ZERO  ", "SYCOS ", "SYSIN ",                         &
+                     "LAMBDA", "SD    ", "SL    ", "SDSL  ",               &
+                     "DTT1  ", "DTT2  ",                                   &
+                     "SIG0  ", "SIG1  ", "SIG2  ", "SIG   ",               &
+                     "GAM0  ", "GAM1  ", "GAM2  ", "GAM   "]
 
    !-------------------!
    !---- Variables ----!
@@ -187,7 +187,7 @@ Module CFML_KeyCodes
 
    !---- Private ----!
    character(len=:),   private, allocatable   :: line
-   character(len=40),  private, dimension(40) :: dire=" "
+   character(len=60),  private, dimension(40) :: dire=" "
    integer,            private, dimension(10) :: ivet=0
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
 
@@ -196,10 +196,6 @@ Module CFML_KeyCodes
 
    integer, public :: NP_Ref_Max =0  ! Number of Maximum refinable Parameters
    integer, public :: NP_Ref     =0  ! Number of Refinable parameters
-
-   integer, public :: NP_Rest_Ang=0  ! Number of Angle restraints relations
-   integer, public :: NP_Rest_Dis=0  ! Number of Distance restraints relations
-   integer, public :: NP_Rest_Tor=0  ! Number of Torsional angles restraints
 
    integer,           public, dimension(:)  , allocatable :: Vec_BCond    ! Vector of Boundary Conditions
    integer,           public, dimension(:)  , allocatable :: Vec_PointPar ! Vector of indices pointing to the parameter number
@@ -210,30 +206,46 @@ Module CFML_KeyCodes
    real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
    character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
 
-   type(Angle_Restraint_Type),    public, dimension(:), allocatable :: Ang_Rest     ! Relations for Angle restraints
-   type(Distance_Restraint_Type), public, dimension(:), allocatable :: Dis_Rest     ! Relations for Distance restraints
-   type(Torsion_Restraint_Type),  public, dimension(:), allocatable :: Tor_Rest     ! Relations for Torsional angles restraints
+   type(RestList_Type), public :: Rest_Ang  ! Relations for Angle restraints
+   type(RestList_Type), public :: Rest_Dis  ! Relations for Distance restraints
+   type(RestList_Type), public :: Rest_Tor  ! Relations for Torsion restraints
 
 
    !---- Overload Zone ----!
 
    !---- Interface Zone ----!
    Interface
-      Module Subroutine Allocate_Restraints_Vec(Ffile, N_ini, N_end, NDfix, NAfix, NTFix)
-         !---- Arguments ----!
-         Type(file_type),  intent( in) :: Ffile
-         integer, optional,intent( in) :: N_Ini
-         integer, optional,intent( in) :: N_End
-         integer, optional,intent(out) :: NDfix
-         integer, optional,intent(out) :: NAfix
-         integer, optional,intent(out) :: NTfix
-      End Subroutine Allocate_Restraints_Vec
 
-      Module Subroutine Allocate_GenParList(NDMax, R)
+      Module Function Index_GPList(CodeNam, G) Result(Ind)
          !---- Arguments ----!
-         integer,                 intent(in)     :: NDMax
+         character(Len=*),      intent(in) :: CodeNam
+         type(GenParList_Type), intent(in) :: G
+         integer                           :: Ind
+      End Function Index_GPList
+
+      Module Function Index_KEY_PHAS(String) Result(Ind)
+         !---- Arguments ----!
+         character(Len=*), intent(in) :: String
+         integer                      :: Ind
+      End Function Index_KEY_PHAS
+
+      Module Function Index_KEY_PATT(String) Result(Ind)
+         !---- Arguments ----!
+         character(Len=*), intent(in) :: String
+         integer                      :: Ind
+      End Function Index_KEY_PATT
+
+      Module Subroutine Allocate_Restraints_List(R, NDim)
+         !---- Arguments ----!
+         Type(RestList_Type), intent(in out) :: R
+         integer,             intent(in)     :: NDim
+      End Subroutine Allocate_Restraints_List
+
+      Module Subroutine Allocate_GPList(NDMax, R)
+         !---- Arguments ----!
+         integer,               intent(in)     :: NDMax
          type(GenParList_Type), intent(in out) :: R
-      End Subroutine Allocate_GenParList
+      End Subroutine Allocate_GPList
 
       Module Subroutine Allocate_VecRef(N)
          !---- Arguments ----!
@@ -251,11 +263,11 @@ Module CFML_KeyCodes
          integer,           intent(in)     :: NPar
       End Subroutine Del_RefCode_Atm
 
-      Module Subroutine Del_RefCode_GenParList(R, NPar)
+      Module Subroutine Del_RefCode_GPList(G, NCode)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in out) :: R
-         integer,                 intent(in)     :: NPar
-      End Subroutine Del_RefCode_GenParList
+         type(GenParList_Type), intent(in out) :: G
+         integer,               intent(in)     :: NCode
+      End Subroutine Del_RefCode_GPList
 
       Module Subroutine Fill_RefCodes_Atm(Keyword, Npar, Bounds, Ic, Natm, Spg, AtList)
          !---- Arguments ----!
@@ -288,26 +300,28 @@ Module CFML_KeyCodes
          integer,           intent(in)     :: Ind
       End Subroutine Fix_XYZ_Atm
 
-
-      Module Subroutine Get_AFIX_Line(String, AtList, IPhase)
+      Module Subroutine Get_AFIX_Line(String, IPhase, AtList, R)
          !---- Arguments ----!
-         character(len=*),  intent(in) :: String
-         type(AtList_Type), intent(in) :: AtList
-         integer, optional, intent(in) :: IPhase
+         character(len=*),    intent(in)     :: String
+         integer,             intent(in)     :: IPhase
+         type(AtList_Type),   intent(in)     :: AtList
+         Type(RestList_Type), intent(in out) :: R
       End Subroutine Get_AFIX_Line
 
-      Module Subroutine Get_DFIX_Line(String, AtList, IPhase)
+      Module Subroutine Get_DFIX_Line(String, IPhase, AtList, R)
          !---- Arguments ----!
-         character(len=*),  intent(in) :: String
-         type(AtList_Type), intent(in) :: AtList
-         integer, optional, intent(in) :: IPhase
+         character(len=*),    intent(in)     :: String
+         integer,             intent(in)     :: IPhase
+         type(AtList_Type),   intent(in)     :: AtList
+         Type(RestList_Type), intent(in out) :: R
       End Subroutine Get_DFIX_Line
 
-      Module Subroutine Get_TFIX_Line(String, AtList, IPhase)
+      Module Subroutine Get_TFIX_Line(String, IPhase, AtList, R)
          !---- Arguments ----!
-         character(len=*),  intent(in) :: String
-         type(AtList_Type), intent(in) :: AtList
-         integer, optional, intent(in) :: IPhase
+         character(len=*),    intent(in)     :: String
+         integer,             intent(in)     :: IPhase
+         type(AtList_Type),   intent(in)     :: AtList
+         Type(RestList_Type), intent(in out) :: R
       End Subroutine Get_TFIX_Line
 
       Module Subroutine Split_GenRefCod_ATM(String, Nc, Ikeys, IPhas, Keys)
@@ -329,44 +343,46 @@ Module CFML_KeyCodes
          character(len=*), dimension(:), intent(out) :: AtLab
       End Subroutine Split_LocRefCod_ATM
 
-      Module Subroutine Vary_OCC_Atm(Atlist, NAtm, Bounds, Ic)
+      Module Subroutine Vary_OCC_Atm(A, NCode)
          !---- Arguments ----!
-         type(AtList_Type),           intent(in out) :: AtList
-         integer,                     intent(in)     :: NAtm
-         real(kind=cp), dimension(3), intent(in)     :: Bounds
-         integer,                     intent(in)     :: Ic
+         class(Atm_Type),           intent(in out) :: A
+         integer,                   intent(in out) :: NCode
       End Subroutine Vary_OCC_Atm
 
-      Module Subroutine Vary_U_Atm(Atlist, NAtm, Ind, Spg, Bounds, Ic)
+      Module Subroutine Vary_U_Atm(A, NCode, Ind)
          !---- Arguments ----!
-         type(AtList_Type),           intent(in out) :: AtList
-         integer,                     intent(in)     :: NAtm
-         integer,                     intent(in)     :: Ind
-         class(SpG_Type),             intent(in)     :: Spg
-         real(kind=cp), dimension(3), intent(in)     :: Bounds
-         integer,                     intent(in)     :: Ic
+         class(Atm_Type), intent(in out) :: A
+         integer,         intent(in out) :: NCode
+         integer,         intent(in)     :: Ind
       End Subroutine Vary_U_Atm
 
-      Module Subroutine Vary_XYZ_Atm(Atlist, NAtm, Ind, Spg, Bounds, Ic)
+      Module Subroutine Vary_XYZ_Atm(A, NCode, Ind)
          !---- Arguments ----!
-         type(AtList_Type),           intent(in out) :: AtList
-         integer,                     intent(in)     :: NAtm
-         integer,                     intent(in)     :: Ind
-         class(SpG_Type),             intent(in)     :: Spg
-         real(kind=cp), dimension(3), intent(in)     :: Bounds
-         integer,                     intent(in)     :: Ic
+         class(Atm_Type), intent(in out) :: A
+         integer,         intent(in out) :: NCode
+         integer,         intent(in)     :: Ind
       End Subroutine Vary_XYZ_Atm
+
+      Module Subroutine WriteInfo_GPList(R, Iunit)
+         !---- Arguments ----!
+         type(GenParList_Type), intent(in) :: R
+         integer, optional,     intent(in) :: Iunit
+      End Subroutine WriteInfo_GPList
 
       Module Subroutine WriteInfo_RefParams(Iunit)
          !---- Arguments ----!
          integer, optional,   intent(in) :: Iunit
       End Subroutine WriteInfo_RefParams
 
-      Module Subroutine WriteInfo_Restraints(AtList, Calc, Iunit)
+      Module Subroutine WriteInfo_Restraints(RDis, RAng, RTor, IPhase, AtList, Calc,Iunit)
          !---- Arguments ----!
-         type(AtList_Type), intent(in) :: AtList
-         logical, optional, intent(in) :: Calc
-         integer, optional, intent(in) :: iunit
+         type(RestList_Type), intent(in) :: RDis
+         type(RestList_Type), intent(in) :: RAng
+         type(RestList_Type), intent(in) :: RTor
+         integer,             intent(in) :: IPhase
+         type(AtList_Type),   intent(in) :: AtList
+         logical, optional,   intent(in) :: Calc
+         integer, optional,   intent(in) :: iunit
       End Subroutine WriteInfo_Restraints
 
       Module Subroutine WriteInfo_Constraints(AtList, Iunit)
@@ -384,6 +400,23 @@ Module CFML_KeyCodes
          type(AtList_Type),  intent(in out) :: AtList
       End Subroutine Read_RefCodes_ATM
 
+      Module Subroutine ReadCode_EQUAL_PHAS(String, IPhas, Spg, Cell, Atm, G)
+         !---- Arguments ----!
+         character(len=*),      intent(in)     :: String
+         integer,               intent(in)     :: IPhas
+         class(SpG_Type),       intent(in)     :: SpG
+         type(Cell_GLS_Type),   intent(in out) :: Cell
+         type(Atlist_Type),     intent(in out) :: Atm
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine ReadCode_EQUAL_PHAS
+
+      Module Subroutine ReadCode_EQUAL_PATT(String, IPatt, G)
+         !---- Arguments ----!
+         character(len=*),      intent(in)     :: String
+         integer,               intent(in)     :: IPatt
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine ReadCode_EQUAL_PATT
+
       Module Subroutine ReadCode_FIX_ATM(String, AtList, Spg)
          !---- Arguments ----!
          character(len=*),   intent(in)     :: String
@@ -398,13 +431,13 @@ Module CFML_KeyCodes
          class (SpG_type),   intent(in)     :: Spg
       End Subroutine ReadCode_VARY_ATM
 
-      Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, Ip, Pat)
+      Module Subroutine Read_RefCodes_PATT(ffile, n_ini, n_end, IPatt, G)
          !---- Arguments ----!
          Type(file_type),         intent(in)     :: ffile
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
-         integer,                 intent(in)     :: Ip
-         type(GenParList_Type),   intent(in out) :: Pat
+         integer,                 intent(in)     :: IPatt
+         type(GenParList_Type),   intent(in out) :: G
       End Subroutine Read_RefCodes_PATT
 
       Module Subroutine Split_RefCod_Patt(String, Nc, Ikeys, IPatt, Keys)
@@ -416,88 +449,110 @@ Module CFML_KeyCodes
          character(len=*), dimension(:), intent(out) :: Keys
       End Subroutine Split_RefCod_Patt
 
-      Module Subroutine ReadCode_FIX_PATT(String, Ip, Pat)
+      Module Subroutine ReadCode_FIX_PATT(String, IPatt, G)
          !---- Arguments ----!
          character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Ip
-         type(GenParList_Type),   intent(in out) :: Pat
+         integer,                 intent(in)     :: IPatt
+         type(GenParList_Type),   intent(in out) :: G
       End Subroutine ReadCode_FIX_PATT
 
-      Module Subroutine ReadCode_VARY_PATT(String, Ip, Pat)
+      Module Subroutine ReadCode_VARY_PATT(String, IPatt, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Ip
-         type(GenParList_Type), intent(in out) :: Pat
+         character(len=*),        intent(in)   :: String
+         integer,                 intent(in)   :: IPatt
+         type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_VARY_PATT
 
-      Module Subroutine FIX_GenParList_Par(R, CodeNam)
+      Module Subroutine FIX_GPList_Par(G, CodeNam)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in out) :: R
-         character(len=*),        intent(in)     :: CodeNam
-      End Subroutine FIX_GenParList_Par
+         type(GenParList_Type), intent(in out) :: G
+         character(len=*),      intent(in)     :: CodeNam
+      End Subroutine FIX_GPList_Par
 
-      Module Subroutine VARY_GenParList_Par(R, CodeNam, Value, Sig, Mult)
+      Module Subroutine VARY_GPList_Par(R, CodeNam, Value, Sig, Mult, Vlim, Bc)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in out) :: R
-         character(len=*),        intent(in)     :: CodeNam
-         real(kind=cp), optional, intent(in)     :: Value
-         real(kind=cp), optional, intent(in)     :: Sig
-         real(kind=cp), optional, intent(in)     :: Mult
-      End Subroutine VARY_GenParList_Par
+         type(GenParList_Type),                 intent(in out) :: R
+         character(len=*),                      intent(in)     :: CodeNam
+         real(kind=cp), optional,               intent(in)     :: Value
+         real(kind=cp), optional,               intent(in)     :: Sig
+         real(kind=cp), optional,               intent(in)     :: Mult
+         real(kind=cp), dimension(2), optional, intent(in)     :: Vlim
+         logical,       optional,               intent(in)     :: Bc
+      End Subroutine VARY_GPList_Par
 
-      Module Subroutine Set_RefCodes_PATT(Keyword, Npar,  IP, Pat)
+      Module Subroutine Set_RefCodes_PATT(Keyword, Npar,  IPatt, G)
          !---- Arguments ----!
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
-         integer,                       intent(in)     :: IP
-         type(GenParList_Type),         intent(in out) :: Pat
+         integer,                       intent(in)     :: IPatt
+         type(GenParList_Type),         intent(in out) :: G
       End Subroutine Set_RefCodes_PATT
 
-      Module Subroutine Read_RefCodes_PHAS(ffile, n_ini, n_end, Ip, Ph)
+      Module Subroutine Read_RefCodes_PHAS(ffile, n_ini, n_end, IPhas, SpG, Cell, Atm, G)
          !---- Arguments ----!
          Type(file_type),         intent(in)     :: ffile
          integer,                 intent(in)     :: n_ini
          integer,                 intent(in)     :: n_end
-         integer,                 intent(in)     :: Ip
-         type(GenParList_Type),   intent(in out) :: Ph
+         integer,                 intent(in)     :: Iphas
+         class(SpG_Type),         intent(in)     :: SpG
+         type(Cell_GLS_Type),     intent(in out) :: Cell
+         type(Atlist_Type),       intent(in out) :: Atm
+         type(GenParList_Type),   intent(in out) :: G
       End Subroutine Read_RefCodes_PHAS
 
-      Module Subroutine GPList_to_Cell(Ph, Ip, Cell)
+      Module Subroutine Read_Restraints_PHAS(ffile, N_ini, N_end, IPhas, Atlist, RDis, RAng, RTor)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in)   :: Ph
-         integer,                 intent(in)   :: Ip
-         class(cell_Type),        intent(inout):: Cell
+         Type(file_type),     intent( in)    :: ffile
+         integer,             intent(in)     :: N_ini
+         integer,             intent(in)     :: N_end
+         integer,             intent(in)     :: IPhas
+         type(AtList_Type),   intent(in)     :: AtList
+         Type(RestList_Type), intent(in out) :: RDis
+         Type(RestList_Type), intent(in out) :: RAng
+         Type(RestList_Type), intent(in out) :: RTor
+      End Subroutine Read_Restraints_PHAS
+
+      Module Subroutine GPList_to_Cell(G, Ip, Cell)
+         !---- Arguments ----!
+         type(GenParList_Type), intent(in)    :: G
+         integer,               intent(in)    :: Ip
+         class(cell_Type),      intent(in out):: Cell
       End Subroutine GPList_to_Cell
 
-      Module Subroutine ReadCode_FIX_PHAS(String, Ip, Ph)
+      Module Subroutine GPList_from_Cell(Cell, IPh, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Ip
-         type(GenParList_Type), intent(inout) :: Ph
+         class(cell_Type),      intent(in)     :: Cell
+         integer,               intent(in)     :: IPh
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine GPList_from_Cell
+
+      Module Subroutine ReadCode_FIX_PHAS(String, IPhas, Spg, Cell, Atm, G)
+         !---- Arguments ----!
+         character(len=*),      intent(in)     :: String
+         integer,               intent(in)     :: IPhas
+         class(SpG_Type),       intent(in)     :: SpG
+         type(Cell_GLS_Type),   intent(in out) :: Cell
+         type(Atlist_Type),     intent(in out) :: Atm
+         type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_FIX_PHAS
 
-      Module Subroutine ReadCode_VARY_PHAS(String, Ip, Ph)
+      Module Subroutine ReadCode_VARY_PHAS(String, IPhas, Spg, Cell, Atm, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)    :: String
-         integer,                 intent(in)    :: Ip
-         type(GenParList_Type), intent(inout) :: Ph
+         character(len=*),      intent(in)     :: String
+         integer,               intent(in)     :: IPhas
+         class(SpG_Type),       intent(in)     :: SpG
+         type(Cell_GLS_Type),   intent(in out) :: Cell
+         type(Atlist_Type),     intent(in out) :: Atm
+         type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_VARY_PHAS
 
-      Module Subroutine Split_RefCod_PHAS(String, Nc, Ikeys, IPhas, Keys)
-         !---- Arguments ----!
-         character(len=*),               intent(in)  :: String
-         integer,                        intent(out) :: Nc
-         integer, dimension(:),          intent(out) :: IKeys
-         integer, dimension(:),          intent(out) :: IPhas
-         character(len=*), dimension(:), intent(out) :: Keys
-      End Subroutine Split_RefCod_PHAS
-
-      Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IP, Ph)
+      Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IPhas, Lab, G)
          !---- Arguments ----!
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
-         integer,                       intent(in)     :: IP
-         type(GenParList_Type),         intent(in out) :: Ph
+         integer,                       intent(in)     :: IPhas
+         character(len=*),              intent(in)     :: Lab
+         type(GenParList_Type),         intent(in out) :: G
       End Subroutine Set_RefCodes_PHAS
 
       Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
@@ -546,6 +601,69 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: Im
          type(Molecule_type),     intent(in out) :: Mol
       End Subroutine GPList_to_Molec
+
+      Module Subroutine GPList_from_AtmList(AtList, IPh, G)
+         !---- Arguments ----!
+         type(Atlist_Type),     intent(in)     :: AtList
+         integer,               intent(in)     :: IPh
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine GPList_from_AtmList
+
+      Module Subroutine GPList_to_AtmList(G, IPh, Atlist)
+         !---- Arguments ----!
+         type(GenParList_Type), intent(in)     :: G
+         integer,               intent(in)     :: IPh   ! Phase
+         type(Atlist_Type),     intent(in out) :: AtList
+      End Subroutine GPList_to_AtmList
+
+      Module Subroutine Set_KeyConstr_Cell(CrystSys, Cell)
+         !---- Arguments ----!
+         character(len=*),    intent(in)     :: CrystSys
+         type(Cell_GLS_Type), intent(in out) :: Cell
+      End Subroutine Set_KeyConstr_Cell
+
+      Module Subroutine Update_GPList_Code(G)
+         !---- Argument ----!
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine Update_GPList_Code
+
+      Module Subroutine Get_InfoKeyCode_String(Str, IPatt, IPhas, Itype, Nkey, Lab)
+        !---- Arguments ----!
+        character(len=*), intent(in)  :: Str
+        integer,          intent(out) :: IPatt
+        integer,          intent(out) :: IPhas
+        integer,          intent(out) :: IType
+        integer,          intent(out) :: NKey
+        character(len=*), intent(out) :: Lab
+      End Subroutine Get_InfoKeyCode_String
+
+      Module Subroutine Set_KeyConstr_Atm(Atm, Spg)
+         !---- Arguments ----!
+         type(Atlist_Type), intent(in out) :: Atm
+         class(SpG_Type),   intent(in)     :: SpG
+      End Subroutine Set_KeyConstr_Atm
+
+      Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab)
+         !---- Arguments ----!
+         character(len=*), intent(in) :: Str
+         integer,          intent(out):: iKey
+         integer,          intent(out):: IPh
+         character(len=*), intent(out):: Lab
+      End Subroutine Get_InfoKey_StrPhas
+
+      Module Subroutine Get_InfoKey_StrPatt(Str, iKey, IPat)
+         !---- Arguments ----!
+         character(len=*), intent(in) :: Str
+         integer,          intent(out):: iKey
+         integer,          intent(out):: IPat
+      End Subroutine Get_InfoKey_StrPatt
+
+      Module Subroutine SetCode_EQUAL_PHAS(string, IPhas, G)
+         !---- Arguments ----!
+         character(len=*),      intent(in)     :: String
+         integer,               intent(in)     :: IPhas
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine SetCode_EQUAL_PHAS
 
    End Interface
 
