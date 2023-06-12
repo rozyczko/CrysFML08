@@ -25,7 +25,7 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
 
       !--- Local variables ---!
       integer                          :: i,j,L,n,m,Ng,invt,i_centre,d
-      integer,       dimension(multip) :: perm
+      !integer,       dimension(multip) :: perm
       real(kind=cp), dimension(multip) :: tr   !Sum of absolute values of Translations components associated to the array of operators
       logical,       dimension(multip) :: nul  !Logical to control the exclusion of an operator from the independet list
       type(rational), dimension(:,:),allocatable:: identity,invers,imat !(d,d)

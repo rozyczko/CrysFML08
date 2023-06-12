@@ -42,7 +42,7 @@
  Module CFML_Strings
     !---- Use Modules ----!
     use Ieee_Arithmetic,   only: ieee_is_nan,ieee_is_finite
-    use CFML_GlobalDeps,   only: cp, ops_sep, err_cfml, clear_error
+    use CFML_GlobalDeps,   only: cp, ops_sep, err_cfml, clear_error, set_error
     use CFML_Maths,        only: Negligible, Zbelong
 
     implicit none
@@ -56,7 +56,7 @@
               NumCol_from_NumFmt, Pack_String, Read_Fract,Number_Lines,   &
               Set_Symb_From_Mat, String_Count, Strip_String, String_Real, &
               String_Fraction_1Dig, String_Fraction_2Dig, String_NumStd,  &
-              Reading_File, File_To_FileList
+              Reading_File, File_To_FileList, Get_Vec_from_FracStr
 
 
     !---- List of public subroutines ----!
@@ -219,6 +219,12 @@
           real(kind=cp),dimension(3),     optional,  intent(out) :: v        ! Vector
           character(len=1), dimension(4), optional,  intent(in)  :: cod      ! Code
        End Subroutine Get_Transf
+
+       Module Function Get_Vec_from_FracStr(Str) Result(V)
+          !---- Arguments ----!
+          character(len=*), intent(in) :: str
+          real(kind=cp), dimension(3)  :: V
+       End Function Get_Vec_from_FracStr
 
        Pure Module Subroutine Get_Separator_Pos(Str,car,pos,ncar)
           !---- Arguments ----!

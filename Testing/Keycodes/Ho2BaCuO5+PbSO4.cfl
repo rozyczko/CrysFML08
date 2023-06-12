@@ -187,36 +187,41 @@ END_PATTERN_myXray
 
 COMMANDS
 
-  %Global_parametric   !To be implemented
-  %End_Global_parametric
+  Global_parametric   !To be implemented
+  End_Global_parametric
 
-  %Phase_Ho2BaCuO5
-    VARY xyz
-    VARY mxmymz
+  Phase_Ho2BaCuO5
     VARY cell
-    VARY Iso_SIZE
-    VARY Iso_SIZE_GaussFract
-    FIX Iso_STRAIN_LorentzFract 0.0
-    VARY Iso_STRAIN
+    
+    !VARY xyz
+    !VARY mxmymz
+    !VARY Iso_SIZE
+    !VARY Iso_SIZE_GaussFract
+    !FIX Iso_STRAIN_LorentzFract 0.0
+    !VARY Iso_STRAIN
+    
     ! Instructions for refining parameters that depend on the pattern
-    VARY Scale_Factors
-  %End_Phase_Ho2BaCuO5
+    !VARY Scale_Factors
+  End_Phase_Ho2BaCuO5
 
-  %Phase_PbSO4
+  Phase_PbSO4
     VARY xyz
-    VARY biso
-    EQUAL b_O1 b_O2 b_O3
-  %End_Phase_PbSO4
+    FIX xyz O1 
+    !VARY biso
+    !EQUAL b_O1 b_O2 b_O3
+  End_Phase_PbSO4
 
-  %Phase_LeBail
+  Phase_3  ! Equivalent to put Phase_LaBail
     VARY cell
-    VARY Iso_SIZE
-    FIX  Iso_SIZE_GaussFract 0.0
-  %End_Phase_LeBail
+    !VARY Iso_SIZE
+    !FIX  Iso_SIZE_GaussFract 0.0
+  End_Phase_3
 
-  %Pattern_NeutronCW
+  Pattern_NeutronCW
     VARY UVW
-  %End_Pattern_NeutronCW
+    VARY ZERO
+    VARY SYSCOS
+  End_Pattern_NeutronCW
 
 END_COMMANDS
 

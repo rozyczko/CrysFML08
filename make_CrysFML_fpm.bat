@@ -59,15 +59,15 @@ rem .
       cd ..
       if [%_WINT%]==[win] (
           if [%_DEBUG%]==[Y] (
-             fpm @./rsp/ifort_win_debug_win
+             fpm @./rsp/ifort_win_debug_win.rsp
           ) else (
-             fpm @./rsp/ifort_win_release_win
+             fpm @./rsp/ifort_win_release_win.rsp
           )
       ) else (
           if [%_DEBUG%]==[Y] (
-             fpm @./rsp/ifort_win_debug_con
+             fpm @./rsp/ifort_win_debug_con.rsp
           ) else (
-             fpm @./rsp/ifort_win_release_con
+             fpm @./rsp/ifort_win_release_con.rsp
           )
       )
       cd .\Src
@@ -82,9 +82,9 @@ rem .
       ren  CFML_GlobalDeps_Windows_IFOR.xxx  CFML_GlobalDeps.f90
       cd ..
       if [%_DEBUG%]==[Y] (
-         fpm @./rsp/ifx_win_debug_con
+         fpm @./rsp/ifx_win_debug_con.rsp
       ) else (
-         fpm @./rsp/ifx_win_release_con
+         fpm @./rsp/ifx_win_release_con.rsp
       )
       cd .\Src
       ren CFML_GlobalDeps.f90 CFML_GlobalDeps_Windows_IFOR.xxx
@@ -96,15 +96,15 @@ rem .
       cd ..
       if [%_WINT%]==[win] (
           if [%_DEBUG%]==[Y] (
-             fpm @./rsp/gf_debug_win
+             fpm @./rsp/gf_debug_win.rsp
           ) else (
-             fpm @./rsp/gf_release_win
+             fpm @./rsp/gf_release_win.rsp
           )
       ) else (
           if [%_DEBUG%]==[Y] (
-             fpm @./rsp/gf_debug_con
+             fpm @./rsp/gf_debug_con.rsp
           ) else (
-             fpm @./rsp/gf_release_con
+             fpm @./rsp/gf_release_con.rsp
           )
       )
       cd .\Src

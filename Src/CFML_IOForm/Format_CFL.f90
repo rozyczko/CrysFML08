@@ -859,6 +859,8 @@ SubModule (CFML_IOForm) Format_CFL
       nt_phases=0; ip=cfl%nlines; ip(1)=1
       do i=1,cfl%nlines
          line=adjustl(cfl%line(i)%str)
+         if (len_trim(line) <=0) cycle
+
          if (l_case(line(1:6)) == "phase_")  then
             nt_phases=nt_phases+1
             ip(nt_phases)=i

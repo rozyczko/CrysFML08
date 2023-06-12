@@ -666,9 +666,8 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
             if (i /= 0) then
                symbol=tsymbol(1:i-1)
                !call Read_Xsym(tsymbol(i+1:),1,Rsym,Tr,.false.)
-               Op=Get_Op_from_Symb(tsymbol(i+1:))
-               tr=Op%Mat(1:3,4)
 
+               tr=Get_Vec_from_FracStr(tsymbol(i+1:))
                if (sum(abs(x-tr)) < EPSS) then
                   ssymb=["  0","  0","  0"]
                   if (present(Ipr)) then

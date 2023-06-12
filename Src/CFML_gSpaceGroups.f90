@@ -55,7 +55,7 @@ Module CFML_gSpaceGroups
     Use CFML_Maths,             only: Set_eps_math, modulo_lat, determ3D, Get_eps_math, Zbelong,EPSS,Diagonalize_RGEN, &
                                       equal_vector,resolv_sist_3x3,trace,Equal_Matrix, Inverse_Matrix,Lat_modulo
     Use CFML_Strings,           only: u_case, l_case, pack_string, get_separator_pos, get_num, &
-                                      get_words, String_Fraction_2Dig,Set_Symb_From_Mat
+                                      get_words, String_Fraction_2Dig,Set_Symb_From_Mat, Get_Vec_from_FracStr
 
     !---- Variables ----!
     implicit none
