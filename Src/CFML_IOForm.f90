@@ -166,11 +166,10 @@ Module CFML_IOForm
    !-------------------!
 
    !---- Private ----!
-   character(len=:),   private, allocatable   :: line
+   character(len=256),   private              :: line
    character(len=60),  private, dimension(40) :: dire=" "
    integer,            private, dimension(15) :: ivet=0
    real(kind=cp),      private, dimension(15) :: vet=0.0_cp
-
 
    !---- Public ----!
    integer, public :: NP_Instr =0     ! Number of Directives

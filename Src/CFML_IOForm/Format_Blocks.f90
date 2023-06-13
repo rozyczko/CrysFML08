@@ -26,10 +26,9 @@ Submodule (CFML_IOForm) Format_Blocks
       integer,                       intent(out) :: N_Id        ! Number of ID
 
      !---- Local Arguments ----!
-     integer                          :: i, j, n, nc, iv
-     character(len=:), allocatable    :: car
-
-     logical                          :: Debug=.false.
+     integer           :: i, j, n, nc, iv
+     character(len=40) :: car
+     logical           :: Debug=.false.
 
      !> Init
      Ind=0
@@ -49,7 +48,7 @@ Submodule (CFML_IOForm) Format_Blocks
         end if
 
         !> No comments
-        if (line(1:1) =='!') then
+        if (line(1:1) =='!' .or. line(1:1) ==' ') then
            i=i+1
            cycle
         end if
@@ -134,8 +133,9 @@ Submodule (CFML_IOForm) Format_Blocks
       !> Determine the zone of commands in the file
       do i=1,ffile%nlines
          line=adjustl(ffile%line(i)%str)
-         if (len_trim(line) == 0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) =='!') cycle
+         if (line(1:1) ==' ') cycle
 
          j=index(line,'!')
          if (j > 0) line=line(:j-1)
@@ -161,7 +161,7 @@ Submodule (CFML_IOForm) Format_Blocks
 
       !> Check error
       if (n_ini > 0 .and. n_end ==0) then
-         call set_error(1, "Error in Commands...End_Commands Block definition!")
+         call set_error(1, "Error in COMMANDS/END_COMMANDS Block definition!")
       end if
 
    End Subroutine Get_Block_Commands
@@ -201,6 +201,7 @@ Submodule (CFML_IOForm) Format_Blocks
          line=adjustl(ffile%line(i)%str)
          if(len_trim(line) == 0) cycle
          if (line(1:1) =='!') cycle
+         if (line(1:1) ==' ') cycle
 
          j=index(line,'!')
          if (j > 0) line=line(:j-1)
@@ -264,6 +265,7 @@ Submodule (CFML_IOForm) Format_Blocks
 
          if (len_trim(line) == 0) cycle
          if (line(1:1) =="!") cycle
+         if (line(1:1) ==" ") cycle
 
          j=index(line,'!')
          if (j > 0) line=line(:j-1)
@@ -313,6 +315,7 @@ Submodule (CFML_IOForm) Format_Blocks
          line = adjustl(ffile%line(j)%str)
          if (len_trim(line) == 0) cycle
          if (line(1:1) =='!') cycle
+         if (line(1:1) ==' ') cycle
 
          k=index(line,'!')
          if (k > 0) line=line(:k-1)
@@ -336,6 +339,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -365,6 +369,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -396,6 +401,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -425,6 +431,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -464,6 +471,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -513,6 +521,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -554,6 +563,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -585,6 +595,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -622,6 +633,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -652,6 +664,7 @@ Submodule (CFML_IOForm) Format_Blocks
                         line = adjustl(ffile%line(j)%str)
                         if (len_trim(line) == 0) cycle
                         if (line(1:1) =='!') cycle
+                        if (line(1:1) ==' ') cycle
 
                         k=index(line,'!')
                         if (k > 0) line=line(:k-1)
@@ -702,11 +715,11 @@ Submodule (CFML_IOForm) Format_Blocks
       logical, optional, intent(in) :: LSymm
 
       !---- Local Variables ----!
-      logical                          :: exc_reg, exc_bck, exc_symm
-      integer                          :: i, j, k, kk, ic, iv
-      integer, dimension(2)            :: Ind1, Ind2
-      character(len=10)                :: str
-      character(len=:),  allocatable   :: linec
+      logical               :: exc_reg, exc_bck, exc_symm
+      integer               :: i, j, k, kk, ic, iv
+      integer, dimension(2) :: Ind1, Ind2
+      character(len=10)     :: str
+      character(len=132)    :: linec
 
 
       !> Init
@@ -751,7 +764,7 @@ Submodule (CFML_IOForm) Format_Blocks
             cycle
          end if
 
-         if (line(1:1) =="!") then
+         if (line(1:1) =="!" .or. line(1:1)==' ') then
             i=i+1
             cycle
          end if

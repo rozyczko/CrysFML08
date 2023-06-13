@@ -66,18 +66,18 @@ Module CFML_KeyCodes
    public :: Index_GPList
 
    !---- List of public Subroutines ----!
-   public :: Allocate_VecRef, Allocate_Restraints_List, Allocate_GPList,   &
+   public :: Allocate_Restraints_List, Allocate_GPList,   &
              Del_RefCode_ATM, Del_RefCode_GPList, &
              Fill_RefCodes_Atm,  &
-             Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, &
+             Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, GPList_to_Cell, GPList_to_Molec, &
+             GPList_to_AtmList, GPList_from_AtmList, Get_InfoKey_StrPhas, &
+             Get_InfoKey_StrPatt, GPList_from_Cell, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
-             Read_RefCodes_PHAS, GPList_to_Cell, Read_RefCodes_MOL, GPList_to_Molec, &
-             GPList_to_AtmList, Get_InfoKey_StrPhas, Get_InfoKey_StrPatt,&
-             Split_GenRefCod_ATM, Split_LocRefCod_ATM, &
-             WriteInfo_RefParams, WriteInfo_Restraints, WriteInfo_Constraints, &
-             WriteInfo_GPList, GPList_from_AtmList, GPList_from_Cell, Set_KeyConstr_Cell, &
-             Update_GPList_Code, ReadCode_EQUAL_PHAS, ReadCode_EQUAL_PATT, &
-             Read_Restraints_PHAS
+             Read_RefCodes_PHAS, Read_RefCodes_MOL, ReadCode_EQUAL_PHAS, &
+             ReadCode_EQUAL_PATT, Read_Restraints_PHAS, &
+             Split_GenRefCod_ATM, Split_LocRefCod_ATM, Set_KeyConstr_Cell, &
+             Update_GPList_Code, &
+             WriteInfo_Restraints, WriteInfo_Constraints, WriteInfo_GPList
 
 
    !---- Definitions ----!
@@ -186,7 +186,7 @@ Module CFML_KeyCodes
    !-------------------!
 
    !---- Private ----!
-   character(len=:),   private, allocatable   :: line
+   character(len=256), private                :: line
    character(len=60),  private, dimension(40) :: dire=" "
    integer,            private, dimension(10) :: ivet=0
    real(kind=cp),      private, dimension(10) :: vet=0.0_cp
@@ -196,15 +196,6 @@ Module CFML_KeyCodes
 
    integer, public :: NP_Ref_Max =0  ! Number of Maximum refinable Parameters
    integer, public :: NP_Ref     =0  ! Number of Refinable parameters
-
-   integer,           public, dimension(:)  , allocatable :: Vec_BCond    ! Vector of Boundary Conditions
-   integer,           public, dimension(:)  , allocatable :: Vec_PointPar ! Vector of indices pointing to the parameter number
-   real(kind=cp),     public, dimension(:,:), allocatable :: Vec_LimPar   ! Vector of Lower, Upper limits and Step for Parameters
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefPar   ! Vector of refined parameters (values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefParSTD! Vector of STD of refined paramaters
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefSave  ! Vector of refined paramaters (saved values)
-   real(kind=cp),     public, dimension(:)  , allocatable :: Vec_RefShift ! Vector of Shifts with repect to previous values
-   character(len=40), public, dimension(:)  , allocatable :: Vec_NamePar  ! Vector of names for all refinable parameters
 
    type(RestList_Type), public :: Rest_Ang  ! Relations for Angle restraints
    type(RestList_Type), public :: Rest_Dis  ! Relations for Distance restraints
@@ -241,21 +232,11 @@ Module CFML_KeyCodes
          integer,             intent(in)     :: NDim
       End Subroutine Allocate_Restraints_List
 
-      Module Subroutine Allocate_GPList(NDMax, R)
+      Module Subroutine Allocate_GPList(NDMax, G)
          !---- Arguments ----!
          integer,               intent(in)     :: NDMax
-         type(GenParList_Type), intent(in out) :: R
+         type(GenParList_Type), intent(in out) :: G
       End Subroutine Allocate_GPList
-
-      Module Subroutine Allocate_VecRef(N)
-         !---- Arguments ----!
-         integer, intent(in) :: N
-      End Subroutine Allocate_VecRef
-
-      Module Subroutine Del_Element_in_VRef(N)
-         !---- Arguments ----!
-         integer, intent(in) :: N
-      End Subroutine Del_Element_in_VRef
 
       Module Subroutine Del_RefCode_Atm(AtList, NPar)
          !---- Arguments ----!
@@ -363,16 +344,11 @@ Module CFML_KeyCodes
          integer,         intent(in)     :: Ind
       End Subroutine Vary_XYZ_Atm
 
-      Module Subroutine WriteInfo_GPList(R, Iunit)
+      Module Subroutine WriteInfo_GPList(G, Iunit)
          !---- Arguments ----!
-         type(GenParList_Type), intent(in) :: R
+         type(GenParList_Type), intent(in) :: G
          integer, optional,     intent(in) :: Iunit
       End Subroutine WriteInfo_GPList
-
-      Module Subroutine WriteInfo_RefParams(Iunit)
-         !---- Arguments ----!
-         integer, optional,   intent(in) :: Iunit
-      End Subroutine WriteInfo_RefParams
 
       Module Subroutine WriteInfo_Restraints(RDis, RAng, RTor, IPhase, AtList, Calc,Iunit)
          !---- Arguments ----!
@@ -469,15 +445,15 @@ Module CFML_KeyCodes
          character(len=*),      intent(in)     :: CodeNam
       End Subroutine FIX_GPList_Par
 
-      Module Subroutine VARY_GPList_Par(R, CodeNam, Value, Sig, Mult, Vlim, Bc)
+      Module Subroutine VARY_GPList_Par(G, CodeNam, Value, Sig, Mult, Vlim, Bc)
          !---- Arguments ----!
-         type(GenParList_Type),                 intent(in out) :: R
+         type(GenParList_Type),                 intent(in out) :: G
          character(len=*),                      intent(in)     :: CodeNam
-         real(kind=cp), optional,               intent(in)     :: Value
-         real(kind=cp), optional,               intent(in)     :: Sig
-         real(kind=cp), optional,               intent(in)     :: Mult
+         real(kind=cp),               optional, intent(in)     :: Value
+         real(kind=cp),               optional, intent(in)     :: Sig
+         real(kind=cp),               optional, intent(in)     :: Mult
          real(kind=cp), dimension(2), optional, intent(in)     :: Vlim
-         logical,       optional,               intent(in)     :: Bc
+         logical,                     optional, intent(in)     :: Bc
       End Subroutine VARY_GPList_Par
 
       Module Subroutine Set_RefCodes_PATT(Keyword, Npar,  IPatt, G)
@@ -626,16 +602,6 @@ Module CFML_KeyCodes
          !---- Argument ----!
          type(GenParList_Type), intent(in out) :: G
       End Subroutine Update_GPList_Code
-
-      Module Subroutine Get_InfoKeyCode_String(Str, IPatt, IPhas, Itype, Nkey, Lab)
-        !---- Arguments ----!
-        character(len=*), intent(in)  :: Str
-        integer,          intent(out) :: IPatt
-        integer,          intent(out) :: IPhas
-        integer,          intent(out) :: IType
-        integer,          intent(out) :: NKey
-        character(len=*), intent(out) :: Lab
-      End Subroutine Get_InfoKeyCode_String
 
       Module Subroutine Set_KeyConstr_Atm(Atm, Spg)
          !---- Arguments ----!

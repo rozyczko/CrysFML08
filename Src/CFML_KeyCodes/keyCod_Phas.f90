@@ -32,6 +32,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
          line=adjustl(ffile%line(i)%str)
          if (len_trim(line) == 0) cycle
          if (line(1:1) =="!") cycle
+         if (line(1:1) ==" ") cycle
 
          k=index(line,"!")
          if( k /= 0) line=line(:k-1)
@@ -131,6 +132,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (52)
+
                      case default
                         call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
                   end select
@@ -224,6 +226,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (52)
+
                      case default
                         call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
                   end select
@@ -306,6 +309,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call GPList_from_AtmList(Atm, k, G)
 
                case (52)
+
                case default
                   call Set_RefCodes_PHAS('FIX', ikey, k, ' ', G)
             end select
@@ -315,6 +319,8 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
          !> Updating Codes
          call Update_GPList_Code(G)
+
+         !> Debugging
          !call WriteInfo_GPList(G)
 
          i=i+1
@@ -400,6 +406,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (52)
+
                      case default
                         call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
                   end select
@@ -493,6 +500,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (52)
+
                      case default
                         call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
                   end select
@@ -533,6 +541,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            if (n < j-1) call Update_GPList_Code(G)
 
                         case (52)
+
                         case default
                            call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
                      end select
@@ -575,6 +584,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call GPList_from_AtmList(Atm, k, G)
 
                case (52)
+
                case default
                   call Set_RefCodes_PHAS('VARY', ikey, k, ' ', G)
             end select
@@ -584,27 +594,12 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
          !> Updating Codes
          call Update_GPList_Code(G)
+
+         !> Debugging
          !call WriteInfo_GPList(G)
 
          i=i+1
       end do
-
-            ! ALL
-
-            !   !> Only atom names
-            !   do j=2,n_dir
-            !      n=11
-            !      call Set_RefCodes_PHAS('VARY', n, k, dire(j), G)
-            !      n=13
-            !      call Set_RefCodes_PHAS('VARY', n, k, dire(j), G)
-            !   end do
-            !
-            !   call GPList_to_AtmList(G, k, Atm)
-            !   call Set_KeyConstr_Atm(Atm, Spg)
-            !   call GPList_from_AtmList(Atm, k, G)
-            !   call Update_GPList_Code(G)
-            !   exit
-
 
    End Subroutine ReadCode_VARY_PHAS
 
@@ -1016,8 +1011,6 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=20):: lab, lab2, lab3
       character(len=60):: str1, str2, str3
 
-      !real(kind=cp) :: val
-
       logical :: chemlabel = .false.
       logical :: atmlabel = .false.
 
@@ -1046,14 +1039,10 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
             !> -----------------
             !> General Directive
             !> -----------------
-            ind1=0
-            do i=1, NKEY_PHAS
-               if (trim(KEY_PHAS(i)) /= trim(u_case(dire(1))) ) cycle
-               ind1=i
-               exit
-            end do
+            ind1=Index_key_phas(trim(u_case(dire(1))) )
             if (ind1 ==0) then
-               call set_error(1, "Not Defined the current directive!")
+               call set_error(1, &
+                   "Error in EQUAL Instructions. Waiting for a PHASE directive: "//trim(dire(1)) )
                return
             end if
 
@@ -1067,8 +1056,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
             !> chemical species
             spc = Get_Chem_Symb(lab2)
-            spc=u_case(spc)
-            if (trim(spc) == trim(u_case(lab2))) chemlabel=.true.
+            if (trim(spc) == trim(lab2) ) chemlabel=.true.
 
             if (.not. chemlabel) then
                if (ind2 ==0 .and. len_trim(lab2) > 0) atmlabel=.true.
@@ -1087,25 +1075,21 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                str2=trim(u_case(dire(1)))//trim(str1)
                str3='_PHAS'//trim(car)
 
-               n2 = len_trim(str1)
+               ind2=0
                do j=1,G%NPar
-                  n = index(trim(G%Par(j)%Nam), trim(str3))
+                  n = index(trim(G%Par(j)%Nam), trim(str3)) ! Select the correct phase
                   if (n == 0) cycle
 
-                  n = index(trim(G%Par(j)%Nam), trim(str2))
+                  n = index(trim(G%Par(j)%Nam), trim(str2)) ! Select same directive + chemical symbol
                   if (n == 0) cycle
-
-                  n1 = index(trim(G%Par(j)%Nam),trim(str1))
-                  cn=G%Par(j)%Nam(n1+n2:)
-                  call get_num(cn, vet, ivet, iv)
-                  if (iv ==0) then
-                     call set_error(1,' Error reading the format on EQUAL Directive!!')
-                     return
-                  end if
 
                   ind2=j
                   exit
                end do
+               if (ind2 == 0) then
+                  call set_error(1, 'Cannot determine a possible Parent for EQUAL instruction!')
+                  return
+               end if
 
                kc2=G%Par(ind2)%L
 
@@ -1114,10 +1098,10 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   if (j == ind2) cycle
                   call Get_InfoKey_StrPhas(trim(G%Par(j)%Nam), ind3, ik3, lab3)
 
-                  if (ik3 /= ik2) cycle
-                  if (ind3 /= ind1) cycle
+                  if (ik3 /= ik2) cycle                ! Same phase
+                  if (ind3 /= ind1) cycle              ! Same parameter
                   spc3 = Get_Chem_Symb(lab3)
-                  if (trim(spc) /= trim(spc3)) cycle
+                  if (trim(spc) /= trim(spc3)) cycle   ! Same chemical specie
 
                   !> Assign the values
                   kc3=G%Par(j)%L
@@ -1132,7 +1116,6 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         G%Par(n)%L =kc2
                      end if
                   end do
-
                end do
 
             else if (atmlabel) then
@@ -1158,7 +1141,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                   ind3= index_GPList(trim(u_case(dire(1)))//'_'//trim(lab3)//'_PHAS'//trim(car), G)
                   if (ind3 ==0) then
-                     call set_error(1, ' Not found the parent information on EQUAL directive!')
+                     call set_error(1, ' Not found a correct offprings information on EQUAL directive!')
                      return
                   end if
 

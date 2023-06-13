@@ -274,19 +274,19 @@ Program KeyCodes
    end if
 
    do i=1,NB_Phas
-      call Read_XTal_Structure(trim(filcod)//'.cfl',ph(i)%Cell,ph(i)%Spg,ph(i)%Atm,IPhase=i)
+      call Read_XTal_Structure(trim(filcod)//'.cfl',ph(i)%Cell, ph(i)%Spg, ph(i)%Atm, IPhase=i)
       if (Err_CFML%IErr == 1) then
          write(unit=*,fmt="(a,i3)")  ' => Error reading phase #',i
+         write(unit=*,fmt='(a)') ' => '//trim(err_CFML%Msg)
          stop
       end if
       ph(i)%Atm%Iph=i   ! Actualizar
-
 
       write(unit=lun,fmt='(/,a)')  '  ==========================='
       write(unit=lun,fmt='(a,i4)') '  Information about Phase',i
       write(unit=lun,fmt='(a,/)')  '  ==========================='
       call Write_SpaceGroup_Info(Ph(i)%SpG,lun)
-      call Write_Atom_List(Ph(i)%atm,Iunit=lun)
+      call Write_Atom_List(Ph(i)%atm,i, Iunit=lun)
       write(unit=lun,fmt='(a)')' '
    end do
 

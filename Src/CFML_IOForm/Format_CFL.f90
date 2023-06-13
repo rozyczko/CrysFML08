@@ -25,12 +25,10 @@ SubModule (CFML_IOForm) Format_CFL
       integer, optional,    intent(in)     :: i_ini, i_end
 
       !---- Local variables -----!
-      character(len=:),   allocatable   :: mom_comp
-      character(len=:),   allocatable   :: direc
-      integer                           :: i, j, na, npos, n_oc, n_mc,n_dc,n_uc
-      integer                           :: j_ini, j_end
-      ! --- Debugging variables
-      !character(len=:),allocatable :: fmt1
+      character(len=80) :: mom_comp
+      character(len=80) :: direc
+      integer           :: i, j, na, npos, n_oc, n_mc,n_dc,n_uc
+      integer           :: j_ini, j_end
 
       !> Init
       call clear_error()
@@ -53,6 +51,7 @@ SubModule (CFML_IOForm) Format_CFL
           line=adjustl(cfl%line(i)%str)
           if (len_trim(line) == 0) cycle
           if (line(1:1) == "!" .or. line(1:1) == "#") cycle
+          if (line(1:1) == ' ') cycle
 
           if (index(u_case(line),"ATM_MOM_COMP") /= 0) then
              j=index(line,"!")
@@ -71,14 +70,12 @@ SubModule (CFML_IOForm) Format_CFL
       call Allocate_Atom_List(na, Atmlist, Type_Atm, d)
       if (len_trim(mom_comp) > 2) Atmlist%mcomp=mom_comp
 
-      !debugging
-      !fmt1="(T6,a,T18,a,T28,i3,5f10.5,a)"
-
       na=0
       do i=j_ini,j_end
          line=adjustl(cfl%line(i)%str)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
+         if (line(1:1) ==' ') cycle
 
          !> Truncate line from symbols: # and !
          npos=index(line,'!')
@@ -102,7 +99,7 @@ SubModule (CFML_IOForm) Format_CFL
          na=na+1
          call read_atom(line, Atmlist%atom(na))  ! Utype is read now in the line
          Atmlist%atom(na)%ThType="iso"
-         if(len_trim(Atmlist%atom(na)%SfacSymb) == 0) Atmlist%atom(na)%SfacSymb=Atmlist%atom(na)%chemSymb
+         if (len_trim(Atmlist%atom(na)%SfacSymb) == 0) Atmlist%atom(na)%SfacSymb=Atmlist%atom(na)%chemSymb
 
          !Debugging
          !associate (Atm => Atmlist%atom)
@@ -121,9 +118,7 @@ SubModule (CFML_IOForm) Format_CFL
 
                if (len_trim(line) == 0) cycle
                if (line(1:1) == "!" .or. line(1:1) == "#") cycle
-               if(len_trim(line) >= 4) then
-                 if (u_case(line(1:4)) == "ATOM") exit
-               end if
+               if (u_case(line(1:4)) == "ATOM") exit
 
                npos=index(line," ")
                if (npos <= 1) cycle
@@ -165,10 +160,8 @@ SubModule (CFML_IOForm) Format_CFL
 
                      if (len_trim(line) == 0) cycle
                      if (line(1:1) == "!" .or. line(1:1) == "#") cycle
-
-                     if(len_trim(line) >= 4) then
-                       if (u_case(line(1:4)) == "ATOM") exit
-                     end if
+                     if (line(1:1) == ' ') cycle
+                     if (u_case(line(1:4)) == "ATOM") exit
 
                      npos=index(line," ")
                      if (npos <= 1) then
@@ -227,7 +220,7 @@ SubModule (CFML_IOForm) Format_CFL
       integer                              :: i, iv, n_ini, n_end
       integer                              :: j_ini,j_end
       real(kind=cp), dimension (6)         :: vcell, std
-      character(len=132),dimension(1)      :: lines
+      character(len=132), dimension(1)     :: linec
 
       !> Init
       call clear_error()
@@ -243,12 +236,12 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Search: CELL
       do i=j_ini,j_end
-         lines(1)=adjustl(u_case(cfl%line(i)%str))
-         if (lines(1)(1:4) == "CELL") exit
-         lines(1)=" "
+         linec(1)=adjustl(u_case(cfl%line(i)%str))
+         if (linec(1)(1:4) == "CELL") exit
+         linec(1)=" "
       end do
 
-      if (len_trim(lines(1)) == 0) then
+      if (len_trim(linec(1)) == 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Cell@CFML_IOForm: Instruction 'CELL' not provided "
          return
@@ -256,15 +249,15 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Eliminate Tabs
       do
-         iv=index(lines(1),TAB)
+         iv=index(linec(1),TAB)
          if (iv == 0) exit
-         lines(1)(iv:iv)=' '
+         linec(1)(iv:iv)=' '
       end do
 
       n_ini=1; n_end=1
       vcell=0.0
       std=0.0
-      call Read_Key_ValueSTD(lines, n_ini, n_end,"CELL", vcell, std, iv)
+      call Read_Key_ValueSTD(linec, n_ini, n_end,"CELL", vcell, std, iv)
       if (iv /= 6) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Cell@CFML_IOForm: Problems reading cell parameters!"
@@ -313,6 +306,7 @@ SubModule (CFML_IOForm) Format_CFL
          line=adjustl(cfl%line(i)%str)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
+         if (line(1:1) == " ") cycle
 
          !> Eliminate Tabs
          do
@@ -447,6 +441,7 @@ SubModule (CFML_IOForm) Format_CFL
          line=adjustl(cfl%line(i)%str)
          if (len_trim(line) == 0) cycle
          if (line(1:1) == "!" .or. line(1:1) == "#") cycle
+         if (line(1:1) == " ") cycle
 
          !> Eliminate Tabs
          do
@@ -860,8 +855,10 @@ SubModule (CFML_IOForm) Format_CFL
       do i=1,cfl%nlines
          line=adjustl(cfl%line(i)%str)
          if (len_trim(line) <=0) cycle
+         if (line(1:1) =='!') cycle
+         if (line(1:1) ==' ') cycle
 
-         if (l_case(line(1:6)) == "phase_")  then
+         if (u_case(line(1:6)) == 'PHASE_') then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
          end if
@@ -902,6 +899,7 @@ SubModule (CFML_IOForm) Format_CFL
 
          if (len_trim(line) <=0) cycle
          if (line(1:1) == '!') cycle
+         if (line(1:1) == ' ') cycle
 
          if (u_case(line(1:4)) /= 'ATOM') cycle
 
