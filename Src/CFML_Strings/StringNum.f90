@@ -9,6 +9,34 @@
 
  Contains
     !!----
+    !!---- Function
+    !!----
+    !!---- Convert a fractional vector string in a real vector
+    !!----
+    !!---- June 2023
+    !!
+    Module Function Get_Vec_from_FracStr(Str) Result(V)
+       !---- Arguments ----!
+       character(len=*), intent(in) :: str
+       real(kind=cp), dimension(3)  :: V
+
+       !---- Local Variables ----!
+       integer              :: npos
+       integer, dimension(2):: pos
+
+       V=0.0_cp
+       call Get_Separator_Pos(Str,',',pos,npos)
+       if (npos /= 2) then
+          call set_error(1,"The string don't have a correct format to define a vector: "//trim(str))
+          return
+       end if
+       V(1)=read_fract(str(:pos(1)-1))
+       V(2)=read_fract(str(pos(1)+1:pos(2)-1))
+       V(3)=read_fract(str(pos(2)+1:))
+
+    End Function Get_Vec_from_FracStr
+
+    !!----
     !!---- STRING_FRACTION_1DIG
     !!----
     !!----    Get a string with the most simple fraction that uses single digits

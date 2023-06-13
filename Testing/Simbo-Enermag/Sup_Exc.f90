@@ -9,7 +9,7 @@
 !!---------------------------------------------------------------------------------
 Module Super_Exchange
 
-  Use CFML_Strings,          only: Frac_Trans_1Dig, Pack_String,u_case
+  Use CFML_Strings,          only: Pack_String,u_case
   Use CFML_gSpaceGroups,     only: Get_Symb_from_OP
   implicit none
   private
@@ -104,41 +104,38 @@ Module Super_Exchange
           read(unit=xx(i),fmt=*) vect(i)
         end if
       end do
-      return
    End Subroutine Get_vect
 
    Subroutine Get_Expo_c(trans, expo)
-    character (len=*),  intent(in)  :: trans
-    character (len=*), intent(out)  :: expo
+     character (len=*),  intent(in)  :: trans
+     character (len=*), intent(out)  :: expo
 
-    real, dimension(3) :: tr
-    real, dimension(3,3) :: mat
-    integer :: i
+     real, dimension(3) :: tr
+     real, dimension(3,3) :: mat
+     integer :: i
 
-    mat=0.0; tr=0.0
-    call Get_vect(trans,mat(1,:))
-    expo = Get_Symb_from_OP(mat,tr)
-    i=index(expo,",")
-    expo=u_case(expo(1:i-1))
-    expo="exp{-2pi("//trim(expo)//")}"
-    return
+     mat=0.0; tr=0.0
+     call Get_vect(trans,mat(1,:))
+     expo = Get_Symb_from_OP(mat,tr)
+     i=index(expo,",")
+     expo=u_case(expo(1:i-1))
+     expo="exp{-2pi("//trim(expo)//")}"
    End Subroutine Get_Expo_c
 
    Subroutine Get_Expo_r(v, expo)
-    real, dimension(3), intent(in)  :: v
-    character (len=*), intent(out) :: expo
+     real, dimension(3), intent(in)  :: v
+     character (len=*), intent(out) :: expo
 
-    real, dimension(3) :: tr
-    real, dimension(3,3) :: mat
-    integer :: i
+     real, dimension(3) :: tr
+     real, dimension(3,3) :: mat
+     integer :: i
 
-    mat=0.0; tr=0.0
-    mat(1,:)=v
-    expo= Get_Symb_from_OP(mat,tr)
-    i=index(expo,",")
-    expo=u_case(expo(1:i-1))
-    expo="exp{-2pi("//trim(expo)//")}"
-    return
+     mat=0.0; tr=0.0
+     mat(1,:)=v
+     expo = Get_Symb_from_OP(mat,tr)
+     i=index(expo,",")
+     expo=u_case(expo(1:i-1))
+     expo="exp{-2pi("//trim(expo)//")}"
    End Subroutine Get_Expo_r
 
    Pure Function rkky(dist,kf) result(jval)

@@ -341,7 +341,9 @@ Submodule (CFML_Molecules) Mol_to_AtList
          if (err_CFML%Ierr /= 0) return
 
          if (A%natoms <= 0) cycle
-         !AtList%Atom(n+1:n+A%natoms)=A%Atom(1:A%natoms) !this assignment is not compiled by gfortran -> individual components should be used
+         !AtList%Atom(n+1:n+A%natoms)=A%Atom(1:A%natoms)
+         !this assignment is not compiled by gfortran -> individual components
+         !should be used
          AtList%Atom(n+1:n+A%natoms)%Lab     =A%Atom(1:A%natoms)%Lab
          AtList%Atom(n+1:n+A%natoms)%ChemSymb=A%Atom(1:A%natoms)%ChemSymb
          AtList%Atom(n+1:n+A%natoms)%SfacSymb=A%Atom(1:A%natoms)%SfacSymb
@@ -369,7 +371,7 @@ Submodule (CFML_Molecules) Mol_to_AtList
          do j=1,5
             AtList%Atom(n+1:n+A%natoms)%VarF(j)    =A%Atom(1:A%natoms)%VarF(j)
          end do
-         AtList%Atom(n+1:n+A%natoms)%active  =A%Atom(1:A%natoms)%Active         
+         AtList%Atom(n+1:n+A%natoms)%active  =A%Atom(1:A%natoms)%Active
          n=n+A%natoms
          call allocate_atom_list(0,A,' ',0)
       end do

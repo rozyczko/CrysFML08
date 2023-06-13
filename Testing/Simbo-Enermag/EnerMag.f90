@@ -14,7 +14,8 @@
   !!---  The program code is written below the module "J_k_exchange". It uses
   !!---  the external module Super_Exchange that is also used by other programs
   !----------------------------------------------------------------------------
-   Module J_k_exchange
+ Module J_k_exchange
+   use CFML_gSpaceGroups, only: SPG_Type
    Implicit none
 
    public  :: j_k, spin_conf, genj, genk  !, read_exchange
@@ -32,9 +33,12 @@
    character (len=6), public, dimension(nat) :: rnam   !Name of the atoms
 
    Interface spin_conf
-   Module procedure spin_confc
-   Module procedure spin_confr
+      Module procedure spin_confc
+      Module procedure spin_confr
    End Interface
+
+   class(SPG_Type), allocatable, public :: Grp
+
    Contains
 
     !----------------------------------------------------------------------------------------------
@@ -252,7 +256,7 @@
 
       real,    dimension(3) ::  x1,x2,x3,fs,dk
       integer, dimension(3) ::  ngrid
-      integer :: iop, n, l, i1,i2
+      integer :: iop, n, l, i1,i2, i_kve=20
       iprint=0
       double_k=.false.
       good=.false.
@@ -295,12 +299,12 @@
             " => Interactive (i) or read from ",infil(1:ln),".kve file (k): "
         read(unit=*,fmt="(a)") ans
         if(ans == "K" .or. ans == "k") then
-          open(unit=20,file=infil(1:ln)//".kve",status="replace",action="write")
-          read(unit=20,fmt=*) nvk
+          open(unit=i_kve,file=infil(1:ln)//".kve",status="replace",action="write")
+          read(unit=i_kve,fmt=*) nvk
           do j=1,nvk
-            read(unit=20,fmt=*) (vk(i,j),i=1,3)
+            read(unit=i_kve,fmt=*) (vk(i,j),i=1,3)
           end do
-          close(unit=20)
+          close(unit=i_kve)
         else
          do
           write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
@@ -325,120 +329,174 @@
          end do
 
       Case (2)
-        iprint=1
+         iprint=1
          do
-          write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
-          read(unit=*,fmt=*,iostat=ier) nvk
-          if(ier /=0) cycle
-          exit
+            write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
+            read(unit=*,fmt=*,iostat=ier) nvk
+            if(ier /=0) cycle
+            exit
          end do
-        write(unit=*,fmt="(a)")" => Origin and extreme of the line (in r.l.u.): "
-        read(unit=*,fmt=*) (x1(j),j=1,3),(x2(k),k=1,3)
-        do i=1,3
-          x3(i)=(x2(i)-x1(i))/real(nvk-1)
-        end do
-        do j=1,nvk
-          do i=1,3
-            vk(i,j)=x1(i)+real(j-1)*x3(i)
-          end do
-        end do
+         write(unit=*,fmt="(a)")" => Origin and extreme of the line (in r.l.u.): "
+         read(unit=*,fmt=*) (x1(j),j=1,3),(x2(k),k=1,3)
+         do i=1,3
+           x3(i)=(x2(i)-x1(i))/real(nvk-1)
+         end do
+         do j=1,nvk
+           do i=1,3
+             vk(i,j)=x1(i)+real(j-1)*x3(i)
+           end do
+         end do
 
-        write(unit=lun,fmt="(/,a)")      " => Test of k-vectors along a line "
-        write(unit=lun,fmt="( a,3f8.4)") "    These vectors are between:",(x1(j),j=1,3)
-        write(unit=lun,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
-        write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
+         write(unit=lun,fmt="(/,a)")      " => Test of k-vectors along a line "
+         write(unit=lun,fmt="( a,3f8.4)") "    These vectors are between:",(x1(j),j=1,3)
+         write(unit=lun,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
+         write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
 
       Case (3)
-        iprint=1
+         iprint=1
          do
-          write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
-          read(unit=*,fmt=*,iostat=ier) nvk
-          if(ier /=0) cycle
-          exit
+           write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
+           read(unit=*,fmt=*,iostat=ier) nvk
+           if(ier /=0) cycle
+           exit
          end do
-        n=SQRT(real(nvk))
-        write(unit=*,fmt="(a)")  " => Plane defined by K=m1*U+m2*V  "
-        write(unit=*,fmt="(a)")  "    Give the two vectors U,V (in r.l.u.) defining the plane: "
-        read(unit=*,fmt=*) (x1(j),j=1,3),(x2(k),k=1,3)
-        do i=1,3
-          x1(i)=x1(i)/real(n-1)
-          x2(i)=x2(i)/real(n-1)
-        end do
-        nvk=0
-        do i1=1,n
-          do i2=1,n
-            do i=1,3
-              x3(i)=real(i1-1)*x1(i)+real(i2-1)*x2(i)
-              if(abs(x3(i)) > 1.0) x3(i)=sign(1.0,x3(i))
-            end do
-            nvk=nvk+1
-            do i=1,3
-              vk(i,nvk)=x3(i)
-            end do
-          end do
-        end do
+         n=SQRT(real(nvk))
+         write(unit=*,fmt="(a)")  " => Plane defined by K=m1*U+m2*V  "
+         write(unit=*,fmt="(a)")  "    Give the two vectors U,V (in r.l.u.) defining the plane: "
+         read(unit=*,fmt=*) (x1(j),j=1,3),(x2(k),k=1,3)
+         do i=1,3
+           x1(i)=x1(i)/real(n-1)
+           x2(i)=x2(i)/real(n-1)
+         end do
+         nvk=0
+         do i1=1,n
+           do i2=1,n
+             do i=1,3
+               x3(i)=real(i1-1)*x1(i)+real(i2-1)*x2(i)
+               if(abs(x3(i)) > 1.0) x3(i)=sign(1.0,x3(i))
+             end do
+             nvk=nvk+1
+             do i=1,3
+               vk(i,nvk)=x3(i)
+             end do
+           end do
+         end do
 
-        write(unit=lun,fmt="(/,a)")      " => Test of k-vectors within a plane defined by K=m1*U+m2*V  "
-        write(unit=lun,fmt="( a,3f8.4)") "     The vectors U and V are :",(x1(j),j=1,3)
-        write(unit=lun,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
-        write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
-        write(unit=*,fmt="(/,a)")      " => Test of k-vectors within a plane defined by K=m1*U+m2*V  "
-        write(unit=*,fmt="( a,3f8.4)") "     The vectors U and V are :",(x1(j),j=1,3)
-        write(unit=*,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
-        write(unit=*,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
+         write(unit=lun,fmt="(/,a)")      " => Test of k-vectors within a plane defined by K=m1*U+m2*V  "
+         write(unit=lun,fmt="( a,3f8.4)") "     The vectors U and V are :",(x1(j),j=1,3)
+         write(unit=lun,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
+         write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
+         write(unit=*,fmt="(/,a)")      " => Test of k-vectors within a plane defined by K=m1*U+m2*V  "
+         write(unit=*,fmt="( a,3f8.4)") "     The vectors U and V are :",(x1(j),j=1,3)
+         write(unit=*,fmt="( a,3f8.4)") "                         and :",(x2(j),j=1,3)
+         write(unit=*,fmt="( a,i6   )") "    Total number of k-vectors:",nvk
 
       Case (4)
          do
-          write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
-          read(unit=*,fmt=*,iostat=ier) nvk
-          if(ier /=0) cycle
-          exit
+           write(unit=*,fmt="(a,i6,a)",advance="no")" => Number of k-vectors (<",nv,"): "
+           read(unit=*,fmt=*,iostat=ier) nvk
+           if(ier /=0) cycle
+           exit
          end do
-        write(unit=*,fmt="(a,/,a)",advance="no")" => Give region of k-vectors (in r.l.u.)",  &
-                        "              (kx1,kx2,ky1,ky2,kz1,kz2): "
-        read(unit=*,fmt=*) (x1(i),x2(i),i=1,3)
-        do i=1,3
-          if(x1(i) < -0.000001) then
-             double_k=.true.
-             i1=i
-          end if
-        end do
-        l=0
-        do_spec: do i=1,n_sk
-          do j=1,3
-            if(sk(j,i) < x1(j) .or. sk(j,i) > x2(j)) cycle do_spec
-          end do
-          good(i)=.true.
-          l=l+1
-          do j=1,3
-            vk(j,l)=sk(j,i)
-          end do
-        end do do_spec
+         Select Case (Grp%Laue)
+            Case("-1")
+               x1(1)=-0.50; x1(2)=-0.50; x1(3)=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "C" .or. Grp%SPG_lat == "A" .or. Grp%SPG_lat == "B") then
+                   x1(1)=-1; x1(2)=-1
+                   x2(1)= 1; x2(2)= 1
+               else if(Grp%SPG_lat == "I" .or. Grp%SPG_lat == "F" ) then
+                   x1(1)=-1; x1(2)=-1
+                   x2=1.0
+               end if
+            Case("2/m")
+               x1(1)=-0.50; x1(2)=-0.50; x1(3)=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "C" .or. Grp%SPG_lat == "A" .or. Grp%SPG_lat == "B") then
+                   x1(1)=-1; x1(3)=-1
+                   x2(1)= 1; x2(3)= 1
+               else if(Grp%SPG_lat == "I" .or. Grp%SPG_lat == "F" ) then
+                   x1(1)=-1; x1(3)=-1
+                   x2(3)=1.0
+               end if
+            Case("mmm")
+               x1=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "C" .or. Grp%SPG_lat == "A" .or. Grp%SPG_lat == "B") then
+                   x2(1)= 1; x2(2)= 1
+               else if(Grp%SPG_lat == "I" .or. Grp%SPG_lat == "F" ) then
+                   x2(3)=1.0
+               end if
+            Case("4/mmm")
+               x1=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "I" .or. Grp%SPG_lat == "F" ) then
+                   x2(3)=1.0
+               end if
+            Case("3m1")
+               x1=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "R") then
+                   x2(3)=1.5
+               end if
+            Case("6/mmm")
+               x1=0.0
+               x2=0.5
+            Case("m3m")
+               x1=0.0
+               x2=0.5
+               if(Grp%SPG_lat == "I" .or. Grp%SPG_lat == "F" ) then
+                   x2(3)=1.0
+               end if
+            Case default
+              write(unit=*,fmt="(a,/,a)",advance="no")" => Give region of k-vectors (in r.l.u.)",  &
+                         "              (kx1,kx2,ky1,ky2,kz1,kz2): "
+              read(unit=*,fmt=*) (x1(i),x2(i),i=1,3)
+         End Select
+         write(unit=*,fmt="(a)") " => Range of k-components:"
+         do i=1,3
+           write(unit=*,fmt="(a,i1,a,2(f6.2,a))")  "      k_",i," [",x1(i),",",x2(i)," ]"
+           if(x1(i) < -0.000001) then
+              double_k=.true.
+              i1=i
+           end if
+         end do
+         l=0
+         do_spec: do i=1,n_sk
+           do j=1,3
+             if(sk(j,i) < x1(j) .or. sk(j,i) > x2(j)) cycle do_spec
+           end do
+           good(i)=.true.
+           l=l+1
+           do j=1,3
+             vk(j,l)=sk(j,i)
+           end do
+         end do do_spec
 
-        !i2=n_sk
-        i2=l
-        if(double_k) then
-          do i=2,n_sk
-            if(good(i)) then
-              i2=i2+1
-              vk(:,i2)=sk(:,i)
-              vk(i1,i2)=-vk(i1,i2)
-            end if
-          end do
-        end if
+         !i2=n_sk
+         i2=l
+         if(double_k) then
+           do i=2,n_sk
+             if(good(i)) then
+               i2=i2+1
+               vk(:,i2)=sk(:,i)
+               vk(i1,i2)=-vk(i1,i2)
+             end if
+           end do
+         end if
 
-        do j=i2+1,nvk
-            call random_number(xran)
-            vk(:,j)=x1(:)+(x2(:)-x1(:))*xran(:)
-        end do
-        nvk=nvk+i2
-        write(unit=lun,fmt="(/,a)")      " => k-vectors generated at random in the region:   "
-        write(unit=lun,fmt="( a,2f8.4)") "    Kx :",x1(1),x2(1)
-        write(unit=lun,fmt="( a,2f8.4)") "    Ky :",x1(2),x2(2)
-        write(unit=lun,fmt="( a,2f8.4)") "    Kz :",x1(3),x2(3)
-        write(unit=lun,fmt="(a)") "    Plus special",i2,"  vectors stored in the program"
-        write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors (generated + special):",nvk
-        write(unit=*,fmt="( a,i6   )")   "    Total number of k-vectors (generated + special):",nvk
+         do j=i2+1,nvk
+             call random_number(xran)
+             vk(:,j)=x1(:)+(x2(:)-x1(:))*xran(:)
+         end do
+         nvk=nvk+i2
+         write(unit=lun,fmt="(/,a)")      " => k-vectors generated at random in the region:   "
+         write(unit=lun,fmt="( a,2f8.4)") "    Kx :",x1(1),x2(1)
+         write(unit=lun,fmt="( a,2f8.4)") "    Ky :",x1(2),x2(2)
+         write(unit=lun,fmt="( a,2f8.4)") "    Kz :",x1(3),x2(3)
+         write(unit=lun,fmt="(a,i6,a)")   "    Plus special",i2,"  vectors stored in the program"
+         write(unit=lun,fmt="( a,i6   )") "    Total number of k-vectors (generated + special):",nvk
+         write(unit=*,fmt="( a,i6   )")   "    Total number of k-vectors (generated + special):",nvk
 
       Case (5)
         do
@@ -483,22 +541,24 @@
           vk(:,1)=0.0
       End Select
      ! if(iprint == 1) then
-     !   open(unit=11,file=infil(1:ln)//".val",status="replace",action="write")
+     !   open(unit=i_exc1,file=infil(1:ln)//".val",status="replace",action="write")
      ! end if
 
     End Subroutine genk
 
-   End Module J_k_exchange
+ End Module J_k_exchange
   !----------------------------------------------------------------------------
 
 
  Program enermag
    !use Mod_fun
+   use CFML_GlobalDeps, only: Err_CFML
    use CFML_Maths, only: diagonalize_sh
+   use CFML_gSpaceGroups, only: SPG_Type, Set_gSpG_from_string, Write_SpaceGroup_Info
    use j_k_exchange
    use Super_Exchange
    Implicit none
-
+   integer, PARAMETER :: i_exc=1, i_enm=2, i_mom=7, i_res=4
    real, dimension(3,nv)  :: vk
    integer, dimension(nv) :: nvect
    real, dimension(3) :: ktar, rktar, rk
@@ -512,7 +572,6 @@
    character (len=80)  ::  expo,name_Jota
    real, dimension(6)  :: ad
    LOGICAL :: ansf, compl, compl_tar
-   integer, PARAMETER :: lun1=1, lun2=2, lun7=7
    COMPLEX, dimension(nat,nat) :: exchk,aop,eigen_cvectors
    COMPLEX, dimension(nat)  :: dtarc
    real, dimension(nat,nat) :: aux,eigen_rvectors
@@ -568,13 +627,13 @@
      IF(lr == 0) outfil=infil
    end if
 
-   open(unit=1,file=trim(infil)//".exc",status="old",action="read",position="rewind",iostat=ier)
+   open(unit=i_exc,file=trim(infil)//".exc",status="old",action="read",position="rewind",iostat=ier)
    if(ier /= 0) then
      write(unit=*,fmt="(a)") " => File "//trim(infil)//".exc not found !!!"
-     STOP
+     stop
    end if
-   open(unit=2,file=trim(outfil)//".enm",status="replace",action="write")
-   open(unit=7,file=trim(outfil)//".mom",status="replace",action="write")
+   open(unit=i_enm,file=trim(outfil)//".enm",status="replace",action="write")
+   open(unit=i_mom,file=trim(outfil)//".mom",status="replace",action="write")
    write(unit=*,fmt="(a)",advance="no") " => Do you want to save data in *.res file (y/n)?: "
    read(unit=*,fmt="(a)") ans
    IF(ans == "y" .OR. ans == "Y") THEN
@@ -583,77 +642,85 @@
      lr=len_trim(resfil)
      IF(lr == 0) resfil=outfil
      ansf=.true.
-     open(unit=4,file=trim(resfil)//".res",status="replace",action="write")
+     open(unit=i_res,file=trim(resfil)//".res",status="replace",action="write")
      write(unit=*,fmt="(a)",advance="no")" => Give a comment for the .res file: "
      read(unit=*,fmt="(a)") title
-     write(unit=4,fmt="(a)") title
+     write(unit=i_res,fmt="(a)") title
    END IF
 
    ! Read input file infil.exc
 
 
-   !     Call read_exchange(lun1)
+   !     Call read_exchange(i_exc)
 
-   write(unit=lun2,fmt="(a)")"   *****************************************************"
-   write(unit=lun2,fmt="(a)")"   ****               PROGRAM ENERMAG               ****"
-   write(unit=lun2,fmt="(a)")"   *****************************************************"
-   write(unit=lun2,fmt="(a)")"  "
-   write(unit=lun2,fmt="(a)")"                 *** Version 1.5 *** "
-   write(unit=lun2,fmt="(a)")"   *****************************************************"
-   write(unit=lun2,fmt="(a)")"   * Calculates the Magnetic Energy for k-vectors in BZ*"
-   write(unit=lun2,fmt="(a)")"   *      Uses a Classical Heisenberg Hamiltonian      *"
-   write(unit=lun2,fmt="(a)")"   *        and isotropic exchange interactions        *"
-   write(unit=lun2,fmt="(a)")"   *****************************************************"
-   write(unit=lun2,fmt="(a)") "                   (JRC August-2001, LLB)"
-   write(unit=lun2,fmt="(a)") " "
-   write(unit=lun2,fmt="(a)") " "
-   write(unit=lun2,fmt="(a)") " "
+   write(unit=i_enm,fmt="(a)")"   *****************************************************"
+   write(unit=i_enm,fmt="(a)")"   ****               PROGRAM ENERMAG               ****"
+   write(unit=i_enm,fmt="(a)")"   *****************************************************"
+   write(unit=i_enm,fmt="(a)")"  "
+   write(unit=i_enm,fmt="(a)")"                   *** Version 2.0 *** "
+   write(unit=i_enm,fmt="(a)")"   *****************************************************"
+   write(unit=i_enm,fmt="(a)")"   * Calculates the Magnetic Energy for k-vectors in BZ*"
+   write(unit=i_enm,fmt="(a)")"   *      Uses a Classical Heisenberg Hamiltonian      *"
+   write(unit=i_enm,fmt="(a)")"   *        and isotropic exchange interactions        *"
+   write(unit=i_enm,fmt="(a)")"   *****************************************************"
+   write(unit=i_enm,fmt="(a)") "                  (JRC June-2023, ILL)"
+   write(unit=i_enm,fmt="(a)") " "
+   write(unit=i_enm,fmt="(a)") " "
+   write(unit=i_enm,fmt="(a)") " "
 
-   read(unit=1,fmt="(a)") title
+   read(unit=i_exc,fmt="(a)") title
    write(unit=*,fmt="(a)") title
-   IF(ansf) write(unit=4,fmt="(a)") title
-   write(unit=lun2,fmt="(/,a,/)") title
-   write(unit=lun7,fmt="(a)")    "      OUTPUT OF THE SPIN CONFIGURATIONS"
-   write(unit=lun7,fmt="(/,a,/)")  " => Warning!, this output is provisional!"
-   write(unit=lun7,fmt="(a,a,/)") " => Title:",title
-   read(unit=1,fmt="(i4,f8.4)")natcel,dmax
-   IF(ansf) write(unit=4,fmt="(i5,a)") natcel, "   <--- Number of atoms"
-   write(unit=lun2,fmt="(a,i3)") " => Number of atoms: ",natcel
+   IF(ansf) write(unit=i_res,fmt="(a)") title
+   write(unit=i_enm,fmt="(/,a,/)") title
+   write(unit=i_mom,fmt="(a)")    "      OUTPUT OF THE SPIN CONFIGURATIONS"
+   write(unit=i_mom,fmt="(/,a,/)")  " => Warning!, this output is provisional!"
+   write(unit=i_mom,fmt="(a,a,/)") " => Title:",title
+   read(unit=i_exc,fmt="(i4,f8.4)") natcel,dmax
+   IF(ansf) write(unit=i_res,fmt="(i5,a)") natcel, "   <--- Number of atoms"
+   write(unit=i_enm,fmt="(a,i3)") " => Number of atoms: ",natcel
    write(unit=*,fmt="(a,i3)") " => Number of atoms: ",natcel
-   write(unit=lun2,fmt="(a,f8.3)") " => Maximum interatomic distance: ",dmax
+   write(unit=i_enm,fmt="(a,f8.3)") " => Maximum interatomic distance: ",dmax
    write(unit=*,fmt="(a,f8.3)") " => Maximum interatomic distance: ",dmax
-   read(unit=1,fmt="(a)") spg
-   write(unit=lun2,fmt="(a,a)") " => Space group: ",spg
+   read(unit=i_exc,fmt="(a)") spg
+   write(unit=i_enm,fmt="(a,a)") " => Space group: ",spg
    write(unit=*,fmt="(a,a)") " => Space group: ",spg
-   read(unit=1,fmt="(3f8.4,3f8.3)") (ad(j),j=1,6)
-   write(unit=lun2,fmt="(a,/,a,3f8.4,3f8.3)") "     ",   &
+
+   call Set_gSpG_from_string("SPGR "//trim(spg),Grp)
+   if(Err_CFML%Ierr /= 0) then
+     write(unit=*,fmt="(a)") " => "//trim(Err_CFML%Msg)
+     stop
+   end if
+   call Write_SpaceGroup_Info(Grp,i_enm)
+
+   read(unit=i_exc,fmt="(3f8.4,3f8.3)") (ad(j),j=1,6)
+   write(unit=i_enm,fmt="(a,/,a,3f8.4,3f8.3)") "     ",   &
        " => Unit cell parameters (Angstroms & degrees):",(ad(j),j=1,6)
    write(unit=*,fmt="(a,/,a,3f8.4,3f8.3)") "     ", &
        " => Unit cell parameters (Angstroms & degrees):",(ad(j),j=1,6)
-   write(unit=lun2,fmt="(/,a,/)") " => Atoms in the unit cell"
+   write(unit=i_enm,fmt="(/,a,/)") " => Atoms in the unit cell"
    write(unit=*,fmt="(/,a,/)") " => Atoms in the unit cell"
-   write(unit=lun2,fmt="(a,/)") "  No. Name      x        y        z       Spin"
+   write(unit=i_enm,fmt="(a,/)") "  No. Name      x        y        z       Spin"
    write(unit=*,fmt="(a,/)") "  No. Name      x        y        z       Spin"
    DO i=1,natcel
-     read(unit=1,fmt="(a6,tr1,4f9.5)") rnam(i),(xyz(j,i),j=1,3),s(i)
+     read(unit=i_exc,fmt="(a6,tr1,4f9.5)") rnam(i),(xyz(j,i),j=1,3),s(i)
      IF(s(i) == 0.0) s(i)=1.0
-     write(unit=lun2,fmt="(i4,a,a6,4f9.5)")i,"  ",rnam(i),(xyz(j,i),j=1,3),s(i)
+     write(unit=i_enm,fmt="(i4,a,a6,4f9.5)")i,"  ",rnam(i),(xyz(j,i),j=1,3),s(i)
      write(unit=*,   fmt="(i4,a,a6,4f9.5)")i,"  ",rnam(i),(xyz(j,i),j=1,3),s(i)
    END DO
-   write(unit=lun2,fmt="(/,a)") "--------------------------------------------"
-   write(unit=lun2,fmt="(  a)") " => Input elements for constructing J_k(i,j)"
+   write(unit=i_enm,fmt="(/,a)") "--------------------------------------------"
+   write(unit=i_enm,fmt="(  a)") " => Input elements for constructing J_k(i,j)"
    write(unit=*,   fmt="(  a)") " => Input elements for constructing J_k(i,j)"
-   write(unit=lun2,fmt="(a,/)") "--------------------------------------------"
+   write(unit=i_enm,fmt="(a,/)") "--------------------------------------------"
    DO i=1,natcel
      DO j=1,natcel
-       read(unit=1,fmt="(2i4,i5)") inn,jnn,nterm(i,j)
+       read(unit=i_exc,fmt="(2i4,i5)") inn,jnn,nterm(i,j)
        IF(inn /= i .AND. jnn /= j)  &
            write(unit=*,fmt="(a)") " => Warning!, check the input exchange matrix!"
-       write(unit=lun2,fmt="(a,3(i2,a))") " => J(",i,",",j,")[K]   (",nterm(i,j), " terms)"
+       write(unit=i_enm,fmt="(a,3(i2,a))") " => J(",i,",",j,")[K]   (",nterm(i,j), " terms)"
        write(unit=*,fmt="(a,3(i2,a))") " => J(",i,",",j,")[K]   (",nterm(i,j), " terms)"
        IF(nterm(i,j) /= 0) THEN
          DO nt=1,nterm(i,j)
-           read(unit=1,fmt="(a)")  line
+           read(unit=i_exc,fmt="(a)")  line
            k=index(line,"J")
            if(k == 0) then
             write(unit=*,fmt="(a)") " => Error reading J in exchange file "
@@ -663,10 +730,10 @@
            jota=line(k:k+3)
            read(unit=line(k+1:k+3),fmt=*) nvalj(i,j,nt)
            name_jota=line(k+4:)
-           !read(unit=1,fmt="(t5,3f9.5,f10.3,t45,2a)")  &
+           !read(unit=i_exc,fmt="(t5,3f9.5,f10.3,t45,2a)")  &
            !    (trans(m,i,j,nt),m=1,3),exch,jota,name_jota
            CALL get_expo(trans(:,i,j,nt),expo)
-           write(unit=lun2,fmt="(a,a,3f6.2,a,f8.2,a,a,a)") "  ", &
+           write(unit=i_enm,fmt="(a,a,3f6.2,a,f8.2,a,a,a)") "  ", &
                " Rn=(", (trans(m,i,j,nt),m=1,3)," ) J= ",exch, " --> ",jota,expo
            write(unit=*,fmt="(a,a,3f6.2,a,f8.2,a,a,a)") "  ", &
                " Rn=(", (trans(m,i,j,nt),m=1,3)," ) J= ",exch, " --> ",jota,expo
@@ -683,38 +750,38 @@
    ! For small number of exchange parameters select a strategy
    ! of changing them for constructing a phase diagram
    DO
-     write(unit=lun2,fmt="(/,a)") "------------------------------------"
-     write(unit=lun2,fmt="(  a)") " => Input set of exchange parameters"
-     write(unit=lun2,fmt="(a,/)") "------------------------------------"
+     write(unit=i_enm,fmt="(/,a)") "------------------------------------"
+     write(unit=i_enm,fmt="(  a)") " => Input set of exchange parameters"
+     write(unit=i_enm,fmt="(a,/)") "------------------------------------"
      write(unit=*,fmt="(/,a)") "------------------------------------"
      write(unit=*,fmt="(  a)") " => Input set of exchange parameters"
      write(unit=*,fmt="(a,/)") "------------------------------------"
      IF(ansf) THEN
-       write(unit=4,fmt="(/,a)") "------------------------------------"
-       write(unit=4,fmt="(  a)") " => Input set of exchange parameters"
-       write(unit=4,fmt="(a,/)") "------------------------------------"
+       write(unit=i_res,fmt="(/,a)") "------------------------------------"
+       write(unit=i_res,fmt="(  a)") " => Input set of exchange parameters"
+       write(unit=i_res,fmt="(a,/)") "------------------------------------"
      END IF
      IF(nex < 20) THEN
        DO j=1,nex
          write(unit=*,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
-         write(unit=lun2,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
-         IF(ansf) write(unit=4,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
+         write(unit=i_enm,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
+         IF(ansf) write(unit=i_res,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
        END DO
        iphase=0
        write(unit=*,fmt="(a)",advance="no") " => Do you want to calculate a phase diagram (y/n)?: "
        read(unit=*,fmt="(a)") ans
-       IF(ans == "y".OR.ans == "Y") iphase=1
+       IF(ans == "y" .or. ans == "Y") iphase=1
      ELSE
        write(unit=*,fmt="(a)",advance="no") " => Too many exchange interactions, phase diagram cannot be calculated "
        DO j=1,9
          write(unit=*,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
-         write(unit=lun2,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
-         IF(ansf) write(unit=4,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
+         write(unit=i_enm,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
+         IF(ansf) write(unit=i_res,fmt="(a,i1,a,f8.3,a,a)") "  J",j," =",valj(j),"  ",trim(jotas(j))
        END DO
        DO j=10,nex
          write(unit=*,fmt="(a,i2,a,f8.3,a,a)") "  J",j,"=",valj(j),"  ",trim(jotas(j))
-         write(unit=lun2,fmt="(a,i2,a,f8.3,a,a)") "  J",j,"=",valj(j),"  ",trim(jotas(j))
-         IF(ansf) write(unit=4,fmt="(a,i2,a,f8.3,a,a)") "  J",j,"=",valj(j),"  ",trim(jotas(j))
+         write(unit=i_enm,fmt="(a,i2,a,f8.3,a,a)") "  J",j,"=",valj(j),"  ",trim(jotas(j))
+         IF(ansf) write(unit=i_res,fmt="(a,i2,a,f8.3,a,a)") "  J",j,"=",valj(j),"  ",trim(jotas(j))
        END DO
        iphase=0
      END IF
@@ -728,7 +795,7 @@
          DO j=1,id
            write(unit=*,fmt="(a)",advance="no") " -> Enter number of J and value (0 0: stop): "
            read(unit=*,fmt=*) inum, rvalj
-           IF(inum == 0) EXIT
+           if(inum == 0) exit
            valj(inum)=rvalj
          END DO
          cycle
@@ -736,7 +803,7 @@
      END IF
      IF(iphase == 1) THEN
        write(unit=*,fmt="(/,a,/)")" => Phase diagram will be calculated "
-       write(unit=lun2,fmt="(/,a,/)")" => Phase diagram will be calculated "
+       write(unit=i_enm,fmt="(/,a,/)")" => Phase diagram will be calculated "
        write(unit=*,fmt="(a)",advance="no")" => Enter a target k-vector (3 reals): "
        read(unit=*,fmt=*) (ktar(i),i=1,3)
        DO i=1,ijo
@@ -773,9 +840,9 @@
        nojvar=0
      END IF
      IF(ansf) THEN
-       write(unit=4,fmt="(i7,a)")  njotas,"   <--- Number of sets of J "
+       write(unit=i_res,fmt="(i7,a)")  njotas,"   <--- Number of sets of J "
        DO i=1,nojvar
-         write(unit=4,fmt="(a,i1,a, i2,2f10.4,i6)")  &
+         write(unit=i_res,fmt="(a,i1,a, i2,2f10.4,i6)")  &
              " -> Number & Range of varied J-parameter ",i," & No of points: ",  &
              ivar(i),rang1(i),rang2(i),npoi(i)
        END DO
@@ -785,10 +852,10 @@
      IF(iphase == 1) then
          write(unit=*,fmt="(a,i7,a)") " => Phase diagram for: ",  &
          njotas," sets of exchange integrals"
-         write(unit=lun2,fmt="(a,i5,a)") " => Phase diagram for: ",  &
+         write(unit=i_enm,fmt="(a,i7,a)") " => Phase diagram for: ",  &
          njotas," sets of exchange integrals"
        DO i=1,nojvar
-         write(unit=lun2,fmt="(a,i1,a, i2,2f10.4,i6)")  &
+         write(unit=i_enm,fmt="(a,i1,a, i2,2f10.4,i6)")  &
              " -> Number & Range of varied J-parameter ",i," & No of points: ",  &
              ivar(i),rang1(i),rang2(i),npoi(i)
        END DO
@@ -798,19 +865,19 @@
      DO jj=1,njotas            !Start phase diagram
      !-----------------------------------------------------------------
 
-       DO j=1,nojvar         !this loop is executed only if iphase>0
+       DO j=1,nojvar         !this loop is executed only if iphase > 0
          valj(ivar(j))=valjj(j,jj)
        END DO
        IF(iphase == 0) THEN
-         write(unit=lun7,fmt="(5(a,i1))") ("        J",j,j=1,nex)
-         write(unit=lun7,fmt="(5f10.2)") (valj(j),j=1,nex)
+         write(unit=i_mom,fmt="(5(a,i1))") ("        J",j,j=1,nex)
+         write(unit=i_mom,fmt="(5f10.2)") (valj(j),j=1,nex)
        END IF
        emin=9999999.0E+20
        !------------------------------------------
        ! Select strategy of searching of k-vectors
        !------------------------------------------
        IF(jj == 1) THEN
-         CALL genk(lun2,ln,infil,nvk,vk,iprint)
+         CALL genk(i_enm,ln,infil,nvk,vk,iprint)
          Do ik=1,nvk
            nvect(ik)=0
          End Do
@@ -818,9 +885,9 @@
          forma="(/,a, (a,i1),a,/)"
          write(unit=forma(6:6),fmt="(i1)") nojvar
          if(ansf) then
-          write(unit=4,fmt=forma)"       Energy   Vector  Kx    Ky    Kz "  &
+          write(unit=i_res,fmt=forma)"       Energy   Vector  Kx    Ky    Kz "  &
              , ("      J",ivar(j),j=1,nojvar),"                    Eigenvectors "
-          write(unit=lun2,fmt=forma)"       Energy   Targetk Kx    Ky    Kz "  &
+          write(unit=i_enm,fmt=forma)"       Energy   Targetk Kx    Ky    Kz "  &
              , ("      J",ivar(j),j=1,nojvar),"                    Eigenvectors "
          END IF
         END IF
@@ -828,10 +895,10 @@
         cpu=cpu_ini
        END IF
        IF(iphase == 0) THEN
-         write(unit=lun2,fmt="(/,a)")"-------------------------------------------------"
-         write(unit=lun2,fmt="(  a)")" => Calculation of energy for different k-vectors"
-         write(unit=lun2,fmt="(a,/)")"-------------------------------------------------"
-         IF(ansf) write(unit=4,fmt="(i6,a)") nvk, "   <--- Number of k-vectors "
+         write(unit=i_enm,fmt="(/,a)")"-------------------------------------------------"
+         write(unit=i_enm,fmt="(  a)")" => Calculation of energy for different k-vectors"
+         write(unit=i_enm,fmt="(a,/)")"-------------------------------------------------"
+         IF(ansf) write(unit=i_res,fmt="(i6,a)") nvk, "   <--- Number of k-vectors "
          iprint=1
        END IF
        !-------------------
@@ -864,15 +931,15 @@
          IF(ansf .AND. iphase == 0) THEN
            forma="(3f8.4, a,  f14.2)"
            write(unit=forma(11:12),fmt="(i2)") natcel
-           write(unit=4,fmt=forma)(rk(i),i=1,3)," ",(eigen_val(i),i=1,natcel)
+           write(unit=i_res,fmt=forma)(rk(i),i=1,3)," ",(eigen_val(i),i=1,natcel)
          END IF
 
          IF(eigen_val(natcel) < emin ) THEN
            IF(iphase == 0) THEN
              write(unit=*,fmt="(a,3f8.4,a)") " => Eigenvalues for k = (",(rk(i),i=1,3)," )"
              write(unit=*,fmt="(99f12.3)") eigen_val(1:natcel)
-             write(unit=lun2,fmt="(a,3f8.4,a)") " => Eigenvalues & Eigenvectors for k = (",(rk(i),i=1,3)," )"
-           !  write(unit=11,fmt="(a,3f8.4,a)") " => Eigenvalues & Eigenvectors for k = (",(rk(i),i=1,3)," )"
+             write(unit=i_enm,fmt="(a,3f8.4,a)") " => Eigenvalues & Eigenvectors for k = (",(rk(i),i=1,3)," )"
+           !  write(unit=i_exc1,fmt="(a,3f8.4,a)") " => Eigenvalues & Eigenvectors for k = (",(rk(i),i=1,3)," )"
              forma="(f14.4,a,  f12.4,a)"
              j=natcel
              if(iex /= 0) j=2*j
@@ -883,13 +950,13 @@
              end if
              if(iex /= 0) then
               do i=1,natcel
-                write(unit=lun2,fmt=forma ) eigen_val(i)," : (",eigen_cvectors(1:natcel,i),")"
-              !  write(unit=11,fmt=forma ) eigen_val(i)," : (",eigen_cvectors(1:natcel,i),")"
+                write(unit=i_enm,fmt=forma ) eigen_val(i)," : (",eigen_cvectors(1:natcel,i),")"
+              !  write(unit=i_exc1,fmt=forma ) eigen_val(i)," : (",eigen_cvectors(1:natcel,i),")"
               end do
              else
               do i=1,natcel
-                write(unit=lun2,fmt=forma ) eigen_val(i)," : (",eigen_rvectors(1:natcel,i),")"
-              !  write(unit=11,fmt=forma ) eigen_val(i)," : (",eigen_rvectors(1:natcel,i),")"
+                write(unit=i_enm,fmt=forma ) eigen_val(i)," : (",eigen_rvectors(1:natcel,i),")"
+              !  write(unit=i_exc1,fmt=forma ) eigen_val(i)," : (",eigen_rvectors(1:natcel,i),")"
               end do
              end if
            END IF
@@ -920,59 +987,59 @@
 
        IF(iphase == 0) THEN   !write only if no phase diagram is calculated
 
-         write(unit=lun2,fmt="(/,a)") "--------------------------------------------------------"
-         write(unit=lun2,fmt="(  a)") " => Exchange interaction matrix for the optimum k-vector"
-         write(unit=lun2,fmt="(a,/)") "--------------------------------------------------------"
+         write(unit=i_enm,fmt="(/,a)") "--------------------------------------------------------"
+         write(unit=i_enm,fmt="(  a)") " => Exchange interaction matrix for the optimum k-vector"
+         write(unit=i_enm,fmt="(a,/)") "--------------------------------------------------------"
          if(compl) then
            forma="( a,  (i15,tr5))"
          else
            forma="( a,  i10)"
          end if
          write(unit=forma(5:6),fmt="(i2)") natcel
-         write(unit=lun2,fmt=forma) "     ",(i,i=1,natcel)
+         write(unit=i_enm,fmt=forma) "     ",(i,i=1,natcel)
          forma="(i3, a,  f10.2)"
          write(unit=forma(8:9),fmt="(i2)") nop
          if(compl) then
            DO i=1,natcel
-             write(unit=lun2,fmt=forma)i,"  ",(aop(i,j),j=1,natcel)
+             write(unit=i_enm,fmt=forma)i,"  ",(aop(i,j),j=1,natcel)
            END DO
          else
            DO i=1,natcel
-             write(unit=lun2,fmt=forma)i,"  ",(real(aop(i,j)),j=1,natcel)
+             write(unit=i_enm,fmt=forma)i,"  ",(real(aop(i,j)),j=1,natcel)
            END DO
          end if
-         write(unit=lun2,fmt="(/,a)") "-------------------------------------------------------"
-         write(unit=lun2,fmt="(  a)") " => Eigenvalues and eigenvector of the optimum k-vector"
-         write(unit=lun2,fmt="(a,/)") "-------------------------------------------------------"
-         write(unit=lun2,fmt="(a,3f8.4,a)") " => Optimum k-vector -> (",(vk(i,iopt),i=1,3)," )"
+         write(unit=i_enm,fmt="(/,a)") "-------------------------------------------------------"
+         write(unit=i_enm,fmt="(  a)") " => Eigenvalues and eigenvector of the optimum k-vector"
+         write(unit=i_enm,fmt="(a,/)") "-------------------------------------------------------"
+         write(unit=i_enm,fmt="(a,3f8.4,a)") " => Optimum k-vector -> (",(vk(i,iopt),i=1,3)," )"
          forma="(a,i2,a,  f10.4,a)"
          write(unit=forma(9:10),fmt="(i2)") nop
          if(compl) then
             DO i=1,natcel
-              write(unit=lun2,fmt="(a,i2,a,f14.4)")  "    Eigenvalue  E(k,",i,") = ",eigen_val(i)
-              write(unit=lun2,fmt=forma) "    Eigenvector V(k,",i,") = (",(eigen_cvectors(j,i),j=1,natcel),")"
+              write(unit=i_enm,fmt="(a,i2,a,f14.4)")  "    Eigenvalue  E(k,",i,") = ",eigen_val(i)
+              write(unit=i_enm,fmt=forma) "    Eigenvector V(k,",i,") = (",(eigen_cvectors(j,i),j=1,natcel),")"
             END DO
          else
             DO i=1,natcel
-              write(unit=lun2,fmt="(a,i2,a,f14.4)")  "    Eigenvalue  E(k,",i,") = ",eigen_val(i)
-              write(unit=lun2,fmt=forma) "    Eigenvector V(k,",i,") = (",(eigen_rvectors(j,i),j=1,natcel),")"
+              write(unit=i_enm,fmt="(a,i2,a,f14.4)")  "    Eigenvalue  E(k,",i,") = ",eigen_val(i)
+              write(unit=i_enm,fmt=forma) "    Eigenvector V(k,",i,") = (",(eigen_rvectors(j,i),j=1,natcel),")"
             END DO
          end if
        ELSE
        !------------- Below is for a phase diagram to be calculated
          IF(.NOT. ansf) THEN
-           write(unit=lun2,fmt="(5(a,i1))") ("        J",j,j=1,nex)
-           write(unit=lun2,fmt="(5f10.2)")     (valj(j),j=1,nex)
-           write(unit=lun2,fmt="(a,3f8.4,a)")  &
+           write(unit=i_enm,fmt="(5(a,i1))") ("        J",j,j=1,nex)
+           write(unit=i_enm,fmt="(5f10.2)")     (valj(j),j=1,nex)
+           write(unit=i_enm,fmt="(a,3f8.4,a)")  &
                " => Optimum k-vector -> (",(vk(i,iopt),i=1,3)," )"
-           write(unit=lun2,fmt="(a,f14.4)")  "    Emin = ",eigen_val(nop)
+           write(unit=i_enm,fmt="(a,f14.4)")  "    Emin = ",eigen_val(nop)
            forma="(a,i2,a,  f10.4,a)"
            write(unit=forma(9:10),fmt="(i2)") nop
            if(compl) then
-               write(unit=lun2,fmt=forma)  &
+               write(unit=i_enm,fmt=forma)  &
                "    Eigenvector V(k,",natcel,") = (",(eigen_cvectors(j,natcel),j=1,natcel),")"
            else
-               write(unit=lun2,fmt=forma)  &
+               write(unit=i_enm,fmt=forma)  &
                "    Eigenvector V(k,",natcel,") = (",(eigen_rvectors(j,natcel),j=1,natcel),")"
            end if
          !-------------
@@ -981,10 +1048,10 @@
            write(unit=forma(26:27),fmt="(i2)") nojvar
            write(unit=forma(38:39),fmt="(i2)") nop
            if(compl) then
-               write(unit=4,fmt=forma) eigen_val(nop),iopt," ",(vk(i,iopt),i=1,3),"  ",(valj(ivar(j)),j=1,nojvar),  &
+               write(unit=i_res,fmt=forma) eigen_val(nop),iopt," ",(vk(i,iopt),i=1,3),"  ",(valj(ivar(j)),j=1,nojvar),  &
                "  (",(sign(1.0,real(eigen_cvectors(1,natcel)))*eigen_cvectors(j,natcel),j=1,natcel),")"
            else
-               write(unit=4,fmt=forma) eigen_val(nop),iopt," ",(vk(i,iopt),i=1,3),"  ",(valj(ivar(j)),j=1,nojvar),  &
+               write(unit=i_res,fmt=forma) eigen_val(nop),iopt," ",(vk(i,iopt),i=1,3),"  ",(valj(ivar(j)),j=1,nojvar),  &
                "  (",(sign(1.0,eigen_rvectors(1,natcel))*eigen_rvectors(j,natcel),j=1,natcel),")"
            end if
            nvect(iopt)=nvect(iopt)+1
@@ -1014,21 +1081,21 @@
             if(compl) then     !complex
 
              if (real(eigen_cvectors(1,nop))  < 0.0 ) then
-              write(unit=lun2,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
+              write(unit=i_enm,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
                 (valj(ivar(j)),j=1,nojvar),"  (",(-eigen_cvectors(j,natcel),j=1,natcel),")"
             !  forma="(f14.4,a,a,"//trim(forma(38:))
             ! write(*,*) " forma: ", forma
             ! do k=natcel-1,1,-1
-            !   write(unit=lun2,fmt=forma) eigen_val(k),"                                                   ",  &
+            !   write(unit=i_enm,fmt=forma) eigen_val(k),"                                                   ",  &
             !   "  (",(-eigen_cvectors(j,k),j=1,natcel),")"
             ! end do
              else
-              write(unit=lun2,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
+              write(unit=i_enm,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
                 (valj(ivar(j)),j=1,nojvar),"  (",(eigen_cvectors(j,natcel),j=1,natcel),")"
             ! forma="(f14.4,a,a,"//trim(forma(38:))
             ! write(*,*) " forma: ", forma
             ! do k=natcel-1,1,-1
-            !   write(unit=lun2,fmt=forma) eigen_val(k),"                                                   ",  &
+            !   write(unit=i_enm,fmt=forma) eigen_val(k),"                                                   ",  &
             !   "  (",(eigen_cvectors(j,k),j=1,natcel),")"
             ! end do
              end if
@@ -1036,21 +1103,21 @@
             else ! no complex
 
              if (eigen_rvectors(1,nop)  < 0.0 ) then
-              write(unit=lun2,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
+              write(unit=i_enm,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
                 (valj(ivar(j)),j=1,nojvar),"  (",(-eigen_rvectors(j,natcel),j=1,natcel),")"
             ! forma="(f14.4,a,a,"//trim(forma(38:))
             ! write(*,*) " forma: ", forma
             ! do k=natcel-1,1,-1
-            !   write(unit=lun2,fmt=forma) eigen_val(k),"                                                   ",  &
+            !   write(unit=i_enm,fmt=forma) eigen_val(k),"                                                   ",  &
             !   "  (",(-eigen_cvectors(j,k),j=1,natcel),")"
             ! end do
              else
-              write(unit=lun2,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
+              write(unit=i_enm,fmt=forma) eigen_val(natcel),iopt," ",(vk(i,iopt),i=1,3),"  ",  &
                 (valj(ivar(j)),j=1,nojvar),"  (",(eigen_rvectors(j,natcel),j=1,natcel),")"
             ! forma="(f14.4,a,a,"//trim(forma(38:))
             ! write(*,*) " forma: ", forma
             ! do k=natcel-1,1,-1
-            !   write(unit=lun2,fmt=forma) eigen_val(k),"                                                   ",  &
+            !   write(unit=i_enm,fmt=forma) eigen_val(k),"                                                   ",  &
             !   "  (",(eigen_cvectors(j,k),j=1,natcel),")"
             ! end do
              end if
@@ -1072,9 +1139,9 @@
          rk(:)=vk(:,iopt)
          energy=eigen_val(natcel)
          if(compl) then
-           CALL spin_conf(lun7,rk,energy,eigen_cvectors(1:natcel,natcel))
+           CALL spin_conf(i_mom,rk,energy,eigen_cvectors(1:natcel,natcel))
          else
-           CALL spin_conf(lun7,rk,energy,eigen_rvectors(1:natcel,natcel))
+           CALL spin_conf(i_mom,rk,energy,eigen_rvectors(1:natcel,natcel))
          end if
        END IF
      !---------------------------------
@@ -1083,14 +1150,14 @@
      IF(iphase == 1 .and. ansf) THEN
 
          if(compl) then
-           CALL spin_conf(lun7,rktar,energytar,dtarc)
+           CALL spin_conf(i_mom,rktar,energytar,dtarc)
          else
-           CALL spin_conf(lun7,rktar,energytar,dtarr)
+           CALL spin_conf(i_mom,rktar,energytar,dtarr)
          end if
-       write(unit=lun2,fmt="(a)") " => Frequency of optimum k-vectors"
+       write(unit=i_enm,fmt="(a)") " => Frequency of optimum k-vectors"
        DO ik=1,nv
          IF(nvect(ik) > 1) THEN
-           write(unit=lun2,fmt="(a,3f6.2,a,i6,a,i7,a)")  &
+           write(unit=i_enm,fmt="(a,3f6.2,a,i6,a,i7,a)")  &
                " k = (",(vk(j,ik),j=1,3),")   #:",ik," -> ",nvect(ik), " times"
          END IF
        END DO
@@ -1098,7 +1165,7 @@
      call cpu_time(cpu_fin)
      !---- CPU times ----!
      write(unit=*,fmt="(/,/,t8,a,f8.2,a)") "Cpu Time: ", (cpu_fin - cpu_ini)/60.0, " min."
-     write(unit=lun2,fmt="(/,/,t8,a,f8.2,a)") "Cpu Time: ", (cpu_fin - cpu_ini)/60.0, " min."
+     write(unit=i_enm,fmt="(/,/,t8,a,f8.2,a)") "Cpu Time: ", (cpu_fin - cpu_ini)/60.0, " min."
      write(unit=*,fmt="(/,a)",advance="no")" => Do you want to continue (y/n)?: "
      read(unit=*,fmt="(a)") ans
      IF(ans == "y".OR.ans == "Y") cycle

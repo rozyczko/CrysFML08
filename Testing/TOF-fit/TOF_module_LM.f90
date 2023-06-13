@@ -442,7 +442,7 @@ Module  TOF_Diffraction
       integer                                  :: i,j, no, ierror
       real(Kind=cp), allocatable, dimension(:) :: wf
       character(len=1)                         :: ans
-      Character (Len=512)                      :: texte,filecod
+      Character (Len=512)                      :: texte !,filecod
       logical :: opn
       ! Init
       chi2 = 0.
@@ -730,9 +730,9 @@ Module  TOF_Diffraction
    End Subroutine Set_Nampar_TOF
 
    Subroutine Set_Limits()
-     integer :: i,j,ilim
+     integer :: i,j  !,ilim
      real(kind=cp) :: val2,val3,val4
-     character(len=20) :: comment
+     !character(len=20) :: comment
      if(allocated(lower)) deallocate(lower)
      if(allocated(upper)) deallocate(upper)
      allocate(lower(vs%np),upper(vs%np))

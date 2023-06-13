@@ -49,7 +49,8 @@ Module CFML_IOForm
                                      FindFMT, Init_FindFMT, String_Array_Type,       &
                                      File_type, Reading_File, Get_Transf,            &
                                      Get_Extension, Get_Datetime,Read_Fract,         &
-                                     Frac_Trans_2Dig, Pack_String, File_List_type
+                                     Frac_Trans_2Dig, Pack_String, File_List_type,   &
+                                     String_Real, String_Count
 
    Use CFML_Atoms,             only: Atm_Type, Atm_Std_Type, ModAtm_std_type, Atm_Ref_Type, &
                                      AtList_Type, Allocate_Atom_List, Init_Atom_Type, mAtom_Type, &
@@ -81,14 +82,20 @@ Module CFML_IOForm
 
    !---- Public subroutines ----!
 
-   public :: Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
-             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File
+   public :: Get_Block_Commands, Get_Block_KEY, Get_SubBlock_KEY, Get_Block_Phases, &
+             Get_Block_Patterns, Read_Block_Instructions, Get_Blocks_Filetype, &
+             Get_SubBlock_CommPatterns, Get_SubBlock_CommPhases, &
+             Read_Block_ExcludeReg, Read_Block_Backgd, &
+             Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
+             Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
+             Write_InfoBlock_ExcludedRegions, Write_InfoBlock_Backgd
 
    !--------------------!
    !---- PARAMETERS ----!
    !--------------------!
    character(len=*), parameter :: DIGCAR="0123456789+-"  ! Digit character and signs
    integer,          parameter :: MAX_PHASES=30          ! Number of Maximum Phases
+   integer,          parameter :: MAX_PATTERNS=500       ! Number of Maximum Phases
    real(kind=cp),    parameter :: EPSV=0.0001_cp         ! Small real value to be used for decisions
 
 
@@ -128,6 +135,52 @@ Module CFML_IOForm
       real(kind=cp)      ,dimension(:), allocatable :: dtt1,dtt2              ! d-to-TOF coefficients
    End Type Job_Info_type
 
+   !!----
+   !!---- TYPE :: BLOCKINFO_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: BlockInfo_Type
+      character(len=60)             :: StrName=" "
+      character(len=10)             :: BlName=" "  ! Command, Phase, Pattern, Molec, Atoms....
+      integer                       :: IBl=-1      !     0      1        2      3      4
+      integer, dimension(2)         :: Nl =0       ! Ini/End line
+   End Type BlockInfo_Type
+
+   !!----
+   !!---- TYPE :: GENVEC_TYPE
+   !!--..
+   !!----
+   !!---- Update: May - 2023
+   Type, public :: GenVec_Type
+      character(len=60)                 :: Str=" "      ! Generic string (Use for directives)
+      integer                           :: NPar=0       ! Number of parameters
+      integer,           dimension(15)  :: IV  =0       ! Integer values
+      real(kind=cp),     dimension(15)  :: RV  =0.0_cp  ! Real values
+      character(len=40), dimension(15)  :: CV  =' '     ! Words
+   End Type GenVec_Type
+
+
+   !-------------------!
+   !---- Variables ----!
+   !-------------------!
+
+   !---- Private ----!
+   character(len=256),   private              :: line
+   character(len=60),  private, dimension(40) :: dire=" "
+   integer,            private, dimension(15) :: ivet=0
+   real(kind=cp),      private, dimension(15) :: vet=0.0_cp
+
+   !---- Public ----!
+   integer, public :: NP_Instr =0     ! Number of Directives
+   integer, public :: NP_Backgd=0     ! Number of Background
+   integer, public :: NP_ExReg =0     ! Number of Exclude Regions
+
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Instr    ! Vector of Instructions
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_ExReg    ! Vector of Excluded regions
+   type(GenVec_Type), public, dimension(:), allocatable :: Vec_Backgd   ! Vector for Background definitions
+
+
    !---- Overloaded Zone ----!
    !Interface Readn_Set_Xtal_Structure
    !   Module Procedure Readn_Set_Xtal_Structure_Split  ! For Cell, Spg, A types
@@ -136,6 +189,109 @@ Module CFML_IOForm
 
    !---- Interface zone ----!
    Interface
+      Module Subroutine Get_Blocks_Filetype(ffile, NComm, Bl_Comm, NPatt, Bl_Patt, &
+                                         NPhas, Bl_Phas, NCPatt, BlC_Patt, NCPhas, BlC_Phas)
+         !---- Arguments ----!
+         type(File_type),                               intent(in)  :: ffile
+         integer,                            optional,  intent(out) :: NComm
+         type(BlockInfo_Type),               optional,  intent(out) :: Bl_Comm
+         integer,                            optional,  intent(out) :: NPatt
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Patt
+         integer,                            optional,  intent(out) :: NPhas
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: Bl_Phas
+         integer,                            optional,  intent(out) :: NCPatt
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Patt
+         integer,                            optional,  intent(out) :: NCPhas
+         type(BlockInfo_Type), dimension(:), optional,  intent(out) :: BlC_Phas
+
+      End Subroutine Get_Blocks_Filetype
+
+      Module Subroutine Get_Block_Commands(ffile, N_Ini, N_End)
+         !---- Arguments ----!
+         Type(file_type),    intent(in)  :: ffile
+         integer,            intent(out) :: n_ini
+         integer,            intent(out) :: n_end
+      End Subroutine Get_Block_Commands
+
+      Module Subroutine Get_Block_Patterns(ffile, N_Ini, N_End, NPatt, Patt, Ex_Ind)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NPatt
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Patt
+         integer, dimension(2), optional,    intent(in)     :: Ex_ind
+      End Subroutine Get_Block_Patterns
+
+      Module Subroutine Get_Block_Phases(ffile, N_Ini, N_End, NPhas, Phas, Ex_Ind)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NPhas
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Phas
+         integer, dimension(2), optional,    intent(in)     :: Ex_ind
+      End Subroutine Get_Block_Phases
+
+      Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
+         !---- Arguments ----!
+         character(len=*),              intent(in)  :: Key
+         Type(file_type),               intent(in)  :: ffile
+         integer,                       intent(in)  :: n_ini
+         integer,                       intent(in)  :: n_end
+         integer, dimension(2),         intent(out) :: Ind
+         character(len=*),              intent(out) :: StrName
+         integer,                       intent(out) :: N_Id
+      End Subroutine Get_Block_KEY
+
+      Module Subroutine Get_SubBlock_KEY(Key, ffile, n_ini, n_end, Ind, StrName)
+         !---- Arguments ----!
+         character(len=*),                intent(in)  :: key
+         Type(file_type),                 intent(in)  :: ffile
+         integer,                         intent(in)  :: n_ini
+         integer,                         intent(in)  :: n_end
+         integer, dimension(2),           intent(out) :: Ind
+         character(len=*),      optional, intent(out) :: StrName
+      End Subroutine Get_SubBlock_KEY
+
+      Module Subroutine Read_Block_ExcludeReg(ffile, n_ini, n_end, IPatt)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: IPatt
+      End Subroutine Read_Block_ExcludeReg
+
+      Module Subroutine Read_Block_Instructions(ffile, N_ini, N_end, LSymm)
+         !---- Arguments ----!
+         type(File_type), intent(in)   :: Ffile
+         integer,         intent(in)   :: N_ini
+         integer,         intent(in)   :: N_end
+         logical, optional, intent(in) :: LSymm
+      End Subroutine Read_Block_Instructions
+
+      Module Subroutine Read_Block_Backgd(ffile, n_ini, n_end, IPatt)
+         !---- Arguments ----!
+         Type(file_type),         intent(in)    :: ffile
+         integer,                 intent(in)    :: n_ini
+         integer,                 intent(in)    :: n_end
+         integer,                 intent(in)    :: IPatt
+      End Subroutine Read_Block_Backgd
+
+
+      Module Subroutine Write_InfoBlock_Backgd(IPatt, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: IPatt
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine Write_InfoBlock_Backgd
+
+      Module Subroutine Write_InfoBlock_ExcludedRegions(IPatt, Iunit)
+         !---- Arguments ----!
+         integer,             intent(in) :: IPatt
+         integer, optional,   intent(in) :: Iunit
+      End Subroutine Write_InfoBlock_ExcludedRegions
+
+
       Module Function Get_NElem_Loop(cif, keyword, i_ini,i_end) Result(N)
          type(File_Type),   intent(in) :: cif
          character(len=*),  intent(in) :: keyword
@@ -659,6 +815,24 @@ Module CFML_IOForm
          integer,          intent(in) :: Ipr
          class (Spg_type), intent(in) :: Spg
       End Subroutine Write_MCIF_Spg
+
+      Module Subroutine Get_SubBlock_CommPatterns(ffile, N_ini, N_end, Bl_Patt, NPatt, C_Patt)
+         type(File_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: N_ini
+         integer,                            intent(in)     :: N_end
+         type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Patt
+         integer,                            intent(out)    :: Npatt
+         type(BlockInfo_Type), dimension(:), intent(in out) :: C_Patt
+      End Subroutine Get_SubBlock_CommPatterns
+
+      Module Subroutine Get_SubBlock_CommPhases(ffile, N_ini, N_end, Bl_Phas, NPhas, C_Phas)
+         type(File_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: N_ini
+         integer,                            intent(in)     :: N_end
+         type(BlockInfo_Type), dimension(:), intent(in)     :: Bl_Phas
+         integer,                            intent(out)    :: Nphas
+         type(BlockInfo_Type), dimension(:), intent(in out) :: C_Phas
+      End Subroutine Get_SubBlock_CommPhases
 
     End Interface
 

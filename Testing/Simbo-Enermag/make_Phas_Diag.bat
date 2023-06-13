@@ -22,14 +22,14 @@ rem
 rem
 rem ****---- Intel Compiler ----****
 :IFORT
-   ifort /c Sup_Exc.f90 /O2 /nologo /I%CRYSFML%\ifort_release\include
-   ifort /c Phase_Diagram.f90   /O2 /nologo /I%CRYSFML%\ifort_release\include
-   link /subsystem:console /stack:64000000 /out:Phase_Diagram.exe *.obj %CRYSFML%\ifort_release\lib\libcrysfml08.a
+   ifort /c Sup_Exc.f90 /O2 /nologo /I%CRYSFML08%\ifort_release\include
+   ifort /c Phase_Diagram.f90   /O2 /nologo /I%CRYSFML08%\ifort_release\include
+   link /subsystem:console /stack:64000000 /out:Phase_Diagram.exe *.obj %CRYSFML08%\ifort_release\lib\libcrysfml08.a
    goto END
 :IFORTD
-   ifort /c Sup_Exc.f90 /debug:full /check /traceback /nologo /I%CRYSFML%\ifort_debug\include
-   ifort /c Phase_Diagram.f90   /debug:full /check /traceback /nologo /I%CRYSFML%\ifort_debug\include
-   link /subsystem:console /stack:64000000 /out:Phase_Diagram.exe *.obj %CRYSFML%\ifort_debug\lib\libcrysfml08.a
+   ifort /c Sup_Exc.f90 /debug:full /check /traceback /nologo /I%CRYSFML08%\ifort_debug\include
+   ifort /c Phase_Diagram.f90   /debug:full /check /traceback /nologo /I%CRYSFML08%\ifort_debug\include
+   link /subsystem:console /stack:64000000 /out:Phase_Diagram.exe *.obj %CRYSFML08%\ifort_debug\lib\libcrysfml08.a
    goto END
 rem
 rem
@@ -52,7 +52,7 @@ rem  or if you want to conserve the object files
 rem  Compression of executable
         upx Phase_Diagram.exe
 rem  Move the excutable to a directory in the Path
-rem        if exist %FULLPROF% move Phase_Diagram.exe %FULLPROF% > nul
+        if exist %FULLPROF% move Phase_Diagram.exe %FULLPROF% > nul
 rem        if exist %FULLPROF% move Phase_Diagram_gf.exe %FULLPROF% > nul
 rem  Remove unnecessary files
         del *.obj *.mod *.o *.map *.bak > nul
