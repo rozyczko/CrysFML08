@@ -656,22 +656,42 @@ module nexus_mod
         real :: phi_val,chi_val,omegamma_val,gamma_val,psi_val,canne_val,nu_val,tth_val
         real, dimension(9) :: ub
         real, dimension(:,:), allocatable :: datos
-        !character(len=30) :: data_ordering
         character(len=STR_MAX_LEN) :: key
         character(len=STR_MAX_LEN), dimension(:), allocatable :: var_names
         character(len=STR_MAX_LEN) :: namef
         character(len=30) :: data_ordering
         character(len=80) :: user,local_contact,end_time,experiment_id
+        character(len=:), allocatable :: instrument_address
 
         ! Instrument name
         call h5dopen_f(file_id,'entry0/instrument/name',dset,hdferr)
-        if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
-        if (hdferr /= -1) call h5dread_f(dset,filetype,namef,dims,hdferr)
-        call h5dclose_f(dset,hdferr)
         if (hdferr /= -1) then
-            i=index(namef,char(0))
-            nexus%instrument_name = L_Case(namef(1:i-1))
+            instrument_address = 'entry0/instrument/name'
+            call h5dget_type_f(dset,filetype,hdferr)
+            if (hdferr /= -1) call h5dread_f(dset,filetype,namef,dims,hdferr)
+            call h5dclose_f(dset,hdferr)
+            if (hdferr /= -1) then
+                i=index(namef,char(0))
+                nexus%instrument_name = L_Case(namef(1:i-1))
+            end if
         else
+            call h5dopen_f(file_id,'entry0/XTREMD/name',dset,hdferr)
+            if (hdferr /= -1) then
+                nexus%instrument_name = 'xtremed'
+                instrument_address = 'entry0/XTREMD'
+                call h5dclose_f(dset,hdferr)
+            end if
+            if (hdferr == -1) then
+                call h5dopen_f(file_id,'entry0/D10/name',dset,hdferr)
+                if (hdferr /= -1) then
+                    nexus%instrument_name = 'd10'
+                    instrument_address = 'entry0/D10'
+                    call h5dclose_f(dset,hdferr)
+                end if
+            end if
+        end if
+        if (hdferr == -1) then
+            call h5dclose_f(dset,hdferr)
             err_nexus = .true.
             err_nexus_mess = "read_nexus_ill: error getting instrument name"
             return
@@ -748,7 +768,7 @@ module nexus_mod
         call h5dclose_f(dset,hdferr)
 
         ! Geometry
-        call h5dopen_f(file_id,'entry0/instrument/SingleCrystalSettings/mode',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/mode',dset,hdferr)
         if (hdferr /= -1) then
             call h5dread_f(dset,H5T_NATIVE_INTEGER,mode,scalar,hdferr)
             call h5dclose_f(dset,hdferr)
@@ -762,8 +782,8 @@ module nexus_mod
         end if
 
         ! Data ordering
-        call h5dopen_f(file_id,'entry0/instrument/Detector/data_ordering',dset,hdferr)
-        if (hdferr == -1) call h5dopen_f(file_id,'entry0/instrument/Det1/data_ordering',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'Detector/data_ordering',dset,hdferr)
+        if (hdferr == -1) call h5dopen_f(file_id,instrument_address//'Det1/data_ordering',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,data_ordering,dims,hdferr)
         call h5dclose_f(dset,hdferr)
@@ -774,14 +794,14 @@ module nexus_mod
         end if
 
         ! Reflection
-        call h5dopen_f(file_id,'entry0/instrument/SingleCrystalSettings/reflection',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/reflection',dset,hdferr)
         if (hdferr /= -1) call h5dget_space_f(dset,space,hdferr)
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%reflection,dims,hdferr)
         call h5dclose_f(dset,hdferr)
 
         ! UB-matrix
-        call h5dopen_f(file_id,'entry0/instrument/SingleCrystalSettings/orientation_matrix',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/orientation_matrix',dset,hdferr)
         if (hdferr /= -1) call h5dget_space_f(dset,space,hdferr)
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ub,dims,hdferr)
@@ -909,7 +929,7 @@ module nexus_mod
                     end select
                 end do
                 if (.not. nexus%is_phi) then
-                    call h5dopen_f(file_id,'entry0/instrument/phi/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'phi/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_phi = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,phi_val,scalar,hdferr)
@@ -918,7 +938,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_chi) then
-                    call h5dopen_f(file_id,'entry0/instrument/chi/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'chi/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_chi = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,chi_val,scalar,hdferr)
@@ -927,7 +947,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_omega) then
-                    call h5dopen_f(file_id,'entry0/instrument/omega/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'omega/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_omega = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,omegamma_val,scalar,hdferr)
@@ -936,7 +956,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_gamma) then
-                    call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'gamma/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_gamma = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,gamma_val,scalar,hdferr)
@@ -945,7 +965,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_psi) then
-                    call h5dopen_f(file_id,'entry0/instrument/psi/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'psi/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_psi = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,psi_val,scalar,hdferr)
@@ -954,7 +974,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_canne) then
-                    call h5dopen_f(file_id,'entry0/instrument/canne/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'canne/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_canne = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,canne_val,scalar,hdferr)
@@ -963,7 +983,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_nu) then
-                    call h5dopen_f(file_id,'entry0/instrument/nu/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'nu/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_nu = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,nu_val,scalar,hdferr)
@@ -972,7 +992,7 @@ module nexus_mod
                     end if
                 end if
                 if (.not. nexus%is_tth) then
-                    call h5dopen_f(file_id,'entry0/instrument/2theta/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'2theta/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_tth = .true.
                         call h5dread_f(dset,H5T_NATIVE_REAL,tth_val,scalar,hdferr)
@@ -1051,6 +1071,7 @@ module nexus_mod
         else ! Virtual detector?
 
             call h5dopen_f(file_id,'entry0/instrument/Detector/virtual_cgap',dset,hdferr)
+            if (hdferr == -1) call h5dopen_f(file_id,'entry0/instrument/Det1/virtual_cgap',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,scalar,hdferr)
             if (hdferr /= -1) then
                 call h5dclose_f(dset,hdferr)

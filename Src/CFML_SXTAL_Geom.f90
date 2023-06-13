@@ -226,14 +226,16 @@
 !!
  Module CFML_SXTAL_Geom
     !---- Use Modules ----!
-    Use CFML_GlobalDeps,        Only: Cp,Dp,To_Deg,To_Rad, clear_error, Err_CFML
-    Use CFML_Maths,             Only: Cross_Product, invert => Inverse_Matrix,co_linear,in_limits
+    Use CFML_GlobalDeps,        Only: Cp,Dp,To_Deg,To_Rad, clear_error, Err_CFML,ops_sep
+    use CFML_gSpacegroups,      Only: Spg_Type,Set_Spacegroup
+    Use CFML_Maths,             Only: Cross_Product, invert => Inverse_Matrix,co_linear,in_limits,sort
     Use CFML_Metrics,           Only: Cell_G_Type, Zone_Axis_type, Get_basis_from_uvw, &
-                                      Rot_Gibbs_Matrix
+                                      Rot_Gibbs_Matrix,Set_Crystal_Cell
     Use CFML_Geom,              Only: Get_OmegaChiPhi, Get_Matrix_moving_v_to_u,&
                                       Get_Anglen_Axis_From_Rotmat, Set_Rotation_Matrix
     Use CFML_ILL_Instrm_data,   Only: Current_Orient, Current_Instrm, SXTAL_Numor_type, &
                                       Diffractometer_Type
+    use CFML_Reflections,       Only: Reflist_Type,Hkl_Gen_Sxtal
     Use CFML_Strings,           Only: file_type,l_case
 
     !---- Variables ----!
@@ -245,13 +247,13 @@
     Public :: Chkin180
 
     !---- List of public subroutines ----!
-    Public :: Angs_4C_bisecting, Equatorial_Chi_Phi, Get_dspacing_theta,                        &
-              Get_GaOmNu_frChiPhi, Chi_mat, Phi_mat, Psi_mat, Get_Angs_NB,                      &
-              Calc_Om_Chi_Phi, Calc_Psi, d19psd, dspace, fixdnu, Normal_Beam_Angles,            &
-              s4cnb, snb4c, Flat_Cone_vertDet, ganu_from_xz, Get_WaveGaNu_frZ4, normal, refvec, &
-              sxdpsd, triple, z3frz1, z2frz1, z1frfc, z1frnb, z1frmd, z1frz4, z1frz3, z1frz2,   &
-              z4frgn, z4frz1, calang, genb, genub, cell_fr_UB, set_psd, get_z1_from_pixel,      &
-              Get_z1_D9angls, psd_convert, Get_UB_from_uvw_hkl_omega, Get_UB_from_hkl_hkl_omega,&
+    Public :: Angs_4C_bisecting, Equatorial_Chi_Phi, Get_dspacing_theta,                          &
+              Get_GaOmNu_frChiPhi, Chi_mat, Phi_mat, Psi_mat, Get_Angs_NB,                        &
+              Calc_Om_Chi_Phi, Calc_Psi, d19psd, dspace, fixdnu, Normal_Beam_Angles,              &
+              s4cnb, snb4c, Flat_Cone_vertDet, ganu_from_xz, Get_WaveGaNu_frZ4, normal, refvec,   &
+              sxdpsd, triple, ubfrqcel, z3frz1, z2frz1, z1frfc, z1frnb, z1frmd, z1frz4, z1frz3,   &
+              z1frz2, z4frgn, z4frz1, calang, genb, genub, cell_fr_UB, set_psd, get_z1_from_pixel,&
+              Get_z1_D9angls, psd_convert, Get_UB_from_uvw_hkl_omega, Get_UB_from_hkl_hkl_omega,  &
               Get_FlatCone_Angles_D10, Read_Twinlaw, Write_Twinlaw, psd_convert_old
 
 
@@ -562,6 +564,21 @@
          real(kind=cp),    Intent(Out),    Dimension(3,3):: tv
       End Subroutine triple
 
+      Module Subroutine ubfrqcel(spg_id,q_user,cell_user,ub,rfac,nq_max_user,npairs_max_user,nubs_max_user,angle_min_user,rtol_user,rfac_max_user,output_file)
+         !---- Arguments ----!
+         character(len=*),                       intent(in)  :: spg_id          ! space group (number, symbol...)
+         real,    dimension(:,:),                intent(in)  :: q_user          ! scattering vectors (3,nq)
+         real,    dimension(6),                  intent(in)  :: cell_user       ! cell parameters
+         real,    dimension(:,:,:), allocatable, intent(out) :: ub              ! returned ubs
+         real,    dimension(:),     allocatable, intent(out) :: rfac            ! rfactors for returned ubs
+         integer, optional,                      intent(in)  :: nq_max_user     ! maximum number of q-vectors
+         integer, optional,                      intent(in)  :: npairs_max_user ! maximum number of pairs to be tested
+         integer, optional,                      intent(in)  :: nubs_max_user   ! maximum number of ubs returned
+         real,    optional,                      intent(in)  :: angle_min_user  ! minimum angle between pairs of reflections
+         real,    optional,                      intent(in)  :: rtol_user       ! tolerance in reciprocal space
+         real,    optional,                      intent(in)  :: rfac_max_user   ! maximum allowed value for R-factor
+         character(len=*), optional,             intent(in)  :: output_file     ! full path of the output file
+      End Subroutine ubfrqcel
       ! End SubModule (CFML_Geometry_SXTAL) SXTAL_UB
 
       ! SubModule (CFML_Geometry_SXTAL) SXTAL_IO
@@ -687,7 +704,7 @@
          real(kind=cp), dimension(4)               :: angl_4C
       End Function snb4c
 
-      Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,blfr,ga_P,nu_P,f_virtual)
+      Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,ga_P,nu_P,f_virtual)
          !---- Arguments ----!
          real,                  intent(in)  :: px                 ! x coordinate, in pixels
          real,                  intent(in)  :: pz                 ! z coordinate, in pixels
@@ -699,7 +716,6 @@
          real,                  intent(in)  :: dist_samp_detector ! sample detector distance
          real,    dimension(3), intent(in)  :: det_offsets        ! x, y and z detector offsets
          integer,               intent(in)  :: origin             ! origin for numbering pixels
-         integer,               intent(in)  :: blfr               ! Busing-Levy frame
          real,                  intent(out) :: ga_P               ! Gamma value of the reflection
          real,                  intent(out) :: nu_P               ! Nu value of the reflection
          integer, optional,     intent(in)  :: f_virtual          ! stretching factor for virtual detectors

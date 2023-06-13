@@ -12,7 +12,7 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
    !!----
    !!---- 29/03/2023
    !!----
-   Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,blfr,ga_P,nu_P,f_virtual)
+   Module Subroutine ganu_from_xz(px,pz,ga_D,nu_D,ipsd,npix,pisi,dist_samp_detector,det_offsets,origin,ga_P,nu_P,f_virtual)
       !---- Arguments ----!
       real,                  intent(in)  :: px                 ! x coordinate, in pixels
       real,                  intent(in)  :: pz                 ! z coordinate, in pixels
@@ -24,7 +24,6 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
       real,                  intent(in)  :: dist_samp_detector ! sample detector distance
       real,    dimension(3), intent(in)  :: det_offsets        ! x, y and z detector offsets
       integer,               intent(in)  :: origin             ! origin for numbering pixels
-      integer,               intent(in)  :: blfr               ! Busing-Levy frame
       real,                  intent(out) :: ga_P               ! Gamma value of the reflection
       real,                  intent(out) :: nu_P               ! Nu value of the reflection
       integer, optional,     intent(in)  :: f_virtual          ! stretching factor for virtual detectors
@@ -41,11 +40,6 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
       diffractometer%agap = pisi(2)
       diffractometer%dist_samp_detector = dist_samp_detector
       diffractometer%det_offsets(:) = det_offsets(:)
-      if (blfr == 1) then
-            diffractometer%bl_frame = 'z-down'
-      else
-            diffractometer%bl_frame = 'z-up'
-      end if
       if (present(f_virtual)) then
          f = f_virtual
       else
@@ -58,9 +52,10 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
    end subroutine ganu_from_xz
 
    !!---- PSD_CONVERT
-   !!---- Calculates pixel coordinates from angles and viceversa for 2D detectors
+   !!---- Calculates pixel coordinates from angles and viceversa for 2D detectors.
    !!----
-   !!---- Pixel numbering start by one
+   !!---- Coordinates given by the users are assumed to be Busing-Levy.
+   !!---- Pixel numbering starts by one
    !!---- The detector is assumed to be viewed from the crystal
    !!----
    !!---- r_D contains the pixel coordinates in the detector
@@ -99,7 +94,6 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
       !---- Local variables ----!
       integer :: orig
       real(kind=cp) :: px_mid,pz_mid,radius,y_D,x_L,y_L,z_L,px_,pz_,deltaX
-      character(len=:), allocatable :: blfr
 
       call clear_error()
       diffractometer%np_horiz = diffractometer%np_horiz * f_virtual
@@ -118,7 +112,6 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
       else
          orig = 0
       end if
-      blfr = L_Case(diffractometer%bl_frame)
 
       if (conversion_type == 0) then ! pixels to angles
 
@@ -128,13 +121,9 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
          pz_ = pz
          if (orig == 0 .or. orig == 1) pz_ = diffractometer%np_vert - pz_ + 1
          if (orig == 1 .or. orig == 2) px_ = diffractometer%np_horiz - px_ + 1
-         x_D = (px_ - px_mid) * diffractometer%cgap
+         x_D = (px_ - 0.5 - px_mid) * diffractometer%cgap
          y_D = 0.0
-         z_D = (pz_ - pz_mid) * diffractometer%agap
-         if (trim(blfr) == 'z-down') then
-            x_D = -x_D
-            z_D = -z_D
-         end if
+         z_D = (pz_ - 0.5 - pz_mid) * diffractometer%agap
          ! Cartesian coordinates in the laboratory system
          select case(diffractometer%ipsd)
                case(2) ! Flat detector
@@ -180,11 +169,6 @@ SubModule (CFML_SXTAL_Geom) SXTAL_PSD
          nu_P = nu_P + nu_D
 
          ! Compute pixels from detector coordinates
-         ! Pixels from origin 3
-         if (trim(blfr) == 'z-down') then
-            x_D = -x_D
-            z_D = -z_D
-         end if
          px = px_mid + x_D / diffractometer%cgap
          pz = pz_mid + z_D / diffractometer%agap
          if (orig == 0 .or. orig == 1) pz = diffractometer%np_vert - pz + 1
