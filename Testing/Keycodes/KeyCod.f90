@@ -12,10 +12,10 @@ Program KeyCodes
    use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
                                 ModAtm_Std_Type, ModAtm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
-   use CFML_Molecules,    only: Molecule_type
 
    use CFML_IOForm
    use CFML_KeyCodes
+   use CFML_Molecules
 
    !---- Variables ----!
    implicit none
@@ -28,7 +28,7 @@ Program KeyCodes
 
    integer, parameter :: NMAX_PHAS =10
    integer, parameter :: NMAX_PATT =10
-   integer, parameter :: NMAX_MOLE =10
+   integer, parameter :: NMAX_MOLEX=10
    integer, parameter :: NMAX_ATLIS=10
 
    !> --------------------------
@@ -103,6 +103,7 @@ Program KeyCodes
    integer :: NB_Phas  ! Number of Phase blocks
    integer :: NC_Patt  ! Number of Pattern blocks into Command Block
    integer :: NC_Phas  ! Number of Phase blocks into command block
+   integer :: NB_Mol   ! Number of Molecules blocks
 
    type(File_type)                         :: Ffile        ! File and lines information
 
@@ -111,12 +112,18 @@ Program KeyCodes
    type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Phas      ! Phase blocks
    type(BlockInfo_Type), dimension(NB_MAX) :: Bl_CommPatt  ! Patterns zone into Command block
    type(BlockInfo_Type), dimension(NB_MAX) :: Bl_CommPhas  ! Phases zone into Command block
-
+   type(BlockInfo_Type), dimension(NB_MAX) :: Bl_Mol       ! Molex zones
 
    type(GenParList_Type)                       :: VGen     ! General vector constains refinement codes
-   type(Phase_Type), dimension(:), allocatable :: Ph
 
-   integer :: i, j,k,n_ini, n_end, narg, nt, lun
+   type(Phase_Type),      dimension(:), allocatable :: Ph  ! Phases
+   type(MolPhase_Type),   dimension(:), allocatable :: MPh ! MolPhase
+
+
+   !---- Variables ----!
+   integer :: i, j, k, n_ini, n_end, narg
+   integer :: n, nt, nc, lun
+   integer, dimension(NB_MAX) :: ph_molcrys=0
 
    character(len=256) :: filcod
    character(len=2)   :: ans
@@ -211,8 +218,10 @@ Program KeyCodes
    call Allocate_GPList(500,VGen)   ! Up to 1000 parameters for refinement
 
    if (allocated(Ph)) deallocate(Ph)
+   if (allocated(MPh)) deallocate(MPh)
    nt=max(1,NB_Phas)
-   allocate(ph(nt))
+
+   allocate(ph(nt), Mph(nt))
 
    if (allocated(Vec_Instr)) deallocate(Vec_Instr)
    allocate (Vec_Instr(3*ffile%nlines))
@@ -273,21 +282,65 @@ Program KeyCodes
       end if
    end if
 
-   do i=1,NB_Phas
-      call Read_XTal_Structure(trim(filcod)//'.cfl',ph(i)%Cell, ph(i)%Spg, ph(i)%Atm, IPhase=i)
-      if (Err_CFML%IErr == 1) then
-         write(unit=*,fmt="(a,i3)")  ' => Error reading phase #',i
-         write(unit=*,fmt='(a)') ' => '//trim(err_CFML%Msg)
-         stop
-      end if
-      ph(i)%Atm%Iph=i   ! Actualizar
+   !> Molex definitions?
+   call Get_SubBlock_MolPhases(ffile, 1, ffile%nlines, NB_Mol, Bl_Mol)
+   if (Err_CFML%IErr == 1) then
+      write(unit=*,fmt="(a)")  ' => Error reading Molex zone: '//trim(err_CFML%Msg)
+      stop
+   end if
 
-      write(unit=lun,fmt='(/,a)')  '  ==========================='
-      write(unit=lun,fmt='(a,i4)') '  Information about Phase',i
-      write(unit=lun,fmt='(a,/)')  '  ==========================='
-      call Write_SpaceGroup_Info(Ph(i)%SpG,lun)
-      call Write_Atom_List(Ph(i)%atm,i, Iunit=lun)
-      write(unit=lun,fmt='(a)')' '
+   do i=1, NB_Phas
+      do j=1,NB_Mol
+         if (Bl_Mol(j)%Nl(1) >= Bl_Phas(i)%Nl(1) .and. &
+             Bl_Mol(j)%Nl(2) <= Bl_Phas(i)%Nl(2) ) then
+
+             ! N. molecules in the current Phase
+             ph_molcrys(i)=ph_molcrys(i)+1
+
+         end if
+      end do
+   end do
+
+   print*,' ---- Blocks Zone ----'
+   print*,' Number of Patterns: ', NB_Patt
+   print*,'   Number of Phases: ', NB_Phas
+   print*,' '
+
+   do i=1,NB_Phas
+      if (ph_molcrys(i) == 0) then
+         call Read_XTal_Structure(trim(filcod)//'.cfl',ph(i)%Cell, ph(i)%Spg, ph(i)%Atm, IPhase=i)
+         if (Err_CFML%IErr == 1) then
+            write(unit=*,fmt="(a,i3)")  ' => Error reading phase #',i
+            write(unit=*,fmt='(a)') ' => '//trim(err_CFML%Msg)
+            stop
+         end if
+         ph(i)%Atm%Iph=i   ! Actualizar
+
+         write(unit=lun,fmt='(/,a)')  '  ==========================='
+         write(unit=lun,fmt='(a,i4)') '  Information about Phase',i
+         write(unit=lun,fmt='(a,/)')  '  ==========================='
+         call Write_SpaceGroup_Info(Ph(i)%SpG,lun)
+         call Write_Atom_List(Ph(i)%atm,i, Iunit=lun)
+         write(unit=lun,fmt='(a)')' '
+
+      else
+         if (allocated(MPh(i)%Mol)) deallocate(MPh(i)%Mol)
+         allocate(MPh(i)%Mol(ph_molcrys(i)))
+
+         call read_cfl_MolPhase(ffile, Bl_Phas(i)%Nl(1), Bl_Phas(i)%Nl(2),MPh(i))
+         Mph(i)%Atm%Iph=i
+
+         write(unit=lun,fmt='(/,a)')  '  ====================================='
+         write(unit=lun,fmt='(a,i4)') '  Information about Molecular Phase',i
+         write(unit=lun,fmt='(a,/)')  '  ====================================='
+         call Write_SpaceGroup_Info(MPh(i)%SpG,lun)
+         do j=1, ph_molcrys(i)
+            call WriteInfo_Molecule(Mph(i)%Mol(j),Lun)
+         end do
+         call Write_Atom_List(MPh(i)%atm,i, Iunit=lun)
+
+         write(unit=lun,fmt='(a)')' '
+      end if
    end do
 
    nt = Np_Instr
@@ -301,8 +354,8 @@ Program KeyCodes
    !> ----------------------
    if (NB_Comm > 0) then
       print*,' ---- Commands Zone ----'
-      print*,' Number of Patterns Block: ', nc_patt
-      print*,'   Number of Phases Block: ', nc_phas
+      print*,' Number of Patterns Block in Coomand Zone: ', nc_patt
+      print*,'   Number of Phases Block in Command Zone: ', nc_phas
       print*,' '
 
       !> Check the Atom type in the list
@@ -326,7 +379,9 @@ Program KeyCodes
          end select
       end do
 
+      !> -------------------------
       !> Read RefCodes of Patterns
+      !> -------------------------
       if (NC_Patt ==0) then
          call Read_RefCodes_PATT(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, VGen)
 
@@ -346,11 +401,29 @@ Program KeyCodes
          end do
       end if
 
+      !> -----------------------
       !> Read RefCodes of Phases
+      !> -----------------------
       if (NC_Phas ==0) then
+         if (ph_molcrys(1) ==0) then
+            !> Refinable parameters
+            call Read_RefCodes_PHAS(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
+                                    Ph(1)%Spg, Ph(1)%Cell, Ph(1)%Atm, VGen)
 
-         call Read_RefCodes_PHAS(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
-                                 Ph(1)%Spg, Ph(1)%Cell, Ph(1)%Atm, VGen)
+            !> Restraints parameters
+            call Read_Restraints_PHAS(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
+                                      Ph(1)%Atm, Rest_Dis, Rest_Ang, Rest_Tor )
+         else
+            !> Refinable parameters
+            call Read_RefCodes_PHAS(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
+                                    MPh(1)%Spg, MPh(1)%Cell, MPh(1)%Atm, VGen)
+
+            call Read_RefCodes_MOL(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
+                                   MPh(1)%N_Mol, MPh(1)%Mol, VGen)
+
+            !> Restraints parameters
+         end if
+
 
       else
          do i=1, NC_Phas
@@ -363,21 +436,43 @@ Program KeyCodes
                exit
             end do
 
-            !print*,'=> Phase seleccionada: ',k
+            if (ph_molcrys(k) == 0) then
 
-            call Read_RefCodes_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,    &
-                                           Bl_CommPhas(i)%Nl(2)-1, k, &
-                                           Ph(k)%Spg, Ph(k)%Cell, Ph(k)%Atm, VGen)
+               !> Refinable parameters
+               call Read_RefCodes_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,    &
+                                              Bl_CommPhas(i)%Nl(2)-1, k, &
+                                              Ph(k)%Spg, Ph(k)%Cell, Ph(k)%Atm, VGen)
 
-            call Read_Restraints_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,               &
-                                             Bl_CommPhas(i)%Nl(2)-1, k, Ph(k)%Atm, &
-                                             Rest_Dis, Rest_Ang, Rest_Tor )
+               !> Restraints parameters
+               call Read_Restraints_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,               &
+                                                Bl_CommPhas(i)%Nl(2)-1, k, Ph(k)%Atm, &
+                                                Rest_Dis, Rest_Ang, Rest_Tor )
+            else
+
+               !> Refinable parameters
+               call Read_RefCodes_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,    &
+                                              Bl_CommPhas(i)%Nl(2)-1, k, &
+                                              MPh(k)%Spg, MPh(k)%Cell, MPh(k)%Atm, VGen)
+
+               call Read_RefCodes_MOL(ffile, Bl_CommPhas(i)%Nl(1)+1, &
+                                      Bl_CommPhas(i)%Nl(2)-1, k, &
+                                      MPh(k)%N_Mol, MPh(k)%Mol, VGen)
+
+               !> Restraints parameters
+               call Read_Restraints_PHAS(ffile, Bl_CommPhas(i)%Nl(1)+1,               &
+                                                Bl_CommPhas(i)%Nl(2)-1, k, MPh(k)%Atm, &
+                                                Rest_Dis, Rest_Ang, Rest_Tor )
+            end if
          end do
       end if
 
       call WriteInfo_GPList(VGen)
       do i=1, NC_Phas
-         call WriteInfo_Restraints(Rest_Dis, Rest_Ang, Rest_Tor, i, Ph(i)%Atm)
+         if (ph_molcrys(i) == 0) then
+            call WriteInfo_Restraints(Rest_Dis, Rest_Ang, Rest_Tor, i, Ph(i)%Atm)
+         else
+            call WriteInfo_Restraints(Rest_Dis, Rest_Ang, Rest_Tor, i, MPh(i)%Atm)
+         end if
       end do
 
    end if ! NB_Comm
@@ -444,6 +539,44 @@ End Subroutine Write_Info_Instructions
 !!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>!!
 !!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>!!
 !!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>!!
+Subroutine Read_CFL_MolPhase(cfl, n_ini, n_end, M)
+   !---- Arguments ----!
+   type(File_Type),       intent(in)     :: cfl
+   integer,               intent(in)     :: n_ini
+   integer,               intent(in)     :: n_end
+   type(MolPhase_Type),   intent(in out) :: M
+
+   !---- Local varibles ----!
+   character(len=80) :: line
+   integer           :: i, natm, nmol, k, n
+   type(BlockInfo_Type), dimension(10) :: Bl
+   type(Molecule_type)                 :: Mol
+
+   !> Init
+   call clear_error()
+
+   !> Cell parameters
+   call read_cfl_cell(cfl, M%Cell, i_ini=n_ini,i_end=n_end)
+   if (Err_CFML%IErr==1) return
+
+   !> Space group
+   call read_CFL_SpG(cfl,M%SpG, i_ini=n_ini, i_end=n_end)
+   if (Err_CFML%IErr==1) return
+
+   !> Molecules
+   call Get_SubBlock_MolPhases(cfl, n_ini, n_end, NMol, Bl)
+   do i=1, nmol
+      k=Bl(i)%iex(1)
+      if (k ==0) k=i
+      call Read_CFL_Molecule(cfl, Bl(i)%Nl(1), Bl(i)%Nl(2), M%Mol(k))
+   end do
+   M%N_Mol=nmol
+
+   !> Free atoms
+   call Read_CFL_Atoms(cfl, M%Atm, 'Atm_Ref_Type', 0, n_ini, n_end)
+
+End Subroutine Read_CFL_MolPhase
+
 
 End Program KeyCodes
 

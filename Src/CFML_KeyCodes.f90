@@ -53,7 +53,8 @@ Module CFML_KeyCodes
                                 Get_OP_from_Symb, Symmetry_symbol, Get_AtomBet_CTR, Get_AtomPos_CTR,&
                                 Get_Moment_CTR, Get_TFourier_CTR
    use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
-   use CFML_Molecules,    only: Molecule_type
+
+   use CFML_Molecules,    only: Molecule_type, index_atLab_on_Molecule
 
    Use CFML_Scattering_Tables, only: Get_Chem_Symb
    Use CFML_Rational
@@ -71,7 +72,7 @@ Module CFML_KeyCodes
              Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, GPList_to_Cell, GPList_to_Molec, &
              GPList_to_AtmList, GPList_from_AtmList, Get_InfoKey_StrPhas, &
-             Get_InfoKey_StrPatt, GPList_from_Cell, &
+             Get_InfoKey_StrPatt, Get_InfoKey_StrMol, GPList_from_Cell, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
              Read_RefCodes_PHAS, Read_RefCodes_MOL, ReadCode_EQUAL_PHAS, &
              ReadCode_EQUAL_PATT, Read_Restraints_PHAS, &
@@ -147,7 +148,7 @@ Module CFML_KeyCodes
 
 
    !---- Parameters ----!
-   integer, public, parameter :: NKEY_PHAS=52      ! Number of Keywords for Phases
+   integer, public, parameter :: NKEY_PHAS=55      ! Number of Keywords for Phases
    integer, public, parameter :: NKEY_PATT=42      ! Number of Keywords for Patterns
    !integer, public, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
 
@@ -166,7 +167,9 @@ Module CFML_KeyCodes
                      "THE   ", "PHI   ", "CHI   ", "ORIENT",               &
                      "T     ", "L     ", "S     ", "TL    ",               &
                      "LS    ", "TS    ", "TLS   ",                         &
-                     "SIZE  ", "STRAIN", "SCALE ", "ALL   "]
+                     "SIZE  ", "STRAIN", "SCALE ",                         & !51
+                     "DIST  ", "BANG  ", "TORS  ",                         & ! For Z-Matrix
+                     "ALL   "]
 
    character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
                      "U     ", "V     ", "W     ", "UVW   ",               &
@@ -531,44 +534,43 @@ Module CFML_KeyCodes
          type(GenParList_Type),         intent(in out) :: G
       End Subroutine Set_RefCodes_PHAS
 
-      Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
+      Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         Type(file_type),         intent(in)     :: ffile
-         integer,                 intent(in)     :: n_ini
-         integer,                 intent(in)     :: n_end
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         Type(file_type),                   intent(in)     :: ffile
+         integer,                           intent(in)     :: n_ini
+         integer,                           intent(in)     :: n_end
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine Read_RefCodes_MOL
 
-      Module Subroutine ReadCode_FIX_MOL(String, Im, M)
+      Module Subroutine ReadCode_FIX_MOL(String, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         character(len=*),                  intent(in)     :: String
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine ReadCode_FIX_MOL
 
-      Module Subroutine ReadCode_VARY_MOL(String, Im, M)
+      Module Subroutine ReadCode_VARY_MOL(String, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         character(len=*),                  intent(in)     :: String
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine ReadCode_VARY_MOL
 
-      Module Subroutine Split_RefCod_MOL(String, Nc, Ikeys, IMol, Keys)
+      Module Subroutine Set_RefCodes_MOL(Keyword, Npar, IPhas, IMol, Lab, G)
          !---- Arguments ----!
-         character(len=*),               intent(in)  :: String
-         integer,                        intent(out) :: Nc
-         integer, dimension(:),          intent(out) :: IKeys
-         integer, dimension(:),          intent(out) :: IMol
-         character(len=*), dimension(:), intent(out) :: Keys
-      End Subroutine Split_RefCod_MOL
-
-      Module Subroutine Set_RefCodes_MOL(Keyword, Npar,  Im, M)
-         !---- Arguments ----!
-         character(len=*),              intent(in)     :: Keyword
-         integer,                       intent(in)     :: NPar
-         integer,                       intent(in)     :: Im
-         type(GenParList_Type),         intent(in out) :: M
+         character(len=*),           intent(in)     :: Keyword
+         integer,                    intent(in)     :: NPar
+         integer,                    intent(in)     :: IPhas
+         integer,                    intent(in)     :: IMol
+         character(len=*), optional, intent(in)     :: Lab
+         type(GenParList_Type),      intent(in out) :: G
       End Subroutine Set_RefCodes_MOL
 
       Module Subroutine GPList_to_Molec(M, Im, Mol)
@@ -608,6 +610,14 @@ Module CFML_KeyCodes
          type(Atlist_Type), intent(in out) :: Atm
          class(SpG_Type),   intent(in)     :: SpG
       End Subroutine Set_KeyConstr_Atm
+
+      Module Subroutine Get_InfoKey_StrMol(Str, iKey, IPh, IMol)
+         !---- Arguments ----!
+         character(len=*), intent(in) :: Str
+         integer,          intent(out):: iKey
+         integer,          intent(out):: IPh
+         integer,          intent(out):: IMol
+      End Subroutine Get_InfoKey_StrMol
 
       Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab)
          !---- Arguments ----!

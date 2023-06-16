@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_Initialize
 
    implicit none
- 
+
  Contains
    !!----
    !!---- Subroutine Init_Molecule(Molecule,Natm)
@@ -109,7 +109,7 @@ Submodule (CFML_Molecules) Mol_Initialize
       end if
 
    End Subroutine Init_Molecule
-   
+
    !!----
    !!---- Subroutine Init_MolCrystal
    !!----
@@ -119,14 +119,14 @@ Submodule (CFML_Molecules) Mol_Initialize
    !!
    Module Subroutine Init_MolCrystal(MolX, NMol, NAtm, AtmType)
       !---- Argument ----!
-      type(MolCrystal_Type),  intent(out) :: MolX
+      type(MolCrystal_Type),      intent(out) :: MolX
       integer,          optional, intent(in)  :: Nmol       !Molucule object
-      integer,          optional, intent(in)  :: NAtm       !Free atoms 
-      character(len=*), optional, intent(in)  :: Atmtype  
+      integer,          optional, intent(in)  :: NAtm       !Free atoms
+      character(len=*), optional, intent(in)  :: Atmtype
 
-      !---- Local Variables ----!  
+      !---- Local Variables ----!
       integer :: i
-      type(Atm_Ref_Type)  :: at1
+      type(Atm_Ref_Type)    :: at1
       type(ModAtm_Ref_Type) :: at2
 
       molx%N_Free    = 0
@@ -152,16 +152,16 @@ Submodule (CFML_Molecules) Mol_Initialize
                allocate(molx%atm(natm), source=at2)
             else
                allocate(molx%atm(natm), source=at1)
-            end if 
+            end if
          else
             allocate(molx%atm(natm), source=at1)
-         end if 
-           
+         end if
+
          do i=1,natm
             call init_atom_type(molx%atm(i),0)
          end do
       end if
-      
+
    End Subroutine Init_MolCrystal
- 
-End Submodule Mol_Initialize 
+
+End Submodule Mol_Initialize
