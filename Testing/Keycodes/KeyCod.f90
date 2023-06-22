@@ -212,6 +212,9 @@ Program KeyCodes
       write(unit=*,fmt="(a)") trim(Err_CFML%Msg)
       write(unit=*,fmt="(/,a)") " => PROGRAM KEYCODES finished in error!"
       stop
+   else
+      write(*,"(a)")   "  NB_Comm, NB_Patt, NB_Phas, NC_Patt, NC_Phas"
+      write(*,"(5i9)") NB_Comm, NB_Patt, NB_Phas, NC_Patt, NC_Phas
    end if
 
    !> Allocating Vectors
@@ -241,7 +244,7 @@ Program KeyCodes
    !> ----------------------
    !> ---- PATTERN ZONE ----
    !> ----------------------
-   if (NB_Patt ==0) then
+   if (NB_Patt == 0) then
       NB_Patt=1
 
       Bl_Patt(1)%StrName='PatternDefault'
@@ -269,7 +272,7 @@ Program KeyCodes
    !> --------------------
    !> ---- PHASE ZONE ----
    !> --------------------
-   if (NB_Phas ==0) then
+   if (NB_Phas == 0) then
       NB_Phas=1
 
       Bl_Phas(1)%StrName='PhaseDefault'
@@ -304,6 +307,7 @@ Program KeyCodes
    print*,' ---- Blocks Zone ----'
    print*,' Number of Patterns: ', NB_Patt
    print*,'   Number of Phases: ', NB_Phas
+   print*,'Number of Molecules: ', NB_Mol
    print*,' '
 
    do i=1,NB_Phas
@@ -324,6 +328,7 @@ Program KeyCodes
          write(unit=lun,fmt='(a)')' '
 
       else
+
          if (allocated(MPh(i)%Mol)) deallocate(MPh(i)%Mol)
          allocate(MPh(i)%Mol(ph_molcrys(i)))
 
@@ -347,6 +352,7 @@ Program KeyCodes
    do i=1,NB_Phas
       call Read_Block_Instructions(ffile,Bl_Phas(i)%Nl(1), Bl_Phas(i)%Nl(2),.true.)
    end do
+
    !call write_info_Instructions(nt+1,NP_Instr)
 
    !> ----------------------
@@ -354,7 +360,7 @@ Program KeyCodes
    !> ----------------------
    if (NB_Comm > 0) then
       print*,' ---- Commands Zone ----'
-      print*,' Number of Patterns Block in Coomand Zone: ', nc_patt
+      print*,' Number of Patterns Block in Command Zone: ', nc_patt
       print*,'   Number of Phases Block in Command Zone: ', nc_phas
       print*,' '
 
@@ -382,7 +388,7 @@ Program KeyCodes
       !> -------------------------
       !> Read RefCodes of Patterns
       !> -------------------------
-      if (NC_Patt ==0) then
+      if (NC_Patt == 0) then
          call Read_RefCodes_PATT(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, VGen)
 
       else
@@ -404,8 +410,8 @@ Program KeyCodes
       !> -----------------------
       !> Read RefCodes of Phases
       !> -----------------------
-      if (NC_Phas ==0) then
-         if (ph_molcrys(1) ==0) then
+      if (NC_Phas == 0) then
+         if (ph_molcrys(1) == 0) then
             !> Refinable parameters
             call Read_RefCodes_PHAS(ffile, Bl_Comm%Nl(1)+1, Bl_Comm%Nl(2)-1, 1, &
                                     Ph(1)%Spg, Ph(1)%Cell, Ph(1)%Atm, VGen)
@@ -426,6 +432,7 @@ Program KeyCodes
 
 
       else
+
          do i=1, NC_Phas
             Str1=u_case(Bl_CommPhas(i)%StrName)
             k=0
@@ -465,8 +472,10 @@ Program KeyCodes
             end if
          end do
       end if
-
+      write(*,*) "Calling WriteInfo_GPList"
       call WriteInfo_GPList(VGen)
+      write(*,*) "Out of WriteInfo_GPList"
+
       do i=1, NC_Phas
          if (ph_molcrys(i) == 0) then
             call WriteInfo_Restraints(Rest_Dis, Rest_Ang, Rest_Tor, i, Ph(i)%Atm)
