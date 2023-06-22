@@ -131,7 +131,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call GPList_from_AtmList(Atm, k, G)
                         call Update_GPList_Code(G)
 
-                     case (52)
+                     case (34:48)
+
+                     case (NKEY_PHAS)
 
                      case default
                         call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
@@ -174,7 +176,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < n_dir) call Update_GPList_Code(G)
 
-                        case (52)
+                        case (34:48)
+
+                        case (NKEY_PHAS)
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
 
                            if (n2 > 0) then
@@ -225,7 +229,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call GPList_from_AtmList(Atm, k, G)
                         call Update_GPList_Code(G)
 
-                     case (52)
+                     case (34:48)
+
+                     case (NKEY_PHAS)
 
                      case default
                         call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
@@ -266,7 +272,10 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < j-1) call Update_GPList_Code(G)
 
-                        case (52)
+                        case (34:48)
+
+                        case (NKEY_PHAS)
+
                         case default
                            call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
                      end select
@@ -308,7 +317,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Set_KeyConstr_Atm(Atm, Spg)
                   call GPList_from_AtmList(Atm, k, G)
 
-               case (52)
+               case (34:48)
+
+               case (NKEY_PHAS)
 
                case default
                   call Set_RefCodes_PHAS('FIX', ikey, k, ' ', G)
@@ -405,7 +416,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call GPList_from_AtmList(Atm, k, G)
                         call Update_GPList_Code(G)
 
-                     case (52)
+                     case (34:48) ! MOL
+
+                     case (NKEY_PHAS)
 
                      case default
                         call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
@@ -448,7 +461,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < n_dir) call Update_GPList_Code(G)
 
-                        case (52)
+                        case (34:48) ! MOL
+
+                        case (NKEY_PHAS)
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
 
                            if (n2 > 0) then
@@ -499,7 +514,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call GPList_from_AtmList(Atm, k, G)
                         call Update_GPList_Code(G)
 
-                     case (52)
+                     case (34:48)
+
+                     case (NKEY_PHAS)
 
                      case default
                         call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
@@ -540,7 +557,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < j-1) call Update_GPList_Code(G)
 
-                        case (52)
+                        case (34:48)
+
+                        case (NKEY_PHAS)
 
                         case default
                            call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
@@ -583,7 +602,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Set_KeyConstr_Atm(Atm, Spg)
                   call GPList_from_AtmList(Atm, k, G)
 
-               case (52)
+               case (34:48)
+
+               case (NKEY_PHAS)
 
                case default
                   call Set_RefCodes_PHAS('VARY', ikey, k, ' ', G)
@@ -661,34 +682,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Fix_GPList_Par(G,'U13_'//trim(lab)//'_PHAS'//trim(car))
                   call Fix_GPList_Par(G,'U23_'//trim(lab)//'_PHAS'//trim(car))
 
-               case (37) ! CENTRE
-                  call Fix_GPList_Par(G,'XC_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'YC_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'ZC_PHAS'//trim(car))
+               case (34:48) ! MOL
 
-               case (41) ! ORIENT
-                  call Fix_GPList_Par(G,'THE_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'PHI_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'CHI_PHAS'//trim(car))
-
-               case (45) ! TL
-                  call Fix_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'L_PHAS'//trim(car))
-
-               case (46) ! LS
-                  call Fix_GPList_Par(G,'L_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (47) ! TS
-                  call Fix_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (48) ! TLS
-                  call Fix_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'L_PHAS'//trim(car))
-                  call Fix_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (52) ! ALL
+               case (NKEY_PHAS) ! ALL
 
                case default
                   if (len_trim(lab) > 0) then
@@ -729,34 +725,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Vary_GPList_Par(G,'U13_'//trim(lab)//'_PHAS'//trim(car))
                   call Vary_GPList_Par(G,'U23_'//trim(lab)//'_PHAS'//trim(car))
 
-               case (37)
-                  call Vary_GPList_Par(G,'XC_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'YC_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'ZC_PHAS'//trim(car))
+               case (34:48)
 
-               case (41)
-                  call Vary_GPList_Par(G,'THE_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'PHI_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'CHI_PHAS'//trim(car))
-
-               case (45)
-                  call Vary_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'L_PHAS'//trim(car))
-
-               case (46)
-                  call Vary_GPList_Par(G,'L_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (47)
-                  call Vary_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (48)
-                  call Vary_GPList_Par(G,'T_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'L_PHAS'//trim(car))
-                  call Vary_GPList_Par(G,'S_PHAS'//trim(car))
-
-               case (52) ! ALL
+               case (NKEY_PHAS) ! ALL
 
                case default
                   if (len_trim(lab) > 0) then

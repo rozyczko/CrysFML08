@@ -323,10 +323,10 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       write(unit=lun, fmt="(a)") " "
       write(unit=lun, fmt="(a,i5)") " Number of Refinable Parameters: ",G%NPar
       write(unit=lun, fmt="(a)") " "
-      write(unit=lun, fmt="(a,a)")" N.Par      Name                   Value     Sigma    ",&
+      write(unit=lun, fmt="(a,a)")" N.Par      Name                            Value     Sigma    ",&
                                      " L.Bound   U.Bound  Multiplier    Code  B.C."
       do i=1,G%NPar
-         write(unit=lun,fmt="(i4,8x,a20,5f10.5, 4x, i5, 3x,l2)") i,  &
+         write(unit=lun,fmt="(i4,8x,a28,5f10.5, 4x, i5, 3x,l2)") i,  &
                G%Par(i)%Nam, G%Par(i)%Val, G%Par(i)%Sig, G%Par(i)%Vlim,&
                G%Par(i)%M, G%Par(i)%L, G%Par(i)%BCond
       end do
@@ -913,6 +913,57 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       end if
 
    End Subroutine Get_InfoKey_StrPhas
+
+   !!----
+   !!---- Subroutine Get_InfoKey_StrMol
+   !!----     Get information about the Instructiion
+   !!----
+   !!----     Str format: DIR_MOL[N]_PHAS[M]
+   !!----        Ex: XC_MOL1_PHAS2, XC_MOL1,...
+   !!----
+   !!---- June 2023
+   !!
+   Module Subroutine Get_InfoKey_StrMol(Str, iKey, IPh, IMol)
+      !---- Arguments ----!
+      character(len=*), intent(in) :: Str
+      integer,          intent(out):: iKey   ! Index on KEY_PHAS
+      integer,          intent(out):: IPh    ! Phase in str
+      integer,          intent(out):: IMol   ! Molecule in str
+
+      !---- Local Variables ----!
+      integer :: i, n, iv
+
+      !> Init
+      iKey=0; iPh=0; IMol=0
+
+      !> copy
+      line=adjustl(Str)
+
+      !> Phase
+      n = index(u_case(line),'_PHAS')
+      if (n > 0) then
+         call get_num(line(n+5:), vet, ivet, iv)
+         if (iv == 1) Iph=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Molecule
+      n = index(u_case(line),'MOL')
+      if (n > 0) then
+         call get_num(line(n+3:), vet, ivet, iv)
+         if (iv == 1) IMol=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Check if there is a '_'
+      n = index(line,'_', back=.true.)
+      if (n > 0) line=line(:n-1)
+
+      !> Directive
+      i = index_key_Phas(u_case(trim(line)))
+      if ( i > 0) iKey=i
+
+   End Subroutine Get_InfoKey_StrMol
 
    !!----
    !!---- Subroutine Get_InfoKey_StrPatt
