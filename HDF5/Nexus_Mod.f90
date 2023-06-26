@@ -887,7 +887,7 @@ module nexus_mod
                             nexus%is_chi = .true.
                             nexus%angles(2,:) = datos(:,i)
                             if (abs(nexus%angles(2,nexus%nf)-nexus%angles(2,1)) > MIN_SCAN_ANGLE) motors(2) = 1
-                        case('omega')
+                        case('omega','a3')
                             nexus%is_omega = .true.
                             nexus%angles(3,:) = datos(:,i)
                             if (abs(nexus%angles(3,nexus%nf)-nexus%angles(3,1)) > MIN_SCAN_ANGLE) motors(3) = 1
@@ -907,7 +907,7 @@ module nexus_mod
                             nexus%is_nu = .true.
                             nexus%angles(7,:) = datos(:,i)
                             if (abs(nexus%angles(7,nexus%nf)-nexus%angles(7,1)) > MIN_SCAN_ANGLE) motors(7) = 1
-                        case('2theta')
+                        case('2theta','analyser')
                             nexus%is_tth = .true.
                             nexus%angles(8,:) = datos(:,i)
                             if (abs(nexus%angles(8,nexus%nf)-nexus%angles(8,1)) > MIN_SCAN_ANGLE) motors(8) = 1
