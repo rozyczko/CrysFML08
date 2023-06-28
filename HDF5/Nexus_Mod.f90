@@ -666,7 +666,7 @@ module nexus_mod
         ! Instrument name
         call h5dopen_f(file_id,'entry0/instrument/name',dset,hdferr)
         if (hdferr /= -1) then
-            instrument_address = 'entry0/instrument/name'
+            instrument_address = 'entry0/instrument'
             call h5dget_type_f(dset,filetype,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,filetype,namef,dims,hdferr)
             call h5dclose_f(dset,hdferr)
@@ -768,7 +768,7 @@ module nexus_mod
         call h5dclose_f(dset,hdferr)
 
         ! Geometry
-        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/mode',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/mode',dset,hdferr)
         if (hdferr /= -1) then
             call h5dread_f(dset,H5T_NATIVE_INTEGER,mode,scalar,hdferr)
             call h5dclose_f(dset,hdferr)
@@ -782,8 +782,8 @@ module nexus_mod
         end if
 
         ! Data ordering
-        call h5dopen_f(file_id,instrument_address//'Detector/data_ordering',dset,hdferr)
-        if (hdferr == -1) call h5dopen_f(file_id,instrument_address//'Det1/data_ordering',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'/Detector/data_ordering',dset,hdferr)
+        if (hdferr == -1) call h5dopen_f(file_id,instrument_address//'/Det1/data_ordering',dset,hdferr)
         if (hdferr /= -1) call h5dget_type_f(dset,filetype,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,filetype,data_ordering,dims,hdferr)
         call h5dclose_f(dset,hdferr)
@@ -794,14 +794,14 @@ module nexus_mod
         end if
 
         ! Reflection
-        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/reflection',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/reflection',dset,hdferr)
         if (hdferr /= -1) call h5dget_space_f(dset,space,hdferr)
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%reflection,dims,hdferr)
         call h5dclose_f(dset,hdferr)
 
         ! UB-matrix
-        call h5dopen_f(file_id,instrument_address//'SingleCrystalSettings/orientation_matrix',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/orientation_matrix',dset,hdferr)
         if (hdferr /= -1) call h5dget_space_f(dset,space,hdferr)
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,ub,dims,hdferr)
