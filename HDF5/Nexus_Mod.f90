@@ -1069,9 +1069,8 @@ module nexus_mod
             end if
 
         else ! Virtual detector?
-
-            call h5dopen_f(file_id,'entry0/instrument/Detector/virtual_cgap',dset,hdferr)
-            if (hdferr == -1) call h5dopen_f(file_id,'entry0/instrument/Det1/virtual_cgap',dset,hdferr)
+            call h5dopen_f(file_id,instrument_address//'/Detector/virtual_cgap',dset,hdferr)
+            if (hdferr == -1) call h5dopen_f(file_id,instrument_address//'/Det1/virtual_cgap',dset,hdferr)
             if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%virtual_cgap,scalar,hdferr)
             if (hdferr /= -1) then
                 call h5dclose_f(dset,hdferr)
@@ -1079,13 +1078,13 @@ module nexus_mod
                 ! Read gamma
                 if (allocated(nexus%angles)) deallocate(nexus%angles)
                 allocate(nexus%angles(8,nexus%nf))
-                call h5dopen_f(file_id,'entry0/instrument/gamma/value',dset,hdferr)
+                call h5dopen_f(file_id,instrument_address//'/gamma/value',dset,hdferr)
                 if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,gamma_val,scalar,hdferr)
                 if (hdferr /= -1) nexus%angles(4,:) = gamma_val
                 if (hdferr /= -1) call h5dclose_f(dset,hdferr)
                 ! Read nu
                 if (hdferr /= -1) then
-                    call h5dopen_f(file_id,'entry0/instrument/nu/value',dset,hdferr)
+                    call h5dopen_f(file_id,instrument_address//'/nu/value',dset,hdferr)
                     if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nu_val,scalar,hdferr)
                     if (hdferr /= -1) then
                         nexus%angles(7,:) = nu_val
