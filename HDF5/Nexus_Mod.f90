@@ -1078,7 +1078,11 @@ module nexus_mod
                 ! Read gamma
                 if (allocated(nexus%angles)) deallocate(nexus%angles)
                 allocate(nexus%angles(8,nexus%nf))
-                call h5dopen_f(file_id,instrument_address//'/gamma/value',dset,hdferr)
+                if (L_Case(nexus%instrument_name) == 'xtremed') then
+                    call h5dopen_f(file_id,instrument_address//'/2theta/value',dset,hdferr)
+                else
+                    call h5dopen_f(file_id,instrument_address//'/gamma/value',dset,hdferr)
+                end if
                 if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,gamma_val,scalar,hdferr)
                 if (hdferr /= -1) nexus%angles(4,:) = gamma_val
                 if (hdferr /= -1) call h5dclose_f(dset,hdferr)
