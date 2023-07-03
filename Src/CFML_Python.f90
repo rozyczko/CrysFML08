@@ -40,57 +40,110 @@
 !!----    Update: 27/03/2023
 !!----
 !!
- Module CFML_Python
+Module CFML_Python
 
-    !---- Use Modules ----!
-    Use CFML_GlobalDeps
-    Use CFML_Atoms,        only: Atm_Type, Atlist_Type
-    Use CFML_Metrics,      only: Cell_Type, Cell_G_Type
-    Use CFML_Reflections,  only: Refl_Type, SRefl_Type, Reflist_Type
-    Use Forpy_Mod, str_forpy => str
+   !---- Use Modules ----!
+   Use CFML_GlobalDeps
+   Use CFML_Atoms,        only: Atm_Type,Atlist_Type
+   Use CFML_gSpaceGroups, only: Symm_Oper_Type,Group_Type,SpG_Type,SuperSpaceGroup_Type
+   Use CFML_Metrics,      only: Cell_Type,Cell_G_Type
+   Use CFML_Rational
+   Use CFML_Reflections,  only: Refl_Type,SRefl_Type,Reflist_Type
+   Use Forpy_Mod, str_forpy => str
 
-    !---- Variables ----!
-    implicit none
+   !---- Variables ----!
+   implicit none
 
-    private
+   private
 
-    !---- List of public procedures ----!
-    public :: Wrap_Atm_Type, Wrap_Atlist_Type, Wrap_Cell_Type, Wrap_Refl_Type, &
-              Wrap_Reflist_Type
+   !---- List of public procedures ----!
+   public :: Rational_To_Ndarray, Wrap_Atm_Type, Wrap_Atlist_Type, Wrap_Symm_Oper_Type, Wrap_Group_Type, &
+             Wrap_Cell_Type, Wrap_Refl_Type,  Wrap_Reflist_Type
 
-    !---- Interface Zone ----!
-    Interface
+   !---- Overload ----!
+   Interface Rational_To_Ndarray
+      module procedure Rational_To_Ndarray_1d
+      module procedure Rational_To_Ndarray_2d
+      module procedure Rational_To_Ndarray_3d
+   End Interface Rational_To_Ndarray
 
-       Module Subroutine Wrap_Atm_Type(for_var, dic_var)
-        !---- Arguments ----!
-        class(atm_type), intent(in)    :: for_var
-        type(dict),      intent(inout) :: dic_var
-       End Subroutine Wrap_Atm_Type
+   !---- Interface Zone ----!
+   Interface
 
-       Module Subroutine Wrap_Atlist_Type(for_var, dic_var)
-        !---- Arguments ----!
-        type(atlist_type),  intent(in)    :: for_var
-        type(dict),         intent(inout) :: dic_var
-       End Subroutine Wrap_Atlist_Type
+      Module Function Rational_To_Ndarray_1d(rational_arr,ierror) Result(nd_arr)
+         !---- Arguments ----!
+         type(rational), dimension(:), intent(in)  :: rational_arr
+         integer,                      intent(out) :: ierror
+         type(ndarray)                             :: nd_arr
+      End Function Rational_To_Ndarray_1d
 
-       Module Subroutine Wrap_Cell_Type(for_var, dic_var)
-        !---- Arguments ----!
-        class(cell_type), intent(in)    :: for_var
-        type(dict),       intent(inout) :: dic_var
-       End Subroutine Wrap_Cell_Type
+      Module Function Rational_To_Ndarray_2d(rational_arr,ierror) Result(nd_arr)
+         !---- Arguments ----!
+         type(rational), dimension(:,:), intent(in)  :: rational_arr
+         integer,                        intent(out) :: ierror
+         type(ndarray)                               :: nd_arr
+      End Function  Rational_To_Ndarray_2d
 
-       Module Subroutine Wrap_Refl_Type(for_var, dic_var)
-        !---- Arguments ----!
-        class(refl_type), intent(in)    :: for_var
-        type(dict),       intent(inout) :: dic_var
-       End Subroutine Wrap_Refl_Type
+      Module Function Rational_To_Ndarray_3d(rational_arr,ierror) Result(nd_arr)
+         !---- Arguments ----!
+         type(rational), dimension(:,:,:), intent(in)  :: rational_arr
+         integer,                          intent(out) :: ierror
+         type(ndarray)                                 :: nd_arr
+      End Function Rational_To_Ndarray_3d
 
-       Module Subroutine Wrap_Reflist_Type(for_var, dic_var)
-        !---- Arguments ----!
-        type(reflist_type),  intent(in)   :: for_var
-        type(dict),         intent(inout) :: dic_var
-       End Subroutine Wrap_Reflist_Type
+      ! CFML_Atoms
+      Module Subroutine Wrap_Atm_Type(for_var, py_var)
+      !---- Arguments ----!
+      class(atm_type), intent(in)    :: for_var
+      type(dict),      intent(inout) :: py_var
+      End Subroutine Wrap_Atm_Type
 
-    End Interface
+      Module Subroutine Wrap_Atlist_Type(for_var, py_var)
+      !---- Arguments ----!
+      type(atlist_type),  intent(in)    :: for_var
+      type(dict),         intent(inout) :: py_var
+      End Subroutine Wrap_Atlist_Type
 
- End Module CFML_Python
+      ! CFML_gSpaceGroups
+      Module Subroutine Wrap_Symm_Oper_Type(for_var, py_var)
+      !---- Arguments ----!
+      type(symm_oper_type), intent(in)    :: for_var
+      type(dict),           intent(inout) :: py_var
+      End Subroutine Wrap_Symm_Oper_Type
+
+      Module Subroutine Wrap_Group_Type(for_var, py_var)
+         !---- Arguments ----!
+         class(group_type),    intent(in)    :: for_var
+         type(dict),           intent(inout) :: py_var
+      End Subroutine Wrap_Group_Type
+
+      ! CFML_Metrics
+      Module Subroutine Wrap_Cell_Type(for_var, py_var)
+      !---- Arguments ----!
+      class(cell_type), intent(in)    :: for_var
+      type(dict),       intent(inout) :: py_var
+      End Subroutine Wrap_Cell_Type
+
+      ! CFML_Rational
+      Module Subroutine Wrap_Rational(for_var, py_var)
+         !---- Arguments ----!
+         type(rational), intent(in)    :: for_var
+         type(dict),           intent(inout) :: py_var
+      End Subroutine Wrap_Rational
+
+      ! CFML_Reflections
+      Module Subroutine Wrap_Refl_Type(for_var, py_var)
+      !---- Arguments ----!
+      class(refl_type), intent(in)    :: for_var
+      type(dict),       intent(inout) :: py_var
+      End Subroutine Wrap_Refl_Type
+
+      Module Subroutine Wrap_Reflist_Type(for_var, py_var)
+      !---- Arguments ----!
+      type(reflist_type),  intent(in)   :: for_var
+      type(dict),         intent(inout) :: py_var
+      End Subroutine Wrap_Reflist_Type
+
+   End Interface
+
+End Module CFML_Python

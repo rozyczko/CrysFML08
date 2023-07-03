@@ -10,10 +10,10 @@ SubModule (CFML_Python)  Refl_Python_Wraps
     !!----
     !!---- 24/03/2023
     !!
-    Module Subroutine Wrap_Refl_Type(for_var, dic_var)
+    Module Subroutine Wrap_Refl_Type(for_var, py_var)
         !---- Arguments ----!
         class(refl_type), intent(in)    :: for_var
-        type(dict),       intent(inout) :: dic_var
+        type(dict),       intent(inout) :: py_var
 
         !---- Local Variables ----!
         integer :: ierror
@@ -21,26 +21,26 @@ SubModule (CFML_Python)  Refl_Python_Wraps
 
         ierror = 0
         if (ierror == 0) ierror = ndarray_create(nd_h,for_var%h)
-        if (ierror == 0) ierror = dic_var%setitem('h',nd_h)
-        if (ierror == 0) ierror = dic_var%setitem('mult',for_var%mult)
-        if (ierror == 0) ierror = dic_var%setitem('s',for_var%s)
-        if (ierror == 0) ierror = dic_var%setitem('imag',for_var%imag)
-        if (ierror == 0) ierror = dic_var%setitem('pcoeff',for_var%pcoeff)
+        if (ierror == 0) ierror = py_var%setitem('h',nd_h)
+        if (ierror == 0) ierror = py_var%setitem('mult',for_var%mult)
+        if (ierror == 0) ierror = py_var%setitem('s',for_var%s)
+        if (ierror == 0) ierror = py_var%setitem('imag',for_var%imag)
+        if (ierror == 0) ierror = py_var%setitem('pcoeff',for_var%pcoeff)
         select type (A => for_var)
             class is (srefl_type)
-                if (ierror == 0) ierror = dic_var%setitem('fo',A%fo)
-                if (ierror == 0) ierror = dic_var%setitem('fc',A%fc)
-                if (ierror == 0) ierror = dic_var%setitem('sfo',A%sfo)
-                if (ierror == 0) ierror = dic_var%setitem('phase',A%phase)
-                if (ierror == 0) ierror = dic_var%setitem('a',A%a)
-                if (ierror == 0) ierror = dic_var%setitem('b',A%b)
-                if (ierror == 0) ierror = dic_var%setitem('w',A%w)
+                if (ierror == 0) ierror = py_var%setitem('fo',A%fo)
+                if (ierror == 0) ierror = py_var%setitem('fc',A%fc)
+                if (ierror == 0) ierror = py_var%setitem('sfo',A%sfo)
+                if (ierror == 0) ierror = py_var%setitem('phase',A%phase)
+                if (ierror == 0) ierror = py_var%setitem('a',A%a)
+                if (ierror == 0) ierror = py_var%setitem('b',A%b)
+                if (ierror == 0) ierror = py_var%setitem('w',A%w)
         end select
         select type (A => for_var)
             type is (refl_type)
-                if (ierror == 0) ierror = dic_var%setitem('fortran_type','refl_type')
+                if (ierror == 0) ierror = py_var%setitem('fortran_type','refl_type')
             type is (srefl_type)
-                if (ierror == 0) ierror = dic_var%setitem('fortran_type','srefl_type')
+                if (ierror == 0) ierror = py_var%setitem('fortran_type','srefl_type')
         end select
         if (ierror /= 0) then
             err_cfml%flag = .true.
@@ -55,10 +55,10 @@ SubModule (CFML_Python)  Refl_Python_Wraps
     !!----
     !!---- 24/03/2023
     !!
-    Module Subroutine Wrap_Reflist_Type(for_var, dic_var)
+    Module Subroutine Wrap_Reflist_Type(for_var, py_var)
         !---- Arguments ----!
         type(reflist_type),  intent(in)   :: for_var
-        type(dict),         intent(inout) :: dic_var
+        type(dict),         intent(inout) :: py_var
 
         !---- Local Variables ----!
         integer :: ierror,i
@@ -67,7 +67,7 @@ SubModule (CFML_Python)  Refl_Python_Wraps
 
         ierror = 0
         ierror = 0
-        if (ierror == 0) ierror = dic_var%setitem('nref',for_var%nref)
+        if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
         if (ierror == 0) then
             if (ierror == 0) ierror = list_create(li_ref)
             allocate(di_ref(for_var%nref))
@@ -78,7 +78,7 @@ SubModule (CFML_Python)  Refl_Python_Wraps
                 if (ierror == 0) ierror = li_ref%append(di_ref(i))
             end do
         end if
-        if (ierror == 0) ierror = dic_var%setitem('ref',li_ref)
+        if (ierror == 0) ierror = py_var%setitem('ref',li_ref)
         if (ierror /= 0) then
             err_cfml%flag = .true.
             err_cfml%ierr = -1
