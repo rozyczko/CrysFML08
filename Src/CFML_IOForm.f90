@@ -398,10 +398,10 @@ Module CFML_IOForm
       End Subroutine Read_CFL_Atoms
 
       Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end )
-         type(File_Type),            intent(in)     :: cfl
-         class(Cell_Type),           intent(out)    :: Cell
-         character(len=*), optional, intent( in)    :: CFrame
-         integer, optional,          intent(in)     :: i_ini, i_end
+         type(File_Type),               intent(in)     :: cfl
+         class(Cell_Type),              intent(out)    :: Cell
+         character(len=*), optional,    intent( in)    :: CFrame
+         integer, optional,             intent(in)     :: i_ini, i_end
       End Subroutine Read_CFL_Cell
 
       Module Subroutine Read_CFL_KVectors(cfl, Kvec, i_ini, i_end)
@@ -879,7 +879,7 @@ Module CFML_IOForm
     Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, Atm_typ, MGp, mAtm, Mag_dom, IPhase, FType, FileList)
        !---- Arguments ----!
        character(len=*),                    intent( in)  :: filenam    ! Name of the file
-       class(Cell_G_Type),                  intent(out)  :: Cell       ! Cell object
+       class(Cell_G_Type),     allocatable, intent(out)  :: Cell       ! Cell object
        class(SpG_Type),        allocatable, intent(out)  :: SpG        ! Space Group object
        type(Atlist_type),                   intent(out)  :: Atm        ! Atom List object
        character(len=*),          optional, intent(in)   :: Atm_typ    ! Type of atoms
@@ -927,10 +927,12 @@ Module CFML_IOForm
                 end if
              end if
           case ('CIF')
-             allocate(SpG_Type :: SpG)
+             allocate(Cell_G_Type :: Cell)
+             allocate(SpG_Type    :: SpG)
              call Read_XTal_CIF(f, Cell, SpG, Atm)
           case ('INS','RES')
-             allocate(SpG_Type :: SpG)
+             allocate(Cell_G_Type :: Cell)
+             allocate(SpG_Type    :: SpG)
              call Read_XTal_SHX(f, Cell, SpG, Atm)
           case ('FST')
              if(present(mAtm) .and. present(MGp)) then
@@ -944,6 +946,7 @@ Module CFML_IOForm
              end if
           case ('PCR')
           case ('MCIF')
+             allocate(Cell_G_Type :: Cell)
              call Read_XTal_MCIF(f, Cell, Spg, ATM)
           case default
              Err_CFML%Ierr=1

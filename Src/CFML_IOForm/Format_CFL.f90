@@ -211,10 +211,10 @@ SubModule (CFML_IOForm) Format_CFL
    !!
    Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end)
       !---- Arguments ----!
-      type(File_Type),            intent(in)     :: cfl     ! Containing information
-      class(Cell_Type),           intent(out)    :: Cell    ! Cell object
-      character(len=*), optional, intent( in)    :: CFrame
-      integer,          optional, intent(in)     :: i_ini, i_end     ! Lines to explore
+      type(File_Type),               intent(in)     :: cfl     ! Containing information
+      class(Cell_Type),              intent(out)    :: Cell    ! Cell object
+      character(len=*), optional,    intent( in)    :: CFrame
+      integer,          optional,    intent(in)     :: i_ini, i_end     ! Lines to explore
 
       !---- Local variables -----!
       integer                              :: i, iv, n_ini, n_end
