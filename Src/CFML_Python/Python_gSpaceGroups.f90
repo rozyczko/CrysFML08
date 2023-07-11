@@ -55,6 +55,7 @@ SubModule (CFML_Python)  gSpaceGroups_Python_Wraps
         if (ierror == 0) ierror = py_var%setitem('multip',for_var%multip)
         if (ierror == 0) ierror = py_var%setitem('d',for_var%d)
         if (ierror == 0) ierror = ndarray_create(nd_inv,for_var%inv)
+        if (ierror == 0) ierror = py_var%setitem('inv',nd_inv)
         if (ierror == 0) ierror = list_create(li_op)
         if (ierror == 0) allocate(di_op(size(for_var%op)))
         if (ierror == 0) then
@@ -114,8 +115,10 @@ SubModule (CFML_Python)  gSpaceGroups_Python_Wraps
                     if (ierror == 0) ierror = py_var%setitem('ssg_nlabel',A%ssg_nlabel)
                     if (ierror == 0) nd_centre_coord = rational_to_ndarray(a%centre_coord,ierror)
                     if (ierror == 0) ierror = py_var%setitem('centre_coord',nd_centre_coord)
-                    if (ierror == 0) nd_anticentre_coord = rational_to_ndarray(a%anticentre_coord,ierror)
-                    if (ierror == 0) ierror = py_var%setitem('anticentre_coord',nd_anticentre_coord)
+                    if (ierror == 0) then
+                        if (allocated(a%anticentre_coord)) nd_anticentre_coord = rational_to_ndarray(a%anticentre_coord,ierror)
+                        if (ierror == 0) ierror = py_var%setitem('anticentre_coord',nd_anticentre_coord)
+                    end if
                     if (ierror == 0) nd_lat_tr = rational_to_ndarray(a%lat_tr,ierror)
                     if (ierror == 0) ierror = py_var%setitem('lat_tr',nd_lat_tr)
                     if (ierror == 0) nd_alat_tr = rational_to_ndarray(a%alat_tr,ierror)
