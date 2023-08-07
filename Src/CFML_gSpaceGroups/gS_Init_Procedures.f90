@@ -70,9 +70,6 @@ SubModule (CFML_gSpaceGroups) gS_Init_Procedures
             mGrp%mat2std_shu = "       "
             mGrp%generators_list = "      "
             mGrp%Hall       ="          "
-            mGrp%SSG_symb   ="          "
-            mGrp%SSG_Bravais="          "
-            mGrp%SSG_nlabel ="          "
             mGrp%Bravais_num=0      ! Number of the Bravais class
       End Select
 
@@ -80,6 +77,9 @@ SubModule (CFML_gSpaceGroups) gS_Init_Procedures
          class is (SuperSpaceGroup_Type)
             mGrp%nk=0               !  number of k-vectors
             mGrp%nq=0               !  number of q-coefficients
+            mGrp%SSG_symb   ="          "
+            mGrp%SSG_Bravais="          "
+            mGrp%SSG_nlabel ="          "
       End Select
 
    End Subroutine Init_SpaceGroup

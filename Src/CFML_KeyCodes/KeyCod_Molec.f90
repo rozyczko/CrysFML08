@@ -91,10 +91,10 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
 
       i=1
       do while(i <= n_dir)
-         !> word(i) Is a general directive?
+         !> Is dire(i) a general directive? Vary TL Mol1
          n1 = index_Key_Phas(dire(i))
 
-         !> next directive
+         !> The next word is a directive?
          j=0
          do jj=i+1, n_dir
             if (index_Key_Phas(dire(jj)) > 0 ) then
@@ -103,46 +103,71 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
             end if
          end do
 
-         !> word(i) is a directive: centre, orient, tls, ...
+         !> dire(i) is a directive: centre, orient, tls, ...
          if (n1 > 0) then
 
             if (j ==0) then
                if (i == n_dir) then
-                  !> last instruction
+                  !> Only one directive: vary centre
                   k=iphas
-                  im=1  ! Check?
+                  im=n_mol
 
                   select case (n1)
-                     case (34:48)
-                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
-                        !call GPList_to_Molec()      ! Por hacer
-                        !call GPList_from_Molec()    ! Por hacer
+                     case (13, 20)
+                        !> All atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
 
-                     case (52:54)
+                     case (27:34)
+                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
+
+                     case (35:40)
+                        !> all atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
+
+                     case (41:68)
+                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
 
                   end select
 
+                  call GPList_to_Molec(G, k, im, Mol(im))
+                  call GPList_from_Molec(Mol(im), im, k, G)
+
                else
+                  !> One directive with options: vary centre mol1 mol2
                   do n=i+1, n_dir
-                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol)
+                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol) ! ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     im=1
+                     im=n_mol
                      if (jmol > 0) im=jmol
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (34:48)
-                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
-                           !call GPList_to_Molec()      ! Por hacer
-                           !call GPList_from_Molec()    ! Por hacer
+                        case (13, 20) ! Uiso, Biso
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
 
-                        case (52:54)
+                        case (27:34)
+                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
+
+                        case (35:40)
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
+
+                        case (41:68)
+                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
 
                      end select
+
+                     call GPList_to_Molec(G, k, im, Mol(im))
+                     call GPList_from_Molec(Mol(im), im, k, G)
                   end do
 
                   i=n_dir
@@ -151,39 +176,61 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
             else
                if (i+1 == n_dir) then
                   k=iphas
-                  im=1
+                  im=n_mol
 
                   select case (n1)
-                     case (34:48)
-                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
-                        !call GPList_to_Molec()      ! Por hacer
-                        !call GPList_from_Molec()    ! Por hacer
+                     case (13, 20)
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
 
-                     case (52)
+                     case (27:34)
+                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
+
+                     case (35:40)
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
+
+                     case (41:68)
+                        call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
 
                   end select
 
+                  call GPList_to_Molec(G, k, im, Mol(im))
+                  call GPList_from_Molec(Mol(im), im, k, G)
+
                else
                   do n=i+1, j-1
-                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol)
+                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol) ! ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     im=1
+                     im=n_mol
                      if (jmol > 0) im=jmol
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (1:7)
-                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
-                           !call GPList_to_Molec()      ! Por hacer
-                           !call GPList_from_Molec()    ! Por hacer
+                        case (13, 20)
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
 
-                        case (52)
+                        case (27:34)
+                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
+
+                        case (35:40)
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('FIX', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
+
+                        case (41:68)
+                           call Set_RefCodes_MOL('FIX', n1, k, im, G=G)
 
                      end select
+
+                     call GPList_to_Molec(G, k, im, Mol(im))
+                     call GPList_from_Molec(Mol(im), im, k, G)
                   end do
                end if
 
@@ -191,34 +238,46 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
             end if
 
          else
-            !> word(i) is local instruction: xc_, ...
+            !> dire(i) is local instruction: xc_, ...
             call Get_InfoKey_StrMol(dire(i), iKey, IPh, jMol)
 
             k=iphas
             if (iph > 0) k=iPh
 
-            im=1
+            im=n_mol
             if (jmol > 0) im=jmol
 
             select case (ikey)
-               case (34:48)
-                  call Set_RefCodes_MOL('FIX', ikey, k, im, G=G)
-                  !call GPList_to_Molec()      ! Por hacer
-                  !call GPList_from_Molec()    ! Por hacer
-
-               case (52:54)
+               case (13, 20)
                   do j=i+1, n_dir
                      !> Check for atom label
-                     n2=Index_Atlab_on_Molecule(dire(j),Mol(jmol))
+                     n2=Index_Atlab_on_Molecule(dire(j), Mol(im))
                      if (n2 > 0) then
-                        call Set_RefCodes_MOL('VARY', ikey, k, im, &
-                                                  Mol(jmol)%Atname(n2), G)
+                        call Set_RefCodes_MOL('FIX', ikey, k, im, &
+                                                  Mol(im)%Atname(n2), G)
                      end if
                   end do
-                  !call GPList_to_Molec()      ! Por hacer
-                  !call GPList_from_Molec()    ! Por hacer
+
+               case (27:34)
+                  call Set_RefCodes_MOL('FIX', ikey, k, im, G=G)
+
+               case (35:40)
+                  do j=i+1, n_dir
+                     !> Check for atom label
+                     n2=Index_Atlab_on_Molecule(dire(j),Mol(im))
+                     if (n2 > 0) then
+                        call Set_RefCodes_MOL('FIX', ikey, k, im, &
+                                                  Mol(im)%Atname(n2), G)
+                     end if
+                  end do
+
+               case (41:68)
+                  call Set_RefCodes_MOL('FIX', ikey, k, im, G=G)
 
             end select
+
+            call GPList_to_Molec(G, k, im, Mol(im))
+            call GPList_from_Molec(Mol(im), im, k, G)
 
          end if
 
@@ -272,7 +331,7 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
 
       i=1
       do while(i <= n_dir)
-         !> word(i) Is a general directive?
+         !> Is dire(i) a general directive?
          n1 = index_Key_Phas(dire(i))
 
          !> next directive
@@ -291,37 +350,66 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
                if (i == n_dir) then
                   !> last instruction
                   k=iphas
-                  im=1
+                  im=n_mol
 
                   select case (n1)
-                     case (34:48)
-                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
-                        !call GPList_to_Molec()      ! Por hacer
-                        !call GPList_from_Molec()    ! Por hacer
+                     case (13, 20)
+                        !> All atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
 
-                     case (52)
+                     case (27:34)
+                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
+
+                     case (35:40)
+                        !> All atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
+
+                     case (41:68)
+                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
 
                   end select
 
+                  call GPList_to_Molec(G, k, im, Mol(im))
+                  call GPList_from_Molec(Mol(im), im, k, G)
+
                else
                   do n=i+1, n_dir
-                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol)
+                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol) ! ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     im=1
+                     im=n_mol
                      if (jmol > 0) im=jmol
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (34:48)
-                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
-                           !call GPList_to_Molec()      ! Por hacer
-                           !call GPList_from_Molec()    ! Por hacer
+                        case (13, 20)
+                           !> All atoms
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
 
+                        case (27:34)
+                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
+
+                        case (35:40)
+                           !> All atoms
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
+
+                        case (41:68)
+                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
+                           
                      end select
+
+                     call GPList_to_Molec(G, k, im, Mol(im))
+                     call GPList_from_Molec(Mol(im), im, k, G)
+                     
                   end do
 
                   i=n_dir
@@ -330,39 +418,66 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
             else
                if (i+1 == n_dir) then
                   k=iphas
-                  im=1
+                  im=n_mol
 
                   select case (n1)
-                     case (34:48)
-                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
-                        !call GPList_to_Molec()      ! Por hacer
-                        !call GPList_from_Molec()    ! Por hacer
+                     case (13, 20)
+                        !> All atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
 
-                     case (52)
+                     case (27:34)
+                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
+
+                     case (35:40)
+                        !> All atoms
+                        do n2=1,Mol(im)%natoms
+                           call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                        end do
+
+                     case (41:68)
+                        call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
 
                   end select
 
+                  call GPList_to_Molec(G, k, im, Mol(im))
+                  call GPList_from_Molec(Mol(im), im, k, G)
+
                else
                   do n=i+1, j-1
-                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol)
+                     call Get_InfoKey_StrMol(dire(n), iKey, IPh, jMol) ! ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     im=1
+                     im=n_mol
                      if (jmol > 0) im=jmol
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (1:7)
-                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
-                           !call GPList_to_Molec()      ! Por hacer
-                           !call GPList_from_Molec()    ! Por hacer
+                        case (13, 20)
+                           !> All atoms
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
 
-                        case (52)
+                        case (27:34)
+                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
+
+                        case (35:40)
+                           !> All atoms
+                           do n2=1,Mol(im)%natoms
+                              call Set_RefCodes_MOL('VARY', n1, k, im, Mol(im)%Atname(n2), G)
+                           end do
+
+                        case (41:68)
+                           call Set_RefCodes_MOL('VARY', n1, k, im, G=G)
 
                      end select
+
+                     call GPList_to_Molec(G, k, im, Mol(im))
+                     call GPList_from_Molec(Mol(im), im, k, G)
+
                   end do
                end if
 
@@ -376,73 +491,76 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
             k=iphas
             if (iph > 0) k=iPh
 
-            im=1
+            im=n_mol
             if (jmol > 0) im=jmol
 
             select case (ikey)
-               case (13) ! UISO
+               case (13, 20) ! UISO, BISO
                   if (i == n_dir) then
-                     !> Todos los atomos en molex
-                     do j=1, Mol(jmol)%natoms
+                     !> All aoms
+                     do j=1, Mol(im)%natoms
                         call Set_RefCodes_MOL('VARY', ikey, k, im, &
-                                              Mol(jmol)%Atname(j), G=G)
+                                              Mol(im)%Atname(j), G=G)
                      end do
 
                   else
                      do j=i+1, n_dir
                         !> Check for atom label
-                        n2=Index_Atlab_on_Molecule(dire(j),Mol(jmol))
+                        n2=Index_Atlab_on_Molecule(dire(j),Mol(im))
                         if (n2 > 0) then
                            call Set_RefCodes_MOL('VARY', ikey, k, im, &
-                                                  Mol(jmol)%Atname(n2), G)
+                                                  Mol(im)%Atname(n2), G)
                         else
                            n3=0
                            !> Check for chemical symbol
-                           do n=1, Mol(jmol)%natoms
-                              if (trim(dire(j)) == trim(Mol(jmol)%AtSymb(n))) then
+                           do n=1, Mol(im)%natoms
+                              if (trim(dire(j)) == trim(Mol(im)%AtSymb(n))) then
                                  n3=n
                                  exit
                               end if
                            end do
                            if (n3 > 0) then
-                              do n=1, Mol(jmol)%natoms
-                                 if (trim(Mol(jmol)%AtSymb(n)) == &
-                                     trim(Mol(jmol)%AtSymb(n3))) then
+                              do n=1, Mol(im)%natoms
+                                 if (trim(Mol(im)%AtSymb(n)) == &
+                                     trim(Mol(im)%AtSymb(n3))) then
 
                                     call Set_RefCodes_MOL('VARY', ikey, k, im, &
-                                                  Mol(jmol)%Atname(n), G)
+                                                  Mol(im)%Atname(n), G)
 
                                  end if
                               end do
                            end if
-
                         end if
                      end do
                   end if
 
-                  !call GPList_to_Molec()      ! Por hacer
-                  !call GPList_from_Molec()    ! Por hacer
+                  call GPList_to_Molec(G, k, im, Mol(im))
+                  call GPList_from_Molec(Mol(im), im, k, G)
+
+                  call Update_GPList_Code(G)
+
                   exit
 
-
-               case (34:48)
+               case (27:34)
                   call Set_RefCodes_MOL('VARY', ikey, k, im, G=G)
-                  !call GPList_to_Molec()      ! Por hacer
-                  !call GPList_from_Molec()    ! Por hacer
 
-               case (52:54)
+               case (35:40)
                   do j=i+1, n_dir
                      !> Check for atom label
-                     n2=Index_Atlab_on_Molecule(dire(j),Mol(jmol))
+                     n2=Index_Atlab_on_Molecule(dire(j),Mol(im))
                      if (n2 > 0) then
                         call Set_RefCodes_MOL('VARY', ikey, k, im, &
-                                                  Mol(jmol)%Atname(n2), G)
+                                                  Mol(im)%Atname(n2), G)
                      end if
                   end do
-                  !call GPList_to_Molec()      ! Por hacer
-                  !call GPList_from_Molec()    ! Por hacer
+
+               case (41:68)
+                  call Set_RefCodes_MOL('VARY', ikey, k, im, G=G)
 
             end select
+
+            call GPList_to_Molec(G, k, im, Mol(im))
+            call GPList_from_Molec(Mol(im), im, k, G)
 
          end if
 
@@ -503,68 +621,220 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
                case (13)
                   call Fix_GPList_Par(G,'UISO_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (34) ! XC
+               case (20)
+                  call Fix_GPList_Par(G,'BISO_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (27) ! XC
                   call Fix_GPList_Par(G,'XC_MOL'//trim(line))
 
-               case (35) ! YC
+               case (28) ! YC
                   call Fix_GPList_Par(G,'YC_MOL'//trim(line))
 
-               case (36) ! ZC
+               case (29) ! ZC
                   call Fix_GPList_Par(G,'ZC_MOL'//trim(line))
 
-               case (37) ! CENTRE
+               case (30) ! CENTRE
                   call Fix_GPList_Par(G,'XC_MOL'//trim(line))
                   call Fix_GPList_Par(G,'YC_MOL'//trim(line))
                   call Fix_GPList_Par(G,'ZC_MOL'//trim(line))
 
-               case (38) ! THE
+               case (31) ! THE
                   call Fix_GPList_Par(G,'THE_MOL'//trim(line))
 
-               case (39) ! PHI
+               case (32) ! PHI
                   call Fix_GPList_Par(G,'PHI_MOL'//trim(line))
 
-               case (40) ! CHI
+               case (33) ! CHI
                   call Fix_GPList_Par(G,'CHI_MOL'//trim(line))
 
-               case (41) ! ORIENT
+               case (34) ! ORIENT
                   call Fix_GPList_Par(G,'THE_MOL'//trim(line))
                   call Fix_GPList_Par(G,'PHI_MOL'//trim(line))
                   call Fix_GPList_Par(G,'CHI_MOL'//trim(line))
 
-               case (42) ! T
-                  call Fix_GPList_Par(G,'T_MOL'//trim(line))
-
-               case (43) ! L
-                  call Fix_GPList_Par(G,'L_MOL'//trim(line))
-
-               case (44) ! S
-                  call Fix_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (45) ! TL
-                  call Fix_GPList_Par(G,'T_MOL'//trim(line))
-                  call Fix_GPList_Par(G,'L_MOL'//trim(line))
-
-               case (46) ! LS
-                  call Fix_GPList_Par(G,'L_MOL'//trim(line))
-                  call Fix_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (47) ! TS
-                  call Fix_GPList_Par(G,'T_MOL'//trim(line))
-                  call Fix_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (48) ! TLS
-                  call Fix_GPList_Par(G,'T_MOL'//trim(line))
-                  call Fix_GPList_Par(G,'L_MOL'//trim(line))
-                  call Fix_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (52) ! DIST
+               case (35) ! DIST
                   call Fix_GPList_Par(G,'DIST_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (53) ! BANG
+               case (36) ! BANG
                   call Fix_GPList_Par(G,'BANG_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (54) ! TORS
+               case (37) ! TORS
                   call Fix_GPList_Par(G,'TORS_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (38) ! RHO
+                  call Fix_GPList_Par(G,'RHO_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (39) ! TH
+                  call Fix_GPList_Par(G,'TH_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (40) ! PH
+                  call Fix_GPList_Par(G,'PH_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (41)
+                  call Fix_GPList_Par(G,'T11_MOL'//trim(line))
+
+               case (42)
+                  call Fix_GPList_Par(G,'T22_MOL'//trim(line))
+
+               case (43)
+                  call Fix_GPList_Par(G,'T33_MOL'//trim(line))
+
+               case (44)
+                  call Fix_GPList_Par(G,'T12_MOL'//trim(line))
+
+               case (45)
+                  call Fix_GPList_Par(G,'T13_MOL'//trim(line))
+
+               case (46)
+                  call Fix_GPList_Par(G,'T23_MOL'//trim(line))
+
+               case (47)
+                  call Fix_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T23_MOL'//trim(line))
+
+               case (48)
+                  call Fix_GPList_Par(G,'L11_MOL'//trim(line))
+
+               case (49)
+                  call Fix_GPList_Par(G,'L22_MOL'//trim(line))
+
+               case (50)
+                  call Fix_GPList_Par(G,'L33_MOL'//trim(line))
+
+               case (51)
+                  call Fix_GPList_Par(G,'L12_MOL'//trim(line))
+
+               case (52)
+                  call Fix_GPList_Par(G,'L13_MOL'//trim(line))
+
+               case (53)
+                  call Fix_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (54)
+                  call Fix_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (55)
+                  call Fix_GPList_Par(G,'S11_MOL'//trim(line))
+
+               case (56)
+                  call Fix_GPList_Par(G,'S12_MOL'//trim(line))
+
+               case (57)
+                  call Fix_GPList_Par(G,'S13_MOL'//trim(line))
+
+               case (58)
+                  call Fix_GPList_Par(G,'S21_MOL'//trim(line))
+
+               case (59)
+                  call Fix_GPList_Par(G,'S22_MOL'//trim(line))
+
+               case (60)
+                  call Fix_GPList_Par(G,'S23_MOL'//trim(line))
+
+               case (61)
+                  call Fix_GPList_Par(G,'S31_MOL'//trim(line))
+
+               case (62)
+                  call Fix_GPList_Par(G,'S32_MOL'//trim(line))
+
+               case (63)
+                  call Fix_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (64)
+                  call Fix_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (65) ! TL
+                  call Fix_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Fix_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (66) ! LS
+                  call Fix_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L23_MOL'//trim(line))
+
+                  call Fix_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (67) ! TS
+                  call Fix_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Fix_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (68) ! TLS
+                  call Fix_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Fix_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'L23_MOL'//trim(line))
+
+                  call Fix_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Fix_GPList_Par(G,'S33_MOL'//trim(line))
 
             end select ! Npar
 
@@ -578,68 +848,220 @@ Submodule (CFML_KeyCodes) KeyCod_Molec
                case (13)
                   call Vary_GPList_Par(G,'UISO_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (34) ! XC
+               case (20)
+                  call Vary_GPList_Par(G,'UISO_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (27) ! XC
                   call Vary_GPList_Par(G,'XC_MOL'//trim(line))
 
-               case (35) ! YC
+               case (28) ! YC
                   call Vary_GPList_Par(G,'YC_MOL'//trim(line))
 
-               case (36) ! ZC
+               case (29) ! ZC
                   call Vary_GPList_Par(G,'ZC_MOL'//trim(line))
 
-               case (37) ! CENT
+               case (30) ! CENT
                   call Vary_GPList_Par(G,'XC_MOL'//trim(line))
                   call Vary_GPList_Par(G,'YC_MOL'//trim(line))
                   call Vary_GPList_Par(G,'ZC_MOL'//trim(line))
 
-               case (38) ! THE
+               case (31) ! THE
                   call Vary_GPList_Par(G,'THE_MOL'//trim(line))
 
-               case (39) ! PHI
+               case (32) ! PHI
                   call Vary_GPList_Par(G,'PHI_MOL'//trim(line))
 
-               case (40) ! CHI
+               case (33) ! CHI
                   call Vary_GPList_Par(G,'CHI_MOL'//trim(line))
 
-               case (41) ! ORIENT
+               case (34) ! ORIENT
                   call Vary_GPList_Par(G,'THE_MOL'//trim(line))
                   call Vary_GPList_Par(G,'PHI_MOL'//trim(line))
                   call Vary_GPList_Par(G,'CHI_MOL'//trim(line))
 
-               case (42) ! T
-                  call Vary_GPList_Par(G,'T_MOL'//trim(line))
-
-               case (43) ! L
-                  call Vary_GPList_Par(G,'L_MOL'//trim(line))
-
-               case (44) ! S
-                  call Vary_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (45) ! TL
-                  call Vary_GPList_Par(G,'T_MOL'//trim(line))
-                  call Vary_GPList_Par(G,'L_MOL'//trim(line))
-
-               case (46) ! LS
-                  call Vary_GPList_Par(G,'L_MOL'//trim(line))
-                  call Vary_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (47) ! TS
-                  call Vary_GPList_Par(G,'T_MOL'//trim(line))
-                  call Vary_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (48) ! TLS
-                  call Vary_GPList_Par(G,'T_MOL'//trim(line))
-                  call Vary_GPList_Par(G,'L_MOL'//trim(line))
-                  call Vary_GPList_Par(G,'S_MOL'//trim(line))
-
-               case (52) ! DIST
+               case (35) ! DIST
                   call Vary_GPList_Par(G,'DIST_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (53) ! BANG
+               case (36) ! BANG
                   call Vary_GPList_Par(G,'BANG_'//trim(Labc)//'_MOL'//trim(line))
 
-               case (54) ! TORS
+               case (37) ! TORS
                   call Vary_GPList_Par(G,'TORS_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (38) ! RHO
+                  call Vary_GPList_Par(G,'RHO_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (39) ! TH
+                  call Vary_GPList_Par(G,'TH_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (40) ! PH
+                  call Vary_GPList_Par(G,'PH_'//trim(Labc)//'_MOL'//trim(line))
+
+               case (41)
+                  call Vary_GPList_Par(G,'T11_MOL'//trim(line))
+
+               case (42)
+                  call Vary_GPList_Par(G,'T22_MOL'//trim(line))
+
+               case (43)
+                  call Vary_GPList_Par(G,'T33_MOL'//trim(line))
+
+               case (44)
+                  call Vary_GPList_Par(G,'T12_MOL'//trim(line))
+
+               case (45)
+                  call Vary_GPList_Par(G,'T13_MOL'//trim(line))
+
+               case (46)
+                  call Vary_GPList_Par(G,'T23_MOL'//trim(line))
+
+               case (47)
+                  call Vary_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T23_MOL'//trim(line))
+
+               case (48)
+                  call Vary_GPList_Par(G,'L11_MOL'//trim(line))
+
+               case (49)
+                  call Vary_GPList_Par(G,'L22_MOL'//trim(line))
+
+               case (50)
+                  call Vary_GPList_Par(G,'L33_MOL'//trim(line))
+
+               case (51)
+                  call Vary_GPList_Par(G,'L12_MOL'//trim(line))
+
+               case (52)
+                  call Vary_GPList_Par(G,'L13_MOL'//trim(line))
+
+               case (53)
+                  call Vary_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (54)
+                  call Vary_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (55)
+                  call Vary_GPList_Par(G,'S11_MOL'//trim(line))
+
+               case (56)
+                  call Vary_GPList_Par(G,'S12_MOL'//trim(line))
+
+               case (57)
+                  call Vary_GPList_Par(G,'S13_MOL'//trim(line))
+
+               case (58)
+                  call Vary_GPList_Par(G,'S21_MOL'//trim(line))
+
+               case (59)
+                  call Vary_GPList_Par(G,'S22_MOL'//trim(line))
+
+               case (60)
+                  call Vary_GPList_Par(G,'S23_MOL'//trim(line))
+
+               case (61)
+                  call Vary_GPList_Par(G,'S31_MOL'//trim(line))
+
+               case (62)
+                  call Vary_GPList_Par(G,'S32_MOL'//trim(line))
+
+               case (63)
+                  call Vary_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (64)
+                  call Vary_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (65) ! TL
+                  call Vary_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Vary_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L23_MOL'//trim(line))
+
+               case (66) ! LS
+                  call Vary_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L23_MOL'//trim(line))
+
+                  call Vary_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (67) ! TS
+                  call Vary_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Vary_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S33_MOL'//trim(line))
+
+               case (68) ! TLS
+                  call Vary_GPList_Par(G,'T11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'T23_MOL'//trim(line))
+
+                  call Vary_GPList_Par(G,'L11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L33_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'L23_MOL'//trim(line))
+
+                  call Vary_GPList_Par(G,'S11_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S12_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S13_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S21_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S22_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S23_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S31_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S32_MOL'//trim(line))
+                  call Vary_GPList_Par(G,'S33_MOL'//trim(line))
 
             end select ! Npar
 

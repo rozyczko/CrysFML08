@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_Fractional_To
 
    implicit none
- 
+
  Contains
    !!----
    !!---- Subroutine Fractional_to_Cartesian
@@ -56,13 +56,13 @@ Submodule (CFML_Molecules) Mol_Fractional_To
             IMol%is_EulerMat=.true.
          end if
 
-         !> IMol contains fractional coordinates 
+         !> IMol contains fractional coordinates
          do i=1,IMol%natoms
             xi=IMol%I_coor(:,i) - IMol%xcentre   !Fractional coordinates after removing translation
             ci=matmul(cell%Cr_Orth_cel,xi)       !Cartesian components in the Crystal Frame
             IMol%I_coor(1:3,i) = matmul(ci,Eu)   !Final Cartesian internal coordinates (use passive matrix!)
          end do
-      
+
       else
          do i=1,IMol%natoms
             IMol%I_coor(:,i)=matmul(cell%cr_orth_cel,IMol%I_coor(:,i))
@@ -83,7 +83,7 @@ Submodule (CFML_Molecules) Mol_Fractional_To
       end if
 
    End Subroutine Fractional_to_Cartesian
-   
+
    !!----
    !!---- SUBROUTINE FRACTIONAL_TO_SPHERICAL
    !!----
@@ -148,7 +148,7 @@ Submodule (CFML_Molecules) Mol_Fractional_To
       end if
 
    End Subroutine Fractional_to_Spherical
-   
+
    !!----
    !!---- Subroutine Fractional_to_Zmatrix
    !!----
@@ -193,14 +193,14 @@ Submodule (CFML_Molecules) Mol_Fractional_To
          return
       end if
 
-      !Z Step 2 
+      !Z Step 2
       call Cartesian_to_Zmatrix(IMol, Cell=Cell)  !The cell is needed to eventually take into account
       if (err_CFML%IErr /= 0) then                !a different Cartesian frame on the input Mol
          Err_CFML%Msg="Fractional_to_Zmatrix: Intermediate procedure fail (II)!"
          return
       end if
 
-      !> Step 3 
+      !> Step 3
       if (present(NMol)) then
          call Init_molecule(NMol,na)
          if (NMol%natoms <=0) then
@@ -213,5 +213,5 @@ Submodule (CFML_Molecules) Mol_Fractional_To
       end if
 
    End Subroutine Fractional_to_Zmatrix
- 
-End Submodule Mol_Fractional_to 
+
+End Submodule Mol_Fractional_to

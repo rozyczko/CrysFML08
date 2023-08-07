@@ -20,13 +20,13 @@
     character(len=:),allocatable :: cmdline,filered
     logical :: esta !, debug=.true.
 
-    type(Reflection_List)       :: Ref
-    type(File_Type)             :: cfl_file
-    type(Twin_Type)             :: Tw
-    class(SPG_Type),allocatable :: SpG, twSpG
-    Type(Cell_G_Type)           :: cell
-    Type(Conditions_Type)       :: cond
-    Type(kvect_info_Type)       :: kinf
+    type(Reflection_List)          :: Ref
+    type(File_Type)                :: cfl_file
+    type(Twin_Type)                :: Tw
+    class(SPG_Type),   allocatable :: SpG, twSpG
+    class(Cell_G_Type),allocatable :: cell
+    Type(Conditions_Type)          :: cond
+    Type(kvect_info_Type)          :: kinf
     Type(Group_k_Type),dimension(:),allocatable :: Gk
 
 

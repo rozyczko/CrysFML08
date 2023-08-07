@@ -21,11 +21,11 @@ Program Calc_Structure_Factors
    !---- Variables ----!
    implicit none
 
-   type (File_Type)              :: fich_cfl
-   type (AtList_Type)            :: A
-   type (Cell_G_Type)            :: Cell
-   type (RefList_Type)           :: hkl
-   class (SPG_Type), allocatable :: SpG
+   type (File_Type)                 :: fich_cfl
+   type (AtList_Type)               :: A
+   class (Cell_G_Type), allocatable :: Cell
+   type (RefList_Type)              :: hkl
+   class (SPG_Type),    allocatable :: SpG
 
    character(len=132)          :: line
    character(len=256)          :: filcod     ! Name of the input file

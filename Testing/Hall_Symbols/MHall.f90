@@ -30,9 +30,9 @@ Program Test_Magnetic_Hall_Symbols
    !> Main
    do
       call clear_error()
-      write(*,"(a)")'  ----------------------------'
-      write(*,"(a)")'   MHall: Testing Hall symbols'
-      write(*,"(a)")'  ----------------------------'
+      write(*,"(a)")'  -------------------------------'
+      write(*,"(a)")'  - MHall: Testing Hall symbols -'
+      write(*,"(a)")'  -------------------------------'
       if (narg == 0) then
         write(*,"(a)",advance="no") " => Enter the magnetic Hall symbol or a list of generators in Jones'faithful notation: "
         read(*,"(a)") input_Hall

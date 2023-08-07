@@ -13,11 +13,11 @@ Program Schwinger
                                           Set_Form_Factors
  implicit none
 
- type (file_type)             :: fich_cfl
- class(SpG_Type), allocatable :: SpG
- type (Atlist_Type)           :: A
- type (Cell_G_Type)           :: Cell
- type (RefList_Type)          :: hkl
+ type (file_type)               :: fich_cfl
+ class(SpG_Type),   allocatable :: SpG
+ type (Atlist_Type)             :: A
+ class(Cell_G_Type),allocatable :: Cell
+ type (RefList_Type)            :: hkl
 
  character(len=256)           :: line,filcod
  character(len=1)             :: indv

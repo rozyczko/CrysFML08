@@ -18,8 +18,8 @@
     integer                             :: nlong,narg
     real(kind=cp)                       :: start, fin
 
-    type(Cell_G_Type)                   :: Cell
-    class(Spg_Type), allocatable        :: SpG
+    class(Cell_G_Type),allocatable      :: Cell
+    class(Spg_Type),   allocatable      :: SpG
     type(AtList_Type)                   :: Atm
 
 

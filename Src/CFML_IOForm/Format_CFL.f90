@@ -209,13 +209,13 @@ SubModule (CFML_IOForm) Format_CFL
    !!----
    !!---- 07/05/2020
    !!
-   Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end)
+   Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end, cmd)
       !---- Arguments ----!
-      type(File_Type),            intent(in)     :: cfl     ! Containing information
-      class(Cell_Type),           intent(out)    :: Cell    ! Cell object
-      character(len=*), optional, intent( in)    :: CFrame
-      integer,          optional, intent(in)     :: i_ini, i_end     ! Lines to explore
-
+      type(File_Type),                intent(in)     :: cfl     ! Containing information
+      class(Cell_G_Type),allocatable, intent(out)    :: Cell    ! Cell object
+      character(len=*),     optional, intent(in)     :: CFrame
+      integer,              optional, intent(in)     :: i_ini, i_end     ! Lines to explore
+      logical,              optional, intent(in)     :: cmd
       !---- Local variables -----!
       integer                              :: i, iv, n_ini, n_end
       integer                              :: j_ini,j_end
@@ -262,6 +262,11 @@ SubModule (CFML_IOForm) Format_CFL
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Cell@CFML_IOForm: Problems reading cell parameters!"
          return
+      end if
+      if(present(cmd)) then
+        allocate(Cell_GLS_Type :: Cell)
+      else
+        allocate(Cell_G_Type :: Cell)
       end if
       if (present(CFrame)) then
          call Set_Crystal_Cell(vcell(1:3),vcell(4:6), Cell, CarType=CFrame, Vscell=std(1:3), Vsang=std(4:6))
@@ -418,7 +423,7 @@ SubModule (CFML_IOForm) Format_CFL
       !> Init
       call clear_error()
 
-      if (cfl%nlines <=0) then
+      if (cfl%nlines <= 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Spg: 0 lines "
          return
@@ -824,8 +829,8 @@ SubModule (CFML_IOForm) Format_CFL
    Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Atm_Typ, Nphase, CFrame, Job_Info)
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: cfl
-      class(Cell_Type),              intent(out) :: Cell
-      class(SpG_Type), allocatable,  intent(out) :: SpG
+      class(Cell_G_Type),allocatable,intent(out) :: Cell
+      class(SpG_Type),   allocatable,intent(out) :: SpG
       Type(AtList_Type),             intent(out) :: Atmlist
       character(len=*),    optional, intent(in)  :: Atm_Typ
       Integer,             optional, intent(in)  :: Nphase   ! Select the Phase to read
@@ -841,6 +846,7 @@ SubModule (CFML_IOForm) Format_CFL
       real(kind=cp),dimension(:),allocatable:: xvet
 
       type(kvect_info_Type)            :: Kvec
+      logical                          :: commands
 
       !> Init
       call clear_error()
@@ -850,15 +856,18 @@ SubModule (CFML_IOForm) Format_CFL
          return
       end if
 
+      commands=.false.
+
       !> Calculating number of Phases
       nt_phases=0; ip=cfl%nlines; ip(1)=1
       do i=1,cfl%nlines
-         line=adjustl(cfl%line(i)%str)
-         if (len_trim(line) <=0) cycle
+         line=u_case(adjustl(cfl%line(i)%str))
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) =='!') cycle
          if (line(1:1) ==' ') cycle
 
-         if (u_case(line(1:6)) == 'PHASE_') then
+         if(index(line,"COMMANDS") /= 0 .or. index(line,"VARY") /= 0 .or. index(line,"FIX") /= 0) commands=.true.
+         if (line(1:6) == 'PHASE_') then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
          end if
@@ -881,15 +890,23 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Reading Cell Parameters
       if (present(CFrame)) then
-         call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end)
+         if(commands) then
+            call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end,commands)
+         else
+            call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end)
+         end if
       else
-         call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end)
+         if(commands) then
+            call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end,cmd=commands)
+         else
+            call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end)
+         end if
       end if
-      if (Err_CFML%IErr==1) return
+      if (Err_CFML%IErr == 1) return
 
       !> Reading Space groups
       call read_CFL_SpG(cfl,SpG, i_ini=n_ini, i_end=n_end)
-      if (Err_CFML%IErr==1) return
+      if (Err_CFML%IErr == 1 .or. .not. allocated(SpG)) return
 
       !> Read Atoms information
       set_moment=.false.

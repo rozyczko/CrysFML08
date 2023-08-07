@@ -3,7 +3,7 @@ Submodule (CFML_Structure_Factors) SF_AtomicFactors
    implicit none
 
  Contains
- 
+
    !!--++
    !!--++ FUNCTION Fj(s,a,b,c)
    !!--++    Atomic scattering factor calculation according to:
@@ -29,5 +29,5 @@ Submodule (CFML_Structure_Factors) SF_AtomicFactors
       res=res+c
 
    End Function Fj
-   
+
 End Submodule SF_AtomicFactors

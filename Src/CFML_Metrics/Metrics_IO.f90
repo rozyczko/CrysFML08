@@ -11,8 +11,8 @@ Submodule (CFML_Metrics) Metrics_IO
     !!
     Module Subroutine Write_Crystal_Cell(Cell, Iunit)
        !---- Arguments ----!
-       class(Cell_Type),  intent(in) :: Cell         ! Cell object
-       integer, optional, intent(in) :: Iunit
+       class(Cell_Type),    intent(in) :: Cell         ! Cell object
+       integer, optional,   intent(in) :: Iunit
 
        !---- Local variables ----!
        integer :: lun, i, j

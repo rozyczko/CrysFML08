@@ -47,7 +47,7 @@ SubModule (CFML_kvec_Symmetry) ksym_read
        logical                       :: msym_begin, kvect_begin, skp_begin, irreps_given, &
                                         irreps_begin, bfcoef_begin, magdom_begin, done, spg_given, lattice_given, &
                                         kvec_given
-       type(SPG_Type)                :: SpG
+       class(SPG_Type), allocatable  :: SpG
 
        call Clear_Error()
 
