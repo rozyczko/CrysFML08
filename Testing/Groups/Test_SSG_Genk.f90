@@ -16,7 +16,7 @@
 
     Subroutine Set_Intersection_Groups(SpGs,SpG)
       Type (SpG_Type),dimension(:), intent(in)   :: SpGs
-      Type (SpG_Type),              intent(out)  :: SpG
+      class(SpG_Type), allocatable, intent(out)  :: SpG
       !--- Local Variables ---!
       integer :: i,j,k,ng,ipos,n
       integer,dimension(1) :: iip
@@ -794,8 +794,8 @@
       character(len=50)               :: Str_tmp !,forma
       real(kind=cp), dimension(3,12)  :: kv
       type(Group_k_Type),dimension(12):: Gk
-      type(SpG_Type)                  :: SpG,intSpG !,st_intSpG
-      type(SpG_Type),dimension(12)    :: Grpk
+      class(SpG_Type), allocatable    :: SpG,SpG_aux,intSpG !,st_intSpG
+      Type(SpG_Type),  dimension(24)  :: Grpk
       logical                         :: ext=.true.
       type(rational),dimension(4,4)   :: Pmat
       real(kind=cp), dimension(3,3)   :: rot
@@ -813,7 +813,6 @@
            write(*,"(a,i2,a)",advance="no") " => Enter the propagation vector # ",i,": "
            read(*,*) kv(:,i)
         end do
-
         call Set_SpaceGroup(Str_tmp,SpG)
         if(Err_CFML%Ierr /= 0) then
           write(unit=*,fmt="(a)") " => "//trim(Err_CFML%Msg)
@@ -823,7 +822,8 @@
 
         do i=1,nkv
           call K_Star(kv(:,i),SpG,Gk(i),ext)
-          call Set_Gk(Gk(i),Grpk(i),ext)
+          call Set_Gk(Gk(i),SpG_aux,ext)
+          Grpk(i)=SpG_aux
           write(*,"(//a,3f10.5/)") " => GROUP OF THE PROPAGATION VECTOR: ",kv(:,i)
           call Write_Group_K(Gk(i))
           write(*,"(//a/)") " => FULL PROPAGATION VECTOR SPACE GROUP INCLUDING -k (Extended Little Group): "

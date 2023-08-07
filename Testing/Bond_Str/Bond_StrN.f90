@@ -16,7 +16,7 @@ Program Bond_Str
    Use CFML_Strings,      only: u_case, pack_string, String_NumStd,Cut_string, File_type
    use CFML_Maths,        only: Sort,Set_EPS_Math, Set_Eps_Math, Get_Eps_Math, Modulo_Lat,  Equal_Vector, &
                                 Polyhedron_Volume, Get_Centroid_Coord
-   use CFML_Metrics,      only: Write_Crystal_Cell, Cell_G_Type
+   use CFML_Metrics,      only: Write_Crystal_Cell, Cell_Type, Cell_G_Type
    use CFML_gSpaceGroups, only: Apply_OP, SPG_Type, Write_SpaceGroup_Info
    use CFML_Atoms,        only: Write_Atom_List, Atm_Std_Type, AtList_Type, Allocate_Atom_List
    use CFML_Geom,         only: Calc_Dist_Angle_Sigma, coord_info, coord_info, distance
@@ -31,7 +31,6 @@ Program Bond_Str
 
    class (SPG_Type),    allocatable  :: SpGr
    class (Cell_G_Type), allocatable  :: Cell
-
    type (AtList_Type)              :: A
    type (Atoms_Conf_List_Type)     :: Ac
    type (File_type)                :: Fich_cfl

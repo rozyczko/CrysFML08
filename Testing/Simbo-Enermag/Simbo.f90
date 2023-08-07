@@ -818,7 +818,7 @@
    integer, parameter    :: max_magt=96
    class (Cell_G_Type), allocatable    :: Cell, Celln
    class (SPG_Type),allocatable :: Spg
-   type (SPG_Type)       :: gP1
+   class (SPG_Type),allocatable :: gP1
    type (AtList_Type)    :: A       !Original list of atoms in the asymmetric unit
    type (AtList_Type)    :: Ap      !List of atoms inside a primitive cell
    type (Atm_Cell_Type)  :: Acm, Ac !Magnetic atoms and all atoms inside a primitive cell

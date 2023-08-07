@@ -5,52 +5,49 @@ SubModule (CFML_Python)  Atm_Python_Wraps
    implicit none
    Contains
 
-   Module Subroutine Wrap_Atm_Cell_Type(for_var,py_var,ierror)
+   Module Subroutine Unwrap_Atlist_Type(py_var,for_var,ierror)
       !---- Arguments ----!
-      type(atm_cell_type), intent(in)    :: for_var
-      type(dict),          intent(inout) :: py_var
-      integer,             intent(out)   :: ierror
+      type(dict),                    intent(inout) :: py_var
+      type(atlist_type),             intent(out)   :: for_var
+      integer,                       intent(out)   :: ierror
 
       !---- Local Variables ----!
-      type(list) :: li_ddlab,li_lab
-      type(ndarray) :: nd_charge,nd_ddist,nd_distance,nd_moment,nd_neighb,nd_neighb_atom,&
-                       nd_trans,nd_var_free,nd_xyz
+      integer, dimension(:), pointer :: p_int_1d
+      character(len=:), allocatable :: fortran_type
+      type(list) :: my_list
 
       ierror = 0
-      if (ierror == 0) ierror = py_var%setitem('fortran_type','atm_cell_type')
-      if (ierror == 0) ierror = ndarray_create(nd_charge,for_var%charge)
-      if (ierror == 0) ierror = py_var%setitem('charge',nd_charge)
-      if (ierror == 0) ierror = ndarray_create(nd_ddist,for_var%ddist)
-      if (ierror == 0) ierror = py_var%setitem('ddist',nd_ddist)
-      if (ierror == 0) ierror = list_create(li_ddlab)
-      if (ierror == 0) call array_to_list('Wrap_Atm_Cell_Type','ddlab',for_var%ddlab,li_ddlab,ierror)
-      if (ierror == 0) ierror = py_var%setitem('ddlab',li_ddlab)
-      if (ierror == 0) ierror = list_create(li_lab)
-      if (ierror == 0) call array_to_list('Wrap_Atm_Cell_Type','lab',for_var%lab,li_lab,ierror)
-      if (ierror == 0) ierror = py_var%setitem('lab',li_lab)
-      if (ierror == 0) ierror = ndarray_create(nd_distance,for_var%distance)
-      if (ierror == 0) ierror = py_var%setitem('distance',nd_distance)
-      if (ierror == 0) ierror = ndarray_create(nd_moment,for_var%moment)
-      if (ierror == 0) ierror = py_var%setitem('moment',nd_moment)
-      if (ierror == 0) ierror = py_var%setitem('nat',for_var%nat)
-      if (ierror == 0) ierror = py_var%setitem('ndist',for_var%ndist)
-      if (ierror == 0) ierror = ndarray_create(nd_neighb,for_var%neighb)
-      if (ierror == 0) ierror = py_var%setitem('neighb',nd_neighb)
-      if (ierror == 0) ierror = ndarray_create(nd_neighb_atom,for_var%neighb_atom)
-      if (ierror == 0) ierror = py_var%setitem('neighb_atom',nd_neighb_atom)
-      if (ierror == 0) ierror = ndarray_create(nd_trans,for_var%trans)
-      if (ierror == 0) ierror = py_var%setitem('trans',nd_trans)
-      if (ierror == 0) ierror = ndarray_create(nd_var_free,for_var%var_free)
-      if (ierror == 0) ierror = py_var%setitem('var_free',nd_var_free)
-      if (ierror == 0) ierror = ndarray_create(nd_xyz,for_var%xyz)
-      if (ierror == 0) ierror = py_var%setitem('xyz',nd_xyz)
+
+      ! fortran_type
+      ierror = py_var%getitem(fortran_type,"fortran_type")
       if (ierror /= 0) then
-         err_cfml%flag = .true.
-         err_cfml%ierr = -1
-         err_cfml%msg  = 'Wrap_Atm_Type: Wrapping failed'
+          err_cfml%flag = .true.
+          err_cfml%ierr = -1
+          err_cfml%msg  = 'Unwrap_Atlist_Type: Cannot determine fortran type'
+      else
+          if (fortran_type /= 'atlist_type') then
+              ierror = -1
+              err_cfml%flag = .true.
+              err_cfml%ierr = -1
+              err_cfml%msg  = 'Unwrap_Atlist_Type: Unknown fortran type'
+          end if
+      end if
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','active',py_var,my_list,ierror)
+      if (ierror == 0) call list_to_array('Unwrap_Atlist_Type','active',my_list,for_var%active,ierror)
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','atom',py_var,my_list,ierror)
+      if (ierror == 0) call list_to_array('Unwrap_Atlist_Type','atom',my_list,for_var%atom,ierror)
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','iph',py_var,p_int_1d,ierror)
+      if (ierror == 0) call pointer_to_array_alloc('Unwrap_Atlist_Type','iph',p_int_1d,for_var%iph,ierror)
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','mcomp',py_var,for_var%mcomp,ierror)
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','natoms',py_var,for_var%natoms,ierror)
+      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','symm_checked',py_var,for_var%symm_checked,ierror)
+      if (ierror /= 0 .and. err_cfml%ierr == 0) then
+          err_cfml%flag = .true.
+          err_cfml%ierr = -1
+          err_cfml%msg  = 'UnWrap_Atlist_Type: Unwrapping failed'
       end if
 
-   End Subroutine Wrap_Atm_Cell_Type
+   End Subroutine Unwrap_Atlist_Type
 
    Module Subroutine Unwrap_Atm_Cell_Type(py_var,for_var,ierror)
       !---- Arguments ----!
@@ -119,50 +116,6 @@ SubModule (CFML_Python)  Atm_Python_Wraps
      end if
 
    End Subroutine Unwrap_Atm_Cell_Type
-
-   Module Subroutine Unwrap_Atlist_Type(py_var,for_var,ierror)
-      !---- Arguments ----!
-      type(dict),                    intent(inout) :: py_var
-      type(atlist_type),             intent(out)   :: for_var
-      integer,                       intent(out)   :: ierror
-
-      !---- Local Variables ----!
-      integer, dimension(:), pointer :: p_int_1d
-      character(len=:), allocatable :: fortran_type
-      type(list) :: my_list
-
-      ierror = 0
-
-      ! fortran_type
-      ierror = py_var%getitem(fortran_type,"fortran_type")
-      if (ierror /= 0) then
-          err_cfml%flag = .true.
-          err_cfml%ierr = -1
-          err_cfml%msg  = 'Unwrap_Atlist_Type: Cannot determine fortran type'
-      else
-          if (fortran_type /= 'atlist_type') then
-              ierror = -1
-              err_cfml%flag = .true.
-              err_cfml%ierr = -1
-              err_cfml%msg  = 'Unwrap_Atlist_Type: Unknown fortran type'
-          end if
-      end if
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','active',py_var,my_list,ierror)
-      if (ierror == 0) call list_to_array('Unwrap_Atlist_Type','active',my_list,for_var%active,ierror)
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','atom',py_var,my_list,ierror)
-      if (ierror == 0) call list_to_array('Unwrap_Atlist_Type','atom',my_list,for_var%atom,ierror)
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','iph',py_var,p_int_1d,ierror)
-      if (ierror == 0) call pointer_to_array_alloc('Unwrap_Atlist_Type','iph',p_int_1d,for_var%iph,ierror)
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','mcomp',py_var,for_var%mcomp,ierror)
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','natoms',py_var,for_var%natoms,ierror)
-      if (ierror == 0) call unwrap_dict_item('Unwrap_Atlist_Type','symm_checked',py_var,for_var%symm_checked,ierror)
-      if (ierror /= 0 .and. err_cfml%ierr == 0) then
-          err_cfml%flag = .true.
-          err_cfml%ierr = -1
-          err_cfml%msg  = 'UnWrap_Atlist_Type: Unwrapping failed'
-      end if
-
-   End Subroutine Unwrap_Atlist_Type
 
    Module Subroutine Unwrap_Atm_Type(py_var,for_var,ierror)
       !---- Arguments ----!
@@ -560,6 +513,53 @@ SubModule (CFML_Python)  Atm_Python_Wraps
      end if
 
    end subroutine Wrap_Atlist_Type
+
+   Module Subroutine Wrap_Atm_Cell_Type(for_var,py_var,ierror)
+      !---- Arguments ----!
+      type(atm_cell_type), intent(in)    :: for_var
+      type(dict),          intent(inout) :: py_var
+      integer,             intent(out)   :: ierror
+
+      !---- Local Variables ----!
+      type(list) :: li_ddlab,li_lab
+      type(ndarray) :: nd_charge,nd_ddist,nd_distance,nd_moment,nd_neighb,nd_neighb_atom,&
+                       nd_trans,nd_var_free,nd_xyz
+
+      ierror = 0
+      if (ierror == 0) ierror = py_var%setitem('fortran_type','atm_cell_type')
+      if (ierror == 0) ierror = ndarray_create(nd_charge,for_var%charge)
+      if (ierror == 0) ierror = py_var%setitem('charge',nd_charge)
+      if (ierror == 0) ierror = ndarray_create(nd_ddist,for_var%ddist)
+      if (ierror == 0) ierror = py_var%setitem('ddist',nd_ddist)
+      if (ierror == 0) ierror = list_create(li_ddlab)
+      if (ierror == 0) call array_to_list('Wrap_Atm_Cell_Type','ddlab',for_var%ddlab,li_ddlab,ierror)
+      if (ierror == 0) ierror = py_var%setitem('ddlab',li_ddlab)
+      if (ierror == 0) ierror = list_create(li_lab)
+      if (ierror == 0) call array_to_list('Wrap_Atm_Cell_Type','lab',for_var%lab,li_lab,ierror)
+      if (ierror == 0) ierror = py_var%setitem('lab',li_lab)
+      if (ierror == 0) ierror = ndarray_create(nd_distance,for_var%distance)
+      if (ierror == 0) ierror = py_var%setitem('distance',nd_distance)
+      if (ierror == 0) ierror = ndarray_create(nd_moment,for_var%moment)
+      if (ierror == 0) ierror = py_var%setitem('moment',nd_moment)
+      if (ierror == 0) ierror = py_var%setitem('nat',for_var%nat)
+      if (ierror == 0) ierror = py_var%setitem('ndist',for_var%ndist)
+      if (ierror == 0) ierror = ndarray_create(nd_neighb,for_var%neighb)
+      if (ierror == 0) ierror = py_var%setitem('neighb',nd_neighb)
+      if (ierror == 0) ierror = ndarray_create(nd_neighb_atom,for_var%neighb_atom)
+      if (ierror == 0) ierror = py_var%setitem('neighb_atom',nd_neighb_atom)
+      if (ierror == 0) ierror = ndarray_create(nd_trans,for_var%trans)
+      if (ierror == 0) ierror = py_var%setitem('trans',nd_trans)
+      if (ierror == 0) ierror = ndarray_create(nd_var_free,for_var%var_free)
+      if (ierror == 0) ierror = py_var%setitem('var_free',nd_var_free)
+      if (ierror == 0) ierror = ndarray_create(nd_xyz,for_var%xyz)
+      if (ierror == 0) ierror = py_var%setitem('xyz',nd_xyz)
+      if (ierror /= 0) then
+         err_cfml%flag = .true.
+         err_cfml%ierr = -1
+         err_cfml%msg  = 'Wrap_Atm_Type: Wrapping failed'
+      end if
+
+   End Subroutine Wrap_Atm_Cell_Type
 
    Module Subroutine Wrap_Atm_Type(for_var,py_var,ierror)
       !---- Arguments ----!

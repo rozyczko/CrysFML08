@@ -6,7 +6,7 @@
     implicit none
 
     character(len=256)                  :: generatorList
-    type(Spg_Type)                      :: Grp
+    class(Spg_Type), allocatable        :: Grp
     real(kind=cp) :: start, fin
 
     !> Init
