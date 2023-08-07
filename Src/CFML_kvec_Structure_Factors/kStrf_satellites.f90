@@ -37,7 +37,7 @@ SubModule (CFML_kvec_Structure_Factors) kStrf_satellites
        !---- Local variables ----!
        integer                                       :: i,j,k, numref,num_ref,n, ng, lu, addk,nmat,ik
        real(kind=cp)                                 :: smgen, maxr, epv,s1,s2,sqmiv1,sqmiv2, epm
-       type(SPG_Type)                                :: G
+       class(SPG_Type), allocatable                  :: G
        type(Reflist_Type)                            :: reflex
        type(MagH_List_Type)                          :: Hloc
        character(len=20)                             :: Symb

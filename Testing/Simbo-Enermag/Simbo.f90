@@ -816,7 +816,7 @@
 
    character(len=120), allocatable, dimension(:) :: file_dat
    integer, parameter    :: max_magt=96
-   type (Cell_G_Type)    :: Cell, Celln
+   class (Cell_G_Type), allocatable    :: Cell, Celln
    class (SPG_Type),allocatable :: Spg
    type (SPG_Type)       :: gP1
    type (AtList_Type)    :: A       !Original list of atoms in the asymmetric unit

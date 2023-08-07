@@ -132,7 +132,9 @@ SubModule (CFML_gSpaceGroups) gS_Match_Shubnikov_Grp
         allocate(C(4,4,nA),Cinv(4,4,nA),Paux(3,3,nA))
 
         !> Initialize arrays
-        G_aux(:)           = G
+        do i=1,nA
+           G_aux(i) = G
+        end do
         doTest(:)          = .true.
         idx(:,:)           = 0
 

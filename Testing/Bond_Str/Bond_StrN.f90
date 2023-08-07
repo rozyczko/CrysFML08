@@ -29,8 +29,8 @@ Program Bond_Str
    !---- Variables ----!
    Implicit None
 
-   class (SPG_Type), allocatable   :: SpGr
-   type (Cell_G_Type)              :: Cell
+   class (SPG_Type),    allocatable  :: SpGr
+   class (Cell_G_Type), allocatable  :: Cell
 
    type (AtList_Type)              :: A
    type (Atoms_Conf_List_Type)     :: Ac

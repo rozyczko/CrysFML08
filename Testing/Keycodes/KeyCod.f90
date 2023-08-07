@@ -8,7 +8,7 @@ Program KeyCodes
    Use CFML_Strings,      only: File_Type, U_Case, Cut_String, Get_Words, &
                                 Get_Num, Reading_File, l_case, Get_Separator_Pos
    use CFML_gSpaceGroups, only: SpG_Type, Write_SpaceGroup_Info
-   use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type, Write_Crystal_Cell
+   use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type, Cell_G_Type,Write_Crystal_Cell
    use CFML_Atoms,        only: AtList_Type, Atm_type, Atm_Std_Type, Atm_Ref_Type, &
                                 ModAtm_Std_Type, ModAtm_Ref_type, Write_Atom_List, &
                                 Index_AtLab_on_AtList, Change_AtomList_Type
@@ -43,7 +43,7 @@ Program KeyCodes
    Type :: Phase_Type
       character(len=:),      allocatable :: phas_name
       logical, dimension(:), allocatable :: patt_contrib ! Contribution to patterns
-      type(Cell_GLS_Type)                :: Cell         ! Cell object
+      class(Cell_G_Type),    allocatable :: Cell         ! Cell object
       class(SpG_Type),       allocatable :: SpG          ! Space Group object
       type(Atlist_Type)                  :: Atm          ! Atom List object
    End Type Phase_Type

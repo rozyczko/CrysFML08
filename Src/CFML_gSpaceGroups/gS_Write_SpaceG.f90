@@ -17,12 +17,13 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
       integer, optional,  intent(in)   :: lun
 
       !---- Local Variables ----!
-      integer :: iout,i,j,npos
+      integer :: iout,i,j,npos,nh
       Character(len=*), dimension(4),parameter :: gtype=["Colorless    ","Paramagnetic ","Black-White:1","Black-White:2"]
       character(len=10) :: forma="(a,  i3,a)"
       character(len=40) :: Symb
       integer,       dimension(3,3)  :: s
       real(kind=cp), dimension(3)    :: t
+      real(kind=cp) :: stl
       logical :: inverse
 
 
@@ -58,23 +59,32 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
             if(len_trim(Grp%Parent_spg) /= 0)   write(unit=iout,fmt="(a, a)") "            Parent Space Group: ",trim(Grp%Parent_spg)
             if(len_trim(Grp%tfrom_parent) /= 0) write(unit=iout,fmt="(a, a)") "         Transform from Parent: ",trim(Grp%tfrom_parent)
                                                 write(unit=iout,fmt="(a,i6)") "          Bravais Class number: ",Grp%Bravais_num
-            if(len_trim(Grp%mat2std) /= 0)      write(unit=iout,fmt="(a, a)") "                 Bravais Class: ",trim(Grp%SSG_Bravais)
-                                                write(unit=iout,fmt="(a,i6)") "       SuperSpace Group number: ",Grp%numspg
-            if(len_trim(Grp%SSG_nlabel) /= 0)   write(unit=iout,fmt="(a, a)") "       SuperSpace Group  Label: ",trim(Grp%SSG_nlabel)
-            if(len_trim(Grp%SSG_symb) /= 0)     write(unit=iout,fmt="(a, a)") "       SuperSpace Group symbol: ",trim(Grp%SSG_symb)
+
+
             Select Type (Grp)
               class is(SuperSpaceGroup_Type)
-                                               write(unit=iout,fmt="(/,a,i4)")                   "  Number of modulation vectors: ",Grp%nk
-                                               write(unit=iout,fmt="(a)")                        "  Q-vectors & harmonics & maximum SinTheta/Lambda: "
-                                               do i=1,Grp%nk
-                                                  write(unit=iout,fmt="(a,3f10.4,a,i3,f10.4)")   "       [",Grp%kv(:,i)," ]:   ",Grp%nharm(i), Grp%sintlim(i)
-                                               end do
-                                               write(unit=forma(4:5),fmt="(i2)") Grp%nk
-                                               write(unit=iout,fmt="(a,i4)")                     "     Number of  Q-coefficients: ",Grp%nq
-                                               write(unit=iout,fmt="(a )")                       "                Q-coefficients: "
-                                               do i=1,Grp%nq  !Q_coeff(nk,nq)
-                                                  write(unit=iout,fmt=forma)                     "                               [ ",Grp%q_coeff(:,i)," ]"
-                                               end do
+                 if(len_trim(Grp%mat2std) /= 0) write(unit=iout,fmt="(a, a)") "                 Bravais Class: ",trim(Grp%SSG_Bravais)
+                                                write(unit=iout,fmt="(a,i6)") "       SuperSpace Group number: ",Grp%numspg
+              if(len_trim(Grp%SSG_nlabel) /= 0) write(unit=iout,fmt="(a, a)") "       SuperSpace Group  Label: ",trim(Grp%SSG_nlabel)
+                if(len_trim(Grp%SSG_symb) /= 0) write(unit=iout,fmt="(a, a)") "       SuperSpace Group symbol: ",trim(Grp%SSG_symb)
+                            write(unit=iout,fmt="(/,a,i4)")                   "  Number of modulation vectors: ",Grp%nk
+                            write(unit=iout,fmt="(a)")                        "  Q-vectors & harmonics & maximum SinTheta/Lambda: "
+                            if(allocated(Grp%kv)) then
+                              do i=1,Grp%nk
+                                 nh=1; stl=1.0
+                                 if(allocated(Grp%nharm)) nh=Grp%nharm(i)
+                                 if(allocated(Grp%sintlim)) stl=Grp%sintlim(i)
+                                 write(unit=iout,fmt="(a,3f10.4,a,i3,f10.4)") "       [",Grp%kv(:,i)," ]:   ",nh, stl
+                              end do
+                            end if
+                            if(allocated(Grp%q_coeff)) then
+                                write(unit=forma(4:5),fmt="(i2)") Grp%nk
+                                write(unit=iout,fmt="(a,i4)")              "     Number of  Q-coefficients: ",Grp%nq
+                                write(unit=iout,fmt="(a )")                "                Q-coefficients: "
+                                do i=1,Grp%nq  !Q_coeff(nk,nq)
+                                   write(unit=iout,fmt=forma)              "                               [ ",Grp%q_coeff(:,i)," ]"
+                                end do
+                            end if
 
             End Select
       else
@@ -126,7 +136,7 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
          write(unit=iout,fmt="(a,10a)") "                  Centre_coord: [ ",(trim(Rational_String(Grp%centre_coord(i)))//" ",i=1,Grp%d-1),"]"
       end if
 
-      if (Grp%anticentred /= 1) then
+      if (Grp%anticentred /= 1 .and. allocated(Grp%anticentre_coord)) then
          write(unit=iout,fmt="(a,10a)") "             Anti-Centre_coord: [ ",(trim(Rational_String(Grp%anticentre_coord(i)))//" ",i=1,Grp%d-1),"]"
       end if
 
@@ -210,12 +220,12 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
             write(unit=lun) Grp%Parent_spg
             write(unit=lun) Grp%tfrom_parent
             write(unit=lun) Grp%Bravais_num
-            write(unit=lun) Grp%SSG_Bravais
             write(unit=lun) Grp%numspg
-            write(unit=lun) Grp%SSG_nlabel
-            write(unit=lun) Grp%SSG_symb
             Select Type (Grp)
               class is(SuperSpaceGroup_Type)
+                write(unit=lun) Grp%SSG_Bravais
+                write(unit=lun) Grp%SSG_nlabel
+                write(unit=lun) Grp%SSG_symb
                 write(unit=lun)   Grp%nk
                 do i=1,Grp%nk
                    write(unit=lun)Grp%kv(:,i),Grp%nharm(i), Grp%sintlim(i)

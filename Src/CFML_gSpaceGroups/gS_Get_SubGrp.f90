@@ -93,7 +93,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_SubGrp
       !> Formation of the list of possible generators extracted from list of generators of
       !> the input Group
       call Get_Generators(SpG%generators_list,d,gen_min, ngen)
-      
+
       !write(*,"(a)")  "  Input generator list: "//trim(SpG%generators_list)
       !write(*,"(a,i5)")  "  Number of generators: ",ngen
       !do i=1,ngen

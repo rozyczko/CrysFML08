@@ -9,7 +9,7 @@ SubModule (CFML_IOForm) Format_fst
 
    Module Subroutine Read_XTal_FST(FST, Cell, SpG, Atm, MGp, mAtm, Mag_dom)
       Type(File_Type),                     intent(in)     :: FST
-      Class(Cell_Type),                    intent(out)    :: Cell    ! Cell object
+      class(Cell_G_Type),allocatable,      intent(out)    :: Cell    ! Cell object
       Class(SpG_Type), allocatable,        intent(out)    :: SpG
       Type(AtList_Type),                   intent(out)    :: Atm
       Type(MagSymm_k_Type),      optional, intent(out)    :: MGp

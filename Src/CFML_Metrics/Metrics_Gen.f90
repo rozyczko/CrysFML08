@@ -14,8 +14,8 @@ Submodule (CFML_Metrics) Metrics_Gen
     !!
     Pure Module Function SigmaV_From_Cell(Cell) Result(sigma)
        !---- Arguments ----!
-       class(Cell_Type), intent(in) :: Cell      ! Cell Parameters
-       real(kind=cp)                :: sigma     ! Sigma
+       class(Cell_G_Type), intent(in) :: Cell      ! Cell Parameters
+       real(kind=cp)                  :: sigma     ! Sigma
 
        !--- Local variables ---!
        integer                     :: i
@@ -306,7 +306,7 @@ Submodule (CFML_Metrics) Metrics_Gen
     Module Subroutine Set_Crystal_Cell(VCell,VAng,Cell,Cartype,Vscell,Vsang)
        !---- Arguments ----!
        real(kind=cp), dimension(3),         intent(in)  :: Vcell, Vang    ! Cell parameters
-       class(Cell_Type),                    intent(out) :: Cell           ! Cell Object
+       class(Cell_G_Type),               intent(in out) :: Cell           ! Cell Object
        character (len=*),          optional,intent(in ) :: CarType        ! Orientation in Cartesian
        real(kind=cp), dimension(3),optional,intent(in ) :: Vscell, Vsang  ! Standard deviations
 
@@ -331,52 +331,48 @@ Submodule (CFML_Metrics) Metrics_Gen
        end if
        cell%svol=sigmaV_from_Cell(cell)
 
-       select type (cell)
-          class is (Cell_G_Type)
-             !> Reciprocal
-             call reciprocal_cell(Vcell,Vang,cell%rcell,cell%rang,cell%rvol)
+       !> Reciprocal
+       call reciprocal_cell(Vcell,Vang,cell%rcell,cell%rang,cell%rvol)
 
-             !> GD and GR
-             cell%GD=Get_metrics(Vcell,Vang)
-             cell%GR=Get_metrics(cell%rcell,cell%rang)
+       !> GD and GR
+       cell%GD=Get_metrics(Vcell,Vang)
+       cell%GR=Get_metrics(cell%rcell,cell%rang)
 
-             !> Cartesian conversion
-             if (present(Cartype)) then
-                cell%cartType=adjustl(u_case(cartype))
-             else
-                cell%CartType="CA"
-             end if
-             Cell%Cr_Orth_cel=Get_Cryst_Orthog_matrix(Vcell,Vang,cell%CartType)
-             Cell%Orth_Cr_cel=inverse_matrix(Cell%Cr_Orth_cel)
-             if (Err_CFML%IErr ==1) then
-                Err_CFML%Msg="SET_CRYSTAL_CELL@METRICS: Probably wrong cell parameters. Please, check it!"
-                return
-             end if
+       !> Cartesian conversion
+       if (present(Cartype)) then
+          cell%cartType=adjustl(u_case(cartype))
+       else
+          cell%CartType="CA"
+       end if
+       Cell%Cr_Orth_cel=Get_Cryst_Orthog_matrix(Vcell,Vang,cell%CartType)
+       Cell%Orth_Cr_cel=inverse_matrix(Cell%Cr_Orth_cel)
+       if (Err_CFML%IErr ==1) then
+          Err_CFML%Msg="SET_CRYSTAL_CELL@METRICS: Probably wrong cell parameters. Please, check it!"
+          return
+       end if
 
-             !> Busing-Levy matrix component
-             !(it corresponds to the transpose of Orth_Cr_cel when Celda%CartType="CA")
-             if (cell%CartType == "CA") then
-                cell%bl_m=Transpose(Cell%Orth_Cr_cel)
-                cell%inv_bl_m=Transpose(Cell%Cr_Orth_cel)
+       !> Busing-Levy matrix component
+       !(it corresponds to the transpose of Orth_Cr_cel when Celda%CartType="CA")
+       if (cell%CartType == "CA") then
+          cell%bl_m=Transpose(Cell%Orth_Cr_cel)
+          cell%inv_bl_m=Transpose(Cell%Cr_Orth_cel)
 
-             else
-                Cell%bl_m(1,1)=cell%rcell(1)
-                Cell%bl_m(1,2)=cell%rcell(2)*cosd(cell%rang(3))
-                Cell%bl_m(1,3)=cell%rcell(3)*cosd(cell%rang(2))
-                Cell%bl_m(2,2)=cell%rcell(2)*sind(cell%rang(3))
-                Cell%bl_m(2,3)=-(cell%rcell(3)*sind(cell%rang(2))*cosd(cell%ang(1)))
-                Cell%bl_m(3,3)=1.0_cp/cell%cell(3)
-                Cell%bl_m(2,1)=0.0_cp
-                Cell%bl_m(3,1)=0.0_cp
-                Cell%bl_m(3,2)=0.0_cp
-                Cell%Inv_bl_M=inverse_matrix(Cell%bl_M)
-                if (Err_CFML%IErr ==1) then
-                   Err_CFML%Msg="SET_CRYSTAL_CELL@METRICS: Wrong cell parameters. Please, check it!"
-                   return
-                end if
-             end if
-
-       end select
+       else
+          Cell%bl_m(1,1)=cell%rcell(1)
+          Cell%bl_m(1,2)=cell%rcell(2)*cosd(cell%rang(3))
+          Cell%bl_m(1,3)=cell%rcell(3)*cosd(cell%rang(2))
+          Cell%bl_m(2,2)=cell%rcell(2)*sind(cell%rang(3))
+          Cell%bl_m(2,3)=-(cell%rcell(3)*sind(cell%rang(2))*cosd(cell%ang(1)))
+          Cell%bl_m(3,3)=1.0_cp/cell%cell(3)
+          Cell%bl_m(2,1)=0.0_cp
+          Cell%bl_m(3,1)=0.0_cp
+          Cell%bl_m(3,2)=0.0_cp
+          Cell%Inv_bl_M=inverse_matrix(Cell%bl_M)
+          if (Err_CFML%IErr ==1) then
+             Err_CFML%Msg="SET_CRYSTAL_CELL@METRICS: Wrong cell parameters. Please, check it!"
+             return
+          end if
+       end if
 
     End Subroutine Set_Crystal_Cell
 
@@ -388,7 +384,7 @@ Submodule (CFML_Metrics) Metrics_Gen
     !!----
     Module Subroutine Get_Cryst_Family(Cell, Family, Symbol, System)
        !---- Arguments ----!
-       class(Cell_Type),       intent(in ) :: Cell
+       class(Cell_G_Type),     intent(in ) :: Cell
        character(len=*),       intent(out) :: Family
        character(len=*),       intent(out) :: Symbol
        character(len=*),       intent(out) :: System
@@ -530,7 +526,7 @@ Submodule (CFML_Metrics) Metrics_Gen
     !!
     Module Function Get_Deriv_Orth_Cell(Cell,Cartype) Result(De_Orthcell)
        !---- Arguments ----!
-       class(Cell_Type),                intent(in ) :: cell
+       class(Cell_G_Type),              intent(in ) :: cell
        character(len=*), optional,      intent(in ) :: CarType
        real(kind=cp), dimension(3,3,6)              :: De_Orthcell
 
@@ -738,7 +734,7 @@ Submodule (CFML_Metrics) Metrics_Gen
        !
        real(kind=cp), dimension(3,3) :: Mat
        call Get_Transf(sett,Mat)
-       call Change_Setting_Cell(Cell,Mat,Celln)
+       if (err_cfml%ierr ==0) call Change_Setting_Cell(Cell,Mat,Celln)
 
     End Subroutine Change_Setting_Cell_Symb
     !!----
@@ -804,8 +800,8 @@ Submodule (CFML_Metrics) Metrics_Gen
     Module Subroutine Get_Primitive_Cell(Lat_Type,C_Cell,P_Cell,Transfm)
        !---- Arguments ----!
        character(len=*),              intent(in)  :: lat_type    ! Lattice type
-       class(Cell_Type),              intent(in)  :: c_cell      ! Input Cell Object
-       class(Cell_Type),              intent(out) :: p_cell      ! Output Cell Object
+       class(Cell_G_Type),            intent(in)  :: c_cell      ! Input Cell Object
+       class(Cell_G_Type),            intent(out) :: p_cell      ! Output Cell Object
        real(kind=cp), dimension(3,3), intent(out) :: transfm     ! Transformation Matrix between Cell objects
 
        !---- Local variables ----!
@@ -1188,7 +1184,7 @@ Submodule (CFML_Metrics) Metrics_Gen
     Module Subroutine Get_Conventional_Cell(Twofold,Cell,Tr,Message,told)
        !---- Arguments ----!
        Type(Twofold_Axes_Type), intent(in)  :: Twofold
-       class(Cell_Type),        intent(out) :: Cell
+       class(Cell_G_Type),      intent(out) :: Cell
        integer, dimension(3,3), intent(out) :: tr
        character(len=*),        intent(out) :: message
        real(kind=cp), optional, intent(in)  :: told
