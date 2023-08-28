@@ -266,39 +266,410 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    !!----
    !!---- Update: may - 2022
    !!
-   Module Subroutine GPList_to_Molec(M, Im, Mol)
+   Module Subroutine GPList_to_Molec(G, Iph, Im, Mol)
       !---- Arguments ----!
-      type(GenParList_Type), intent(in)   :: M
-      integer,                 intent(in)   :: Im
-      type(Molecule_type),     intent(inout):: Mol
+      type(GenParList_Type), intent(in)     :: G       ! General Vector
+      integer,               intent(in)     :: Iph     ! Phase
+      integer,               intent(in)     :: Im      ! Molec
+      type(Molecule_type),   intent(in out) :: Mol
 
       !---- Local Arguments ----!
-      character(len=30) :: ccc
-      integer           :: i,npos,iv
+      character(len=60) :: car
+      integer           :: i, j, k, m, npos, nc, iv
 
-      do i=1,M%Npar
-         ccc=trim(M%Par(i)%Nam)
-         npos=index(ccc,'MOL')
-         call get_num(ccc(npos+3:),vet,ivet,iv)
+      do i=1, G%Npar
+         car=trim(G%Par(i)%Nam)
+
+         !> Phase
+         npos=index(car,'PHAS')
+         call get_num(car(npos+4:),vet,ivet,iv)
+         if (iv /=1) cycle
+         if (ivet(1) /= iph) cycle
+
+         !> Molec
+         npos=index(car,'MOL')
+         nc=index(car, '_', back=.true.)
+         call get_num(car(npos+3:nc-1), vet, ivet, iv)
+         if (iv /= 1) cycle
          if (ivet(1) /= im) cycle
 
-         npos=index(ccc,'_')
-         ccc=ccc(:npos-1)
-         !do j=1, NKEY_MOL
-         !   if (trim(ccc) /= trim(KEY_MOL(j))) cycle
-         !
-         !   select case (j)
-         !      case (1:3)
-         !         mol%lxcentre(j)=M%Par(i)%L
-         !
-         !      case (5:7)
-         !         mol%lorient(j-4)=M%Par(i)%L
-         !   end select
-         !end do
+         npos=index(car, '_')
+         car=car(:npos-1)
+
+         j=index_key_phas(trim(car))
+         select case (j)
+            case (12) !OCC
+               !> Label
+               car=trim(G%Par(i)%Nam)
+               npos=index(car, '_')
+               car=car(npos+1:)
+               npos=index(car, '_')
+               car=car(:npos-1)
+               k=Index_AtLab_on_Molecule(trim(car), Mol)
+               if (k > 0) then
+                  Mol%locc(k)=G%Par(i)%L
+                  Mol%mocc(k)=G%Par(i)%M
+               end if
+
+            case (13, 20) ! UISO
+               !> Label
+               car=trim(G%Par(i)%Nam)
+               npos=index(car, '_')
+               car=car(npos+1:)
+               npos=index(car, '_')
+               car=car(:npos-1)
+               k=Index_AtLab_on_Molecule(trim(car), Mol)
+               if (k > 0) then
+                  Mol%lU_iso(k)=G%Par(i)%L
+                  Mol%mU_iso(k)=G%Par(i)%M
+               end if
+
+            case (27:29) ! XC,YC,ZC
+               k=j-26
+               Mol%lxcentre(k)=G%Par(i)%L
+               Mol%mxcentre(k)=G%Par(i)%M
+
+            case (31:33) ! THE, PHI, CHI
+               k=j-30
+               Mol%lorient(k)=G%Par(i)%L
+               Mol%morient(k)=G%Par(i)%M
+               
+            case (35:37) ! Dist, Bang, tors
+               !> Label
+               car=trim(G%Par(i)%Nam)
+               npos=index(car, '_')
+               car=car(npos+1:)
+               npos=index(car, '_')
+               car=car(:npos-1)
+               k=Index_AtLab_on_Molecule(trim(car), Mol)
+               if (k > 0) then
+                  m=j-34
+                  Mol%lI_Coor(m,k)=G%Par(i)%L
+                  Mol%mI_Coor(m,k)=G%Par(i)%M
+               end if 
+
+            case (38:39) !Rho, Th, Ph
+               !> Label
+               car=trim(G%Par(i)%Nam)
+               npos=index(car, '_')
+               car=car(npos+1:)
+               npos=index(car, '_')
+               car=car(:npos-1)
+               k=Index_AtLab_on_Molecule(trim(car), Mol)
+               if (k > 0) then
+                  m=j-37
+                  Mol%lI_Coor(m,k)=G%Par(i)%L
+                  Mol%mI_Coor(m,k)=G%Par(i)%M
+               end if                
+
+            case (41:46) ! T
+               m=j-40
+               Mol%lT_TLS(m)=G%Par(i)%L 
+               Mol%mT_TLS(m)=G%Par(i)%M
+
+            case (48:53) ! L
+               m=j-47
+               Mol%lL_TLS(m)=G%Par(i)%L 
+               Mol%mL_TLS(m)=G%Par(i)%M               
+
+            case (55:63) ! S
+               m=j-54
+               select case(m)
+                  case (1)
+                     Mol%lS_TLS(1,1)=G%Par(i)%L
+                     Mol%mS_TLS(1,1)=G%Par(i)%M                     
+                  case (2)
+                     Mol%lS_TLS(1,2)=G%Par(i)%L
+                     Mol%mS_TLS(1,2)=G%Par(i)%M
+                  case (3)
+                     Mol%lS_TLS(1,3)=G%Par(i)%L
+                     Mol%mS_TLS(1,3)=G%Par(i)%M
+                  case (4)
+                     Mol%lS_TLS(2,1)=G%Par(i)%L
+                     Mol%mS_TLS(2,1)=G%Par(i)%M
+                  case (5)
+                     Mol%lS_TLS(2,2)=G%Par(i)%L
+                     Mol%mS_TLS(2,2)=G%Par(i)%M
+                  case (6)
+                     Mol%lS_TLS(2,3)=G%Par(i)%L
+                     Mol%mS_TLS(2,3)=G%Par(i)%M
+                  case (7)
+                     Mol%lS_TLS(3,1)=G%Par(i)%L
+                     Mol%mS_TLS(3,1)=G%Par(i)%M
+                  case (8)
+                     Mol%lS_TLS(3,2)=G%Par(i)%L
+                     Mol%mS_TLS(3,2)=G%Par(i)%M
+                  case (9)
+                     Mol%lS_TLS(3,3)=G%Par(i)%L
+                     Mol%mS_TLS(3,3)=G%Par(i)%M
+               end select
+               
+         end select
 
       end do
 
    End Subroutine GPList_to_Molec
+
+   !!----
+   !!---- SUBROUTINE GPList_from_MOlec
+   !!----
+   !!----
+   !!----
+   !!
+   Module Subroutine GPList_from_Molec(Mol, Im, Iph, G)
+      !---- Arguments ----!
+      type(Molecule_type),   intent(in)     :: Mol
+      integer,               intent(in)     :: Im
+      integer,               intent(in)     :: Iph
+      type(GenParList_Type), intent(in out) :: G
+
+      !---- Local Variables ----!
+      character(len=1) :: c1,c2
+      character(len=4) :: car1, car2
+      character(len=60):: str, str2
+      integer :: j, k, i, n, ic
+
+      !> Init
+      write(unit=car1,fmt='(i4)') iPh
+      car1=adjustl(car1)
+
+      write(unit=car2,fmt='(i4)') im
+      car2=adjustl(car2)
+
+      str='MOL'//trim(car2)//'_PHAS'//trim(car1)
+
+      !> First delete all information from respective molecule
+      !> in the current phase
+      j=1
+      do while(j <= G%Npar)
+         str2=trim(G%Par(j)%Nam)
+         n=index(trim(str2), trim(str))
+         if (n > 0) then
+            call Del_RefCode_GPList(G, G%Par(j)%L)
+            cycle
+         end if
+         j=j+1
+      end do
+
+      ic=0
+      n=G%Npar
+      if (n > 0) ic=maxval(G%Par(1:n)%L)
+
+      !> Centre
+      do k=1,3
+         if (Mol%lxcentre(k) > 0) then
+            n=n+1
+
+            select case (k)
+               case (1)
+                  G%Par(n)%Nam='XC_'//trim(str)
+
+               case (2)
+                  G%Par(n)%Nam='YC_'//trim(str)
+
+               case (3)
+                  G%Par(n)%Nam='ZC_'//trim(str)
+            end select
+            G%Par(n)%L=Mol%lxcentre(k)
+            G%Par(n)%M=Mol%mxcentre(k)
+            G%Par(n)%Val=Mol%xcentre(k)
+            G%Par(n)%Vlim=[0.0_cp, 1.0_cp]
+            G%Par(n)%Sig=0.0_cp
+            G%Par(n)%BCond=.true.
+         end if
+      end do
+
+      !> Orient
+      do k=1,3
+         if (Mol%lorient(k) > 0) then
+            n=n+1
+
+            select case (k)
+               case (1)
+                  G%Par(n)%Nam='THE_'//trim(str)
+
+               case (2)
+                  G%Par(n)%Nam='PHI_'//trim(str)
+
+               case (3)
+                  G%Par(n)%Nam='CHI_'//trim(str)
+            end select
+            G%Par(n)%L=Mol%lorient(k)
+            G%Par(n)%M=Mol%morient(k)
+            G%Par(n)%Val=Mol%orient(k)
+            G%Par(n)%Vlim=[0.0_cp, 360.0_cp]
+            G%Par(n)%Sig=0.0_cp
+            G%Par(n)%BCond=.true.
+         end if
+      end do
+
+      !> Atoms
+      if (Mol%natoms > 0) then
+         do k=1, Mol%natoms
+            !> Occ
+            if (Mol%locc(k) > 0) then
+               n=n+1
+
+               G%Par(n)%Nam='OCC_'//trim(Mol%AtName(k))//'_'//trim(str)
+               G%Par(n)%L=Mol%locc(k)
+               G%Par(n)%M=Mol%mocc(k)
+               G%Par(n)%Val=Mol%occ(k)
+               G%Par(n)%Vlim=[0.0_cp, 1.0_cp]
+               G%Par(n)%Sig=0.0_cp
+               G%Par(n)%BCond=.false.
+            end if
+
+            !> U_Iso /B_Iso
+            if (Mol%lU_iso(k) > 0) then
+               n=n+1
+               
+               G%Par(n)%Nam='UISO_'//trim(Mol%AtName(k))//'_'//trim(str)
+                              
+               G%Par(n)%L=Mol%lU_iso(k)
+               G%Par(n)%M=Mol%mU_iso(k)
+               G%Par(n)%Val=Mol%U_iso(k)
+               G%Par(n)%Vlim=[0.0_cp, 1.0_cp]
+               G%Par(n)%Sig=0.0_cp
+               G%Par(n)%BCond=.false.
+            end if
+
+            !> I_Coord
+            do i=1,3
+               if (Mol%lI_Coor(i,k) > 0) then
+                  n=n+1
+
+                  select case (i)
+                     case (1)
+                        select case (Mol%coor_type)
+                           case ('Z') ! Z-matrix
+                              G%Par(n)%Nam='DIST_'//trim(Mol%AtName(k))//'_'//trim(str)
+                              
+                           case ('S') ! Spherical   
+                              G%Par(n)%Nam='RHO_'//trim(Mol%AtName(k))//'_'//trim(str)
+
+                        end select
+
+                     case (2)
+                        select case (Mol%coor_type)
+                           case ('Z') ! Z-matrix
+                              G%Par(n)%Nam='BANG_'//trim(Mol%AtName(k))//'_'//trim(str)
+                              
+                           case ('S') 
+                              G%Par(n)%Nam='TH_'//trim(Mol%AtName(k))//'_'//trim(str)                           
+
+                        end select
+
+                     case (3)
+                        select case (Mol%coor_type)
+                           case ('Z') ! Z-matrix
+                              G%Par(n)%Nam='TORS_'//trim(Mol%AtName(k))//'_'//trim(str)
+                              
+                           case ('S')   
+                              G%Par(n)%Nam='PH_'//trim(Mol%AtName(k))//'_'//trim(str)
+
+                        end select
+                  end select
+
+                  G%Par(n)%L=Mol%lI_Coor(i,k)
+                  G%Par(n)%M=Mol%mI_Coor(i,k)
+                  G%Par(n)%Val=Mol%I_Coor(i,k)
+                  G%Par(n)%Vlim=[0.0_cp, 1.0_cp]
+                  G%Par(n)%Sig=0.0_cp
+                  G%Par(n)%BCond=.false.
+               end if
+            end do ! I_Coord
+
+         end do ! NAtoms
+      end if   
+         
+      !> TLS
+      do i=1,6
+         if (Mol%lT_TLS(i) > 0) then
+            n=n+1
+               
+            select case (i)
+               case (1)
+                  G%Par(n)%Nam='T11_'//trim(str)
+
+               case (2)
+                  G%Par(n)%Nam='T22_'//trim(str)
+
+               case (3)
+                  G%Par(n)%Nam='T33_'//trim(str)
+                  
+               case (4)
+                  G%Par(n)%Nam='T12_'//trim(str)
+                  
+               case (5)
+                  G%Par(n)%Nam='T13_'//trim(str)
+
+               case (6)
+                  G%Par(n)%Nam='T23_'//trim(str)                
+               
+            end select
+            G%Par(n)%L=Mol%lT_TLS(i)
+            G%Par(n)%M=Mol%mT_TLS(i)
+            G%Par(n)%Val=Mol%T_TLS(i)
+            G%Par(n)%Vlim=[0.0_cp, 0.0_cp]
+            G%Par(n)%Sig=0.0_cp
+            G%Par(n)%BCond=.false.
+         end if
+      end do
+
+      do i=1,6
+         if (Mol%lL_TLS(i) > 0) then
+            n=n+1
+               
+            select case (i)
+               case (1)
+                  G%Par(n)%Nam='L11_'//trim(str)
+
+               case (2)
+                  G%Par(n)%Nam='L22_'//trim(str)
+
+               case (3)
+                  G%Par(n)%Nam='L33_'//trim(str)
+                  
+               case (4)
+                  G%Par(n)%Nam='L12_'//trim(str)
+                  
+               case (5)
+                  G%Par(n)%Nam='L13_'//trim(str)
+
+               case (6)
+                  G%Par(n)%Nam='L23_'//trim(str)                
+               
+            end select
+            G%Par(n)%L=Mol%lL_TLS(i)
+            G%Par(n)%M=Mol%mL_TLS(i)
+            G%Par(n)%Val=Mol%L_TLS(i)
+            G%Par(n)%Vlim=[0.0_cp, 0.0_cp]
+            G%Par(n)%Sig=0.0_cp
+            G%Par(n)%BCond=.false.
+         end if
+      end do
+      
+      do i=1,3
+         write(unit=c1,fmt='(i1)') i
+         do j=1,3
+            write(unit=c2,fmt='(i1)') j
+            if (Mol%lS_TLS(i,j) > 0) then
+               n=n+1
+               
+               G%Par(n)%Nam='S'//c1//c2//'_'//trim(str)
+               G%Par(n)%L=Mol%lS_TLS(i,j)
+               G%Par(n)%M=Mol%mS_TLS(i,j)
+               G%Par(n)%Val=Mol%S_TLS(i,j)
+               G%Par(n)%Vlim=[0.0_cp, 0.0_cp]
+               G%Par(n)%Sig=0.0_cp
+               G%Par(n)%BCond=.false.
+               
+            end if   
+         end do
+      end do   
+      
+      G%Npar=n
+   End Subroutine GPList_from_Molec
 
    !!----
    !!---- SUBROUTINE WriteInfo_GenParList
@@ -323,10 +694,10 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       write(unit=lun, fmt="(a)") " "
       write(unit=lun, fmt="(a,i5)") " Number of Refinable Parameters: ",G%NPar
       write(unit=lun, fmt="(a)") " "
-      write(unit=lun, fmt="(a,a)")" N.Par      Name                   Value     Sigma    ",&
+      write(unit=lun, fmt="(a,a)")" N.Par      Name                            Value     Sigma    ",&
                                      " L.Bound   U.Bound  Multiplier    Code  B.C."
       do i=1,G%NPar
-         write(unit=lun,fmt="(i4,8x,a20,5f10.5, 4x, i5, 3x,l2)") i,  &
+         write(unit=lun,fmt="(i4,8x,a28,5f10.5, 4x, i5, 3x,l2)") i,  &
                G%Par(i)%Nam, G%Par(i)%Val, G%Par(i)%Sig, G%Par(i)%Vlim,&
                G%Par(i)%M, G%Par(i)%L, G%Par(i)%BCond
       end do
@@ -335,7 +706,7 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    End Subroutine WriteInfo_GPList
 
    !!----
-   !!---- SUBROUTINE Update_GenParList_from_AtomList
+   !!---- SUBROUTINE GPList_from_AtmList
    !!----
    !!----
    !!---- Update: June - 2023
@@ -871,19 +1242,22 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    !!----
    !!---- June 2023
    !!
-   Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab)
+   Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab, Qcoeff)
       !---- Arguments ----!
-      character(len=*), intent(in) :: Str
-      integer,          intent(out):: iKey   ! Index on KEY_PHAS
-      integer,          intent(out):: IPh    ! Phase in str
-      character(len=*), intent(out):: Lab    ! Atom label
+      character(len=*),  intent(in) :: Str
+      integer,           intent(out):: iKey   ! Index on KEY_PHAS
+      integer,           intent(out):: IPh    ! Phase in str
+      character(len=*),  intent(out):: Lab    ! Atom label
+      integer, optional, intent(out):: QCoeff ! QCoefficient
 
       !---- Local Variables ----!
-      integer :: i, n, iv
+      integer :: i, n, n1, n2, iv
+      integer :: coeff
 
       !> Init
       iKey=0; iPh=0
       Lab=' '
+      Coeff=-1
 
       !> copy
       line=adjustl(Str)
@@ -894,6 +1268,21 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
          call get_num(line(n+5:), vet, ivet, iv)
          if (iv == 1) Iph=ivet(1)
          line=line(:n-1)
+      end if
+      
+      !> Q-Coeff
+      n1 = index(line,'.')
+      n2 = index(line,'_')
+      if (n2 ==0) n2=len_trim(line)+1
+      
+      if (n1 > 0 ) then
+         call get_num(line(n1+1:n2-1), vet, ivet, iv)
+         if (iv ==1) coeff=ivet(1)
+         
+         line(n1:)=trim(line(n2:))         
+      end if
+      if (present(QCoeff)) then
+         QCoeff=coeff
       end if
 
       !> Directive
@@ -913,6 +1302,57 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       end if
 
    End Subroutine Get_InfoKey_StrPhas
+
+   !!----
+   !!---- Subroutine Get_InfoKey_StrMol
+   !!----     Get information about the Instructiion
+   !!----
+   !!----     Str format: DIR_MOL[N]_PHAS[M]
+   !!----        Ex: XC_MOL1_PHAS2, XC_MOL1,...
+   !!----
+   !!---- June 2023
+   !!
+   Module Subroutine Get_InfoKey_StrMol(Str, iKey, IPh, IMol)
+      !---- Arguments ----!
+      character(len=*), intent(in) :: Str
+      integer,          intent(out):: iKey   ! Index on KEY_PHAS
+      integer,          intent(out):: IPh    ! Phase in str
+      integer,          intent(out):: IMol   ! Molecule in str
+
+      !---- Local Variables ----!
+      integer :: i, n, iv
+
+      !> Init
+      iKey=0; iPh=0; IMol=0
+
+      !> copy
+      line=adjustl(Str)
+
+      !> Phase
+      n = index(u_case(line),'_PHAS')
+      if (n > 0) then
+         call get_num(line(n+5:), vet, ivet, iv)
+         if (iv == 1) Iph=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Molecule
+      n = index(u_case(line),'MOL')
+      if (n > 0) then
+         call get_num(line(n+3:), vet, ivet, iv)
+         if (iv == 1) IMol=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Check if there is a '_'
+      n = index(line,'_', back=.true.)
+      if (n > 0) line=line(:n-1)
+
+      !> Directive
+      i = index_key_Phas(u_case(trim(line)))
+      if ( i > 0) iKey=i
+
+   End Subroutine Get_InfoKey_StrMol
 
    !!----
    !!---- Subroutine Get_InfoKey_StrPatt
@@ -959,6 +1399,54 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    End Subroutine Get_InfoKey_StrPatt
 
    !!----
+   !!---- Subroutine Get_InfoKey_StrPhasPatt
+   !!----     Get information about the Instruction
+   !!----
+   !!----     Str format: DIR_PHAS[N]_PATT[M]
+   !!----        Ex: ISOSTRAIN_PHAS1_PATT2
+   !!----
+   !!---- June 2023
+   !!
+   Module Subroutine Get_InfoKey_StrPhasPatt(Str, iKey, IPh, IPat)
+      !---- Arguments ----!
+      character(len=*), intent(in) :: Str
+      integer,          intent(out):: iKey   ! Index on KEY_PHAS
+      integer,          intent(out):: IPh    ! Phase in str
+      integer,          intent(out):: IPat   ! Pattern in str
+
+      !---- Local Variables ----!
+      integer :: i, n, iv
+
+      !> Init
+      iKey=0; iPh=0; iPat=0
+
+      !> copy
+      line=adjustl(Str)
+
+      !> Pattern
+      n = index(u_case(trim(line)),'_PATT')
+      if (n > 0) then
+         call get_num(line(n+5:), vet, ivet, iv)
+         if (iv == 1) Ipat=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Phase
+      n = index(u_case(line),'_PHAS')
+      if (n > 0) then
+         call get_num(line(n+5:), vet, ivet, iv)
+         if (iv == 1) Iph=ivet(1)
+         line=line(:n-1)
+      end if
+
+      !> Directive
+      n = index(line, '_')
+      i = index_key_Phas(u_case(line(:n-1)))
+      if ( i > 0) ikey=i
+
+   End Subroutine Get_InfoKey_StrPhasPatt
+
+   !!----
    !!---- Function Index_GPList
    !!----
    !!----
@@ -991,14 +1479,16 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    !!----
    !!---- June 2023
    !!
-   Module Function Index_KEY_PHAS(String) Result(Ind)
+   Module Function Index_KEY_PHAS(String, N_ini, N_end) Result(Ind)
       !---- Arguments ----!
-      character(Len=*), intent(in) :: String
-      integer                      :: Ind
+      character(len=*),  intent(in) :: String
+      integer, optional, intent(in) :: N_ini
+      integer, optional, intent(in) :: N_end
+      integer                       :: Ind
 
       !---- Local Variables ----!
-      integer           :: i
-      character(len=40) :: str
+      character(len=60) :: str
+      integer           :: i, i_ini, i_end
 
       !> Init
       Ind=0
@@ -1007,7 +1497,13 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       str=adjustl(string)
       str=u_case(str)
 
-      do i=1, NKEY_PHAS
+      i_ini=1
+      if (present(n_ini)) i_ini=n_ini
+
+      i_end=NKEY_PHAS
+      if (present(n_end)) i_end=n_end
+
+      do i=i_ini, i_end
          if (trim(str) /= trim(KEY_PHAS(i)) ) cycle
          ind=i
          exit
@@ -1021,14 +1517,16 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
    !!----
    !!---- June 2023
    !!
-   Module Function Index_KEY_PATT(String) Result(Ind)
+   Module Function Index_KEY_PATT(String, N_ini, N_end) Result(Ind)
       !---- Arguments ----!
-      character(Len=*), intent(in) :: String
+      character(Len=*),  intent(in) :: String
+      integer, optional, intent(in) :: N_ini
+      integer, optional, intent(in) :: N_end
       integer                      :: Ind
 
       !---- Local Variables ----!
-      integer           :: i
-      character(len=40) :: str
+      character(len=60) :: str
+      integer           :: i, i_ini, i_end
 
       !> Init
       Ind=0
@@ -1037,7 +1535,13 @@ Submodule (CFML_KeyCodes) KeyCod_GenPar
       str=adjustl(string)
       str=u_case(str)
 
-      do i=1, NKEY_PATT
+      i_ini=1
+      if (present(n_ini)) i_ini=n_ini
+
+      i_end=NKEY_PATT
+      if (present(n_end)) i_end=n_end
+
+      do i=i_ini, i_end
          if (trim(str) /= trim(KEY_PATT(i)) ) cycle
          ind=i
          exit

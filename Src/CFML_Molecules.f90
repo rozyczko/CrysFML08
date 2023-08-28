@@ -298,7 +298,7 @@
     use CFML_gSpacegroups,  only: SpG_type, Write_SpaceGroup_Info
     Use CFML_Atoms,         only: AtList_Type, Init_Atom_Type, Allocate_Atom_List, &
                                   Atm_Type, Atm_Std_Type, Atm_Ref_Type, ModAtm_Std_Type, ModAtm_Ref_Type
-    Use CFML_Metrics,       only: Cell_G_Type, Write_Crystal_Cell
+    Use CFML_Metrics,       only: Cell_G_Type,  Write_Crystal_Cell
     Use CFML_Strings,       only: L_Case, U_Case, File_Type, Get_Num, Cut_String, Get_words
     Use CFML_Maths,         only: Cross_Product, Get_Spher_from_Cart
     Use CFML_Geom,          only: Angle_Dihedral, Distance, Get_PhiTheChi
@@ -317,7 +317,7 @@
     public :: Cartesian_to_Fractional, Cartesian_to_Spherical, Cartesian_to_ZMatrix, &
               Empiric_Formula, &
               Fractional_to_Cartesian, Fractional_to_Spherical, Fractional_to_Zmatrix, Fix_Orient_Cartesian, &
-              Init_Molecule, Init_MolCrystal, &
+              Init_Molecule, Init_MolCrystal, Index_AtLab_on_Molecule, &
               Molec_to_AtList, MolCrystal_to_AtList, &
               ReadInfo_Free_Atoms, ReadInfo_Molecule, &
               Spherical_to_Cartesian, Spherical_to_Fractional, Spherical_to_Zmatrix, Set_MolReference, &
@@ -411,6 +411,13 @@
     !---- Interface Zone ----!
 
     Interface
+       Module Function Index_AtLab_on_Molecule(Lab, Mol) Result(Ind)
+          !---- Arguments ----!
+          character(len=*),    intent(in) :: Lab
+          type(molecule_type), intent(in) :: Mol
+          integer                         :: Ind
+       End Function Index_AtLab_on_Molecule
+
        Module Function Set_Euler_Matrix(Rt, Phi, Theta, Chi) Result(Eu)
           !---- Arguments ----!
           character(len=*),              intent ( in) :: Rt

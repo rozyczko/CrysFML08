@@ -288,42 +288,51 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   call Fix_GPList_Par(G,'W_PATT'//trim(car))
 
                case (17) ! BKG (All)
-                  do i=1,12
+                  do i=1,NMax_Bckgd_Params
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Fix_GPList_Par(G,'BKG'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
-               case (21) ! SC (All)
-                  do i=1,3
-                     write(car_n,fmt='(i3)') i
-                     car_n=adjustl(car_n)
-                     call Fix_GPList_Par(G,'SC'//trim(car_n)//'_PATT'//trim(car))
-                  end do
+               case (21) ! Not used yet!
 
-               case (25) ! EXTI (All)
-                  do i=1,3
-                     write(car_n,fmt='(i3)') i
-                     car_n=adjustl(car_n)
-                     call Fix_GPList_Par(G,'EXTI'//trim(car_n)//'_PATT'//trim(car))
-                  end do
-
-               case (32) ! SDSL
+               case (28) ! SDSL
                   call Fix_GPList_Par(G,'SD_PATT'//trim(car))
                   call Fix_GPList_Par(G,'SL_PATT'//trim(car))
 
-               case (38) ! SIG (All)
+               case (34) ! SIG (All)
                   do i=0,2
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Fix_GPList_Par(G,'SIG'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
-               case (42)
+               case (38) ! GAM (All)
                   do i=0,2
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Fix_GPList_Par(G,'GAM'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (49) ! FWHM Generic
+                  do i=0, NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Fix_GPList_Par(G,'FW'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (60) ! FWHM-G (All)
+                  do i=0, NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Fix_GPList_Par(G,'FWG'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (71) ! FWHM-L (All)
+                  do i=0, NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Fix_GPList_Par(G,'FWL'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
                case default
@@ -345,42 +354,51 @@ Submodule (CFML_KeyCodes) KeyCod_Patt
                   call Vary_GPList_Par(G,'W_PATT'//trim(car))
 
                case (17) ! BKGD (All))
-                  do i=1,12
+                  do i=1,NMax_Bckgd_Params
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Vary_GPList_Par(G,'BKG'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
                case (21)  ! SC (All))
-                  do i=1,3
-                     write(car_n,fmt='(i3)') i
-                     car_n=adjustl(car_n)
-                     call Vary_GPList_Par(G,'SC'//trim(car_n)//'_PATT'//trim(car))
-                  end do
 
-               case (25) ! EXTI
-                  do i=1,3
-                     write(car_n,fmt='(i3)') i
-                     car_n=adjustl(car_n)
-                     call Vary_GPList_Par(G,'EXTI'//trim(car_n)//'_PATT'//trim(car))
-                  end do
-
-               case (32) ! SDSL
+               case (28) ! SDSL
                   call Vary_GPList_Par(G,'SD_PATT'//trim(car))
                   call Vary_GPList_Par(G,'SL_PATT'//trim(car))
 
-               case (38) ! SIG
+               case (34) ! SIG
                   do i=0,2
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Vary_GPList_Par(G,'SIG'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
-               case (42) ! GAM
+               case (38) ! GAM
                   do i=0,2
                      write(car_n,fmt='(i3)') i
                      car_n=adjustl(car_n)
                      call Vary_GPList_Par(G,'GAM'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (49)
+                  do i=0,NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Vary_GPList_Par(G,'FW'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (60)
+                  do i=0,NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Vary_GPList_Par(G,'FWG'//trim(car_n)//'_PATT'//trim(car))
+                  end do
+
+               case (71)
+                  do i=0,NMax_FWHM_Param
+                     write(car_n,fmt='(i3)') i
+                     car_n=adjustl(car_n)
+                     call Vary_GPList_Par(G,'FWL'//trim(car_n)//'_PATT'//trim(car))
                   end do
 
                case default

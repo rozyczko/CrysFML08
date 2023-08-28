@@ -1045,6 +1045,58 @@ Submodule (CFML_IOForm) Format_Blocks
    End Subroutine Get_Block_Phases
 
    !!----
+   !!---- SUBROUTINE GET_BLOCK_MOLEX
+   !!----
+   !!---- Date: June- 2023
+   !!
+   Module Subroutine Get_SubBlock_MolPhases(ffile, N_Ini, N_End, NMol, Mol)
+      !---- Arguments ----!
+      Type(file_type),                    intent(in)     :: ffile
+      integer,                            intent(in)     :: n_ini
+      integer,                            intent(in)     :: n_end
+      integer,                            intent(out)    :: NMol
+      type(BlockInfo_Type), dimension(:), intent(in out) :: Mol
+
+      !---- Local Variables ----!
+      character(len=60)     :: StrName
+      integer               :: i, nc, n_fin, iv, n
+      integer, dimension(2) :: Ind
+
+      !> Init
+      NMol=0
+
+      i=N_ini
+      n_fin=N_end
+
+      do while (i < N_end)
+         call Get_SubBlock_KEY('MOLEX', ffile, i, n_fin, Ind, StrName)
+         if (Err_CFML%IErr /= 0) return
+         if (all(ind == 0)) then
+            i=i+1
+            cycle
+         end if
+
+         call get_words(strname,dire,nc)
+         n=0
+         if (nc ==3) then
+            call get_num(dire(3),vet, ivet, iv)
+            if (iv == 1) n=ivet(1)
+         end if
+
+         NMol=NMol+1
+
+         Mol(NMol)%StrName=trim(dire(1))
+         Mol(NMol)%BlName='MOLEX'
+         Mol(NMol)%IBl=3
+         Mol(NMol)%Nl=Ind
+         Mol(NMol)%Iex=n
+
+         i=ind(2)+1
+      end do
+
+   End Subroutine Get_SubBlock_MolPhases
+
+   !!----
    !!---- Subroutine Write_InfoBlock_Backgd
    !!----
    !!----    Write the information about Background Blocks in file associated with

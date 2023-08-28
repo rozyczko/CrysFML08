@@ -52,8 +52,9 @@ Module CFML_KeyCodes
    Use CFML_gSpaceGroups, only: Spg_Type, Symm_Oper_Type, Get_Stabilizer, Get_Symb_from_OP,         &
                                 Get_OP_from_Symb, Symmetry_symbol, Get_AtomBet_CTR, Get_AtomPos_CTR,&
                                 Get_Moment_CTR, Get_TFourier_CTR
-   use CFML_Metrics,      only: Cell_Type, Cell_LS_Type, Cell_GLS_Type
-   use CFML_Molecules,    only: Molecule_type
+   use CFML_Metrics,      only: Cell_Type, Cell_G_Type, Cell_LS_Type, Cell_GLS_Type
+
+   use CFML_Molecules,    only: Molecule_type, index_atLab_on_Molecule
 
    Use CFML_Scattering_Tables, only: Get_Chem_Symb
    Use CFML_Rational
@@ -70,8 +71,9 @@ Module CFML_KeyCodes
              Del_RefCode_ATM, Del_RefCode_GPList, &
              Fill_RefCodes_Atm,  &
              Get_AFIX_Line, Get_DFIX_Line, Get_TFIX_Line, GPList_to_Cell, GPList_to_Molec, &
-             GPList_to_AtmList, GPList_from_AtmList, Get_InfoKey_StrPhas, &
-             Get_InfoKey_StrPatt, GPList_from_Cell, &
+             GPList_to_AtmList, GPList_from_AtmList, GPList_from_Molec, Get_InfoKey_StrPhas, &
+             Get_InfoKey_StrPatt, Get_InfoKey_StrMol, Get_InfoKey_StrPhasPatt, &
+             GPList_from_Cell, &
              ReadCode_FIX_ATM, ReadCode_VARY_ATM, Read_RefCodes_ATM, Read_RefCodes_PATT, &
              Read_RefCodes_PHAS, Read_RefCodes_MOL, ReadCode_EQUAL_PHAS, &
              ReadCode_EQUAL_PATT, Read_Restraints_PHAS, &
@@ -147,39 +149,92 @@ Module CFML_KeyCodes
 
 
    !---- Parameters ----!
-   integer, public, parameter :: NKEY_PHAS=52      ! Number of Keywords for Phases
-   integer, public, parameter :: NKEY_PATT=42      ! Number of Keywords for Patterns
-   !integer, public, parameter :: NKEY_RGB =5       ! Number of Keywords for Rigid body (RGB)
+   integer, public, parameter :: NKEY_PATT=71      ! Number of Keywords for Patterns
+   integer, public, parameter :: NKEY_PHAS=219     ! Number of Keywords for Phases
+
+   character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[       &
+                     "U     ", "V     ", "W     ", "UVW   ",                     &
+                     "BKG1  ", "BKG2  ", "BKG3  ", "BKG4  ", "BKG5  ",           &
+                     "BKG6  ", "BKG7  ", "BKG8  ", "BKG9  ", "BKG10 ",           &
+                     "BKG11 ", "BKG12 ", "BKG   ",                               &
+                     "XX1   ", "XX2   ", "XX3   ", "XX    ",                     &
+                     "ZERO  ", "SYCOS ", "SYSIN ",                               &
+                     "LAMBDA", "SD    ", "SL    ", "SDSL  ",                     &
+                     "DTT1  ", "DTT2  ",                                         &
+                     "SIG0  ", "SIG1  ", "SIG2  ", "SIG   ",                     &
+                     "GAM0  ", "GAM1  ", "GAM2  ", "GAM   ",                     &
+                     "FW0   ", "FW1   ", "FW2   ", "FW3   ", "FW4   ",           &
+                     "FW5   ", "FW6   ", "FW7   ", "FW8   ", "FW9   ", "FWHM  ", &
+                     "FWG0  ", "FWG1  ", "FWG2  ", "FWG3  ", "FWG4  ",           &
+                     "FWG5  ", "FWG6  ", "FWG7  ", "FWG8  ", "FWG9  ", "FWHM-G", &
+                     "FWL0  ", "FWL1  ", "FWL2  ", "FWL3  ", "FWL4  ",           &
+                     "FWL5  ", "FWL6  ", "FWL7  ", "FWL8  ", "FWL9  ", "FWHM-L"]
 
 
-   character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[ &
-                     "A     ", "B     ", "C     ",                         &
-                     "ALPHA ", "BETA  ", "GAMMA ", "CELL  ",               &
-                     "X     ", "Y     ", "Z     ", "XYZ   ", "OCC   ",     &
-                     "UISO  ", "U     ", "U11   ", "U22   ", "U33   ",     &
-                     "U12   ", "U13   ", "U23   ",                         &
-                     "RX    ", "RY    ", "RZ    ",                         &
-                     "IX    ", "IY    ", "IZ    ",                         &
-                     "RM    ", "RPHI  ", "RTHE  ",                         &
-                     "IM    ", "IPHI  ", "ITHE  ", "MAGPH ",               &
-                     "XC    ", "YC    ", "ZC    ", "CENTRE",               &
-                     "THE   ", "PHI   ", "CHI   ", "ORIENT",               &
-                     "T     ", "L     ", "S     ", "TL    ",               &
-                     "LS    ", "TS    ", "TLS   ",                         &
-                     "SIZE  ", "STRAIN", "SCALE ", "ALL   "]
+   character(len=*), dimension(NKEY_PHAS), public, parameter :: KEY_PHAS=[       &
+                     "A       ", "B       ", "C       ",                         &
+                     "ALPHA   ", "BETA    ", "GAMMA   ", "CELL    ",             &
+                     "X       ", "Y       ", "Z       ", "XYZ     ", "OCC     ", &
+                     "UISO    ", "U11     ", "U22     ", "U33     ", "U12     ", &
+                     "U13     ", "U23     ",                                     &
+                     "BISO    ", "B11     ", "B22     ", "B33     ", "B12     ", &
+                     "B13     ", "B23     ",                                     &
+                     "XC      ", "YC      ", "ZC      ", "CENTRE  ",             &
+                     "THE     ", "PHI     ", "CHI     ", "ORIENT  ",             &
+                     "DIST    ", "BANG    ", "TORS    ",                         & ! For Z-Matrix
+                     "RHO     ", "TH      ", "PH      ",                         & ! For Spherical
+                     "T11     ", "T22     ", "T33     ", "T12     ", "T13     ", &
+                     "T23     ", "T       ",                                     &
+                     "L11     ", "L22     ", "L33     ", "L12     ", "L13     ", &
+                     "L23     ", "L       ",                                     &
+                     "S11     ", "S12     ", "S13     ",                         &
+                     "S21     ", "S22     ", "S23     ",                         &
+                     "S31     ", "S32     ", "S33     ", "S       ",             &
+                     "TL      ", "LS      ", "TS      ", "TLS     ",             &
+                     "SCALE   ", "SC1     ", "SC2     ", "SC3     ", "SC4     ", &
+                     "SC5     ", "SC6     ",                                     &
+                     "EXTINC  ", "EXTI1   ", "EXTI2   ", "EXTI3   ",             &
+                     "EXTI4   ", "EXTI5   ", "EXTI6   ",                         &
+                     "ISOSTR  ", "ISOSIZ  ",                                     & !84
+                     "ANISTR11", "ANISTR22", "ANISTR33", "ANISTR44", "ANISTR55", &
+                     "ANISTR66", "ANISTR12", "ANISTR13", "ANISTR14", "ANISTR15", &
+                     "ANISTR16", "ANISTR23", "ANISTR24", "ANISTR25", "ANISTR26", &
+                     "ANISTR34", "ANISTR35", "ANISTR36", "ANISTR45", "ANISTR46", &
+                     "ANISTR56", "ANISTR  ",                                     & !106
+                     "ANISIZ11", "ANISIZ22", "ANISIZ33", "ANISIZ44", "ANISIZ55", &
+                     "ANISIZ66", "ANISIZ12", "ANISIZ13", "ANISIZ14", "ANISIZ15", &
+                     "ANISIZ16", "ANISIZ23", "ANISIZ24", "ANISIZ25", "ANISIZ26", &
+                     "ANISIZ34", "ANISIZ35", "ANISIZ36", "ANISIZ45", "ANISIZ46", &
+                     "ANISIZ56", "ANISIZ  ",                                     &
+                     "STRGFRAC", "STRLFRAC", "SIZGFRAC", "SIZLFRAC",             & !132
+                     "KX      ", "KY      ", "KZ      ",                         &
+                     "KX1     ", "KY1     ", "KZ1     ",                         &
+                     "KX2     ", "KY2     ", "KZ2     ",                         &
+                     "KX3     ", "KY3     ", "KZ3     ",                         &
+                     "KX4     ", "KY4     ", "KZ4     ",                         &
+                     "KX5     ", "KY5     ", "KZ5     ",                         &
+                     "KX6     ", "KY6     ", "KZ6     ",                         &
+                     "KX7     ", "KY7     ", "KZ7     ",                         &
+                     "KX8     ", "KY8     ", "KZ8     ",                         &
+                     "RX      ", "RY      ", "RZ      ",                         &
+                     "IX      ", "IY      ", "IZ      ",                         &
+                     "RM      ", "RPHI    ", "RTHE    ",                         & !168
+                     "IM      ", "IPHI    ", "ITHE    ", "MAGPH   ",             &
+                     "MX      ", "MY      ", "MZ      ", "MXYZ    ",             &
+                     "MOM     ", "MAZI    ", "MPOL    ", "MSPHER  ",             &
+                     "DCOSX   ", "DSINX   ", "DCOSY   ", "DSINY   ",             & !184
+                     "DCOSZ   ", "DSINZ   ",                                     &
+                     "MCOSX   ", "MSINX   ", "MCOSY   ", "MSINY   ",             &
+                     "MCOSZ   ", "MSINZ   ",                                     & !192
+                     "BCOS11  ", "BCOS22  ", "BCOS33  ", "BCOS12  ", "BCOS13  ", &
+                     "BCOS23  ", "BSIN11  ", "BSIN22  ", "BSIN33  ", "BSIN12  ", &
+                     "BSIN13  ", "BSIN23  ",                                     &!204
+                     "UCOS11  ", "UCOS22  ", "UCOS33  ", "UCOS12  ", "UCOS13  ", &
+                     "UCOS23  ", "USIN11  ", "USIN22  ", "USIN33  ", "USIN12  ", &
+                     "USIN13  ", "USIN23  ",                                     & !216
+                     "OCCOS   ", "OCSIN   ",                                     &
+                     "ALL     "]
 
-   character(len=*), dimension(NKEY_PATT), public, parameter :: KEY_PATT=[ &
-                     "U     ", "V     ", "W     ", "UVW   ",               &
-                     "BKG1  ", "BKG2  ", "BKG3  ", "BKG4  ", "BKG5  ",     &
-                     "BKG6  ", "BKG7  ", "BKG8  ", "BKG9  ", "BKG10 ",     &
-                     "BKG11 ", "BKG12 ", "BKG   ",                         &
-                     "SC1   ", "SC2   ", "SC3   ", "SC    ",               &
-                     "EXTI1 ", "EXTI2 ", "EXTI3 ", "EXTI  ",               &
-                     "ZERO  ", "SYCOS ", "SYSIN ",                         &
-                     "LAMBDA", "SD    ", "SL    ", "SDSL  ",               &
-                     "DTT1  ", "DTT2  ",                                   &
-                     "SIG0  ", "SIG1  ", "SIG2  ", "SIG   ",               &
-                     "GAM0  ", "GAM1  ", "GAM2  ", "GAM   "]
 
    !-------------------!
    !---- Variables ----!
@@ -196,6 +251,9 @@ Module CFML_KeyCodes
 
    integer, public :: NP_Ref_Max =0  ! Number of Maximum refinable Parameters
    integer, public :: NP_Ref     =0  ! Number of Refinable parameters
+
+   integer, public :: NMax_FWHM_Param =-1    ! Number of Maximum parameters for FWHM definitions
+   integer, public :: NMax_Bckgd_Params=-1   ! Number of Maximum parameters for Background coefficients
 
    type(RestList_Type), public :: Rest_Ang  ! Relations for Angle restraints
    type(RestList_Type), public :: Rest_Dis  ! Relations for Distance restraints
@@ -214,15 +272,19 @@ Module CFML_KeyCodes
          integer                           :: Ind
       End Function Index_GPList
 
-      Module Function Index_KEY_PHAS(String) Result(Ind)
+      Module Function Index_KEY_PHAS(String, N_ini, N_end) Result(Ind)
          !---- Arguments ----!
          character(Len=*), intent(in) :: String
+         integer, optional, intent(in):: N_ini
+         integer, optional, intent(in):: N_end
          integer                      :: Ind
       End Function Index_KEY_PHAS
 
-      Module Function Index_KEY_PATT(String) Result(Ind)
+      Module Function Index_KEY_PATT(String, N_ini, N_end) Result(Ind)
          !---- Arguments ----!
          character(Len=*), intent(in) :: String
+         integer, optional, intent(in):: N_ini
+         integer, optional, intent(in):: N_end
          integer                      :: Ind
       End Function Index_KEY_PATT
 
@@ -381,7 +443,7 @@ Module CFML_KeyCodes
          character(len=*),      intent(in)     :: String
          integer,               intent(in)     :: IPhas
          class(SpG_Type),       intent(in)     :: SpG
-         type(Cell_GLS_Type),   intent(in out) :: Cell
+         class(Cell_G_Type),    intent(in out) :: Cell
          type(Atlist_Type),     intent(in out) :: Atm
          type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_EQUAL_PHAS
@@ -471,7 +533,7 @@ Module CFML_KeyCodes
          integer,                 intent(in)     :: n_end
          integer,                 intent(in)     :: Iphas
          class(SpG_Type),         intent(in)     :: SpG
-         type(Cell_GLS_Type),     intent(in out) :: Cell
+         class(Cell_G_Type),      intent(in out) :: Cell
          type(Atlist_Type),       intent(in out) :: Atm
          type(GenParList_Type),   intent(in out) :: G
       End Subroutine Read_RefCodes_PHAS
@@ -492,22 +554,30 @@ Module CFML_KeyCodes
          !---- Arguments ----!
          type(GenParList_Type), intent(in)    :: G
          integer,               intent(in)    :: Ip
-         class(cell_Type),      intent(in out):: Cell
+         class(Cell_Type),      intent(in out):: Cell
       End Subroutine GPList_to_Cell
 
       Module Subroutine GPList_from_Cell(Cell, IPh, G)
          !---- Arguments ----!
-         class(cell_Type),      intent(in)     :: Cell
+         class(Cell_Type),      intent(in)     :: Cell
          integer,               intent(in)     :: IPh
          type(GenParList_Type), intent(in out) :: G
       End Subroutine GPList_from_Cell
+
+      Module Subroutine GPList_from_Molec(Mol, Im, Iph, G)
+         !---- Arguments ----!
+         type(Molecule_type),   intent(in)     :: Mol
+         integer,               intent(in)     :: Im
+         integer,               intent(in)     :: Iph
+         type(GenParList_Type), intent(in out) :: G
+      End Subroutine GPList_from_Molec
 
       Module Subroutine ReadCode_FIX_PHAS(String, IPhas, Spg, Cell, Atm, G)
          !---- Arguments ----!
          character(len=*),      intent(in)     :: String
          integer,               intent(in)     :: IPhas
          class(SpG_Type),       intent(in)     :: SpG
-         type(Cell_GLS_Type),   intent(in out) :: Cell
+         class(Cell_G_Type),    intent(in out) :: Cell
          type(Atlist_Type),     intent(in out) :: Atm
          type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_FIX_PHAS
@@ -517,65 +587,66 @@ Module CFML_KeyCodes
          character(len=*),      intent(in)     :: String
          integer,               intent(in)     :: IPhas
          class(SpG_Type),       intent(in)     :: SpG
-         type(Cell_GLS_Type),   intent(in out) :: Cell
+         class(Cell_G_Type),    intent(in out) :: Cell
          type(Atlist_Type),     intent(in out) :: Atm
          type(GenParList_Type), intent(in out) :: G
       End Subroutine ReadCode_VARY_PHAS
 
-      Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IPhas, Lab, G)
+      Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IPhas, Qc, Lab, G)
          !---- Arguments ----!
          character(len=*),              intent(in)     :: Keyword
          integer,                       intent(in)     :: NPar
          integer,                       intent(in)     :: IPhas
+         integer,                       intent(in)     :: Qc
          character(len=*),              intent(in)     :: Lab
          type(GenParList_Type),         intent(in out) :: G
       End Subroutine Set_RefCodes_PHAS
 
-      Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, Im, M)
+      Module Subroutine Read_RefCodes_MOL(ffile, n_ini, n_end, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         Type(file_type),         intent(in)     :: ffile
-         integer,                 intent(in)     :: n_ini
-         integer,                 intent(in)     :: n_end
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         Type(file_type),                   intent(in)     :: ffile
+         integer,                           intent(in)     :: n_ini
+         integer,                           intent(in)     :: n_end
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine Read_RefCodes_MOL
 
-      Module Subroutine ReadCode_FIX_MOL(String, Im, M)
+      Module Subroutine ReadCode_FIX_MOL(String, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         character(len=*),                  intent(in)     :: String
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine ReadCode_FIX_MOL
 
-      Module Subroutine ReadCode_VARY_MOL(String, Im, M)
+      Module Subroutine ReadCode_VARY_MOL(String, IPhas, N_Mol, Mol, G)
          !---- Arguments ----!
-         character(len=*),        intent(in)     :: String
-         integer,                 intent(in)     :: Im
-         type(GenParList_Type),   intent(in out) :: M
+         character(len=*),                  intent(in)     :: String
+         integer,                           intent(in)     :: IPhas
+         integer,                           intent(in)     :: N_Mol
+         type(Molecule_type), dimension(:), intent(in out) :: Mol
+         type(GenParList_Type),             intent(in out) :: G
       End Subroutine ReadCode_VARY_MOL
 
-      Module Subroutine Split_RefCod_MOL(String, Nc, Ikeys, IMol, Keys)
+      Module Subroutine Set_RefCodes_MOL(Keyword, Npar, IPhas, IMol, Lab, G)
          !---- Arguments ----!
-         character(len=*),               intent(in)  :: String
-         integer,                        intent(out) :: Nc
-         integer, dimension(:),          intent(out) :: IKeys
-         integer, dimension(:),          intent(out) :: IMol
-         character(len=*), dimension(:), intent(out) :: Keys
-      End Subroutine Split_RefCod_MOL
-
-      Module Subroutine Set_RefCodes_MOL(Keyword, Npar,  Im, M)
-         !---- Arguments ----!
-         character(len=*),              intent(in)     :: Keyword
-         integer,                       intent(in)     :: NPar
-         integer,                       intent(in)     :: Im
-         type(GenParList_Type),         intent(in out) :: M
+         character(len=*),           intent(in)     :: Keyword
+         integer,                    intent(in)     :: NPar
+         integer,                    intent(in)     :: IPhas
+         integer,                    intent(in)     :: IMol
+         character(len=*), optional, intent(in)     :: Lab
+         type(GenParList_Type),      intent(in out) :: G
       End Subroutine Set_RefCodes_MOL
 
-      Module Subroutine GPList_to_Molec(M, Im, Mol)
+      Module Subroutine GPList_to_Molec(G, Iph, Im, Mol)
          !---- Arguments ----!
-         type(GenParList_Type),   intent(in)     :: M
-         integer,                 intent(in)     :: Im
-         type(Molecule_type),     intent(in out) :: Mol
+         type(GenParList_Type), intent(in)     :: G
+         integer,               intent(in)     :: Iph
+         integer,               intent(in)     :: Im
+         type(Molecule_type),   intent(in out) :: Mol
       End Subroutine GPList_to_Molec
 
       Module Subroutine GPList_from_AtmList(AtList, IPh, G)
@@ -594,8 +665,8 @@ Module CFML_KeyCodes
 
       Module Subroutine Set_KeyConstr_Cell(CrystSys, Cell)
          !---- Arguments ----!
-         character(len=*),    intent(in)     :: CrystSys
-         type(Cell_GLS_Type), intent(in out) :: Cell
+         character(len=*),   intent(in)     :: CrystSys
+         class(Cell_G_Type), intent(in out) :: Cell
       End Subroutine Set_KeyConstr_Cell
 
       Module Subroutine Update_GPList_Code(G)
@@ -609,13 +680,30 @@ Module CFML_KeyCodes
          class(SpG_Type),   intent(in)     :: SpG
       End Subroutine Set_KeyConstr_Atm
 
-      Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab)
+      Module Subroutine Get_InfoKey_StrMol(Str, iKey, IPh, IMol)
          !---- Arguments ----!
          character(len=*), intent(in) :: Str
          integer,          intent(out):: iKey
          integer,          intent(out):: IPh
-         character(len=*), intent(out):: Lab
+         integer,          intent(out):: IMol
+      End Subroutine Get_InfoKey_StrMol
+
+      Module Subroutine Get_InfoKey_StrPhas(Str, iKey, IPh, Lab, QCoeff)
+         !---- Arguments ----!
+         character(len=*),  intent(in) :: Str
+         integer,           intent(out):: iKey
+         integer,           intent(out):: IPh
+         character(len=*),  intent(out):: Lab
+         integer, optional, intent(out):: QCoeff 
       End Subroutine Get_InfoKey_StrPhas
+
+      Module Subroutine Get_InfoKey_StrPhasPatt(Str, iKey, IPh, IPat)
+         !---- Arguments ----!
+         character(len=*), intent(in) :: Str
+         integer,          intent(out):: iKey
+         integer,          intent(out):: IPh
+         integer,          intent(out):: IPat
+      End Subroutine Get_InfoKey_StrPhasPatt
 
       Module Subroutine Get_InfoKey_StrPatt(Str, iKey, IPat)
          !---- Arguments ----!

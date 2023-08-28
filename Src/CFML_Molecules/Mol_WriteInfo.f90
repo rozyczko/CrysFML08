@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_WriteInfo
 
    implicit none
- 
+
  Contains
    !!----
    !!---- SUBROUTINE WRITEINFO_FREE_ATOMS
@@ -32,7 +32,7 @@ Submodule (CFML_Molecules) Mol_WriteInfo
       end do
 
    End Subroutine WriteInfo_Free_Atoms
-   
+
    !!----
    !!---- SUBROUTINE WRITEINFO_MOLECULE
    !!----
@@ -151,7 +151,7 @@ Submodule (CFML_Molecules) Mol_WriteInfo
                          Mol%mU_iso(i),Mol%mocc(i)
             end if
          end do
-         
+
       else
          do i=1,Mol%natoms
             if (Mol%AtSymb(i) /= "DU") geom_cent=geom_cent + Mol%I_Coor(:,i)
@@ -173,7 +173,7 @@ Submodule (CFML_Molecules) Mol_WriteInfo
       end do
 
    End Subroutine WriteInfo_Molecule
-   
+
    !!----
    !!---- SUBROUTINE WRITEINFO_MOLECULAR_CRYSTAL
    !!----
@@ -218,5 +218,5 @@ Submodule (CFML_Molecules) Mol_WriteInfo
       end if
 
    End Subroutine WriteInfo_Molecular_Crystal
- 
-End SubModule Mol_WriteInfo 
+
+End SubModule Mol_WriteInfo

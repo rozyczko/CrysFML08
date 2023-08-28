@@ -22,7 +22,7 @@ Program MagPolar3D
  type (MagSymm_k_Type)          :: MGp
  type (Atlist_type)             :: A
  type (MAtom_list_Type)         :: Am
- type (Cell_G_Type)             :: Cell
+ class(Cell_G_Type),allocatable :: Cell
  type (MagHD_Type)              :: Mh
  type (Magnetic_domain_type)    :: Mag_Dom
  Type (Polar_calc_type)         :: polari

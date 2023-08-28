@@ -1802,8 +1802,8 @@ Contains
       type (eos_data_list_type),  intent(in out)  :: dat  ! data structure
 
       !---- Local Variables ----!
-      integer         :: i
-      type(Cell_type) :: cell
+      integer           :: i
+      type(Cell_G_type) :: cell
 
       !> Check
       if (dat%eosd(1)%v > 0.0) return

@@ -588,16 +588,15 @@ Program Sxtal_Ref_Gen
 
     implicit none
 
-    type (file_List_type)       :: fich_cfl
-    class(SPG_type), allocatable:: SpG
-    type (SPG_type)             :: SpGT
-    type (Atlist_Type)          :: A
-    type (Cell_G_Type)          :: Cell
-    type (RefList_Type)         :: hkl
-
-    type (MagSymm_k_Type)       :: MGp
-    type (MAtom_list_Type)      :: Am
-    type (MagH_List_Type)       :: Mhkl
+    type (file_List_type)          :: fich_cfl
+    class(SPG_type),    allocatable:: SpG
+    class(SPG_type),    allocatable:: SpGT
+    type (Atlist_Type)             :: A
+    class(Cell_G_Type), allocatable:: Cell
+    type (RefList_Type)            :: hkl
+    type (MagSymm_k_Type)          :: MGp
+    type (MAtom_list_Type)         :: Am
+    type (MagH_List_Type)          :: Mhkl
 
     character(len=256)                  :: filcod,cmdline,cputim_string     !Name of the input file and command line
     character(len=256)                  :: mess       !Message after reading the CFL file for ref_gen

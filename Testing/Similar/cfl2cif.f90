@@ -17,7 +17,7 @@
     Implicit None
 
     type(File_Type)                  :: file_dat
-    type(Cell_G_Type)                :: Cell, Cell_n
+    class(Cell_G_Type),allocatable   :: Cell, Cell_n
     class(SpG_Type),allocatable      :: SpaceGroup,SpaceGroup_n
     type(AtList_Type)                :: A, A_n   !List of atoms in the asymmetric unit
     type(Atom_Equiv_List_Type)       :: Ate  !List of all atoms in the cell

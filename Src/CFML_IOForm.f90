@@ -57,7 +57,7 @@ Module CFML_IOForm
                                      mAtom_List_Type, Allocate_mAtom_list, deAllocate_mAtom_list
 
 
-   Use CFML_Metrics,           only: Cell_Type, Cell_G_Type, Set_Crystal_Cell, U_equiv, &
+   Use CFML_Metrics,           only: Cell_Type, Cell_G_Type, Cell_GLS_Type, Set_Crystal_Cell, U_equiv, &
                                      get_U_from_Betas, get_Betas_from_U, get_Betas_from_B
 
    Use CFML_gSpaceGroups,      only: SpG_Type, SuperSpaceGroup_Type, Kvect_Info_Type,   &
@@ -73,6 +73,7 @@ Module CFML_IOForm
 
    Use CFML_Messages
    Use CFML_Scattering_Tables, only: Get_Z_Symb
+   Use CFML_Molecules,         only: Molecule_type, Init_Molecule, Set_Euler_Matrix
 
    !---- Variables ----!
    implicit none
@@ -85,8 +86,10 @@ Module CFML_IOForm
    public :: Get_Block_Commands, Get_Block_KEY, Get_SubBlock_KEY, Get_Block_Phases, &
              Get_Block_Patterns, Read_Block_Instructions, Get_Blocks_Filetype, &
              Get_SubBlock_CommPatterns, Get_SubBlock_CommPhases, &
+             Get_SubBlock_MolPhases, &
              Read_Block_ExcludeReg, Read_Block_Backgd, &
              Read_Xtal_Structure, Read_CFL_KVectors, Read_CFL_Cell, Read_CFL_SpG, &
+             Read_CFL_Molecule, Read_CFL_Atoms, &
              Write_Cif_Template, Write_SHX_Template, Write_MCIF_Template, Write_CFL_File, &
              Write_InfoBlock_ExcludedRegions, Write_InfoBlock_Backgd
 
@@ -145,6 +148,7 @@ Module CFML_IOForm
       character(len=10)             :: BlName=" "  ! Command, Phase, Pattern, Molec, Atoms....
       integer                       :: IBl=-1      !     0      1        2      3      4
       integer, dimension(2)         :: Nl =0       ! Ini/End line
+      integer, dimension(2)         :: iex=0       ! Extra values...for example number asignation
    End Type BlockInfo_Type
 
    !!----
@@ -232,6 +236,15 @@ Module CFML_IOForm
          type(BlockInfo_Type), dimension(:), intent(in out) :: Phas
          integer, dimension(2), optional,    intent(in)     :: Ex_ind
       End Subroutine Get_Block_Phases
+
+      Module Subroutine Get_Block_Molex(ffile, N_Ini, N_End, NMol, Mol)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NMol
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Mol
+      End Subroutine Get_Block_Molex
 
       Module Subroutine Get_Block_KEY(Key, ffile, N_Ini, N_End, Ind, StrName, N_Id)
          !---- Arguments ----!
@@ -326,7 +339,7 @@ Module CFML_IOForm
          character(len=*),                      intent(in)  :: Str
          real(kind=cp), dimension(6),           intent(out) :: Celda
          real(kind=cp), dimension(6), optional, intent(out) :: Std
-         class(Cell_Type),            optional, intent(out) :: Cell
+         class(Cell_G_Type),          optional, intent(out) :: Cell
          character(len=*),            optional, intent(in)  :: CFrame
       End Subroutine Read_Cell
 
@@ -348,8 +361,8 @@ Module CFML_IOForm
       End Subroutine Read_RngSintL
 
       Module Subroutine Read_SpaceGroup(Str,Spg)
-         character(len=*), intent(in)     :: Str
-         class(SpG_Type),  intent(out)    :: SpG
+         character(len=*),             intent(in)     :: Str
+         class(SpG_Type), allocatable, intent(out)    :: SpG
       End Subroutine Read_SpaceGroup
 
       Module Subroutine Read_Transf(str, trans, orig)
@@ -369,6 +382,13 @@ Module CFML_IOForm
          real(kind=cp),    intent(out)    :: ratio
       End Subroutine Read_Wavelength
 
+      Module Subroutine Read_CFL_Molecule(cfl, N_ini, N_end, Mol)
+         type(file_type),      intent(in)   :: cfl
+         integer, optional,    intent(in)   :: N_Ini
+         integer, optional,    intent(in)   :: N_End
+         type (Molecule_type), intent(out)  :: Mol
+      End Subroutine Read_CFL_Molecule
+
       Module Subroutine Read_CFL_Atoms(cfl, AtmList, Type_Atm, d, i_ini, i_end)
          type(File_Type),      intent(in)     :: cfl
          Type(AtList_Type),    intent(out)    :: AtmList
@@ -377,11 +397,13 @@ Module CFML_IOForm
          integer, optional,    intent(in)     :: i_ini, i_end
       End Subroutine Read_CFL_Atoms
 
-      Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end )
-         type(File_Type),            intent(in)     :: cfl
-         class(Cell_Type),           intent(out)    :: Cell
-         character(len=*), optional, intent( in)    :: CFrame
-         integer, optional,          intent(in)     :: i_ini, i_end
+      Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end, cmd)
+         !---- Arguments ----!
+         type(File_Type),                intent(in)     :: cfl
+         class(Cell_G_Type),allocatable, intent(out)    :: Cell
+         character(len=*),     optional, intent( in)    :: CFrame
+         integer,              optional, intent(in)     :: i_ini, i_end
+         logical,              optional, intent(in)     :: cmd
       End Subroutine Read_CFL_Cell
 
       Module Subroutine Read_CFL_KVectors(cfl, Kvec, i_ini, i_end)
@@ -427,7 +449,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_CIF_Cell(cif, Cell, i_Ini, i_End)
          type(File_Type),    intent(in)  :: cif
-         class(Cell_Type),   intent(out) :: Cell
+         class(Cell_G_Type), intent(out) :: Cell
          integer, optional,  intent(in)  :: i_ini, i_end
       End Subroutine Read_CIF_Cell
 
@@ -510,8 +532,8 @@ Module CFML_IOForm
       End Subroutine Write_CIF_Atoms
 
       Module Subroutine Write_CIF_Cell(Ipr, Cell)
-         integer,          intent(in) :: Ipr
-         class(Cell_Type), intent(in) :: Cell
+         integer,            intent(in) :: Ipr
+         class(Cell_G_Type), intent(in) :: Cell
       End Subroutine Write_CIF_Cell
 
       Module Subroutine Write_CIF_ChemData(Ipr)
@@ -544,7 +566,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_SHX_Cell(shx, Cell)
          type(File_Type),                 intent(in)     :: shx
-         class(Cell_Type),                intent(out)    :: Cell
+         class(Cell_G_Type),allocatable,  intent(out)     :: Cell
       End Subroutine Read_SHX_Cell
 
       Module Subroutine Read_SHX_Wave(shx, Wave)
@@ -593,14 +615,14 @@ Module CFML_IOForm
          character(len=*),        intent(in) :: title
          real(kind=cp),           intent(in) :: lambda
          integer,                 intent(in) :: z
-         class(cell_Type),        intent(in) :: cell
+         class(Cell_G_Type),      intent(in) :: cell
          class(SpG_Type),         intent(in) :: SpG
          type(atlist_type),       intent(in) :: atmList
       End Subroutine Write_SHX_Template
 
       Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Atm_typ, Nphase, CFrame, Job_Info)
          type(File_Type),               intent(in)  :: cfl
-         class(Cell_Type),              intent(out) :: Cell
+         class(Cell_G_Type),allocatable,intent(out) :: Cell
          class(SpG_Type), allocatable,  intent(out) :: SpG
          Type(AtList_Type),             intent(out) :: Atmlist
          character(len=*),    optional, intent(in)  :: Atm_typ
@@ -610,16 +632,16 @@ Module CFML_IOForm
       End Subroutine Read_XTal_CFL
 
       Module Subroutine Read_XTal_CIF(cif, Cell, Spg, AtmList, Nphase)
-         type(File_Type),               intent(in)  :: cif
-         class(Cell_Type),              intent(out) :: Cell
-         class(SpG_Type),               intent(out) :: SpG
-         Type(AtList_Type),             intent(out) :: Atmlist
-         Integer,             optional, intent(in)  :: Nphase
+         type(File_Type),                 intent(in)  :: cif
+         class(Cell_G_Type), allocatable, intent(out) :: Cell
+         class(SpG_Type),    allocatable, intent(out) :: SpG
+         Type(AtList_Type),               intent(out) :: Atmlist
+         Integer,             optional,   intent(in)  :: Nphase
       End Subroutine Read_XTal_CIF
 
       Module Subroutine Read_XTal_FST(fst, Cell, Spg, Atm, MGp, mAtm, Mag_dom)
          Type(File_Type),                     intent(in)     :: FST
-         Class(Cell_Type),                    intent(out)    :: Cell
+         class(Cell_G_Type),     allocatable, intent(out)    :: Cell
          Class(SpG_Type),        allocatable, intent(out)    :: SpG
          Type(AtList_Type),                   intent(out)    :: Atm
          Type(MagSymm_k_Type),      optional, intent(out)    :: MGp
@@ -629,7 +651,7 @@ Module CFML_IOForm
 
       Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
          type(File_Type),                 intent(in)  :: cif
-         class(Cell_Type),                intent(out) :: Cell
+         class(Cell_G_Type),allocatable,  intent(out) :: Cell
          class(SpG_Type), allocatable,    intent(out) :: SpG
          Type(AtList_Type),               intent(out) :: Atmlist
          Type(Kvect_Info_Type), optional, intent(out) :: Kvec
@@ -638,8 +660,8 @@ Module CFML_IOForm
 
       Module Subroutine Read_XTal_SHX(shx, Cell, SpG, Atm)
          type(File_Type),                 intent(in)  :: shx
-         class (Cell_G_Type),             intent(out) :: Cell
-         class (SpG_Type),                intent(out) :: SpG
+         class (Cell_G_Type), allocatable,intent(out) :: Cell
+         class (SpG_Type),    allocatable,intent(out) :: SpG
          type (AtList_type),              intent(out) :: Atm
       End Subroutine Read_XTal_SHX
 
@@ -834,6 +856,16 @@ Module CFML_IOForm
          type(BlockInfo_Type), dimension(:), intent(in out) :: C_Phas
       End Subroutine Get_SubBlock_CommPhases
 
+      Module Subroutine Get_SubBlock_MolPhases(ffile, N_Ini, N_End, NMol, Mol)
+         !---- Arguments ----!
+         Type(file_type),                    intent(in)     :: ffile
+         integer,                            intent(in)     :: n_ini
+         integer,                            intent(in)     :: n_end
+         integer,                            intent(out)    :: NMol
+         type(BlockInfo_Type), dimension(:), intent(in out) :: Mol
+      End Subroutine Get_SubBlock_MolPhases
+
+
     End Interface
 
     Contains
@@ -849,7 +881,7 @@ Module CFML_IOForm
     Subroutine Read_Xtal_Structure(filenam, Cell, Spg, Atm, Atm_typ, MGp, mAtm, Mag_dom, IPhase, FType, FileList)
        !---- Arguments ----!
        character(len=*),                    intent( in)  :: filenam    ! Name of the file
-       class(Cell_G_Type),                  intent(out)  :: Cell       ! Cell object
+       class(Cell_G_Type),     allocatable, intent(out)  :: Cell       ! Cell object
        class(SpG_Type),        allocatable, intent(out)  :: SpG        ! Space Group object
        type(Atlist_type),                   intent(out)  :: Atm        ! Atom List object
        character(len=*),          optional, intent(in)   :: Atm_typ    ! Type of atoms
@@ -897,10 +929,8 @@ Module CFML_IOForm
                 end if
              end if
           case ('CIF')
-             allocate(SpG_Type :: SpG)
              call Read_XTal_CIF(f, Cell, SpG, Atm)
           case ('INS','RES')
-             allocate(SpG_Type :: SpG)
              call Read_XTal_SHX(f, Cell, SpG, Atm)
           case ('FST')
              if(present(mAtm) .and. present(MGp)) then
@@ -910,6 +940,7 @@ Module CFML_IOForm
                    call Read_XTal_FST(f, Cell, SpG, Atm, MGp, mAtm)
                 end if
              else
+                allocate(Cell_G_Type :: Cell)
                 call Read_XTal_FST(f, Cell, SpG, Atm)
              end if
           case ('PCR')

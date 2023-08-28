@@ -439,9 +439,9 @@
       real, dimension(:,:),   allocatable :: q        ! returned ubs
       real, dimension(:,:,:), allocatable :: ub_aux   ! returned ubs
       logical :: is_new
-      type(cell_g_type) :: cell
-      type(spg_type) :: spg
-      type(reflist_type) :: hkl
+      type(cell_g_type)            :: cell
+      class(spg_type), allocatable :: spg
+      type(reflist_type)           :: hkl
 
       ! Initialize error variable
       call clear_error()

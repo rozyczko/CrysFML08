@@ -254,7 +254,7 @@
      character(len=8)       :: units="seconds",radiation
      logical                :: full=.true.
 
-     Type(Cell_G_Type)              :: cell
+     class(Cell_G_Type), allocatable:: cell
      class(SPG_Type), allocatable   :: SpG
      Type(AtList_Type)              :: A
      Type(RefList_Type)             :: hkl

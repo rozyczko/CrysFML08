@@ -1,30 +1,28 @@
 Title  Ho2BaCuO5 + PbSO4 + spurious phase treated in LeBail mode
 
-GLOBAL_PARAMETRIC   !This block is for future development
+GLOBAL_PARAMETRIC   ! This block is for future development
+   Patt_Type   Neutrons Powder CW
+   Zero  0.021; sycos 0.0; sysin 0.0
+   UVWX    1.689272  -1.090878 0.343690  0.00
 
-  Patt_Type   Neutrons Powder CW
-  Zero  0.021    sycos 0.0    sysin 0.0
-  UVWX    1.689272  -1.090878 0.343690  0.00
-!Files of an experiment with varying temperature, pressure, etc
- Files
-   MyFile1.xys   [Temp/Press/MField/...: T1]
-   MyFile2.xys   [Temp/Press/MField/...: T2]
-   ....
-   MyFilen.xys   [Temp/Press/MField/...: Tn]
- End_Files
- !
- ! Laws of parametric evolution (to be implemented in the new FullProf)
- !
- Cell_parameters:  Polynomial n_degree
- Atom_Positions: Polynomial m_degree
- Thermal_Displacements:  Einstein-Debye
- Scale_Factors:  Arrhenius
- Magnetic_Moments: Potential/Polynomial/Sigmoid
- Size_parameters: Polynomial p_degree
+   !> Files of an experiment with varying temperature, pressure, etc
+   Files
+       MyFile1.xys   [Temp/Press/MField/...: T1]
+       MyFile2.xys   [Temp/Press/MField/...: T2]
+       ....
+       MyFilen.xys   [Temp/Press/MField/...: Tn]
+   End_Files
 
+   !
+   ! Laws of parametric evolution (to be implemented in the new FullProf)
+   !
+   Cell_parameters:  Polynomial n_degree
+   Atom_Positions: Polynomial m_degree
+   Thermal_Displacements:  Einstein-Debye
+   Scale_Factors:  Arrhenius
+   Magnetic_Moments: Potential/Polynomial/Sigmoid
+   Size_parameters: Polynomial p_degree
 END_GLOBAL_PARAMETRIC
-
-
 
 PHASE_Ho2BaCuO5   1
   !        a           b          c     alpha    beta   gamma
@@ -53,32 +51,28 @@ PHASE_Ho2BaCuO5   1
   Atom O3_2   O      0.1020(3)     0.62500       0.0814(5)     1.22(9)
 
   Contributes_to_patterns  1  2  3   4
-
   ScaleFactors  1.313  0.003  0.456   0.00122
   Pat2_ndomains  4
      domain_fracts 0.12  0.48  0.24  0.26
 
-
   Iso_SIZE    950;  Iso_SIZE_GaussFract 0.11
   Iso_STRAIN  0.2;  Iso_STRAIN_LorentzFract 0.23
-
 END_PHASE_Ho2BaCuO5
 
 PHASE_PbSO4   2
-
-   Cell 8.478356   5.396669   6.957969  90.000000  90.000000  90.000000
+   !
+   cell   8.478356   5.396669   6.957969  90.000000  90.000000  90.000000
    SPGR  P n m a
-  !    Atom Typ         X        Y        Z      Biso       Occ
-   Atom Pb   PB      0.18789  0.25000  0.16720  0.50000   0.50000
-   Atom S    S       0.06455  0.25000  0.68498  0.50000   0.50000
-   Atom O1   O       0.90867  0.25000  0.59565  0.50000   0.50000
-   Atom O2   O       0.19308  0.25000  0.54286  0.50000   0.50000
-   Atom O3   O       0.08073  0.02709  0.80841  0.50000   1.00000
+    !    Atom Typ         X        Y        Z      Biso       Occ
+    Atom Pb   PB      0.18789  0.25000  0.16720  0.50000   0.50000
+    Atom S    S       0.06455  0.25000  0.68498  0.50000   0.50000
+    Atom O1   O       0.90867  0.25000  0.59565  0.50000   0.50000
+    Atom O2   O       0.19308  0.25000  0.54286  0.50000   0.50000
+    Atom O3   O       0.08073  0.02709  0.80841  0.50000   1.00000
 
-   Contributes_to_patterns  1  4
-   ScaleFactors  0.1211  0.23
-   Iso_SIZE    450;  Iso_SIZE_GaussFract 0.11
-
+    Contributes_to_patterns  1  4
+    ScaleFactors  0.1211  0.23
+    Iso_SIZE    450;  Iso_SIZE_GaussFract 0.11
 END_PHASE_PbSO4
 
 PHASE_LeBail   3  !If there is no atom the phase is treated automatically in LeBail mode
@@ -88,8 +82,10 @@ PHASE_LeBail   3  !If there is no atom the phase is treated automatically in LeB
    SPGR  P 4/m m m
    Contributes_to_patterns  1  4
    Iso_SIZE    450;  Iso_SIZE_GaussFract 0.11
-
 END_PHASE_LeBail
+
+!======================================================
+!======================================================
 !======================================================
 PATTERN_NeutronCW  1
   Patt_Type   Neutrons Powder CW
@@ -124,14 +120,12 @@ PATTERN_NeutronCW  1
 
 END_PATTERN_NeutronCW
 
-!=============================================
 PATTERN_SXtalNeutrons 2
   Patt_Type   Neutrons Integrated_Intensities CW
   HKLFILE  HoBaCuO.int
   LAMBDA    0.824
 END_PATTERN_SXtalNeutrons
 
-!=============================================
 PATTERN_NeutronTOF  3
   Patt_Type   Neutrons Powder TOF
   Profile_function  TCH_convol_Back2BackExp
@@ -159,7 +153,6 @@ PATTERN_NeutronTOF  3
 
 END_PATTERN_NeutronTOF
 
-!=============================================
 PATTERN_myXray 4
   Patt_Type   X-rays Powder
   Zero  0.0021;    sycos 0.0;    sysin 0.0
@@ -182,8 +175,8 @@ PATTERN_myXray 4
        0.00    5.45
      123.00  180.00
   END_EXCLUDED_REGIONS
-END_PATTERN_myXray
 
+END_PATTERN_myXray
 
 COMMANDS
 
@@ -192,21 +185,21 @@ COMMANDS
 
   Phase_Ho2BaCuO5
     VARY cell
-    
-    !VARY xyz
+    VARY xyz
     !VARY mxmymz
     !VARY Iso_SIZE
     !VARY Iso_SIZE_GaussFract
     !FIX Iso_STRAIN_LorentzFract 0.0
     !VARY Iso_STRAIN
-    
+
     ! Instructions for refining parameters that depend on the pattern
     !VARY Scale_Factors
+    EQUAL X_Ho1_1 X_Ho2_1
   End_Phase_Ho2BaCuO5
 
   Phase_PbSO4
     VARY xyz
-    FIX xyz O1 
+    FIX xyz O1
     !VARY biso
     !EQUAL b_O1 b_O2 b_O3
   End_Phase_PbSO4

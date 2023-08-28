@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_ZMatrix_To
 
    implicit none
- 
+
  Contains
    !!----
    !!---- SUBROUTINE ZMATRIX_TO_CARTESIAN
@@ -98,7 +98,7 @@ Submodule (CFML_Molecules) Mol_ZMatrix_To
       end if
 
    End Subroutine Zmatrix_to_Cartesian
-   
+
    !!----
    !!---- SUBROUTINE ZMATRIX_TO_FRACTIONAL
    !!----
@@ -121,7 +121,7 @@ Submodule (CFML_Molecules) Mol_ZMatrix_To
       integer                       :: na
       type (Molecule_type)          :: IMol
 
-      !> Controls 
+      !> Controls
       if (Mol%coor_type /= "Z") then
          call set_error(1, "Zmatrix_to_Fractional: the input Mol is not in Zmatrix coordinates")
          return
@@ -150,7 +150,7 @@ Submodule (CFML_Molecules) Mol_ZMatrix_To
       end if
 
    End Subroutine Zmatrix_to_Fractional
-   
+
    !!----
    !!---- Subroutine Zmatrix_to_Spherical
    !!----
@@ -214,7 +214,7 @@ Submodule (CFML_Molecules) Mol_ZMatrix_To
       end if
 
    End Subroutine Zmatrix_to_Spherical
- 
+
    !!--++
    !!--++ Subroutine Get_Cartesian_from_Z(ci,ri,rj,rk,rn)
    !!--++    real, dimension(3), intent ( in) :: ci,rj,rj,rn
@@ -271,5 +271,5 @@ Submodule (CFML_Molecules) Mol_ZMatrix_To
       ri = rj + matmul(M,r)
 
    End Function Get_Cartesian_from_Z
- 
-End Submodule Mol_ZMatrix_To 
+
+End Submodule Mol_ZMatrix_To

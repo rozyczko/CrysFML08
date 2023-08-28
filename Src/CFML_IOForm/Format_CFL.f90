@@ -209,13 +209,13 @@ SubModule (CFML_IOForm) Format_CFL
    !!----
    !!---- 07/05/2020
    !!
-   Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end)
+   Module Subroutine Read_CFL_Cell(cfl, Cell, CFrame, i_ini, i_end, cmd)
       !---- Arguments ----!
-      type(File_Type),            intent(in)     :: cfl     ! Containing information
-      class(Cell_Type),           intent(out)    :: Cell    ! Cell object
-      character(len=*), optional, intent( in)    :: CFrame
-      integer,          optional, intent(in)     :: i_ini, i_end     ! Lines to explore
-
+      type(File_Type),                intent(in)     :: cfl     ! Containing information
+      class(Cell_G_Type),allocatable, intent(out)    :: Cell    ! Cell object
+      character(len=*),     optional, intent(in)     :: CFrame
+      integer,              optional, intent(in)     :: i_ini, i_end     ! Lines to explore
+      logical,              optional, intent(in)     :: cmd
       !---- Local variables -----!
       integer                              :: i, iv, n_ini, n_end
       integer                              :: j_ini,j_end
@@ -262,6 +262,11 @@ SubModule (CFML_IOForm) Format_CFL
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Cell@CFML_IOForm: Problems reading cell parameters!"
          return
+      end if
+      if(present(cmd)) then
+        allocate(Cell_GLS_Type :: Cell)
+      else
+        allocate(Cell_G_Type :: Cell)
       end if
       if (present(CFrame)) then
          call Set_Crystal_Cell(vcell(1:3),vcell(4:6), Cell, CarType=CFrame, Vscell=std(1:3), Vsang=std(4:6))
@@ -418,7 +423,7 @@ SubModule (CFML_IOForm) Format_CFL
       !> Init
       call clear_error()
 
-      if (cfl%nlines <=0) then
+      if (cfl%nlines <= 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CFL_Spg: 0 lines "
          return
@@ -824,8 +829,8 @@ SubModule (CFML_IOForm) Format_CFL
    Module Subroutine Read_XTal_CFL(cfl, Cell, SpG, AtmList, Atm_Typ, Nphase, CFrame, Job_Info)
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: cfl
-      class(Cell_Type),              intent(out) :: Cell
-      class(SpG_Type), allocatable,  intent(out) :: SpG
+      class(Cell_G_Type),allocatable,intent(out) :: Cell
+      class(SpG_Type),   allocatable,intent(out) :: SpG
       Type(AtList_Type),             intent(out) :: Atmlist
       character(len=*),    optional, intent(in)  :: Atm_Typ
       Integer,             optional, intent(in)  :: Nphase   ! Select the Phase to read
@@ -841,6 +846,7 @@ SubModule (CFML_IOForm) Format_CFL
       real(kind=cp),dimension(:),allocatable:: xvet
 
       type(kvect_info_Type)            :: Kvec
+      logical                          :: commands
 
       !> Init
       call clear_error()
@@ -850,15 +856,18 @@ SubModule (CFML_IOForm) Format_CFL
          return
       end if
 
+      commands=.false.
+
       !> Calculating number of Phases
       nt_phases=0; ip=cfl%nlines; ip(1)=1
       do i=1,cfl%nlines
-         line=adjustl(cfl%line(i)%str)
-         if (len_trim(line) <=0) cycle
+         line=u_case(adjustl(cfl%line(i)%str))
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) =='!') cycle
          if (line(1:1) ==' ') cycle
 
-         if (u_case(line(1:6)) == 'PHASE_') then
+         if(index(line,"COMMANDS") /= 0 .or. index(line,"VARY") /= 0 .or. index(line,"FIX") /= 0) commands=.true.
+         if (line(1:6) == 'PHASE_') then
             nt_phases=nt_phases+1
             ip(nt_phases)=i
          end if
@@ -881,15 +890,23 @@ SubModule (CFML_IOForm) Format_CFL
 
       !> Reading Cell Parameters
       if (present(CFrame)) then
-         call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end)
+         if(commands) then
+            call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end,commands)
+         else
+            call read_cfl_cell(cfl, Cell, CFrame,n_ini,n_end)
+         end if
       else
-         call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end)
+         if(commands) then
+            call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end,cmd=commands)
+         else
+            call read_cfl_cell(cfl, Cell, i_ini=n_ini,i_end=n_end)
+         end if
       end if
-      if (Err_CFML%IErr==1) return
+      if (Err_CFML%IErr == 1) return
 
       !> Reading Space groups
       call read_CFL_SpG(cfl,SpG, i_ini=n_ini, i_end=n_end)
-      if (Err_CFML%IErr==1) return
+      if (Err_CFML%IErr == 1 .or. .not. allocated(SpG)) return
 
       !> Read Atoms information
       set_moment=.false.
@@ -1249,5 +1266,368 @@ SubModule (CFML_IOForm) Format_CFL
       end do
 
    End Subroutine Get_Job_Info
+
+   !!----
+   !!---- SUBROUTINE READINFO_MOLECULE
+   !!----
+   !!----    Subroutine to read a molecule from a CFL ffile.
+   !!----    The format is:
+   !!----
+   !!----        MOLEX_MoleculeName Coordinates_Type
+   !!----        ....
+   !!----        END_MOLEX_MoleculeName
+   !!----
+   !!----    where:
+   !!----        Coordinates_Type    C: Cartesian coordinates
+   !!----                            F: Fractional coordinates
+   !!----                            S: Spherical coordinates
+   !!----                            Z: Z-Matrix coordinates
+   !!----
+   !!----    Into the MOLEX Block:
+   !!----       First line:Molecule_Centre(3), Molecule_Orient(3), Rotational_Angle Type(1), Thermal_Factor Type(1)
+   !!----
+   !!----       where:
+   !!----        Molecule_Centre     Coordinate of Center of Molecule
+   !!----        Molecule_Orient     Angles orientation
+   !!----        Rotational Angle    E: Conventional Euler angles (alpha, beta, gamma)
+   !!----                            P: Polar Euler angles (Phi, theta, Chi) (default)
+   !!----        Thermal Factor    ISO: No collective motion
+   !!----                          TLS: Traslational + Librational + Correlation
+   !!----                           TL: Traslational + Librational
+   !!----                            T: Traslational
+   !!----
+   !!----        According to Thermal Factors, next lines will be read
+   !!----                          [T]: 6 Thermal Factors (Line1)
+   !!----
+   !!----                         [TL]: 6 Thermal Factors (Line1)
+   !!----                               6 Thermal Factors (Line3)
+   !!----
+   !!----                        [TLS]: 6 Thermal Factors (Line1)
+   !!----                               6 Thermal Factors (Line3)
+   !!----                               9 Thermal Factors (Line5)
+   !!----
+   !!----    Internal Coordinates for Atoms (N_Atoms Lines)
+   !!----        Atom_Name(6)  Atom_Specie(4)  Coordinates(3)  [N1  N2  N3]  Biso  Occ
+   !!----
+   !!---- Update: June - 2023
+   !!
+   Module Subroutine Read_CFL_Molecule(cfl, N_ini, N_end, Mol)
+      !---- Arguments ----!
+      Type(file_type),      intent(in)   :: cfl
+      integer, optional,    intent(in)   :: N_Ini
+      integer, optional,    intent(in)   :: N_End
+      type (Molecule_type), intent(out)  :: Mol
+
+      !---- Local variables -----!
+      character(len=40)               :: Molname
+      character(len=6)                :: cmol, Atname
+      character(len=4)                :: AtSymb,var
+      character(len=1)                :: ct
+      integer                         :: i,k,n, ic,iv,ini,npos,na
+      real(kind=cp),dimension(3,3)    :: Eu
+
+      logical :: err_flag
+
+      !> Init
+      call clear_error()
+
+      !> First line: MOLEX_MoleculeName Coordinates_Type  Number
+      i=n_ini
+      line=adjustl(cfl%line(i)%str)
+
+      k=index(line,'_')
+      if (k ==0) then
+         call set_error(1, 'Bad format for MOLEX block definition!')
+         return
+      end if
+      line=line(k+1:)
+
+      call get_words(line, dire, ic)
+      if (ic < 2) then
+         call set_error(1, 'Bad format for MOLEX block definition!')
+         return
+      end if
+
+      !> Name of the Molecule
+      Molname=trim(dire(1))
+
+      !> Format of Coordinates
+      ct='-'
+      ct=adjustl(dire(2))
+      ct=u_case(ct)
+      select case (ct)
+         case ('F','C','S','Z')
+         case default
+            call set_error(1," The type of the coordinates is unknown: "//ct )
+            return
+      end select
+
+      !> Number of atoms
+      na=0
+      do i=n_ini+1, n_end-1
+         line=adjustl(cfl%line(i)%str)
+         if (len_trim(line) == 0) cycle
+         if (line(1:1) =="!") cycle
+         if (line(1:1) ==" ") cycle
+         na=na+1
+      end do
+      na=na-1    ! Delete the line for Center definition
+      if (na <= 0) then
+         call set_error(1, "The number of atoms in the Molecule was zero!" )
+         return
+      end if
+
+      !> Initialize the Molecule_Type
+      call Init_Molecule(Mol, na)
+
+      Mol%Name_Mol=trim(Molname)
+      Mol%coor_type=ct
+
+      !> Centre / Orientation
+      i=n_ini+1
+      do i=n_ini+1, n_end-1
+         line=adjustl(cfl%line(i)%str)
+         if (len_trim(line) == 0) cycle
+         if (line(1:1) =="!") cycle
+         if (line(1:1) ==" ") cycle
+
+         npos=index(line,'!')
+         if (npos > 0) line=line(:npos-1)
+
+         call get_words(line, dire, ic)
+         if (ic /= 8) then
+            call set_error(1, "Molecule_Centre(3R), Molecule_Orient(3R), Rotational_Angle Type(1C), Thermal_Factor Type(1C)" )
+            return
+         end if
+
+         !> Centre of Molecule
+         line=trim(dire(1))//'  '//trim(dire(2))//'  '//trim(dire(3))
+         call get_num(line,vet,ivet,iv)
+         if (iv /=3) then
+            call set_error(1, "Wrong number of parameters describing the Centre position of the molecule!")
+            return
+         end if
+         Mol%xcentre=vet(1:3)
+
+         !> Orientation
+         line=trim(dire(4))//'  '//trim(dire(5))//'  '//trim(dire(6))
+         call get_num(line,vet,ivet,iv)
+         if (iv /=3) then
+            call set_error(1, "Wrong number of parameters describing the Orientation of the molecule!")
+            return
+         end if
+         Mol%orient=vet(1:3)
+
+         !> Rotation type
+         ct=adjustl(u_case(trim(dire(7))))
+         select case (ct)
+            case ('E','P')  ! Euler, Polar
+            case default
+               call set_error(1, "Wrong description for angle rotation type: "//ct)
+               return
+         end select
+         Mol%rot_type=ct
+
+         !> Thermal type
+         var=adjustl(u_case(trim(dire(8))))
+         select case (trim(var))
+            case ('ISO')
+            case ('TLS')
+               Na=Na-3
+            case ('TL')
+               Na=Na-2
+            case ('T')
+               Na=Na-1
+            case default
+               call set_error(1, "Wrong description for Thermal type: "//trim(var))
+               return
+         end select
+         Mol%therm_type=trim(var)
+         Mol%natoms=Na
+
+         exit
+      end do
+      Eu=Set_Euler_Matrix(Mol%rot_type, Mol%orient(1), Mol%orient(2), Mol%orient(3))
+      Mol%Euler=Eu
+      Mol%is_EulerMat=.true.
+
+      !> Read the internal coordinates of the atoms in the Mol
+      !> Read the Z-matrix/Cartesian/spherical/Fractional coordinates of the Mol
+      k=0
+      n=i+1
+
+      do i=n, n_end-1
+         line=adjustl(cfl%line(i)%str)
+         if (len_trim(line) == 0) cycle
+         if (line(1:1) =="!") cycle
+         if (line(1:1) ==" ") cycle
+
+         npos=index(line,'!')
+         if (npos > 0) line=line(:npos-1)
+
+         !> Atom Name
+         call Cut_string(line, ic, Atname)
+
+         !> Chemical symbol
+         call Cut_string(line, ic, AtSymb)
+
+         !> Numbers
+         call get_num(line,vet,ivet,iv)
+
+         select case (Mol%coor_type)
+            case ('F','C','S')
+               k=k+1
+               if (iv >= 3 .and. iv <=5) then
+                  select case (iv)
+                     case (3)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =0.5_cp
+                        Mol%Occ(k)       =1.0_cp
+                     case (4)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =vet(4)
+                        Mol%Occ(k)       =1.0_cp
+                     case (5)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =vet(4)
+                        Mol%Occ(k)       =vet(5)
+                  end select
+               else
+                  call set_error(1," Wrong number of parameters for Atoms information into Molecule! " //trim(Atname))
+                  return
+               end if
+
+            case ('Z')
+               if (iv >= 6 .and. iv <=8) then
+                  k=k+1
+                  select case (iv)
+                     case (6)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =0.5_cp
+                        Mol%Occ(k)       =1.0_cp
+                        Mol%conn(1:3,k)  =ivet(4:6)
+                     case (7)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =vet(7)
+                        Mol%Occ(k)       =1.0_cp
+                        Mol%conn(1:3,k)  =ivet(4:6)
+                     case (8)
+                        Mol%I_Coor(:,k)  =vet(1:3)
+                        Mol%U_iso(k)     =vet(7)
+                        Mol%Occ(k)       =vet(8)
+                        Mol%conn(1:3,k)  =ivet(4:6)
+                  end select
+               else
+                  call set_error(1," Wrong number of parameters for Atoms information into Molecule! " //trim(Atname))
+                  return
+               end if
+         end select
+
+         mol%Atname(k)=trim(atname)
+         mol%AtSymb(k)=trim(atsymb)
+
+         if (k == na) exit
+      end do
+      if (k /= na) then
+         call set_error(1," The number of Atoms readen in the file is different from asked! ")
+         return
+      end if
+
+      !> TLS Info
+      n=i+1
+      if (var(1:1) == 'T') then
+         do i=n, n_end-1
+            line=adjustl(cfl%line(i)%str)
+            if (len_trim(line) == 0) cycle
+            if (line(1:1) =="!") cycle
+            if (line(1:1) ==" ") cycle
+
+            npos=index(line,'!')
+            if (npos > 0) line=line(:npos-1)
+
+            call get_num(line,vet,ivet,iv)
+            if (iv /= 6) then
+               call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
+               return
+            end if
+            Mol%T_TLS=vet(1:6)
+            exit
+         end do
+      end if
+
+      if (var(2:2) == 'L') then
+         n=i+1
+         do i=n, n_end-1
+            line=adjustl(cfl%line(i)%str)
+            if (len_trim(line) == 0) cycle
+            if (line(1:1) =="!") cycle
+            if (line(1:1) ==" ") cycle
+
+            npos=index(line,'!')
+            if (npos > 0) line=line(:npos-1)
+
+            call get_num(line,vet,ivet,iv)
+            if (iv /= 6) then
+               call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
+               return
+            end if
+            Mol%L_TLS=vet(1:6)
+            exit
+         end do
+      end if
+
+      if (var(3:3) == 'S') then
+         n=i+1
+         do i=n, n_end-1
+            line=adjustl(cfl%line(i)%str)
+            if (len_trim(line) == 0) cycle
+            if (line(1:1) =="!") cycle
+            if (line(1:1) ==" ") cycle
+
+            npos=index(line,'!')
+            if (npos > 0) line=line(:npos-1)
+
+            call get_num(line,vet,ivet,iv)
+            if (iv /= 9) then
+               call set_error(1, "Wrong number of parameters for Thermal values for Molecule")
+               return
+            end if
+            Mol%S_TLS(1,:)=vet(1:3)
+            Mol%S_TLS(2,:)=vet(4:6)
+            Mol%S_TLS(3,:)=vet(7:9)
+            exit
+         end do
+      end if
+
+      !> Check connectivity if ZMatrix coordinates
+      Mol%is_connect=.false.
+      err_flag=.false.
+      if (Mol%coor_type == "Z") then
+         do i=2,Na
+            if (i==2 .and. all(Mol%conn(:,2) ==0) ) Mol%conn(1,i)=1
+            if (any(Mol%conn(:,i) >= i)) then
+               err_flag=.true.
+               exit
+            end if
+            if (i == 3 .and. (Mol%conn(1,i) == 0 .or. Mol%conn(2,i) == 0)) then
+               err_flag=.true.
+               exit
+            end if
+            if (i > 3) then
+               if (any(Mol%conn(:,i) == 0)) then
+                  err_flag=.true.
+                  exit
+               end if
+            end if
+         end do
+         if (err_flag) then
+            call set_error(1,"The Z-matrix connectivity is wrong!" )
+            return
+         end if
+      end if
+
+   End Subroutine Read_CFL_Molecule
+
+
 
 End SubModule Format_CFL
