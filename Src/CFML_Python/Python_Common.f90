@@ -360,6 +360,29 @@ implicit none
         end if
     End Subroutine Ndarray_Int32_2d_To_Pointer
 
+    Module Subroutine Ndarray_Int64_2d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
+        !---- Arguments ----!
+        character(len=*),                         intent(in)    :: procedure_name
+        character(len=*),                         intent(in)    :: var_name
+        type(ndarray),                            intent(in)    :: nd
+        integer(kind=8), dimension(:,:), pointer, intent(out)   :: p
+        integer,                                  intent(inout) :: ierror
+        character(len=1),                         intent(out)   :: order
+
+        order = 'F'
+        ierror = nd%get_data(p)
+        if (ierror /= 0) then
+            call err_clear()
+            ierror = nd%get_data(p,order='C')
+            if (ierror == 0) order = 'C'
+        end if
+        if (ierror /= 0) then
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = procedure_name//': Error getting data from '//var_name
+        end if
+    End Subroutine Ndarray_Int64_2d_To_Pointer
+
     Module Subroutine Ndarray_Int32_3d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
         !---- Arguments ----!
         character(len=*),                   intent(in)    :: procedure_name
