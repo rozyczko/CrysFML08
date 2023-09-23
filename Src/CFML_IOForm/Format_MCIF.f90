@@ -2839,10 +2839,10 @@ SubModule (CFML_IOForm) Format_MCIF
          if (line(1:nl) /=str) exit
 
          select case (trim(line))
-            case ('_space_group_symop_magn_centering.id')
+            case ('_space_group_symop_magn_centering.id','_space_group_symop.magn_centering_id')
                j=j+1
                lugar(1)=j
-            case ('_space_group_symop_magn_centering.xyz')
+            case ('_space_group_symop_magn_centering.xyz','_space_group_symop.magn_centering_xyz')
                j=j+1
                lugar(2)=j
             case ('_space_group_symop_magn_centering.description')
