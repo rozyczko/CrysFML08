@@ -45,6 +45,7 @@ Module CFML_Python
    !---- Use Modules ----!
    Use CFML_GlobalDeps
    Use CFML_Atoms,        only: Atm_Cell_Type,Atm_Type,Atm_Ref_Type,Atm_Std_Type,Atlist_Type,Modatm_Ref_Type,Modatm_Std_Type
+   Use CFML_DiffPatt,     only: DiffPat_Type,DiffPat_E_Type,DiffPat_G_Type
    Use CFML_gSpaceGroups, only: Symm_Oper_Type,Group_Type,SpG_Type,SuperSpaceGroup_Type
    Use CFML_Metrics,      only: Cell_Type,Cell_G_Type,Cell_LS_Type,Cell_GLS_Type,Twofold_Axes_Type
    Use CFML_Rational
@@ -59,7 +60,8 @@ Module CFML_Python
    !---- List of public procedures ----!
    public :: Array_To_List,Check_Number_Of_Arguments,Get_Var_From_Item,Ndarray_To_Pointer,Pointer_To_Array,&
              Pointer_To_Array_Alloc,Wrap_Atm_Cell_Type,Wrap_Atm_Type,Wrap_Atlist_Type,Wrap_Symm_Oper_Type
-   public :: Wrap_Group_Type,Wrap_Cell_Type,Wrap_Refl_Type,Wrap_Reflist_Type,Wrap_Twofold_Axes_Type
+   public :: Wrap_Group_Type,Wrap_Cell_Type,Wrap_Refl_Type,Wrap_Reflist_Type,Wrap_DiffPat_Type,&
+             Wrap_Twofold_Axes_Type
    public :: Unwrap_Atm_Cell_Type,Unwrap_Atlist_Type,Unwrap_Atm_Type,Unwrap_Atm_Type_No_Alloc,&
              Unwrap_Cell_Type,Unwrap_Cell_G_Type,Unwrap_Dict_Item,Unwrap_Reflist_Type,Unwrap_Refl_Type,&
              Unwrap_Refl_Type_No_Alloc,Unwrap_Spg_Type,Unwrap_Dict_Item_String_Alloc,Unwrap_Twofold_Axes_Type
@@ -143,6 +145,15 @@ Module CFML_Python
 
    !---- Interface Zone ----!
    Interface
+
+      Module Subroutine Array_To_List_Logical(procedure_name,var_name,arr,my_list,ierror)
+         !---- Arguments ----!
+         character(len=*),                                intent(in)    :: procedure_name
+         character(len=*),                                intent(in)    :: var_name
+         logical, dimension(:),                           intent(in)    :: arr
+         type(list),                                      intent(inout) :: my_list
+         integer,                                         intent(inout) :: ierror
+      End Subroutine Array_To_List_Logical
 
       Module Subroutine Array_To_List_Str(procedure_name,var_name,arr,my_list,ierror)
          !---- Arguments ----!
@@ -686,6 +697,15 @@ Module CFML_Python
          type(dict),      intent(inout) :: py_var
          integer,         intent(out)   :: ierror
       End Subroutine Wrap_Atm_Type
+
+      ! #### CFML_DiffPat ####
+
+      Module Subroutine Wrap_DiffPat_Type(for_var,py_var,ierror)
+         !---- Arguments ----!
+         class(diffpat_type), intent(in)    :: for_var
+         type(dict),          intent(inout) :: py_var
+         integer,             intent(out)   :: ierror
+      End Subroutine Wrap_DiffPat_Type
 
       ! #### CFML_gSpaceGroups ####
 
