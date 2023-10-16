@@ -17,7 +17,7 @@
     real,    dimension(3,3)     :: base,trans,newc,gn,tp,stp,itp,istp,trans_inv,ttrans,ttrans_inv
     real,    dimension(3)       :: hkl_bas,k_bas,hkl
     type(RefList_Type)          :: hkl_sup
-    type(SPG_type)              :: SpGr
+    class(SPG_type),allocatable :: SpGr
     character(len=1)            :: lat_type,slat_type
     character(len=50)           :: abc_symb,iabc_symb
     type (Cell_G_Type)          :: cell, supercell, pcell, psupercell

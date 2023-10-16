@@ -13,7 +13,7 @@ SubModule (CFML_gSpaceGroups) gS_Identify_Groups
    !!
    Module Subroutine Identify_Group(G)
       !---- Arguments ----!
-      class(spg_type),    intent(in out) :: G
+      type(spg_type),    intent(in out) :: G
 
       !---- Local Variables ----!
       character(len=5) :: car
@@ -61,7 +61,7 @@ SubModule (CFML_gSpaceGroups) gS_Identify_Groups
    !!----
    Module Subroutine Identify_Shubnikov_Group(G)
       !---- Arguments ----!
-      class(spg_type),    intent(in out) :: G
+      type(spg_type),    intent(in out) :: G
 
       !---- Local variables ---!
       type(rational), dimension(3,3)   :: P,Mp,Mc,M

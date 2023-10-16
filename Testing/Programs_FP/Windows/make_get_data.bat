@@ -23,8 +23,8 @@
            (set OPT=/c /O3 /nologo /nologo /Warn)
            (set OPT2=/c /O3 /nologo /nologo /heap-arrays /Warn)
         )
-      (set INCLUDE=/I %CRYSFML08%\%DIRECTORY%\LibC /I %HDF5_INSTALL%\include\static)
-      (set liblink=/subsystem:console /stack:128000000 /libpath:%HDF5_INSTALL%\lib /libpath:%CRYSFML08%\%DIRECTORY%\LibC ^
+      (set INCLUDE=/I %CRYSFML08%\%DIRECTORY%\LibC /I "%HDF5_INSTALL%"\include\static)
+      (set liblink=/subsystem:console /stack:128000000 /libpath:"%HDF5_INSTALL%"\lib /libpath:%CRYSFML08%\%DIRECTORY%\LibC ^
            CrysFML.lib libhdf5_fortran.lib libhdf5_f90cstub.lib libhdf5.lib libszip.lib libzlib.lib ^
            /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libmmt.lib)
 

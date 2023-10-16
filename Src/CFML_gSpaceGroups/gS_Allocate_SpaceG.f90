@@ -50,7 +50,7 @@ SubModule (CFML_gSpaceGroups) gS_Allocate_SpaceG
       !---- Arguments ----!
       integer,               intent(in)    :: nk  ! Number of independent k-vectors
       integer,               intent(in)    :: nq  !number of effective set of Q_coeff > nk
-      type(Kvect_Info_Type), intent(inout) :: Kvec
+      type(Kvect_Info_Type), intent(in out):: Kvec
 
       !> Init
       if (nk == 0 .and. nq ==0) then
@@ -64,7 +64,7 @@ SubModule (CFML_gSpaceGroups) gS_Allocate_SpaceG
       end if
 
       if (nk > 0) then
-         if (nk /= Kvec%nk) then
+         !if (nk /= Kvec%nk) then
             if (allocated(Kvec%kv))      deallocate(kvec%kv)
             if (allocated(Kvec%kv_std))  deallocate(kvec%kv_std)
             if (allocated(Kvec%sintlim)) deallocate(kvec%sintlim)
@@ -73,7 +73,7 @@ SubModule (CFML_gSpaceGroups) gS_Allocate_SpaceG
             allocate(Kvec%kv_std(3,nk))
             allocate(Kvec%sintlim(nk))
             allocate(Kvec%nharm(nk))
-         end if
+         !end if
          Kvec%nk=nk
          Kvec%kv=0.0_cp
          Kvec%kv_std=0.0_cp

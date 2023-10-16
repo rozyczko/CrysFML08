@@ -511,7 +511,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       !---- Arguments ----!
       character(len=*),           intent(in ) :: Str
       character(len=*),           intent(in ) :: mode
-      class(spg_type),            intent(out) :: SpaceG
+      class(spg_type),allocatable,intent(out) :: SpaceG
       character(len=*), optional, intent(in ) :: xyz_type
       character(len=*), optional, intent(in ) :: Setting
       logical,          optional, intent(in ) :: keepdb
@@ -532,7 +532,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
       call clear_error()
 
-      call Init_SpaceGroup(SpaceG)
 
       !> Check
       if (len_trim(Str) <= 0) then
@@ -541,6 +540,13 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
          return
       end if
       data_typ=u_case(mode)
+      Select Case (trim(data_typ))
+        case ("SHUBN")
+           allocate(SpG_Type :: SpaceG)
+        case ("SUPER")
+           allocate(SuperSpaceGroup_Type :: SpaceG)
+      End Select
+      call Init_SpaceGroup(SpaceG)
       call Rational_Identity_Matrix(Identity)
       call Rational_Identity_Matrix(Ident3)
       change_setting=.false.
@@ -894,17 +900,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%spg_symb=group_label(num)
           i=index(SpaceG%spg_symb,"(")
           SpaceG%Parent_spg=SpaceG%spg_symb(1:i-1)
-          SpaceG%SSG_symb=group_label(num)
-          SpaceG%SSG_Bravais=class_label(iclass)
-          i=index(SpaceG%SSG_symb,"(")
-          SpaceG%Parent_spg=SpaceG%SSG_symb(1:i-1)
-          SpaceG%Bravais_num=igroup_class(num)        ! Number of the Bravais class
-          SpaceG%SSG_nlabel=group_nlabel(num)
-          if( SpaceG%Num_Lat > 0 .and. SpaceG%SSG_symb(1:1) == "P" ) then
-            SpaceG%SPG_Lat="X"
-          else
-            SpaceG%SPG_Lat=SpaceG%SSG_symb(1:1)
-          end if
 
           xyz_typ="xyz"
           if(present(xyz_type)) xyz_typ=xyz_type
@@ -918,6 +913,17 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           Select Type (Grp => SpaceG)
             type is (SuperSpaceGroup_Type)
                 !write(*,"(a,i3)") " => Allocating SuperSpace for : ",nmod
+                Grp%SSG_symb=group_label(num)
+                Grp%SSG_Bravais=class_label(iclass)
+                i=index(Grp%SSG_symb,"(")
+                Grp%Parent_spg=Grp%SSG_symb(1:i-1)
+                Grp%Bravais_num=igroup_class(num)        ! Number of the Bravais class
+                Grp%SSG_nlabel=group_nlabel(num)
+                if( Grp%Num_Lat > 0 .and. Grp%SSG_symb(1:1) == "P" ) then
+                  Grp%SPG_Lat="X"
+                else
+                  Grp%SPG_Lat=Grp%SSG_symb(1:1)
+                end if
                 Grp%nk=nmod                              !(d=1,2,3, ...) number of q-vectors
                 if(Allocated(Grp%kv)) deallocate(Grp%kv)
                 if(Allocated(Grp%sintlim)) deallocate(Grp%sintlim)
@@ -1043,13 +1049,13 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, set_inv)
       !---- Arguments ----!
       character(len=*),                          intent(in ) :: Str
-      class(spg_type),                           intent(out) :: SpaceG
+      class(spg_type),allocatable,               intent(out) :: SpaceG
       integer,                         optional, intent(in ) :: NGen
       character(len=*),  dimension(:), optional, intent(in ) :: Gen
       logical,                         optional, intent(in ) :: set_inv
 
       !---- Local Variables ----!
-      integer                                      :: i,j,n_gen, n_it, d, ier !,j
+      integer                                      :: i,j,k,n_gen, n_it, d, ier !,j
       integer                                      :: n_laue, n_pg, lo !, nfin
       character(len=40), dimension(:), allocatable :: l_gen
       character(len=20)                            :: str_HM, str_HM_std, str_Hall, str_CHM
@@ -1080,7 +1086,6 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       loc_str=Str
       call clear_error()
 
-      call Init_SpaceGroup(SpaceG)
       if (present(ngen) .and. present(gen)) n_gen=ngen
 
       !> Check
@@ -1121,11 +1126,20 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                end do
             end if
 
+            j = index(loc_str,'t')
+            k = index(loc_str,'x4')
+            if (j > 0 .or. k > 0) then
+               allocate(superspacegroup_type :: SpaceG)
+            else
+               allocate(spg_type :: SpaceG)
+            end if
+            call Init_SpaceGroup(SpaceG)
             if(present(set_inv)) then
               call Group_Constructor(loc_Str,SpaceG,set_inv=set_inv)
             else
               call Group_Constructor(loc_Str,SpaceG)
             end if
+
             if (SpaceG%D == 4) then
                call Identify_Group(SpaceG)
                if (Err_CFML%Ierr == 1) then
@@ -1270,6 +1284,14 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       end if
 
       !> Generate the spacegroup
+      j = index(l_gen(1),'t')
+      k = index(l_gen(1),'x4')
+      if (j > 0 .or. k > 0) then
+         allocate(superspacegroup_type :: SpaceG)
+      else
+         allocate(spg_type :: SpaceG)
+      end if
+      call Init_SpaceGroup(SpaceG)
       SpaceG%magnetic=magnetic
       if(present(set_inv)) then
         call Group_Constructor(l_gen,SpaceG,set_inv=set_inv)
@@ -1280,7 +1302,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       if (Err_CFML%Ierr /= 0) return
       if(n_it /= 0) SpaceG%spg_symb= str_HM_std(1:1)//l_case(str_HM_std(2:))
       if(len_trim(str_hall) /= 0) SpaceG%Hall=str_hall
-
+      !Write(*,*) " Num_lat:",SpaceG%Num_lat
       Select Case (SpaceG%Num_lat)
         Case(0)
            SpaceG%SPG_lat="P"

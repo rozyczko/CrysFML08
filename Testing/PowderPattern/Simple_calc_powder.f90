@@ -195,8 +195,8 @@
      character(len=3)       :: mode
      character(len=8)       :: units="seconds",radiation
 
-     Type(Cell_G_Type)              :: cell
-     class(SPG_Type), allocatable   :: SpG
+     class(Cell_G_Type), allocatable:: cell
+     class(SPG_Type),    allocatable:: SpG
      Type(AtList_Type)              :: A
      Type(RefList_Type)             :: hkl
      Type(DiffPat_E_Type)           :: Pat

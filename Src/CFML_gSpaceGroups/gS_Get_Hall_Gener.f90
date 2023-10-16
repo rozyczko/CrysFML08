@@ -348,14 +348,17 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
                      err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: The rotation order of the operator should be 2!"
                      return
                   end if
-                  select case (Ai(i-1))
-                     case (1)
-                        axis=9 ! b-c
-                     case (2)
-                        axis=8 ! a-c
-                     case (3)
-                        axis=7 ! a-b
-                  end select
+
+                  if(i > 1) then
+                     select case (Ai(i-1))
+                        case (1)
+                           axis=9 ! b-c
+                        case (2)
+                           axis=8 ! a-c
+                        case (3)
+                           axis=7 ! a-b
+                     end select
+                  end if
 
                case (5) !"
                   if (Ni(i) /= 2) then
@@ -363,14 +366,16 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
                      err_CFML%Msg="Get_Generators_from_Hall@GSPACEGROUPS: The rotation order of the operator should be 2!"
                      return
                   end if
-                  select case (Ai(i-1))
-                     case (1)
-                        axis=6 ! b+c
-                     case (2)
-                        axis=5 ! c+a
-                     case (3)
-                        axis=4 ! a+b
-                  end select
+                  if(i > 1) then
+                    select case (Ai(i-1))
+                       case (1)
+                          axis=6 ! b+c
+                       case (2)
+                          axis=5 ! c+a
+                       case (3)
+                          axis=4 ! a+b
+                    end select
+                  end if
                case (6) !*
                   axis=10 !a+b+c
             end select
@@ -1589,10 +1594,10 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
 
       character(len=2)               :: c_latt
       character(len=1)               :: c_alatt
-      character(len=8)               :: car_prime
+      character(len=8)               :: car_prime,char_aux
       character(len=10),dimension(35):: car_op,nc_lat,nc_alat
       character(len=40)              :: str_hall
-      integer                        :: i,prime,n,iv,Invt,ind_sh
+      integer                        :: i,j,prime,n,iv,Invt,ind_sh
       integer                        :: n1,n2,n_lat,n_alat,n_antic
       integer,          dimension(3) :: ish
       integer,        dimension(3,3) :: s
@@ -1665,19 +1670,23 @@ SubModule (CFML_gSpaceGroups) gS_Get_Hall_Gener
       !that is not oriented along the c-axis
       ind_sh=0
       ish=0
+      char_aux=" "
       if(present(Ishift)) then
         ish=Ishift
       else
         do i=1,ngen
-          Op_gen(i)=Get_Op_from_Symb(gen(i))
-          s=Op_gen(i)%Mat(1:3,1:3)
-          t=Op_gen(i)%Mat(1:3,4)
-          Symb_gen(i)=Symmetry_Symbol(s,t)
-          !write(*,"(i5,a)") i,"  ->  "//trim(Symb_gen(i))
+          Op_gen(i) = Get_Op_from_Symb(gen(i))
+          s = Op_gen(i)%Mat(1:3,1:3)
+          t = Op_gen(i)%Mat(1:3,4)
+          Symb_gen(i) = Symmetry_Symbol(s,t)
+          j=index(Symb_gen(i),",",back=.true.)
+          if(j /= 0) char_aux=Symb_gen(i)(j+1:)
+          !write(*,"(i5,a)") i,"  ->  "//trim(Symb_gen(i))//"    aux: "//char_aux
           if(Equal_Matrix(s,ident,3)) cycle
           if(ind_sh == 0) then
             !if(index(Symb_gen(i),"z") == 0 .or. .not. (index(Symb_gen(i),"x") /= 0 .and. index(Symb_gen(i),"y") /= 0)) then
-            if(index(Symb_gen(i),"z") == 0 ) then
+            !if(index(Symb_gen(i),"z") == 0 ) then
+            if(index(char_aux,"z") == 0 ) then
               if(index(Symb_gen(i),"/3") /= 0 .or. index(Symb_gen(i),"/6") /= 0 ) then
                 need_shift=.true.
                 ind_sh=i

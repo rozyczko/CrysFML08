@@ -1415,7 +1415,7 @@
       implicit none
       integer                                    :: i,n,k,iout,ngen,ierror
       character(len=40)                          :: Str_tmp
-      type(SpG_Type)                             :: SpG
+      class(SpG_Type),   allocatable             :: SpG
       integer,           dimension(:),allocatable:: point_op
       character(len=40), dimension(:),allocatable:: gen,sym_symb
       character(len=10), dimension(6)            :: list_symb_or
@@ -1430,6 +1430,8 @@
       ! 495:526 : Trigonal
       ! 527:553 : Hexagonal
       ! 554:612 : Cubic
+      allocate(SPG_Type :: SpG)
+      call Init_SpaceGroup(SpG)
       do n=1,612  !NUM_SPGR_INFO
         Str_tmp=spgr_info(n)%HM
         call Set_SpaceGroup(Str_tmp,SpG)

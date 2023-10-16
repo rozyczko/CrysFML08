@@ -309,7 +309,7 @@ SubModule (CFML_IOForm) Format_SHX
    Module Subroutine Read_SHX_Cell(shx, Cell)
       !---- Arguments ----!
       type(File_Type),                 intent(in)     :: shx
-      class(Cell_Type),                intent(out)    :: Cell    ! Cell object
+      class(Cell_G_Type),allocatable,  intent(out)    :: Cell    ! Cell object
 
       !---- Local Variables ----!
       integer                      :: i,iv,z_shx
@@ -326,6 +326,7 @@ SubModule (CFML_IOForm) Format_SHX
       end if
 
       !> Wave, CELL
+      allocate(Cell_G_Type :: Cell)
       iv=0
       do i=1,shx%nlines
          line=adjustl(shx%line(i)%str)
@@ -709,7 +710,7 @@ SubModule (CFML_IOForm) Format_SHX
       character(len=*),        intent(in) :: title
       real(kind=cp),           intent(in) :: lambda
       integer,                 intent(in) :: z
-      class(cell_Type),        intent(in) :: cell
+      class(Cell_G_Type),      intent(in) :: cell
       class(SpG_Type),         intent(in) :: SpG
       type(atlist_type),       intent(in) :: atmList
 
@@ -847,8 +848,8 @@ SubModule (CFML_IOForm) Format_SHX
    Module Subroutine Read_XTal_SHX(shx, Cell, SpG, Atm)
       !---- Arguments ----!
       type(File_Type),                 intent(in)  :: shx
-      class (Cell_G_Type),             intent(out) :: Cell
-      class (SpG_Type),                intent(out) :: SpG
+      class (Cell_G_Type),allocatable, intent(out) :: Cell
+      class (SpG_Type),   allocatable, intent(out) :: SpG
       type (AtList_type),              intent(out) :: Atm
 
       !---- Local Variables ----!
@@ -866,6 +867,8 @@ SubModule (CFML_IOForm) Format_SHX
          err_CFML%Msg="Read_XTal_SHX: No lines in the file!"
          return
       end if
+
+      allocate(SpG_Type :: SpG)
 
       !> CELL / ZERR
       call Read_Shx_Cell(shx, Cell)

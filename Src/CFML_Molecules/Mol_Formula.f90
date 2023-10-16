@@ -1,11 +1,11 @@
 Submodule (CFML_Molecules) Mol_Formula
 
    implicit none
- 
+
  Contains
    !!--++
    !!--++ Subroutine Empiric_Formula_FAtom
-   !!--++ 
+   !!--++
    !!--++    Obtain the Empiric Formula from Atm variable
    !!--++
    !!--++ Update: April - 2022
@@ -55,7 +55,7 @@ Submodule (CFML_Molecules) Mol_Formula
 
       do i=1,NUM_CHEM_INFO
          if (n_pt(i) == 0) cycle
-         
+
          car=Chem_Info(i)%Symb
          car(2:2)=l_case(car(2:2))
          write(unit=numcar,fmt="(i5)") n_pt(i)
@@ -68,7 +68,7 @@ Submodule (CFML_Molecules) Mol_Formula
       if (present(Form_weight)) Form_weight=weight
 
    End Subroutine Empiric_Formula_AtList
-   
+
    !!--++
    !!--++ SUBROUTINE EMPIRIC_FORMULA_MOLEC
    !!--++
@@ -134,7 +134,7 @@ Submodule (CFML_Molecules) Mol_Formula
       if (present(Form_weight)) Form_weight=weight
 
    End Subroutine Empiric_Formula_Molec
-   
+
    !!--++
    !!--++ Subroutine Empiric_Formula_Molcrys
    !!--++
@@ -168,7 +168,7 @@ Submodule (CFML_Molecules) Mol_Formula
          return
       end if
 
-      !> Set Information Table 
+      !> Set Information Table
       call Set_Chem_Info()
 
       do i=1,molcrys%n_free
@@ -215,6 +215,6 @@ Submodule (CFML_Molecules) Mol_Formula
       if (present(Form_weight)) Form_weight=weight
 
    End Subroutine Empiric_Formula_Molcrys
-    
- 
-End SubModule Mol_Formula 
+
+
+End SubModule Mol_Formula

@@ -135,9 +135,6 @@ Module CFML_gSpaceGroups
        character(len=:),              allocatable :: mat2std           ! To standard space group (Parent)
        character(len=:),              allocatable :: mat2std_shu       ! To standard Shubnikov space group
        character(len=:),              allocatable :: generators_list   ! List of generators
-       character(len=:),              allocatable :: SSG_symb          ! Symbol of the superspace  (if known)
-       character(len=:),              allocatable :: SSG_Bravais       ! Symbol of the superspace  Bravais class
-       character(len=:),              allocatable :: SSG_nlabel        ! Label of the superspace  Bravais class (Stokes & Campbell database)
        type(rational),dimension(:),   allocatable :: centre_coord      ! Fractional coordinates for inversion
        type(rational),dimension(:),   allocatable :: anticentre_coord  ! Fractional coordinates for time invesion
        type(rational),dimension(:,:), allocatable :: Lat_tr            ! Lattice traslations (3,12)
@@ -154,6 +151,9 @@ Module CFML_gSpaceGroups
     Type, public, extends(SpG_Type) :: SuperSpaceGroup_Type
        integer                                    :: nk=0      ! (nk=1,2,3, ...) number of k-vectors
        integer                                    :: nq=0      ! number of effective set of Q_coeff >= nk
+       character(len=:),              allocatable :: SSG_symb    ! Symbol of the superspace  (if known)
+       character(len=:),              allocatable :: SSG_Bravais ! Symbol of the superspace  Bravais class
+       character(len=:),              allocatable :: SSG_nlabel  ! Label of the superspace  Bravais class (Stokes & Campbell database)
        real(kind=cp), allocatable,dimension(:,:)  :: kv        ! k-vectors (3,nk)
        real(kind=cp), allocatable,dimension(:,:)  :: kv_std    ! k-vectors sigmas(3,nk)
        real(kind=cp), allocatable,dimension(:)    :: sintlim   ! sintheta/lambda limits (nk)
@@ -773,7 +773,7 @@ Module CFML_gSpaceGroups
 
        Module Subroutine Identify_Group(G)
           !---- Arguments ----!
-          class(spg_type),    intent(in out) :: G
+          type(spg_type),    intent(in out) :: G
        End Subroutine Identify_Group
 
        Module Subroutine Identify_LaueClass(G)
@@ -783,7 +783,7 @@ Module CFML_gSpaceGroups
 
        Module Subroutine Identify_Shubnikov_Group(G)
           !---- Arguments ----!
-          class(spg_type),    intent(in out) :: G
+          type(spg_type),    intent(in out) :: G
        End Subroutine Identify_Shubnikov_Group
 
        Module Subroutine Match_SpaceGroup_3D(G,P,M,n,A)
@@ -966,7 +966,7 @@ Module CFML_gSpaceGroups
           !---- Arguments ----!
           character(len=*),           intent(in ) :: Str
           character(len=*),           intent(in ) :: mode
-          class(spg_type),            intent(out) :: SpaceG
+          class(spg_type),allocatable,intent(out) :: SpaceG
           character(len=*), optional, intent(in ) :: xyz_type
           character(len=*), optional, intent(in ) :: Setting
           logical,          optional, intent(in ) :: keepdb
@@ -977,7 +977,7 @@ Module CFML_gSpaceGroups
        Module Subroutine Set_SpaceGroup_gen(Str, SpaceG, NGen, Gen, set_inv)
           !---- Arguments ----!
           character(len=*),                          intent(in ) :: Str
-          class(spg_type),                           intent(out) :: SpaceG
+          class(spg_type),allocatable,               intent(out) :: SpaceG
           integer,                         optional, intent(in ) :: NGen
           character(len=*),  dimension(:), optional, intent(in ) :: Gen
           logical,                         optional, intent(in ) :: set_inv

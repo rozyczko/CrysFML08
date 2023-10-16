@@ -390,7 +390,7 @@
        Module Subroutine Get_Conventional_Cell(Twofold,Cell,Tr,Message,told)
           !---- Arguments ----!
           Type(Twofold_Axes_Type), intent(in)  :: Twofold
-          class(Cell_Type),        intent(out) :: Cell
+          class(Cell_G_Type),      intent(out) :: Cell
           integer, dimension(3,3), intent(out) :: tr
           character(len=*),        intent(out) :: message
           real(kind=cp), optional, intent(in)  :: told
@@ -398,7 +398,7 @@
 
        Module Subroutine Get_Cryst_Family(Cell, Family, Symbol, System)
           !---- Arguments ----!
-          class(Cell_Type),       intent(in ) :: Cell
+          class(Cell_G_Type),     intent(in ) :: Cell
           character(len=*),       intent(out) :: Family
           character(len=*),       intent(out) :: Symbol
           character(len=*),       intent(out) :: System
@@ -413,7 +413,7 @@
 
        Module Function Get_Deriv_Orth_Cell(Cell,Cartype) Result(De_Orthcell)
           !---- Arguments ----!
-          class(Cell_Type),                intent(in ) :: cell
+          class(Cell_G_Type),              intent(in ) :: cell
           character(len=*), optional,      intent(in ) :: CarType
           real(kind=cp), dimension(3,3,6)              :: De_Orthcell
        End Function Get_Deriv_Orth_Cell
@@ -428,8 +428,8 @@
        Module Subroutine Get_Primitive_Cell(Lat_Type,C_Cell,P_Cell,Transfm)
           !---- Arguments ----!
           character(len=*),              intent(in)  :: lat_type    ! Lattice type
-          class(Cell_Type),              intent(in)  :: c_cell      ! Input Cell Object
-          class(Cell_Type),              intent(out) :: p_cell      ! Output Cell Object
+          class(Cell_G_Type),            intent(in)  :: c_cell      ! Input Cell Object
+          class(Cell_G_Type),            intent(out) :: p_cell      ! Output Cell Object
           real(kind=cp), dimension(3,3), intent(out) :: transfm     ! Transformation Matrix between Cell objects
        End Subroutine Get_Primitive_Cell
 
@@ -445,7 +445,7 @@
           class(Cell_G_Type),              intent(in) :: cella  ! Cell object
           class(Cell_G_Type),              intent(in) :: cellb  ! Cell object
           real(kind=cp), optional,         intent(in) :: tol    ! Tolerance
-          real(kind=cp), dimension(3,3)             :: trm    ! Transformation matrix
+          real(kind=cp), dimension(3,3)               :: trm    ! Transformation matrix
        End Function Get_Transfm_Matrix
 
        Module Subroutine Niggli_Cell_ABC(VCell,Niggli_Point,Cell,Trans)
@@ -512,15 +512,15 @@
        Module Subroutine Set_Crystal_Cell(VCell,VAng,Cell,Cartype,Vscell,Vsang)
           !---- Arguments ----!
           real(kind=cp), dimension(3),         intent(in)  :: Vcell, Vang    ! Cell parameters
-          class(Cell_Type),                    intent(out) :: Cell           ! Cell Object
+          class(Cell_G_Type),               intent(in out) :: Cell           ! Cell Object that has been allocated before
           character (len=*),          optional,intent(in ) :: CarType        ! Orientation in Cartesian
           real(kind=cp), dimension(3),optional,intent(in ) :: Vscell, Vsang  ! Standard deviations
        End Subroutine Set_Crystal_Cell
 
        Pure Module Function SigmaV_From_Cell(Cell) Result(sigma)
           !---- Arguments ----!
-          class(Cell_Type), intent(in) :: Cell      ! Cell Parameters
-          real(kind=cp)                :: sigma     ! Sigma
+          class(Cell_G_Type), intent(in) :: Cell      ! Cell Parameters
+          real(kind=cp)                  :: sigma     ! Sigma
        End Function SigmaV_From_Cell
 
        Pure Module Function U_Equiv(Cell, Th_U) Result(Uequi)
@@ -545,8 +545,8 @@
 
        Module Subroutine Write_Crystal_Cell(Cell, Iunit)
           !---- Arguments ----!
-          class(Cell_Type),  intent(in) :: Cell         ! Cell object
-          integer, optional, intent(in) :: Iunit
+          class(Cell_Type),    intent(in) :: Cell         ! Cell object
+          integer, optional,   intent(in) :: Iunit
        End Subroutine Write_Crystal_Cell
 
        Module Subroutine Fix_Tensor(A,Sys_In)

@@ -28,7 +28,7 @@
     Implicit None
 
     type(File_Type)                  :: file_dat
-    type(Cell_G_Type)                :: Cell, Cell_n, Cell_std
+    class(Cell_G_Type),allocatable   :: Cell, Cell_n, Cell_std
     class(SpG_Type),allocatable      :: SpaceGroup,SpaceGroup_n
     type(SpG_Type), dimension (1024) :: SubGroup
     type(AtList_Type)                :: A, A_n      !List of atoms in the asymmetric unit

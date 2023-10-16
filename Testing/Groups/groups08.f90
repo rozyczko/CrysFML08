@@ -14,10 +14,10 @@
    contains
 
      Subroutine Set_gSpG(Str_tmp,SpG,Mode,Setting)
-       character(len=*),          intent(in) :: Str_tmp
-       Class(SpG_Type),           intent(out):: SpG
-       Character(len=*),          intent(in) :: Mode
-       Character(len=*),optional, intent(in) :: Setting
+       character(len=*),             intent(in) :: Str_tmp
+       Class(SpG_Type),allocatable,  intent(out):: SpG
+       Character(len=*),             intent(in) :: Mode
+       Character(len=*),optional,    intent(in) :: Setting
        ! --- Local Variables ---!
 
        Select Case (trim(Mode))
@@ -450,7 +450,7 @@
     character(len=25)                   :: forma="(i5,tr2,a,   i4,a,i8)"
     character(len=25)                   :: mode
     character(len=5)                    :: aux
-    type(Spg_Type)                      :: Grp
+    class(Spg_Type), allocatable        :: Grp
     type(Spg_Type), dimension(512)      :: sGrp
     !integer, dimension(:,:),allocatable :: table
     !integer, dimension(:,:),allocatable :: G

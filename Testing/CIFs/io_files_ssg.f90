@@ -496,8 +496,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     character(len=256)                  :: ctr_code,forma,formb !setting,
     character(len=256),dimension(26)    :: tctr_code
-    type(Cell_G_Type)                   :: Cell !,Celln
-    class(Spg_Type), allocatable        :: Grp
+    class(Cell_G_Type),allocatable      :: Cell
+    class(Spg_Type),   allocatable      :: Grp
     type(File_type)                     :: flist
     type(Point_Orbit)                   :: orb, orb3
     !type(Orbit_type)                    :: orb3D

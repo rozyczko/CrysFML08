@@ -12,14 +12,14 @@ Program MagRef
 
  implicit none
 
- type (file_type)            :: fich_cfl
- type (file_list_type)       :: fichL_cfl
- class(SPG_type), allocatable:: SpG
- type (MagSymm_k_Type)       :: MGp
- type (Atlist_type)          :: A
- type (MAtom_list_Type)      :: Am
- type (Cell_G_Type)          :: Cell
- type (MagH_Type)            :: Mh
+ type (file_type)               :: fich_cfl
+ type (file_list_type)          :: fichL_cfl
+ class(SPG_type),    allocatable:: SpG
+ type (MagSymm_k_Type)          :: MGp
+ type (Atlist_type)             :: A
+ type (MAtom_list_Type)         :: Am
+ class(Cell_G_Type), allocatable:: Cell
+ type (MagH_Type)               :: Mh
 
  character(len=256)          :: filcod     !Name of the input file
  character(len=1)            :: sig

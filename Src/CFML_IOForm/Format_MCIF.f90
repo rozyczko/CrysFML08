@@ -142,7 +142,7 @@ SubModule (CFML_IOForm) Format_MCIF
    Module Subroutine Read_XTal_MCIF(cif, Cell, Spg, AtmList, Kvec, Nphase)
       !---- Arguments ----!
       type(File_Type),                  intent(in)  :: cif
-      class(Cell_Type),                 intent(out) :: Cell
+      class(Cell_G_Type),allocatable,   intent(out) :: Cell
       class(SpG_Type),allocatable,      intent(out) :: SpG
       Type(AtList_Type),                intent(out) :: Atmlist
       Type(Kvect_Info_Type), optional,  intent(out) :: Kvec
@@ -185,6 +185,7 @@ SubModule (CFML_IOForm) Format_MCIF
       n_end=ip(iph+1)
 
       !> Reading Cell Parameters
+      allocate(Cell_G_Type :: Cell)
       call Read_Cif_Cell(cif,Cell,n_ini,n_end)
       if (Err_CFML%IErr==1) then
          call error_message(err_CFML%Msg)
@@ -2091,22 +2092,38 @@ SubModule (CFML_IOForm) Format_MCIF
       Type(Kvect_Info_Type) :: K
 
       !> K-vectors
+    !Type, public :: Kvect_Info_Type
+    !   integer                                      :: nk=0        ! Number of independent k-vectors
+    !   real(kind=cp),allocatable,dimension(:,:)     :: kv          ! k-vectors (3,nk)
+    !   real(kind=cp),allocatable,dimension(:,:)     :: kv_std      ! k-vectors sigmas(3,nk)
+    !   real(kind=cp),allocatable,dimension(:)       :: sintlim     ! sintheta/lambda limits (nk)
+    !   integer,allocatable,dimension(:)             :: nharm       ! number of harmonics along each k-vector
+    !   integer                                      :: nq=0        ! number of effective set of Q_coeff > nk
+    !   integer,allocatable,dimension(:,:)           :: q_coeff     ! number of q_coeff(nk,nq)
+    !End Type kvect_info_type
       if (present(Spg) .and. (.not. present(Kvec))) then
          select type (SpG)
-            type is (SuperSpaceGroup_Type)
-               call allocate_Kvector(SpG%nk,0,k)
-               K%kv=SpG%kv
-               K%kv_std=SpG%kv_std
+           type is (SuperSpaceGroup_Type)
+               if(SpG%nk > 0) then
+                 k%nk=SpG%nk
+                 call allocate_Kvector(SpG%nk,0,k)
+                 K%kv=SpG%kv
+                 if(allocated(SpG%kv_std)) then
+                   K%kv_std=SpG%kv_std
+                 else
+                   K%kv_std=0.0
+                 end if
+               end if
          end select
 
       else if (present(Kvec) .and. (.not. present(SpG))) then
+         if (Kvec%nk <= 0) return
          call allocate_Kvector(kvec%nk,0,k)
          K%kv=Kvec%kv
          K%kv_std=Kvec%kv_std
       else
          return
       end if
-      if (K%nk <=0) return
 
       write(unit=Ipr,fmt="(a)") "loop_"
       write(unit=Ipr,fmt="(a)") "    _cell_wave_vector_seq_id"
@@ -2318,9 +2335,9 @@ SubModule (CFML_IOForm) Format_MCIF
    !!
    Module Subroutine Read_MCIF_SpaceG_Magn(cif,Spg,i_ini,i_end)
       !---- Arguments ----!
-      Type(File_Type),       intent(in)    :: cif
-      class(SpG_Type),       intent(inout) :: SpG
-      integer, optional,     intent(in)    :: i_ini,i_end
+      Type(File_Type),       intent(in)     :: cif
+      class(SpG_Type),       intent(in out) :: SpG
+      integer, optional,     intent(in)     :: i_ini,i_end
 
       !---- Local Variables ----!
       character(len=1)            :: car
@@ -2574,73 +2591,74 @@ SubModule (CFML_IOForm) Format_MCIF
       !> --------
       !> SSG Zone
       !> --------
+      Select Type (SpG)
+       type is(SuperSpaceGroup_Type)
+         !> SSG_Name
+         str="_space_group_magn.ssg_name"
+         do i=j_ini,j_end
+            line=adjustl(cif%line(i)%str)
 
-      !> SSG_Name
-      str="_space_group_magn.ssg_name"
-      do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+            if (len_trim(line) <=0) cycle
+            if (line(1:1) == '#') cycle
 
-         if (len_trim(line) <=0) cycle
-         if (line(1:1) == '#') cycle
+            npos=index(line,str)
+            if (npos ==0) cycle
 
-         npos=index(line,str)
-         if (npos ==0) cycle
+            call cut_string(line)
+            line=adjustl(line)
 
-         call cut_string(line)
-         line=adjustl(line)
+            do
+               iv=index(line,"'")
+               if (iv > 0) then
+                  line(iv:iv)=" "
+                  cycle
+               end if
 
-         do
-            iv=index(line,"'")
-            if (iv > 0) then
-               line(iv:iv)=" "
-               cycle
-            end if
+               iv=index(line,'"')
+               if (iv > 0) then
+                  line(iv:iv)=" "
+                  cycle
+               end if
+               exit
+            end do
+            SpG%SSG_Symb=trim(adjustl(line))
 
-            iv=index(line,'"')
-            if (iv > 0) then
-               line(iv:iv)=" "
-               cycle
-            end if
             exit
          end do
-         SpG%SSG_Symb=trim(adjustl(line))
 
-         exit
-      end do
+         !> SSG_number
+         str="_space_group_magn.ssg_number"
+         do i=j_ini,j_end
+            line=adjustl(cif%line(i)%str)
 
-      !> SSG_number
-      str="_space_group_magn.ssg_number"
-      do i=j_ini,j_end
-         line=adjustl(cif%line(i)%str)
+            if (len_trim(line) <=0) cycle
+            if (line(1:1) == '#') cycle
 
-         if (len_trim(line) <=0) cycle
-         if (line(1:1) == '#') cycle
+            npos=index(line,str)
+            if (npos ==0) cycle
 
-         npos=index(line,str)
-         if (npos ==0) cycle
+            call cut_string(line)
+            line=adjustl(line)
 
-         call cut_string(line)
-         line=adjustl(line)
+            do
+               iv=index(line,"'")
+               if (iv > 0) then
+                  line(iv:iv)=" "
+                  cycle
+               end if
 
-         do
-            iv=index(line,"'")
-            if (iv > 0) then
-               line(iv:iv)=" "
-               cycle
-            end if
+               iv=index(line,'"')
+               if (iv > 0) then
+                  line(iv:iv)=" "
+                  cycle
+               end if
+               exit
+            end do
+            SpG%SSG_NLabel=trim(adjustl(line))
 
-            iv=index(line,'"')
-            if (iv > 0) then
-               line(iv:iv)=" "
-               cycle
-            end if
             exit
          end do
-         SpG%SSG_NLabel=trim(adjustl(line))
-
-         exit
-      end do
-
+      End Select
    End Subroutine Read_MCIF_SpaceG_Magn
 
    !!----
@@ -2821,10 +2839,10 @@ SubModule (CFML_IOForm) Format_MCIF
          if (line(1:nl) /=str) exit
 
          select case (trim(line))
-            case ('_space_group_symop_magn_centering.id')
+            case ('_space_group_symop_magn_centering.id','_space_group_symop.magn_centering_id')
                j=j+1
                lugar(1)=j
-            case ('_space_group_symop_magn_centering.xyz')
+            case ('_space_group_symop_magn_centering.xyz','_space_group_symop.magn_centering_xyz')
                j=j+1
                lugar(2)=j
             case ('_space_group_symop_magn_centering.description')

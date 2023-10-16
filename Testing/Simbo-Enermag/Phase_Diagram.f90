@@ -78,11 +78,11 @@
       character (len=80) :: titulo=' Magnetic Phase Diagram'
 
    !---- Symmetry parameters ----!
-      character (len=20)         :: spgr               ! Space Group
-      type (Cell_G_Type)         :: celda              ! Cell type structure
-      type (SPG_Type)            :: grp_espacial       ! Space Group structure
-      integer, dimension(3)      :: ngrid
-      integer                    :: ntype=1,jfilbin=15,j,k
+      character (len=20)            :: spgr               ! Space Group
+      type (Cell_G_Type)            :: celda              ! Cell type structure
+      class(SPG_Type), allocatable  :: grp_espacial       ! Space Group structure
+      integer, dimension(3)         :: ngrid
+      integer                       :: ntype=1,jfilbin=15,j,k
       REAL,    allocatable,dimension(:,:,:) :: rho
       integer, allocatable,dimension(:,:,:) :: freq
       real                  :: denmin=1.0,denmax

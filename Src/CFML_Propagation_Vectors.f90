@@ -424,9 +424,9 @@
     !!
     Subroutine Set_Gk(Gk,SPGk,ext)
        !---- Arguments ----!
-       Type (Group_k_Type),     intent(in)  :: Gk
-       Type (SpG_Type),         intent(out) :: SPGk
-       logical, optional,       intent(in)  :: ext
+       Type (Group_k_Type),          intent(in)  :: Gk
+       class (SpG_Type),allocatable, intent(out) :: SPGk
+       logical, optional,            intent(in)  :: ext
 
        !---- Local Variables ----!
        character(len=50),dimension(Gk%G0%multip) :: gen
@@ -494,6 +494,7 @@
              ngen=ngen+1
              gen(ngen)="x+2/3,y+1/3,z+1/3"
        End Select
+       allocate(SPG_Type::SPGk)
        SPGk%magnetic=.false.
        Call Set_SpaceGroup(" ",SPGk,Ngen,Gen)
     End Subroutine Set_Gk

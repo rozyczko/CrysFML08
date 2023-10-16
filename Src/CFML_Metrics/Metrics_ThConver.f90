@@ -40,7 +40,6 @@ Submodule (CFML_Metrics) Metrics_ThConver
                            2.0*u12 * a * b * as * bs * cosg + &
                            2.0*u13 * a * c * as * cs * cosb + &
                            2.0*u23 * b * c * bs * cs * cosa )
-
     End Function U_Equiv
 
     !!----
@@ -55,14 +54,12 @@ Submodule (CFML_Metrics) Metrics_ThConver
        real(kind=cp),dimension(6), intent(in)  :: B
        class(Cell_G_Type),         intent(in)  :: Cell
        real(kind=cp),dimension(6)              :: Beta
-
        beta(1)=0.25*b(1)*cell%gr(1,1)                ! beta11
        beta(2)=0.25*b(2)*cell%gr(2,2)                ! beta22
        beta(3)=0.25*b(3)*cell%gr(3,3)                ! beta33
        beta(4)=0.25*b(4)*cell%rcell(1)*cell%rcell(2) ! beta12
        beta(5)=0.25*b(5)*cell%rcell(1)*cell%rcell(3) ! beta13
        beta(6)=0.25*b(6)*cell%rcell(2)*cell%rcell(3) ! beta23
-
     End Function Get_Betas_from_B
 
     !!----
@@ -100,7 +97,6 @@ Submodule (CFML_Metrics) Metrics_ThConver
        b(4)=4.0*beta(4)/(cell%rcell(1)*cell%rcell(2)) ! B12
        b(5)=4.0*beta(5)/(cell%rcell(1)*cell%rcell(3)) ! B13
        b(6)=4.0*beta(6)/(cell%rcell(2)*cell%rcell(3)) ! B23
-
     End Function Get_B_from_Betas
 
     !!----
@@ -115,14 +111,12 @@ Submodule (CFML_Metrics) Metrics_ThConver
        real(kind=cp),dimension(6),intent(in)  :: U
        class(Cell_G_Type),        intent(in)  :: Cell
        real(kind=cp),dimension(6)             :: Beta
-
        beta(1)=tpi2*u(1)*cell%gr(1,1)                ! beta11
        beta(2)=tpi2*u(2)*cell%gr(2,2)                ! beta22
        beta(3)=tpi2*u(3)*cell%gr(3,3)                ! beta33
        beta(4)=tpi2*u(4)*cell%rcell(1)*cell%rcell(2) ! beta12
        beta(5)=tpi2*u(5)*cell%rcell(1)*cell%rcell(3) ! beta13
        beta(6)=tpi2*u(6)*cell%rcell(2)*cell%rcell(3) ! beta23
-
     End Function Get_Betas_from_U
 
     !!----
@@ -160,7 +154,6 @@ Submodule (CFML_Metrics) Metrics_ThConver
        betas(4) = bet(1,2)
        betas(5) = bet(1,3)
        betas(6) = bet(2,3)
-
     End Function Get_Betas_from_Biso
 
     !!----

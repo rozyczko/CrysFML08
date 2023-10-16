@@ -12,7 +12,7 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
    !!----
    !!---- Update: April - 2022
    !!
-   Module Subroutine WriteInfo_Restraints(RDis, RAng, RTor, IPhase, AtList, Calc,Iunit)
+   Module Subroutine WriteInfo_Restraints(RDis, RAng, RTor, IPhase, AtList, Calc, Iunit)
       !---- Arguments ----!
       type(RestList_Type), intent(in) :: RDis
       type(RestList_Type), intent(in) :: RAng
@@ -52,7 +52,9 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
             i1=RDis%RT(i)%p(1)
             i2=RDis%RT(i)%p(2)
             car1=trim(Atlist%Atom(i1)%lab)
-            car2=trim(Atlist%Atom(i2)%lab)//'_'//trim(RDis%RT(i)%code(1))
+            car2=trim(Atlist%Atom(i2)%lab)
+            if (len_trim(RDis%RT(i)%code(1)) >0) car2=trim(car2)//'_'//trim(RDis%RT(i)%code(1))
+           
             disto=RDis%RT(i)%obs
             distc=RDis%RT(i)%cal
             delta=disto-distc
@@ -81,8 +83,12 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
             i2=RAng%RT(i)%p(2)
             i3=RAng%RT(i)%p(3)
             car1=trim(Atlist%Atom(i1)%lab)
-            car2=trim(Atlist%Atom(i2)%lab)//'_'//trim(RAng%RT(i)%code(1) )
-            car3=trim(Atlist%Atom(i3)%lab)//'_'//trim(RAng%RT(i)%code(2) )
+            
+            car2=trim(Atlist%Atom(i2)%lab)
+            if (len_trim(RAng%RT(i)%code(1)) >0) car2=trim(car2)//'_'//trim(RAng%RT(i)%code(1))
+            car3=trim(Atlist%Atom(i3)%lab)
+            if (len_trim(RAng%RT(i)%code(2)) >0) car3=trim(car3)//'_'//trim(RAng%RT(i)%code(2))
+            
             ango=RAng%RT(i)%obs
             angc=RAng%RT(i)%cal
             delta=ango-angc
@@ -112,9 +118,14 @@ Submodule (CFML_KeyCodes) KeyCod_WriteInfo
             i3=RTor%RT(i)%p(3)
             i4=RTor%RT(i)%p(4)
             car1=trim(Atlist%Atom(i1)%lab)
-            car2=trim(Atlist%Atom(i2)%lab)//'_'//trim(RTor%RT(i)%code(1))
-            car3=trim(Atlist%Atom(i3)%lab)//'_'//trim(RTor%RT(i)%code(2))
-            car4=trim(Atlist%Atom(i4)%lab)//'_'//trim(RTor%RT(i)%code(3))
+            
+            car2=trim(Atlist%Atom(i2)%lab)
+            if (len_trim(RTor%RT(i)%code(1)) >0) car2=trim(car2)//'_'//trim(RTor%RT(i)%code(1))
+            car3=trim(Atlist%Atom(i3)%lab)
+            if (len_trim(RTor%RT(i)%code(2)) >0) car3=trim(car3)//'_'//trim(RTor%RT(i)%code(2))
+            car4=trim(Atlist%Atom(i4)%lab)
+            if (len_trim(RTor%RT(i)%code(3)) >0) car4=trim(car4)//'_'//trim(RTor%RT(i)%code(3))
+            
             ango=RTor%RT(i)%obs
             angc=RTor%RT(i)%cal
             delta=ango-angc

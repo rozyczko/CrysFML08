@@ -439,9 +439,9 @@
       real, dimension(:,:),   allocatable :: q        ! returned ubs
       real, dimension(:,:,:), allocatable :: ub_aux   ! returned ubs
       logical :: is_new
-      type(cell_g_type) :: cell
-      type(spg_type) :: spg
-      type(reflist_type) :: hkl
+      type(cell_g_type)            :: cell
+      class(spg_type), allocatable :: spg
+      type(reflist_type)           :: hkl
 
       ! Initialize error variable
       call clear_error()
@@ -491,7 +491,7 @@
               end if
           end if
           write(unit=u_out,fmt='(a)') ' => Input parameters:'
-          write(unit=u_out,fmt='(4x,a,1x,6f10.4)') 'CELL =',cell_user(6)
+          write(unit=u_out,fmt='(4x,a12,1x,6f10.4)')    'CELL =',cell_user(1:6)
           write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NQMAX =',     nq_max,     '! Maximum number of q-vectors used in the search'
           write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NPAIRS_MAX =',npairs_max, '! Maximum number of reflections pairs to be tested'
           write(unit=u_out,fmt='(4x,a12,1x,i8,1x,a)')   'NUBS_MAX =',  nubs_max,   '! Maximum number of ub-matrices'

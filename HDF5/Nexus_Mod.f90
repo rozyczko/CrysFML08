@@ -774,7 +774,7 @@ module nexus_mod
             call h5dclose_f(dset,hdferr)
             if (mode == 0) then
                 nexus%geometry = 'NB' ! Normal Beam
-            else if (mode == 1) then
+            else if (mode == 1 .or. mode == 2) then
                 nexus%geometry = '4C' ! Four Circle
             else
                 nexus%geometry = '??'

@@ -25,9 +25,9 @@ submodule (CFML_VTK) VTK_Scan_Utils
         integer :: i,j,k,n
 
         n = 0
-        do k = 1 , size(counts,3) !frames
-            do j = 1 , size(counts,2) ! x
-                do i = 1 , size(counts,1) ! z
+        do k = 1 , size(counts,3)
+            do j = 1 , size(counts,2)
+                do i = 1 , size(counts,1)
                     if (counts(i,j,k) >= th) then
                         n = n + 1
                         if (n > size(vtk_counts)) then
@@ -36,8 +36,8 @@ submodule (CFML_VTK) VTK_Scan_Utils
                             err_cfml%msg = 'scan_arrays: threshold inconsistent with array dimension'
                             return
                         end if
-                        vtk_points(1,n) = j-1
-                        vtk_points(2,n) = i-1
+                        vtk_points(1,n) = i-1
+                        vtk_points(2,n) = j-1
                         vtk_points(3,n) = k-1
                         vtk_cells(1,n) = 1
                         vtk_cells(2,n) = n

@@ -413,8 +413,8 @@ SubModule (CFML_IOForm) Format_CIF
    !!
    Module Subroutine Write_CIF_Cell(Ipr, Cell)
       !---- Arguments ----!
-      integer,          intent(in) :: Ipr
-      class(Cell_Type), intent(in) :: Cell         ! Cell parameters
+      integer,            intent(in) :: Ipr
+      class(Cell_G_Type), intent(in) :: Cell         ! Cell parameters
 
       !---- Local Variables ----!
       integer                         :: i
@@ -1114,9 +1114,9 @@ SubModule (CFML_IOForm) Format_CIF
    !!
    Module Subroutine Read_CIF_Cell(cif, Cell, i_Ini, i_End)
       !---- Arguments ----!
-      type(File_Type),    intent(in)  :: cif
-      class(Cell_Type),   intent(out) :: Cell    ! Cell object
-      integer, optional,  intent(in)  :: i_ini, i_end   ! Index to start
+      type(File_Type),      intent(in)  :: cif
+      class(Cell_G_Type),   intent(out) :: Cell    ! Cell object
+      integer, optional,    intent(in)  :: i_ini, i_end   ! Index to start
 
       !---- Local Variables ----!
       integer                         :: i,npos,nl,iv
@@ -2984,8 +2984,8 @@ SubModule (CFML_IOForm) Format_CIF
    Module Subroutine Read_XTal_CIF(cif, Cell, Spg, AtmList, Nphase)
       !---- Arguments ----!
       type(File_Type),               intent(in)  :: cif
-      class(Cell_Type),              intent(out) :: Cell
-      class(SpG_Type),               intent(out) :: SpG
+      class(Cell_G_Type),allocatable,intent(out) :: Cell
+      class(SpG_Type), allocatable,  intent(out) :: SpG
       Type(AtList_Type),             intent(out) :: Atmlist
       Integer,             optional, intent(in)  :: Nphase   ! Select the Phase to read
 
@@ -3024,6 +3024,9 @@ SubModule (CFML_IOForm) Format_CIF
 
       n_ini=ip(iph)
       n_end=ip(iph+1)
+
+      allocate(SpG_Type :: SpG)
+      allocate(Cell_G_Type :: Cell)
 
       !> Reading Cell Parameters
       call Read_Cif_Cell(cif,Cell,n_ini,n_end)

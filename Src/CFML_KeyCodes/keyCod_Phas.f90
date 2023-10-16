@@ -17,7 +17,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       integer,                 intent(in)     :: n_end  ! End line
       integer,                 intent(in)     :: IPhas  ! Number of the phase block definition
       class(SpG_Type),         intent(in)     :: SpG
-      type(Cell_GLS_Type),     intent(in out) :: Cell
+      class(Cell_G_Type),      intent(in out) :: Cell
       type(Atlist_Type),       intent(in out) :: Atm
       type(GenParList_Type),   intent(in out) :: G
 
@@ -65,7 +65,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=*),      intent(in)     :: String
       integer,               intent(in)     :: IPhas
       class(SpG_Type),       intent(in)     :: SpG
-      type(Cell_GLS_Type),   intent(in out) :: Cell
+      class(Cell_G_Type),    intent(in out) :: Cell
       type(Atlist_Type),     intent(in out) :: Atm
       type(GenParList_Type), intent(in out) :: G
 
@@ -74,6 +74,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=15)                 :: lab
       integer                           :: i, j, jj, k, ikey, iph
       integer                           :: n, n1, n2, n3, n_dir
+      integer                           :: qc
 
       !> Init
       call clear_error()
@@ -94,10 +95,11 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       i=1
       do while(i <= n_dir)
-         !> word(i) Is a general directive?
+         !> Is dire(i) a general directive? (n1 > 0))
          n1 = index_Key_Phas(dire(i))
 
-         !> next directive
+         !> Is there another general directive in the same line?
+         !> If yes, j is the word position in the line
          j=0
          do jj=i+1, n_dir
             if (index_Key_Phas(dire(jj)) > 0 ) then
@@ -116,14 +118,14 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                   select case (n1)
                      case (1:7)
-                        call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                         call GPList_to_Cell(G, k, Cell)
                         call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                         call GPList_from_Cell(Cell, k, G)
 
                      case (8:33)
                         do n=1,Atm%natoms
-                           call Set_RefCodes_PHAS('FIX', n1, k, trim(Atm%atom(n)%lab), G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(Atm%atom(n)%lab), G)
                         end do
 
                         call GPList_to_AtmList(G, k, Atm)
@@ -132,11 +134,12 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (34:48)
+                     case (52:54)
 
                      case (NKEY_PHAS)
 
                      case default
-                        call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                   end select
 
 
@@ -151,7 +154,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                      select case (n1)
                         case (1:7)
-                           call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                            call GPList_to_Cell(G, k, Cell)
                            call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                            call GPList_from_Cell(Cell, k, G)
@@ -161,13 +164,13 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                            if (n2 > 0) then
                               !> Atom label
-                              call Set_RefCodes_PHAS('FIX', n1, k, trim(lab), G)
+                              call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(lab), G)
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('FIX', n1, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(Atm%atom(n3)%Lab), G)
                               end do
                            end if
 
@@ -177,21 +180,22 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            if (n < n_dir) call Update_GPList_Code(G)
 
                         case (34:48)
+                        case (52:54)
 
                         case (NKEY_PHAS)
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
 
                            if (n2 > 0) then
                               !> Atom label
-                              call Set_RefCodes_PHAS('FIX', 13, k, trim(lab), G) !UISO
-                              call Set_RefCodes_PHAS('FIX', 11, k, trim(lab), G) !XYZ
+                              call Set_RefCodes_PHAS('FIX', 13, k, 0,trim(lab), G) !UISO
+                              call Set_RefCodes_PHAS('FIX', 11, k, 0,trim(lab), G) !XYZ
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('FIX', 13, k, trim(Atm%atom(n3)%Lab), G)
-                                 call Set_RefCodes_PHAS('FIX', 11, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('FIX', 13, k, 0,trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('FIX', 11, k, 0,trim(Atm%atom(n3)%Lab), G)
                               end do
                            end if
 
@@ -201,7 +205,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            if (n < n_dir) call Update_GPList_Code(G)
 
                         case default
-                           call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                      end select
                   end do
 
@@ -214,14 +218,14 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                   select case (n1)
                      case (1:7)
-                        call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                         call GPList_to_Cell(G, k, Cell)
                         call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                         call GPList_from_Cell(Cell, k, G)
 
                      case (8:33)
                         do n=1,Atm%natoms
-                           call Set_RefCodes_PHAS('FIX', n1, k, trim(Atm%atom(n)%lab), G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(Atm%atom(n)%lab), G)
                         end do
 
                         call GPList_to_AtmList(G, k, Atm)
@@ -230,11 +234,12 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call Update_GPList_Code(G)
 
                      case (34:48)
+                     case (52:54)
 
                      case (NKEY_PHAS)
 
                      case default
-                        call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                   end select
 
                else
@@ -248,7 +253,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
                      select case (n1)
                         case (1:7)
-                           call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                            call GPList_to_Cell(G, k, Cell)
                            call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                            call GPList_from_Cell(Cell, k, G)
@@ -257,13 +262,13 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
                            if (n2 > 0) then
                               !> Atom label
-                              call Set_RefCodes_PHAS('FIX', n1, k, trim(lab), G)
+                              call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(lab), G)
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('FIX', n1, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('FIX', n1, k, 0,trim(Atm%atom(n3)%Lab), G)
                               end do
                            end if
 
@@ -273,11 +278,12 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            if (n < j-1) call Update_GPList_Code(G)
 
                         case (34:48)
+                        case (52:54)
 
                         case (NKEY_PHAS)
 
                         case default
-                           call Set_RefCodes_PHAS('FIX', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('FIX', n1, k, 0,' ', G)
                      end select
                   end do
                end if
@@ -287,14 +293,14 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
          else
             !> word(i) is local instruction: x_, xyz_,....
-            call Get_InfoKey_StrPhas(dire(i), iKey, IPh, Lab)
+            call Get_InfoKey_StrPhas(dire(i), iKey, IPh, Lab, qc)
 
             k=iphas
             if (iph > 0) k=iPh
 
             select case (ikey)
                case (1:7)
-                  call Set_RefCodes_PHAS('FIX', ikey, k, ' ', G)
+                  call Set_RefCodes_PHAS('FIX', ikey, k, 0,' ', G)
                   call GPList_to_Cell(G, k, Cell)
                   call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                   call GPList_from_Cell(Cell, k, G)
@@ -303,13 +309,13 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
                   if (n2 > 0) then
                      !> Atom label
-                     call Set_RefCodes_PHAS('FIX', ikey, k, trim(lab), G)
+                     call Set_RefCodes_PHAS('FIX', ikey, k, 0,trim(lab), G)
 
                   else
                      !> Chemical species
                      do n3=1, Atm%natoms
                         if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                        call Set_RefCodes_PHAS('FIX', ikey, k, trim(Atm%atom(n3)%Lab), G)
+                        call Set_RefCodes_PHAS('FIX', ikey, k, 0,trim(Atm%atom(n3)%Lab), G)
                      end do
                   end if
 
@@ -318,11 +324,16 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call GPList_from_AtmList(Atm, k, G)
 
                case (34:48)
+               case (52:54)
+               
+               case (181:218)
+                  n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
+                  call Set_RefCodes_PHAS('FIX', ikey, k, qc, trim(lab), G)
 
                case (NKEY_PHAS)
 
                case default
-                  call Set_RefCodes_PHAS('FIX', ikey, k, ' ', G)
+                  call Set_RefCodes_PHAS('FIX', ikey, k, 0,' ', G)
             end select
 
 
@@ -349,7 +360,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=*),      intent(in)     :: String
       integer,               intent(in)     :: IPhas
       class(SpG_Type),       intent(in)     :: SpG
-      type(Cell_GLS_Type),   intent(in out) :: Cell
+      class(Cell_G_Type),    intent(in out) :: Cell
       type(Atlist_Type),     intent(in out) :: Atm
       type(GenParList_Type), intent(in out) :: G
 
@@ -358,6 +369,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=15)                 :: lab
       integer                           :: i, j, jj, k, ikey, iph
       integer                           :: n, n1, n2, n3, n_dir
+      integer                           :: qc
 
       !> Init
       call clear_error()
@@ -379,10 +391,11 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
       i=1
       do while(i <= n_dir)
-         !> word(i) Is a general directive?
+         !> Is dire(i) a general directive? n1 > 0
          n1 = index_Key_Phas(dire(i))
 
-         !> next directive
+         !> Is there other general directive?
+         !> If yes j > 0 (word position in the line)
          j=0
          do jj=i+1, n_dir
             if (index_Key_Phas(dire(jj)) > 0 ) then
@@ -391,68 +404,71 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
             end if
          end do
 
-         !> word(i) is a directive: cell, xyz,...
+         !> dire(i) is a general directive: cell, xyz,...
          if (n1 > 0) then
 
             if (j ==0) then
                if (i == n_dir) then
-                  !> last instruction
+                  !> only one directive: vary cell
                   k=iphas
 
                   select case (n1)
-                     case (1:7)
-                        call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                     case (1:7) ! Cell parameters
+                        call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
+
                         call GPList_to_Cell(G, k, Cell)
                         call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                         call GPList_from_Cell(Cell, k, G)
 
-                     case (8:33)
+                     case (8:26) ! Normal atoms
                         do n=1,Atm%natoms
-                           call Set_RefCodes_PHAS('VARY', n1, k, trim(Atm%atom(n)%lab), G)
+                           call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(Atm%atom(n)%lab), G)
                         end do
 
                         call GPList_to_AtmList(G, k, Atm)
                         call Set_KeyConstr_Atm(Atm, Spg)
                         call GPList_from_AtmList(Atm, k, G)
+
                         call Update_GPList_Code(G)
 
-                     case (34:48) ! MOL
+                     case (27:68) ! MOL
 
-                     case (NKEY_PHAS)
+                     case (NKEY_PHAS) ! ALL
 
                      case default
-                        call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
                   end select
 
 
                else
+                  !> only one generic directive with options: vary xyz O1 O2 ...
                   do n=i+1, n_dir
-                     call Get_InfoKey_StrPhas(dire(n), iKey, IPh, Lab)
+                     call Get_InfoKey_StrPhas(dire(n), iKey, IPh, Lab) ! Ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (1:7)
-                           call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
-                           call GPList_to_Cell(G, k, Cell)
-                           call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
-                           call GPList_from_Cell(Cell, k, G)
+                        case (1:7) ! Cell parameters
+                           !> Don't have sense
 
-                        case (8:33)
+                           !call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                           !call GPList_to_Cell(G, k, Cell)
+                           !call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
+                           !call GPList_from_Cell(Cell, k, G)
+
+                        case (8:26) ! Normal atoms
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
 
                            if (n2 > 0) then
-                              !> Atom label
-                              call Set_RefCodes_PHAS('VARY', n1, k, trim(lab), G)
+                              !> Atom labels
+                              call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(lab), G)
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('VARY', n1, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(Atm%atom(n3)%Lab), G)
                               end do
                            end if
 
@@ -461,22 +477,30 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < n_dir) call Update_GPList_Code(G)
 
-                        case (34:48) ! MOL
+                        case (27:68) ! MOL
 
-                        case (NKEY_PHAS)
+                        case (NKEY_PHAS) ! ALL
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
 
                            if (n2 > 0) then
-                              !> Atom label
-                              call Set_RefCodes_PHAS('VARY', 11, k, trim(lab), G) !XYZ
-                              call Set_RefCodes_PHAS('VARY', 13, k, trim(lab), G) !UISO
+                              !> Atom labels
+                              call Set_RefCodes_PHAS('VARY', 11, k, 0,trim(lab), G) !XYZ
+                              if (Atm%atom(n2)%Utype == 'U_IJ') then
+                                 call Set_RefCodes_PHAS('VARY', 13, k, 0,trim(lab), G) !UISO
+                              else
+                                 call Set_RefCodes_PHAS('VARY', 20, k, 0,trim(lab), G) !BISO
+                              end if
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('VARY', 11, k, trim(Atm%atom(n3)%Lab), G)
-                                 call Set_RefCodes_PHAS('VARY', 13, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('VARY', 11, k, 0,trim(Atm%atom(n3)%Lab), G)
+                                 if (Atm%atom(n3)%Utype == 'U_IJ') then
+                                    call Set_RefCodes_PHAS('VARY', 13, k, 0,trim(Atm%atom(n3)%Lab), G)
+                                 else
+                                    call Set_RefCodes_PHAS('VARY', 20, k, 0,trim(Atm%atom(n3)%Lab), G)
+                                 end if
                               end do
                            end if
 
@@ -486,7 +510,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            if (n < n_dir) call Update_GPList_Code(G)
 
                         case default
-                           call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
                      end select
                   end do
 
@@ -495,18 +519,20 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
 
             else
                if (i+1 == n_dir) then
+                  !> two directives: vary uiso xyz
                   k=iphas
 
                   select case (n1)
-                     case (1:7)
-                        call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                     case (1:7) ! Cell parameters
+                        call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
+
                         call GPList_to_Cell(G, k, Cell)
                         call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                         call GPList_from_Cell(Cell, k, G)
 
-                     case (8:33)
+                     case (8:26) ! Normal atoms
                         do n=1,Atm%natoms
-                           call Set_RefCodes_PHAS('VARY', n1, k, trim(Atm%atom(n)%lab), G)
+                           call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(Atm%atom(n)%lab), G)
                         end do
 
                         call GPList_to_AtmList(G, k, Atm)
@@ -514,41 +540,42 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                         call GPList_from_AtmList(Atm, k, G)
                         call Update_GPList_Code(G)
 
-                     case (34:48)
+                     case (27:68) ! MOL
 
-                     case (NKEY_PHAS)
+                     case (NKEY_PHAS) ! ALL
 
                      case default
-                        call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                        call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
                   end select
 
                else
+                  !> a directive with options... vary xyz o1 o2 uiso o3
                   do n=i+1, j-1
-                     call Get_InfoKey_StrPhas(dire(n), iKey, IPh, Lab)
+                     call Get_InfoKey_StrPhas(dire(n), iKey, IPh, Lab)  ! ikey should be 0
 
                      k=iphas
                      if (iph > 0) k=iPh
 
-                     !> ikey debe ser 0
-
                      select case (n1)
-                        case (1:7)
-                           call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                        case (1:7) ! Cell parameters
+                           call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
+
                            call GPList_to_Cell(G, k, Cell)
                            call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                            call GPList_from_Cell(Cell, k, G)
 
-                        case (8:33)
+                        case (8:26) ! Normal atoms
                            n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
+
                            if (n2 > 0) then
-                              !> Atom label
-                              call Set_RefCodes_PHAS('VARY', n1, k, trim(lab), G)
+                              !> Atom labels
+                              call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(lab), G)
 
                            else
                               !> Chemical species
                               do n3=1, Atm%natoms
                                  if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                                 call Set_RefCodes_PHAS('VARY', n1, k, trim(Atm%atom(n3)%Lab), G)
+                                 call Set_RefCodes_PHAS('VARY', n1, k, 0,trim(Atm%atom(n3)%Lab), G)
                               end do
                            end if
 
@@ -557,12 +584,12 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                            call GPList_from_AtmList(Atm, k, G)
                            if (n < j-1) call Update_GPList_Code(G)
 
-                        case (34:48)
+                        case (27:68) ! MOL
 
-                        case (NKEY_PHAS)
+                        case (NKEY_PHAS) ! ALL
 
                         case default
-                           call Set_RefCodes_PHAS('VARY', n1, k, ' ', G)
+                           call Set_RefCodes_PHAS('VARY', n1, k, 0,' ', G)
                      end select
                   end do
                end if
@@ -571,30 +598,31 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
             end if
 
          else
-            !> word(i) is local instruction: x_, xyz_,....
-            call Get_InfoKey_StrPhas(dire(i), iKey, IPh, Lab)
+            !> dire(i) is local instruction: x_O1, xyz_O1, ....
+            call Get_InfoKey_StrPhas(dire(i), iKey, IPh, Lab, Qc)
 
             k=iphas
             if (iph > 0) k=iPh
 
             select case (ikey)
-               case (1:7)
-                  call Set_RefCodes_PHAS('VARY', ikey, k, ' ', G)
+               case (1:7) ! Cell parameters
+                  call Set_RefCodes_PHAS('VARY', ikey, k, 0,' ', G)
+
                   call GPList_to_Cell(G, k, Cell)
                   call Set_KeyConstr_Cell(Spg%CrystalSys, Cell)
                   call GPList_from_Cell(Cell, k, G)
 
-               case (8:33)
+               case (8:26) ! Normal atoms
                   n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
                   if (n2 > 0) then
-                     !> Atom label
-                     call Set_RefCodes_PHAS('VARY', ikey, k, trim(lab), G)
+                     !> Atom labels
+                     call Set_RefCodes_PHAS('VARY', ikey, k, 0,trim(lab), G)
 
                   else
                      !> Chemical species
                      do n3=1, Atm%natoms
                         if (trim(Atm%atom(n3)%ChemSymb) /= trim(lab)) cycle
-                        call Set_RefCodes_PHAS('VARY', ikey, k, trim(Atm%atom(n3)%Lab), G)
+                        call Set_RefCodes_PHAS('VARY', ikey, k, 0,trim(Atm%atom(n3)%Lab), G)
                      end do
                   end if
 
@@ -602,14 +630,17 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Set_KeyConstr_Atm(Atm, Spg)
                   call GPList_from_AtmList(Atm, k, G)
 
-               case (34:48)
-
-               case (NKEY_PHAS)
+               case (27:68) ! MOL
+               
+               case (181:218)
+                  n2 = Index_AtLab_on_AtList(trim(lab),k, Atm)
+                  call Set_RefCodes_PHAS('VARY', ikey, k, qc,trim(lab), G)
+               
+               case (NKEY_PHAS) ! ALL
 
                case default
-                  call Set_RefCodes_PHAS('VARY', ikey, k, ' ', G)
+                  call Set_RefCodes_PHAS('VARY', ikey, k, 0,' ', G)
             end select
-
 
          end if
 
@@ -632,17 +663,18 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
    !!--++
    !!--++ Update: May - 2022
    !!
-   Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IPhas, Lab, G)
+   Module Subroutine Set_RefCodes_PHAS(Keyword, Npar,  IPhas, Qc, Lab, G)
       !---- Arguments ----!
       character(len=*),            intent(in)     :: Keyword     ! VARY/FIX/....
       integer,                     intent(in)     :: NPar        ! Specific parameter A,B,C,...
       integer,                     intent(in)     :: IPhas
+      integer,                     intent(in)     :: Qc
       character(len=*),            intent(in)     :: Lab
       type(GenParList_Type),       intent(in out) :: G
 
       !---- Local variables ----!
       !integer          :: i
-      character(len=4) :: cdire, car
+      character(len=4) :: cdire, car, cqc
       character(len=20):: str
 
       !> Init
@@ -683,6 +715,16 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Fix_GPList_Par(G,'U23_'//trim(lab)//'_PHAS'//trim(car))
 
                case (34:48) ! MOL
+               
+               case (181:218)
+                  if (Qc > 0) then
+                     write(cqc,fmt='(i3)') qc
+                     cqc=adjustl(cqc)
+                     str=trim(KEY_PHAS(Npar))//'.'//trim(cqc)//'_'//trim(lab)//'_PHAS'//trim(car)
+                  else
+                     str=trim(KEY_PHAS(Npar))//'_'//trim(lab)//'_PHAS'//trim(car)
+                  end if   
+                  call Fix_GPList_Par(G,trim(str))
 
                case (NKEY_PHAS) ! ALL
 
@@ -726,6 +768,16 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                   call Vary_GPList_Par(G,'U23_'//trim(lab)//'_PHAS'//trim(car))
 
                case (34:48)
+               
+               case (181:218)
+                  if (Qc > 0) then
+                     write(cqc,fmt='(i3)') qc
+                     cqc=adjustl(cqc)
+                     str=trim(KEY_PHAS(Npar))//'.'//trim(cqc)//'_'//trim(lab)//'_PHAS'//trim(car)
+                  else
+                     str=trim(KEY_PHAS(Npar))//'_'//trim(lab)//'_PHAS'//trim(car)
+                  end if   
+                  call Vary_GPList_Par(G,trim(str))
 
                case (NKEY_PHAS) ! ALL
 
@@ -752,107 +804,110 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
    Module Subroutine Set_KeyConstr_Cell(CrystSys, Cell)
       !---- Arguments ----!
       character(len=*),    intent(in)     :: CrystSys
-      type(Cell_GLS_Type), intent(in out) :: Cell
+      class(Cell_G_Type),  intent(in out) :: Cell
 
       !---- Local Variables ----!
       integer               :: i, j, k, n, ic_min, ic_max
       integer, dimension(6) :: ind
       real(kind=cp)         :: dif1, dif2, dif3
 
-      Select case (trim(CrystSys))
-         case ('Triclinic')
-            ! Nothing to do
+      Select Type(Cell)
+       Type is(Cell_GLS_Type)
+         Select case (trim(CrystSys))
+            case ('Triclinic')
+               ! Nothing to do
 
-         case ('Monoclinic')
-            dif1=abs(cell%ang(1)-90.0_cp)
-            dif2=abs(cell%ang(2)-90.0_cp)
-            dif3=abs(cell%ang(3)-90.0_cp)
+            case ('Monoclinic')
+               dif1=abs(cell%ang(1)-90.0_cp)
+               dif2=abs(cell%ang(2)-90.0_cp)
+               dif3=abs(cell%ang(3)-90.0_cp)
 
-            !Axis a
-            if (dif1 > 0.005) then
-               cell%lang(2:3)=0
-               cell%ang(2:3)=90.0_cp
+               !Axis a
+               if (dif1 > 0.005) then
+                  cell%lang(2:3)=0
+                  cell%ang(2:3)=90.0_cp
 
-            !Axis b
-            else if (dif2 > 0.005) then
-               cell%lang(1)=0
-               cell%lang(3)=0
-               cell%ang(1)=90.0_cp
-               cell%ang(3)=90.0_cp
+               !Axis b
+               else if (dif2 > 0.005) then
+                  cell%lang(1)=0
+                  cell%lang(3)=0
+                  cell%ang(1)=90.0_cp
+                  cell%ang(3)=90.0_cp
 
-            !> Axis c
-            else if (dif3 > 0.005) then
+               !> Axis c
+               else if (dif3 > 0.005) then
+                  cell%lang(1:2)=0
+                  cell%ang(1:2)=90.0_cp
+               end if
+
+            case ('Orthorhombic')
+               cell%lang=0
+               cell%ang=90.0_cp
+
+            case ('Tetragonal')
+               !> b=a
+               if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
+               cell%cell(2)=cell%cell(1)
+
+               cell%lang=0
+               cell%ang=90.0_cp
+
+            case ('Trigonal')
+               !> b=a; c=a
+               if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
+               if (cell%lcell(1) /= cell%lcell(3)) cell%lcell(3)=cell%lcell(1)
+               cell%cell(2:3)=cell%cell(1)
+
+               !> beta=gamma=alpha
+               if (cell%lang(1) /= cell%lang(2)) cell%lang(2)=cell%lang(1)
+               if (cell%lang(1) /= cell%lang(3)) cell%lang(3)=cell%lang(1)
+               cell%ang(2:3)=cell%ang(1)
+
+
+            case ('Hexagonal', 'Rhombohedral')
+               !> b=a
+               if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
+               cell%cell(2)=cell%cell(1)
+
+               !> angles
                cell%lang(1:2)=0
-               cell%ang(1:2)=90.0_cp
-            end if
+               cell%lang(3)=cell%lcell(1)    ! Esto es correcto para algo general?
 
-         case ('Orthorhombic')
-            cell%lang=0
-            cell%ang=90.0_cp
-
-         case ('Tetragonal')
-            !> b=a
-            if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
-            cell%cell(2)=cell%cell(1)
-
-            cell%lang=0
-            cell%ang=90.0_cp
-
-         case ('Trigonal')
-            !> b=a; c=a
-            if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
-            if (cell%lcell(1) /= cell%lcell(3)) cell%lcell(3)=cell%lcell(1)
-            cell%cell(2:3)=cell%cell(1)
-
-            !> beta=gamma=alpha
-            if (cell%lang(1) /= cell%lang(2)) cell%lang(2)=cell%lang(1)
-            if (cell%lang(1) /= cell%lang(3)) cell%lang(3)=cell%lang(1)
-            cell%ang(2:3)=cell%ang(1)
+               cell%ang=[90.0_cp, 90.0_cp, 120.0_cp]
 
 
-         case ('Hexagonal', 'Rhombohedral')
-            !> b=a
-            if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
-            cell%cell(2)=cell%cell(1)
+            case ('Cubic')
+               !> c=b=a
+               if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
+               if (cell%lcell(1) /= cell%lcell(3)) cell%lcell(3)=cell%lcell(1)
+               cell%cell(2:3)=cell%cell(1)
 
-            !> angles
-            cell%lang(1:2)=0
-            cell%lang(3)=cell%lcell(1)    ! Esto es correcto para algo general?
+               !> angles
+               cell%lang=0
+               cell%ang=90.0_cp
+         End Select
 
-            cell%ang=[90.0_cp, 90.0_cp, 120.0_cp]
+         if (all(cell%lcell == 0) .and. all(cell%lang == 0)) return
 
+         !> Reindexation
+         ind(1:3)=cell%lcell
+         ind(4:6)=cell%lang
+         ic_min=minval(ind, mask=ind > 0)
+         ic_max=maxval(ind)
 
-         case ('Cubic')
-            !> c=b=a
-            if (cell%lcell(1) /= cell%lcell(2)) cell%lcell(2)=cell%lcell(1)
-            if (cell%lcell(1) /= cell%lcell(3)) cell%lcell(3)=cell%lcell(1)
-            cell%cell(2:3)=cell%cell(1)
+         n=0
+         do i=ic_min, ic_max
+            k=count(ind ==i)
+            if (k > 0) n=n+1
+            do j=1,3
+               if (cell%lcell(j) == i) cell%lcell(j)=n
+            end do
+            do j=1,3
+               if (cell%lang(j) == i) cell%lang(j)=n
+            end do
+         end do
 
-            !> angles
-            cell%lang=0
-            cell%ang=90.0_cp
       End Select
-
-      if (all(cell%lcell ==0) .and. all(cell%lang ==0)) return
-
-      !> Reindexation
-      ind(1:3)=cell%lcell
-      ind(4:6)=cell%lang
-      ic_min=minval(ind, mask=ind > 0)
-      ic_max=maxval(ind)
-
-      n=0
-      do i=ic_min, ic_max
-         k=count(ind ==i)
-         if (k > 0) n=n+1
-         do j=1,3
-            if (cell%lcell(j) == i) cell%lcell(j)=n
-         end do
-         do j=1,3
-            if (cell%lang(j) == i) cell%lang(j)=n
-         end do
-      end do
-
    End Subroutine Set_KeyConstr_Cell
 
    !!----
@@ -865,7 +920,7 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
       character(len=*),      intent(in)     :: String
       integer,               intent(in)     :: IPhas
       class(SpG_Type),       intent(in)     :: SpG
-      type(Cell_GLS_Type),   intent(in out) :: Cell
+      class(Cell_G_Type),    intent(in out) :: Cell
       type(Atlist_Type),     intent(in out) :: Atm
       type(GenParList_Type), intent(in out) :: G
 
@@ -1162,10 +1217,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
             write(unit=car, fmt='(i3)') ik
             car=adjustl(car)
 
-            ind1 = index_GPList(trim(dire(1))//'_PHAS'//trim(car), G)
+            ind1 = index_GPList(u_case(trim(dire(1)))//'_PHAS'//trim(car), G)
             if (ind1 ==0) then
                call set_error(1, 'Not found the Parent into the Refinement vector!')
-               stop
                return
             end if
 
@@ -1186,10 +1240,9 @@ Submodule (CFML_KeyCodes) KeyCod_Phas
                write(unit=car, fmt='(i3)') ik2
                car=adjustl(car)
 
-               ind2 = index_GPList(trim(dire(i))//'_PHAS'//trim(car), G)
+               ind2 = index_GPList(u_case(trim(dire(i)))//'_PHAS'//trim(car), G)
                if (ind2 ==0) then
                   call set_error(1, 'Not found the Parent into the Refinement vector!')
-                  stop
                   return
                end if
 

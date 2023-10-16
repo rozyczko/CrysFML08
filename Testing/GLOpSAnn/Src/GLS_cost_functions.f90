@@ -68,7 +68,7 @@
       class(SPG_Type), allocatable,   public :: SpG
       type(AtList_Type),              public :: A, A_Clone
       type(Atoms_Conf_list_Type),     public :: Ac
-      type(Cell_G_Type),              public :: Cell
+      class(Cell_G_Type),allocatable, public :: Cell
       type(RefList_Type),             public :: hkl
       type(Observation_List_Type),    public :: Oh
       Integer, parameter,             public :: N_costf=11

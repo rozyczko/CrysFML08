@@ -170,7 +170,7 @@ SubModule (CFML_IOForm) Format_GEN
        character(len=*),                      intent(in)  :: Str
        real(kind=cp), dimension(6),           intent(out) :: Celda
        real(kind=cp), dimension(6), optional, intent(out) :: Std
-       class(Cell_Type),            optional, intent(out) :: Cell
+       class(Cell_G_Type),          optional, intent(out) :: Cell
        character(len=*),            optional, intent(in)  :: CFrame
 
        !---- Local variables -----!
@@ -479,8 +479,8 @@ SubModule (CFML_IOForm) Format_GEN
     !!
     Module Subroutine Read_SpaceGroup(Str,Spg)
        !---- Arguments ----!
-       character(len=*), intent(in)     :: Str
-       class(SpG_Type),  intent(out)    :: SpG
+       character(len=*),             intent(in)     :: Str
+       class(SpG_Type), allocatable, intent(out)    :: SpG
 
        !---- Local Variables ----!
        integer, parameter       :: NDIR=2

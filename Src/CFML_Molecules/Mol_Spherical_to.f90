@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_Spherical_To
 
    implicit none
- 
+
  Contains
    !!----
    !!---- Subroutine Spherical_to_Cartesian
@@ -65,7 +65,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
       end if
 
    End Subroutine Spherical_to_Cartesian
-   
+
    !!----
    !!---- Subroutine Spherical_to_Fractional
    !!----
@@ -110,7 +110,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
          return
       end if
 
-      !> Step 2 
+      !> Step 2
       call Cartesian_to_Fractional(IMol,Cell)
       if (err_CFML%Ierr /= 0) then
          Err_CFML%Msg="Spherical_to_Fractional: Intermediate procedure fail (II)!"
@@ -130,7 +130,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
       end if
 
    End Subroutine Spherical_to_Fractional
-   
+
    !!----
    !!---- Subroutine Spherical_to_Zmatrix
    !!----
@@ -154,7 +154,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
       integer                     :: na
       type (Molecule_type)        :: IMol
 
-      !> Controls 
+      !> Controls
       if (Mol%coor_type /= "S") then
          call set_error(1, "Spherical_to_ZMatrix: the input Mol is not in Spherical coordinates")
          return
@@ -175,7 +175,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
          return
       end if
 
-      !> Step 2 
+      !> Step 2
       if (present(Cell)) then
          call Cartesian_to_Zmatrix(IMol,Cell=Cell)
       else
@@ -186,7 +186,7 @@ Submodule (CFML_Molecules) Mol_Spherical_To
          return
      end if
 
-      !> Step 3 
+      !> Step 3
       if (present(NMol)) then
          call Init_molecule(NMol,na)
          if (NMol%natoms <=0) then
@@ -199,5 +199,5 @@ Submodule (CFML_Molecules) Mol_Spherical_To
       end if
 
    End Subroutine Spherical_to_Zmatrix
- 
-End Submodule Mol_Spherical_To 
+
+End Submodule Mol_Spherical_To

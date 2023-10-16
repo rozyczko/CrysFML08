@@ -1,7 +1,7 @@
 Submodule (CFML_Molecules) Mol_Orientation
 
    implicit none
- 
+
  Contains
    !!----
    !!---- Subroutine Set_Euler_Matrix
@@ -34,7 +34,7 @@ Submodule (CFML_Molecules) Mol_Orientation
       real(kind=cp)    :: PH,TH,CH
 
       car=u_case(adjustl(rt))
-      
+
       TH=THETA
       if (car == "E") then
          PH=PHI+90.0_cp
@@ -53,8 +53,8 @@ Submodule (CFML_Molecules) Mol_Orientation
       Eu(3,2) =  sind(CH)* sind(TH)
       Eu(3,3) =            cosd(TH)
 
-   End Function Set_Euler_Matrix 
-   
+   End Function Set_Euler_Matrix
+
    !!----
    !!---- SUBROUTINE FIX_ORIENT_CARTESIAN
    !!----
@@ -101,7 +101,7 @@ Submodule (CFML_Molecules) Mol_Orientation
       call Set_MolReference(Mol, IMol, n_or, n_x, n_xy)
       if (err_CFML%IErr /=0) return
 
-      !> Traslation the Origin 
+      !> Traslation the Origin
       do i=2,IMol%natoms
          IMol%I_coor(:,i)=IMol%I_coor(:,i)-IMol%I_coor(:,1)
       end do
@@ -133,7 +133,7 @@ Submodule (CFML_Molecules) Mol_Orientation
       end if
 
    End Subroutine Fix_Orient_Cartesian
-   
+
    !!----
    !!---- SUBROUTINE SET_MOLREFERENCE
    !!----
@@ -165,7 +165,7 @@ Submodule (CFML_Molecules) Mol_Orientation
 
       !> Initialize
       call clear_error()
-      
+
       n_or=1
       n_x =2
       n_xy=3
@@ -275,7 +275,7 @@ Submodule (CFML_Molecules) Mol_Orientation
          end if
       end if
 
-      !> Fix X Axis 
+      !> Fix X Axis
       if (n_x /= 2) then
 
          SetMol%AtName(1)    =IMol%AtName(n_x)
@@ -358,7 +358,7 @@ Submodule (CFML_Molecules) Mol_Orientation
          end if
       end if
 
-      !> Fix XY Plane 
+      !> Fix XY Plane
       if (n_xy /= 3) then
 
          SetMol%AtName(1)    =IMol%AtName(n_xy)
@@ -442,9 +442,9 @@ Submodule (CFML_Molecules) Mol_Orientation
          call Init_molecule(NMol,IMol%natoms)
          NMol=IMol
       else
-         Mol=IMol   
-      end if   
+         Mol=IMol
+      end if
 
    End Subroutine Set_MolReference
- 
-End Submodule Mol_Orientation 
+
+End Submodule Mol_Orientation
