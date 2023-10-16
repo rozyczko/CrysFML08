@@ -61,8 +61,8 @@ Module CFML_Python
              Pointer_To_Array_Alloc,Wrap_Atm_Cell_Type,Wrap_Atm_Type,Wrap_Atlist_Type,Wrap_Symm_Oper_Type
    public :: Wrap_Group_Type,Wrap_Cell_Type,Wrap_Refl_Type,Wrap_Reflist_Type,Wrap_Twofold_Axes_Type
    public :: Unwrap_Atm_Cell_Type,Unwrap_Atlist_Type,Unwrap_Atm_Type,Unwrap_Atm_Type_No_Alloc,&
-             Unwrap_Cell_Type,Unwrap_Cell_G_Type,Unwrap_Dict_Item,&
-             Unwrap_Reflist_Type,Unwrap_Refl_Type,Unwrap_Refl_Type_No_Alloc,Unwrap_Spg_Type,Unwrap_Twofold_Axes_Type
+             Unwrap_Cell_Type,Unwrap_Cell_G_Type,Unwrap_Dict_Item,Unwrap_Reflist_Type,Unwrap_Refl_Type,&
+             Unwrap_Refl_Type_No_Alloc,Unwrap_Spg_Type,Unwrap_Dict_Item_String_Alloc,Unwrap_Twofold_Axes_Type
 
    !---- Overload ----!
    Interface Array_To_List
@@ -89,6 +89,7 @@ Module CFML_Python
    Interface Ndarray_To_Pointer
       module procedure Ndarray_Int32_1d_To_Pointer
       module procedure Ndarray_Int32_2d_To_Pointer
+      module procedure Ndarray_Int64_2d_To_Pointer
       module procedure Ndarray_Int32_3d_To_Pointer
       module procedure Ndarray_Real32_1d_To_Pointer
       module procedure Ndarray_Real32_2d_To_Pointer
@@ -269,6 +270,16 @@ Module CFML_Python
          integer,                            intent(inout) :: ierror
          character(len=1),                   intent(out)   :: order
       End Subroutine Ndarray_Int32_2d_To_Pointer
+
+      Module Subroutine Ndarray_Int64_2d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                         intent(in)    :: procedure_name
+         character(len=*),                         intent(in)    :: var_name
+         type(ndarray),                            intent(in)    :: nd
+         integer(kind=8), dimension(:,:), pointer, intent(out)   :: p
+         integer,                                  intent(inout) :: ierror
+         character(len=1),                         intent(out)   :: order
+      End Subroutine Ndarray_Int64_2d_To_Pointer
 
       Module Subroutine Ndarray_Int32_3d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
          !---- Arguments ----!
