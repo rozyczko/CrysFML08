@@ -65,5 +65,5 @@ rem
 rem   
    if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe  
    if exist %PROGCFML% copy MHall.exe %PROGCFML%\DistFPS_64b\MHall.exe    
-   del *.obj *.mod *.o *.map *.bak > nul
+   del *.obj *.mod *.o *.map *.bak *.exe > nul
 cd ..\Programs_FP\Windows
