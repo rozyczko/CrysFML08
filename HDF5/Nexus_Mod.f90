@@ -975,7 +975,7 @@ module nexus_mod
                         nexus%angles(5,:) = psi_val
                     end if
                 end if
-                if (.not. nexus%is_canne) then
+                if (.not. nexus%is_canne .and. .not. nexus%is_omega) then
                     call h5dopen_f(file_id,instrument_address//'/canne/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_canne = .true.
