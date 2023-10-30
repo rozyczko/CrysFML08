@@ -776,6 +776,8 @@ module nexus_mod
                 nexus%geometry = 'NB' ! Normal Beam
             else if (mode == 1) then
                 nexus%geometry = '4C' ! Four Circle
+            else if (mode == 2) then
+                nexus%geometry = 'MT' ! Minimum Tilt
             else
                 nexus%geometry = '??'
             end if
