@@ -776,6 +776,8 @@ module nexus_mod
                 nexus%geometry = 'NB' ! Normal Beam
             else if (mode == 1) then
                 nexus%geometry = '4C' ! Four Circle
+            else if (mode == 2) then
+                nexus%geometry = 'MT' ! Minimum Tilt
             else
                 nexus%geometry = '??'
             end if
@@ -899,7 +901,7 @@ module nexus_mod
                             nexus%is_psi = .true.
                             nexus%angles(5,:) = datos(:,i)
                             if (abs(nexus%angles(5,nexus%nf)-nexus%angles(5,1)) > MIN_SCAN_ANGLE) motors(5) = 1
-                        case('canne')
+                        case('canne','canne-ech')
                             nexus%is_canne = .true.
                             nexus%angles(6,:) = datos(:,i)
                             if (abs(nexus%angles(6,nexus%nf)-nexus%angles(6,1)) > MIN_SCAN_ANGLE) motors(6) = 1
@@ -973,7 +975,7 @@ module nexus_mod
                         nexus%angles(5,:) = psi_val
                     end if
                 end if
-                if (.not. nexus%is_canne) then
+                if (.not. nexus%is_canne .and. .not. nexus%is_omega) then
                     call h5dopen_f(file_id,instrument_address//'/canne/value',dset,hdferr)
                     if (hdferr /= -1) then
                         nexus%is_canne = .true.
@@ -1049,14 +1051,14 @@ module nexus_mod
 
                 else if (nexus%nbang == 2) then
 
-                    if (motors(3) == 1 .and. motors(4) == 1) then
+                    if (motors(3) == 1 .and. motors(4) == 1 .or. motors(3) == 1 .and. motors(8) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'omega'
                         nexus%scan_start = nexus%angles(3,1)
                         nexus%scan_width = nexus%angles(3,nexus%nf) - nexus%angles(3,1)
                         if (nexus%nf > 1) nexus%scan_step = nexus%scan_width / (nexus%nf - 1)
                         nexus%fcoupling = (nexus%angles(3,nexus%nf)-nexus%angles(3,1)) / (nexus%angles(4,nexus%nf)-nexus%angles(4,1))
-                    else if (motors(3) == 1 .and. motors(4) == 1) then
+                    else if (motors(3) == 1 .and. motors(4) == 1 .or. motors(4) == 1 .and. motors(8) == 1) then
                         nexus%manip = 2
                         nexus%scan_type = 'canne'
                         nexus%scan_start = nexus%angles(6,1)
