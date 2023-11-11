@@ -6,6 +6,31 @@ SubModule (CFML_Python)  Unwrap
 implicit none
     Contains
 
+    Module Subroutine Array_To_List_Logical(procedure_name,var_name,arr,my_list,ierror)
+        !---- Arguments ----!
+        character(len=*),                                intent(in)    :: procedure_name
+        character(len=*),                                intent(in)    :: var_name
+        logical, dimension(:),                           intent(in)    :: arr
+        type(list),                                      intent(inout) :: my_list
+        integer,                                         intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i
+
+        ierror = 0
+        do i = 1 , size(arr)
+            if (ierror == 0) then
+                ierror = my_list%append(arr(i))
+            else
+                err_cfml%flag = .true.
+                err_cfml%ierr = -1
+                err_cfml%msg  = procedure_name//': Error building list '//var_name
+                return
+            end if
+        end do
+
+    End Subroutine Array_To_List_Logical
+
     Module Subroutine Array_To_List_Str(procedure_name,var_name,arr,my_list,ierror)
         !---- Arguments ----!
         character(len=*),                                intent(in)    :: procedure_name
