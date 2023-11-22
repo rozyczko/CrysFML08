@@ -6,6 +6,31 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    Contains
 
 
+   !!----Module Function Inverse_Setting(setting,D) Result(inv_sett)
+   !!----   character(len=*), intent(in) :: setting
+   !!----   integer,          intent(in) :: D
+   !!----   Character(len=:), allocatable:: inv_sett
+   !!----
+   !!----
+   !!----   This routine invert a provided setting in the form
+   !!----     m1a+m2b+m3c...,m4a+m5b+m6c...,m7a+m8b+m9c...,...;o1,o2,o3, ...
+   !!----   into a similar form representing the inverse operation.
+   !!----   The integer D represents the dimension of the matrices
+   !!----
+   Module Function Inverse_Setting(setting,D) Result(inv_sett)
+      Character(len=*), intent(in) :: setting
+      integer,          intent(in) :: D
+      Character(len=:), allocatable:: inv_sett
+      !Local variables
+      Type(rational), dimension(D,D)     :: Pmat,invPmat
+
+      inv_sett = setting
+      call Get_Mat_From_Symb(setting, Pmat)
+      if(err_CFML%Ierr /= 0) return
+      invPmat=Rational_Inverse_Matrix(Pmat)
+      inv_sett=Get_Symb_From_Mat(invPmat,StrCode="abc" )
+   End Function Inverse_Setting
+
    !!---- Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
    !!----   character(len=*), intent(in) :: BNS_Symb
    !!----   integer,          intent(in) :: mag_type
@@ -507,7 +532,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
+   Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path,trn_to)
       !---- Arguments ----!
       character(len=*),           intent(in ) :: Str
       character(len=*),           intent(in ) :: mode
@@ -517,6 +542,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       logical,          optional, intent(in ) :: keepdb
       character(len=*), optional, intent(in ) :: parent
       character(len=*), optional, intent(in ) :: database_path
+      logical,          optional, intent(in ) :: trn_to
 
       !---- Local Variables ----!
       integer                         :: i,j,k,d, Dd, L,La, idem,ier, num, n,m, iclass, nmod
@@ -578,13 +604,14 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
             do i=1,magcount
               !write(*,"(i5,tr5,a)") i, spacegroup_label_bns(i)
               if(trim(loc_str) == trim(spacegroup_label_bns(i)) .or. &
-                 trim(loc_str) == trim(spacegroup_label_og(i))) then
+                 trim(loc_str) == trim(spacegroup_label_og(i))  .or. &
+                 trim(loc_str) == trim(spacegroup_label_unified(i))) then
                  num=i
                  exit
               end if
             end do
             if(num == 0) then
-               Err_CFML%Msg=" => The BNS symbol: "//trim(loc_str)//" is illegal! "
+               Err_CFML%Msg=" => The BNS/UNI/OG symbol: "//trim(loc_str)//" is illegal! "
                Err_CFML%Ierr=1
                if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                return
@@ -825,7 +852,12 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           SpaceG%UNI=adjustl(shubnikov_info(Litvin2IT(num))%STD)
           write(SpaceG%UNI_num,"(i4)") Litvin2IT(num)
 
+
+
           if(change_setting) then
+              if(present(trn_to)) then
+                 sett=inverse_setting(setting,SpaceG%D)
+              end if
               call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
@@ -1009,6 +1041,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           if(SpaceG%Centred == 2 .or. SpaceG%Centred == 0) SpaceG%NumOps=SpaceG%NumOps/2
 
           if(change_setting) then
+              if(present(trn_to)) then
+                 sett=inverse_setting(setting,SpaceG%D)
+              end if
               call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_SSG_DBase()

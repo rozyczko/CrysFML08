@@ -82,6 +82,7 @@ Module CFML_Magnetic_Database
     Character(Len=12), dimension(  :), public, allocatable :: nlabel_og            ! nlabel_og(i): numerical label in OG setting
     Integer,           dimension(:,:), public, allocatable :: nlabelparts_og       ! nlabel_parts_og(j,i): jth part of nlabel_og
     Character(Len=14), dimension(  :), public, allocatable :: spacegroup_label_og  ! label_og(i): group symbol
+    Character(Len=27), dimension(  :), public, allocatable :: spacegroup_label_unified  ! UNIFIED group symbol
     Integer,           dimension(  :), public, allocatable :: magtype              ! magtype(i): type of magnetic space group (1-4)
 
     !> BNS-OG transformation (if type-4)
