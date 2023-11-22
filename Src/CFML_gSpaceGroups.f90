@@ -71,7 +71,7 @@ Module CFML_gSpaceGroups
               Get_Crystal_System, Get_Dimension_SymmOP, Get_Hall_from_Generators,        &
               Get_HM_Standard, Get_Lattice_Type, Get_Laue_Num, Get_Laue_Str,             &
               Get_OP_from_Symb, Get_PointGroup_Num, Get_PointGroup_Str,                  &
-              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,                   &
+              Get_Rotation_Order, get_Symb_from_Mat, Get_Symb_from_OP,Inverse_Setting,   &
               Inverse_OP, Get_Orbit, Get_Moment_ctr, Get_TFourier_Ctr, Get_AtomBet_CTR,  &
               Get_AtomPos_CTR,ISO_to_jones_notation, Get_Symb_from_Rational_Mat
 
@@ -134,6 +134,7 @@ Module CFML_gSpaceGroups
        character(len=:),              allocatable :: setting           ! Operators transformed by "setting" (e.g. -a+b,a+b,-c;1/2,0,0)
        character(len=:),              allocatable :: mat2std           ! To standard space group (Parent)
        character(len=:),              allocatable :: mat2std_shu       ! To standard Shubnikov space group
+       character(len=:),              allocatable :: matfrom           ! From standard space group
        character(len=:),              allocatable :: generators_list   ! List of generators
        type(rational),dimension(:),   allocatable :: centre_coord      ! Fractional coordinates for inversion
        type(rational),dimension(:),   allocatable :: anticentre_coord  ! Fractional coordinates for time invesion
