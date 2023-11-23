@@ -109,7 +109,8 @@ SubModule (CFML_Magnetic_Database) TAB_Read_MagneticDBase
 
       !> read data for each magnetic space group
       do i=1,1651
-         Read(i_mag,*) (nlabelparts_bns(j,i),j=1,2),nlabel_bns(i),  &
+         Read(i_mag,*) (nlabelparts_bns(j,i),j=1,2),nlabel_bns(i),           &
+                       spacegroup_label_unified(i),                          &
                        spacegroup_label_bns(i),(nlabelparts_og(j,i),j=1,3),  &
                        nlabel_og(i),spacegroup_label_og(i)
 
@@ -248,7 +249,8 @@ SubModule (CFML_Magnetic_Database) TAB_Read_MagneticDBase
 
       !> read data for each magnetic space group
       do i=1,1651
-         Read(i_mag) (nlabelparts_bns(j,i),j=1,2),nlabel_bns(i),  &
+         Read(i_mag) (nlabelparts_bns(j,i),j=1,2),nlabel_bns(i),           &
+                     spacegroup_label_unified(i),                          &
                      spacegroup_label_bns(i),(nlabelparts_og(j,i),j=1,3),  &
                      nlabel_og(i),spacegroup_label_og(i)
          Read(i_mag) magtype(i)

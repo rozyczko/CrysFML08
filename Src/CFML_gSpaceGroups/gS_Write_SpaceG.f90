@@ -36,39 +36,40 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
 
       if(Grp%d-1 > 3) then !Superspace group
 
-            write(unit=iout,fmt="(/,a)")                                      "    --------------------------"
-            write(unit=iout,fmt="(a)")                                        "     General SuperSpace Group"
-            write(unit=iout,fmt="(a)")                                        "    --------------------------"
-            write(unit=iout,fmt="(a,i6)")                                     "                  Op-Dimension: ",Grp%d
-            write(unit=iout,fmt="(a,i6)")                                     "               Space-Dimension: ",Grp%d-1
-            write(unit=iout,fmt="(a,i6)")                                     "                  Multiplicity: ",Grp%multip
-            write(unit=iout,fmt="(a,i6,a)")                                   "                       MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
-            write(unit=iout,fmt="(a,i6)")                                     "                        NumOps: ",Grp%numops
-            write(unit=iout,fmt="(a,i6)")                                     "                       Centred: ",Grp%centred
-            write(unit=iout,fmt="(a,i6)")                                     "     Num. Centring translation: ",Grp%num_lat
-            write(unit=iout,fmt="(a,i6)")                                     "        Num. Anti-translations: ",Grp%num_alat
-            if(len_trim(Grp%init_label) /= 0)   write(unit=iout,fmt="(a, a)") "        Space Group Init Label: ",trim(Grp%init_label)
-            if(len_trim(Grp%Crystalsys) /= 0)   write(unit=iout,fmt="(a, a)") "                Crystal system: ",trim(Grp%Crystalsys)
-            if(len_trim(Grp%centre) /= 0)       write(unit=iout,fmt="(a, a)") "            Centre of symmetry: ",trim(Grp%centre)
-            if(len_trim(Grp%pg) /=0 )           write(unit=iout,fmt="(a, a)") "  Crystallographic Point group: ",trim(Grp%pg)
-            if(len_trim(Grp%laue) /= 0)         write(unit=iout,fmt="(a, a)") "                    Laue class: ",trim(Grp%laue)
-            if(len_trim(Grp%setting) /= 0)      write(unit=iout,fmt="(a, a)") "     Setting w.r.t. or. gener.: ",trim(Grp%setting)
-            if(len_trim(Grp%mat2std) /= 0)      write(unit=iout,fmt="(a, a)") "  To Standard SuperSpace Group: ",trim(Grp%mat2std)
-            if(len_trim(Grp%mag_pg) /= 0)       write(unit=iout,fmt="(a, a)") "          Magnetic Point group: ",trim(Grp%mag_pg)
-                                                write(unit=iout,fmt="(a,i6)") "     Parent Space Group number: ",Grp%Parent_num
-            if(len_trim(Grp%Parent_spg) /= 0)   write(unit=iout,fmt="(a, a)") "            Parent Space Group: ",trim(Grp%Parent_spg)
-            if(len_trim(Grp%tfrom_parent) /= 0) write(unit=iout,fmt="(a, a)") "         Transform from Parent: ",trim(Grp%tfrom_parent)
-                                                write(unit=iout,fmt="(a,i6)") "          Bravais Class number: ",Grp%Bravais_num
+            write(unit=iout,fmt="(/,a)")                                      "      --------------------------"
+            write(unit=iout,fmt="(a)")                                        "       General SuperSpace Group"
+            write(unit=iout,fmt="(a)")                                        "      --------------------------"
+            write(unit=iout,fmt="(a,i6)")                                     "                    Op-Dimension: ",Grp%d
+            write(unit=iout,fmt="(a,i6)")                                     "                 Space-Dimension: ",Grp%d-1
+            write(unit=iout,fmt="(a,i6)")                                     "                    Multiplicity: ",Grp%multip
+            write(unit=iout,fmt="(a,i6,a)")                                   "                         MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
+            write(unit=iout,fmt="(a,i6)")                                     "                          NumOps: ",Grp%numops
+            write(unit=iout,fmt="(a,i6)")                                     "                         Centred: ",Grp%centred
+            write(unit=iout,fmt="(a,i6)")                                     "       Num. Centring translation: ",Grp%num_lat
+            write(unit=iout,fmt="(a,i6)")                                     "          Num. Anti-translations: ",Grp%num_alat
+            if(len_trim(Grp%init_label) /= 0)   write(unit=iout,fmt="(a, a)") "          Space Group Init Label: ",trim(Grp%init_label)
+            if(len_trim(Grp%Crystalsys) /= 0)   write(unit=iout,fmt="(a, a)") "                  Crystal system: ",trim(Grp%Crystalsys)
+            if(len_trim(Grp%centre) /= 0)       write(unit=iout,fmt="(a, a)") "              Centre of symmetry: ",trim(Grp%centre)
+            if(len_trim(Grp%pg) /=0 )           write(unit=iout,fmt="(a, a)") "    Crystallographic Point group: ",trim(Grp%pg)
+            if(len_trim(Grp%laue) /= 0)         write(unit=iout,fmt="(a, a)") "                      Laue class: ",trim(Grp%laue)
+            if(len_trim(Grp%setting) /= 0)      write(unit=iout,fmt="(a, a)") "       Setting w.r.t. or. gener.: ",trim(Grp%setting)
+            if(len_trim(Grp%mat2std) /= 0)      write(unit=iout,fmt="(a, a)") "    To Standard SuperSpace Group: ",trim(Grp%mat2std)
+            if(len_trim(Grp%matfrom) /= 0)      write(unit=iout,fmt="(a, a)") "  From Standard SuperSpace Group: ",trim(Grp%matfrom)
+            if(len_trim(Grp%mag_pg) /= 0)       write(unit=iout,fmt="(a, a)") "            Magnetic Point group: ",trim(Grp%mag_pg)
+                                                write(unit=iout,fmt="(a,i6)") "       Parent Space Group number: ",Grp%Parent_num
+            if(len_trim(Grp%Parent_spg) /= 0)   write(unit=iout,fmt="(a, a)") "              Parent Space Group: ",trim(Grp%Parent_spg)
+            if(len_trim(Grp%tfrom_parent) /= 0) write(unit=iout,fmt="(a, a)") "           Transform from Parent: ",trim(Grp%tfrom_parent)
+                                                write(unit=iout,fmt="(a,i6)") "            Bravais Class number: ",Grp%Bravais_num
 
 
             Select Type (Grp)
               class is(SuperSpaceGroup_Type)
-                 if(len_trim(Grp%mat2std) /= 0) write(unit=iout,fmt="(a, a)") "                 Bravais Class: ",trim(Grp%SSG_Bravais)
-                                                write(unit=iout,fmt="(a,i6)") "       SuperSpace Group number: ",Grp%numspg
-              if(len_trim(Grp%SSG_nlabel) /= 0) write(unit=iout,fmt="(a, a)") "       SuperSpace Group  Label: ",trim(Grp%SSG_nlabel)
-                if(len_trim(Grp%SSG_symb) /= 0) write(unit=iout,fmt="(a, a)") "       SuperSpace Group symbol: ",trim(Grp%SSG_symb)
-                            write(unit=iout,fmt="(/,a,i4)")                   "  Number of modulation vectors: ",Grp%nk
-                            write(unit=iout,fmt="(a)")                        "  Q-vectors & harmonics & maximum SinTheta/Lambda: "
+                 if(len_trim(Grp%mat2std) /= 0) write(unit=iout,fmt="(a, a)") "                   Bravais Class: ",trim(Grp%SSG_Bravais)
+                                                write(unit=iout,fmt="(a,i6)") "         SuperSpace Group number: ",Grp%numspg
+              if(len_trim(Grp%SSG_nlabel) /= 0) write(unit=iout,fmt="(a, a)") "         SuperSpace Group  Label: ",trim(Grp%SSG_nlabel)
+                if(len_trim(Grp%SSG_symb) /= 0) write(unit=iout,fmt="(a, a)") "         SuperSpace Group symbol: ",trim(Grp%SSG_symb)
+                            write(unit=iout,fmt="(/,a,i4)")                   "    Number of modulation vectors: ",Grp%nk
+                            write(unit=iout,fmt="(a)")                        "    Q-vectors & harmonics & maximum SinTheta/Lambda: "
                             if(allocated(Grp%kv)) then
                               do i=1,Grp%nk
                                  nh=1; stl=1.0
@@ -88,40 +89,42 @@ SubModule (CFML_gSpaceGroups) gS_Write_SpaceG
 
             End Select
       else
-                                               write(unit=iout,fmt="(/,a)")      "    General Space Group"
-                                               write(unit=iout,fmt="(a)")        "    -------------------"
-                                               write(unit=iout,fmt="(a,i4)")     "                  Op-Dimension: ",Grp%d
-                                               write(unit=iout,fmt="(a,i4)")     "               Space-Dimension: ",Grp%d-1
-                                               write(unit=iout,fmt="(a,i4)")     "                  Multiplicity: ",Grp%multip
-            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4,a)")   "                       MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
-                                               write(unit=iout,fmt="(a,i4)")     "                        NumOps: ",Grp%numops
-                                               write(unit=iout,fmt="(a,i4)")     "                       Centred: ",Grp%centred
-                                               write(unit=iout,fmt="(a,i4)")     "     Num. Centring translation: ",Grp%num_lat
-            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4)")     "        Num. Anti-translations: ",Grp%num_alat
-            if(len_trim(Grp%centre) /= 0)      write(unit=iout,fmt="(a, a)")     "            Centre of symmetry: ",trim(Grp%centre)
-            if(len_trim(Grp%Crystalsys) /= 0)  write(unit=iout,fmt="(a, a)")     "                Crystal system: ",trim(Grp%Crystalsys)
-            if(len_trim(Grp%pg) /= 0)          write(unit=iout,fmt="(a, a)")     "  Crystallographic Point group: ",trim(Grp%pg)
-            if(len_trim(Grp%laue) /= 0)        write(unit=iout,fmt="(a, a)")     "                    Laue class: ",trim(Grp%laue)
-            if(Grp%numspg /= 0)                write(unit=iout,fmt="(a,i4)")     "            Space Group number: ",Grp%numspg
-            if(len_trim(Grp%init_label) /= 0)  write(unit=iout,fmt="(a, a)")     "        Space Group Init Label: ",trim(Grp%init_label)
-            if(len_trim(Grp%spg_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "            Space Group symbol: ",trim(Grp%spg_symb)
-            if(len_trim(Grp%Hall) /= 0)        write(unit=iout,fmt="(a, a)")     "                   Hall symbol: ",trim(Grp%Hall)
+                                               write(unit=iout,fmt="(/,a)")      "     General Space Group"
+                                               write(unit=iout,fmt="(a)")        "     -------------------"
+                                               write(unit=iout,fmt="(a,i4)")     "                   Op-Dimension: ",Grp%d
+                                               write(unit=iout,fmt="(a,i4)")     "                Space-Dimension: ",Grp%d-1
+                                               write(unit=iout,fmt="(a,i4)")     "                   Multiplicity: ",Grp%multip
+            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4,a)")   "                        MagType: ",Grp%mag_type,", "//trim(gtype(Grp%mag_type))
+                                               write(unit=iout,fmt="(a,i4)")     "                         NumOps: ",Grp%numops
+                                               write(unit=iout,fmt="(a,i4)")     "                        Centred: ",Grp%centred
+                                               write(unit=iout,fmt="(a,i4)")     "      Num. Centring translation: ",Grp%num_lat
+            if(Grp%magnetic)                   write(unit=iout,fmt="(a,i4)")     "         Num. Anti-translations: ",Grp%num_alat
+            if(len_trim(Grp%centre) /= 0)      write(unit=iout,fmt="(a, a)")     "             Centre of symmetry: ",trim(Grp%centre)
+            if(len_trim(Grp%Crystalsys) /= 0)  write(unit=iout,fmt="(a, a)")     "                 Crystal system: ",trim(Grp%Crystalsys)
+            if(len_trim(Grp%pg) /= 0)          write(unit=iout,fmt="(a, a)")     "   Crystallographic Point group: ",trim(Grp%pg)
+            if(len_trim(Grp%laue) /= 0)        write(unit=iout,fmt="(a, a)")     "                     Laue class: ",trim(Grp%laue)
+            if(Grp%numspg /= 0)                write(unit=iout,fmt="(a,i4)")     "             Space Group number: ",Grp%numspg
+            if(len_trim(Grp%init_label) /= 0)  write(unit=iout,fmt="(a, a)")     "         Space Group Init Label: ",trim(Grp%init_label)
+            if(len_trim(Grp%spg_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "             Space Group symbol: ",trim(Grp%spg_symb)
+            if(len_trim(Grp%Hall) /= 0)        write(unit=iout,fmt="(a, a)")     "                    Hall symbol: ",trim(Grp%Hall)
 
          if(Grp%magnetic) then
-            if(Grp%numshu /= 0 )               write(unit=iout,fmt="(a,i4)")     "        Shubnikov Group number: ",Grp%numshu
-            if(len_trim(Grp%bns_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-symbol: ",trim(Grp%bns_symb)
-            if(len_trim(Grp%bns_num) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group BNS-label : ",trim(Grp%bns_num)
-            if(len_trim(Grp%og_symb) /= 0)     write(unit=iout,fmt="(a, a)")     "    Shubnikov Group  OG-symbol: ",trim(Grp%og_symb)
-            if(len_trim(Grp%UNI) /= 0)         write(unit=iout,fmt="(a, a)")     "   MSG unified notation symbol: ",trim(Grp%UNI)
-            if(len_trim(Grp%UNI_num) /= 0)     write(unit=iout,fmt="(a, a)")     "   MSG unified notation number: ",trim(Grp%UNI_num)
-            if(len_trim(Grp%mag_pg) /= 0)      write(unit=iout,fmt="(a, a)")     "          Magnetic Point Group: ",trim(Grp%mag_pg)
-            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "   To Standard Shubnikov Group: ",trim(Grp%Mat2Std_Shu)
+            if(Grp%numshu /= 0 )               write(unit=iout,fmt="(a,i4)")     "         Shubnikov Group number: ",Grp%numshu
+            if(len_trim(Grp%bns_symb) /= 0)    write(unit=iout,fmt="(a, a)")     "     Shubnikov Group BNS-symbol: ",trim(Grp%bns_symb)
+            if(len_trim(Grp%bns_num) /= 0)     write(unit=iout,fmt="(a, a)")     "     Shubnikov Group BNS-label : ",trim(Grp%bns_num)
+            if(len_trim(Grp%og_symb) /= 0)     write(unit=iout,fmt="(a, a)")     "     Shubnikov Group  OG-symbol: ",trim(Grp%og_symb)
+            if(len_trim(Grp%UNI) /= 0)         write(unit=iout,fmt="(a, a)")     "    MSG unified notation symbol: ",trim(Grp%UNI)
+            if(len_trim(Grp%UNI_num) /= 0)     write(unit=iout,fmt="(a, a)")     "    MSG unified notation number: ",trim(Grp%UNI_num)
+            if(len_trim(Grp%mag_pg) /= 0)      write(unit=iout,fmt="(a, a)")     "           Magnetic Point Group: ",trim(Grp%mag_pg)
+            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "    To Standard Shubnikov Group: ",trim(Grp%Mat2Std_Shu)
+            if(len_trim(Grp%Matfrom) /= 0)     write(unit=iout,fmt="(a, a)")     "  From Standard Shubnikov Group: ",trim(Grp%Matfrom)
          else
-            !if(len_trim(Grp%mat2std) /= 0)     write(unit=iout,fmt="(a, a)")     "       To Standard Space Group: ",trim(Grp%mat2std)
-            if(len_trim(Grp%setting) /= 0)     write(unit=iout,fmt="(a, a)")     "     Setting w.r.t. or. gener.: ",trim(Grp%setting)
-            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "             To Standard Group: ",trim(Grp%Mat2Std_Shu)
-            if(len_trim(Grp%Parent_spg) /= 0)  write(unit=iout,fmt="(a, a)")     "            Parent Space Group: ",trim(Grp%Parent_spg)
-            if(len_trim(Grp%tfrom_parent) /= 0)write(unit=iout,fmt="(a, a)")     "         Transform from Parent: ",trim(Grp%tfrom_parent)
+            !if(len_trim(Grp%mat2std) /= 0)     write(unit=iout,fmt="(a, a)")     "        To Standard Space Group: ",trim(Grp%mat2std)
+            if(len_trim(Grp%setting) /= 0)     write(unit=iout,fmt="(a, a)")     "      Setting w.r.t. or. gener.: ",trim(Grp%setting)
+            if(len_trim(Grp%Mat2Std_Shu) /= 0) write(unit=iout,fmt="(a, a)")     "              To Standard Group: ",trim(Grp%Mat2Std_Shu)
+            if(len_trim(Grp%Matfrom) /= 0)     write(unit=iout,fmt="(a, a)")     "            From Standard Group: ",trim(Grp%Matfrom)
+            if(len_trim(Grp%Parent_spg) /= 0)  write(unit=iout,fmt="(a, a)")     "             Parent Space Group: ",trim(Grp%Parent_spg)
+            if(len_trim(Grp%tfrom_parent) /= 0)write(unit=iout,fmt="(a, a)")     "          Transform from Parent: ",trim(Grp%tfrom_parent)
          end if
 
       end if
