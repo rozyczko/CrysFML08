@@ -7,8 +7,6 @@ December 2023
 Functions
 ---------
 get_cfml_modules_filenames() -> list
-get_types(lines : list,n : int =0) -> tuple
-get_uses(lines : list,n : int =0) -> tuple
 read() -> None
 read_cfml_module(file_name : str) -> None
 run() -> None
@@ -30,6 +28,8 @@ except:
 
 # In EXCLUDED we put the modules we do not want to wrap
 EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','rational','strings','tables','vtk']
+PRIMITIVES = ['integer','real','logical','characer','complex']
+NUMERICALS = ['integer','real']
 modules = {}
 
 def get_cfml_modules_filenames() -> list:
@@ -52,48 +52,6 @@ def get_cfml_modules_filenames() -> list:
             print(f"{'Error: No Fortran modules found. There is nothing to do. Bye bye.'}")
         raise IOError
     return my_modules
-
-def get_types(lines : list,n : int =0) -> tuple:
-
-    types = {}
-    while n < len(lines):
-        line = lines[n].lower().strip()
-        if line.startswith('interface') or line.startswith('contains'):
-            return (types,n-1)
-        if not line.startswith('type'):
-            n += 1
-            continue
-        if line[4:].strip().startswith('('):
-            n += 1
-            continue
-        if line.find('public') < 0:
-            n += 1
-            continue
-        n,line = parser_utils.get_line(n,lines)
-        t_name = parser_utils.get_type_name(line)
-        p_name = parser_utils.get_type_parent(line)
-        #if is_colorama:
-        #    print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
-        #else:
-        #    print(f"{' ':>4}{'Parsing '}{'type' : <11}{t_name}")
-        types[t_name] = cfml_objects.init_type(name=t_name,parent=p_name)
-        n = parser_utils.get_type_components(n+1,lines,types[t_name]['components'])
-    return (types,n)
-
-def get_uses(lines : list,n : int =0) -> tuple:
-
-    uses = []
-    while n < len(lines):
-        line = lines[n].lower().strip()
-        if line.startswith('interface') or line.startswith('contains'):
-            return (uses,n-1)
-        if not line.startswith('use'):
-            n += 1
-            continue
-        n,line = parser_utils.get_line(n,lines)
-        uses.append(line)
-        n += 1
-    return (uses,n)
 
 def read() -> None:
 
@@ -122,17 +80,17 @@ def read_cfml_module(file_name : str) -> None:
         else:
             print(f"{'Error: '}{e}")
         raise IOError
-    modules[m_name] = cfml_objects.init_module(name=m_name)
+    modules[m_name] = cfml_objects.Module(name=m_name)
     if is_colorama:
         print(f"{' ':>4}{colorama.Fore.GREEN}{'Module name: '}{colorama.Fore.CYAN}{m_name}{colorama.Style.RESET_ALL}")
     else:
         print(f"{' ':>4}{'Module name: '}{m_name}")
 
     # Get used modules
-    modules[m_name]['uses'],n = get_uses(lines,0)
+    n = parser_utils.get_uses(0,lines,modules[m_name].uses)
 
     # Get types
-    modules[m_name]['types'],n = get_types(lines,0)
+    n = parser_utils.get_types(0,lines,modules[m_name].types)
 
 def run() -> None:
 
@@ -163,10 +121,16 @@ def run() -> None:
 def set_childs():
 
     for m in modules:
-        for t in modules[m]['types']:
-            if modules[m]['types'][t]['parent']:
-                p = modules[m]['types'][t]['parent']
-                modules[m]['types'][p]['childs'].append(t)
+        for t in modules[m].types:
+            if modules[m].types[t].parent:
+                parent = modules[m].types[t].parent
+                p = modules[m].types[t].parent
+                level = 0
+                while modules[m].types[p].parent:
+                    parent = modules[m].types[p].parent
+                    p = modules[m].types[p].parent
+                    level += 1
+                modules[m].types[parent].childs.append(t)
 
 def wrap() -> None:
 
@@ -174,6 +138,7 @@ def wrap() -> None:
         os.mkdir('CFML_Wraps')
     for m in modules:
         wrap_cfml_module(m)
+        #break
     return None
 
 def wrap_cfml_module(m_name : str) -> None:
@@ -182,10 +147,132 @@ def wrap_cfml_module(m_name : str) -> None:
     w_file = os.path.join('CFML_Wraps',w_name+'.f90')
     with open(w_file,'w') as f:
         f.write(f"submodule (CFML_Wraps) {w_name}\n")
-        f.write(f"{'':>4} implicit none\n")
-        f.write(f"{'':>4} contains\n")
+        f.write(f"\n{'':>4}implicit none\n")
+        f.write(f"{'':>4}contains\n")
+        t = modules[m_name].types
+        for s in t:
+            if not t[s].parent:
+                write_unwrap_proc(f,t,s)
+                write_wrap_proc(f,t,s)
+            #break
+        f.write(f"\nend submodule")
 
-        f.write(f"end submodule")
+def local_variables_unwrap(t : cfml_objects.FortranType) -> list:
+
+    p_int_1D = False
+    p_int_2D = False
+    p_int_3D = False
+    p_real_1D = False
+    p_real_2D = False
+    p_real_3D = False
+    for c in t.components:
+        var = t.components[c]
+        if var.ftype.lower() == 'integer':
+            if var.ndim == 1:
+                p_int_1D = True
+            elif var.ndim == 2:
+                p_int_2D = True
+            elif var.ndim == 3:
+                p_int_3D = True
+        elif var.ftype.lower() == 'real':
+            if var.ndim == 1:
+                p_real_1D = True
+            elif var.ndim == 2:
+                p_real_2D = True
+            elif var.ndim == 3:
+                p_real_3D = True
+    lv = []
+    if p_int_1D:
+        lv.append('integer, dimension(:), pointer :: p_int_1d')
+    if p_int_2D:
+        lv.append('integer, dimension(:,:), pointer :: p_int_2d')
+    if p_int_3D:
+        lv.append('integer, dimension(:,:,:), pointer :: p_int_3d')
+    if p_real_1D:
+        lv.append('real, dimension(:), pointer :: p_real_1d')
+    if p_real_2D:
+        lv.append('real, dimension(:,:), pointer :: p_real_2d')
+    if p_real_3D:
+        lv.append('real, dimension(:,:,:), pointer :: p_real_3d')
+    return lv
+
+def write_unwrap_proc(f,t : dict,s : str) -> None:
+
+    f.write(f"\n{'':>4}Module Subroutine Unwrap_{s}(py_var,for_var,ierror)\n")
+    # Arguments
+    f.write(f"\n{'':>8}! Arguments\n")
+    f.write(f"{'':>8}type(dict), intent(inout) :: py_var\n")
+    if t[s].childs:
+        f.write(f"{'':>8}class({s}), allocatable, intent(out) :: for_var\n")
+    else:
+        f.write(f"{'':>8}type({s}), intent(out) :: for_var\n")
+    f.write(f"{'':>8}integer, intent(out) :: ierror\n")
+    # Local variables
+    local_var = local_variables_unwrap(t[s])
+    f.write(f"\n{'':>8}! Local variables\n")
+    f.write(f"{'':>8}character(len=:), allocatable :: fortran_type\n")
+    for lv in local_var:
+        f.write(f"{'':>8}{lv}\n")
+    # Initialization
+    f.write(f"\n{'':>8}ierror = 0\n")
+    # Procedure
+    f.write(f"{'':>8}ierror = py_var%getitem(fortran_type,'fortran_type')\n")
+    f.write(f"{'':>8}if (ierror /= 0) then\n")
+    f.write(f"{'':>12}err_cfml%flag = .true.\n")
+    f.write(f"{'':>12}err_cfml%ierr = ierror\n")
+    f.write(f"{'':>12}err_cfml%msg  = 'Unwrap_{s}: Cannot determine fortran type'\n")
+    f.write(f"{'':>8}else\n")
+    f.write(f"{'':>12}if (fortran_type == '{s}') then\n")
+    f.write(f"{'':>16}allocate({s} :: for_var)\n")
+    childs = t[s].childs
+    if childs:
+        level = 0
+        n = 1
+        while n > 0:
+            n = 0
+            for ch in childs:
+                if ch[1] == level:
+                    f.write(f"{'':>12}else if (fortran_type == '{ch[0]}') then\n")
+                    f.write(f"{'':>16}allocate({ch[0]} :: for_var)\n")
+                    n += 1
+            level += 1
+    f.write(f"{'':>12}else\n")
+    f.write(f"{'':>16}ierror = -1\n")
+    f.write(f"{'':>16}err_cfml%flag = .true.\n")
+    f.write(f"{'':>16}err_cfml%ierr = ierror\n")
+    f.write(f"{'':>16}err_cfml%msg  = 'Unwrap_{s}: Wrong fortran type:'//adjustl(trim(fortran_type))\n")
+    f.write(f"{'':>12}end if\n")
+    f.write(f"{'':>8}end if\n")
+    for c in t[s].components:
+        var = t[s].components[c]
+        if var.ftype.lower() in PRIMITIVES:
+            if var.ndim == 0:
+                f.write(f"{'':>8}if (ierror == 0) call unwrap_dict_item('Unwrap_{s}','{var.name}',py_var,for_var%{var.name},ierror)\n")
+            elif var.ftype.lower() in NUMERICALS:
+                if var.ftype.lower() == 'integer':
+                    pointer = 'p_int_'+str(var.ndim)+'d'
+                else:
+                    pointer = 'p_real_'+str(var.ndim)+'d'
+                if var.allocatable:
+                    func = 'pointer_to_array_alloc'
+                else:
+                    func = 'pointer_to_array'
+                f.write(f"{'':>8}if (ierror == 0) call unwrap_dict_item('Unwrap_{s}','{var.name}',py_var,{pointer},ierror)\n")
+                f.write(f"{'':>8}if (ierror == 0) call {func}('Unwrap_{s}','{var.name}',{pointer},for_var%{var.name},ierror)\n")
+
+    f.write(f"\n{'':>4}End Subroutine Unwrap_{s}\n")
+
+def write_wrap_proc(f,t : dict,s : str) -> None:
+
+    f.write(f"\n{'':>4}Module Subroutine Wrap_{s}(py_var,for_var,ierror)\n")
+    f.write(f"\n{'':>8}! Arguments\n")
+    if t[s].childs:
+        f.write(f"{'':>8}class({s}), intent(in) :: for_var\n")
+    else:
+        f.write(f"{'':>8}type({s}), intent(in) :: for_var\n")
+    f.write(f"{'':>8}type(dict), intent(inout) :: py_var\n")
+    f.write(f"{'':>8}integer, intent(out) :: ierror\n")
+    f.write(f"\n{'':>4}End Subroutine Wrap_{s}\n")
 
 
 if __name__ == '__main__':

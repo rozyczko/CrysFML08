@@ -20,9 +20,11 @@ get_procedure(line : str) -> str
 get_subroutine_arguments(line : str, s : cfml_objects.Subroutine) -> None
 get_subroutine_name(lines : list) -> str
 get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int
+get_types(n,lines : list,t : dict) -> int:
 get_type_components(n : int, lines : list, t : cfml_objects.FortranType) -> int
 get_type_name(line : str) -> str
 get_type_parent(line : str) -> str
+get_uses(n,lines : list,us : dict) -> int
 is_array(dim : str) -> bool
 is_empty(line : str) -> bool
 is_optional(line : str) -> bool
@@ -263,7 +265,33 @@ def get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> 
             in_subroutine = False
     return n
 
-def get_type_components(n : int, lines: list, t : dict) -> int:
+def get_types(n,lines : list,t : dict) -> int:
+
+    while n < len(lines):
+        line = lines[n].lower().strip()
+        if line.startswith('interface') or line.startswith('contains'):
+            return n-1
+        if not line.startswith('type'):
+            n += 1
+            continue
+        if line[4:].strip().startswith('('):
+            n += 1
+            continue
+        if line.find('public') < 0:
+            n += 1
+            continue
+        n,line = get_line(n,lines)
+        t_name = get_type_name(line)
+        p_name = get_type_parent(line)
+        #if is_colorama:
+        #    print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
+        #else:
+        #    print(f"{' ':>4}{'Parsing '}{'type' : <11}{t_name}")
+        t[t_name] = cfml_objects.FortranType(name=t_name,parent=p_name)
+        n = get_type_components(n+1,lines,t[t_name])
+    return n
+
+def get_type_components(n : int, lines: list, t : cfml_objects.FortranType) -> int:
 
     in_type = True
     while in_type:
@@ -278,7 +306,7 @@ def get_type_components(n : int, lines: list, t : dict) -> int:
         else:
             v = parse_var(line)
             for var_name in v[0]:
-                t[var_name] = cfml_objects.init_fortran_var(var_name,v[1],**v[2])
+                t.components[var_name] = cfml_objects.FortranVar(var_name,v[1],**v[2])
         n += 1
     return n
 
@@ -298,6 +326,20 @@ def get_type_parent(line : str) -> str:
         return(line[i+j+1:i+k].strip())
     else:
         return('')
+
+def get_uses(n,lines : list,us : list) -> int:
+
+    while n < len(lines):
+        line = lines[n].lower().strip()
+        if line.startswith('interface') or line.startswith('contains'):
+            return (n-1)
+        if not line.startswith('use'):
+            n += 1
+            continue
+        n,line = get_line(n,lines)
+        us.append(line)
+        n += 1
+    return n
 
 def is_array(dim : str) -> bool:
 

@@ -1,6 +1,6 @@
 class FortranVar():
 
-    def __init__(self,name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',len : str='',allocatable : bool=False, is_class : bool=False,value = None,parent : str='',childs : list=[]):
+    def __init__(self,name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',len : str='',allocatable : bool=False, is_class : bool=False,value = None,parent : str=''):
 
         self.name        = name
         self.ftype       = ftype
@@ -12,7 +12,6 @@ class FortranVar():
         self.len         = len
         self.allocatable = allocatable
         self.parent      = parent
-        self.childs      = childs
         self.is_class    = is_class
         self.value       = value
 
@@ -41,6 +40,28 @@ class Interface():
         self.name       = name
         self.procedures = procedures.copy()
 
+class FortranType():
+
+    def __init__(self,name : str ='',parent : str ='',childs : list=[],components : dict ={}):
+
+        self.name       = name
+        self.parent     = parent
+        self.childs     = childs.copy()
+        self.components = components.copy()
+
+class Module():
+
+    def __init__(self,name : str ='',uses : list=[],types : dict ={},procedures : dict ={},publics : list =[],interface : dict ={},wraps : list=[], unwraps : list=[]):
+
+        self.name       = name
+        self.types      = types.copy()
+        self.procedures = procedures.copy()
+        self.publics    = publics.copy()
+        self.interface  = interface.copy()
+        self.uses       = uses.copy()
+        self.wraps      = wraps.copy()
+        self.unwraps    = unwraps.copy()
+
 def init_fortran_var(name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',len : str='',allocatable : bool=False, is_class : bool=False,value = None,parent : str='') -> dict:
 
     v = {}
@@ -67,7 +88,7 @@ def init_type(name : str ='',parent : str ='',childs : list=[],components : dict
     t['components'] = components
     return t
 
-def init_module(name : str ='',uses : list=[],types : dict ={},procedures : dict ={},publics : list =[],interface : dict ={}) -> dict:
+def init_module(name : str ='',uses : list=[],types : dict ={},procedures : dict ={},publics : list =[],interface : dict ={}, wraps : list=[], unwraps : list=[]) -> dict:
 
     m = {}
     m['name']       = name
@@ -76,4 +97,6 @@ def init_module(name : str ='',uses : list=[],types : dict ={},procedures : dict
     m['procedures'] = procedures
     m['publics']    = publics
     m['interface']  = interface
+    m['wraps']      = wraps
+    m['unwraps']    = unwraps
     return m
