@@ -7,11 +7,15 @@ December 2023
 Functions
 ---------
 get_cfml_modules_filenames() -> list
+local_variables_unwrap(t : cfml_objects.FortranType) -> list
 read() -> None
 read_cfml_module(file_name : str) -> None
 run() -> None
 wrap() -> None
 wrap_cfml_module(file_name : str) -> None
+write_unwrap_proc(f,t : dict,s : str) -> None
+write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
+write_wrap_proc(f,t : dict,s : str) -> None:
 """
 
 import cfml_objects
@@ -28,9 +32,10 @@ except:
 
 # In EXCLUDED we put the modules we do not want to wrap
 EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','rational','strings','tables','vtk']
-PRIMITIVES = ['integer','real','logical','characer','complex']
+PRIMITIVES = ['integer','real','logical','character','complex']
 NUMERICALS = ['integer','real']
 modules = {}
+lucy = {} # Base class for every type
 
 def get_cfml_modules_filenames() -> list:
 
@@ -52,6 +57,64 @@ def get_cfml_modules_filenames() -> list:
             print(f"{'Error: No Fortran modules found. There is nothing to do. Bye bye.'}")
         raise IOError
     return my_modules
+
+def local_variables_unwrap(t : cfml_objects.FortranType) -> list:
+
+    p_int_1D = False
+    p_int_2D = False
+    p_int_3D = False
+    p_real_1D = False
+    p_real_2D = False
+    p_real_3D = False
+    my_list = False
+    my_dicts = []
+    for c in t.components:
+        var = t.components[c]
+        if var.ndim == 0:
+            if var.ftype.lower() not in PRIMITIVES:
+                my_dicts.append(f"dict_{var.name}")
+        else:
+            if var.ftype.lower() == 'integer':
+                if var.ndim == 1:
+                    p_int_1D = True
+                elif var.ndim == 2:
+                    p_int_2D = True
+                elif var.ndim == 3:
+                    p_int_3D = True
+            elif var.ftype.lower() == 'real':
+                if var.ndim == 1:
+                    p_real_1D = True
+                elif var.ndim == 2:
+                    p_real_2D = True
+                elif var.ndim == 3:
+                    p_real_3D = True
+            else:
+                my_list = True
+    lv = []
+    order = False
+    if p_int_1D:
+        lv.append('integer, dimension(:), pointer :: p_int_1d')
+    if p_int_2D:
+        lv.append('integer, dimension(:,:), pointer :: p_int_2d')
+        order = True
+    if p_int_3D:
+        lv.append('integer, dimension(:,:,:), pointer :: p_int_3d')
+        order = True
+    if p_real_1D:
+        lv.append('real, dimension(:), pointer :: p_real_1d')
+    if p_real_2D:
+        lv.append('real, dimension(:,:), pointer :: p_real_2d')
+        order = True
+    if p_real_3D:
+        lv.append('real, dimension(:,:,:), pointer :: p_real_3d')
+        order = True
+    if order:
+        lv.append('character(len=1) :: order')
+    if my_list:
+        lv.append('type(list) :: my_list')
+    if my_dicts:
+        lv.append('type(dict) :: '+','.join(my_dicts))
+    return lv
 
 def read() -> None:
 
@@ -130,7 +193,10 @@ def set_childs():
                     parent = modules[m].types[p].parent
                     p = modules[m].types[p].parent
                     level += 1
-                modules[m].types[parent].childs.append(t)
+                modules[m].types[parent].childs.append([t,level])
+                lucy[t] = parent
+            else:
+                lucy[t] = t
 
 def wrap() -> None:
 
@@ -156,45 +222,6 @@ def wrap_cfml_module(m_name : str) -> None:
                 write_wrap_proc(f,t,s)
             #break
         f.write(f"\nend submodule")
-
-def local_variables_unwrap(t : cfml_objects.FortranType) -> list:
-
-    p_int_1D = False
-    p_int_2D = False
-    p_int_3D = False
-    p_real_1D = False
-    p_real_2D = False
-    p_real_3D = False
-    for c in t.components:
-        var = t.components[c]
-        if var.ftype.lower() == 'integer':
-            if var.ndim == 1:
-                p_int_1D = True
-            elif var.ndim == 2:
-                p_int_2D = True
-            elif var.ndim == 3:
-                p_int_3D = True
-        elif var.ftype.lower() == 'real':
-            if var.ndim == 1:
-                p_real_1D = True
-            elif var.ndim == 2:
-                p_real_2D = True
-            elif var.ndim == 3:
-                p_real_3D = True
-    lv = []
-    if p_int_1D:
-        lv.append('integer, dimension(:), pointer :: p_int_1d')
-    if p_int_2D:
-        lv.append('integer, dimension(:,:), pointer :: p_int_2d')
-    if p_int_3D:
-        lv.append('integer, dimension(:,:,:), pointer :: p_int_3d')
-    if p_real_1D:
-        lv.append('real, dimension(:), pointer :: p_real_1d')
-    if p_real_2D:
-        lv.append('real, dimension(:,:), pointer :: p_real_2d')
-    if p_real_3D:
-        lv.append('real, dimension(:,:,:), pointer :: p_real_3d')
-    return lv
 
 def write_unwrap_proc(f,t : dict,s : str) -> None:
 
@@ -243,12 +270,41 @@ def write_unwrap_proc(f,t : dict,s : str) -> None:
     f.write(f"{'':>16}err_cfml%msg  = 'Unwrap_{s}: Wrong fortran type:'//adjustl(trim(fortran_type))\n")
     f.write(f"{'':>12}end if\n")
     f.write(f"{'':>8}end if\n")
-    for c in t[s].components:
-        var = t[s].components[c]
-        if var.ftype.lower() in PRIMITIVES:
-            if var.ndim == 0:
-                f.write(f"{'':>8}if (ierror == 0) call unwrap_dict_item('Unwrap_{s}','{var.name}',py_var,for_var%{var.name},ierror)\n")
-            elif var.ftype.lower() in NUMERICALS:
+    write_unwrap_type(f,t[s],8,'for_var')
+    if childs:
+        f.write(f"{'':>8}if (ierror == 0) then\n")
+        level = 0
+        n = 1
+        while n > 0:
+            n = 0
+            for ch in childs:
+                if ch[1] == level:
+                    if (n == 0):
+                        f.write(f"{'':>12}select type (A => for_var)\n")
+                    f.write(f"{'':>16}class is ({ch[0]})\n")
+                    write_unwrap_type(f,t[ch[0]],20,'A')
+                    n += 1
+            if n > 0:
+                f.write(f"{'':>12}end select\n")
+            level += 1
+        f.write(f"{'':>8}end if\n")
+    f.write(f"\n{'':>4}End Subroutine Unwrap_{s}\n")
+
+def write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str):
+
+    tab = ''
+    for i in range(n):
+        tab = tab + ' '
+    for c in t.components:
+        var = t.components[c]
+        if var.ndim == 0:
+            if var.ftype.lower() in PRIMITIVES:
+                f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,{forvar}%{var.name},ierror)\n")
+            else:
+                f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,dict_{var.name},ierror)\n")
+                f.write(f"{tab}if (ierror == 0) call unwrap_{lucy[var.ftype]}('Unwrap_{t.name}','{var.name}',dict_{var.name},{forvar}%{var.name},ierror)\n")
+        else:
+            if var.ftype.lower() in NUMERICALS:
                 if var.ftype.lower() == 'integer':
                     pointer = 'p_int_'+str(var.ndim)+'d'
                 else:
@@ -257,10 +313,17 @@ def write_unwrap_proc(f,t : dict,s : str) -> None:
                     func = 'pointer_to_array_alloc'
                 else:
                     func = 'pointer_to_array'
-                f.write(f"{'':>8}if (ierror == 0) call unwrap_dict_item('Unwrap_{s}','{var.name}',py_var,{pointer},ierror)\n")
-                f.write(f"{'':>8}if (ierror == 0) call {func}('Unwrap_{s}','{var.name}',{pointer},for_var%{var.name},ierror)\n")
-
-    f.write(f"\n{'':>4}End Subroutine Unwrap_{s}\n")
+                if var.ndim == 1:
+                    f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,{pointer},ierror)\n")
+                    f.write(f"{tab}if (ierror == 0) call {func}('Unwrap_{t.name}','{var.name}',{pointer},{forvar}%{var.name},ierror)\n")
+                else:
+                    f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,{pointer},ierror,order)\n")
+                    f.write(f"{tab}if (ierror == 0) call {func}('Unwrap_{t.name}','{var.name}',{pointer},{forvar}%{var.name},ierror,order)\n")
+            else:
+                f.write(f"{tab}if (ierror == 0) ierror = list_create(my_list)\n")
+                f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,my_list,ierror)\n")
+                f.write(f"{tab}if (ierror == 0) call list_to_array('Unwrap_{t.name}','{var.name}',my_list,{forvar}%{var.name},ierror)\n")
+                f.write(f"{tab}if (ierror == 0) call my_list%destroy\n")
 
 def write_wrap_proc(f,t : dict,s : str) -> None:
 
