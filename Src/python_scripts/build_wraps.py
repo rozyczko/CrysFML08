@@ -33,7 +33,7 @@ except:
     is_colorama = False
 
 # In EXCLUDED we put the modules we do not want to wrap
-EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','rational','strings','tables','vtk']
+EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','strings','vtk']
 PRIMITIVES = ['integer','real','logical','character','complex']
 NUMERICALS = ['integer','real']
 modules = {}
@@ -420,19 +420,32 @@ def write_wrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str):
         if var.ndim == 0:
             if var.ftype.lower() in PRIMITIVES:
                 f.write(f"{tab}if (ierror == 0) ierror = py_var%setitem('{var.name}',{forvar}%{var.name})\n")
-        #    else:
-        #        f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,dict_{var.name},ierror)\n")
-        #        f.write(f"{tab}if (ierror == 0) call unwrap_{lucy[var.ftype]}('Unwrap_{t.name}','{var.name}',dict_{var.name},{forvar}%{var.name},#ierror)\n")
+            else:
+                f.write(f"{tab}if (ierror == 0) call wrap_{lucy[var.ftype]}(for_var%{var.name},di_{var.name},ierror)\n")
+                f.write(f"{tab}if (ierror == 0) ierror = py_var%setitem('{var.name}',di_{var.name})\n")
         else:
             if var.ftype.lower() in NUMERICALS:
                 f.write(f"{tab}if (ierror == 0) ierror = ndarray_create(nd_{var.name},for_var%{var.name})\n")
                 f.write(f"{tab}if (ierror == 0) ierror = py_var%setitem('{var.name}',nd_{var.name})\n")
-        #    else:
-        #        f.write(f"{tab}if (ierror == 0) ierror = list_create(my_list)\n")
-        #        f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,my_list,ierror)\n")
-        #        f.write(f"{tab}if (ierror == 0) call list_to_array('Unwrap_{t.name}','{var.name}',my_list,{forvar}%{var.name},ierror)\n")
-        #        f.write(f"{tab}if (ierror == 0) call my_list%destroy\n")
-
+            elif var.ftype.lower() in PRIMITIVES:
+                f.write(f"{tab}if (ierror == 0) ierror = list_create(li_{var.name})\n")
+                f.write(f"{tab}if (ierror == 0) then\n")
+                f.write(f"{tab}    do i = 1 , size(for_var%{var.name})\n")
+                f.write(f"{tab}        if (ierror == 0) ierror = li_{var.name}%append(for_var%{var.name}(i))\n")
+                f.write(f"{tab}    end do\n")
+                f.write(f"{tab}end if\n")
+                f.write(f"{tab}if (ierror == 0) ierror = py_var%setitem('{var.name}',li_{var.name})\n")
+            else:
+                f.write(f"{tab}if (ierror == 0) ierror = list_create(li_{var.name})\n")
+                f.write(f"{tab}if (ierror == 0) allocate(di_{var.name}(size(for_var%{var.name})))\n")
+                f.write(f"{tab}if (ierror == 0) then\n")
+                f.write(f"{tab}    do i = 1 , size(for_var%{var.name})\n")
+                f.write(f"{tab}        ierror = dict_create(di_{var.name}(i))\n")
+                f.write(f"{tab}        if (ierror == 0) call wrap_{lucy[var.ftype]}(for_var%{var.name},(di_{var.name}(i),ierror))\n")
+                f.write(f"{tab}        if (ierror == 0) ierror = li_{var.name}%append(di_{var.name}(i))\n")
+                f.write(f"{tab}    end do\n")
+                f.write(f"{tab}end if\n")
+                f.write(f"{tab}if (ierror == 0) ierror = py_var%setitem('{var.name}',li_{var.name})\n")
 
 if __name__ == '__main__':
 
