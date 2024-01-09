@@ -35,7 +35,7 @@ except:
     is_colorama = False
 
 # In EXCLUDED we put the modules we do not want to wrap
-EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','strings','vtk']
+EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','strings','vtk','wraps']
 PRIMITIVES = ['integer','real','logical','character','complex']
 NUMERICALS = ['integer','real']
 modules = {}
