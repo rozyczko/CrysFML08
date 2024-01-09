@@ -321,7 +321,7 @@ SubModule (CFML_Python)  Atm_Python_Wraps
          err_cfml%ierr = ierror
          err_cfml%msg  = 'Unwrap_Atm_Type: Cannot determine fortran type'
       else
-         if (fortran_type == 'atm_type' .and. .not. fortran_type == 'atm_std_type' &
+         if (.not. fortran_type == 'atm_type' .and. .not. fortran_type == 'atm_std_type' &
             .and. .not. fortran_type == 'modatm_std_type' .and. .not. fortran_type == 'atm_ref_type' &
             .and. .not. fortran_type == 'modatm_ref_type') then
             ierror = -1

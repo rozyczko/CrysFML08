@@ -14,6 +14,7 @@ read_cfml_module(file_name : str) -> None
 run() -> None
 wrap() -> None
 wrap_cfml_module(file_name : str) -> None
+write_cfml_wraps() -> None
 write_unwrap_proc(f,t : dict,s : str) -> None
 write_unwrap_proc_no_alloc(f,t : dict,s : str) -> None
 write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
@@ -38,6 +39,9 @@ EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','p
 PRIMITIVES = ['integer','real','logical','character','complex']
 NUMERICALS = ['integer','real']
 modules = {}
+publics_unwrap = []
+publics_unwrap_no_alloc = []
+publics_wrap = []
 lucy = {} # Base class for every type
 
 def get_cfml_modules_filenames() -> list:
@@ -234,7 +238,7 @@ def wrap() -> None:
         os.mkdir('CFML_Wraps')
     for m in modules:
         wrap_cfml_module(m)
-        #break
+    write_cfml_wraps()
     return None
 
 def wrap_cfml_module(m_name : str) -> None:
@@ -254,6 +258,90 @@ def wrap_cfml_module(m_name : str) -> None:
                 write_wrap_proc(f,t,s)
         f.write(f"\nend submodule")
 
+def write_cfml_wraps() -> None:
+
+    w_file = os.path.join('CFML_Wraps.f90')
+    with open(w_file,'w') as f:
+        f.write(f"\nModule CFML_Wraps\n")
+        f.write(f"\n{'':>4}use cfml_globaldeps\n")
+        for m in modules:
+            if modules[m].types:
+                f.write(f"{'':>4}use {m}, only: ")
+                n = 0
+                for s in modules[m].types:
+                    #if n == 6:
+                    #    f.write(f",&\n{'':>12}")
+                    #    n = 0
+                    if n == 0:
+                        f.write(f"{s}")
+                    else:
+                        f.write(f",{s}")
+                    n += 1
+                f.write(f"\n")
+        f.write(f"\n{'':>4}implicit none\n")
+        f.write(f"\n{'':>4}private\n")
+        f.write(f"\n{'':>4}public :: ")
+        n = 0
+        for p in publics_unwrap:
+            if n == 5:
+                f.write(f",&\n{'':>14}")
+                n = 0
+            if n == 0:
+                f.write(f"unwrap_{p[0]}")
+            else:
+                f.write(f",unwrap_{p[0]}")
+            n += 1
+        f.write(f"\n{'':>4}public :: ")
+        n = 0
+        for p in publics_unwrap_no_alloc:
+            if n == 5:
+                f.write(f",&\n{'':>14}")
+                n = 0
+            if n == 0:
+                f.write(f"unwrap_{p}_no_alloc")
+            else:
+                f.write(f",unwrap_{p}_no_alloc")
+            n += 1
+        f.write(f"\n{'':>4}public :: ")
+        n = 0
+        for p in publics_wrap:
+            if n == 5:
+                f.write(f",&\n{'':>14}")
+                n = 0
+            if n == 0:
+                f.write(f"wrap_{p[0]}")
+            else:
+                f.write(f",wrap_{p[0]}")
+            n += 1
+        f.write(f"\n")
+        f.write(f"\n{'':>4}interface\n")
+        for p in publics_unwrap:
+            f.write(f"\n{'':>8}module subroutine unwrap_{p[0]}(py_var,for_var,ierror)\n")
+            f.write(f"{'':>12}type(dict), intent(inout) :: py_var\n")
+            if p[1] == 'class':
+                f.write(f"{'':>12}class({p[0]}), allocatable, intent(out) :: for_var\n")
+            else:
+                f.write(f"{'':>12}type({p[0]}), intent(out) :: for_var\n")
+            f.write(f"{'':>12}integer, intent(out) :: ierror\n")
+            f.write(f"{'':>8}end subroutine unwrap_{p[0]}\n")
+        for p in publics_unwrap_no_alloc:
+            f.write(f"\n{'':>8}module subroutine unwrap_{p}_no_alloc(py_var,for_var,ierror)\n")
+            f.write(f"{'':>12}type(dict), intent(inout) :: py_var\n")
+            f.write(f"{'':>12}class({p}), intent(out) :: for_var\n")
+            f.write(f"{'':>12}integer, intent(out) :: ierror\n")
+            f.write(f"{'':>8}end subroutine unwrap_{p}_no_alloc\n")
+        for p in publics_wrap:
+            f.write(f"\n{'':>8}module subroutine wrap_{p[0]}(for_var,py_var,ierror)\n")
+            f.write(f"{'':>12}type(dict), intent(inout) :: py_var\n")
+            if p[1] == 'class':
+                f.write(f"{'':>12}class({p[0]}), intent(out) :: for_var\n")
+            else:
+                f.write(f"{'':>12}type({p[0]}), intent(out) :: for_var\n")
+            f.write(f"{'':>12}integer, intent(out) :: ierror\n")
+            f.write(f"{'':>8}end subroutine wrap_{p[0]}\n")
+        f.write(f"\n{'':>4}end interface\n")
+        f.write(f"\nEnd Module CFML_Wraps\n")
+
 def write_unwrap_proc(f,t : dict,s : str) -> None:
 
     f.write(f"\n{'':>4}Module Subroutine Unwrap_{s}(py_var,for_var,ierror)\n")
@@ -261,8 +349,10 @@ def write_unwrap_proc(f,t : dict,s : str) -> None:
     f.write(f"\n{'':>8}! Arguments\n")
     f.write(f"{'':>8}type(dict), intent(inout) :: py_var\n")
     if t[s].childs:
+        publics_unwrap.append([s,'class'])
         f.write(f"{'':>8}class({s}), allocatable, intent(out) :: for_var\n")
     else:
+        publics_unwrap.append([s,'type'])
         f.write(f"{'':>8}type({s}), intent(out) :: for_var\n")
     f.write(f"{'':>8}integer, intent(out) :: ierror\n")
     # Local variables
@@ -331,6 +421,7 @@ def write_unwrap_proc(f,t : dict,s : str) -> None:
 
 def write_unwrap_proc_no_alloc(f,t : dict,s : str) -> None:
 
+    publics_unwrap_no_alloc.append(s)
     f.write(f"\n{'':>4}Module Subroutine Unwrap_{s}_no_alloc(py_var,for_var,ierror)\n")
     # Arguments
     f.write(f"\n{'':>8}! Arguments\n")
@@ -435,8 +526,10 @@ def write_wrap_proc(f,t : dict,s : str) -> None:
     # Arguments
     f.write(f"\n{'':>8}! Arguments\n")
     if t[s].childs:
+        publics_wrap.append([s,'class'])
         f.write(f"{'':>8}class({s}), intent(in) :: for_var\n")
     else:
+        publics_wrap.append([s,'type'])
         f.write(f"{'':>8}type({s}), intent(in) :: for_var\n")
     f.write(f"{'':>8}type(dict), intent(inout) :: py_var\n")
     f.write(f"{'':>8}integer, intent(out) :: ierror\n")
