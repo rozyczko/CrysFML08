@@ -15,6 +15,7 @@ run() -> None
 wrap() -> None
 wrap_cfml_module(file_name : str) -> None
 write_unwrap_proc(f,t : dict,s : str) -> None
+write_unwrap_proc_no_alloc(f,t : dict,s : str) -> None
 write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
 write_wrap_proc(f,t : dict,s : str) -> None:
 write_wrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
@@ -248,8 +249,9 @@ def wrap_cfml_module(m_name : str) -> None:
         for s in t:
             if not t[s].parent:
                 write_unwrap_proc(f,t,s)
+                if t[s].childs:
+                    write_unwrap_proc_no_alloc(f,t,s)
                 write_wrap_proc(f,t,s)
-            #break
         f.write(f"\nend submodule")
 
 def write_unwrap_proc(f,t : dict,s : str) -> None:
@@ -326,6 +328,71 @@ def write_unwrap_proc(f,t : dict,s : str) -> None:
     f.write(f"{'':>12}err_cfml%msg  = 'Unwrap_{s}: Unwrapping failed'\n")
     f.write(f"{'':>8}end if\n")
     f.write(f"\n{'':>4}End Subroutine Unwrap_{s}\n")
+
+def write_unwrap_proc_no_alloc(f,t : dict,s : str) -> None:
+
+    f.write(f"\n{'':>4}Module Subroutine Unwrap_{s}_no_alloc(py_var,for_var,ierror)\n")
+    # Arguments
+    f.write(f"\n{'':>8}! Arguments\n")
+    f.write(f"{'':>8}type(dict), intent(inout) :: py_var\n")
+    if t[s].childs:
+        f.write(f"{'':>8}class({s}), intent(out) :: for_var\n")
+    else:
+        f.write(f"{'':>8}type({s}), intent(out) :: for_var\n")
+    f.write(f"{'':>8}integer, intent(out) :: ierror\n")
+    # Local variables
+    tipos = [t[s]]
+    for ch in t[s].childs:
+        tipos.append(t[ch[0]])
+    local_var = local_variables_unwrap(tipos)
+    f.write(f"\n{'':>8}! Local variables\n")
+    f.write(f"{'':>8}character(len=:), allocatable :: fortran_type\n")
+    for lv in local_var:
+        f.write(f"{'':>8}{lv}\n")
+    # Initialization
+    f.write(f"\n{'':>8}ierror = 0\n")
+    # Procedure
+    f.write(f"{'':>8}ierror = py_var%getitem(fortran_type,'fortran_type')\n")
+    f.write(f"{'':>8}if (ierror /= 0) then\n")
+    f.write(f"{'':>12}err_cfml%flag = .true.\n")
+    f.write(f"{'':>12}err_cfml%ierr = ierror\n")
+    f.write(f"{'':>12}err_cfml%msg  = 'Unwrap_{s}_no_alloc: Cannot determine fortran type'\n")
+    f.write(f"{'':>8}else\n")
+    f.write(f"{'':>12}if (fortran_type /= '{s}' &\n")
+    childs = t[s].childs
+    for ch in childs:
+        f.write(f"{'':>16}.and. fortran_type /= '{ch[0]}' &\n")
+    f.write(f"{'':>16}) then\n")
+    f.write(f"{'':>16}ierror = -1\n")
+    f.write(f"{'':>16}err_cfml%flag = .true.\n")
+    f.write(f"{'':>16}err_cfml%ierr = ierror\n")
+    f.write(f"{'':>16}err_cfml%msg  = 'Unwrap_{s}_no_alloc: Wrong fortran type:'//adjustl(trim(fortran_type))\n")
+    f.write(f"{'':>12}end if\n")
+    f.write(f"{'':>8}end if\n")
+    write_unwrap_type(f,t[s],8,'for_var')
+    if childs:
+        f.write(f"{'':>8}if (ierror == 0) then\n")
+        level = 0
+        n = 1
+        while n > 0:
+            n = 0
+            for ch in childs:
+                if ch[1] == level:
+                    if (n == 0):
+                        f.write(f"{'':>12}select type (A => for_var)\n")
+                    f.write(f"{'':>16}class is ({ch[0]})\n")
+                    write_unwrap_type(f,t[ch[0]],20,'A')
+                    n += 1
+            if n > 0:
+                f.write(f"{'':>12}end select\n")
+            level += 1
+        f.write(f"{'':>8}end if\n")
+    f.write(f"{'':>8}if (ierror /= 0) then\n")
+    f.write(f"{'':>12}err_cfml%flag = .true.\n")
+    f.write(f"{'':>12}err_cfml%ierr = -1\n")
+    f.write(f"{'':>12}err_cfml%msg  = 'Unwrap_{s}_no_alloc: Unwrapping failed'\n")
+    f.write(f"{'':>8}end if\n")
+    f.write(f"\n{'':>4}End Subroutine Unwrap_{s}_no_alloc\n")
 
 def write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str):
 
