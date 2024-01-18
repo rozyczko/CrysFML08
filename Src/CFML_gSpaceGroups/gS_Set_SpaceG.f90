@@ -1158,7 +1158,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          !> Check if we are providing a generator list as the first argument
          i=index(Str,")")
-         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
+         if (index(Str,";") > 4 .or. index(Str,",1") /= 0  .or. index(Str,",+1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
 
             if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
               !Transform the list of generators to the standard form in CrysFML
@@ -1214,6 +1214,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
                SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
             end if
+
             return
          end if
 
