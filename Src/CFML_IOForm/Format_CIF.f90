@@ -5,7 +5,7 @@ SubModule (CFML_IOForm) Format_CIF
    implicit none
 
    !---- Local Variables ----!
-   character(len=:), allocatable :: str
+   character(len=:), allocatable :: str, str2
    integer                       :: j_ini, j_end
 
    Contains
@@ -1784,14 +1784,12 @@ SubModule (CFML_IOForm) Format_CIF
 
       !---- Local Variables ----!
       integer                       :: i,iv,nl,npos
-      !integer, dimension(1)         :: ivet
-      !real(kind=cp),dimension(1)    :: vet
 
       !> Init
       it=0
 
       call clear_error()
-      if (cif%nlines <=0) then
+      if (cif%nlines <= 0) then
          err_CFML%Ierr=1
          err_CFML%Msg="Read_CIF_IT: 0 lines "
          return
@@ -1801,12 +1799,13 @@ SubModule (CFML_IOForm) Format_CIF
       if (present(i_ini)) j_ini=i_ini
       if (present(i_end)) j_end=i_end
 
-      str="_space_group_IT_number"
+      str="_space_group_IT_number"        !
+      str2="_symmetry_Int_Tables_number"  !Old item used sometimes in ICDD
       nl=len_trim(str)
       do i=j_ini,j_end
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
          !> eliminar tabs
@@ -1817,7 +1816,11 @@ SubModule (CFML_IOForm) Format_CIF
          end do
 
          npos=index(line,str)
-         if (npos ==0) cycle
+         if (npos == 0) then
+            npos=index(line,str2)
+            if (npos == 0) cycle
+            nl=len_trim(str2)
+         end if
 
          call get_Num(line(npos+nl:), vet, ivet, iv)
          if (iv == 1) then
@@ -1953,7 +1956,7 @@ SubModule (CFML_IOForm) Format_CIF
       do i=j_ini, j_end
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
          !> eliminar tabs
@@ -2178,7 +2181,7 @@ SubModule (CFML_IOForm) Format_CIF
       do i=j_ini, j_end
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
          !> eliminar tabs
@@ -2209,12 +2212,13 @@ SubModule (CFML_IOForm) Format_CIF
       if (n_oper > 0) return
 
       !> Second tentative
+
       str="_symmetry_equiv_pos_as_xyz"
       nl=len_trim(str)
       do i=j_ini, j_end
          line=adjustl(cif%line(i)%str)
 
-         if (len_trim(line) <=0) cycle
+         if (len_trim(line) <= 0) cycle
          if (line(1:1) == '#') cycle
 
          !> eliminar tabs
@@ -2990,9 +2994,10 @@ SubModule (CFML_IOForm) Format_CIF
       Integer,             optional, intent(in)  :: Nphase   ! Select the Phase to read
 
       !---- Local Variables ----!
-      character(len= 20)             :: Spp
-      integer                        :: i, iph, nt_phases, it, n_ini,n_end
-      integer, dimension(MAX_PHASES) :: ip
+      character(len= 20)                :: Spp
+      integer                           :: i, iph, nt_phases, it, n_ini,n_end, N_oper
+      integer, dimension(MAX_PHASES)    :: ip
+      character(len=50), dimension(512) :: oper_symm
 
       !real(kind=cp),dimension(6):: vet !,vet2
       real(kind=cp)             :: val
@@ -3030,25 +3035,39 @@ SubModule (CFML_IOForm) Format_CIF
 
       !> Reading Cell Parameters
       call Read_Cif_Cell(cif,Cell,n_ini,n_end)
-      if (Err_CFML%IErr==1) return
+      if (Err_CFML%IErr== 1) return
 
       !> SpaceGroup Information
       spp=" "
       call read_cif_it(cif,it,n_ini,n_end)
-      if (it > 0) write(unit=spp,fmt='(i4)') it
-      call set_spacegroup(spp,Spg)
-
-      if (len_trim(Spg%spg_symb) <= 0) then
-         call read_cif_hm(cif,spp,n_ini,n_end)
-         call set_spacegroup(spp,Spg)
+      if (it > 0) then
+        write(unit=spp,fmt='(i4)') it
+        call set_spacegroup(spp,Spg)
+        if(err_CFML%Ierr == 1) return
       end if
 
-      if (len_trim(Spg%spg_symb) <= 0) then
+      if (len_trim(spp) <= 0) then
+         call read_cif_hm(cif,spp,n_ini,n_end) !spp is intent(out)
+         if(len_trim(spp) > 1) call set_spacegroup(spp,Spg)
+         if(err_CFML%Ierr == 1) return
+      end if
+
+      if (len_trim(spp) <= 0) then
          call read_cif_hall(cif,spp,n_ini,n_end)
-         call set_spacegroup(spp,Spg)
+         if(len_trim(spp) > 1) call set_spacegroup(spp,Spg)
+         if(err_CFML%Ierr == 1) return
       end if
 
-      if (len_trim(Spg%spg_symb) <= 0 .or. Err_CFML%IErr ==1) return
+      if (len_trim(spp) <= 0) then
+         call read_cif_symm(cif, N_Oper, Oper_Symm,n_ini,n_end)
+         if(N_Oper > 0) then
+           call set_spacegroup(spp, SpG, N_Oper, Oper_Symm(1:N_Oper))
+           if(err_CFML%Ierr == 1) return
+         else
+           err_CFML%Ierr = 1
+           err_CFML%Msg  = "Error reading symmetry operators in file: "//trim(cif%fname)
+         end if
+      end if
 
       !> Atoms information
       call read_cif_Atoms(cif,AtmList,n_ini,n_end)

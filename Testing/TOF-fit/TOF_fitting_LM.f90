@@ -3,7 +3,7 @@
       use TOF_diffraction
       use CFML_Optimization_LSQ
       use CFML_DiffPatt
-      use CFML_Strings, only: Get_Words
+      use CFML_Strings, only: Get_Words,L_Case
 
       implicit none
       private
@@ -11,9 +11,9 @@
       public  :: INPUT_data, get_texte, output_plot
       private :: Backa
       ! Global variables
-      real(kind=cp), public :: thmin,step,thmax,ain,afin
+      real(kind=cp), public :: thmin,step,thmax,ain,afin,tof_2theta
       integer,       public :: icont,imeth, NPEAKX
-
+      Character(len=132) :: info_tof
       contains
 
       Function Backa(tth) result(back)
@@ -54,11 +54,15 @@
           read(unit=lun,fmt="(a)",iostat=ier) texte
           if( ier /= 0) return
           texte=adjustl(texte)
+          if(L_case(texte(1:5)) == "twoth") then
+            read(texte(6:),*,iostat=ier) tof_2theta
+            if(ier /= 0) tof_2theta=90.0
+            cycle
+          end if
           if(texte(1:1) == "!") cycle
           exit
         end do
         ok=.true.
-        return
       End Subroutine Get_Texte
 
 !--------------------------------------------------------------------
@@ -91,6 +95,7 @@
       ico=0
       if(c%constr) ico=1
       write(unit=i_pik,fmt="(a)") trim(title)
+      write(unit=i_pik,fmt="(a,f12.4)") "TWOTH",tof_2theta
       write(unit=i_pik,fmt="(a)")       &
       "!    TOF_init       TOF_fin      Nbac Npeak  Ncyc  Inst  Jobt  Cont Weight Corr Constr Percent  Algorithm"
 
@@ -100,18 +105,18 @@
       write(unit=i_pik,fmt="(f14.6,a)") d2tof , "  <=  d to T.O.F. coefficient"
       write(unit=i_pik,fmt="(a)") "!  Global Profile Parameters:"
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(1),vs%code(1),   " <= Global-alpha0  &  Flag "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2),   " <= Global-alpha1  &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3),   " <= Global-alpha2  &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(2),vs%code(2),   " <= Global-alpha1  &           a0 |      a1 |                       aq |"
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(3),vs%code(3),   " <= Global-alpha2  &  alpha= alpha0 + alpha1/d + alpha2/d^2 + alpha3/sqrt(d)     "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(4),vs%code(4),   " <= Global-alpha3  &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5),   " <= Global-beta0   &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6),   " <= Global-beta1   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(5),vs%code(5),   " <= Global-beta0   &         b0 |                bq |         b1 |"
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(6),vs%code(6),   " <= Global-beta1   &  Beta= beta0 + beta1/d + beta2/d^2 + beta3/d^4     "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(7),vs%code(7),   " <= Global-beta2   &       "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(8),vs%code(8),   " <= Global-beta3   &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(9),vs%code(9),   " <= Global-Sig-2   &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(10),vs%code(10), " <= Global-Sig-1   &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(9),vs%code(9),   " <= Global-Sig-2   &           |           |         |        |"
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(10),vs%code(10), " <= Global-Sig-1   &  sigma = sig2 d^4 + sig1 d^2 + sig0 + sig-q/d^2    "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(11),vs%code(11), " <= Global-Sig-0   &       "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(12),vs%code(12), " <= Global-Sig-Q   &       "
-      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(13),vs%code(13), " <= Global-eta0    &       "
+      write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(13),vs%code(13), " <= Global-eta0    &  eta = eta0 + eta1 d  + eta2 d^2     "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(14),vs%code(14), " <= Global-eta1    &       "
       write(unit=i_pik,fmt="(f14.6,4x,i2,5x,a)")    vs%pv(15),vs%code(15), " <= Global-eta2    &       "
       write(unit=i_pik,fmt="(a)") "!  Background Parameters:"
@@ -136,7 +141,7 @@
         if(fobs(i) > yma ) yma =fobs(i)
         if(fobs(i) < ymi ) ymi =fobs(i)
       end do
-
+       step=(xx(nob)-xx(1))/real(nob-1)
        shb   = 0.0                         ! idem wpl_pfit.f90
        shd   = ymi - 0.2*(yma-ymi)
        iposr = ymi - 0.1*(yma-ymi)
@@ -191,6 +196,19 @@
       if(.not. opn) &
       open(unit=i_irf,file=trim(filecode)//".irf",status="replace",action="write")
 
+      write(unit=i_irf,fmt="(a)") "Instrumental Resolution Parameters for TOF-NPD (numerical look-up table)"
+      write(unit=i_irf,fmt="(a)") "! To be used with functions NPROF=9 in FullProf (Res=5)"
+      write(unit=i_irf,fmt="(a)") "! Title of the data: "//trim(title)
+      write(unit=i_irf,fmt="(a)") "! ----------------------------------------------------  Bank #"
+      write(unit=i_irf,fmt="(a)") "!  Type of profile function: back-to-back expon * pseudo-Voigt"
+      write(unit=i_irf,fmt="(a)") "NPROF   9"
+      write(unit=i_irf,fmt="(a)") "!       Tof-min(us)       step      Tof-max(us)"
+      write(unit=i_irf,fmt="(a,3f14.5)") "TOFRG",ain,step,afin
+      write(unit=i_irf,fmt="(a)") "!             Dtt1              Dtt2       Dtt_1overD         Zero"
+      write(unit=i_irf,fmt="(a,4f16.6)") "D2TOF",d2tof,0.0,0.0,0.0
+      write(unit=i_irf,fmt="(a)") "!     TOF-TWOTH of the bank"
+      write(unit=i_irf,fmt="(a,f12.4)") "TWOTH", tof_2theta
+      write(unit=i_irf,fmt="(a)") "!"
       write(unit=i_irf,fmt="(a)") "!  d-spacing            Sigma^2           Gamma           Alpha            Beta          Shift"
       write(unit=i_irf,fmt="(a,i6)") "LIST_SIG_GAM_ALF_BET_SHIFT",npeakx
       l=nglob_tof+n_ba+1
@@ -205,12 +223,11 @@
         !Calculate gamma from sigma and eta using TCH relations
         FWHM= sqrt_8ln2*sqrt(abs(sigma))
         call get_HG_HL(fwhm,eta,hg,gamm)
-        sigma=(hg/sqrt_8ln2)**2
+        !sigma=(hg/sqrt_8ln2)**2
         write(unit=i_irf,fmt="(6f16.7,i8)") dsp, sigma, gamm, alpha, beta, 0.0,i
         l=l+nshp_tof
       end do
       if(icont == 0) close (unit=i_irf)
-      return
      End subroutine output_plot
 
      Subroutine Input_Data(filename,iform,dif)

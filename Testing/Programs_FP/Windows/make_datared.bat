@@ -72,5 +72,5 @@ rem
 rem 
    if exist %FULLPROF% copy DataRed.exe %FULLPROF%\nDataRed.exe  
    if exist %PROGCFML% copy DataRed.exe %PROGCFML%\DistFPS_64b\nDataRed.exe   
-   del *.obj *.mod *.o *.map *.bak > nul
+   del *.obj *.mod *.o *.map *.bak *.exe > nul
 cd ..\Programs_FP\Windows

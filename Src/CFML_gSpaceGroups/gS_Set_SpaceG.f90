@@ -6,6 +6,31 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    Contains
 
 
+   !!----Module Function Inverse_Setting(setting,D) Result(inv_sett)
+   !!----   character(len=*), intent(in) :: setting
+   !!----   integer,          intent(in) :: D
+   !!----   Character(len=:), allocatable:: inv_sett
+   !!----
+   !!----
+   !!----   This routine invert a provided setting in the form
+   !!----     m1a+m2b+m3c...,m4a+m5b+m6c...,m7a+m8b+m9c...,...;o1,o2,o3, ...
+   !!----   into a similar form representing the inverse operation.
+   !!----   The integer D represents the dimension of the matrices
+   !!----
+   Module Function Inverse_Setting(setting,D) Result(inv_sett)
+      Character(len=*), intent(in) :: setting
+      integer,          intent(in) :: D
+      Character(len=:), allocatable:: inv_sett
+      !Local variables
+      Type(rational), dimension(D,D)     :: Pmat,invPmat
+
+      inv_sett = setting
+      call Get_Mat_From_Symb(setting, Pmat)
+      if(err_CFML%Ierr /= 0) return
+      invPmat=Rational_Inverse_Matrix(Pmat)
+      inv_sett=Get_Symb_From_Mat(invPmat,StrCode="abc" )
+   End Function Inverse_Setting
+
    !!---- Module Function Get_MagPG_from_BNS(BNS_Symb,mag_type) Result(mag_pg)
    !!----   character(len=*), intent(in) :: BNS_Symb
    !!----   integer,          intent(in) :: mag_type
@@ -507,7 +532,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----
    !!---- 05/02/2020
    !!
-   Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path)
+   Module Subroutine Set_SpaceGroup_DBase(Str,mode,SpaceG,xyz_type,Setting,keepdb,parent,database_path,trn_to)
       !---- Arguments ----!
       character(len=*),           intent(in ) :: Str
       character(len=*),           intent(in ) :: mode
@@ -517,6 +542,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       logical,          optional, intent(in ) :: keepdb
       character(len=*), optional, intent(in ) :: parent
       character(len=*), optional, intent(in ) :: database_path
+      logical,          optional, intent(in ) :: trn_to
 
       !---- Local Variables ----!
       integer                         :: i,j,k,d, Dd, L,La, idem,ier, num, n,m, iclass, nmod
@@ -578,13 +604,14 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
             do i=1,magcount
               !write(*,"(i5,tr5,a)") i, spacegroup_label_bns(i)
               if(trim(loc_str) == trim(spacegroup_label_bns(i)) .or. &
-                 trim(loc_str) == trim(spacegroup_label_og(i))) then
+                 trim(loc_str) == trim(spacegroup_label_og(i))  .or. &
+                 trim(loc_str) == trim(spacegroup_label_unified(i))) then
                  num=i
                  exit
               end if
             end do
             if(num == 0) then
-               Err_CFML%Msg=" => The BNS symbol: "//trim(loc_str)//" is illegal! "
+               Err_CFML%Msg=" => The BNS/UNI/OG symbol: "//trim(loc_str)//" is illegal! "
                Err_CFML%Ierr=1
                if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                return
@@ -823,14 +850,29 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           call set_Shubnikov_info()
           SpaceG%Hall=adjustl(shubnikov_info(Litvin2IT(num))%MHall)
           SpaceG%UNI=adjustl(shubnikov_info(Litvin2IT(num))%STD)
+          if(trim(SpaceG%UNI) /= trim(spacegroup_label_unified(num))) then
+            write(*,"(a)") " Warning! two different values of UNI symbol: "//trim(SpaceG%UNI)//"  <=>  "//trim(spacegroup_label_unified(num))
+          end if
           write(SpaceG%UNI_num,"(i4)") Litvin2IT(num)
 
+
+
           if(change_setting) then
+              if(present(trn_to)) then
+                 SpaceG%Mat2std_Shu=setting
+                 sett=inverse_setting(setting,SpaceG%D)
+              end if
+              SpaceG%Matfrom=sett
+              SpaceG%setting=sett
               call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
                 return
               end if
+          else
+              SpaceG%Matfrom="a,b,c;0,0,0"
+              SpaceG%setting="a,b,c;0,0,0"
+              SpaceG%Mat2std_Shu="a,b,c;0,0,0"
           end if
           if(.not. present(keepdb)) call Deallocate_Magnetic_DBase()
           do i=1,SpaceG%multip
@@ -1009,11 +1051,27 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
           if(SpaceG%Centred == 2 .or. SpaceG%Centred == 0) SpaceG%NumOps=SpaceG%NumOps/2
 
           if(change_setting) then
+              if(present(trn_to)) then
+                 SpaceG%mat2std=setting
+                 sett=inverse_setting(setting,SpaceG%D)
+                 SpaceG%matfrom=sett
+              else
+                 SpaceG%setting=sett
+              end if
               call Change_Setting_SpaceG(sett, SpaceG)
               if(Err_CFML%Ierr /= 0) then
                 if(.not. present(keepdb)) call Deallocate_SSG_DBase()
                 return
               end if
+          else
+              Select Case(d)
+                Case(4)
+                   SpaceG%setting="a,b,c,d;0,0,0,0"
+                Case(5)
+                   SpaceG%setting="a,b,c,d,e;0,0,0,0,0"
+                Case(6)
+                   SpaceG%setting="a,b,c,d,e,f;0,0,0,0,0,0"
+              End Select
           end if
           if(.not. present(keepdb)) then
              call Deallocate_SSG_DBase()
@@ -1100,7 +1158,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
 
          !> Check if we are providing a generator list as the first argument
          i=index(Str,")")
-         if (index(Str,";") > 4 .or. index(Str,",1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
+         if (index(Str,";") > 4 .or. index(Str,",1") /= 0  .or. index(Str,",+1") /= 0 .or. index(Str,",-1") /= 0 .or. i /= 0 .or. index(Str,"UNI") /= 0) then !Call directly to the space group constructor
 
             if(i /= 0) then  !Format provided by Harold Stokes e.g. (x,y,-z+1/2)';(-x,y,z)
               !Transform the list of generators to the standard form in CrysFML
@@ -1110,7 +1168,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               magnetic=.true.
             end if
 
-            i=index(loc_str,"UNI")
+            j=index(loc_str,"trn_to")
+            if(j /= 0) loc_str=loc_str(1:j-1)
+            i=index(loc_str,"UNI");
             if(i /= 0) then
                if(i == 1) then
                   loc_str=adjustl(loc_str(i+3:))
@@ -1154,6 +1214,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
                if(SpaceG%mag_type == 4) SpaceG%Anticentred=1
                SpaceG%mag_pg = Get_MagPG_from_BNS(SpaceG%bns_symb,SpaceG%mag_type)
             end if
+
             return
          end if
 
@@ -1390,6 +1451,7 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
    !!----   UNI Pnna.1'_a[Pncm]                    <-- Shubnikov group given in unified notation"
    !!----   UNI Pnna.1'_a[Pncm] :: -c,b,a;0,0,0    <-- Shubnikov group given in unified notation in non-stardard setting"
    !!----   Pn'ma  :: -c,b,a;0,0,0     shub        <-- Shubnikov group type Pn'ma in the non-standard setting Pcmn'"
+   !!----   Pn'ma  :: c/2,b,-a/2;0,0,0 shub trn_to <-- Shubnikov group type Pn'ma in a supercell with transformation to standard"
    !!----   B 2 C B                                <-- space #41 of standard symbol Aba2"
    !!----   13232  :: sup                          <-- SuperSpace group 13232 in standard setting"
    !!----   221    :: a2,-a1,a3,a4;0,0,1/2,0  sup  <-- SuperSpace group #221 in non-standard setting"
@@ -1410,9 +1472,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
       character(len=len(str)) :: sett, strs,aux
       character(len=5) :: Mode
       integer :: ier, num_group, i, j
-      logical :: set_given, setting
+      logical :: set_given, setting, to_std
 
-       setting=.false.
+       setting=.false.; to_std=.false.
        if(present(Setting_Search)) setting=.true.
        Mode=" "
        strs=trim(str)
@@ -1453,7 +1515,8 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
        read(unit=strs,fmt=*,iostat=ier) num_group
        if (ier == 0) then
           !Now determine if setting is appearing in which case it uses data bases
-          i=index(strs,"::")
+          i=index(strs,"::"); j=index(strs,"trn_to")
+          if(j /= 0) to_std=.true.
           if(i /= 0) then
              j=index(str,"sup")  !Superspace
              if(j /= 0) then
@@ -1480,7 +1543,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
              strs=strs(1:i-1)
           end if
        else
-          i=index(strs,"::")
+
+          i=index(strs,"::"); j=index(strs,"trn_to")
+          if(j /= 0) to_std=.true.
           if(i /= 0) then
              j=index(str,"sup")  !Superspace
              if(j /= 0) then
@@ -1511,7 +1576,11 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
        Select Case (trim(Mode))
          Case("SHUBN","SUPER")
            if(set_given) then
-             call Set_SpaceGroup(Strs,Mode,SpG,Setting=Sett)
+             if(to_std) then
+                call Set_SpaceGroup(Strs,Mode,SpG,Setting=Sett,trn_to=.true.)
+             else
+                call Set_SpaceGroup(Strs,Mode,SpG,Setting=Sett)
+             end if
            else
              call Set_SpaceGroup(Strs,Mode,SpG)
            end if
@@ -1522,6 +1591,9 @@ SubModule (CFML_gSpaceGroups) gS_Set_SpaceG
               write(*,*) "ERROR: "//trim(Err_CFML%Msg)
            end if
            if(set_given) then
+             if(to_std) then
+                sett=inverse_setting(sett,SpG%D)
+             end if
              call Change_Setting_SpaceG(sett,SpG)
            end if
        End Select
