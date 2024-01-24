@@ -67,5 +67,5 @@ rem
 rem   
    if exist %FULLPROF% copy TOF_fit_LM.exe %FULLPROF%\TOF_fit_LM.exe
    if exist %PROGCFML% copy TOF_fit_LM.exe %PROGCFML%\DistFPS_64b\TOF_fit_LM.exe    
-   del *.obj *.mod *.o *.map *.bak > nul
+   del *.obj *.mod *.o *.map *.bak *.exe > nul
 cd ..\Programs_FP\Windows

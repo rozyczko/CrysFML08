@@ -68,6 +68,7 @@ SubModule (CFML_gSpaceGroups) gS_Init_Procedures
             mGrp%laue        = "       " !laue Group
             mGrp%mat2std     = "       "
             mGrp%mat2std_shu = "       "
+            mGrp%matfrom     = "       "
             mGrp%generators_list = "      "
             mGrp%Hall       ="          "
             mGrp%Bravais_num=0      ! Number of the Bravais class

@@ -268,6 +268,7 @@ SubModule (CFML_gSpaceGroups) gS_Match_Shubnikov_Grp
                                 G%OG_num      = nlabel_og(i)
                                 G%numshu      = i
                                 G%mat2std_shu = trim(symb)
+                                G%matfrom     = inverse_setting(symb,4)
                                 call set_shubnikov_info()
                                 j=Litvin2IT(i)
                                 G%UNI         = shubnikov_info(j)%STD

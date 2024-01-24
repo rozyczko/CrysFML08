@@ -10,7 +10,7 @@
    Public :: Set_gSpG, SubGroups
    integer,          dimension(0:2), parameter :: CENT=[2,1,2]
    character(len=1), dimension(10),  parameter :: XYZ=["x","y","z","t","u","v","w","p","q","r"]
-
+   logical, public :: to_std=.false.
    contains
 
      Subroutine Set_gSpG(Str_tmp,SpG,Mode,Setting)
@@ -19,18 +19,27 @@
        Character(len=*),             intent(in) :: Mode
        Character(len=*),optional,    intent(in) :: Setting
        ! --- Local Variables ---!
-
+       Character(len=:), allocatable :: Sett
        Select Case (trim(Mode))
          Case("SHUBN","SUPER")
            if(present(setting)) then
-             call Set_SpaceGroup(Str_tmp,Mode,SpG,Setting=Setting)
+             if(to_std) then
+               call Set_SpaceGroup(Str_tmp,Mode,SpG,Setting=Setting,trn_to=.true.)
+             else
+               call Set_SpaceGroup(Str_tmp,Mode,SpG,Setting=Setting)
+             end if
            else
              call Set_SpaceGroup(Str_tmp,Mode,SpG)
            end if
          Case default
            call Set_SpaceGroup(Str_tmp,SpG)
            if(present(setting)) then
-             call Change_Set_SpaceG(setting,SpG)
+              if(to_std) then
+                sett=inverse_setting(setting,SpG%D)
+              else
+                sett=setting
+              end if
+             call Change_Set_SpaceG(sett,SpG)
              if(err_CFML%Ierr /= 0) then
                write(*,"(a)") " => "//trim(err_CFML%Msg)
                write(*,"(a)") " => Provided setting not applied!"
@@ -73,7 +82,9 @@
       newLat=0//1
       invPmat=Rational_Inverse_Matrix(Pmat)
       SpaceG%setting=trim(setting)
+      SpaceG%matfrom=trim(setting)
       SpaceG%mat2std=Get_Symb_From_Mat(invPmat,StrCode="abc" )
+      SpaceG%mat2std_shu=SpaceG%mat2std
       centring=.false.
       Strcode="xyz"
       if(present(xyz_type)) Strcode=trim(xyz_type)
@@ -473,6 +484,7 @@
        write(*,'(a)') "UNI Pnna.1'_a[Pncm]                    <-- Shubnikov group given in unified notation"
        write(*,'(a)') "UNI Pnna.1'_a[Pncm] :: -c,b,a;0,0,0    <-- Shubnikov group given in unified notation in non-stardard setting"
        write(*,'(a)') "Pn'ma  :: -c,b,a;0,0,0     shub        <-- Shubnikov group type Pn'ma in the non-standard setting Pcmn'"
+       write(*,'(a)') "Pn'ma  :: -c/2,b,a/2;0,0,0 shub trn_to <-- Shubnikov group type Pn'ma in a non-standard giving the inverse tranformation"
        write(*,'(a)') "B 2 C B                                <-- space #41 of standard symbol Aba2"
        write(*,'(a)') "13232  :: sup                          <-- SuperSpace group 13232 in standard setting"
        write(*,'(a)') "221    :: a2,-a1,a3,a4;0,0,1/2,0  sup  <-- SuperSpace group #221 in non-standard setting"
@@ -484,11 +496,17 @@
        if (len_trim(generatorList) == 0) exit
 
        !> Determine if it is a number
-       aux=" "
+       aux=" "; to_std=.false.
+       j=index(generatorList,"trn_to")
+       if(j /= 0) then
+          generatorList=generatorList(1:j-1)
+          to_std=.true.
+       end if
        read(unit=generatorList,fmt=*,iostat=ier) num_group
        if (ier == 0) then
           !Now determine if setting is appearing in which case it uses data bases
           i=index(generatorList,"::")
+
           if(i /= 0) then
              j=index(generatorList,"sup")  !Superspace
              if(j /= 0) then
@@ -506,6 +524,7 @@
                else
                  setting= adjustl(generatorlist(i+2:))
                  if(len_trim(setting) /= 0) set_given=.true.
+
                end if
              end if
              generatorlist=generatorlist(1:i-1)

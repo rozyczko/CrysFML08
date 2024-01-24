@@ -305,7 +305,7 @@ SubModule (CFML_Python)  Metrics_Python_Wraps
             err_cfml%ierr = -1
             err_cfml%msg  = 'Unwrap_Twofold_Axes_Type: Cannot determine fortran type'
         else
-            if (fortran_type /= 'twofold_axes_type') then
+            if (fortran_type /= 'twofoldaxes_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = -1

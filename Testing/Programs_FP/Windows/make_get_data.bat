@@ -54,5 +54,5 @@ rem
 rem
 rem Clean several files
 rem
-   del *.obj *.o *.mod *.map *.bak *.pdb
+   del *.obj *.o *.mod *.map *.bak *.pdb *.exe > nul
 :ENDT
