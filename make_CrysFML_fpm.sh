@@ -83,15 +83,15 @@ cd ..
       cd ..
         if [ $WINT == "win" ]; then  # Winteracter mode (dependency different for all OS)
             if [ $DEBUG == "Y" ];then
-               fpm @./rsp/ifort_lin_debug_win
+               fpm @./rsp/ifort_lin_debug_win.rsp
             else
-               fpm @./rsp/ifort_lin_release_win
+               fpm @./rsp/ifort_lin_release_win.rsp
             fi
         else   # Console mode (no dependencies, same for all OS)
             if [ $DEBUG == "Y" ]; then
-               fpm @./rsp/ifort_lin_debug_con
+               fpm @./rsp/ifort_lin_debug_con.rsp
             else
-               fpm @./rsp/ifort_lin_release_con
+               fpm @./rsp/ifort_lin_release_con.rsp
             fi
         fi
 
@@ -109,15 +109,15 @@ cd ..
       cd ..
         if [ $WINT == "win" ]; then
             if [ $DEBUG == "Y" ]; then
-               fpm @./rsp/ifx_lin_debug_win
+               fpm @./rsp/ifx_lin_debug_win.rsp
             else
-               fpm @./rsp/ifx_lin_release_win
+               fpm @./rsp/ifx_lin_release_win.rsp
             fi
         else
             if [ $DEBUG == "Y" ]; then
-               fpm @./rsp/ifx_lin_debug_con
+               fpm @./rsp/ifx_lin_debug_con.rsp
             else
-               fpm @./rsp/ifx_lin_release_con
+               fpm @./rsp/ifx_lin_release_con.rsp
             fi
         fi
 
@@ -135,15 +135,15 @@ cd ..
       cd ..
         if [ $WINT == "win" ]; then
             if [ $DEBUG == "Y" ]; then
-               fpm @./rsp/gf_debug_win
+               fpm @./rsp/gf_debug_win.rsp
             else
-               fpm @./rsp/gf_release_win
+               fpm @./rsp/gf_release_win.rsp
             fi
         else
             if [ $DEBUG == "Y" ]; then
-               fpm @./rsp/gf_debug_con
+               fpm @./rsp/gf_debug_con.rsp
             else
-               fpm @./rsp/gf_release_con
+               fpm @./rsp/gf_release_con.rsp
             fi
         fi
 
