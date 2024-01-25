@@ -519,7 +519,7 @@ set(CRYSFML_COMMON_SRC
     ${PYTHON_SRC})
 
 # Build the library
-set(LIBRARY_NAME crysfml)
+set(LIBRARY_NAME CrysFML08)
 
 add_library(${LIBRARY_NAME} STATIC ${CRYSFML_COMMON_SRC})
 
@@ -538,7 +538,7 @@ install(TARGETS ${LIBRARY_NAME} ARCHIVE DESTINATION ${CRYSFML_PREFIX})
 
 # The rules for installing the mod files. Take care the "/" is on purpose.
 install(DIRECTORY ${CRYSFML_MODULE_DIRECTORY}/
-        DESTINATION ${CRYSFML_PREFIX}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
         FILES_MATCHING
         PATTERN "*.*mod"
         PATTERN CMakeFiles EXCLUDE)
