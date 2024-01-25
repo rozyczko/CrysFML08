@@ -2,7 +2,7 @@
 rem ---------------------------------------
 rem ---- Compilation for MHall Program ----
 rem ---------------------------------------
-rem > INIT 
+rem > INIT
    (set _DEBUG=N)
    (set _COMP=ifort)
    if [%TARGET_ARCH%]==[] (set TARGET_ARCH=ia32)
@@ -18,7 +18,7 @@ rem > Arguments ----
     if [%1]==[gfortran64] (
        (set _COMP=gfortran)
        (set _VER=m64)
-    )   
+    )
     shift
     if not [%1]==[] goto LOOP
 rem
@@ -36,7 +36,7 @@ rem
       )
       (set OPT2=/fpp /Qopt-report:0)
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
       if [%_DEBUG%]==[Y] (
          if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran64_debug)
@@ -54,16 +54,16 @@ rem > Compilation
 rem > Go to the proper directory
 cd ..\..\Hall_Symbols
    if [%_COMP%]==[ifort] (
-      ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /exe:MHall *.obj  %CRYSFML08%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
+      ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /exe:MHall *.obj  %CRYSFML08%\%DIRECTORY%\lib\CrysFML08.lib /link /stack:300000000
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c MHall.f90           %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -o MHall.exe *.o -L%CRYSFML08%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c MHall.f90           %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -o MHall.exe *.o -L%CRYSFML08%\%DIRECTORY%\lib -lCrysFML08
    )
-rem   
-   if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe  
-   if exist %PROGCFML% copy MHall.exe %PROGCFML%\DistFPS_64b\MHall.exe    
+rem
+   if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe
+   if exist %PROGCFML% copy MHall.exe %PROGCFML%\DistFPS_64b\MHall.exe
    del *.obj *.mod *.o *.map *.bak *.exe > nul
 cd ..\Programs_FP\Windows
