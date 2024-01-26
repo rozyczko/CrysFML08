@@ -1113,7 +1113,7 @@ module nexus_mod
     subroutine set_data_ordering(data_ordering_,data_ordering)
 
         ! Arguments
-        character(len=:), allocatable, intent(in)  :: data_ordering_
+        character(len=*),              intent(in)  :: data_ordering_
         character(len=:), allocatable, intent(out) :: data_ordering
 
         ! Local variables
