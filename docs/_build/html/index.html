@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
-    <link rel="stylesheet" type="text/css" href="_static/css/colors.css?v=558cf669" />
+    <link rel="stylesheet" type="text/css" href="_static/css/colors.css?v=736776f0" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
@@ -46,7 +46,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Types" href="pages/index.html" />
+    <link rel="next" title="Types" href="pages/types.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -134,7 +134,7 @@
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="pages/index.html">
+                      <a class="nav-link nav-internal" href="pages/types.html">
                         Types
                       </a>
                     </li>
@@ -224,7 +224,7 @@ document.write(`
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="pages/index.html">
+                      <a class="nav-link nav-internal" href="pages/types.html">
                         Types
                       </a>
                     </li>
@@ -280,240 +280,12 @@ document.write(`
   <section id="welcome-to-pycrysfml08-s-documentation">
 <h1>Welcome to PyCrysFML08’s documentation!<a class="headerlink" href="#welcome-to-pycrysfml08-s-documentation" title="Link to this heading">#</a>
 </h1>
+<p>PyCrysFML08 is a Python wrapper for the Fortran library <a class="reference external" href="https://code.ill.fr/rodriguez-carvajal/CrysFML2008">CrysFML08</a>, a library which provides plenty of procedures for crystallographic and diffraction calculations. PyCrysFML08 allows the use of the main types, subroutines and functions of <a class="reference external" href="https://code.ill.fr/rodriguez-carvajal/CrysFML2008">CrysFML08</a>, from a Python environment.</p>
+<p><a class="reference external" href="https://code.ill.fr/rodriguez-carvajal/CrysFML2008">CrysFML08</a> is organised in modules. Each module is dedicated to a specific functionality: input / output, symmetry, optimisation, mathematics, atoms, structure factors, diffraction patterns, etc. Each module contains a number of derived types and classes and a number of procedures, which can be functions or subroutines. Fortran derived types and classes are treated in Python as dictionaries, while both Fortran functions and subroutines are treated in Python as functions.</p>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">CONTENTS</span></p>
 <ul>
-<li class="toctree-l1">
-<a class="reference internal" href="pages/index.html">Types</a><ul>
-<li class="toctree-l2">
-<a class="reference internal" href="pages/types/index.html">Modules</a><ul>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_maps.html">py_cfml_maps</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_maps/cube_info_type.html">cube_info_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_bvs_tables.html">py_cfml_bvs_tables</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bvs_tables/atomic_properties_type.html">atomic_properties_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bvs_tables/bvel_par_type.html">bvel_par_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bvs_tables/bvs_par_type.html">bvs_par_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bvs_tables/sbvs_par_type.html">sbvs_par_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_ill_instrm_data.html">py_cfml_ill_instrm_data</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/basic_numc_type.html">basic_numc_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/basic_numi_type.html">basic_numi_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/basic_numr_type.html">basic_numr_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/calibration_detector_type.html">calibration_detector_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/diffractometer_type.html">diffractometer_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/generic_numor_type.html">generic_numor_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/ill_data_record_type.html">ill_data_record_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/powder_numor_type.html">powder_numor_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/sxtal_numor_type.html">sxtal_numor_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ill_instrm_data/sxtal_orient_type.html">sxtal_orient_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_optimization_lsq.html">py_cfml_optimization_lsq</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_optimization_lsq/lsq_conditions_type.html">lsq_conditions_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_optimization_lsq/lsq_data_type.html">lsq_data_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_optimization_lsq/lsq_state_vector_type.html">lsq_state_vector_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_scattering_tables.html">py_cfml_scattering_tables</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_scattering_tables/anomalous_sc_type.html">anomalous_sc_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_scattering_tables/chem_info_type.html">chem_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_scattering_tables/magnetic_form_type.html">magnetic_form_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_scattering_tables/xray_form_type.html">xray_form_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_scattering_tables/xray_wavelength_type.html">xray_wavelength_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_bckpeaks.html">py_cfml_bckpeaks</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bckpeaks/pkb_type.html">pkb_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_bckpeaks/peak_search_cond_type.html">peak_search_cond_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_sxtal_geom.html">py_cfml_sxtal_geom</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_sxtal_geom/psd_val_type.html">psd_val_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_sxtal_geom/sxd_val_type.html">sxd_val_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_sxtal_geom/twin_type.html">twin_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_optimization.html">py_cfml_optimization</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_optimization/opt_conditions_type.html">opt_conditions_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_propagation_vectors.html">py_cfml_propagation_vectors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_propagation_vectors/group_k_type.html">group_k_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_bonds_tables.html">py_cfml_bonds_tables</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_diffpatt.html">py_cfml_diffpatt</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_diffpatt/diffpat_type.html">diffpat_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_diffpatt/diffpat_e_type.html">diffpat_e_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_diffpatt/diffpat_g_type.html">diffpat_g_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry.html">py_cfml_kvec_polarimetry</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calc_type.html">polar_calc_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calc_list_type.html">polar_calc_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calcmulti_list_type.html">polar_calcmulti_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_info_type.html">polar_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_obs_type.html">polar_obs_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_obs_list_type.html">polar_obs_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_obsmulti_list_type.html">polar_obsmulti_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calc_svs_type.html">polar_calc_svs_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calc_svs_list_type.html">polar_calc_svs_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_polarimetry/polar_calcmulti_svs_list_type.html">polar_calcmulti_svs_list_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_rational.html">py_cfml_rational</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_rational/rational.html">rational</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_metrics.html">py_cfml_metrics</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/cell_type.html">cell_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/cell_g_type.html">cell_g_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/cell_ls_type.html">cell_ls_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/cell_gls_type.html">cell_gls_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/twofold_axes_type.html">twofold_axes_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/zone_axis_type.html">zone_axis_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_metrics/strain_tensor_type.html">strain_tensor_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_gspacegroups.html">py_cfml_gspacegroups</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/symm_oper_type.html">symm_oper_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/group_type.html">group_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/spg_type.html">spg_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/superspacegroup_type.html">superspacegroup_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/kvect_info_type.html">kvect_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_gspacegroups/point_orbit.html">point_orbit</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_geom.html">py_cfml_geom</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_geom/coordination_type.html">coordination_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_geom/point_list_type.html">point_list_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_kvec_symmetry.html">py_cfml_kvec_symmetry</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_symmetry/sym_oper_type.html">sym_oper_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_symmetry/msym_oper_type.html">msym_oper_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_symmetry/magnetic_domain_type.html">magnetic_domain_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_symmetry/magsymm_k_type.html">magsymm_k_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_reflections.html">py_cfml_reflections</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_reflections/refl_type.html">refl_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_reflections/srefl_type.html">srefl_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_reflections/mrefl_type.html">mrefl_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_reflections/reflist_type.html">reflist_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_symmetry_tables.html">py_cfml_symmetry_tables</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_symmetry_tables/shub_spgr_info_type.html">shub_spgr_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_symmetry_tables/spgr_info_type.html">spgr_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_symmetry_tables/table_equiv_type.html">table_equiv_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_symmetry_tables/wyck_info_type.html">wyck_info_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_molecules.html">py_cfml_molecules</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_molecules/molecule_type.html">molecule_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_molecules/molcrystal_type.html">molcrystal_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_extincorr.html">py_cfml_extincorr</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_ioform.html">py_cfml_ioform</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ioform/interval_type.html">interval_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ioform/job_info_type.html">job_info_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ioform/blockinfo_type.html">blockinfo_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_ioform/genvec_type.html">genvec_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_enbvs.html">py_cfml_enbvs</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_enbvs/atoms_conf_list_type.html">atoms_conf_list_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_profiles.html">py_cfml_profiles</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_profiles/deriv_tof_type.html">deriv_tof_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_simulated_annealing.html">py_cfml_simulated_annealing</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_simulated_annealing/multistate_vector_type.html">multistate_vector_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_simulated_annealing/simann_conditions_type.html">simann_conditions_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_simulated_annealing/state_vector_type.html">state_vector_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_atoms.html">py_cfml_atoms</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atm_type.html">atm_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atm_std_type.html">atm_std_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/modatm_std_type.html">modatm_std_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atm_ref_type.html">atm_ref_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/modatm_ref_type.html">modatm_ref_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atm_cell_type.html">atm_cell_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atom_equiv_type.html">atom_equiv_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atom_equiv_list_type.html">atom_equiv_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/atlist_type.html">atlist_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/matom_type.html">matom_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_atoms/matom_list_type.html">matom_list_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_structure_factors.html">py_cfml_structure_factors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_structure_factors/scattering_species_type.html">scattering_species_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_structure_factors/strf_type.html">strf_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_structure_factors/strflist_type.html">strflist_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_kvec_structure_factors.html">py_cfml_kvec_structure_factors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_structure_factors/magh_type.html">magh_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_structure_factors/magh_list_type.html">magh_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_structure_factors/maghd_type.html">maghd_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_kvec_structure_factors/maghd_list_type.html">maghd_list_type</a></li>
-</ul>
-</li>
-<li class="toctree-l3">
-<a class="reference internal" href="pages/types/py_cfml_eos.html">py_cfml_eos</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/pvt_table.html">pvt_table</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/eos_type.html">eos_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/eos_list_type.html">eos_list_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/eos_cell_type.html">eos_cell_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/axis_type.html">axis_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/eos_data_type.html">eos_data_type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pages/types/py_cfml_eos/eos_data_list_type.html">eos_data_list_type</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="pages/types.html">Types</a></li>
 </ul>
 </div>
 </section>
@@ -530,7 +302,7 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="right-next"
-       href="pages/index.html"
+       href="pages/types.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>

@@ -139,3 +139,16 @@
     font-size: small;
 }
 
+/* Custom background color for header rows */
+table.table thead th {
+    background-color: #CCCCCC; /* Light gray background */
+}
+
+/* Alternate background colors for non-header rows */
+table.table tbody tr:nth-child(even) {
+    background-color: #F2F2F2; /* Lighter alternate color */
+}
+
+table.table tbody tr:nth-child(odd) {
+    background-color: #E6E6E6; /* Darker alternate color */
+}

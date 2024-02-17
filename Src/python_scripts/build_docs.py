@@ -16,6 +16,7 @@ import cfml_objects
 import glob
 import os
 import parser_utils
+from typing import TextIO
 
 try:
     import colorama
@@ -125,16 +126,7 @@ def set_childs():
         for t in modules[m].types:
             if modules[m].types[t].parent:
                 parent = modules[m].types[t].parent
-                p = modules[m].types[t].parent
-                level = 0
-                while modules[m].types[p].parent:
-                    parent = modules[m].types[p].parent
-                    p = modules[m].types[p].parent
-                    level += 1
-                modules[m].types[parent].childs.append([t,level])
-                lucy[t] = parent
-            else:
-                lucy[t] = t
+                modules[m].types[parent].childs.append(t)
 
 def build_docs() -> None:
 
@@ -145,56 +137,79 @@ def build_docs() -> None:
     return None
 
 def build_entrypage() -> None:
-    with open('./pages/index.rst', 'w') as f:
-        f.write(".. include:: ./types.rst\n")
-        if not os.path.isdir('./pages/types'):
-            os.mkdir('./pages/types')
+    if not os.path.isdir('./pages/types'):
+        os.mkdir('./pages/types')
 
     with open('./pages/types.rst', 'w') as f:
         f.write("#####\n")
         f.write("Types\n")
         f.write("#####\n")
-        f.write(".. toctree::\n")
-        f.write("   :glob:\n")
         f.write("\n")
-        f.write("   ./types/index\n")
+        f.write("Description\n")
+        f.write("-----------\n")
+        f.write("\n")
+        f.write("PyCrysFML08 dictionaries correspond to Fortran derived types and classes of CrysFML08. They can be created by calling the appropiate PyCrysFML08 function.\n")
+        f.write("\n")
+        f.write("Modules\n")
+        f.write("-------\n")
+        f.write("\n")
+        f.write(".. toctree::\n")
+        f.write("   :maxdepth: 1\n")
+        f.write("\n")
 
-        document_cfml_type_modules()
+        document_cfml_type_modules(f)
 
-def document_cfml_type_modules() -> None:
-    with open(f'./pages/types/index.rst', 'w') as fi:
-        fi.write("#######\n")
-        fi.write("Modules\n")
-        fi.write("#######\n")
-        fi.write(".. toctree::\n")
-        fi.write("\n")
-        for m_name in modules.keys():
-            if not os.path.isdir(f"./pages/types/py_{m_name.lower()}"):
-                os.mkdir(f"./pages/types/py_{m_name.lower()}")
+def document_cfml_type_modules(file: TextIO) -> None:
+    for m_name in modules.keys():
+        file.write(f"   ./types/py_{m_name.lower()}\n")
+        if not os.path.isdir(f"./pages/types/py_{m_name.lower()}"):
+            os.mkdir(f"./pages/types/py_{m_name.lower()}")
 
-            with open(f'./pages/types/py_{m_name.lower()}.rst', 'w') as f:
-                f.write("#"*(len(m_name)+3)+"\n")
-                f.write(f"py_{m_name.lower()}\n")
-                f.write("#"*(len(m_name)+3)+"\n")
-                f.write(".. toctree::\n")
-                f.write("\n")
-                f.write(f"   ./py_{m_name.lower()}/index\n")
+        with open(f'./pages/types/py_{m_name.lower()}.rst', 'w') as f:
+            f.write("#"*(len(m_name)+3)+"\n")
+            f.write(f"py_{m_name.lower()}\n")
+            f.write("#"*(len(m_name)+3)+"\n")
+            f.write(".. toctree::\n")
+            f.write("   :titlesonly:\n")
+            f.write("   :maxdepth: 1\n")
+            f.write("\n")
 
-            fi.write(f"   ./py_{m_name.lower()}\n")
-            document_cfml_type_modules_dicts(m_name)
+            document_cfml_type_modules_dicts(m_name, f)
 
-def document_cfml_type_modules_dicts(m_name: str) -> None:
-    with open(f'./pages/types/py_{m_name.lower()}/index.rst', 'w') as fi:
-        fi.write(".. toctree::\n")
-        fi.write("\n")
-        for t_name in modules[m_name].types.keys():
-            with open(f"./pages/types/py_{m_name.lower()}/{t_name}.rst", "w") as f:
-                f.write("#"*len(t_name)+"\n")
-                f.write(f"{t_name}\n")
-                f.write("#"*len(t_name)+"\n")
-                f.write("\n")
+def document_cfml_type_modules_dicts(m_name: str, file: TextIO) -> None:
+    for t_name in modules[m_name].types.keys():
+        file.write(f"   ./py_{m_name.lower()}/{t_name}\n")
+        with open(f"./pages/types/py_{m_name.lower()}/{t_name}.rst", "w") as f:
+            f.write("#"*len(t_name)+"\n")
+            f.write(f"{t_name}\n")
+            f.write("#"*len(t_name)+"\n")
+            f.write("\n")
+            parent = modules[m_name].types[t_name].parent
+            childs = modules[m_name].types[t_name].childs
+            if parent:
+                f.write(f"**Extends From:** :doc:`{modules[m_name].types[t_name].parent} <{modules[m_name].types[t_name].parent}>`\n")
+            if childs:
+                childlist = [f":doc:`{child} <{child}>`" for child in modules[m_name].types[t_name].childs]
+                f.write(f"**Extended By:**  {', '.join(childlist)}\n")
+            f.write("\n")
+            f.write("Properties\n")
+            f.write("----------\n")
+            f.write(".. list-table::\n")
+            f.write("   :header-rows: 1\n")
+            f.write("\n")
+            f.write(f"   * - Key\n")
+            f.write(f"     - Value\n")
+            f.write(f"     - Description\n")
+            for c_name, c_val in modules[m_name].types[t_name].components.items():
+                f.write(f"   * - {c_name}\n")
+                f.write(f"     - Description\n")
+                f.write(f"     - Description\n")
 
-            fi.write(f"   ./{t_name}\n")
+            f.write("\n")
+            f.write("Functions\n")
+            f.write("---------\n")
+            f.write(f"The following functions use **{t_name}** as an argument\n")
+
 
 if __name__ == '__main__':
 

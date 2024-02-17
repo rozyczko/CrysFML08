@@ -2,5 +2,6 @@
 py_cfml_extincorr
 #################
 .. toctree::
+   :titlesonly:
+   :maxdepth: 1
 
-   ./py_cfml_extincorr/index
