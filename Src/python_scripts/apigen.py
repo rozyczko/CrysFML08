@@ -6,22 +6,10 @@ February 2024
 ---------
 Functions
 ---------
-local_variables_unwrap(tipos : list[cfml_objects.FortranType]) -> list
-local_variables_wrap(tipos : list[cfml_objects.FortranType]) -> list
 run() -> None
-wrap_types() -> None
-wrap_cfml_module_types(file_name : str) -> None
-write_cfml_wraps() -> None
-write_unwrap_proc(f,t : dict,s : str) -> None
-write_unwrap_proc_no_alloc(f,t : dict,s : str) -> None
-write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
-write_wrap_proc(f,t : dict,s : str) -> None:
-write_wrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str)
 """
 
-import cfml_objects
 import os
-import parser_utils
 import reader
 import wrapper_types
 try:

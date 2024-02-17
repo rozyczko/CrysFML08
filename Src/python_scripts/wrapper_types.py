@@ -8,9 +8,14 @@ Functions
 ---------
 local_variables_unwrap(tipos : list) -> list
 local_variables_wrap(tipos : list) -> list
-wrap(modules) -> None
-wrap_cfml_module_types(m : cfml_objects.Module,m_name : str) -> None
-write_unwrap_proc(f,t : dict,s : str) -> None
+wrap(modules : dict,lucy : dict) -> None
+wrap_cfml_module_types(m : cfml_objects.Module,m_name : str,lucy : dict) -> None
+write_cfml_wraps(modules : dict) -> None
+write_unwrap_proc(f,t : dict,s : str,lucy : dict) -> None
+write_unwrap_proc_no_alloc(f,t : dict,s : str,lucy : dict) -> None
+write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str,lucy : dict)
+write_wrap_proc(f,t : dict,s : str,lucy : dict) -> None
+write_wrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str,lucy : dict)
 """
 import cfml_objects
 import os
