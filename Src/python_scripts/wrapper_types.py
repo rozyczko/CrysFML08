@@ -14,6 +14,7 @@ write_cfml_wraps(modules : dict) -> None
 write_unwrap_proc(f,t : dict,s : str,lucy : dict) -> None
 write_unwrap_proc_no_alloc(f,t : dict,s : str,lucy : dict) -> None
 write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str,lucy : dict)
+write_wraps_primitives()
 write_wrap_proc(f,t : dict,s : str,lucy : dict) -> None
 write_wrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str,lucy : dict)
 """
@@ -115,8 +116,10 @@ def wrap(modules : dict,lucy : dict) -> None:
 
     if not os.path.isdir('CFML_Wraps'):
         os.mkdir('CFML_Wraps')
+
     for m in modules:
         wrap_cfml_module_types(modules[m],m,lucy)
+    write_wraps_primitives()
     write_cfml_wraps(modules)
     return None
 
@@ -135,6 +138,7 @@ def wrap_cfml_module_types(m : cfml_objects.Module,m_name : str,lucy : dict) -> 
                 if t[s].childs:
                     write_unwrap_proc_no_alloc(f,t,s,lucy)
                 write_wrap_proc(f,t,s,lucy)
+                write_list_to_array(f,t,s,lucy)
         f.write(f"\nend submodule")
 
 def write_cfml_wraps(modules : dict) -> None:
@@ -148,9 +152,6 @@ def write_cfml_wraps(modules : dict) -> None:
                 f.write(f"{'':>4}use {m}, only: ")
                 n = 0
                 for s in modules[m].types:
-                    #if n == 6:
-                    #    f.write(f",&\n{'':>12}")
-                    #    n = 0
                     if n == 0:
                         f.write(f"{s}")
                     else:
@@ -162,7 +163,7 @@ def write_cfml_wraps(modules : dict) -> None:
         f.write(f"\n{'':>4}public :: ")
         n = 0
         for p in publics_unwrap:
-            if n == 5:
+            if n == 3:
                 f.write(f",&\n{'':>14}")
                 n = 0
             if n == 0:
@@ -173,7 +174,7 @@ def write_cfml_wraps(modules : dict) -> None:
         f.write(f"\n{'':>4}public :: ")
         n = 0
         for p in publics_unwrap_no_alloc:
-            if n == 5:
+            if n == 3:
                 f.write(f",&\n{'':>14}")
                 n = 0
             if n == 0:
@@ -184,7 +185,7 @@ def write_cfml_wraps(modules : dict) -> None:
         f.write(f"\n{'':>4}public :: ")
         n = 0
         for p in publics_wrap:
-            if n == 5:
+            if n == 3:
                 f.write(f",&\n{'':>14}")
                 n = 0
             if n == 0:
@@ -192,7 +193,16 @@ def write_cfml_wraps(modules : dict) -> None:
             else:
                 f.write(f",wrap_{p[0]}")
             n += 1
-        f.write(f"\n")
+        f.write(f"\n{'':>4}public :: list_to_array\n")
+        f.write(f"\n{'':>4}interface list_to_array\n")
+        f.write(f"{'':>8}module procedure list_to_array_character\n")
+        f.write(f"{'':>8}module procedure list_to_array_logical\n")
+        for m in modules:
+            t = modules[m].types
+            for s in t:
+                if not t[s].parent:
+                    f.write(f"{'':>8}module procedure list_to_array_{s.lower()}\n")
+        f.write(f"{'':>4}end interface\n")
         f.write(f"\n{'':>4}interface\n")
         for p in publics_unwrap:
             f.write(f"\n{'':>8}module subroutine unwrap_{p[0]}(py_var,for_var,ierror)\n")
@@ -218,8 +228,98 @@ def write_cfml_wraps(modules : dict) -> None:
                 f.write(f"{'':>12}type({p[0]}), intent(out) :: for_var\n")
             f.write(f"{'':>12}integer, intent(out) :: ierror\n")
             f.write(f"{'':>8}end subroutine wrap_{p[0]}\n")
+        f.write(f"\n{'':>8}module subroutine list_to_array_character(procedure_name,var_name,my_list,arr,ierror)\n")
+        f.write(f"{'':>12}character(len=*), intent(in) :: procedure_name\n")
+        f.write(f"{'':>12}character(len=*), intent(in) :: var_name\n")
+        f.write(f"{'':>12}type(list), intent(inout) :: my_list\n")
+        f.write(f"{'':>12}character(len=*), dimension(:), allocatable, intent(out) :: arr\n")
+        f.write(f"{'':>12}integer, intent(inout) :: ierror\n")
+        f.write(f"{'':>8}end subroutine list_to_array_character\n")
+        f.write(f"\n{'':>8}module subroutine list_to_array_logical(procedure_name,var_name,my_list,arr,ierror)\n")
+        f.write(f"{'':>12}character(len=*), intent(in) :: procedure_name\n")
+        f.write(f"{'':>12}character(len=*), intent(in) :: var_name\n")
+        f.write(f"{'':>12}type(list), intent(inout) :: my_list\n")
+        f.write(f"{'':>12}logical, dimension(:), allocatable, intent(out) :: arr\n")
+        f.write(f"{'':>12}integer, intent(inout) :: ierror\n")
+        f.write(f"{'':>8}end subroutine list_to_array_logical\n")
+        for m in modules:
+            t = modules[m].types
+            for s in t:
+                if not t[s].parent:
+                    f.write(f"\n{'':>8}module subroutine list_to_array_{s.lower()}(procedure_name,var_name,my_list,arr,ierror)\n")
+                    f.write(f"{'':>12}character(len=*), intent(in) :: procedure_name\n")
+                    f.write(f"{'':>12}character(len=*), intent(in) :: var_name\n")
+                    f.write(f"{'':>12}type(list), intent(inout) :: my_list\n")
+                    if t[s].childs:
+                        f.write(f"{'':>12}class({s}), dimension(:), allocatable, intent(out) :: arr\n")
+                    else:
+                        f.write(f"{'':>12}type({s}), dimension(:), allocatable, intent(out) :: arr\n")
+                    f.write(f"{'':>12}integer, intent(inout) :: ierror\n")
+                    f.write(f"{'':>8}end subroutine list_to_array_{s.lower()}\n")
         f.write(f"\n{'':>4}end interface\n")
         f.write(f"\nEnd Module CFML_Wraps\n")
+
+def write_list_to_array(f,t : dict,s : str,lucy : dict) -> None:
+
+    f.write(f"\n{'':>4}Module Subroutine List_to_Array_{s}(procedure_name,var_name,my_list,arr,ierror)\n")
+    # Arguments
+    f.write(f"\n{'':>8}! Arguments\n")
+    f.write(f"{'':>8}character(len=*), intent(in) :: procedure_name\n")
+    f.write(f"{'':>8}character(len=*), intent(in) :: var_name\n")
+    f.write(f"{'':>8}type(list), intent(inout) :: my_list\n")
+    if t[s].childs:
+        f.write(f"{'':>8}class({s}), dimension(:), allocatable, intent(out) :: arr\n")
+    else:
+        f.write(f"{'':>8}type({s}), dimension(:), allocatable, intent(out) :: arr\n")
+    f.write(f"{'':>8}integer, intent(inout) :: ierror\n")
+    # Local variables
+    f.write(f"\n{'':>8}! Local variables\n")
+    f.write(f"{'':>8}integer :: i,n\n")
+    if t[s].childs:
+        f.write(f"{'':>8}character(len=:), allocatable :: fortran_type\n")
+        tipos = [t[s]]
+        f.write(f"{'':>8}type({s}) :: src_1\n")
+        n = 2
+        for ch in t[s].childs:
+            f.write(f"{'':>8}type({ch[0]}) :: src{n}\n")
+            n += 1
+    f.write(f"{'':>8}type(object) :: item\n")
+    f.write(f"{'':>8}type(dict) :: my_dict\n")
+    f.write(f"\n{'':>8}ierror = my_list%len(n)\n")
+    f.write(f"{'':>8}if (n > 0) then\n")
+    if not t[s].childs:
+        f.write(f"{'':>12}allocate(arr(n))\n")
+    f.write(f"{'':>12}do i = 0 , n-1\n")
+    f.write(f"{'':>16}if (ierror == 0) ierror = my_list%getitem(item,i)\n")
+    f.write(f"{'':>16}if (ierror == 0) ierror = cast(my_dict,item)\n")
+    if t[s].childs:
+        f.write(f"{'':>16}if (ierror == 0) then\n")
+        f.write(f"{'':>20}ierror = my_dict%getitem(fortran_type,'fortran_type')\n")
+        f.write(f"{'':>20}if (ierror /= 0) then\n")
+        f.write(f"{'':>24}err_cfml%flag = .true.\n")
+        f.write(f"{'':>24}err_cfml%ierr = -1\n")
+        f.write(f"{'':>24}err_cfml%msg  = 'List_To_Array_{s}: Cannot determine fortran type'\n")
+        f.write(f"{'':>20}else if (fortran_type == '{s}') then\n")
+        f.write(f"{'':>24}allocate(arr(n),source=src1)\n")
+        n = 2
+        for ch in t[s].childs:
+            f.write(f"{'':>20}else if (fortran_type == '{ch[0]}') then\n")
+            f.write(f"{'':>24}allocate(arr(n),source=src{n})\n")
+            n += 1
+        f.write(f"{'':>20}else\n")
+        f.write(f"{'':>24}ierror = -1\n")
+        f.write(f"{'':>24}err_cfml%flag = .true.\n")
+        f.write(f"{'':>24}err_cfml%ierr = -1\n")
+        f.write(f"{'':>24}err_cfml%msg  = 'List_To_Array_{s}: Wrong fortran type'\n")
+        f.write(f"{'':>20}end if\n")
+        f.write(f"{'':>16}end if\n")
+        f.write(f"{'':>16}if (ierror == 0) call unwrap_{s}_no_alloc(my_dict,arr(i+1),ierror)\n")
+    else:
+        f.write(f"{'':>16}if (ierror == 0) call unwrap_{s}(my_dict,arr(i+1),ierror)\n")
+    f.write(f"{'':>16}if (ierror == 0) ierror = err_cfml%ierr\n")
+    f.write(f"{'':>12}end do\n")
+    f.write(f"{'':>8}end if\n")
+    f.write(f"\n{'':>4}End Subroutine List_to_Array_{s}\n")
 
 def write_unwrap_proc(f,t : dict,s : str,lucy : dict) -> None:
 
@@ -398,6 +498,58 @@ def write_unwrap_type(f,t : cfml_objects.FortranType,n : int,forvar : str,lucy :
                 f.write(f"{tab}if (ierror == 0) call unwrap_dict_item('Unwrap_{t.name}','{var.name}',py_var,my_list,ierror)\n")
                 f.write(f"{tab}if (ierror == 0) call list_to_array('Unwrap_{t.name}','{var.name}',my_list,{forvar}%{var.name},ierror)\n")
                 f.write(f"{tab}if (ierror == 0) call my_list%destroy\n")
+
+def write_wraps_primitives():
+
+    w_name = 'Wraps_Primitives'
+    w_file = os.path.join('CFML_Wraps',w_name+'.f90')
+    with open(w_file,'w') as f:
+        f.write(f"submodule (CFML_Wraps) {w_name}\n")
+        f.write(f"\n{'':>4}implicit none\n")
+        f.write(f"\n{'':>4}contains\n")
+        f.write(f"\n{'':>4}subroutine list_to_array_character(procedure_name,var_name,my_list,arr,ierror)\n")
+        f.write(f"\n{'':>8}! Arguments\n")
+        f.write(f"{'':>8}character(len=*), intent(in) :: procedure_name\n")
+        f.write(f"{'':>8}character(len=*), intent(in) :: var_name\n")
+        f.write(f"{'':>8}type(list), intent(inout) :: my_list\n")
+        f.write(f"{'':>8}character(len=*), dimension(:), allocatable, intent(out) :: arr\n")
+        f.write(f"{'':>8}integer, intent(inout) :: ierror\n")
+        f.write(f"\n{'':>8}! Local variables\n")
+        f.write(f"{'':>8}integer :: i,n\n")
+        f.write(f"{'':>8}character(len=:), allocatable :: my_str\n")
+        f.write(f"{'':>8}type(object) :: item\n")
+        f.write(f"\n{'':>8}ierror = my_list%len(n)\n")
+        f.write(f"{'':>8}if (n > 0) then\n")
+        f.write(f"{'':>12}allocate(arr(n))\n")
+        f.write(f"{'':>12}do i = 0 , n-1\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = my_list%getitem(item,i)\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = cast(my_str,item)\n")
+        f.write(f"{'':>16}if (ierror == 0) arr(i+1) = my_str\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = err_cfml%ierr\n")
+        f.write(f"{'':>12}end do\n")
+        f.write(f"{'':>8}end if\n")
+        f.write(f"\n{'':>4}end subroutine list_to_array_character\n")
+        f.write(f"\n{'':>4}subroutine list_to_array_logical(procedure_name,var_name,my_list,arr,ierror)\n")
+        f.write(f"\n{'':>8}! Arguments\n")
+        f.write(f"{'':>8}character(len=*), intent(in) :: procedure_name\n")
+        f.write(f"{'':>8}character(len=*), intent(in) :: var_name\n")
+        f.write(f"{'':>8}type(list), intent(inout) :: my_list\n")
+        f.write(f"{'':>8}logical, dimension(:), allocatable, intent(out) :: arr\n")
+        f.write(f"{'':>8}integer, intent(inout) :: ierror\n")
+        f.write(f"\n{'':>8}! Local variables\n")
+        f.write(f"{'':>8}integer :: i,n\n")
+        f.write(f"{'':>8}type(object) :: item\n")
+        f.write(f"\n{'':>8}ierror = my_list%len(n)\n")
+        f.write(f"{'':>8}if (n > 0) then\n")
+        f.write(f"{'':>12}allocate(arr(n))\n")
+        f.write(f"{'':>12}do i = 0 , n-1\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = my_list%getitem(item,i)\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = cast(arr(i+1),item)\n")
+        f.write(f"{'':>16}if (ierror == 0) ierror = err_cfml%ierr\n")
+        f.write(f"{'':>12}end do\n")
+        f.write(f"{'':>8}end if\n")
+        f.write(f"\n{'':>4}end subroutine list_to_array_logical\n")
+        f.write(f"\nend submodule")
 
 def write_wrap_proc(f,t : dict,s : str,lucy : dict) -> None:
 

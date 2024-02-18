@@ -257,37 +257,31 @@ def get_procedures(n,lines : list,publics : list,interface : dict,procedures : d
         n,line = get_line(n,lines)
         if is_procedure('function',line):
             f_name = get_function_name(line)
-            if f_name in publics:
-                if is_colorama:
-                    print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
-                else:
-                    print(f"{' ':>8}{'Parsing '}{'function' : <11}{f_name}")
-                procedures[f_name] = cfml_objects.Function(f_name)
-                get_arguments(line,procedures[f_name])
-                get_function_result(line,procedures[f_name])
-                ov = is_overload(interface,f_name)
-                if ov:
-                    procedures[f_name].is_overload = True
-                    procedures[f_name].overload = ov
-                n = get_function_types(n+1,lines,procedures[f_name])
+            if is_colorama:
+                print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
             else:
-                n += 1
+                print(f"{' ':>8}{'Parsing '}{'function' : <11}{f_name}")
+            procedures[f_name] = cfml_objects.Function(f_name)
+            get_arguments(line,procedures[f_name])
+            get_function_result(line,procedures[f_name])
+            ov = is_overload(interface,f_name)
+            if ov:
+                procedures[f_name].is_overload = True
+                procedures[f_name].overload = ov
+            n = get_function_types(n+1,lines,procedures[f_name])
         elif is_procedure('subroutine',line):
             s_name = get_subroutine_name(line)
-            if s_name in publics:
-                if is_colorama:
-                    print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
-                else:
-                    print(f"{' ':>8}{'Parsing '}{'subroutine' : <11}{s_name}")
-                procedures[s_name] = cfml_objects.Subroutine(s_name)
-                get_arguments(line,procedures[s_name])
-                ov = is_overload(interface,s_name)
-                if ov:
-                    procedures[s_name].is_overload = True
-                    procedures[s_name].overload = ov
-                n = get_subroutine_types(n+1,lines,procedures[s_name])
+            if is_colorama:
+                print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
             else:
-                n += 1
+                print(f"{' ':>8}{'Parsing '}{'subroutine' : <11}{s_name}")
+            procedures[s_name] = cfml_objects.Subroutine(s_name)
+            get_arguments(line,procedures[s_name])
+            ov = is_overload(interface,s_name)
+            if ov:
+                procedures[s_name].is_overload = True
+                procedures[s_name].overload = ov
+            n = get_subroutine_types(n+1,lines,procedures[s_name])
         else:
             n += 1
     return n

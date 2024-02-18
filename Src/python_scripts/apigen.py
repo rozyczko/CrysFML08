@@ -11,6 +11,7 @@ run() -> None
 
 import os
 import reader
+import wrapper_procs
 import wrapper_types
 try:
     import colorama
@@ -46,7 +47,7 @@ def run() -> None:
     else:
         print(f"{'Building wraps / unwraps of CrysFML08 types'}")
     wrapper_types.wrap(modules,lucy)
-    #wrap_procs()
+    wrapper_procs.wrap(modules,lucy)
 
 if __name__ == '__main__':
 
