@@ -48,7 +48,7 @@ def get_cfml_modules_filenames() -> list:
 
 def read(modules : dict, lucy : dict) -> None:
 
-    os.chdir('../')
+    os.chdir('../../Src')
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name,modules)

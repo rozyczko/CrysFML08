@@ -18,8 +18,8 @@ def get_methods(m : dict) -> list:
 
 def wrap(modules : dict,lucy : dict) -> None:
 
-    if not os.path.isdir('../Python_API'):
-        os.mkdir('../Python_API')
+    if not os.path.isdir('../Python_API/src'):
+        os.mkdir('../Python_API/src')
     for m in modules:
         wrap_cfml_module_procs(modules[m],m,lucy)
 
@@ -27,7 +27,7 @@ def wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str,lucy : dict) -> 
 
 	methods = get_methods(m)
 	w_name = 'py_'+m_name.lower()
-	w_file = os.path.join('../Python_API',w_name+'.f90')
+	w_file = os.path.join('../Python_API/src',w_name+'.f90')
 	with open(w_file,'w') as f:
 		f.write(f"module {w_name}\n")
 		f.write(f"\n{'':>4}use forpy\n")
