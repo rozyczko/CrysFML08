@@ -25,6 +25,7 @@ lucy = {} # Base class for every type
 
 def run() -> None:
 
+    cwd = os.getcwd()
     if is_colorama:
         print(f"{' ' :>20}{colorama.Fore.GREEN}{'==========='}{colorama.Style.RESET_ALL}")
         print(f"{' ' :>20}{colorama.Back.GREEN}{'Build Wraps'}{colorama.Style.RESET_ALL}")
@@ -48,6 +49,7 @@ def run() -> None:
         print(f"{'Building wraps / unwraps of CrysFML08 types'}")
     wrapper_types.wrap(modules,lucy)
     wrapper_procs.wrap(modules,lucy)
+    os.chdir(cwd)
 
 if __name__ == '__main__':
 
