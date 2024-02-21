@@ -43,7 +43,9 @@
 Module CFML_Wraps_Utils
 
    !---- Use Modules ----!
-   Use Forpy_Mod, str_forpy => str
+   use Forpy_Mod, str_forpy => str
+   use CFML_GlobalDeps
+   use CFML_Rational
 
    !---- Variables ----!
    implicit none
@@ -51,12 +53,16 @@ Module CFML_Wraps_Utils
    private
 
    !---- List of public procedures ----!
-   public :: Check_Number_Of_Arguments,Get_Var_From_Item,Ndarray_To_Pointer,Pointer_To_Array,&
-             Pointer_To_Array_Alloc,Unwrap_Dict_Item
+   public :: Check_Number_Of_Arguments,Get_Var_From_Item,&
+             Ndarray_To_Pointer,Pointer_To_Array,Pointer_To_Array_Alloc,Unwrap_Dict_Item
+
+   !List_to_Alloc_Array_Character,&
+   !          List_to_Alloc_Array_Logical,List_to_No_Alloc_Array_Character,List_to_No_Alloc_Array_Logical,&
 
    !---- Overload ----!
 
    Interface Get_Var_From_Item
+      module procedure Get_Complex32_From_Item
       module procedure Get_Dict_From_Item
       module procedure Get_Int32_From_Item
       module procedure Get_Logical_From_Item
@@ -65,7 +71,31 @@ Module CFML_Wraps_Utils
       module procedure Get_String_From_Item
    End Interface Get_Var_From_Item
 
+   !Interface List_to_Alloc_Array_Character
+   !   module procedure List_to_Alloc_Array1d_Character
+   !   module procedure List_to_Alloc_Array2d_Character
+   !End Interface List_to_Alloc_Array_Character
+
+   !Interface List_to_Alloc_Array_Logical
+   !   module procedure List_to_Alloc_Array1d_Logical
+   !   module procedure List_to_Alloc_Array2d_Logical
+   !End Interface List_to_Alloc_Array_Logical
+
+   !Interface List_to_No_Alloc_Array_Character
+   !   module procedure List_to_No_Alloc_Array1d_Character
+   !   module procedure List_to_No_Alloc_Array2d_Character
+   !End Interface List_to_No_Alloc_Array_Character
+
+   !Interface List_to_No_Alloc_Array_Logical
+   !   module procedure List_to_No_Alloc_Array1d_Logical
+   !   module procedure List_to_No_Alloc_Array2d_Logical
+   !End Interface List_to_No_Alloc_Array_Logical
+
    Interface Ndarray_To_Pointer
+      module procedure Ndarray_Complex32_1d_To_Pointer
+      module procedure Ndarray_Complex32_2d_To_Pointer
+      module procedure Ndarray_Complex32_3d_To_Pointer
+      module procedure Ndarray_Complex32_4d_To_Pointer
       module procedure Ndarray_Int32_1d_To_Pointer
       module procedure Ndarray_Int32_2d_To_Pointer
       module procedure Ndarray_Int64_2d_To_Pointer
@@ -76,6 +106,10 @@ Module CFML_Wraps_Utils
    End Interface Ndarray_To_Pointer
 
    Interface Pointer_To_Array
+      module procedure Pointer_Complex32_1d_To_Array
+      module procedure Pointer_Complex32_2d_To_Array
+      module procedure Pointer_Complex32_3d_To_Array
+      module procedure Pointer_Complex32_4d_To_Array
       module procedure Pointer_Int32_1d_To_Array
       module procedure Pointer_Int32_2d_To_Array
       module procedure Pointer_Int32_3d_To_Array
@@ -88,6 +122,10 @@ Module CFML_Wraps_Utils
    End Interface Pointer_To_Array
 
    Interface Pointer_To_Array_Alloc
+      module procedure Pointer_Complex32_1d_To_Array_Alloc
+      module procedure Pointer_Complex32_2d_To_Array_Alloc
+      module procedure Pointer_Complex32_3d_To_Array_Alloc
+      module procedure Pointer_Complex32_4d_To_Array_Alloc
       module procedure Pointer_Int32_1d_To_Array_Alloc
       module procedure Pointer_Int32_2d_To_Array_Alloc
       module procedure Pointer_Int32_3d_To_Array_Alloc
@@ -100,10 +138,15 @@ Module CFML_Wraps_Utils
    End Interface Pointer_To_Array_Alloc
 
    Interface Unwrap_Dict_Item
+      module procedure Unwrap_Dict_Item_Complex32
       module procedure Unwrap_Dict_Item_Dict
       module procedure Unwrap_Dict_Item_Int32
       module procedure Unwrap_Dict_Item_List
       module procedure Unwrap_Dict_Item_Logical
+      module procedure Unwrap_Dict_Item_Ndarray_Complex32_1d
+      module procedure Unwrap_Dict_Item_Ndarray_Complex32_2d
+      module procedure Unwrap_Dict_Item_Ndarray_Complex32_3d
+      module procedure Unwrap_Dict_Item_Ndarray_Complex32_4d
       module procedure Unwrap_Dict_Item_Ndarray_Int32_1d
       module procedure Unwrap_Dict_Item_Ndarray_Int32_2d
       module procedure Unwrap_Dict_Item_Ndarray_Int32_3d
@@ -116,6 +159,15 @@ Module CFML_Wraps_Utils
 
    !---- Interface Zone ----!
    Interface
+
+      Module Subroutine Get_Complex32_from_Item(procedure_name,var_name,item,var,ierror)
+         !---- Arguments ----!
+         character(len=*), intent(in)    :: procedure_name
+         character(len=*), intent(in)    :: var_name
+         type(object),     intent(inout) :: item
+         complex,          intent(out)   :: var
+         integer,          intent(inout) :: ierror
+      End Subroutine Get_Complex32_from_Item
 
       Module Subroutine Get_Dict_from_Item(procedure_name,var_name,item,di,ierror)
          !---- Arguments ----!
@@ -170,6 +222,117 @@ Module CFML_Wraps_Utils
          character(len=:), allocatable, intent(out)   :: var
          integer,                       intent(inout) :: ierror
       End Subroutine Get_String_from_Item
+
+      !subroutine list_to_alloc_array1d_character(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),                            intent(in)    :: procedure_name
+      !   character(len=*),                            intent(in)    :: var_name
+      !   type(list),                                  intent(inout) :: my_list
+      !   character(len=*), dimension(:), allocatable, intent(out)   :: arr
+      !   integer,                                     intent(inout) :: ierror
+      !end subroutine list_to_alloc_array1d_character
+!
+      !subroutine list_to_alloc_array2d_character(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),                              intent(in)    :: procedure_name
+      !   character(len=*),                              intent(in)    :: var_name
+      !   type(list),                                    intent(inout) :: my_list
+      !   character(len=*), dimension(:,:), allocatable, intent(out)   :: arr
+      !   integer,                                       intent(inout) :: ierror
+      !end subroutine list_to_alloc_array2d_character
+!
+      !subroutine list_to_no_alloc_array1d_character(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),               intent(in)    :: procedure_name
+      !   character(len=*),               intent(in)    :: var_name
+      !   type(list),                     intent(inout) :: my_list
+      !   character(len=*), dimension(:), intent(out)   :: arr
+      !   integer,                        intent(inout) :: ierror
+      !end subroutine list_to_no_alloc_array1d_character
+!
+      !subroutine list_to_no_alloc_array2d_character(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),                 intent(in)    :: procedure_name
+      !   character(len=*),                 intent(in)    :: var_name
+      !   type(list),                       intent(inout) :: my_list
+      !   character(len=*), dimension(:,:), intent(out)   :: arr
+      !   integer,                          intent(inout) :: ierror
+      !end subroutine list_to_no_alloc_array2d_character
+!
+      !subroutine list_to_alloc_array1d_logical(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),                   intent(in)    :: procedure_name
+      !   character(len=*),                   intent(in)    :: var_name
+      !   type(list),                         intent(inout) :: my_list
+      !   logical, dimension(:), allocatable, intent(out)   :: arr
+      !   integer,                            intent(inout) :: ierror
+      !end subroutine list_to_alloc_array1d_logical
+!
+      !subroutine list_to_alloc_array2d_logical(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),                     intent(in)    :: procedure_name
+      !   character(len=*),                     intent(in)    :: var_name
+      !   type(list),                           intent(inout) :: my_list
+      !   logical, dimension(:,:), allocatable, intent(out)   :: arr
+      !   integer,                              intent(inout) :: ierror
+      !end subroutine list_to_alloc_array2d_logical
+!
+      !subroutine list_to_no_alloc_array1d_logical(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),      intent(in)    :: procedure_name
+      !   character(len=*),      intent(in)    :: var_name
+      !   type(list),            intent(inout) :: my_list
+      !   logical, dimension(:), intent(out)   :: arr
+      !   integer,               intent(inout) :: ierror
+      !end subroutine list_to_no_alloc_array1d_logical
+!
+      !subroutine list_to_no_alloc_array2d_logical(procedure_name,var_name,my_list,arr,ierror)
+      !   ! Arguments
+      !   character(len=*),        intent(in)    :: procedure_name
+      !   character(len=*),        intent(in)    :: var_name
+      !   type(list),              intent(inout) :: my_list
+      !   logical, dimension(:,:), intent(out)   :: arr
+      !   integer,                 intent(inout) :: ierror
+      !end subroutine list_to_no_alloc_array2d_logical
+
+      Module Subroutine Ndarray_Complex32_1d_To_Pointer(procedure_name,var_name,nd,p,ierror)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         type(ndarray),                      intent(in)    :: nd
+         complex, dimension(:), pointer,     intent(out)   :: p
+         integer,                            intent(inout) :: ierror
+      End Subroutine Ndarray_Complex32_1d_To_Pointer
+
+      Module Subroutine Ndarray_Complex32_2d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         type(ndarray),                      intent(in)    :: nd
+         complex, dimension(:,:), pointer,   intent(out)   :: p
+         integer,                            intent(inout) :: ierror
+         character(len=1),                   intent(out)   :: order
+      End Subroutine Ndarray_Complex32_2d_To_Pointer
+
+      Module Subroutine Ndarray_Complex32_3d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         type(ndarray),                      intent(in)    :: nd
+         complex, dimension(:,:,:), pointer, intent(out)   :: p
+         integer,                            intent(inout) :: ierror
+         character(len=1),                   intent(out)   :: order
+      End Subroutine Ndarray_Complex32_3d_To_Pointer
+
+      Module Subroutine Ndarray_Complex32_4d_To_Pointer(procedure_name,var_name,nd,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                     intent(in)    :: procedure_name
+         character(len=*),                     intent(in)    :: var_name
+         type(ndarray),                        intent(in)    :: nd
+         complex, dimension(:,:,:,:), pointer, intent(out)   :: p
+         integer,                              intent(inout) :: ierror
+         character(len=1),                     intent(out)   :: order
+      End Subroutine Ndarray_Complex32_4d_To_Pointer
 
       Module Subroutine Ndarray_Int32_1d_To_Pointer(procedure_name,var_name,nd,p,ierror)
          !---- Arguments ----!
@@ -238,6 +401,84 @@ Module CFML_Wraps_Utils
          integer,                            intent(inout) :: ierror
          character(len=1),                   intent(out)   :: order
       End Subroutine Ndarray_Real32_3d_To_Pointer
+
+      Module Subroutine Pointer_Complex32_1d_To_Array(procedure_name,var_name,p,arr,ierror)
+         !---- Arguments ----!
+         character(len=*),               intent(in)    :: procedure_name
+         character(len=*),               intent(in)    :: var_name
+         complex, dimension(:), pointer, intent(in)    :: p
+         complex, dimension(:),          intent(out)   :: arr
+         integer,                        intent(inout) :: ierror
+      End Subroutine Pointer_Complex32_1d_To_Array
+
+      Module Subroutine Pointer_Complex32_1d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         complex, dimension(:), pointer,     intent(in)    :: p
+         complex, dimension(:), allocatable, intent(out)   :: arr
+         integer,                            intent(inout) :: ierror
+      End Subroutine Pointer_Complex32_1d_To_Array_Alloc
+
+      Module Subroutine Pointer_Complex32_2d_To_Array(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                 intent(in)    :: procedure_name
+         character(len=*),                 intent(in)    :: var_name
+         complex, dimension(:,:), pointer, intent(in)    :: p
+         complex, dimension(:,:),          intent(out)   :: arr
+         integer,                          intent(inout) :: ierror
+         character(len=1),                 intent(in)    :: order
+      End Subroutine Pointer_Complex32_2d_To_Array
+
+      Module Subroutine Pointer_Complex32_2d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                     intent(in)    :: procedure_name
+         character(len=*),                     intent(in)    :: var_name
+         complex, dimension(:,:), pointer,     intent(in)    :: p
+         complex, dimension(:,:), allocatable, intent(out)   :: arr
+         integer,                              intent(inout) :: ierror
+         character(len=1),                     intent(in)    :: order
+      End Subroutine Pointer_Complex32_2d_To_Array_Alloc
+
+      Module Subroutine Pointer_Complex32_3d_To_Array(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         complex, dimension(:,:,:), pointer, intent(in)    :: p
+         complex, dimension(:,:,:),          intent(out)   :: arr
+         integer,                            intent(inout) :: ierror
+         character(len=1),                   intent(in)    :: order
+      End Subroutine Pointer_Complex32_3d_To_Array
+
+      Module Subroutine Pointer_Complex32_3d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                       intent(in)    :: procedure_name
+         character(len=*),                       intent(in)    :: var_name
+         complex, dimension(:,:,:), pointer,     intent(in)    :: p
+         complex, dimension(:,:,:), allocatable, intent(out)   :: arr
+         integer,                                intent(inout) :: ierror
+         character(len=1),                       intent(in)    :: order
+      End Subroutine Pointer_Complex32_3d_To_Array_Alloc
+
+      Module Subroutine Pointer_Complex32_4d_To_Array(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                     intent(in)    :: procedure_name
+         character(len=*),                     intent(in)    :: var_name
+         complex, dimension(:,:,:,:), pointer, intent(in)    :: p
+         complex, dimension(:,:,:,:),          intent(out)   :: arr
+         integer,                              intent(inout) :: ierror
+         character(len=1),                     intent(in)    :: order
+      End Subroutine Pointer_Complex32_4d_To_Array
+
+      Module Subroutine Pointer_Complex32_4d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                         intent(in)    :: procedure_name
+         character(len=*),                         intent(in)    :: var_name
+         complex, dimension(:,:,:,:), pointer,     intent(in)    :: p
+         complex, dimension(:,:,:,:), allocatable, intent(out)   :: arr
+         integer,                                  intent(inout) :: ierror
+         character(len=1),                         intent(in)    :: order
+      End Subroutine Pointer_Complex32_4d_To_Array_Alloc
 
       Module Subroutine Pointer_Int32_1d_To_Array(procedure_name,var_name,p,arr,ierror)
          !---- Arguments ----!
@@ -434,6 +675,15 @@ Module CFML_Wraps_Utils
          type(ndarray)                                 :: nd_arr
       End Function Rational_To_Ndarray_3d
 
+      Module Subroutine Unwrap_Dict_Item_Complex32(procedure_name,var_name,di,f,ierror)
+         !---- Arguments ----!
+         character(len=*),            intent(in)    :: procedure_name
+         character(len=*),            intent(in)    :: var_name
+         type(dict),                  intent(inout) :: di
+         complex,                     intent(out)   :: f
+         integer,                     intent(inout) :: ierror
+      End Subroutine Unwrap_Dict_Item_Complex32
+
       Module Subroutine Unwrap_Dict_Item_Dict(procedure_name,var_name,di,my_dict,ierror)
          !---- Arguments ----!
          character(len=*),            intent(in)    :: procedure_name
@@ -470,6 +720,45 @@ Module CFML_Wraps_Utils
          integer,                     intent(inout) :: ierror
       End Subroutine Unwrap_Dict_Item_Logical
 
+      Module Subroutine Unwrap_Dict_Item_Ndarray_Complex32_1d(procedure_name,var_name,di,p,ierror)
+         !---- Arguments ----!
+         character(len=*),               intent(in)    :: procedure_name
+         character(len=*),               intent(in)    :: var_name
+         type(dict),                     intent(inout) :: di
+         complex, dimension(:), pointer, intent(out)   :: p
+         integer,                        intent(inout) :: ierror
+      End Subroutine Unwrap_Dict_Item_Ndarray_Complex32_1d
+
+      Module Subroutine Unwrap_Dict_Item_Ndarray_Complex32_2d(procedure_name,var_name,di,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                 intent(in)    :: procedure_name
+         character(len=*),                 intent(in)    :: var_name
+         type(dict),                       intent(inout) :: di
+         complex, dimension(:,:), pointer, intent(out)   :: p
+         integer,                          intent(inout) :: ierror
+         character(len=1),                 intent(out)   :: order
+      End Subroutine Unwrap_Dict_Item_Ndarray_Complex32_2d
+
+      Module Subroutine Unwrap_Dict_Item_Ndarray_Complex32_3d(procedure_name,var_name,di,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                   intent(in)    :: procedure_name
+         character(len=*),                   intent(in)    :: var_name
+         type(dict),                         intent(inout) :: di
+         complex, dimension(:,:,:), pointer, intent(out)   :: p
+         integer,                            intent(inout) :: ierror
+         character(len=1),                   intent(out)   :: order
+      End Subroutine Unwrap_Dict_Item_Ndarray_Complex32_3d
+
+      Module Subroutine Unwrap_Dict_Item_Ndarray_Complex32_4d(procedure_name,var_name,di,p,ierror,order)
+         !---- Arguments ----!
+         character(len=*),                     intent(in)    :: procedure_name
+         character(len=*),                     intent(in)    :: var_name
+         type(dict),                           intent(inout) :: di
+         complex, dimension(:,:,:,:), pointer, intent(out)   :: p
+         integer,                              intent(inout) :: ierror
+         character(len=1),                     intent(out)   :: order
+      End Subroutine Unwrap_Dict_Item_Ndarray_Complex32_4d
+
       Module Subroutine Unwrap_Dict_Item_Ndarray_Int32_1d(procedure_name,var_name,di,p,ierror)
          !---- Arguments ----!
          character(len=*),               intent(in)    :: procedure_name
@@ -496,7 +785,7 @@ Module CFML_Wraps_Utils
          type(dict),                         intent(inout) :: di
          integer, dimension(:,:,:), pointer, intent(out)   :: p
          integer,                            intent(inout) :: ierror
-         character(len=1),                 intent(out)   :: order
+         character(len=1),                 intent(out)     :: order
       End Subroutine Unwrap_Dict_Item_Ndarray_Int32_3d
 
       Module Subroutine Unwrap_Dict_Item_Ndarray_Real32_1d(procedure_name,var_name,di,p,ierror)
