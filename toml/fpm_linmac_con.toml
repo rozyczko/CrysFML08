@@ -21,7 +21,8 @@ auto-examples = false
 [install]
 library = true
 
-
+[dependencies]
+openmp="*"
 
 #
 # The lines above are enough for building the library using the scripts make_CrysFML_fpm.bat/make_CrysFML_fpm.sh
