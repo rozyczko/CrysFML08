@@ -662,7 +662,7 @@ implicit none
 
     End Subroutine Pointer_Complex32_1d_To_Array
 
-    Module Subroutine Pointer_Complex32_1d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror)
+    Module Subroutine Pointer_Complex32_1d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
         character(len=*),                   intent(in)    :: procedure_name
         character(len=*),                   intent(in)    :: var_name
@@ -685,7 +685,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Complex32_1d_To_Array_Alloc
+    End Subroutine Pointer_Complex32_1d_To_Alloc_Array
 
     Module Subroutine Pointer_Complex32_2d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -720,7 +720,7 @@ implicit none
 
     End Subroutine Pointer_Complex32_2d_To_Array
 
-    Module Subroutine Pointer_Complex32_2d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Complex32_2d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                     intent(in)    :: procedure_name
         character(len=*),                     intent(in)    :: var_name
@@ -754,7 +754,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Complex32_2d_To_Array_Alloc
+    End Subroutine Pointer_Complex32_2d_To_Alloc_Array
 
     Module Subroutine Pointer_Complex32_3d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -842,7 +842,7 @@ implicit none
 
     End Subroutine Pointer_Complex32_4d_To_Array
 
-    Module Subroutine Pointer_Complex32_3d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Complex32_3d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                       intent(in)    :: procedure_name
         character(len=*),                       intent(in)    :: var_name
@@ -884,9 +884,9 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Complex32_3d_To_Array_Alloc
+    End Subroutine Pointer_Complex32_3d_To_Alloc_Array
 
-    Module Subroutine Pointer_Complex32_4d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Complex32_4d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                         intent(in)    :: procedure_name
         character(len=*),                         intent(in)    :: var_name
@@ -932,7 +932,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Complex32_4d_To_Array_Alloc
+    End Subroutine Pointer_Complex32_4d_To_Alloc_Array
 
     Module Subroutine Pointer_Int32_1d_To_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
@@ -955,7 +955,7 @@ implicit none
 
     End Subroutine Pointer_Int32_1d_To_Array
 
-    Module Subroutine Pointer_Int32_1d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror)
+    Module Subroutine Pointer_Int32_1d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
         character(len=*),                   intent(in)    :: procedure_name
         character(len=*),                   intent(in)    :: var_name
@@ -978,7 +978,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Int32_1d_To_Array_Alloc
+    End Subroutine Pointer_Int32_1d_To_Alloc_Array
 
     Module Subroutine Pointer_Int32_2d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1013,7 +1013,7 @@ implicit none
 
     End Subroutine Pointer_Int32_2d_To_Array
 
-    Module Subroutine Pointer_Int32_2d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Int32_2d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                     intent(in)    :: procedure_name
         character(len=*),                     intent(in)    :: var_name
@@ -1047,7 +1047,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Int32_2d_To_Array_Alloc
+    End Subroutine Pointer_Int32_2d_To_Alloc_Array
 
     Module Subroutine Pointer_Int32_3d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1090,7 +1090,7 @@ implicit none
 
     End Subroutine Pointer_Int32_3d_To_Array
 
-    Module Subroutine Pointer_Int32_3d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Int32_3d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                       intent(in)    :: procedure_name
         character(len=*),                       intent(in)    :: var_name
@@ -1132,7 +1132,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Int32_3d_To_Array_Alloc
+    End Subroutine Pointer_Int32_3d_To_Alloc_Array
 
     Module Subroutine Pointer_Rational_1d_To_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
@@ -1155,7 +1155,7 @@ implicit none
 
     End Subroutine Pointer_Rational_1d_To_Array
 
-    Module Subroutine Pointer_Rational_1d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror)
+    Module Subroutine Pointer_Rational_1d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
         character(len=*),                          intent(in)    :: procedure_name
         character(len=*),                          intent(in)    :: var_name
@@ -1178,7 +1178,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Rational_1d_To_Array_Alloc
+    End Subroutine Pointer_Rational_1d_To_Alloc_Array
 
     Module Subroutine Pointer_Rational_2d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1213,7 +1213,7 @@ implicit none
 
     End Subroutine Pointer_Rational_2d_To_Array
 
-    Module Subroutine Pointer_Rational_2d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Rational_2d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                            intent(in)    :: procedure_name
         character(len=*),                            intent(in)    :: var_name
@@ -1247,7 +1247,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Rational_2d_To_Array_Alloc
+    End Subroutine Pointer_Rational_2d_To_Alloc_Array
 
     Module Subroutine Pointer_Rational_3d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1290,7 +1290,7 @@ implicit none
 
     End Subroutine Pointer_Rational_3d_To_Array
 
-    Module Subroutine Pointer_Rational_3d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Rational_3d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                              intent(in)    :: procedure_name
         character(len=*),                              intent(in)    :: var_name
@@ -1332,7 +1332,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Rational_3d_To_Array_Alloc
+    End Subroutine Pointer_Rational_3d_To_Alloc_Array
 
     Module Subroutine Pointer_Real32_1d_To_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
@@ -1355,7 +1355,7 @@ implicit none
 
     End Subroutine Pointer_Real32_1d_To_Array
 
-    Module Subroutine Pointer_Real32_1d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror)
+    Module Subroutine Pointer_Real32_1d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror)
         !---- Arguments ----!
         character(len=*),                intent(in)    :: procedure_name
         character(len=*),                intent(in)    :: var_name
@@ -1378,7 +1378,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Real32_1d_To_Array_Alloc
+    End Subroutine Pointer_Real32_1d_To_Alloc_Array
 
     Module Subroutine Pointer_Real32_2d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1413,7 +1413,7 @@ implicit none
 
     End Subroutine Pointer_Real32_2d_To_Array
 
-    Module Subroutine Pointer_Real32_2d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Real32_2d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                  intent(in)    :: procedure_name
         character(len=*),                  intent(in)    :: var_name
@@ -1447,7 +1447,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Real32_2d_To_Array_Alloc
+    End Subroutine Pointer_Real32_2d_To_Alloc_Array
 
     Module Subroutine Pointer_Real32_3d_To_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
@@ -1490,7 +1490,7 @@ implicit none
 
     End Subroutine Pointer_Real32_3d_To_Array
 
-    Module Subroutine Pointer_Real32_3d_To_Array_Alloc(procedure_name,var_name,p,arr,ierror,order)
+    Module Subroutine Pointer_Real32_3d_To_Alloc_Array(procedure_name,var_name,p,arr,ierror,order)
         !---- Arguments ----!
         character(len=*),                    intent(in)    :: procedure_name
         character(len=*),                    intent(in)    :: var_name
@@ -1532,7 +1532,7 @@ implicit none
             end if
         end if
 
-    End Subroutine Pointer_Real32_3d_To_Array_Alloc
+    End Subroutine Pointer_Real32_3d_To_Alloc_Array
 
     Module Subroutine Unwrap_Dict_Item_Complex32(procedure_name,var_name,di,f,ierror)
         !---- Arguments ----!
@@ -1597,6 +1597,24 @@ implicit none
         end if
 
     End Subroutine Unwrap_Dict_Item_Int32
+
+    Module Subroutine Unwrap_Dict_Item_Int64(procedure_name,var_name,di,f,ierror)
+        !---- Arguments ----!
+        character(len=*),            intent(in)    :: procedure_name
+        character(len=*),            intent(in)    :: var_name
+        type(dict),                  intent(inout) :: di
+        integer(kind=8),             intent(out)   :: f
+        integer,                     intent(inout) :: ierror
+
+        ierror = 0
+        if (ierror == 0) ierror = di%getitem(f,var_name)
+        if (ierror /= 0) then
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = procedure_name//': Error getting item '//var_name
+        end if
+
+    End Subroutine Unwrap_Dict_Item_Int64
 
     Module Subroutine Unwrap_Dict_Item_List(procedure_name,var_name,di,my_list,ierror)
         !---- Arguments ----!
