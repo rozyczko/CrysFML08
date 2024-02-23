@@ -108,12 +108,12 @@ Module CFML_Rational
               maxloc,minloc, matmul, sum, real
 
 
-    integer(kind=LI),   public, parameter :: MAXIMUM_DENOMINATOR=999_LI
+    integer(kind=8),   public, parameter :: MAXIMUM_DENOMINATOR=999_LI
 
     !> Types definitions
     Type, public :: rational
-       integer(kind=LI) :: numerator
-       integer(kind=LI) :: denominator
+       integer(kind=8) :: numerator
+       integer(kind=8) :: denominator
     End type rational
 
     !> Assignment
@@ -274,8 +274,8 @@ Module CFML_Rational
        !> Constructor //
        Elemental Module Function Make_Rational(Numerator, Denominator) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI), intent (in) :: numerator
-          integer(kind=LI), intent (in) :: denominator
+          integer(kind=8), intent (in) :: numerator
+          integer(kind=8), intent (in) :: denominator
           type(rational)                :: res
        End Function Make_Rational
 
@@ -290,7 +290,7 @@ Module CFML_Rational
        Elemental Module Subroutine Assign_Int_LI_Rational(I, Res)
           !---- Arguments ----!
           type(rational),  intent (in)   :: res  !, volatile
-          integer(kind=LI),intent (out)  :: i
+          integer(kind=8),intent (out)  :: i
        End Subroutine Assign_Int_LI_Rational
 
        Elemental Module Subroutine Assign_Int_Rational(I, Res)
@@ -308,7 +308,7 @@ Module CFML_Rational
        Elemental Module Subroutine Assign_Rational_Int_LI(Res, I)
           !---- Arguments ----!
           type(rational),   intent (out) :: res  ! volatile
-          integer(kind=LI), intent (in)  :: i
+          integer(kind=8), intent (in)  :: i
        End Subroutine Assign_Rational_Int_LI
 
        Elemental Module Subroutine Assign_Rational_Real_CP(Res, Xr)
@@ -326,7 +326,7 @@ Module CFML_Rational
        !> Operator +
        Elemental Module Function Integer_Rational_Add(I, S) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: s
           type(rational)               :: res
        End Function Integer_Rational_Add
@@ -341,14 +341,14 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_Add(S, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: s
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational)               :: res
        End Function Rational_Integer_Add
 
        !> Operator -
        Elemental Module Function Integer_Rational_Subtract(I, S) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: s
           type(rational)               :: res
        End Function Integer_Rational_Subtract
@@ -356,7 +356,7 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_Subtract(S,I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: s
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational)               :: res
        End Function Rational_Integer_Subtract
 
@@ -376,14 +376,14 @@ Module CFML_Rational
        !> Operator *
        Elemental Module Function Integer_Rational_Multiply(I, S) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: s
           type(rational)               :: res
        End Function Integer_Rational_Multiply
 
        Elemental Module Function Rational_Integer_Multiply(S,I) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: s
           type(rational)               :: res
        End Function Rational_Integer_Multiply
@@ -398,7 +398,7 @@ Module CFML_Rational
        !> Operator divisor
        Elemental Module Function Integer_Rational_Divide(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI), intent(in) :: I
+          integer(kind=8), intent(in) :: I
           type (rational),  intent(in) :: r
           type (rational)              :: res
        End Function Integer_Rational_Divide
@@ -413,14 +413,14 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_Divide(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational)               :: res
        End Function Rational_Integer_Divide
 
        !> Operator <
        Elemental Module Function Integer_Rational_LT(I,R) Result (Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_LT
@@ -428,7 +428,7 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_LT(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           logical                      :: res
        End Function Rational_Integer_LT
 
@@ -443,7 +443,7 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_LE(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           logical                      :: res
        End Function Rational_Integer_LE
 
@@ -456,7 +456,7 @@ Module CFML_Rational
 
        Pure Module Function Integer_Rational_LE(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_LE
@@ -464,7 +464,7 @@ Module CFML_Rational
        !> Operator >
        Elemental Module Function Integer_Rational_GT(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_GT
@@ -479,14 +479,14 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_GT(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),   intent (in) :: r
-          integer(kind=LI), intent (in) :: i
+          integer(kind=8), intent (in) :: i
           logical                       :: res
        End Function Rational_Integer_GT
 
        !> Operator >=
        Elemental Module Function Integer_Rational_GE(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_GE
@@ -501,14 +501,14 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_GE(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           logical                      :: res
        End Function Rational_Integer_GE
 
        !> Operator ==
        Elemental Module Function Integer_Rational_EQ(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_EQ
@@ -523,14 +523,14 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_EQ(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           logical                      :: res
        End Function Rational_Integer_EQ
 
        !> Operator /=
        Elemental Module Function Integer_Rational_NE(I, R) Result(Res)
           !---- Arguments ----!
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           type(rational),  intent (in) :: r
           logical                      :: res
        End Function Integer_Rational_NE
@@ -538,7 +538,7 @@ Module CFML_Rational
        Elemental Module Function Rational_Integer_NE(R, I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent (in) :: i
+          integer(kind=8),intent (in) :: i
           logical                      :: res
        End Function Rational_Integer_NE
 
@@ -559,20 +559,20 @@ Module CFML_Rational
        Elemental Module Function Rational_Int(R) Result(Res)
           !---- Arguments ----!
           type(rational), intent (in) :: r
-          integer(kind=LI)            :: res
+          integer(kind=8)            :: res
        End Function Rational_Int
 
        Elemental Module Function Rational_Integer_Mod(R,I) Result(Res)
           !---- Arguments ----!
           type(rational),   intent (in) :: r
-          integer(kind=LI), intent (in) :: i
+          integer(kind=8), intent (in) :: i
           type(rational)                :: res
        End Function Rational_Integer_Mod
 
        Elemental Module Function Rational_Integer_Modulo(R,I) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in) :: r
-          integer(kind=LI),intent(in)  :: i
+          integer(kind=8),intent(in)  :: i
           type(rational)               :: res
        End Function Rational_Integer_Modulo
 
@@ -591,7 +591,7 @@ Module CFML_Rational
        Elemental Module Function Rational_Nint(R) Result(Res)
           !---- Arguments ----!
           type(rational),  intent (in)  :: r
-          integer(kind=LI)              :: res
+          integer(kind=8)              :: res
        End Function Rational_Nint
 
        Elemental Module Function Rational_Real(R) Result (Res)
@@ -813,9 +813,9 @@ Module CFML_Rational
     !!
     Pure Recursive Function R_Gcd(I, J) Result(Res)
        !---- Arguments ----!
-       integer(kind=LI), intent (in) :: i
-       integer(kind=LI), intent (in) :: j
-       integer(kind=LI)              :: res
+       integer(kind=8), intent (in) :: i
+       integer(kind=8), intent (in) :: j
+       integer(kind=8)              :: res
 
        if (j == 0) then
           res=i
@@ -836,7 +836,7 @@ Module CFML_Rational
        type(rational)              :: res
 
        !---- Local Variables ----!
-       integer(kind=LI) :: g
+       integer(kind=8) :: g
 
        g=r_gcd(r%numerator, r%denominator)
        if (g /= 0) then
