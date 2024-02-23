@@ -48,10 +48,11 @@ class Interface():
 
 class FortranType():
 
-    def __init__(self,name : str ='',parent : str ='',childs : list=[],components : dict ={}):
+    def __init__(self,name : str ='',parent : str ='',lucy : str ='',childs : list=[],components : dict ={}):
 
         self.name       = name
         self.parent     = parent
+        self.lucy       = lucy
         self.childs     = childs.copy()
         self.components = components.copy()
 

@@ -7,6 +7,7 @@ February 2024
 Functions
 ---------
 run() -> None
+set_public_types() -> None
 """
 
 import os
@@ -21,7 +22,6 @@ except:
     is_colorama = False
 
 modules = {}
-lucy = {} # Base class for every type
 
 def run() -> None:
 
@@ -38,18 +38,36 @@ def run() -> None:
         print(f"{colorama.Fore.GREEN}{'Reading modules'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Reading modules'}")
-    reader.read(modules,lucy)
+    reader.read(modules)
+    reader.set_childs(modules)
+    reader.set_lucy(modules)
+    set_public_types()
+
     if is_colorama:
         print(f"{colorama.Fore.GREEN}{'Setting childs'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Setting childs'}")
     if is_colorama:
-        print(f"{colorama.Fore.GREEN}{'Start building wraps'}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.GREEN}{'Building wraps / unwraps of CrysFML08 types'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Building wraps / unwraps of CrysFML08 types'}")
-    wrapper_types.wrap(modules,lucy)
-    wrapper_procs.wrap(modules,lucy)
+    wrapper_types.wrap(modules)
+    if is_colorama:
+        print(f"{colorama.Fore.GREEN}{'Building wraps / unwraps of CrysFML08 procedures'}{colorama.Style.RESET_ALL}")
+    else:
+        print(f"{'Building wraps / unwraps of CrysFML08 procedures'}")
+    wrapper_procs.wrap(modules)
     os.chdir(cwd)
+
+def set_public_types():
+
+    publics_types = {}
+    for m in modules:
+        t = modules[m].types
+        for s in t:
+            publics_types[s] = t[s]
+    wrapper_types.publics_types = publics_types
+    wrapper_procs.publics_types = publics_types
 
 if __name__ == '__main__':
 
