@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - hm
-     - Description
+     - str
      - Description
    * - hall
-     - Description
+     - str
      - Description
    * - laue
-     - Description
+     - int
      - Description
    * - pg
-     - Description
+     - int
      - Description
    * - asu
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - inf_extra
-     - Description
+     - str
      - Description
 
 Functions

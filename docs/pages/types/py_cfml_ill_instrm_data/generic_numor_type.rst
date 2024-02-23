@@ -12,49 +12,49 @@ Properties
      - Value
      - Description
    * - numor
-     - Description
+     - int
      - Description
    * - instr
-     - Description
+     - str
      - Description
    * - expname
-     - Description
+     - str
      - Description
    * - date
-     - Description
+     - str
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - sampleid
-     - Description
+     - dict
      - Description
    * - diffopt
-     - Description
+     - dict
      - Description
    * - monmpar
-     - Description
+     - dict
      - Description
    * - diffmpar
-     - Description
+     - dict
      - Description
    * - detpar
-     - Description
+     - dict
      - Description
    * - dacflags
-     - Description
+     - dict
      - Description
    * - dacparam
-     - Description
+     - dict
      - Description
    * - samplest
-     - Description
+     - dict
      - Description
    * - icounts
-     - Description
+     - dict
      - Description
    * - rcounts
-     - Description
+     - dict
      - Description
 
 Functions

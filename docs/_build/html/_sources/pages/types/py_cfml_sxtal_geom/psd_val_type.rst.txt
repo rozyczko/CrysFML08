@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - name_inst
-     - Description
+     - str
      - Description
    * - xoff
-     - Description
+     - float
      - Description
    * - zoff
-     - Description
+     - float
      - Description
    * - radius
-     - Description
+     - float
      - Description
    * - yoff
-     - Description
+     - float
      - Description
    * - cgap
-     - Description
+     - float
      - Description
    * - agap
-     - Description
+     - float
      - Description
    * - ncat
-     - Description
+     - int
      - Description
    * - nano
-     - Description
+     - int
      - Description
    * - ipsd
-     - Description
+     - int
      - Description
 
 Functions

@@ -12,31 +12,31 @@ Properties
      - Value
      - Description
    * - natoms
-     - Description
+     - int
      - Description
    * - n_spec
-     - Description
+     - int
      - Description
    * - n_anions
-     - Description
+     - int
      - Description
    * - n_cations
-     - Description
+     - int
      - Description
    * - tol
-     - Description
+     - float
      - Description
    * - totatoms
-     - Description
+     - float
      - Description
    * - species
-     - Description
+     - 
      - Description
    * - radius
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - atom
-     - Description
+     - 
      - Description
 
 Functions

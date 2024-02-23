@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - z
-     - Description
+     - int
      - Description
    * - a
-     - Description
+     - ndarray: dtype=float32, shape=(4)
      - Description
    * - b
-     - Description
+     - ndarray: dtype=float32, shape=(4)
      - Description
    * - c
-     - Description
+     - float
      - Description
 
 Functions

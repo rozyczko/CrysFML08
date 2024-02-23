@@ -12,37 +12,37 @@ Properties
      - Value
      - Description
    * - nd
-     - Description
+     - int
      - Description
    * - chir
-     - Description
+     - bool
      - Description
    * - trans
-     - Description
+     - bool
      - Description
    * - twin
-     - Description
+     - bool
      - Description
    * - dmat
-     - Description
+     - ndarray: dtype=int32, shape=(3,3,24)
      - Description
    * - dt
-     - Description
+     - ndarray: dtype=float32, shape=(3,24)
      - Description
    * - pop
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - lpop
-     - Description
+     - ndarray: dtype=int32, shape=(2,24)
      - Description
    * - mpop
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - pop_std
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - lab
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - system
-     - Description
+     - str
      - Description
    * - eos
-     - Description
+     - 
      - Description
 
 Functions

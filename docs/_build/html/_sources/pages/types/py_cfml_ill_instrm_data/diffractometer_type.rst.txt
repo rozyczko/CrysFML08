@@ -12,205 +12,205 @@ Properties
      - Value
      - Description
    * - info
-     - Description
+     - str
      - Description
    * - name_inst
-     - Description
+     - str
      - Description
    * - geom
-     - Description
+     - str
      - Description
    * - bl_frame
-     - Description
+     - str
      - Description
    * - dist_units
-     - Description
+     - str
      - Description
    * - r_ord
-     - Description
+     - str
      - Description
    * - angl_units
-     - Description
+     - str
      - Description
    * - detector_type
-     - Description
+     - str
      - Description
    * - data_ordering
-     - Description
+     - str
      - Description
    * - dist_samp_detector
-     - Description
+     - float
      - Description
    * - wave
-     - Description
+     - float
      - Description
    * - wave_min
-     - Description
+     - float
      - Description
    * - wave_max
-     - Description
+     - float
      - Description
    * - vert
-     - Description
+     - float
      - Description
    * - horiz
-     - Description
+     - float
      - Description
    * - agap
-     - Description
+     - float
      - Description
    * - cgap
-     - Description
+     - float
      - Description
    * - np_vert
-     - Description
+     - int
      - Description
    * - np_horiz
-     - Description
+     - int
      - Description
    * - tilted
-     - Description
+     - bool
      - Description
    * - rd
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - ga_d
-     - Description
+     - float
      - Description
    * - nu_d
-     - Description
+     - float
      - Description
    * - tiltx_d
-     - Description
+     - float
      - Description
    * - tilty_d
-     - Description
+     - float
      - Description
    * - tiltz_d
-     - Description
+     - float
      - Description
    * - igeom
-     - Description
+     - int
      - Description
    * - ipsd
-     - Description
+     - int
      - Description
    * - e1
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - e2
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - e3
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - gnxz_limited
-     - Description
+     - bool
      - Description
    * - gap_min
-     - Description
+     - float
      - Description
    * - gap_max
-     - Description
+     - float
      - Description
    * - gan_min
-     - Description
+     - float
      - Description
    * - gan_max
-     - Description
+     - float
      - Description
    * - nu_min
-     - Description
+     - float
      - Description
    * - nu_max
-     - Description
+     - float
      - Description
    * - d_min
-     - Description
+     - float
      - Description
    * - x_min
-     - Description
+     - float
      - Description
    * - x_max
-     - Description
+     - float
      - Description
    * - z_min
-     - Description
+     - float
      - Description
    * - z_max
-     - Description
+     - float
      - Description
    * - num_ang
-     - Description
+     - int
      - Description
    * - ang_names
-     - Description
+     - 
      - Description
    * - ang_limits
-     - Description
+     - ndarray: dtype=float32, shape=(15,2)
      - Description
    * - ang_offsets
-     - Description
+     - ndarray: dtype=float32, shape=(15)
      - Description
    * - ang_velocity
-     - Description
+     - ndarray: dtype=float32, shape=(15)
      - Description
    * - num_disp
-     - Description
+     - int
      - Description
    * - disp_names
-     - Description
+     - 
      - Description
    * - disp_limits
-     - Description
+     - ndarray: dtype=float32, shape=(10,2)
      - Description
    * - disp_offsets
-     - Description
+     - ndarray: dtype=float32, shape=(10)
      - Description
    * - displaced
-     - Description
+     - bool
      - Description
    * - det_offsets
-     - Description
+     - ndarray: dtype=float32, shape=(3 )
      - Description
    * - rangtim
-     - Description
+     - bool
      - Description
    * - range_time
-     - Description
+     - ndarray: dtype=float32, shape=(:,:,:)
      - Description
    * - alphas
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - sigma_alphas
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - shift_correct
-     - Description
+     - bool
      - Description
    * - shifts
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - alpha_correct
-     - Description
+     - bool
      - Description
    * - sigma_alpha_correct
-     - Description
+     - bool
      - Description
    * - alpha_file
-     - Description
+     - str
      - Description
    * - resol_given
-     - Description
+     - bool
      - Description
    * - nga
-     - Description
+     - int
      - Description
    * - nnu
-     - Description
+     - int
      - Description
    * - resurf
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

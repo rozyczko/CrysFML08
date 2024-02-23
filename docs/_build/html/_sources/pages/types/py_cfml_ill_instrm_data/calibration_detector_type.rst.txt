@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - name_instrm
-     - Description
+     - str
      - Description
    * - ndet
-     - Description
+     - int
      - Description
    * - npointsdet
-     - Description
+     - int
      - Description
    * - pos_read
-     - Description
+     - bool
      - Description
    * - true_eff
-     - Description
+     - bool
      - Description
    * - posx
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - effic
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - sposx
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - seffic
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - active
-     - Description
+     - 
      - Description
 
 Functions

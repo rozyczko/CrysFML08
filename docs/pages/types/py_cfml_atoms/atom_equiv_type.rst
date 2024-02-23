@@ -12,16 +12,16 @@ Properties
      - Value
      - Description
    * - mult
-     - Description
+     - int
      - Description
    * - chemsymb
-     - Description
+     - str
      - Description
    * - lab
-     - Description
+     - 
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

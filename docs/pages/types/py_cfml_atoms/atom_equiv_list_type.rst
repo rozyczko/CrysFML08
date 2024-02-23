@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - nauas
-     - Description
+     - int
      - Description
    * - atm
-     - Description
+     - 
      - Description
 
 Functions

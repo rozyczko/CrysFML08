@@ -12,28 +12,28 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - avcoor
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - rzero
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - rcutoff
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - dzero
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - rmin
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - alpha
-     - Description
+     - ndarray: dtype=float32, shape=(bvel_anions_n)
      - Description
    * - refnum
-     - Description
+     - ndarray: dtype=int32, shape=(bvel_anions_n)
      - Description
 
 Functions

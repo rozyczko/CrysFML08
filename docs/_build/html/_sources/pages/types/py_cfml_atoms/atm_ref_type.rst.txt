@@ -13,34 +13,34 @@ Properties
      - Value
      - Description
    * - l_x
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - l_occ
-     - Description
+     - int
      - Description
    * - l_u_iso
-     - Description
+     - int
      - Description
    * - l_moment
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - l_u
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - m_x
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - m_occ
-     - Description
+     - float
      - Description
    * - m_u_iso
-     - Description
+     - float
      - Description
    * - m_moment
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - m_u
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
 
 Functions

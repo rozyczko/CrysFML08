@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - sc
-     - Description
+     - str
      - Description
    * - ml
-     - Description
+     - str
      - Description
    * - ko
-     - Description
+     - str
      - Description
    * - bc
-     - Description
+     - str
      - Description
    * - za
-     - Description
+     - str
      - Description
 
 Functions

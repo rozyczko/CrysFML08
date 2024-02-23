@@ -12,28 +12,28 @@ Properties
      - Value
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - system
-     - Description
+     - str
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - ic_dat
-     - Description
+     - ndarray: dtype=int32, shape=(ncol_data_max)
      - Description
    * - pscale_name
-     - Description
+     - str
      - Description
    * - vscale_name
-     - Description
+     - str
      - Description
    * - lscale_name
-     - Description
+     - str
      - Description
    * - eosd
-     - Description
+     - 
      - Description
 
 Functions

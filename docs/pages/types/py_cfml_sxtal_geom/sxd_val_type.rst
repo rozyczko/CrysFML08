@@ -12,37 +12,37 @@ Properties
      - Value
      - Description
    * - distms
-     - Description
+     - float
      - Description
    * - distsd
-     - Description
+     - float
      - Description
    * - dimx
-     - Description
+     - float
      - Description
    * - dimz
-     - Description
+     - float
      - Description
    * - xoff
-     - Description
+     - float
      - Description
    * - yoff
-     - Description
+     - float
      - Description
    * - zoff
-     - Description
+     - float
      - Description
    * - toff
-     - Description
+     - float
      - Description
    * - velcon
-     - Description
+     - float
      - Description
    * - nxcel
-     - Description
+     - int
      - Description
    * - nzcel
-     - Description
+     - int
      - Description
 
 Functions

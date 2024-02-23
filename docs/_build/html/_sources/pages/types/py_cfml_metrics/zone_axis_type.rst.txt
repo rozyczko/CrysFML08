@@ -12,16 +12,16 @@ Properties
      - Value
      - Description
    * - nlayer
-     - Description
+     - int
      - Description
    * - uvw
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - rx
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - ry
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
 
 Functions

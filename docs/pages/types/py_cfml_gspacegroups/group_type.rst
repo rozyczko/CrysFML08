@@ -13,19 +13,19 @@ Properties
      - Value
      - Description
    * - multip
-     - Description
+     - int
      - Description
    * - d
-     - Description
+     - int
      - Description
    * - inv
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - op
-     - Description
+     - 
      - Description
    * - symb_op
-     - Description
+     - 
      - Description
 
 Functions

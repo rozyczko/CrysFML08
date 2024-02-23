@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - g0
-     - Description
+     - dict
      - Description
    * - ngk
-     - Description
+     - int
      - Description
    * - k_equiv_minusk
-     - Description
+     - bool
      - Description
    * - minusk
-     - Description
+     - bool
      - Description
    * - extended
-     - Description
+     - bool
      - Description
    * - p
-     - Description
+     - ndarray: dtype=int32, shape=(192)
      - Description
    * - co
-     - Description
+     - ndarray: dtype=int32, shape=(48,48)
      - Description
    * - nk
-     - Description
+     - int
      - Description
    * - stark
-     - Description
+     - ndarray: dtype=float32, shape=(3,48)
      - Description
    * - eqv_k
-     - Description
+     - ndarray: dtype=float32, shape=(3,48)
      - Description
 
 Functions

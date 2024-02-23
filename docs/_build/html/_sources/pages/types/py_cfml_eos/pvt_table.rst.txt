@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - np
-     - Description
+     - int
      - Description
    * - nt
-     - Description
+     - int
      - Description
    * - pmin
-     - Description
+     - float
      - Description
    * - pmax
-     - Description
+     - float
      - Description
    * - tmin
-     - Description
+     - float
      - Description
    * - tmax
-     - Description
+     - float
      - Description
    * - ptv
-     - Description
+     - ndarray: dtype=float32, shape=(:,:,:)
      - Description
 
 Functions

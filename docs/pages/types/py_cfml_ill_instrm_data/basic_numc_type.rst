@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - namevar
-     - Description
+     - 
      - Description
    * - cvalues
-     - Description
+     - 
      - Description
 
 Functions

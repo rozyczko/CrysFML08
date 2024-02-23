@@ -14,121 +14,121 @@ Properties
      - Value
      - Description
    * - magnetic
-     - Description
+     - bool
      - Description
    * - standard_setting
-     - Description
+     - bool
      - Description
    * - numspg
-     - Description
+     - int
      - Description
    * - numshu
-     - Description
+     - int
      - Description
    * - numops
-     - Description
+     - int
      - Description
    * - centred
-     - Description
+     - int
      - Description
    * - anticentred
-     - Description
+     - int
      - Description
    * - mag_type
-     - Description
+     - int
      - Description
    * - num_lat
-     - Description
+     - int
      - Description
    * - num_alat
-     - Description
+     - int
      - Description
    * - parent_num
-     - Description
+     - int
      - Description
    * - bravais_num
-     - Description
+     - int
      - Description
    * - spg_lat
-     - Description
+     - str
      - Description
    * - shu_lat
-     - Description
+     - 
      - Description
    * - init_label
-     - Description
+     - str
      - Description
    * - parent_spg
-     - Description
+     - str
      - Description
    * - tfrom_parent
-     - Description
+     - str
      - Description
    * - centre
-     - Description
+     - str
      - Description
    * - spg_symb
-     - Description
+     - str
      - Description
    * - bns_num
-     - Description
+     - str
      - Description
    * - og_num
-     - Description
+     - str
      - Description
    * - bns_symb
-     - Description
+     - str
      - Description
    * - og_symb
-     - Description
+     - str
      - Description
    * - hall
-     - Description
+     - str
      - Description
    * - uni
-     - Description
+     - str
      - Description
    * - uni_num
-     - Description
+     - str
      - Description
    * - crystalsys
-     - Description
+     - str
      - Description
    * - pg
-     - Description
+     - str
      - Description
    * - mag_pg
-     - Description
+     - str
      - Description
    * - laue
-     - Description
+     - str
      - Description
    * - setting
-     - Description
+     - str
      - Description
    * - mat2std
-     - Description
+     - str
      - Description
    * - mat2std_shu
-     - Description
+     - str
      - Description
    * - matfrom
-     - Description
+     - str
      - Description
    * - generators_list
-     - Description
+     - str
      - Description
    * - centre_coord
-     - Description
+     - 
      - Description
    * - anticentre_coord
-     - Description
+     - 
      - Description
    * - lat_tr
-     - Description
+     - 
      - Description
    * - alat_tr
-     - Description
+     - 
      - Description
 
 Functions

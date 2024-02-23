@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - v
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - atype
-     - Description
+     - str
      - Description
    * - ieos
-     - Description
+     - int
      - Description
 
 Functions

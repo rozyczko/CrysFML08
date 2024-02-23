@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - mult
-     - Description
+     - int
      - Description
    * - pos
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - mom
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - pts
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - lat
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
 
 Functions

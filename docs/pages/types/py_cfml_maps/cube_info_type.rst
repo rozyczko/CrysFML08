@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - nelem
-     - Description
+     - int
      - Description
    * - code
-     - Description
+     - int
      - Description
    * - edges
-     - Description
+     - ndarray: dtype=int32, shape=(12)
      - Description
 
 Functions

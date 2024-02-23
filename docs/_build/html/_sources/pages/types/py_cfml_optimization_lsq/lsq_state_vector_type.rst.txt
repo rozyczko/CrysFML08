@@ -12,31 +12,31 @@ Properties
      - Value
      - Description
    * - np
-     - Description
+     - int
      - Description
    * - code_comp
-     - Description
+     - bool
      - Description
    * - code_max
-     - Description
+     - int
      - Description
    * - mul
-     - Description
+     - ndarray: dtype=float32, shape=(max_free_par)
      - Description
    * - pv
-     - Description
+     - ndarray: dtype=float32, shape=(max_free_par)
      - Description
    * - spv
-     - Description
+     - ndarray: dtype=float32, shape=(max_free_par)
      - Description
    * - dpv
-     - Description
+     - ndarray: dtype=float32, shape=(max_free_par)
      - Description
    * - code
-     - Description
+     - ndarray: dtype=int32, shape=(max_free_par)
      - Description
    * - nampar
-     - Description
+     - 
      - Description
 
 Functions

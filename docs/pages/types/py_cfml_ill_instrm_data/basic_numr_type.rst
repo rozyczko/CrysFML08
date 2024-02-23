@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - namevar
-     - Description
+     - 
      - Description
    * - rvalues
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
 
 Functions

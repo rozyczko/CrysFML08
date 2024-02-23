@@ -12,40 +12,40 @@ Properties
      - Value
      - Description
    * - method
-     - Description
+     - str
      - Description
    * - nmeth
-     - Description
+     - int
      - Description
    * - npar
-     - Description
+     - int
      - Description
    * - mxfun
-     - Description
+     - int
      - Description
    * - loops
-     - Description
+     - int
      - Description
    * - iquad
-     - Description
+     - int
      - Description
    * - iout
-     - Description
+     - int
      - Description
    * - nflag
-     - Description
+     - int
      - Description
    * - ifun
-     - Description
+     - int
      - Description
    * - iter
-     - Description
+     - int
      - Description
    * - eps
-     - Description
+     - float
      - Description
    * - acc
-     - Description
+     - float
      - Description
 
 Functions

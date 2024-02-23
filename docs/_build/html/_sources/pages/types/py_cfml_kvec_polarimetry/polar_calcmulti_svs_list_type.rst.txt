@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - nset
-     - Description
+     - int
      - Description
    * - polarisvslist
-     - Description
+     - 
      - Description
 
 Functions

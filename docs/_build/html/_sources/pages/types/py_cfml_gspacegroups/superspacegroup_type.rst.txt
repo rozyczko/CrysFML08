@@ -13,49 +13,49 @@ Properties
      - Value
      - Description
    * - nk
-     - Description
+     - int
      - Description
    * - nq
-     - Description
+     - int
      - Description
    * - ssg_symb
-     - Description
+     - str
      - Description
    * - ssg_bravais
-     - Description
+     - str
      - Description
    * - ssg_nlabel
-     - Description
+     - str
      - Description
    * - kv
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - kv_std
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - sintlim
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - nharm
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - q_coeff
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - rot
-     - Description
+     - ndarray: dtype=int32, shape=(:,:,:)
      - Description
    * - m
-     - Description
+     - ndarray: dtype=int32, shape=(:,:,:)
      - Description
    * - ep
-     - Description
+     - ndarray: dtype=int32, shape=(:,:,:)
      - Description
    * - t
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - ti
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

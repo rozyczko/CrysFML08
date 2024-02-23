@@ -14,34 +14,34 @@ Properties
      - Value
      - Description
    * - rcell
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - rang
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - rvol
-     - Description
+     - float
      - Description
    * - gd
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - gr
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - cr_orth_cel
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - orth_cr_cel
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - bl_m
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - inv_bl_m
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - carttype
-     - Description
+     - str
      - Description
 
 Functions

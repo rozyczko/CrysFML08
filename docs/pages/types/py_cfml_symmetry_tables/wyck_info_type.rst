@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - hm
-     - Description
+     - str
      - Description
    * - norbit
-     - Description
+     - int
      - Description
    * - corbit
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - id_bns
-     - Description
+     - str
      - Description
    * - bns
-     - Description
+     - str
      - Description
    * - id_og
-     - Description
+     - str
      - Description
    * - og
-     - Description
+     - str
      - Description
    * - std
-     - Description
+     - str
      - Description
    * - mhall
-     - Description
+     - str
      - Description
    * - generators
-     - Description
+     - str
      - Description
 
 Functions

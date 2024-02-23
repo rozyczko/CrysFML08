@@ -14,73 +14,73 @@ Properties
      - Value
      - Description
    * - n_oc
-     - Description
+     - int
      - Description
    * - n_bc
-     - Description
+     - int
      - Description
    * - n_mc
-     - Description
+     - int
      - Description
    * - n_dc
-     - Description
+     - int
      - Description
    * - n_uc
-     - Description
+     - int
      - Description
    * - poc_q
-     - Description
+     - ndarray: dtype=int32, shape=(max_mod)
      - Description
    * - pbc_q
-     - Description
+     - ndarray: dtype=int32, shape=(max_mod)
      - Description
    * - pmc_q
-     - Description
+     - ndarray: dtype=int32, shape=(max_mod)
      - Description
    * - pdc_q
-     - Description
+     - ndarray: dtype=int32, shape=(max_mod)
      - Description
    * - puc_q
-     - Description
+     - ndarray: dtype=int32, shape=(max_mod)
      - Description
    * - ocs
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - ocs_std
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - bcs
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - bcs_std
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - mcs
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - mcs_std
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - dcs
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - dcs_std
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - ucs
-     - Description
+     - ndarray: dtype=float32, shape=(12,max_mod)
      - Description
    * - ucs_std
-     - Description
+     - ndarray: dtype=float32, shape=(12,max_mod)
      - Description
    * - xs
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - moms
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - us
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

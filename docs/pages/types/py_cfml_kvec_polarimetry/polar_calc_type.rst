@@ -12,55 +12,55 @@ Properties
      - Value
      - Description
    * - h
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - spv
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - cell
-     - Description
+     - dict
      - Description
    * - p
-     - Description
+     - float
      - Description
    * - miv
-     - Description
+     - 
      - Description
    * - nsf
-     - Description
+     - dict
      - Description
    * - nc
-     - Description
+     - float
      - Description
    * - my
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - mz
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - ry
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - rz
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - iy
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - iz
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - tc
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - mm
-     - Description
+     - ndarray: dtype=float32, shape=(2,24)
      - Description
    * - cs
-     - Description
+     - ndarray: dtype=float32, shape=(3,2,24)
      - Description
    * - pij
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
 
 Functions

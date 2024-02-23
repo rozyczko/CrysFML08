@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - nk
-     - Description
+     - int
      - Description
    * - kv
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - kv_std
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - sintlim
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - nharm
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - nq
-     - Description
+     - int
      - Description
    * - q_coeff
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
 
 Functions

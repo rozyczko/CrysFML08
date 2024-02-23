@@ -12,148 +12,148 @@ Properties
      - Value
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - system
-     - Description
+     - str
      - Description
    * - model
-     - Description
+     - str
      - Description
    * - tmodel
-     - Description
+     - str
      - Description
    * - tranmodel
-     - Description
+     - str
      - Description
    * - smodel
-     - Description
+     - str
      - Description
    * - cmodel
-     - Description
+     - str
      - Description
    * - oscmodel
-     - Description
+     - 
      - Description
    * - parname
-     - Description
+     - 
      - Description
    * - comment
-     - Description
+     - 
      - Description
    * - pscale_name
-     - Description
+     - str
      - Description
    * - vscale_name
-     - Description
+     - str
      - Description
    * - doc
-     - Description
+     - 
      - Description
    * - savedate
-     - Description
+     - str
      - Description
    * - lineardir
-     - Description
+     - str
      - Description
    * - imodel
-     - Description
+     - int
      - Description
    * - iorder
-     - Description
+     - int
      - Description
    * - linear
-     - Description
+     - bool
      - Description
    * - itherm
-     - Description
+     - int
      - Description
    * - itran
-     - Description
+     - int
      - Description
    * - ishear
-     - Description
+     - int
      - Description
    * - icross
-     - Description
+     - int
      - Description
    * - iangle
-     - Description
+     - int
      - Description
    * - iosc
-     - Description
+     - ndarray: dtype=int32, shape=(2)
      - Description
    * - iuse
-     - Description
+     - ndarray: dtype=int32, shape=(n_eospar)
      - Description
    * - pref
-     - Description
+     - float
      - Description
    * - tref
-     - Description
+     - float
      - Description
    * - stoich
-     - Description
+     - float
      - Description
    * - density0
-     - Description
+     - float
      - Description
    * - tref_fixed
-     - Description
+     - bool
      - Description
    * - pthermaleos
-     - Description
+     - bool
      - Description
    * - osc_allowed
-     - Description
+     - bool
      - Description
    * - allowed_orders
-     - Description
+     - 
      - Description
    * - params
-     - Description
+     - ndarray: dtype=float32, shape=(n_eospar)
      - Description
    * - esd
-     - Description
+     - ndarray: dtype=float32, shape=(n_eospar)
      - Description
    * - x
-     - Description
+     - float
      - Description
    * - wchi2
-     - Description
+     - float
      - Description
    * - delpmax
-     - Description
+     - float
      - Description
    * - iwt
-     - Description
+     - ndarray: dtype=int32, shape=(4)
      - Description
    * - iref
-     - Description
+     - ndarray: dtype=int32, shape=(n_eospar)
      - Description
    * - factor
-     - Description
+     - ndarray: dtype=float32, shape=(n_eospar)
      - Description
    * - alphafactor
-     - Description
+     - float
      - Description
    * - lastshift
-     - Description
+     - ndarray: dtype=float32, shape=(n_eospar)
      - Description
    * - vcv
-     - Description
+     - ndarray: dtype=float32, shape=(n_eospar,n_eospar)
      - Description
    * - angpoly
-     - Description
+     - ndarray: dtype=float32, shape=(3,0:3,n_angpoly)
      - Description
    * - table
-     - Description
+     - dict
      - Description
    * - cv_table
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - cv_external
-     - Description
+     - bool
      - Description
 
 Functions

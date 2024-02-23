@@ -13,22 +13,22 @@ Properties
      - Value
      - Description
    * - cell
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - scell
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - ang
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - sang
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - vol
-     - Description
+     - float
      - Description
    * - svol
-     - Description
+     - float
      - Description
 
 Functions

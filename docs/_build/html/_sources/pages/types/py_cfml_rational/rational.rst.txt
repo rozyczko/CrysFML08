@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - numerator
-     - Description
+     - int
      - Description
    * - denominator
-     - Description
+     - int
      - Description
 
 Functions

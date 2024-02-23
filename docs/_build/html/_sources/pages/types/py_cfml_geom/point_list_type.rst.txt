@@ -12,16 +12,16 @@ Properties
      - Value
      - Description
    * - np
-     - Description
+     - int
      - Description
    * - nam
-     - Description
+     - 
      - Description
    * - p
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

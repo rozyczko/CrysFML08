@@ -12,22 +12,22 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - d0
-     - Description
+     - ndarray: dtype=float32, shape=(bvs_anions_n)
      - Description
    * - b_par
-     - Description
+     - ndarray: dtype=float32, shape=(bvs_anions_n)
      - Description
    * - cn
-     - Description
+     - ndarray: dtype=float32, shape=(bvs_anions_n)
      - Description
    * - ctoff
-     - Description
+     - ndarray: dtype=float32, shape=(bvs_anions_n)
      - Description
    * - refnum
-     - Description
+     - ndarray: dtype=int32, shape=(bvs_anions_n)
      - Description
 
 Functions

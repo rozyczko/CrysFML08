@@ -27,7 +27,7 @@ except:
 
 # In EXCLUDED we put the modules we do not want to wrap
 EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','strings','vtk','wraps']
-PRIMITIVES = ['integer','real','logical','character','complex']
+PRIMITIVES = {'integer': 'int', 'real': 'float','logical': 'bool','character': 'str'}
 NUMERICALS = ['integer','real']
 modules = {}
 publics_unwrap = []
@@ -201,8 +201,27 @@ def document_cfml_type_modules_dicts(m_name: str, file: TextIO) -> None:
             f.write(f"     - Value\n")
             f.write(f"     - Description\n")
             for c_name, c_val in modules[m_name].types[t_name].components.items():
+                if c_val.ndim == 0:
+                    if c_val.ftype.lower() not in PRIMITIVES:
+                        pytype = 'dict'
+                    else:
+                        pytype = PRIMITIVES[c_val.ftype.lower()]
+                else:
+                    if c_val.ftype.lower() in NUMERICALS:
+                        if c_val.ftype.lower() == 'integer':
+                            dtype = 'int32'
+                        elif c_val.ftype.lower() == 'real':
+                            dtype = 'float32'
+                        else:
+                            dtype = 'complex?'
+                        print(c_val.dim)
+                        shape = ','.join(c_val.dim) 
+                        pytype = f"ndarray: dtype={dtype}, shape=({shape})"
+                    else:
+                        pytype = ''
+                        #my_lists.append(f"li_{c_val.name}")
                 f.write(f"   * - {c_name}\n")
-                f.write(f"     - Description\n")
+                f.write(f"     - {pytype}\n")
                 f.write(f"     - Description\n")
 
             f.write("\n")

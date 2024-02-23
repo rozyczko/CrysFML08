@@ -12,22 +12,22 @@ Properties
      - Value
      - Description
    * - h
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - spv
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - p
-     - Description
+     - float
      - Description
    * - opij
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - sopij
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - wopij
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
 
 Functions

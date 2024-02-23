@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - npar
-     - Description
+     - int
      - Description
    * - code
-     - Description
+     - ndarray: dtype=int32, shape=(np_san)
      - Description
    * - bound
-     - Description
+     - ndarray: dtype=int32, shape=(np_san)
      - Description
    * - state
-     - Description
+     - ndarray: dtype=float32, shape=(np_san)
      - Description
    * - stp
-     - Description
+     - ndarray: dtype=float32, shape=(np_san)
      - Description
    * - low
-     - Description
+     - ndarray: dtype=float32, shape=(np_san)
      - Description
    * - high
-     - Description
+     - ndarray: dtype=float32, shape=(np_san)
      - Description
    * - config
-     - Description
+     - ndarray: dtype=float32, shape=(np_san)
      - Description
    * - cost
-     - Description
+     - float
      - Description
    * - nampar
-     - Description
+     - 
      - Description
 
 Functions

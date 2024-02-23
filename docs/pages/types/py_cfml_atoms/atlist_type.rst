@@ -12,22 +12,22 @@ Properties
      - Value
      - Description
    * - natoms
-     - Description
+     - int
      - Description
    * - mcomp
-     - Description
+     - str
      - Description
    * - symm_checked
-     - Description
+     - bool
      - Description
    * - active
-     - Description
+     - 
      - Description
    * - iph
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - atom
-     - Description
+     - 
      - Description
 
 Functions

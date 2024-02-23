@@ -13,10 +13,10 @@ Properties
      - Value
      - Description
    * - lcell
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - lang
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
 
 Functions

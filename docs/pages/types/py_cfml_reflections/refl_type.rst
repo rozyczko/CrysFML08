@@ -13,19 +13,19 @@ Properties
      - Value
      - Description
    * - h
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - mult
-     - Description
+     - int
      - Description
    * - s
-     - Description
+     - float
      - Description
    * - imag
-     - Description
+     - int
      - Description
    * - pcoeff
-     - Description
+     - int
      - Description
 
 Functions

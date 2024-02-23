@@ -13,22 +13,22 @@ Properties
      - Value
      - Description
    * - legend_x
-     - Description
+     - str
      - Description
    * - legend_y
-     - Description
+     - str
      - Description
    * - gy
-     - Description
+     - bool
      - Description
    * - gycalc
-     - Description
+     - bool
      - Description
    * - gsigma
-     - Description
+     - bool
      - Description
    * - gbgr
-     - Description
+     - bool
      - Description
 
 Functions

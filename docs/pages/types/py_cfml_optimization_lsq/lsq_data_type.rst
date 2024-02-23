@@ -12,22 +12,22 @@ Properties
      - Value
      - Description
    * - nobs
-     - Description
+     - int
      - Description
    * - iw
-     - Description
+     - int
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - y
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - sw
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - yc
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
 
 Functions

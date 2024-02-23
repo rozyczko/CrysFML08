@@ -12,40 +12,40 @@ Properties
      - Value
      - Description
    * - t_ini
-     - Description
+     - float
      - Description
    * - anneal
-     - Description
+     - float
      - Description
    * - accept
-     - Description
+     - float
      - Description
    * - threshold
-     - Description
+     - float
      - Description
    * - initconfig
-     - Description
+     - int
      - Description
    * - nalgor
-     - Description
+     - int
      - Description
    * - nm_cycl
-     - Description
+     - int
      - Description
    * - num_temps
-     - Description
+     - int
      - Description
    * - num_therm
-     - Description
+     - int
      - Description
    * - num_conf
-     - Description
+     - int
      - Description
    * - cost_function_name
-     - Description
+     - str
      - Description
    * - seed
-     - Description
+     - int
      - Description
 
 Functions

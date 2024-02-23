@@ -12,43 +12,43 @@ Properties
      - Value
      - Description
    * - iuse
-     - Description
+     - int
      - Description
    * - igrp
-     - Description
+     - ndarray: dtype=int32, shape=(5)
      - Description
    * - xtype
-     - Description
+     - int
      - Description
    * - t
-     - Description
+     - float
      - Description
    * - p
-     - Description
+     - float
      - Description
    * - v
-     - Description
+     - float
      - Description
    * - cell
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - ang
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - sigt
-     - Description
+     - float
      - Description
    * - sigp
-     - Description
+     - float
      - Description
    * - sigv
-     - Description
+     - float
      - Description
    * - sigc
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - siga
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
 
 Functions

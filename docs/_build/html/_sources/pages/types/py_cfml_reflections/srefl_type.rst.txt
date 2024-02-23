@@ -14,28 +14,28 @@ Properties
      - Value
      - Description
    * - iph
-     - Description
+     - int
      - Description
    * - fo
-     - Description
+     - float
      - Description
    * - fc
-     - Description
+     - float
      - Description
    * - sfo
-     - Description
+     - float
      - Description
    * - phase
-     - Description
+     - float
      - Description
    * - a
-     - Description
+     - float
      - Description
    * - b
-     - Description
+     - float
      - Description
    * - w
-     - Description
+     - float
      - Description
 
 Functions

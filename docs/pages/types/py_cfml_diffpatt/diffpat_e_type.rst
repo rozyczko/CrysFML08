@@ -14,64 +14,64 @@ Properties
      - Value
      - Description
    * - instr
-     - Description
+     - str
      - Description
    * - filename
-     - Description
+     - str
      - Description
    * - filepath
-     - Description
+     - str
      - Description
    * - scal
-     - Description
+     - float
      - Description
    * - monitor
-     - Description
+     - float
      - Description
    * - norm_mon
-     - Description
+     - float
      - Description
    * - col_time
-     - Description
+     - float
      - Description
    * - tsample
-     - Description
+     - float
      - Description
    * - tset
-     - Description
+     - float
      - Description
    * - ct_step
-     - Description
+     - bool
      - Description
    * - al_x
-     - Description
+     - bool
      - Description
    * - al_y
-     - Description
+     - bool
      - Description
    * - al_sigma
-     - Description
+     - bool
      - Description
    * - al_ycalc
-     - Description
+     - bool
      - Description
    * - al_bgr
-     - Description
+     - bool
      - Description
    * - al_istat
-     - Description
+     - bool
      - Description
    * - ycalc
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - bgr
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - istat
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - nd
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
 
 Functions

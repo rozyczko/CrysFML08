@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - time_inv
-     - Description
+     - int
      - Description
    * - dt
-     - Description
+     - int
      - Description
    * - mat
-     - Description
+     - 
      - Description
 
 Functions

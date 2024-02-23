@@ -12,40 +12,40 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - name
-     - Description
+     - str
      - Description
    * - z
-     - Description
+     - int
      - Description
    * - atwe
-     - Description
+     - float
      - Description
    * - rcov
-     - Description
+     - float
      - Description
    * - rwaals
-     - Description
+     - float
      - Description
    * - vatm
-     - Description
+     - float
      - Description
    * - oxid
-     - Description
+     - ndarray: dtype=int32, shape=(5)
      - Description
    * - rion
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - sctf
-     - Description
+     - float
      - Description
    * - sedinc
-     - Description
+     - float
      - Description
    * - sea
-     - Description
+     - float
      - Description
 
 Functions

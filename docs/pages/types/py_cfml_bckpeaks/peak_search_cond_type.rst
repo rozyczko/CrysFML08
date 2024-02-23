@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - peak_threshold
-     - Description
+     - float
      - Description
    * - shoulder_threshold
-     - Description
+     - float
      - Description
    * - bkg_threshold
-     - Description
+     - float
      - Description
    * - kindofpeaks
-     - Description
+     - int
      - Description
    * - iterations
-     - Description
+     - int
      - Description
 
 Functions

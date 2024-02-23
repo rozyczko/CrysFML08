@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - natoms
-     - Description
+     - int
      - Description
    * - suscept
-     - Description
+     - bool
      - Description
    * - magfield
-     - Description
+     - float
      - Description
    * - dir_mfield
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - atom
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,37 +12,37 @@ Properties
      - Value
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - system
-     - Description
+     - str
      - Description
    * - eos
-     - Description
+     - 
      - Description
    * - unique_label
-     - Description
+     - str
      - Description
    * - unique
-     - Description
+     - int
      - Description
    * - obtuse
-     - Description
+     - 
      - Description
    * - eosc
-     - Description
+     - dict
      - Description
    * - eosang
-     - Description
+     - dict
      - Description
    * - loaded
-     - Description
+     - ndarray: dtype=int32, shape=(0:6)
      - Description
    * - cout
-     - Description
+     - 
      - Description
    * - inputlist
-     - Description
+     - str
      - Description
 
 Functions

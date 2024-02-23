@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - orient_set
-     - Description
+     - bool
      - Description
    * - wave
-     - Description
+     - float
      - Description
    * - ub
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - ubinv
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - conv
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
 
 Functions

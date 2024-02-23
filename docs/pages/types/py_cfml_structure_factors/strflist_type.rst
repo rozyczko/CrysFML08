@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - nref
-     - Description
+     - int
      - Description
    * - strf
-     - Description
+     - 
      - Description
 
 Functions

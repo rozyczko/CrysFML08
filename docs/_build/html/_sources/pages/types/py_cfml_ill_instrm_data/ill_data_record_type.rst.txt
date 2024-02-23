@@ -12,118 +12,118 @@ Properties
      - Value
      - Description
    * - numor
-     - Description
+     - int
      - Description
    * - nset_prime
-     - Description
+     - int
      - Description
    * - ntran
-     - Description
+     - int
      - Description
    * - inst_ch
-     - Description
+     - str
      - Description
    * - date_ch
-     - Description
+     - str
      - Description
    * - fill_ch
-     - Description
+     - str
      - Description
    * - user_ch
-     - Description
+     - str
      - Description
    * - lc_ch
-     - Description
+     - str
      - Description
    * - text_ch
-     - Description
+     - str
      - Description
    * - scan_motor
-     - Description
+     - str
      - Description
    * - nvers
-     - Description
+     - int
      - Description
    * - ntype
-     - Description
+     - int
      - Description
    * - kctrl
-     - Description
+     - int
      - Description
    * - manip
-     - Description
+     - int
      - Description
    * - nbang
-     - Description
+     - int
      - Description
    * - nkmes
-     - Description
+     - int
      - Description
    * - npdone
-     - Description
+     - int
      - Description
    * - jcode
-     - Description
+     - int
      - Description
    * - icalc
-     - Description
+     - int
      - Description
    * - ianal
-     - Description
+     - int
      - Description
    * - imode
-     - Description
+     - int
      - Description
    * - itgv
-     - Description
+     - int
      - Description
    * - iregul
-     - Description
+     - int
      - Description
    * - ivolt
-     - Description
+     - int
      - Description
    * - naxe
-     - Description
+     - int
      - Description
    * - npstart
-     - Description
+     - int
      - Description
    * - ilasti
-     - Description
+     - int
      - Description
    * - isa
-     - Description
+     - int
      - Description
    * - flgkif
-     - Description
+     - int
      - Description
    * - ih_sqs
-     - Description
+     - int
      - Description
    * - ik_sqs
-     - Description
+     - int
      - Description
    * - nbsqs
-     - Description
+     - int
      - Description
    * - nb_cells
-     - Description
+     - int
      - Description
    * - nfree1
-     - Description
+     - int
      - Description
    * - icdesc
-     - Description
+     - ndarray: dtype=int32, shape=(11)
      - Description
    * - valco
-     - Description
+     - ndarray: dtype=float32, shape=(35)
      - Description
    * - valdef
-     - Description
+     - ndarray: dtype=float32, shape=(10)
      - Description
    * - valenv
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
 
 Functions

@@ -13,46 +13,46 @@ Properties
      - Value
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - kindrad
-     - Description
+     - str
      - Description
    * - scatvar
-     - Description
+     - str
      - Description
    * - xmin
-     - Description
+     - float
      - Description
    * - xmax
-     - Description
+     - float
      - Description
    * - ymin
-     - Description
+     - float
      - Description
    * - ymax
-     - Description
+     - float
      - Description
    * - step
-     - Description
+     - float
      - Description
    * - npts
-     - Description
+     - int
      - Description
    * - sigvar
-     - Description
+     - bool
      - Description
    * - wave
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - y
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - sigma
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
 
 Functions

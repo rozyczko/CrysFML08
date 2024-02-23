@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - h
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - spv
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - cell
-     - Description
+     - dict
      - Description
    * - p
-     - Description
+     - float
      - Description
    * - pij
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
 
 Functions

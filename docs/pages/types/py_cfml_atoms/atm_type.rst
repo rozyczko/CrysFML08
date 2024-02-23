@@ -13,64 +13,64 @@ Properties
      - Value
      - Description
    * - lab
-     - Description
+     - str
      - Description
    * - chemsymb
-     - Description
+     - str
      - Description
    * - sfacsymb
-     - Description
+     - str
      - Description
    * - z
-     - Description
+     - int
      - Description
    * - mult
-     - Description
+     - int
      - Description
    * - charge
-     - Description
+     - int
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - u_iso
-     - Description
+     - float
      - Description
    * - occ
-     - Description
+     - float
      - Description
    * - utype
-     - Description
+     - str
      - Description
    * - thtype
-     - Description
+     - str
      - Description
    * - u
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - magnetic
-     - Description
+     - bool
      - Description
    * - mom
-     - Description
+     - float
      - Description
    * - moment
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - ind_ff
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - atminfo
-     - Description
+     - str
      - Description
    * - wyck
-     - Description
+     - str
      - Description
    * - varf
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - active
-     - Description
+     - bool
      - Description
 
 Functions

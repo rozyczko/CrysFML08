@@ -12,40 +12,40 @@ Properties
      - Value
      - Description
    * - constr
-     - Description
+     - bool
      - Description
    * - reached
-     - Description
+     - bool
      - Description
    * - failed
-     - Description
+     - bool
      - Description
    * - corrmax
-     - Description
+     - int
      - Description
    * - nfev
-     - Description
+     - int
      - Description
    * - njev
-     - Description
+     - int
      - Description
    * - icyc
-     - Description
+     - int
      - Description
    * - npvar
-     - Description
+     - int
      - Description
    * - iw
-     - Description
+     - int
      - Description
    * - nprint
-     - Description
+     - int
      - Description
    * - tol
-     - Description
+     - float
      - Description
    * - percent
-     - Description
+     - float
      - Description
 
 Functions

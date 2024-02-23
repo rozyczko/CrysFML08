@@ -12,37 +12,37 @@ Properties
      - Value
      - Description
    * - ntwo
-     - Description
+     - int
      - Description
    * - tol
-     - Description
+     - float
      - Description
    * - caxes
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - dtwofold
-     - Description
+     - ndarray: dtype=int32, shape=(3,12)
      - Description
    * - rtwofold
-     - Description
+     - ndarray: dtype=int32, shape=(3,12)
      - Description
    * - dot
-     - Description
+     - ndarray: dtype=int32, shape=(12)
      - Description
    * - cross
-     - Description
+     - ndarray: dtype=float32, shape=(12)
      - Description
    * - maxes
-     - Description
+     - ndarray: dtype=float32, shape=(12)
      - Description
    * - a
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - b
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - c
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
 
 Functions

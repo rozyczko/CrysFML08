@@ -13,16 +13,16 @@ Properties
      - Value
      - Description
    * - mivo
-     - Description
+     - float
      - Description
    * - smivo
-     - Description
+     - float
      - Description
    * - msf
-     - Description
+     - 
      - Description
    * - miv
-     - Description
+     - 
      - Description
 
 Functions

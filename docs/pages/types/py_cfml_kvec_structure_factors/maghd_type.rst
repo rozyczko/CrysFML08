@@ -12,37 +12,37 @@ Properties
      - Value
      - Description
    * - keqv_minus
-     - Description
+     - bool
      - Description
    * - num_k
-     - Description
+     - int
      - Description
    * - signp
-     - Description
+     - float
      - Description
    * - s
-     - Description
+     - float
      - Description
    * - sqamiv
-     - Description
+     - float
      - Description
    * - sqmiv
-     - Description
+     - float
      - Description
    * - h
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - msf
-     - Description
+     - 
      - Description
    * - miv
-     - Description
+     - 
      - Description
    * - mivc
-     - Description
+     - 
      - Description
    * - amiv
-     - Description
+     - 
      - Description
 
 Functions

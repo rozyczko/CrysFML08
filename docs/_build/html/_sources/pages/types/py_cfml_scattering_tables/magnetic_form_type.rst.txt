@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - sctm
-     - Description
+     - ndarray: dtype=float32, shape=(7)
      - Description
 
 Functions

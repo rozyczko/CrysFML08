@@ -12,55 +12,55 @@ Properties
      - Value
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - num_phases
-     - Description
+     - int
      - Description
    * - num_patterns
-     - Description
+     - int
      - Description
    * - num_cmd
-     - Description
+     - int
      - Description
    * - patt_typ
-     - Description
+     - 
      - Description
    * - phas_nam
-     - Description
+     - 
      - Description
    * - cmd
-     - Description
+     - 
      - Description
    * - range_stl
-     - Description
+     - 
      - Description
    * - range_q
-     - Description
+     - 
      - Description
    * - range_d
-     - Description
+     - 
      - Description
    * - range_2theta
-     - Description
+     - 
      - Description
    * - range_energy
-     - Description
+     - 
      - Description
    * - range_tof
-     - Description
+     - 
      - Description
    * - lambda
-     - Description
+     - 
      - Description
    * - ratio
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - dtt1
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - dtt2
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
 
 Functions

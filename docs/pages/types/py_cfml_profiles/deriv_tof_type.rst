@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - alfa
-     - Description
+     - float
      - Description
    * - beta
-     - Description
+     - float
      - Description
    * - dt
-     - Description
+     - float
      - Description
    * - sigma
-     - Description
+     - float
      - Description
    * - gamm
-     - Description
+     - float
      - Description
    * - eta
-     - Description
+     - float
      - Description
    * - kappa
-     - Description
+     - float
      - Description
 
 Functions

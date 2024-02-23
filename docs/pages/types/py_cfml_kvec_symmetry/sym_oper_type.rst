@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - rot
-     - Description
+     - ndarray: dtype=int32, shape=(3,3)
      - Description
    * - tr
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
 
 Functions

@@ -14,19 +14,19 @@ Properties
      - Value
      - Description
    * - x_std
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - occ_std
-     - Description
+     - float
      - Description
    * - u_iso_std
-     - Description
+     - float
      - Description
    * - u_std
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - moment_std
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
 
 Functions

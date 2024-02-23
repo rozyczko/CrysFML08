@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - num_species
-     - Description
+     - int
      - Description
    * - num_magspc
-     - Description
+     - int
      - Description
    * - symb
-     - Description
+     - 
      - Description
    * - symb_mag
-     - Description
+     - 
      - Description
    * - br
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - bi
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - delta_fp
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - delta_fpp
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - xcoef
-     - Description
+     - 
      - Description
    * - mcoef
-     - Description
+     - 
      - Description
 
 Functions

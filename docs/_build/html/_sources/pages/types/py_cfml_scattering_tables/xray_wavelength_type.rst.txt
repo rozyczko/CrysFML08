@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - kalfa
-     - Description
+     - ndarray: dtype=float32, shape=(2)
      - Description
    * - kbeta
-     - Description
+     - float
      - Description
 
 Functions

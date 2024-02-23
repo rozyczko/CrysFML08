@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - strname
-     - Description
+     - str
      - Description
    * - blname
-     - Description
+     - str
      - Description
    * - ibl
-     - Description
+     - int
      - Description
    * - nl
-     - Description
+     - ndarray: dtype=int32, shape=(2)
      - Description
    * - iex
-     - Description
+     - ndarray: dtype=int32, shape=(2)
      - Description
 
 Functions

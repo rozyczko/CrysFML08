@@ -12,28 +12,28 @@ Properties
      - Value
      - Description
    * - natoms
-     - Description
+     - int
      - Description
    * - max_coor
-     - Description
+     - int
      - Description
    * - coord_num
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - n_cooatm
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - n_sym
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - dist
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - s_dist
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - tr_coo
-     - Description
+     - ndarray: dtype=float32, shape=(:,:,:)
      - Description
 
 Functions

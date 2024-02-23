@@ -13,58 +13,58 @@ Properties
      - Value
      - Description
    * - l_x
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - l_occ
-     - Description
+     - int
      - Description
    * - l_u_iso
-     - Description
+     - int
      - Description
    * - l_u
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - m_x
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - m_occ
-     - Description
+     - float
      - Description
    * - m_u_iso
-     - Description
+     - float
      - Description
    * - m_u
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - l_ocs
-     - Description
+     - ndarray: dtype=int32, shape=(2, max_mod)
      - Description
    * - l_bcs
-     - Description
+     - ndarray: dtype=int32, shape=(2, max_mod)
      - Description
    * - l_mcs
-     - Description
+     - ndarray: dtype=int32, shape=(6, max_mod)
      - Description
    * - l_dcs
-     - Description
+     - ndarray: dtype=int32, shape=(6, max_mod)
      - Description
    * - l_ucs
-     - Description
+     - ndarray: dtype=int32, shape=(12,max_mod)
      - Description
    * - m_ocs
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - m_bcs
-     - Description
+     - ndarray: dtype=float32, shape=(2, max_mod)
      - Description
    * - m_mcs
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - m_dcs
-     - Description
+     - ndarray: dtype=float32, shape=(6, max_mod)
      - Description
    * - m_ucs
-     - Description
+     - ndarray: dtype=float32, shape=(12,max_mod)
      - Description
 
 Functions

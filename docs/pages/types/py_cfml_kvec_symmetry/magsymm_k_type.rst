@@ -12,103 +12,103 @@ Properties
      - Value
      - Description
    * - magmodel
-     - Description
+     - str
      - Description
    * - sk_type
-     - Description
+     - str
      - Description
    * - bns_number
-     - Description
+     - str
      - Description
    * - og_number
-     - Description
+     - str
      - Description
    * - bns_symbol
-     - Description
+     - str
      - Description
    * - og_symbol
-     - Description
+     - str
      - Description
    * - magtype
-     - Description
+     - int
      - Description
    * - parent_num
-     - Description
+     - int
      - Description
    * - parent_spg
-     - Description
+     - str
      - Description
    * - latt
-     - Description
+     - str
      - Description
    * - nirreps
-     - Description
+     - int
      - Description
    * - irrep_dim
-     - Description
+     - ndarray: dtype=int32, shape=(4)
      - Description
    * - small_irrep_dim
-     - Description
+     - ndarray: dtype=int32, shape=(4)
      - Description
    * - irrep_modes_number
-     - Description
+     - ndarray: dtype=int32, shape=(4)
      - Description
    * - irrep_id
-     - Description
+     - 
      - Description
    * - irrep_direction
-     - Description
+     - 
      - Description
    * - irrep_action
-     - Description
+     - 
      - Description
    * - nmsym
-     - Description
+     - int
      - Description
    * - centred
-     - Description
+     - int
      - Description
    * - mcentred
-     - Description
+     - int
      - Description
    * - nkv
-     - Description
+     - int
      - Description
    * - kvec
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - num_lat
-     - Description
+     - int
      - Description
    * - ltr
-     - Description
+     - ndarray: dtype=float32, shape=(3,4)
      - Description
    * - numops
-     - Description
+     - int
      - Description
    * - multip
-     - Description
+     - int
      - Description
    * - nbas
-     - Description
+     - ndarray: dtype=int32, shape=(4)
      - Description
    * - icomp
-     - Description
+     - ndarray: dtype=int32, shape=(12,4)
      - Description
    * - basf
-     - Description
+     - 
      - Description
    * - symopsymb
-     - Description
+     - 
      - Description
    * - symop
-     - Description
+     - 
      - Description
    * - msymopsymb
-     - Description
+     - 
      - Description
    * - msymop
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,28 +12,28 @@ Properties
      - Value
      - Description
    * - n_free
-     - Description
+     - int
      - Description
    * - n_mol
-     - Description
+     - int
      - Description
    * - n_species
-     - Description
+     - int
      - Description
    * - npat
-     - Description
+     - int
      - Description
    * - cell
-     - Description
+     - dict
      - Description
    * - spg
-     - Description
+     - dict
      - Description
    * - atm
-     - Description
+     - 
      - Description
    * - mol
-     - Description
+     - 
      - Description
 
 Functions

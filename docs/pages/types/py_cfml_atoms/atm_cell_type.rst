@@ -12,43 +12,43 @@ Properties
      - Value
      - Description
    * - nat
-     - Description
+     - int
      - Description
    * - lab
-     - Description
+     - 
      - Description
    * - xyz
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - charge
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - moment
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - var_free
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - neighb
-     - Description
+     - ndarray: dtype=int32, shape=(:)
      - Description
    * - neighb_atom
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - distance
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - trans
-     - Description
+     - ndarray: dtype=float32, shape=(:,:,:)
      - Description
    * - ndist
-     - Description
+     - int
      - Description
    * - ddist
-     - Description
+     - ndarray: dtype=float32, shape=(:)
      - Description
    * - ddlab
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,67 +12,67 @@ Properties
      - Value
      - Description
    * - iref
-     - Description
+     - int
      - Description
    * - icell
-     - Description
+     - int
      - Description
    * - istype
-     - Description
+     - int
      - Description
    * - cell0
-     - Description
+     - dict
      - Description
    * - cell1
-     - Description
+     - dict
      - Description
    * - cartype
-     - Description
+     - str
      - Description
    * - system
-     - Description
+     - str
      - Description
    * - pt
-     - Description
+     - ndarray: dtype=float32, shape=(0:1,1:2,1:2)
      - Description
    * - e
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - esd
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - eval
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - evalesd
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - evec
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - cart_ang
-     - Description
+     - ndarray: dtype=float32, shape=(3,3,2)
      - Description
    * - cell_ang
-     - Description
+     - ndarray: dtype=float32, shape=(3,3,4)
      - Description
    * - dir_close
-     - Description
+     - ndarray: dtype=float32, shape=(3,2,4)
      - Description
    * - ep
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - esdp
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - evalp
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - evalpesd
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - property
-     - Description
+     - str
      - Description
 
 Functions

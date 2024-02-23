@@ -12,19 +12,19 @@ Properties
      - Value
      - Description
    * - mystr
-     - Description
+     - str
      - Description
    * - npar
-     - Description
+     - int
      - Description
    * - iv
-     - Description
+     - ndarray: dtype=int32, shape=(15)
      - Description
    * - rv
-     - Description
+     - ndarray: dtype=float32, shape=(15)
      - Description
    * - cv
-     - Description
+     - 
      - Description
 
 Functions

@@ -12,127 +12,127 @@ Properties
      - Value
      - Description
    * - name_mol
-     - Description
+     - str
      - Description
    * - natoms
-     - Description
+     - int
      - Description
    * - in_xtal
-     - Description
+     - bool
      - Description
    * - is_eulermat
-     - Description
+     - bool
      - Description
    * - is_connect
-     - Description
+     - bool
      - Description
    * - rot_type
-     - Description
+     - str
      - Description
    * - coor_type
-     - Description
+     - str
      - Description
    * - therm_type
-     - Description
+     - str
      - Description
    * - xcentre
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - mxcentre
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - lxcentre
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - orient
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - morient
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - lorient
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - t_tls
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - mt_tls
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - lt_tls
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - l_tls
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - ml_tls
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - ll_tls
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - s_tls
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - ms_tls
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - ls_tls
-     - Description
+     - ndarray: dtype=int32, shape=(3,3)
      - Description
    * - euler
-     - Description
+     - ndarray: dtype=float32, shape=(3,3)
      - Description
    * - atname
-     - Description
+     - 
      - Description
    * - atsymb
-     - Description
+     - 
      - Description
    * - atz
-     - Description
+     - ndarray: dtype=int32, shape=(  :)
      - Description
    * - ptr
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - i_coor
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - mi_coor
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - li_coor
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - u_iso
-     - Description
+     - ndarray: dtype=float32, shape=(  :)
      - Description
    * - mu_iso
-     - Description
+     - ndarray: dtype=float32, shape=(  :)
      - Description
    * - lu_iso
-     - Description
+     - ndarray: dtype=int32, shape=(  :)
      - Description
    * - occ
-     - Description
+     - ndarray: dtype=float32, shape=(  :)
      - Description
    * - mocc
-     - Description
+     - ndarray: dtype=float32, shape=(  :)
      - Description
    * - locc
-     - Description
+     - ndarray: dtype=int32, shape=(  :)
      - Description
    * - nb
-     - Description
+     - ndarray: dtype=int32, shape=(  :)
      - Description
    * - inb
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - tb
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
    * - conn
-     - Description
+     - ndarray: dtype=int32, shape=(:,:)
      - Description
 
 Functions

@@ -12,25 +12,25 @@ Properties
      - Value
      - Description
    * - twin_name
-     - Description
+     - str
      - Description
    * - ityp
-     - Description
+     - int
      - Description
    * - n_twins
-     - Description
+     - int
      - Description
    * - twin_mat
-     - Description
+     - ndarray: dtype=float32, shape=(3,3,48)
      - Description
    * - twin_matinv
-     - Description
+     - ndarray: dtype=float32, shape=(3,3,48)
      - Description
    * - twin_axis
-     - Description
+     - ndarray: dtype=float32, shape=(3,48)
      - Description
    * - twin_ang
-     - Description
+     - ndarray: dtype=float32, shape=(48)
      - Description
 
 Functions

@@ -12,10 +12,10 @@ Properties
      - Value
      - Description
    * - mina
-     - Description
+     - float
      - Description
    * - maxb
-     - Description
+     - float
      - Description
 
 Functions

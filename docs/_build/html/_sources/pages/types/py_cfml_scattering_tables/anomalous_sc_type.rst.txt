@@ -12,13 +12,13 @@ Properties
      - Value
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - fp
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - fpp
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
 
 Functions

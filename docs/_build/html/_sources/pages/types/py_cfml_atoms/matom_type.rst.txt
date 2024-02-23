@@ -12,190 +12,190 @@ Properties
      - Value
      - Description
    * - lab
-     - Description
+     - str
      - Description
    * - chemsymb
-     - Description
+     - str
      - Description
    * - sfacsymb
-     - Description
+     - str
      - Description
    * - wyck
-     - Description
+     - str
      - Description
    * - active
-     - Description
+     - bool
      - Description
    * - z
-     - Description
+     - int
      - Description
    * - mult
-     - Description
+     - int
      - Description
    * - x
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - x_std
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - mx
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - lx
-     - Description
+     - ndarray: dtype=int32, shape=(3)
      - Description
    * - occ
-     - Description
+     - float
      - Description
    * - occ_std
-     - Description
+     - float
      - Description
    * - mocc
-     - Description
+     - float
      - Description
    * - locc
-     - Description
+     - int
      - Description
    * - biso
-     - Description
+     - float
      - Description
    * - biso_std
-     - Description
+     - float
      - Description
    * - mbiso
-     - Description
+     - float
      - Description
    * - lbiso
-     - Description
+     - int
      - Description
    * - utype
-     - Description
+     - str
      - Description
    * - thtype
-     - Description
+     - str
      - Description
    * - u
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - u_std
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - ueq
-     - Description
+     - float
      - Description
    * - mu
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - lu
-     - Description
+     - ndarray: dtype=int32, shape=(6)
      - Description
    * - charge
-     - Description
+     - float
      - Description
    * - moment
-     - Description
+     - float
      - Description
    * - ind
-     - Description
+     - ndarray: dtype=int32, shape=(5)
      - Description
    * - nvar
-     - Description
+     - int
      - Description
    * - varf
-     - Description
+     - ndarray: dtype=float32, shape=(25)
      - Description
    * - mvarf
-     - Description
+     - ndarray: dtype=float32, shape=(25)
      - Description
    * - lvarf
-     - Description
+     - ndarray: dtype=int32, shape=(25)
      - Description
    * - atminfo
-     - Description
+     - str
      - Description
    * - nvk
-     - Description
+     - int
      - Description
    * - imat
-     - Description
+     - ndarray: dtype=int32, shape=(12)
      - Description
    * - skr
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - skr_std
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - spher_skr
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - spher_skr_std
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - mskr
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - lskr
-     - Description
+     - ndarray: dtype=int32, shape=(3,12)
      - Description
    * - ski
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - ski_std
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - spher_ski
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - spher_ski_std
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - mski
-     - Description
+     - ndarray: dtype=float32, shape=(3,12)
      - Description
    * - lski
-     - Description
+     - ndarray: dtype=int32, shape=(3,12)
      - Description
    * - mphas
-     - Description
+     - ndarray: dtype=float32, shape=(12)
      - Description
    * - mphas_std
-     - Description
+     - ndarray: dtype=float32, shape=(12)
      - Description
    * - mmphas
-     - Description
+     - ndarray: dtype=float32, shape=(12)
      - Description
    * - lmphas
-     - Description
+     - ndarray: dtype=int32, shape=(12)
      - Description
    * - cbas
-     - Description
+     - ndarray: dtype=float32, shape=(12,12)
      - Description
    * - cbas_std
-     - Description
+     - ndarray: dtype=float32, shape=(12,12)
      - Description
    * - mbas
-     - Description
+     - ndarray: dtype=float32, shape=(12,12)
      - Description
    * - lbas
-     - Description
+     - ndarray: dtype=int32, shape=(12,12)
      - Description
    * - chitype
-     - Description
+     - str
      - Description
    * - chi
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - chi_std
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - chieq
-     - Description
+     - float
      - Description
    * - mchi
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
    * - lchi
-     - Description
+     - ndarray: dtype=float32, shape=(6)
      - Description
 
 Functions

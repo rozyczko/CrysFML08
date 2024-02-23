@@ -12,61 +12,61 @@ Properties
      - Value
      - Description
    * - numor
-     - Description
+     - int
      - Description
    * - manip
-     - Description
+     - int
      - Description
    * - icalc
-     - Description
+     - int
      - Description
    * - header
-     - Description
+     - str
      - Description
    * - instrm
-     - Description
+     - str
      - Description
    * - title
-     - Description
+     - str
      - Description
    * - scantype
-     - Description
+     - str
      - Description
    * - angles
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - scans
-     - Description
+     - ndarray: dtype=float32, shape=(3)
      - Description
    * - monitor
-     - Description
+     - float
      - Description
    * - time
-     - Description
+     - float
      - Description
    * - wave
-     - Description
+     - float
      - Description
    * - conditions
-     - Description
+     - ndarray: dtype=float32, shape=(5)
      - Description
    * - nbdata
-     - Description
+     - int
      - Description
    * - nframes
-     - Description
+     - int
      - Description
    * - nbang
-     - Description
+     - int
      - Description
    * - icdesc
-     - Description
+     - ndarray: dtype=int32, shape=(11)
      - Description
    * - tmc_ang
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
    * - counts
-     - Description
+     - ndarray: dtype=float32, shape=(:,:)
      - Description
 
 Functions

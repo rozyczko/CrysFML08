@@ -12,34 +12,34 @@ Properties
      - Value
      - Description
    * - z
-     - Description
+     - int
      - Description
    * - symb
-     - Description
+     - str
      - Description
    * - oxs
-     - Description
+     - int
      - Description
    * - dox
-     - Description
+     - int
      - Description
    * - mass
-     - Description
+     - float
      - Description
    * - n
-     - Description
+     - int
      - Description
    * - g
-     - Description
+     - int
      - Description
    * - b
-     - Description
+     - int
      - Description
    * - rc
-     - Description
+     - float
      - Description
    * - sigma
-     - Description
+     - float
      - Description
 
 Functions

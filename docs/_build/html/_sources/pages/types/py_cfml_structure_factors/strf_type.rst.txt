@@ -12,22 +12,22 @@ Properties
      - Value
      - Description
    * - sqnuc
-     - Description
+     - float
      - Description
    * - sqmiv
-     - Description
+     - float
      - Description
    * - nsf
-     - Description
+     - dict
      - Description
    * - msf
-     - Description
+     - 
      - Description
    * - miv
-     - Description
+     - 
      - Description
    * - mivc
-     - Description
+     - 
      - Description
 
 Functions
