@@ -35,7 +35,7 @@ rem .
           copy .\toml\fpm_windows_win.toml  fpm.toml
    ) else (
           echo Copying .\toml\fpm_windows_con.toml to fpm.toml
-          copy .\toml\fpm_windows_con.toml  fpm.toml
+rem          copy .\toml\fpm_windows_con.toml  fpm.toml
           )
    )
 rem .

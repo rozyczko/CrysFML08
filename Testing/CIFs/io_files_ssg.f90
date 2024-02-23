@@ -476,7 +476,7 @@
     use CFML_Strings,      only: File_type, u_case, Get_extension
     use CFML_Metrics,      only: Cell_G_Type, Write_Crystal_Cell, Change_Setting_Cell
     use CFML_gSpaceGroups, only: Spg_Type, SuperSpaceGroup_Type, Write_SpaceGroup_Info, &
-                                 Get_moment_ctr, Get_TFourier_Ctr, Get_Orbit, point_orbit,Get_Inv_OP
+                                 Get_moment_ctr, Get_TFourier_Ctr, Get_moment_ctr_Wigner, Get_Orbit, point_orbit,Get_Inv_OP
     use CFML_Atoms,        only: AtList_Type, Write_Atom_List, ModAtm_Std_Type
     use CFML_IOForm
     use Atoms_in_BOX
@@ -504,9 +504,10 @@
     integer :: i, j, d, codini, s, nt, ier
     real(kind=cp), dimension(3)               :: codes=1.0, v
     real(kind=cp), dimension(:,:),allocatable :: codeT
-    logical :: box_given
+    logical :: box_given, skip_orb
 
     !> Init
+    skip_orb=.false.
     narg=COMMAND_ARGUMENT_COUNT()
     cmdline=" "; nlong=0; box_given=.false.
     if (narg ==0) then
@@ -541,6 +542,7 @@
           write(*,"(a)",advance="no") " => Please enter the box for calculations (3 integers): "
           read(*,*,iostat=ier) tbox
           if(ier /= 0) tbox=[1,1,1]
+          if(any(tbox==0)) skip_orb=.true.
        end if
        call Write_Crystal_Cell(Cell)
 
@@ -582,31 +584,36 @@
           write(forma(5:5),"(i1)") d
           write(forma(16:16),"(i1)") d
           write(forma(30:30),"(i1)") d
-          write(*,"(//a)") "  Orbits of atoms after applying constraints on moments:"
-          write(*,"(  a)") "  ======================================================"
+          if(.not. skip_orb) then
+            write(*,"(//a)") "  Orbits of atoms after applying constraints on moments:"
+            write(*,"(  a)") "  ======================================================"
+            Ol%num_orbs=Atm%natoms
+            allocate(Ol%orbit(Atm%natoms))
+          end if
 
-          Ol%num_orbs=Atm%natoms
-          allocate(Ol%orbit(Atm%natoms))
           do i=1,Atm%natoms
-            codini=1; codes=1.0
-            call Get_moment_ctr(Atm%Atom(i)%x,Atm%Atom(i)%moment,Grp,codini,codes,ctr_code=ctr_code)!,Ipr=6)
+            codini=1; codes=11.0
+            !call Get_moment_ctr(Atm%Atom(i)%x,Atm%Atom(i)%moment,Grp,codini,codes,ctr_code=ctr_code)!,Ipr=6)
+            call Get_moment_ctr_Wigner(Atm%Atom(i)%x,Atm%Atom(i)%moment,Grp,codini,codes,ctr_code=ctr_code)!,Ipr=6)
             write(*,"(a,3f10.5,a)") " => Moment of atom "//trim(Atm%Atom(i)%Lab)//": ",Atm%Atom(i)%moment,"    CtrCode: "//trim(ctr_code)
 
-            call Get_Orbit(Atm%Atom(i)%x,Grp,orb,Atm%Atom(i)%moment,tbox=tbox)  !,orb3D)
-            !call Get_Orbit(Atm%Atom(i)%x,Grp,orb,Atm%Atom(i)%moment)  !,orb3D)
+            if(.not. skip_orb) then
+              call Get_Orbit(Atm%Atom(i)%x,Grp,orb,Atm%Atom(i)%moment,tbox=tbox)  !,orb3D)
+              !call Get_Orbit(Atm%Atom(i)%x,Grp,orb,Atm%Atom(i)%moment)  !,orb3D)
 
-            write(*,"(a)") " => Orbit of atom: "//trim(Atm%Atom(i)%Lab)
+              write(*,"(a)") " => Orbit of atom: "//trim(Atm%Atom(i)%Lab)
 
-            Select Case(Grp%d-1)
-              Case(3)
-                write(*,"(a)") "    N      X         Y         Z                 Mx        My       Mz      PointoOP"
-              Case(4)
-                write(*,"(a)") "    N     X1        X2        X3        X4                 M1        M2         M3        M4      PointoOP"
-              Case(5)
-                write(*,"(a)") "    N     X1        X2        X3        X4        X5                 M1        M2        M3        M4        M5      PointoOP"
-              Case(6)
-                write(*,"(a)") "    N     X1        X2        X3        X4        X5        X6                 M1        M2        M3        M4        M5        M6      PointoOP"
-            End Select
+              Select Case(Grp%d-1)
+                Case(3)
+                  write(*,"(a)") "    N      X         Y         Z                 Mx        My       Mz      PointoOP"
+                Case(4)
+                  write(*,"(a)") "    N     X1        X2        X3        X4                 M1        M2         M3        M4      PointoOP"
+                Case(5)
+                  write(*,"(a)") "    N     X1        X2        X3        X4        X5                 M1        M2        M3        M4        M5      PointoOP"
+                Case(6)
+                  write(*,"(a)") "    N     X1        X2        X3        X4        X5        X6                 M1        M2        M3        M4        M5        M6      PointoOP"
+              End Select
+            end if
 
             Select Type (Grp)
               Type is (SuperSpaceGroup_Type)
@@ -614,7 +621,7 @@
                  Select Type(at => Atm%Atom(i))
 
                    type is (ModAtm_Std_Type)
-
+                     if(.not. skip_orb) then
                       do j=1,orb%Mult
                           !Calculate modulation functions to write properly the superspace coordinates
                           s=orb%pts(j)
@@ -645,16 +652,17 @@
                         write(unit=Ol%orbit(i)%lab(j),fmt="(a,i5)")  trim(At%Lab)//"_",j
                         Ol%orbit(i)%lab(j)=pack_string(Ol%orbit(i)%lab(j))
                       end do
-
+                     end if
                  End Select
 
               Type is(Spg_Type)
-
+                if(.not. skip_orb) then
                  do j=1,orb%Mult
                      s=orb%pts(j)
                      write(*,forma) j,orb%pos(1:d,j),orb%mom(1:d,j),s,orb%Lat(1:d,j),orb%mom(1:3,j)
                  end do
                  !write(*,"(/,a)") " => Orbit of atom (restricted to 3D): "//trim(Atm%Atom(i)%Lab)
+                end if
             End Select
             !write(*,"(/,a)") " => Orbit of atom: "//trim(Atm%Atom(i)%Lab)//"  restricted to 3D but within TBOX"
             !call Get_Orbit3D(Atm%Atom(i)%x,Atm%Atom(i)%Lab,Atm%Atom(i)%ChemSymb,Grp,orb3D,tbox)
@@ -683,39 +691,42 @@
                       !Atm%Atom(i)%Mcs(:,j) = At%Mcs(:,j)  !!!! ERROR
                     end do
                     if(allocated(CodeT)) deallocate(CodeT)
-                    allocate(CodeT(6,at%n_dc))
-                    CodeT=1.0
-                    call Get_TFourier_Ctr(At%x,At%Dcs(:,1:at%n_dc),codeT,Grp,codini,"D",ctr_code=tctr_code)
-                    do j=1,At%n_dc
-                      write(*,formb) "     Dcs: [",Grp%Q_coeff(:,j),"]",At%Dcs(:,j),"    CtrCode: "//trim(tctr_code(j))
-                    end do
+                    if(at%n_dc > 0) then
+                      allocate(CodeT(6,at%n_dc))
+                      CodeT=1.0
+                      call Get_TFourier_Ctr(At%x,At%Dcs(:,1:at%n_dc),codeT,Grp,codini,"D",Ipr=6,ctr_code=tctr_code)
+                      do j=1,At%n_dc
+                        write(*,formb) "     Dcs: [",Grp%Q_coeff(:,j),"]",At%Dcs(:,j),"    CtrCode: "//trim(tctr_code(j))
+                      end do
+                    end if
                end select
            end select
           end do
+          if(.not. skip_orb) then
+             Select Type (Grp)
 
-          Select Type (Grp)
+                 Type is (SuperSpaceGroup_Type)
+                   ! Testing atoms in BOX
+                   call Get_ModAtoms_inBOX(Atm,Grp,TBOX,Ol)
+                   formb="(a15,tr5,a, 3f14.6,2i4,a,3i4,a)"
+                   do i=1,Ol%num_orbs
+                     write(*,"(/,a,i4)") " Orbit of atom: ",i
+                     do j=1,Ol%orbit(i)%mult
+                        write(*,formb) Ol%orbit(i)%Lab(j),Ol%orbit(i)%ChemSymb(j),Ol%orbit(i)%pos(1:3,j),Ol%orbit(i)%pts(j),Ol%orbit(i)%Ls(j),"  [",Ol%orbit(i)%Latt(:,j)," ]"
+                        write(*,"(tr22,3f14.6)") Ol%orbit(i)%mom(1:3,j)
+                     end do
+                   end do
+                   call Write_CIF_P1()
+                   i=index(fname,".")
+                   call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_ssg_MCIF")
 
-              Type is (SuperSpaceGroup_Type)
-                ! Testing atoms in BOX
-                call Get_ModAtoms_inBOX(Atm,Grp,TBOX,Ol)
-                formb="(a15,tr5,a, 3f14.6,2i4,a,3i4,a)"
-                do i=1,Ol%num_orbs
-                  write(*,"(/,a,i4)") " Orbit of atom: ",i
-                  do j=1,Ol%orbit(i)%mult
-                     write(*,formb) Ol%orbit(i)%Lab(j),Ol%orbit(i)%ChemSymb(j),Ol%orbit(i)%pos(1:3,j),Ol%orbit(i)%pts(j),Ol%orbit(i)%Ls(j),"  [",Ol%orbit(i)%Latt(:,j)," ]"
-                     write(*,"(tr22,3f14.6)") Ol%orbit(i)%mom(1:3,j)
-                  end do
-                end do
-                call Write_CIF_P1()
-                i=index(fname,".")
-                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_ssg_MCIF")
+                 Type is (SPG_Type)
+                   i=index(fname,".")
+                   call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
+                   call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_MCIF")
 
-              Type is (SPG_Type)
-                i=index(fname,".")
-                call Write_Cif_Template(fname(1:i)//"cif", Cell, Grp, Atm, 2, "Testing WriteCIF")
-                call Write_MCIF_Template(fname(1:i-1)//"_mod.mcif",Cell,Grp,Atm,"Testing Write_MCIF")
-
-          End Select
+             End Select
+          end if
        end if
     else
       write(*,"(a)") " => Error found!"

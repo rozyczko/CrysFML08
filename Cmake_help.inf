@@ -25,7 +25,7 @@
    called "gF_oneAPI.bat", for using gfortran and ifort in the same environment, with the following content:
 -----------------------------------------------------start bat file line below
 @echo off
-set  MINGW=C:\mingw_10.2.0\mingw64
+set  MINGW=C:\mingw_12.2.0\mingw64
 SET  INTEL= "C:\Program Files (x86)\Intel\oneAPI"
 set  INTEL_BIN=%INTEL%\compiler\2022.0.0\windows\bin
 set  INTEL_LIB=%INTEL%\compiler\2022.0.0\windows\lib
@@ -88,6 +88,15 @@ cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_BUILD_TYPE=Debug -D
 cmake -G "NMake Makefiles"  -D GUI=ON -D ARCH32=OFF -D CMAKE_Fortran_COMPILER_FORCED=ON -D CMAKE_BUILD_TYPE=Debug -D CMAKE_Fortran_COMPILER=ifort -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_debug -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
 
 cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifort -D PYTHON_API=ON -D ARCH32=OFF -D -D CMAKE_INSTALL_PREFIX=%CRYSFML08%\ifort64_py -D CRYSFML_PREFIX=LibC ..\..\.
+
+IFX Release with Winteracter
+============================ 
+cmake -G "NMake Makefiles" -D CMAKE_Fortran_COMPILER=ifx -D GUI=ON -D ARCH32=OFF -D CMAKE_INSTALL_PREFIX=%CRYSFML%\ifx_release -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+
+GFORTRAN Release with Winteracter
+=================================
+cmake -G "MinGW Makefiles"  -D CMAKE_Fortran_COMPILER=gfortran -D ARCH32=OFF -D GUI=ON -D CMAKE_INSTALL_PREFIX=%CRYSFML%\gfortran -D CRYSFML_PREFIX=LibC -D WCRYSFML_PREFIX=LibW ..\..\.
+For Gfortran use: "mingw32-make install"
 -----------------------------------------------------------------------OK for debug
 
 Building CrysFML08 only for console mode  

@@ -27,14 +27,14 @@ rem
    if [%_COMP%]==[ifort] (
       if [%_DEBUG%]==[Y] (
          if [%TARGET_ARCH%]==[ia32] (set DIRECTORY=ifort_debug) else (set DIRECTORY=ifort64_debug)
-         (set OPT0=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB)
-         (set OPT1=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB)
+         (set OPT0=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Qdiag-disable:10448)
+         (set OPT1=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Qdiag-disable:10448)
       ) else (
          if [%TARGET_ARCH%]==[ia32] (set DIRECTORY=ifort) else (set DIRECTORY=ifort64)
-         (set OPT0=/Od)
-         (set OPT1=/O2)
+         (set OPT0=/Od /Qdiag-disable:10448 /nologo)
+         (set OPT1=/O2 /Qdiag-disable:10448 /nologo)
       )
-      (set OPT2=/fpp /Qopt-report:0)
+      (set OPT2=/fpp /Qopt-report:0 /Qdiag-disable:10448 /nologo)
    )
 rem
    if [%_COMP%]==[gfortran] (
@@ -54,8 +54,8 @@ rem > Compilation
 rem > Go to the proper directory
 cd ..\..\Hall_Symbols
    if [%_COMP%]==[ifort] (
-      ifort /c MHall.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
-      ifort /exe:MHall *.obj  %CRYSFML08%\%DIRECTORY%\lib\CrysFML08.lib /link /stack:300000000
+      ifort /c MHall.f90  %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /exe:MHall *.obj /nologo /Qdiag-disable:10448 %CRYSFML08%\%DIRECTORY%\lib\CrysFML08.lib /link /stack:300000000
    )
 rem
    if [%_COMP%]==[gfortran] (
@@ -63,6 +63,7 @@ rem
       gfortran -o MHall.exe *.o -L%CRYSFML08%\%DIRECTORY%\lib -lCrysFML08
    )
 rem
+   upx MHall.exe
    if exist %FULLPROF% copy MHall.exe %FULLPROF%\MHall.exe
    if exist %PROGCFML% copy MHall.exe %PROGCFML%\DistFPS_64b\MHall.exe
    del *.obj *.mod *.o *.map *.bak *.exe > nul

@@ -31,14 +31,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
       !> Init
       order = 1              ! Identity belongs always to the stabilizer
-      ptr   = 0; ptr(1)= 1
+      ptr   = 0; ptr(1)=1
       atr   = 0.0_cp
-      nop=min(2*Spg%NumOps,Spg%Multip)
+      !nop=min(2*Spg%NumOps,Spg%Multip)
        do n1=-1,1
           do n2=-1,1
              do n3=-1,1
                tr=real([n1, n2, n3])
-               do j=2,nop
+               do j=2,Spg%Multip
                   xx=Apply_OP(Spg%Op(j),x)  - x   + tr
                   if (sum(abs(xx)) > 2.0 * EPSS) cycle
                   order=order+1
@@ -298,7 +298,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       !---- Local variables ----!
       real(kind=cp),     parameter      :: EPSS=0.01_cp
 
-      character (len=1), dimension(6)   :: cdd
+      character (len=1), dimension(6)   :: cdb
       integer                           :: i,j,order
       integer,           dimension(48)  :: ss_ptr
       integer,           dimension(6)   :: codd
@@ -324,9 +324,9 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
          call get_stabilizer(x,Spgr,order,ss_ptr,atr)
       end if
 
-      bet=reshape((/17.0, 7.0,3.0,  &
+      bet=reshape([17.0, 7.0,3.0,  &
                     7.0,13.0,5.0,  &
-                    3.0, 5.0,11.0/),(/3,3/))
+                    3.0, 5.0,11.0],[3,3])
       bett=bet
       if (order > 1 ) then
          do j=2,order
@@ -337,21 +337,21 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       end if
       Rsym=nint(1000.0*bett)
       codd=[Rsym(1,1),Rsym(2,2),Rsym(3,3),Rsym(1,2),Rsym(1,3),Rsym(2,3)]
-      cdd=['a','b','c','d','e','f']
+      cdb=['a','b','c','d','e','f']
       multip=1.0_cp
 
       !> Search systematically all the possible constraints
       if (codd(1) == codd(2) .and. codd(1) == codd(3)) then ! a a a
          if (codd(4) == codd(5) .and. codd(4) == codd(6) ) then ! a a a d d d
             if (codd(4) == 0) then
-               cdd=['a','a','a','0','0','0']     ! 1 A A A 0   0   0
+               cdb=['a','a','a','0','0','0']     ! 1 A A A 0   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
                betas(4:6)=0.0_cp
                betas(2:3)=betas(1)
                cod(2:3)=cod(1); cod(4:6)=0.0_cp
 
             else
-               cdd=['a','a','a','d','d','d']     ! 5 A A A D   D   D
+               cdb=['a','a','a','d','d','d']     ! 5 A A A D   D   D
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
                betas(5:6)=betas(4)
                betas(2:3)=betas(1)
@@ -359,21 +359,21 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
             end if
 
          else if (codd(4) == -codd(5) .and. codd(4) == -codd(6) ) then !a a a d -d -d
-            cdd=['a','a','a','d','d','d']       ! 6 A A A D  -D  -D
+            cdb=['a','a','a','d','d','d']       ! 6 A A A D  -D  -D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, -1.0_cp]
             betas(5:6)=-betas(4)
             betas(2:3)=betas(1)
             cod(2:3)=cod(1); cod(5:6)=cod(4)
 
          else if (codd(4) == -codd(5) .and. codd(4) ==  codd(6) ) then !a a a d -d  d
-            cdd=['a','a','a','d','d','d']       ! 7 A A A D  -D   D
+            cdb=['a','a','a','d','d','d']       ! 7 A A A D  -D   D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, 1.0_cp]
             betas(5)=-betas(4); betas(6)=betas(4)
             betas(2:3)=betas(1)
             cod(2:3)=cod(1); cod(5:6)= cod(4)
 
          else if (codd(4) ==  codd(5) .and. codd(4) == -codd(6) ) then !a a a d  d -d
-            cdd=['a','a','a','d','d','d']       ! 8 A A A D   D  -D
+            cdb=['a','a','a','d','d','d']       ! 8 A A A D   D  -D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp]
             betas(6)=-betas(4); betas(5)=betas(4)
             betas(2:3)=betas(1)
@@ -382,7 +382,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
       else if (codd(1) == codd(2)) then ! a a c
          if (codd(4) == codd(5) .and. codd(4) == codd(6) .and. codd(4) == 0) then ! a a c 0 0 0
-            cdd=['a','a','c','0','0','0']     ! 2 A A C 0   0   0
+            cdb=['a','a','c','0','0','0']     ! 2 A A C 0   0   0
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
             betas(4:6)=0.0
             betas(2)=betas(1)
@@ -390,14 +390,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
          else if (codd(5) == codd(6) .and. codd(5) == 0) then ! a a c x 0 0
             if (codd(4) == codd(1)/2) then
-               cdd=['a','a','c','a','0','0']     ! 9 A A C A/2 0   0
+               cdb=['a','a','c','a','0','0']     ! 9 A A C A/2 0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp; betas(4)=betas(1)*0.5_cp
                betas(2)=betas(1)
                cod(2)=cod(1); cod(4)= cod(1); cod(5:6)=0.0_cp
 
             else
-               cdd=['a','a','c','d','0','0']     !11 A A C D   0   0
+               cdb=['a','a','c','d','0','0']     !11 A A C D   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp
                betas(2)=betas(1)
@@ -406,14 +406,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
          else
             if (codd(5) == codd(6)) then  ! a a c d e e
-               cdd=['a','a','c','d','e','e']     !20 A A C D   E   E
+               cdb=['a','a','c','d','e','e']     !20 A A C D   E   E
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
                betas(6)=betas(5)
                betas(2)=betas(1)
                cod(2)=cod(1); cod(6)=cod(5)
 
             else if (codd(5) == -codd(6)) then  ! a a c d e -e
-               cdd=['a','a','c','d','e','e']     !19 A A C D   E  -E
+               cdb=['a','a','c','d','e','e']     !19 A A C D   E  -E
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp]
                betas(6)=-betas(5)
                betas(2)=betas(1)
@@ -425,14 +425,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
          if (codd(4) == codd(6)) then    ! a b a d x d
             if (codd(4) == 0) then  ! a b a 0 x 0
                if (codd(5) == 0) then ! a b a 0 0 0
-                  cdd=['a','b','a','0','0','0']     ! 3 A B A 0   0   0
+                  cdb=['a','b','a','0','0','0']     ! 3 A B A 0   0   0
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
                   betas(4:6)=0.0_cp
                   betas(3)=betas(1)
                   cod(3)=cod(1); cod(4:6)=0.0_cp
 
                else                  ! a b a 0 e 0
-                  cdd=['a','b','a','0','e','0']     !12 A B A 0   E   0
+                  cdb=['a','b','a','0','e','0']     !12 A B A 0   E   0
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 1.0_cp, 0.0_cp]
                   betas(4)=0.0_cp;  betas(6)=0.0_cp
                   betas(3)=betas(1)
@@ -440,7 +440,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
                end if
 
             else  !! a b a d e d
-               cdd=['a','b','a','d','e','d']       !22 A B A D   E   D
+               cdb=['a','b','a','d','e','d']       !22 A B A D   E   D
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
                betas(6)=betas(4)
                betas(3)=betas(1)
@@ -448,7 +448,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
             end if
 
          else if (codd(4) == -codd(6)) then ! a b a d e -d
-            cdd=['a','b','a','d','e','d']         !21 A B A D   E  -D
+            cdb=['a','b','a','d','e','d']         !21 A B A D   E  -D
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp]
             betas(6)=-betas(4)
             betas(3)=betas(1)
@@ -459,14 +459,14 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
          if (codd(4) == codd(5)) then    ! a b b d d x
             if (codd(4) == 0) then  ! a b b 0 0 x
                if (codd(6) == 0) then ! a b b 0 0 0
-                  cdd=['a','b','b','0','0','0']     ! 4 A B B 0   0   0
+                  cdb=['a','b','b','0','0','0']     ! 4 A B B 0   0   0
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
                   betas(4:6)=0.0_cp
                   betas(3)=betas(2)
                   cod(3)=cod(2); cod(4:6)=0.0_cp
 
                else                  ! a b b 0 0 f
-                  cdd=['a','b','b','0','0','f']     !13 A B B 0   0   F
+                  cdb=['a','b','b','0','0','f']     !13 A B B 0   0   F
                   multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 1.0_cp]
                   betas(4:5)=0.0_cp
                   betas(3)=betas(2)
@@ -474,7 +474,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
                end if
 
             else  !! a b b d d f
-               cdd=['a','b','b','d','d','f']       !24 A B B D   D   F
+               cdb=['a','b','b','d','d','f']       !24 A B B D   D   F
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
                betas(5)=betas(4)
                betas(3)=betas(2)
@@ -482,7 +482,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
             end if
 
          else if (codd(4) == -codd(5)) then ! a b b d -d e
-            cdd=['a','b','b','d','d','f']         !23 A B B D  -D   F
+            cdb=['a','b','b','d','d','f']         !23 A B B D  -D   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, -1.0_cp, 1.0_cp]
             betas(5)=-betas(4)
             betas(3)=betas(2)
@@ -492,13 +492,13 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       else !Now a /= b /= c
          if (codd(4) == codd(5) .and. codd(4) == 0) then ! a b c 0 0 x
             if (codd(6) == 0) then ! a b c 0 0 0
-               cdd=['a','b','c','0','0','0']          !10 A B C 0   0   0
+               cdb=['a','b','c','0','0','0']          !10 A B C 0   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 0.0_cp]
                betas(4:6)=0.0_cp
                cod(4:6)=0.0_cp
 
             else
-               cdd=['a','b','c','0','0','f']          !18 A B C 0   0   F
+               cdb=['a','b','c','0','0','f']          !18 A B C 0   0   F
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp, 1.0_cp]
                betas(4:5)=0.0_cp
                cod(4:5)=0.0_cp
@@ -506,62 +506,62 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
          else if (codd(5) == codd(6) .and. codd(5) == 0) then  ! a b c x 0 0
             if (codd(4) == codd(1)/2) then ! a b c a/2 0 0
-               cdd=['a','b','c','a','0','0']          !15 A B C A/2 0   0
+               cdb=['a','b','c','a','0','0']          !15 A B C A/2 0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp; betas(4)=betas(1)*0.5_cp
                cod(4)=cod(1); cod(5:6)=0.0_cp
 
             else if(codd(4) == codd(2)/2) then    !a b c b/2 0 0
-               cdd=['a','b','c','b','0','0']          !14 A B C B/2 0   0
+               cdb=['a','b','c','b','0','0']          !14 A B C B/2 0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp; betas(4)=betas(2)*0.5_cp
                cod(4)=cod(2); cod(5:6)=0.0_cp
 
             else
-               cdd=['a','b','c','d','0','0']          !16 A B C D   0   0
+               cdb=['a','b','c','d','0','0']          !16 A B C D   0   0
                multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 0.0_cp]
                betas(5:6)=0.0_cp
                cod(5:6)=0.0_cp
             end if
 
          else if (codd(4) == codd(6) .and. codd(4) == 0) then !a b c 0 e 0
-            cdd=['a','b','c','0','e','0']            !17 A B C 0   E   0
+            cdb=['a','b','c','0','e','0']            !17 A B C 0   E   0
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.0_cp, 1.0_cp, 0.0_cp]
             betas(4)=0.0_cp; betas(6)=0.0_cp
             cod(4)=0.0_cp; cod(6)=0.0_cp
 
          else if (codd(4) == codd(1)/2 .and. codd(5) == 0) then !a b c a/2 0 f
-            cdd=['a','b','c','a','0','f']            !26 A B C A/2 0   F
+            cdb=['a','b','c','a','0','f']            !26 A B C A/2 0   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 0.0_cp, 1.0_cp]
             betas(4)=betas(1)*0.5_cp; betas(5)=0.0_cp
             cod(4)=cod(1); cod(5)=0.0_cp
 
          else if (codd(4) == codd(2)/2 .and. codd(6) == 0) then !a b c b/2 e 0
-            cdd=['a','b','c','b','e','0']            !27 A B C B/2 E   0
+            cdb=['a','b','c','b','e','0']            !27 A B C B/2 E   0
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 1.0_cp, 0.0_cp]
             betas(4)=betas(2)*0.5_cp; betas(6)=0.0_cp
             cod(4)=cod(2); cod(6)=0.0_cp
 
          else if (codd(4) == codd(2)/2 .and. codd(5) == codd(6)/2) then !a b c b/2 f/2 f
-            cdd=(/'a','b','c','b','f','f'/)            !25 A B C B/2 F/2 F
-            multip=(/1.0,1.0,1.0,0.5,0.5,1.0/)
+            cdb=['a','b','c','b','f','f']            !25 A B C B/2 F/2 F
+            multip=[1.0,1.0,1.0,0.5,0.5,1.0]
             betas(4)=betas(2)*0.5; betas(5)=betas(6)*0.5
             cod(4)=cod(2); cod(5)=cod(6)
 
          else if(codd(4) == codd(1)/2 .and. codd(6) == codd(5)/2) then !a b c a/2 e e/2
-            cdd=['a','b','c','a','e','e']            !28 A B C A/2 E   E/2
+            cdb=['a','b','c','a','e','e']            !28 A B C A/2 E   E/2
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 0.5_cp, 1.0_cp, 0.5_cp]
             betas(4)=betas(1)*0.5_cp; betas(6)=betas(5)*0.5_cp
             cod(4)=cod(1); cod(6)=cod(5)
 
          else
-            cdd=['a','b','c','d','e','f']            !29 A B C D   E   F
+            cdb=['a','b','c','d','e','f']            !29 A B C D   E   F
             multip=[1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp, 1.0_cp]
          end if
       end if
 
       do j=1,6
-         if (multip(j) < EPSS .or. cdd(j) == "0" ) then
+         if (multip(j) < EPSS .or. cdb(j) == "0" ) then
             icodes(j) = 0
 
          else
@@ -571,7 +571,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
 
       if (present(Ipr)) then
          write(Ipr,'(a,6i5)')           '     Codes on Betas       :  ',Icodes
-         write(Ipr,'(a,6(a,1x),6f7.3)') '     Codes and multipliers:  ',cdd,multip
+         write(Ipr,'(a,6(a,1x),6f7.3)') '     Codes and multipliers:  ',cdb,multip
          write(Ipr,'(a)')               '     Beta_TOT matrix:  '
          do i=1,3
             write(Ipr,'(a,3f12.4)')       '                      ',bett(i,:)
@@ -818,6 +818,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
    !!----     class(SuperSpaceGroup_Type),            intent(in)     :: Spg      ! Super Space Group
    !!----     Integer,                                intent(in out) :: codini   ! Number of the Last attributed parameter
    !!----     real(kind=cp), dimension(3),            intent(in out) :: codes    ! codewords for magnetic moment
+   !!----     real(kind=cp), dimension(3),   optional,intent(in)     :: side
    !!----     integer,                       optional,intent(in)     :: ord      ! Order of stabilizer
    !!----     integer, dimension(:),         optional,intent(in)     :: ss       ! Pointer to operators
    !!----     real(kind=cp), dimension(:,:), optional,intent(in)     :: att      ! Translations of stabilizer operators
@@ -835,12 +836,13 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
    !!----   Updated: March 2020
    !!----
    !!
-   Module Subroutine Get_Moment_CTR(xnr,moment,Spg,codini,codes,ord,ss,att,Ipr,ctr_code)
+   Module Subroutine Get_Moment_CTR(xnr,moment,Spg,codini,codes,side,ord,ss,att,Ipr,ctr_code)
       real(kind=cp), dimension(3),            intent(in)     :: xnr
       real(kind=cp), dimension(:),            intent(in out) :: moment
       class(SpG_type),                        intent(in)     :: Spg
       Integer,                                intent(in out) :: codini
       real(kind=cp), dimension(:),            intent(in out) :: codes
+      real(kind=cp), dimension(3),   optional,intent(in)     :: side
       integer,                       optional,intent(in)     :: ord
       integer, dimension(:),         optional,intent(in)     :: ss
       real(kind=cp), dimension(:,:), optional,intent(in)     :: att
@@ -851,15 +853,18 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       character(len=1),  dimension(3)   :: codd
       character(len=15), dimension(3)   :: St_Cod
       character(len=:), allocatable     :: mag
-      integer                           :: i,j,order,n,ig,iss
+      integer                           :: i,j,order,n,ig,iss,npos
       real(kind=cp)                     :: suma
       integer,           dimension(48)  :: ss_ptr
       real(kind=cp),     dimension(3,48):: atr
       real(kind=cp),     dimension(3)   :: cod,multi
-      real(kind=cp),     dimension(3)   :: x
-      real(kind=cp),     dimension(3,3) :: magm  !g, magm= delta * det(g) * g
+      real(kind=cp),     dimension(3)   :: x, Rsym
+      real(kind=cp),     dimension(3,3) :: magm,mg  !g, magm= delta * det(g) * g
       real(kind=dp),     dimension(3,3) :: sCtr
       real(kind=cp),     dimension(3)   :: momentL,TotMom
+      character(len=40)                 :: Symb
+      integer,           dimension(3,3) :: s
+      real(kind=cp),     dimension(3)   :: t
 
 
       !Test if all codes are given ... in such a case the user constraints
@@ -890,21 +895,37 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       end if
 
       momentL=moment
+      !if(present(side)) momentL=momentL/side
       sCtr=0.0_cp
       if(order > 1) then
         do ig=1,order
           j=ss_ptr(ig)
-          magm(:,:) = real(Spg%Op(j)%Mat(1:3,1:3))*Spg%Op(j)%dt*Spg%Op(j)%time_inv
-          mag=Set_Symb_From_Mat(magm,["u","v","w"])
-          sCtr=sCtr+magm !Adding constraint matrices for each operator of stabilizer
+          s=Spg%Op(j)%Mat(1:3,1:3)
+          magm(:,:) = real(s)*Spg%Op(j)%dt*Spg%Op(j)%time_inv
+          if(present(side)) then
+            do i=1,3
+              mg(i,:)= magm(i,:)/side
+            end do
+          end if
+          sCtr=sCtr+mg   !magm !Adding constraint matrices for each operator of stabilizer
+          do i=1,3
+            write(unit=*,fmt="(2(3f14.4,a))") mg(i,:),"  ->  ",sCtr(i,:)
+          end do
           if(present(ipr)) then
-            write(unit=ipr,fmt='(a,i2,a,t20,a,t55,a,t75,9f8.4)') '     Operator ',ig,": ",trim(Spg%Symb_Op(j)), &
-             trim(mag), sCtr
+            t=Spg%Op(j)%Mat(1:3,4)
+            Symb=Symmetry_Symbol(s,t)
+            mag=Set_Symb_From_Mat(magm,["u","v","w"])
+            if(Spg%Op(j)%time_inv < 0) then
+              npos=index(Symb," ")
+              Symb=Symb(1:npos-1)//"' "//Symb(npos+1:)
+            end if
+            Rsym=matmul(magm,momentL)
+            write(unit=ipr,fmt='(a,i3,a,tr2,a40,tr2,3f12.4,tr4,a)') '     Operator ',j,": ",trim(Spg%Symb_Op(j))//"  MagMat: "//trim(mag), Rsym,trim(Symb)
           end if
         end do  !ig operators
         sCtr=sCtr/order
         suma=sum(abs(sCtr))
-        !write(*,"(a,f10.4,a,i3)") " suma:",suma, "Mag_Type:", spg%mag_type
+        write(*,"(a,f10.4,a,i3)") " suma:",suma, "Mag_Type:", spg%mag_type
         if(suma < epss .or. spg%mag_type == 2) then !This corresponds to a grey point group
            moment=0.0_cp
            codes=0.0_cp
@@ -916,7 +937,18 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
            return
         end if
         TotMom=matmul(sCtr,momentL)
-        call Get_Refinement_Codes(n,TotMom,sCtr,iss,multi,codd,momentL)
+        if(present(side)) then
+             !TotMom=TotMom*side
+             if(present(Ipr))  write(unit=Ipr,fmt="(2(a,3f14.4))") " SIDE:",side, " MOMENT_TOT:",TotMom
+            do i=1,3
+              if(present(Ipr))  write(unit=Ipr,fmt="(3f14.4)") sCtr(i,:)
+            end do
+        end if
+        if(present(Ipr)) then
+          call Get_Refinement_Codes(n,TotMom,sCtr,iss,multi,codd,momentL,Ipr)
+        else
+          call Get_Refinement_Codes(n,TotMom,sCtr,iss,multi,codd,momentL)
+        end if
         cod=0.0
         do j=1,n
           if(codd(j) /= "0") then
@@ -929,6 +961,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
           end if
         end do
         moment=momentL
+        if(present(side)) moment=momentL*side
         codes=0.0
         do j=1,n
           if(abs(multi(j)) > epss)  codes(j) = sign(1.0_cp, multi(j))*(abs(cod(j))*10.0_cp + abs(multi(j)) )
@@ -983,7 +1016,334 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
       end if
    End Subroutine Get_Moment_CTR
 
-   Subroutine Get_Refinement_Codes(n,vect_val,Ctr,iss,multi,codd,vect_out)
+   !!
+   !!----  Subroutine get_moment_ctr_Wigner(xnr,moment,Spgr,codini,codes,side,ord,ss,att,Ipr,ctr_code)
+   !!----     real(kind=cp), dimension(3),            intent(in    ) :: xnr    !Atom position (fractional coordinates)
+   !!----     real(kind=cp), dimension(3),            intent(in out) :: moment !Moment at position xnr
+   !!----     class(SPG_type),                        intent(in    ) :: Spgr   !Magnetic Space Group
+   !!----     Integer,                                intent(in out) :: codini !Last attributed parameter
+   !!----     real(kind=cp), dimension(3),            intent(in out) :: codes  !codewords for positions
+   !!----     real(kind=cp), dimension(3),   optional,intent(in)     :: side
+   !!----     integer,                       optional,intent(in)     :: ord
+   !!----     integer, dimension(:),         optional,intent(in)     :: ss
+   !!----     real(kind=cp), dimension(:,:), optional,intent(in)     :: att
+   !!----     integer,                       optional,intent(in)     :: Ipr
+   !!----     character(len=*),              optional,intent(out)    :: ctr_code
+   !!----
+   !!----  Subroutine to get the appropriate constraints in the refinement codes of
+   !!----  magnetic moment parameters.
+   !!----  Algorithm based in the Wigner theorem.
+   !!----  The vector Mom = Sum { R Moment} displays the symmetry constraints to be
+   !!----  applied to the magnetic moments. The sum runs over all magnetic
+   !!----  matrices of the stabilizer of the particular atom position in the given
+   !!----  space group.
+   !!----
+   !!----   Updated: 16 April 2016
+   !!----
+   !!
+   Module Subroutine get_moment_ctr_Wigner(xnr,moment,Spgr,codini,codes,side,ord,ss,att,Ipr,ctr_code)
+      real(kind=cp), dimension(3),            intent(in)     :: xnr
+      real(kind=cp), dimension(3),            intent(in out) :: moment
+      Class(SPG_type),                        intent(in)     :: Spgr
+      Integer,                                intent(in out) :: codini
+      real(kind=cp), dimension(3),            intent(in out) :: codes
+      real(kind=cp), dimension(3),   optional,intent(in)     :: side
+      integer,                       optional,intent(in)     :: ord
+      integer, dimension(:),         optional,intent(in)     :: ss
+      real(kind=cp), dimension(:,:), optional,intent(in)     :: att
+      integer,                       optional,intent(in)     :: Ipr
+      character(len=*),              optional,intent(out)    :: ctr_code
+
+      ! Local variables
+      character (len=4), dimension(3)   :: cdw
+      character (len=4)                 :: cditem
+      real(kind=cp),     dimension(3)   :: multip
+      integer                           :: j,order, ig, npos
+      real(kind=cp)                     :: suma,dif
+      integer,           dimension(48)  :: ss_ptr
+      integer,           dimension(3)   :: codd,msym
+      real(kind=cp),     dimension(3,3) :: Rs
+      real(kind=cp),     dimension(3)   :: x,cod,multi,mom,mome,Rsym
+      real(kind=cp),     dimension(3,48):: atr
+      character(len=:),  allocatable    :: Symb,mag
+      integer,           dimension(3,3) :: s
+      real(kind=cp),     dimension(3)   :: t
+      real(kind=cp),     parameter      :: epss=0.01_cp
+
+      suma=0.0
+      do j=1,3
+         suma=suma+abs(codes(j))
+         cod(j)=int(abs(codes(j))/10.0_cp)             !Input Parameter number with sign
+         multi(j)=mod(codes(j),10.0_cp)                !Input Multipliers
+         if(cod(j) < 1.0 .and. abs(multi(j)) > epss)  then
+              codini=codini+1
+              cod(j) = real(codini)
+         end if
+      end do
+      if(suma < epss) return  !No refinement is required
+
+      x=modulo_lat(xnr)
+
+      if(present(ord) .and. present(ss) .and. present(att)) then
+        order=ord
+        ss_ptr(1:order) = ss(1:ord)
+        atr(:,1:order)  = att(:,1:ord)
+      else
+        call get_stabilizer(x,Spgr,order,ss_ptr,atr)
+      end if
+
+      mom=[17.0, 7.0,5.0]
+      if(present(side)) mom=mom/side
+      mome=mom
+      if(present(ipr)) Write(unit=ipr,fmt="(a,i3)") " => Magnetic stabilizer without identity, order:",order
+      if (order > 1 ) then
+         do ig=2,order
+            j=ss_ptr(ig)
+            s=Spgr%Op(j)%Mat(1:3,1:3)
+            Rs = real(s)*Spgr%Op(j)%dt*Spgr%Op(j)%time_inv
+            Rsym=matmul(Rs,mom)
+            mome=mome + Rsym
+            if(present(ipr)) then
+              t=Spgr%Op(j)%Mat(1:3,4)
+              Symb=Symmetry_Symbol(s,t)
+              mag=Set_Symb_From_Mat(Rs,["u","v","w"])
+              if(Spgr%Op(j)%time_inv < 0) then
+                npos=index(Symb," ")
+                Symb=Symb(1:npos-1)//"' "//Symb(npos+1:)
+              end if
+              write(unit=ipr,fmt='(a,i3,a,tr2,a,tr2,3f12.4,tr4,a)') '     Operator ',ig,": ",trim(Spgr%Symb_Op(j))//"  MagMat: "//trim(mag), Rsym,trim(Symb)
+            end if
+         end do
+         mome=mome/real(order)
+         if(present(side)) mome=mome*side
+      end if
+      msym=nint(1000.0*mome)
+      codd=msym
+      cdw=['a','b','c']
+      multip=1.0
+
+      !Search systematically all the possible constraints
+
+      if(codd(1) == codd(2) .and. codd(1) == codd(3)) then ! a a a
+        cdw=['a','a','a']     ! 1 A A A
+        multip=[1.0,1.0,1.0]
+        moment(2:3)=moment(1)
+        cod(2:3)=cod(1)
+        if(codd(1) == 0) then !No magnetic moment allowed for this site
+          cod=0
+          moment=0.0
+          multip=0.0
+          cdw=['0','0','0']
+        end if
+
+      else if(codd(1) == codd(2)) then ! a a c
+        cdw=['a','a','c']    ! 2  A A C
+        multip=[1.0,1.0,1.0]
+        moment(2)=moment(1)
+        cod(2)=cod(1)
+        if(codd(1) == 0) then ! 0 0 c
+          cod(1:2)=0
+          moment(1:2)=0.0
+          multip(1:2)=0.0
+          cdw=['0','0','c']
+        else if(codd(3) == 0) then  ! a a 0
+          cod(3)=0
+          moment(3)=0.0
+          multip(3)=0.0
+          cdw=['a','a','0']
+        else if(codd(3) == -codd(1)) then  ! a a -a
+          cod(3)=cod(1)
+          moment(3)=-moment(1)
+          multip(3)=-1.0
+          cdw=['a ','a ','-a']
+        end if
+
+      else if(codd(1) == codd(3)) then ! a b a
+        cdw=['a','b','a']     ! 3  A B A
+        multip=[1.0,1.0,1.0]
+        moment(3)=moment(1)
+        cod(3)=cod(1)
+        if(codd(1) == 0) then !0 b 0
+          cod(1)=0; cod(3)=0
+          moment(1)=0.0; moment(3)=0.0
+          multip(1)=0.0; multip(3)=0.0
+          cdw=['0','b','0']
+        else if(codd(2) == 0) then  ! a 0 a
+          cod(2)=0
+          moment(2)=0.0
+          multip(2)=0.0
+          cdw=['a','0','a']
+        else if(codd(2) == -codd(1)) then  ! a -a a
+          cod(2)=cod(1)
+          moment(2)=-moment(1)
+          multip(2)=-1.0
+          cdw=['a ','-a','a ']
+        end if
+
+      else if(codd(2) == codd(3)) then ! a b b
+        cdw=['a','b','b']     ! 4  A B B
+        multip=[1.0,1.0,1.0]
+        moment(3)=moment(2)
+        cod(3)=cod(2)
+        if(codd(2) == 0) then !a 0 0
+          cod(2:3)=0
+          moment(2:3)=0.0
+          multip(2:3)=0.0
+          cdw=['a','0','0']
+        else if(codd(1) == 0) then  ! 0 b b
+          cod(1)=0
+          moment(1)=0.0
+          multip(1)=0.0
+          cdw=['0','b','b']
+        else if(codd(1) == -codd(2)) then  ! -b b b
+          cod(1)=cod(2)
+          moment(1)=-moment(2)
+          multip(1)=-1.0
+          cdw=['-b','b ','b ']
+        end if
+
+      else !Now a /= b /= c
+
+        if(codd(1) == 0) then  !0 b c
+          cod(1)=0
+          moment(1)=0.0
+          multip(1)=0.0
+          cdw=['0','b','c']
+        end if
+        if(codd(2) == 0) then  !a 0 c
+          cod(2)=0
+          moment(2)=0.0
+          multip(2)=0.0
+          cdw=['a','0','c']
+        end if
+        if(codd(3) == 0) then  !a b 0
+          cod(3)=0
+          moment(3)=0.0
+          multip(3)=0.0
+          cdw=['a','b','0']
+        end if
+        !Comparison a,b
+        if(codd(1) /= 0 .and. codd(2)/=0) then
+          suma=real(codd(1))/real(codd(2))
+          if(abs(suma) < 1.0) then
+            suma=1.0/suma
+            order=codd(2)/codd(1)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(2)=cod(1)
+              multip(2)=suma
+              moment(2)=suma*moment(1)
+              write(unit=cditem,fmt="(i2,a)") order,"a"
+              !cdw=['a',cditem,'c']  !incompatible with Lahey compiler
+              cdw(1)='a'
+              cdw(2)=cditem
+              cdw(3)='c'
+            end if
+          else
+            order=codd(1)/codd(2)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(1)=cod(2)
+              multip(1)=suma
+              moment(1)=suma*moment(2)
+              write(unit=cditem,fmt="(i2,a)") order,"b"
+              !cdw=[cditem,'b','c']
+              cdw(1)=cditem
+              cdw(2)='b'
+              cdw(3)='c'
+            end if
+           end if
+        end if
+        !Comparison a,c
+        if(codd(1) /= 0 .and. codd(3)/=0) then
+          suma=real(codd(1))/real(codd(3))
+          if(abs(suma) < 1.0) then
+            suma=1.0/suma
+            order=codd(3)/codd(1)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(3)=cod(1)
+              multip(3)=suma
+              moment(3)=suma*moment(1)
+              write(unit=cditem,fmt="(i2,a)") order,"a"
+              !cdw=['a','b',cditem]
+              cdw(1)='a'
+              cdw(2)='b'
+              cdw(3)=cditem
+            end if
+          else
+            order=codd(1)/codd(3)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(1)=cod(3)
+              multip(1)=suma
+              moment(1)=suma*moment(3)
+              write(unit=cditem,fmt="(i2,a)") order,"c"
+              !cdw=[cditem,'b','c']
+              cdw(1)=cditem
+              cdw(2)='b'
+              cdw(3)='c'
+            end if
+           end if
+        end if
+        !Comparison b,c
+        if(codd(2) /= 0 .and. codd(3)/=0) then
+          suma=real(codd(2))/real(codd(3))
+          if(abs(suma) < 1.0) then
+            suma=1.0/suma
+            order=codd(3)/codd(2)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(3)=cod(2)
+              multip(3)=suma
+              moment(3)=suma*moment(2)
+              write(unit=cditem,fmt="(i2,a)") order,"b"
+              !cdw=['a','b',cditem]
+              cdw(1)='a'
+              cdw(2)='b'
+              cdw(3)=cditem
+            end if
+          else
+            order=codd(2)/codd(3)
+            dif=abs(suma-real(order))
+            if(dif < epss) then
+              cod(2)=cod(3)
+              multip(2)=suma
+              moment(2)=suma*moment(3)
+              write(unit=cditem,fmt="(i2,a)") order,"c"
+              !cdw=['a',cditem,'c']
+              cdw(1)='a'
+              cdw(2)=cditem
+              cdw(3)='c'
+            end if
+           end if
+        end if
+
+      end if
+      codini=maxval(cod)
+      do j=1,3
+        if(abs(multi(j)) < epss .or. cdw(j) == '0' ) then
+          codes(j) = 0.0_cp
+        else if(multi(j) < 0) then
+          codes(j) = sign(1.0_cp, multi(j))*(abs(cod(j))*10.0_cp + abs(multi(j)) )
+        else
+          codes(j) = sign(1.0_cp, multip(j))*(abs(cod(j))*10.0_cp + abs(multip(j)) )
+        end if
+      end do
+
+      if(present(Ipr)) then
+        write(Ipr,'(a,3f10.4)')        '     Codes on Moments     : ',codes
+        Write(Ipr,'(a,3(a,1x),6f7.3)') '     Codes and multipliers: ',cdw,multip
+        Write(Ipr,'(a,3f12.4)')        '     Moment_TOT vector    : ',mome
+      end if
+      if(present(ctr_code)) then
+         write(unit=ctr_code,fmt="(5a)") " ( ",(cdw(j)//", ",j=1,2),cdw(j)//" )"
+         ctr_code=pack_string(ctr_code)
+      end if
+
+   End Subroutine get_moment_ctr_Wigner
+
+   Subroutine Get_Refinement_Codes(n,vect_val,Ctr,iss,multi,codd,vect_out,Ipr)
      integer,                       intent(in)    :: n !dimension of the vector and the matrix
      real(kind=cp), dimension(:),   intent(in)    :: vect_val
      real(kind=dp), dimension(:,:), intent(in out):: Ctr
@@ -991,10 +1351,11 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
      real(kind=cp), dimension(:),   intent(out)   :: multi
      character(len=*), dimension(:),intent(out)   :: codd
      real(kind=cp), dimension(:),   intent(out)   :: vect_out
+     integer,       optional,       intent(in)    :: Ipr
      !--- Local variables ---!
      real(kind=cp), dimension(n)   :: val
      integer,       dimension(n)   :: pti
-     real(kind=dp), dimension(n,n) :: zv
+     real(kind=dp), dimension(n,n) :: zv,inpmat
      integer                       :: i,j,k,kval,ip !,ier
      real(kind=dp)                 :: zmi
      real(kind=dp), dimension(n)   :: Wr, Wi
@@ -1003,6 +1364,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
      !Diagonalize the matrix and pickup the lambda=1 eigenvalues
      !The corresponding eigenvector contains the constraints of all moment components
      !Calling the general diagonalization subroutine from EisPack
+     inpmat=Ctr
      call Diagonalize_RGen(n,Ctr,wr,wi,.true.,zv)
      iss=0
      pti=0
@@ -1010,8 +1372,8 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
      do i=1,n
        if(abs(wr(i)-1.0_dp) < epss .and. abs(wi(i)) < epss) then
          iss=iss+1   !Number of eigenvalues = 1 => number of free parameters
-         pti(iss)=i !This points to the eigenvectors with eigenvalue equal to 1.
-         zmi=1.0e6 !normalize the eigenvectors so that the minimum (non-zero value) is 1.
+         pti(iss)=i  !This points to the eigenvectors with eigenvalue equal to 1.
+         zmi=1.0e6   !normalize the eigenvectors so that the minimum (non-zero value) is 1.
          j=1
          do k=1,n
            if(abs(zv(k,i)) < epss) cycle
@@ -1021,10 +1383,26 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
              j=nint(sign(1.0_dp,zv(k,i)))
            end if
          end do
-         zv(1:n,i)=j*zv(1:n,i)/zmi  !This provides directly the multipliers for a single lambda=1 eigenvalue
-         val(iss)=vect_val(kval) !This is the basis value to construct the new Moment
+         !zv(1:n,i)=j*zv(1:n,i)/zmi  !This provides directly the multipliers for a single lambda=1 eigenvalue
+         zv(1:n,i)=zv(1:n,i)/zmi    !This provides directly the multipliers for a single lambda=1 eigenvalue
+         val(iss)=vect_val(kval)    !This is the basis value to construct the new Moment
        end if
      end do
+     if(present(Ipr)) then
+        write(unit=Ipr,fmt="(a)")        "  Input matrix to be diagonalized (Sum of symmetry operator matrices)"
+        do i=1,n
+            write(unit=Ipr,fmt="(a,6F12.4)") "    ", inpmat(i,1:n)
+        end do
+        write(unit=Ipr,fmt="(a)")        "  Normalized Eigen Vectors for eigenvalues = 1 :"
+        write(unit=Ipr,fmt="(a,6F12.4)") "  Input vect_val: ",vect_val
+        j=0
+        do i=1,n
+            if(abs(wr(i)-1.0_dp) < epss .and. abs(wi(i)) < epss) then
+               j=j+1
+               write(unit=Ipr,fmt="(a,2i5,7F12.4)") "  i,j, zv(1:n,i), val(j): ",i,j, zv(1:n,i), val(j)
+            end if
+        end do
+     end if
      codd="0"
      vect_out=0.0
      multi=0.0
@@ -1034,7 +1412,8 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
        case(1)
          vect_out(1:n)=val(1)*zv(1:n,pti(1))
          where(abs(vect_out) > epss)  codd(:)=cdd(1)
-         multi(1:n)=zv(1:n,pti(1))
+         multi(1:n)=zv(1:n,pti(iss))
+       !case(2)
        case(2:)
          ip=0
          do i=1,n
@@ -1042,19 +1421,19 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
              if(abs(vect_val(i)) > epss) then
                ip=ip+1
                codd(i)=cdd(ip)
-               multi(i)=1.0
+               multi(i)= 1.0  !zv(i,pti(iss))     !1.0
                vect_out(i)=vect_val(i)
                done(i)=.true.
                do j=i+1,n
                  if(.not. done(j)) then
                    if(abs(vect_val(i)-vect_val(j)) < epss) then
                      codd(j)=cdd(ip)
-                     multi(j)=1.0
+                     multi(j)=1.0  !zv(j,pti(iss)) !
                      vect_out(j)=vect_val(i)
                      done(j)=.true.
                    else if(abs(vect_val(i)+vect_val(j)) < epss) then
                      codd(j)=cdd(ip)
-                     multi(j)=-1.0
+                     multi(j)= -1.0 !-zv(j,pti(iss)) !-1.0
                      vect_out(j)=-vect_val(i)
                      done(j)=.true.
                    end if
@@ -1064,6 +1443,10 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
            end if
          end do
      End Select
+     if(present(Ipr)) then
+        write(unit=Ipr,fmt="(a,6F12.4)") "  Input  vect_val: ",vect_val
+        write(unit=Ipr,fmt="(a,6F12.4)") "  Output vect_out: ",vect_out
+     end if
    End Subroutine Get_Refinement_Codes
 
    !!
@@ -1166,7 +1549,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Orb_Stabilizer_Constr
         n=6*nq
 
         do ig=1,order
-          ir=ss_ptr(ig)
+            ir=ss_ptr(ig)
               g(:,:) = SpG%Op(ir)%Mat(1:3,1:3)   !                          /  g    0   t  \
                ts(:) = SpG%Op(ir)%Mat(1:d,d+1)   !   Superspace operator:  |  Mx   ep   tI  |    !ts=(t,tI)
              Mx(:,:) = SpG%Op(ir)%Mat(4:d,1:3)   !                          \   0    0   1 /
