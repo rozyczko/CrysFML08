@@ -796,7 +796,8 @@ module nexus_mod
         end if
 
         ! Reflection
-        call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/reflection',dset,hdferr)
+        call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/actual_reflection',dset,hdferr)
+        if (hdferr == -1) call h5dopen_f(file_id,instrument_address//'/SingleCrystalSettings/reflection',dset,hdferr)
         if (hdferr /= -1) call h5dget_space_f(dset,space,hdferr)
         if (hdferr /= -1) call h5sget_simple_extent_dims_f(space,dims,maxdims,hdferr)
         if (hdferr /= -1) call h5dread_f(dset,H5T_NATIVE_REAL,nexus%reflection,dims,hdferr)
