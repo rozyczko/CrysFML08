@@ -1,4 +1,4 @@
-cd#!/bin/bash
+#!/bin/bash
 #
 #
 #  Attempt to create a unified build method for CrysFML using fmp
@@ -68,9 +68,9 @@ done
 #
 cd ./Src
     if [ $WINT == "win" ]; then
-          tochange.sh xxx win
+          ./tochange.sh xxx win
     else
-          tochange.sh xxx
+          ./tochange.sh xxx
     fi
 cd ..
 #
