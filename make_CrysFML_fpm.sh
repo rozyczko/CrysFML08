@@ -156,8 +156,8 @@ cd ..
 #
 cd ./Src
     if [ $WINT == "win" ]; then
-          tochange.sh f90 win
+          ./tochange.sh f90 win
     else
-          tochange.sh f90
+          ./tochange.sh f90
     fi
 cd ..
