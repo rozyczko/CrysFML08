@@ -1,3 +1,9 @@
+"""
+Python script for building CFML_Wraps.
+Author: Nebil A. Katcho
+February 2024
+"""
+
 class FortranVar():
 
     def __init__(self,name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',len : str='',allocatable : bool=False, is_class : bool=False,value = None,parent : str=''):

@@ -1,4 +1,8 @@
 """
+Python script for building CFML_Wraps.
+Author: Nebil A. Katcho
+February 2024
+
 Utilities for parsing CrysFML08
 
 ---------
@@ -15,8 +19,11 @@ get_interface_name(line : str) -> str
 get_len(ftype : str) -> str
 get_line(n : int, lines : list) -> tuple
 get_module_name(lines : list) -> str
+get_overloads(n,lines : list,interface : dict) -> int
 get_overload_procedures(n : int, lines : list, t : cfml_objects.Interface) -> int
 get_procedure(line : str) -> str
+get_procedures(n,lines : list,publics : list,interface : dict,procedures : dict) -> int
+get_publics(n : int,lines : list,publics : list) -> int
 get_subroutine_arguments(line : str, s : cfml_objects.Subroutine) -> None
 get_subroutine_name(lines : list) -> str
 get_subroutine_types(n : int, lines : list, s : cfml_objects.Subroutine) -> int
@@ -28,6 +35,7 @@ get_uses(n,lines : list,us : dict) -> int
 is_array(dim : str) -> bool
 is_empty(line : str) -> bool
 is_optional(line : str) -> bool
+is_overload(interface : dict,p_name : str) -> str
 is_primitive(line : str) -> bool
 is_procedure(procedure : str,line : str) -> bool
 parse_var(line : str) -> tuple
@@ -193,6 +201,28 @@ def get_module_name(lines : list) -> str:
             return l[1]
     raise Exception('Module name not found')
 
+def get_overloads(n,lines : list,interface : dict) -> int:
+
+    while n < len(lines):
+        line = lines[n].lower()
+        if line.startswith('contains'):
+            return n-1
+        if not line.strip().startswith('interface'):
+            n += 1
+            continue
+        n,line = get_line(n,lines)
+        i_name = get_interface_name(line)
+        if i_name == '': # Starting the interface zone
+            return n-1
+        if is_colorama:
+            print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'interface' : <11}{colorama.Fore.CYAN}{i_name}{colorama.Style.RESET_ALL}")
+        else:
+            print(f"{' ':>8}{'Parsing '}{'interface' : <11}{i_name}")
+        interface[i_name] = cfml_objects.Interface(i_name)
+        n = get_overload_procedures(n+1,lines,interface[i_name])
+        n += 1
+    return n
+
 def get_overload_procedures(n : int, lines : list, i : cfml_objects.Interface) -> int:
 
     in_interface = True
@@ -220,6 +250,59 @@ def get_procedure(line : str) -> str:
     else:
         p = line.split()[-1]
     return p
+
+def get_procedures(n,lines : list,publics : list,interface : dict,procedures : dict) -> int:
+
+    while n < len(lines):
+        n,line = get_line(n,lines)
+        if is_procedure('function',line):
+            f_name = get_function_name(line)
+            if is_colorama:
+                print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'function' : <11}{colorama.Fore.CYAN}{f_name}{colorama.Style.RESET_ALL}")
+            else:
+                print(f"{' ':>8}{'Parsing '}{'function' : <11}{f_name}")
+            procedures[f_name] = cfml_objects.Function(f_name)
+            get_arguments(line,procedures[f_name])
+            get_function_result(line,procedures[f_name])
+            ov = is_overload(interface,f_name)
+            if ov:
+                procedures[f_name].is_overload = True
+                procedures[f_name].overload = ov
+            n = get_function_types(n+1,lines,procedures[f_name])
+        elif is_procedure('subroutine',line):
+            s_name = get_subroutine_name(line)
+            if is_colorama:
+                print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'subroutine' : <11}{colorama.Fore.CYAN}{s_name}{colorama.Style.RESET_ALL}")
+            else:
+                print(f"{' ':>8}{'Parsing '}{'subroutine' : <11}{s_name}")
+            procedures[s_name] = cfml_objects.Subroutine(s_name)
+            get_arguments(line,procedures[s_name])
+            ov = is_overload(interface,s_name)
+            if ov:
+                procedures[s_name].is_overload = True
+                procedures[s_name].overload = ov
+            n = get_subroutine_types(n+1,lines,procedures[s_name])
+        else:
+            n += 1
+    return n
+
+def get_publics(n : int,lines : list,publics : list) -> int:
+    """
+    Get the public methods of the module
+    """
+    while n < len(lines):
+        line = lines[n].lower().strip()
+        if line.startswith('type') or line.startswith('interface') or \
+            line.startswith('contains') or line.startswith('end'):
+            break
+        if line.strip().startswith('public'):
+            n,line = get_line(n,lines)
+            line = line.lower().strip()
+            i = line.find('::')
+            for p in line[i+2:].split(','):
+                publics.append(p.strip())
+        n += 1
+    return n-1
 
 def get_subroutine_name(line : str) -> str:
 
@@ -283,10 +366,10 @@ def get_types(n,lines : list,t : dict) -> int:
         n,line = get_line(n,lines)
         t_name = get_type_name(line)
         p_name = get_type_parent(line)
-        #if is_colorama:
-        #    print(f"{' ':>4}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
-        #else:
-        #    print(f"{' ':>4}{'Parsing '}{'type' : <11}{t_name}")
+        if is_colorama:
+            print(f"{' ':>8}{colorama.Fore.GREEN}{'Parsing '}{colorama.Fore.YELLOW}{'type' : <11}{colorama.Fore.CYAN}{t_name}{colorama.Style.RESET_ALL}")
+        else:
+            print(f"{' ':>8}{'Parsing '}{'type' : <11}{t_name}")
         t[t_name] = cfml_objects.FortranType(name=t_name,parent=p_name)
         n = get_type_components(n+1,lines,t[t_name])
     return n
@@ -363,6 +446,15 @@ def is_optional(line : str) -> bool:
     if i > -1:
         optional = True
     return optional
+
+def is_overload(interface : dict,p_name : str) -> str:
+
+    ov = ''
+    for iface in interface.keys():
+        for p in interface[iface].procedures:
+            if p.strip() == p_name.strip():
+                return iface
+    return ov
 
 def is_primitive(line : str) -> bool:
 
