@@ -59,7 +59,7 @@ done
           echo "Copying ./toml/fpm_linmac_win.toml to ./fpm.toml"
           cp ./toml/fpm_linmac_win.toml  ./fpm.toml
    else
-          echo "Copying ./toml/fpm_linmac_con.toml to ./fpm.toml" 
+          echo "Copying ./toml/fpm_linmac_con.toml to ./fpm.toml"
           cp ./toml/fpm_linmac_con.toml  ./fpm.toml
    fi
 #
