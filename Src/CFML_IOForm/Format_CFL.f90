@@ -657,47 +657,36 @@ SubModule (CFML_IOForm) Format_CFL
       character(len=36)              :: forma,fom
       character(len=30),dimension(6) :: text
       real(kind=cp), dimension(6)    :: u,bet,sb
-      integer                        :: i, j, iunit, leng, maxl,ish
+      integer                        :: i, j, iunit, leng !, maxl
 
       !> Unit
       iunit=6
       if (present(lun)) iunit=lun
 
       if (AtmList%natoms == 0) then
-         write (unit=iunit,fmt="(a)") " There aren't atoms defined!"
+         write (unit=iunit,fmt="(a)") " There are no atoms defined!"
          return
       end if
 
       !> Determine the maximum length of the atom labels
-      maxl=0
-      do i=1,AtmList%natoms
-         leng=len_trim(atmList%atom(i)%lab)
-         if (leng > maxl) maxl=leng
-      end do
-      maxl=max(maxl,4)+1
+      !maxl=0
+      !do i=1,AtmList%natoms
+      !   leng=len_trim(atmList%atom(i)%lab)
+      !   if (leng > maxl) maxl=leng
+      !end do
+      !maxl=max(maxl,4)+1
 
-      !> define format fom
-      fom   ="(a,tr  ,a)"
-      forma="(a,a  ,tr2,a,tr3,5a14,2f9.2,tr3,a)"
+      !> define format forma
+      forma="(a,a8,tr2,a4,tr3,5a14,2f9.2,tr3,a)"
+      !select case(maxl)
+      !   case(:9)
+      !      write(unit=forma(5:5),fmt="(i1)") maxl
+      !   case(10:)
+      !      write(unit=forma(5:6),fmt="(i2)") maxl
+      !end select
 
-      ish=maxl-4
-      select case(ish)
-         case(:9)
-            write(unit=fom(6:6),fmt="(i1)") ish
-
-         case(10:)
-            write(unit=fom(6:7),fmt="(i2)") ish
-      end select
-
-      select case(maxl)
-         case(:9)
-            write(unit=forma(5:5),fmt="(i1)") maxl
-         case(10:)
-            write(unit=forma(5:6),fmt="(i2)") maxl
-      end select
-
-      write (unit=iunit,fmt=fom) "!     ", &
-            "Atom  Type     x/a           y/b           z/c           Biso          Occ           Spin    Charge    Info"
+      write (unit=iunit,fmt="(a)")  &
+      "!    Atom      Type     x/a           y/b           z/c           Biso          Occ             Spin    Charge    Info"
 
       select type (at => AtmList%atom)
          class is (Atm_Std_Type)
@@ -709,8 +698,14 @@ SubModule (CFML_IOForm) Format_CFL
                text(4)=string_NumStd(at(i)%U_iso, at(i)%U_iso_std)
                text(5)=string_NumStd(at(i)%Occ, at(i)%Occ_std)
 
-               write (unit=iunit,fmt=forma) "Atom ",trim(at(i)%lab),at(i)%ChemSymb, &
+               if(at(i)%magnetic) then
+                   write (unit=iunit,fmt=forma) "Atom ",at(i)%lab,at(i)%SfacSymb, &
                      (text(j),j=1,5), at(i)%mom, real(at(i)%charge), " # "//trim(at(i)%AtmInfo)
+                   write (unit=iunit,fmt="(a,3f14.5)") "Moment          ",at(i)%moment
+               else
+                   write (unit=iunit,fmt=forma) "Atom ",at(i)%lab,at(i)%ChemSymb, &
+                     (text(j),j=1,5), at(i)%mom, real(at(i)%charge), " # "//trim(at(i)%AtmInfo)
+               end if
 
                select case (l_case(at(i)%ThType))
                   case ('ani')
@@ -774,7 +769,7 @@ SubModule (CFML_IOForm) Format_CFL
       character(len=*),  optional,           intent(in)    :: Title
       character(len=*),dimension(:),optional,intent(in)    :: info_lines
       !----- Local variables -----!
-      integer                         :: j
+      integer                         :: i,j
       real(kind=cp), dimension(6)     :: a,sa
       character(len=30), dimension(6) :: text
 
@@ -798,9 +793,23 @@ SubModule (CFML_IOForm) Format_CFL
       write(unit=lun,fmt='(a)')" "
 
       !> Space group
-      write(unit=lun,fmt="(a,i3)")"!     Space Group # ",SpG%NumSpg
-      write(unit=lun,fmt="(a,a)") "Spgr  ",SpG%spg_symb
-      write(unit=lun,fmt='(a)')" "
+      if(SpG%magnetic) then
+        write(unit=lun,fmt="(a)")"! Magnetic Space Group, BNS number: "//SpG%BNS_num
+        write(unit=lun,fmt="(a)")"!                       BNS symbol: "//SpG%BNS_symb
+        if(len_trim(SpG%UNI) /= 0) write(unit=lun,fmt="(a)")"!                       UNI symbol: "//SpG%UNI
+        if(SpG%standard_setting) then
+          write(unit=lun,fmt="(a)") "SHUB "//SpG%BNS_symb
+        else
+          do i=1,SpG%Multip
+             write(unit=lun,fmt="(a)") "SYMM "//trim(Spg%Symb_Op(i))
+          end do
+        end if
+        write(unit=lun,fmt="(a)")"  "
+      else
+        write(unit=lun,fmt="(a,i3)")"!     Space Group # ",SpG%NumSpg
+        write(unit=lun,fmt="(a,a)") "Spgr  ",SpG%spg_symb
+        write(unit=lun,fmt='(a)')" "
+      end if
 
       !> Atoms
       if (present(Atm)) then

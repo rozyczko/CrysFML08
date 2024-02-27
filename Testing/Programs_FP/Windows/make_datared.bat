@@ -2,7 +2,7 @@
 rem ****---------------------------------------------
 rem ****---- Compilation for nDataRed Program ----****
 rem ****---------------------------------------------
-rem > INIT 
+rem > INIT
    (set _DEBUG=N)
    (set _COMP=ifort)
    if [%TARGET_ARCH%]==[] (set TARGET_ARCH=ia32)
@@ -18,7 +18,7 @@ rem > Arguments ----
     if [%1]==[gfortran64] (
        (set _COMP=gfortran)
        (set _VER=m64)
-    )   
+    )
     shift
     if not [%1]==[] goto LOOP
 rem
@@ -27,16 +27,16 @@ rem
    if [%_COMP%]==[ifort] (
       if [%_DEBUG%]==[Y] (
          if [%TARGET_ARCH%]==[ia32] (set DIRECTORY=ifort_debug) else (set DIRECTORY=ifort64_debug)
-         (set OPT0=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB)
-         (set OPT1=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB)
+         (set OPT0=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Qdiag-disable:10448)
+         (set OPT1=/debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Qdiag-disable:10448)
       ) else (
          if [%TARGET_ARCH%]==[ia32] (set DIRECTORY=ifort) else (set DIRECTORY=ifort64)
-         (set OPT0=/Od)
-         (set OPT1=/O2)
+         (set OPT0=/Od /Qdiag-disable:10448)
+         (set OPT1=/O2 /Qdiag-disable:10448)
       )
       (set OPT2=/fpp /Qopt-report:0)
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
       if [%_DEBUG%]==[Y] (
          if [%_VER%]==[m32] (set DIRECTORY=gfortran_debug) else (set DIRECTORY=gfortran64_debug)
@@ -53,24 +53,25 @@ rem > Compilation
 rem > Go to the proper directory
 cd ..\..\DataRed
    if [%_COMP%]==[ifort] (
-      ifort /c Twin_Mod.f90                   /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /c DataRed_Mod.f90                /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /c DataRed_rnw_reflections.f90    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /c DataRed_treat_reflections.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /c DataRed.f90                    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\LibC
-      ifort /exe:DataRed *.obj  %CRYSFML08%\%DIRECTORY%\LibC\crysfml.lib /link /stack:300000000 
+      ifort /c Twin_Mod.f90                   /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /c DataRed_Mod.f90                /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /c DataRed_rnw_reflections.f90    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /c DataRed_treat_reflections.f90  /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /c DataRed.f90                    /nologo %OPT1% /I%CRYSFML08%\%DIRECTORY%\include
+      ifort /exe:DataRed *.obj  /Qdiag-disable:10448 /nologo %CRYSFML08%\%DIRECTORY%\lib\CrysFML08.lib /link /stack:300000000
    )
-rem   
+rem
    if [%_COMP%]==[gfortran] (
-      gfortran -c Twin_Mod.f90                   %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -c DataRed_Mod.f90                %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -c DataRed_rnw_reflections.f90    %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -c DataRed_treat_reflections.f90  %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -c DataRed.f90                    %OPT1% -I%CRYSFML08%\%DIRECTORY%\LibC
-      gfortran -o DataRed.exe *.o -L%CRYSFML08%\%DIRECTORY%\LibC -lcrysfml
+      gfortran -c Twin_Mod.f90                   %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -c DataRed_Mod.f90                %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -c DataRed_rnw_reflections.f90    %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -c DataRed_treat_reflections.f90  %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -c DataRed.f90                    %OPT1% -I%CRYSFML08%\%DIRECTORY%\include
+      gfortran -o DataRed.exe *.o -L%CRYSFML08%\%DIRECTORY%\lib -lCrysFML08
    )
-rem 
-   if exist %FULLPROF% copy DataRed.exe %FULLPROF%\nDataRed.exe  
-   if exist %PROGCFML% copy DataRed.exe %PROGCFML%\DistFPS_64b\nDataRed.exe   
+rem
+   upx DataRed.exe
+   if exist %FULLPROF% copy DataRed.exe %FULLPROF%\nDataRed.exe
+   if exist %PROGCFML% copy DataRed.exe %PROGCFML%\DistFPS_64b\nDataRed.exe
    del *.obj *.mod *.o *.map *.bak *.exe > nul
 cd ..\Programs_FP\Windows

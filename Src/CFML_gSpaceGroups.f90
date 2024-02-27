@@ -82,7 +82,7 @@ Module CFML_gSpaceGroups
               Set_Conditions_NumOP_EPS, Set_SpaceGroup,Is_OP_Lattice_Centring,           &
               Write_SpaceGroup_Info, Get_Multip_Pos, Is_Lattice_Vec,Is_OP_Anti_Lattice,  &
               Get_SubGroups_full, SearchOp, Write_SymTrans_Code, Read_SymTrans_Code,     &
-              Write_SpaceGroup_bin, Set_gSpG_from_string
+              Write_SpaceGroup_bin, Set_gSpG_from_string, get_moment_ctr_Wigner
 
     !---- Types ----!
 
@@ -514,18 +514,33 @@ Module CFML_gSpaceGroups
           type(rational), dimension(3,3)              :: Mp
        End Function Get_Mp_Matrix
 
-       Module Subroutine Get_Moment_CTR(xnr,moment,Spg,codini,codes,ord,ss,att,Ipr,ctr_code)
+       Module Subroutine Get_Moment_CTR(xnr,moment,Spg,codini,codes,side,ord,ss,att,Ipr,ctr_code)
           real(kind=cp), dimension(3),            intent(in)     :: xnr
           real(kind=cp), dimension(:),            intent(in out) :: moment
           class(SpG_type),                        intent(in)     :: Spg
           Integer,                                intent(in out) :: codini
           real(kind=cp), dimension(:),            intent(in out) :: codes
+          real(kind=cp), dimension(3),   optional,intent(in)     :: side
           integer,                       optional,intent(in)     :: ord
           integer, dimension(:),         optional,intent(in)     :: ss
           real(kind=cp), dimension(:,:), optional,intent(in)     :: att
           integer,                       optional,intent(in)     :: Ipr
           character(len=*),              optional,intent(out)    :: ctr_code
        End Subroutine Get_Moment_CTR
+
+       Module Subroutine get_moment_ctr_Wigner(xnr,moment,Spgr,codini,codes,side,ord,ss,att,Ipr,ctr_code)
+          real(kind=cp), dimension(3),            intent(in)     :: xnr
+          real(kind=cp), dimension(3),            intent(in out) :: moment
+          Class(SPG_type),                        intent(in)     :: Spgr
+          Integer,                                intent(in out) :: codini
+          real(kind=cp), dimension(3),            intent(in out) :: codes
+          real(kind=cp), dimension(3),   optional,intent(in)     :: side
+          integer,                       optional,intent(in)     :: ord
+          integer, dimension(:),         optional,intent(in)     :: ss
+          real(kind=cp), dimension(:,:), optional,intent(in)     :: att
+          integer,                       optional,intent(in)     :: Ipr
+          character(len=*),              optional,intent(out)    :: ctr_code
+       End Subroutine get_moment_ctr_Wigner
 
        Module Subroutine Get_Multip_OP_Table(Op,Table)
           !---- Arguments ----!

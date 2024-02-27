@@ -41,18 +41,21 @@
  Module Gen_Mag_Powder_Pattern
     !---- Use Modules ----!
     use CFML_GlobalDeps,        only: to_Deg,cp
-    use CFML_Maths,             only: locate
+    use CFML_Maths,             only: locate, modulo_lat, zbelong
     use CFML_Reflections,       only: RefList_Type, Refl_Type
     use CFML_Structure_Factors, only: StrfList_Type
     use CFML_DiffPatt,          only: DiffPat_Type, DiffPat_E_Type, allocate_pattern
     use CFML_Profiles,          only: PseudoVoigt
-
+    !
+    Use CFML_gSpaceGroups,      only: SpG_Type, get_stabilizer, Symmetry_Symbol
+    Use CFML_Strings,           only: Set_Symb_From_Mat,pack_string
+    Use CFML_Rational
     !---- Variables ----!
     implicit none
 
     private
 
-    public  :: calc_powder_pattern, Write_PRF
+    public  :: calc_powder_pattern, Write_PRF, get_moment_ctr_test
     private :: TCH
 
     Type, public :: PowPat_CW_Conditions
@@ -218,6 +221,206 @@
       close(unit=i_prf)
     End Subroutine Write_PRF
 
+    Subroutine get_moment_ctr_test(xnr,moment,Spgr,codini,codes,side,ctr_code,Ipr)
+       real(kind=cp), dimension(3),            intent(in)     :: xnr
+       real(kind=cp), dimension(3),            intent(in out) :: moment
+       Class(SPG_type),                        intent(in)     :: Spgr
+       Integer,                                intent(in out) :: codini
+       real(kind=cp), dimension(3),            intent(in out) :: codes
+       real(kind=cp), dimension(3),            intent(in)     :: side
+       character(len=*),                       intent(out)    :: ctr_code
+       integer,                       optional,intent(in)     :: Ipr
+
+       ! Local variables
+       character(len=20), dimension(3)   :: item
+       character (len=80)                :: aux
+       real(kind=cp),     dimension(3)   :: multip
+       integer                           :: i,j,order, ig, npos, icod
+       real(kind=cp)                     :: suma
+       integer,           dimension(48)  :: ss_ptr
+       integer,           dimension(3)   :: iside
+       real(kind=cp),     dimension(3)   :: x,cod,multi,mom,momt
+       real(kind=cp),     dimension(3,48):: atr
+       character(len=:),  allocatable    :: Symb,mag
+       integer,           dimension(3,3) :: s,mat,Rs
+       real(kind=cp),     dimension(3)   :: t
+       real(kind=cp),     parameter      :: epss=0.01_cp
+       logical :: done
+
+       suma=0.0
+       do j=1,3
+          suma=suma+abs(codes(j))
+          multi(j)=mod(codes(j),10.0_cp)                !Input Multipliers
+       end do
+       if(suma < epss) return  !No refinement is required
+
+       x=modulo_lat(xnr)
+       call get_stabilizer(x,Spgr,order,ss_ptr,atr)
+
+       iside=1
+       momt=moment/side
+       mom=moment/side
+       do i=1,3
+         multip=side/side(i)
+         do j=1,3
+           if(j == i) cycle
+           if(Zbelong(multip(j))) then
+             iside(j) = nint(multip(j))
+           end if
+         end do
+       end do
+
+       multip=1.0
+       mat=0
+       mat(1,1)=1 ; mat(2,2)=1  ; mat(3,3)=1
+       if(present(ipr)) Write(unit=ipr,fmt="(a,i3)") " => Magnetic stabilizer without identity, order:",order
+       if (order > 1 ) then
+          do ig=2,order
+             j=ss_ptr(ig)
+             s=Spgr%Op(j)%Mat(1:3,1:3)
+             Rs=s*Spgr%Op(j)%dt*Spgr%Op(j)%time_inv
+             mat=mat + Rs
+             momt=momt + matmul(Rs,mom)
+             if(present(ipr)) then
+               t=Spgr%Op(j)%Mat(1:3,4)
+               Symb=Symmetry_Symbol(s,t)
+               mag=Set_Symb_From_Mat(real(Rs),["u","v","w"])
+               if(Spgr%Op(j)%time_inv < 0) then
+                 npos=index(Symb," ")
+                 Symb=Symb(1:npos-1)//"' "//Symb(npos+1:)
+               end if
+               write(unit=ipr,fmt='(a,i3,a)') '     Operator ',ig,": ",trim(Spgr%Symb_Op(j))//"  MagMat: "//trim(mag)//" SymmElement -> "//trim(Symb)
+             end if
+          end do
+          mat=mat/order
+          momt=momt/order*side
+       end if
+
+       moment=momt !Returned value of the constrained moment
+
+       do i=1,3
+         mat(i,:)=mat(i,:)*iside(i)
+         aux=" "
+         if(mat(i,1) /= 0 ) then
+            if(mat(i,1) == 1) then
+              aux="a"
+            else if(mat(i,1) == -1) then
+              aux="-a"
+            else
+              write(aux,"(i3,a)") mat(i,1),"a"
+            end if
+         end if
+         item(i) = pack_string(aux)
+         aux=" "
+         if(mat(i,2) /= 0 ) then
+
+            if(mat(i,2) == 1) then
+              aux="b"
+            else if(mat(i,2) == -1) then
+              aux="-b"
+            else
+              write(aux,"(i3,a)") mat(i,2),"b"
+            end if
+
+           if(mat(i,2) < 0) then
+             item(i)= trim(item(i))//trim(aux)
+           else
+             item(i)= trim(item(i))//"+"//trim(aux)
+           end if
+
+         end if
+         aux=" "
+         if(mat(i,3) /= 0 ) then
+           if(mat(i,3) == 1) then
+              aux="c"
+            else if(mat(i,3) == -1) then
+              aux="-c"
+            else
+              write(aux,"(i3,a)") mat(i,3),"c"
+            end if
+
+           if(mat(i,3) < 0) then
+             item(i)= trim(item(i))//trim(aux)
+           else
+             item(i)= trim(item(i))//"+"//trim(aux)
+           end if
+         end if
+         if(len_trim(item(i)) == 0) item(i)="0"
+         if(item(i)(1:1) == "+") item(i)(1:1) = " "
+         item(i)=pack_string(item(i))
+       End do
+       aux=" "
+       write(unit=aux,fmt="(4a)") " ( ",(item(j)//", ",j=1,2),item(j)//" )"
+       ctr_code=pack_string(aux)
+
+       !Calculation of the codes
+       multip=0.0
+       do i=1,3
+         if(item(i) == "a" .or. item(i) == "b" .or. item(i) == "c")  then
+            multip(i)=1.0
+         else if(item(i) == "-a" .or. item(i) == "-b" .or. item(i) == "-c")  then
+            multip(i)=-1.0
+         else if(item(i) == "2a" .or. item(i) == "2b" .or. item(i) == "2c")  then
+            multip(i)= 2.0
+         else if(item(i) == "-2a" .or. item(i) == "-2b" .or. item(i) == "-2c")  then
+            multip(i)= -2.0
+         else if(item(i) == "3a" .or. item(i) == "3b" .or. item(i) == "3c")  then
+            multip(i)= 3.0
+         else if(item(i) == "-3a" .or. item(i) == "-3b" .or. item(i) == "-3c")  then
+            multip(i)= -3.0
+         else if(item(i) == "4a" .or. item(i) == "4b" .or. item(i) == "4c")  then
+            multip(i)= 4.0
+         else if(item(i) == "-4a" .or. item(i) == "-4b" .or. item(i) == "-4c")  then
+            multip(i)= -4.0
+         end if
+       end do
+
+       icod=codini
+       done=.false.
+       do i=1,3
+         if(index(item(i),"a") /= 0) then
+            cod(i) = icod
+            done=.true.
+         end if
+       end do
+       if(done) icod=icod+1
+       done=.false.
+       do i=1,3
+         if(index(item(i),"b") /= 0) then
+            cod(i) = icod
+            done=.true.
+         end if
+       end do
+       if(done) icod=icod+1
+       done=.false.
+       do i=1,3
+         if(index(item(i),"c") /= 0) then
+            cod(i) = icod
+            done=.true.
+         end if
+       end do
+       codini=icod+1
+
+       write(*,"(a,3f10.4,a)") " Atom Pos: ",x,"   Code: "//trim(ctr_code)
+
+       do j=1,3
+         if(abs(multi(j)) < epss .or. item(j) == '0' ) then
+           codes(j) = 0.0_cp
+         else if(multi(j) < 0) then
+           codes(j) = sign(1.0_cp, multi(j))*(abs(cod(j))*10.0_cp + abs(multi(j)) )
+         else
+           codes(j) = sign(1.0_cp, multip(j))*(abs(cod(j))*10.0_cp + abs(multip(j)) )
+         end if
+       end do
+
+       if(present(Ipr)) then
+         write(Ipr,'(a,3f10.4)')        '     Codes on Moments     : ',codes
+         Write(Ipr,'(a,3(a,1x),3f7.3)') '     Codes and multipliers: ',item,multip
+         Write(Ipr,'(a,3f12.4)')        '     Moment_TOT vector    : ',mom
+       end if
+
+    End Subroutine get_moment_ctr_test
+
   End Module Gen_Mag_Powder_Pattern
 
   !!----
@@ -232,8 +435,8 @@
      use CFML_Atoms,              only: AtList_Type, Allocate_Atom_List,Write_Atom_List
      use CFML_Metrics,            only: Cell_G_type, set_Crystal_Cell,write_crystal_cell
      use CFML_Reflections,        only: RefList_Type,H_uni,get_maxnumref,Initialize_RefList
-     Use CFML_gSpaceGroups,       only: SpG_Type, Set_SpaceGroup, &
-                                        Write_SpaceGroup_Info
+     Use CFML_gSpaceGroups,       only: SpG_Type, Set_SpaceGroup, Get_moment_ctr_Wigner,&
+                                        Get_moment_ctr,Write_SpaceGroup_Info
      Use CFML_Structure_Factors,  only: Write_Structure_Factors, Structure_Factors,StrfList_Type,&
                                         Init_Structure_Factors, Magnetic_Structure_Factors
      use CFML_DiffPatt,           only: DiffPat_E_Type
@@ -247,9 +450,9 @@
 
      integer                :: i,ier,nf,codini=0
      integer                :: lun=1,lp=2
-     real, dimension(3)     :: codes=[11.0,21.0,31.0]
+     real, dimension(3)     :: codes=[1.0,1.0,1.0], side, mom
      real                   :: stlmax,tini,tfin,tim,ftim=1.0
-     character(len=132)     :: line,powfile,filcod,prf_file
+     character(len=132)     :: line,powfile,filcod,prf_file,fname,ctrcode
      character(len=3)       :: mode
      character(len=8)       :: units="seconds",radiation
      logical                :: full=.true.
@@ -270,41 +473,47 @@
      narg=command_argument_count()
 
      if (narg > 0) then
-        call get_command_argument(1,filcod)
+        call get_command_argument(1,fname)
         arggiven=.true.
      end if
 
 
      write(unit=*,fmt="(/,/,6(a,/))")                                                     &
           "            ------ PROGRAM SIMPLE POWDER PATTERN CALCULATION  ------"        , &
-          "                    ---- Version 0.2 January-2020----"                         , &
+          "                    ---- Version 0.3 January-2024----"                         , &
           "    **********************************************************************"  , &
           "    * Calculates powder diffraction pattern from a *.CFL or a *.CIF file *"  , &
           "    **********************************************************************"  , &
-          "                          (JRC- January-2020 )"
+          "                          (JRC- January-2024 )"
      write(unit=*,fmt=*) " "
 
      if (.not. arggiven) then
         write(unit=*,fmt="(a)", advance='no') " => Code of the file xx.cif(cfl) (give xx): "
-        read(unit=*,fmt="(a)") filcod
-        if(len_trim(filcod) == 0) stop
+        read(unit=*,fmt="(a)") fname
+        if(len_trim(fname) == 0) stop
      end if
 
-     i=index(filcod,".cfl")
-     if(i /= 0) filcod=filcod(1:i-1)
-
-     inquire(file=trim(filcod)//".mcif",exist=esta)
-     if (esta) then
-       call Read_Xtal_Structure(trim(filcod)//".mcif",Cell,SpG,A,Ftype=fich_cfl)
-       mode="CIF"
+     i=index(fname,".",back=.true.)
+     filcod=fname(1:i-1)
+     inquire(file=trim(filcod)//".cfl",exist=esta)
+     if(esta) then
+       call Read_Xtal_Structure(trim(filcod)//".cfl",Cell,SpG,A,Ftype=fich_cfl)
+       mode="CFL"
      else
-        inquire(file=trim(filcod)//".cfl",exist=esta)
-        if ( .not. esta) then
-           write(unit=*,fmt="(a)") " File: "//trim(filcod)//".mcif (or .cfl) does'nt exist!"
-           stop
-        end if
-        call Read_Xtal_Structure(trim(filcod)//".cfl",Cell,SpG,A,Ftype=fich_cfl)
-        mode="CFL"
+       inquire(file=trim(filcod)//".mcif",exist=esta)
+       if (esta) then
+         call Read_Xtal_Structure(trim(filcod)//".mcif",Cell,SpG,A,Ftype=fich_cfl)
+       else
+         inquire(file=trim(filcod)//".cif",exist=esta)
+         if (esta) then
+           call Read_Xtal_Structure(trim(filcod)//".cif",Cell,SpG,A,Ftype=fich_cfl)
+         else
+           write(unit=*,fmt="(a)") " File: "//trim(filcod)//".cfl (or .cif, or mcif) does'nt exist!"
+           stop " No valid file is provided, given name: "//trim(fname)
+         end if
+         mode="CIF"
+       end if
+
      end if
 
      if (err_CFML%Ierr /= 0) then
@@ -330,14 +539,33 @@
        ! Write initial structure information in the .powder file
        call Write_Crystal_Cell(Cell,lun)
        call Write_SpaceGroup_Info(SpG,lun)
-       !Get information on moment constraints and modify the list of atoms accordingly
-       !write(unit=lun,fmt="(/,a,/)") " => Symmetry constraints in magnetic moments:"
-       !do i=1,A%natoms
-       !  if(A%Atom(i)%mom < 0.001) cycle !Skip non-magnetic atoms
-       !  call Get_moment_ctr(A%Atom(i)%X,A%Atom(i)%M_xyz,Spg,codini,codes)
-       !  write(unit=lun,fmt="(a12,3(a,3f10.4))") "     "//A%Atom(i)%Lab," Pos:",A%Atom(i)%X," Mom:",A%Atom(i)%M_xyz," Codes:",codes
-       !end do
        call Write_Atom_List(A,Iunit=lun)
+
+       !Get information on moment constraints and modify the list of atoms accordingly
+       write(unit=lun,fmt="(/,a)") " => Symmetry constraints in magnetic moments:"
+       side=Cell%cell
+       do i=1,A%natoms
+         if(A%Atom(i)%mom < 0.001) cycle !Skip non-magnetic atoms
+         codes=[1.0,1.0,1.0]
+         mom=A%Atom(i)%moment
+         !write(unit=lun,fmt="(/,a)") "  => DIAGONALIZING"
+         !call Get_moment_ctr(A%Atom(i)%X,mom,Spg,codini,codes,side,Ipr=lun)
+         write(unit=lun,fmt="(/,a)") "  => WIGNER THEOREM"
+         write(*,"(i6,3f12.4)") codini, codes
+         call Get_moment_ctr_Wigner(A%Atom(i)%X,A%Atom(i)%moment,Spg,codini,codes,side,Ipr=lun,ctr_code=ctrcode)
+         !write(unit=lun,fmt="(/,a)") "  => WIGNER THEOREM TEST"
+         !call Get_moment_ctr_test(A%Atom(i)%X,A%Atom(i)%moment,Spg,codini,codes,side,ctrcode,Ipr=lun)
+         write(*,"(t51,a)") trim(ctrcode)
+         write(*,"(i6,3f12.4)") codini, codes
+         write(*,"(a,3f12.4)") " Moment: ",A%Atom(i)%moment
+       end do
+
+       write(unit=lun,fmt="(/,a)") " => Modified magnetic moments:"
+       do i=1,A%natoms
+         if(A%Atom(i)%mom < 0.001) cycle !Skip non-magnetic atoms
+         write(unit=lun,fmt="(a12,3(a,3f10.4))") "     "//A%Atom(i)%Lab," Pos:",A%Atom(i)%X," Mom:",A%Atom(i)%moment," Codes:",codes
+       end do
+
 
        ! Look for calculation conditions in the CFL file that are provided before the list of atoms
        if (mode == "CFL") then
