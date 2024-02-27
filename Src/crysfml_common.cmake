@@ -85,9 +85,9 @@ else()
 endif()
 
 # CFML_Python
-file(GLOB SUBMOD_PYTHON_SRC CFML_Python/*.f90)
-set(PYTHON_SRC CFML_Python.f90
-                ${SUBMOD_PYTHON_SRC})
+#file(GLOB SUBMOD_PYTHON_SRC CFML_Python/*.f90)
+#set(PYTHON_SRC CFML_Python.f90
+#                ${SUBMOD_PYTHON_SRC})
 if(${COMPILER_NAME} STREQUAL ifort)
     set_source_files_properties(${PYTHON_SRC}
         PROPERTIES COMPILE_FLAGS "${OPT_FLAGS2}")
