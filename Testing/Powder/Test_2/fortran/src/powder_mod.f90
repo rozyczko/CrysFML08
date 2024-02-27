@@ -86,7 +86,7 @@ module powder_mod
         character(len=3)  :: mode
         character(len=8)  :: units="seconds",radiation
         type(Cell_G_Type) :: cell
-        type(Spg_Type) :: spg
+        class(Spg_Type), allocatable :: spg
         type(AtList_Type) :: a
         Type(RefList_Type) :: hkl
         Type(DiffPat_E_Type) :: Pat
