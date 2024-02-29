@@ -46,6 +46,7 @@ SubModule (CFML_gSpaceGroups) gS_CheckGener
          if (len_trim(gen_in(i)) == 0 .or. nul(i)) cycle
          if (.not. init) then
             d=Get_Dimension_SymmOp(gen_in(i))
+            if (allocated(Mat)) deallocate(Mat)
             allocate(Mat(d,d))
             do j=0, size(Op)-1
                call allocate_OP(d, Op(j))
