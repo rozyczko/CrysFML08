@@ -24,6 +24,7 @@ SubModule (CFML_Rational) RAT_rowechelon
 
       nrow    = size(M,1)
       ncolumn = size(M,2)
+      if (allocated(row)) deallocate(row)
       allocate(row(ncolumn))
 
       r = 1  ! index for rows
