@@ -47,6 +47,9 @@ SubModule (CFML_gSpaceGroups) gS_Reorder_Oper
 
       !> dimension of the square matrix containing rotational operator
       d=n-1
+      if (allocated(identity)) deallocate(identity)
+      if (allocated(invers)) deallocate(invers)
+      if (allocated(imat)) deallocate(imat)
       allocate(identity(d,d),invers(d,d),imat(d,d))
       call allocate_op(n,Op_identp)   ! {1|0}'
       call allocate_op(n,Op_centre)   ! Allocate auxiliary operators
