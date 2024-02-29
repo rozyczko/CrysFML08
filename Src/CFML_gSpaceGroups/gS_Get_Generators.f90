@@ -28,6 +28,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_Generators
         nGen          = 0
         inversion     = 0
         call Rational_Identity_Matrix(identity)
+        if (allocated(idd)) deallocate(idd)
         allocate(idd(nSymOp,2))
         do i = 1 , 3
            allocate(Gen(i)%Mat(4,4))
