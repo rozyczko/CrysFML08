@@ -161,7 +161,8 @@ SubModule (CFML_Rational) RAT_generic
 
       !> Init
       n1=size(M,1); n2=size(M,2)
-
+      if (allocated(U)) deallocate(U)
+      if (allocated(nullVector)) deallocate(nullVector)
       allocate(U(n1,n2))
       allocate(nullVector(n2))
 
