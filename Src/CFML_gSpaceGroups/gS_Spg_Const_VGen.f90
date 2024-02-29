@@ -72,6 +72,8 @@ SubModule (CFML_gSpaceGroups) gs_Spg_Const_VGen
       if (Err_CFML%Ierr /= 0) return
 
       ! Allocate provisionally to Multip the lattice translations and anti-Translations
+      if (allocated(Lat_tr)) deallocate(Lat_tr)
+      if (allocated(aLat_tr)) deallocate(aLat_tr)
       allocate(Lat_tr(d-1,multip), aLat_tr(d-1,multip))
       allocate(centre_coord(d-1),anticentre_coord(d-1))
 
