@@ -48,3 +48,9 @@ API
 *.build
 install_manifest.txt
 Makefile
+build-*
+build_*
+gfortran
+ifort
+TAGS
+Src/TAGS
