@@ -137,21 +137,21 @@ macro(set_compiler_flags)
         elseif(COMPILER_NAME STREQUAL ifx)
             message(STATUS "_____ Unix + ifx _____")
                 
-            set(OPT_FLAGS2 "")
-
             # Unix + ifx + Debug
             if(CMAKE_BUILD_TYPE STREQUAL Debug)
                 message(STATUS "_____ Unix + ifx + Debug _____")
 
-                set(CMAKE_Fortran_FLAGS_DEBUG "-fpp -heap-arrays")
-                set(OPT_FLAGS0 "-O0 -Warn")
-                set(OPT_FLAGS1 "-g  -Warn")
-                
+                #set(CMAKE_Fortran_FLAGS_DEBUG "-fpp -heap-arrays")  # original
+                #set(OPT_FLAGS0 "-O0 -Warn")  # original
+                #set(OPT_FLAGS1 "-g  -Warn")  # original
+                set(CMAKE_Fortran_FLAGS_DEBUG "-g -warn -cpp -ffree-line-length-none -fPIC -heap-arrays")  # from ifort
+
             # Unix + ifx + Release
             elseif(CMAKE_BUILD_TYPE STREQUAL Release)
                 message(STATUS "_____ Unix + ifx + Release _____")
 
-                set(CMAKE_Fortran_FLAGS_RELEASE "-fpp -heap-arrays")
+                #set(CMAKE_Fortran_FLAGS_RELEASE "-fpp -heap-arrays")  # original
+                set(CMAKE_Fortran_FLAGS_RELEASE "-warn -cpp -ffree-line-length-none -fPIC -heap-arrays")  # from ifort
                 set(OPT_FLAGS0 "-O0")
                 set(OPT_FLAGS1 "-O2")
                 
@@ -171,7 +171,7 @@ macro(set_compiler_flags)
             if(CMAKE_BUILD_TYPE STREQUAL Debug)
                 message(STATUS "_____ Unix + gfortran + Debug _____")
 
-                set(CMAKE_Fortran_FLAGS_DEBUG "-cpp -std=f2008 -Wall -Wno-maybe-uninitialized -Wno-conversion -Wno-character-truncation -fbacktrace -fdec-math -ffree-line-length-0 -fPIC -fall-intrinsics -fno-stack-arrays -fmax-stack-var-size=8")
+                set(CMAKE_Fortran_FLAGS_DEBUG "-cpp -std=f2008 -Wall -Wno-maybe-uninitialized -Wno-conversion -Wno-character-truncation -fbacktrace -fdec-math -ffree-line-length-none -fPIC -fall-intrinsics -fno-stack-arrays -fmax-stack-var-size=8")
                 set(OPT_FLAGS0 "-O0")
                 set(OPT_FLAGS1 "-O0")
                 
@@ -179,7 +179,7 @@ macro(set_compiler_flags)
             elseif(CMAKE_BUILD_TYPE STREQUAL Release)
                 message(STATUS "_____ Unix + gfortran + Release _____")
 
-                set(CMAKE_Fortran_FLAGS_RELEASE "-cpp -std=f2008 -ffree-line-length-0 -fPIC -fdec-math -fall-intrinsics -fno-stack-arrays -fmax-stack-var-size=8")
+                set(CMAKE_Fortran_FLAGS_RELEASE "-cpp -std=f2008 -ffree-line-length-none -fPIC -fdec-math -fall-intrinsics -fno-stack-arrays -fmax-stack-var-size=8")
                 set(OPT_FLAGS0 "-O0")
                 set(OPT_FLAGS1 "-O0")
                 
