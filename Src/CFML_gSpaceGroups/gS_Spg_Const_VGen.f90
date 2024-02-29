@@ -57,6 +57,7 @@ SubModule (CFML_gSpaceGroups) gs_Spg_Const_VGen
 
       !> Construct the list of the generators on top of Op.
       !> The identity is always the first operator
+      if (allocated(Mat)) deallocate(Mat)
       allocate(Mat(d,d))
       do i=1,ngen
          call Get_Mat_From_Symb(gen(i),Mat,invt)
