@@ -404,6 +404,7 @@ SubModule (CFML_gSpaceGroups) gS_Get_X_Matrix
 
          else
             rNumLat = (G%num_lat+1)//1
+            if (allocated(auxVec)) deallocate(auxVec)
             allocate(auxVec(3,G%num_lat))
          end if
          do i = 1 , G%num_lat
