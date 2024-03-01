@@ -421,7 +421,6 @@ SubModule (CFML_gSpaceGroups) gS_Get_X_Matrix
                end if
             end do
          end if
-         if (allocated(centringVec)) deallocate(centringVec)
          allocate(centringVec(4,10*nAuxVec))
          nCentringVec = 0
          do n = 1 , nAuxVec
