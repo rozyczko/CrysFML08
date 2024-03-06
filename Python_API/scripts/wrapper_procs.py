@@ -6,6 +6,7 @@ February 2024
 ---------
 Functions
 ---------
+get_mandatory(p) -> int
 wrap(modules : dict) -> None
 wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str) -> None
 write_init(f,nproc : int,m_name : str,m : cfml_objects.Module)
@@ -16,6 +17,13 @@ import cfml_objects
 import os
 
 publics_types = {}
+
+def get_mandatory(p) -> int:
+	n = 0
+	for a in p.arguments:
+		if not p.arguments[a].optional:
+			n += 1
+	return n
 
 def get_methods(m : dict) -> list:
 
@@ -85,9 +93,37 @@ def write_pyinit(f,w_name : str):
 def write_wrap_procedure(f,p):
 
 	f.write(f"\n{'':>4}function py_{p.name.lower()}(self_ptr,args_ptr) result(resul) bind(c)\n")
+	# Arguments
 	f.write(f"\n{'':>8}! Arguments\n")
 	f.write(f"{'':>8}type(c_ptr), value :: self_ptr\n")
 	f.write(f"{'':>8}type(c_ptr), value :: args_ptr\n")
 	f.write(f"{'':>8}type(c_ptr) :: resul\n")
+	# Local Python like variables
+	f.write(f"\n{'':>8}! Local Python like variables\n")
+	for arg in p.arguments:
+		a = p.arguments[arg]
+		if not a.primitive:
+			if not a.allocatable:
+				if a.is_class:
+					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 class = {a.ftype}\n")
+				else:
+					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 type = {a.ftype}\n")
+			else:
+				if a.is_class:
+					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 class = {a.ftype}\n")
+				else:
+					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 type = {a.ftype}\n")
+	f.write(f"{'':>8}type(object) :: item\n")
+	f.write(f"{'':>8}type(tuple) :: args,ret\n")
+	# Local Fortran variables	
+	f.write(f"\n{'':>8}! Local Fortran variables\n")
+	n = get_mandatory(p)
+	f.write(f"{'':>8}integer, parameter :: NMANDATORY = {n}\n")
+	f.write(f"{'':>8}integer :: ierror,narg\n")
+	# Procedure
+	f.write(f"\n{'':>8}ierror = 0\n")
+	f.write(f"{'':>8}call clear_error()\n")
+	f.write(f"\n{'':>8}! Use unsafe_cast_from_c_ptr to cast from c_ptr to tuple/dict\n")
+	f.write(f"{'':>8}call unsafe_cast_from_c_ptr(args,args_ptr)\n")
 	f.write(f"\n{'':>4}end function py_{p.name.lower()}\n")
 
