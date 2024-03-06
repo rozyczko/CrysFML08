@@ -42,7 +42,7 @@ done
 # Intel compiler
 #
 if [ $compiler == "ifort" ]; then
-   inc="-I$CRYSFML08/ifort64/LibC"
+   inc="-I$CRYSFML08/ifort64/include"
    if [ $debug == "Y" ]; then
       opt1="-c -g -warn -m64"
    else
@@ -54,7 +54,7 @@ fi
 # GFortran compiler
 #
 if [ $compiler == "gfortran" ]; then
-   inc="-I$CRYSFML08/GFortran64/LibC"
+   inc="-I$CRYSFML08/GFortran64/include"
    if [ $debug == "Y" ]; then
       opt1="-c -g -m64 -ffree-line-length-none"
    else

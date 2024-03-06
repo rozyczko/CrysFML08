@@ -20,7 +20,7 @@
     !!----    RG_ORT calls EISPACK routines to find the eigenvalues and eigenvectors
     !!----    of a real general matrix, using orthogonal transformations. All the
     !!----    subroutines of EISPACK needed by this Module Subroutine are included in
-    !!----    this submodule but they are keep private.
+    !!----    this submodule but they are kept private.
     !!----
     !!----  Modified:
     !!----

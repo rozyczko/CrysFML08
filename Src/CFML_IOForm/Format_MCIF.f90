@@ -1366,7 +1366,7 @@ SubModule (CFML_IOForm) Format_MCIF
                   At(k)%Mcs_std(i2,nq)=xv_std(2)
                   At(k)%Magnetic=.true.
                   At(k)%AtmInfo= trim(At(k)%AtmInfo)//" "//trim(symcode_cos)//" "//trim(symcode_sin)
-                  write(*,"(i6,a)") k, trim(At(k)%lab)//" -> "//trim(At(k)%AtmInfo)
+                  if(len_trim(At(k)%AtmInfo) > 0) write(*,"(i6,a)") k, trim(At(k)%lab)//" -> "//trim(At(k)%AtmInfo)
                   At(k)%n_mc=max(At(k)%n_mc,nq)
                   At(k)%pmc_q(nq)=nq
             end select

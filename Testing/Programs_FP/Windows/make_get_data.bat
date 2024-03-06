@@ -16,16 +16,16 @@
     if [%_COMP%]==[ifort] (
         if [%_DEBUG%]==[Y] (
            (set DIRECTORY=ifort64_debug)
-           (set OPT=/c /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Warn)
-           (set OPT2=/c /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /heap-arrays /Warn)
+           (set OPT=/c /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /Warn /Qdiag-disable:10448)
+           (set OPT2=/c /debug:full /check /check:noarg_temp_created /traceback /nologo /CB /heap-arrays /Warn /Qdiag-disable:10448)
         ) else (
            (set DIRECTORY=ifort64)
-           (set OPT=/c /O3 /nologo /nologo /Warn)
-           (set OPT2=/c /O3 /nologo /nologo /heap-arrays /Warn)
+           (set OPT=/c /O3 /nologo /nologo /Warn /Qdiag-disable:10448)
+           (set OPT2=/c /O3 /nologo /nologo /heap-arrays /Warn /Qdiag-disable:10448)
         )
-      (set INCLUDE=/I %CRYSFML08%\%DIRECTORY%\LibC /I %HDF5_INSTALL%\include\static)
-      (set liblink=/subsystem:console /stack:128000000 /libpath:%HDF5_INSTALL%\lib /libpath:%CRYSFML08%\%DIRECTORY%\LibC ^
-           CrysFML.lib libhdf5_fortran.lib libhdf5_f90cstub.lib libhdf5.lib libszip.lib libzlib.lib ^
+      (set INCLUDE=/I %CRYSFML08%\%DIRECTORY%\include /I %HDF5_INSTALL%\include\static)
+      (set liblink=/subsystem:console /stack:128000000 /libpath:%HDF5_INSTALL%\lib /libpath:%CRYSFML08%\%DIRECTORY%\lib ^
+           CrysFML08.lib libhdf5_fortran.lib libhdf5_f90cstub.lib libhdf5.lib libszip.lib libzlib.lib ^
            /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libmmt.lib)
 
     )
@@ -39,18 +39,18 @@ rem Compiling the source files
     %_COMP% %SRC%\D2B_int_mod.f90         %OPT% %INCLUDE%
     %_COMP% %SRC%\GetData_Globals.f90     %OPT% %INCLUDE%
     %_COMP% %SRC%\Get_data.f90            %OPT% %INCLUDE%
-    link /out:get_data.exe *.obj    %liblink%
+    link /out:get_data.exe *.obj  /nologo  %liblink%
 :FIN
 rem
 rem Compress executable
 rem
    upx get_data.exe
-rem    
+rem
 rem
 rem Update FullProf Distribution
 rem
    if exist %FULLPROF% copy get_data.exe %FULLPROF%
-   if exist %PROGCFML% copy get_data.exe %PROGCFML%\DistFPS_64b\get_data.exe    
+   if exist %PROGCFML% copy get_data.exe %PROGCFML%\DistFPS_64b\get_data.exe
 rem
 rem Clean several files
 rem
