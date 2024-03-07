@@ -228,7 +228,7 @@
     !---- Use Modules ----!
     Use CFML_GlobalDeps,        Only: Cp,Dp,To_Deg,To_Rad, clear_error, Err_CFML,ops_sep
     use CFML_gSpacegroups,      Only: Spg_Type,Set_Spacegroup
-    Use CFML_Maths,             Only: Cross_Product, invert => Inverse_Matrix,co_linear,in_limits,sort
+    Use CFML_Maths,             Only: Cross_Product,set_eps_math, invert => Inverse_Matrix,co_linear,in_limits,sort
     Use CFML_Metrics,           Only: Cell_G_Type, Zone_Axis_type, Get_basis_from_uvw, &
                                       Rot_Gibbs_Matrix,Set_Crystal_Cell
     Use CFML_Geom,              Only: Get_OmegaChiPhi, Get_Matrix_moving_v_to_u,&

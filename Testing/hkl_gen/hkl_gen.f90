@@ -1,7 +1,7 @@
 Module Ref_Gen
 
     use CFML_GlobalDeps
-    use CFML_Maths,           only: Co_Prime_Vector,cross_product
+    use CFML_Maths,           only: Co_Prime_Vector,cross_product, set_eps_math
     use CFML_ILL_Instrm_data, only:  &
                                     SXTAL_Orient_type, Current_Orient, diffractometer_type, &
                                     Current_Instrm, Read_Current_Instrm, Update_Current_Instrm_UB,&
@@ -26,7 +26,7 @@ Module Ref_Gen
     integer,                    public :: n_phi, n_chi
     real, dimension(20),        public :: phi_val,chi_val
     real,                       public :: delta_ang,time_ref=3.0,sec_frame=4.0
-    logical,                    public :: optimize=.false., scann=.false.,scan_chi=.false.,scan_phi=.false.,unique=.false.
+    logical,                    public :: optimize=.false., scann=.false.,scan_chi=.false.,scan_phi=.false.,unique=.false., strict=.false.
     real, parameter, dimension(3,3), public :: Identity = reshape([1.0,0.0,0.0,  0.0,1.0,0.0,  0.0,0.0,1.0],[3,3])
 
  contains
@@ -97,6 +97,9 @@ Module Ref_Gen
 
                 case("unique")
                     unique=.true.
+
+                case("strict")
+                    strict=.true.
 
                 case("dmin")
                     if(present(sgiven) .and. present(smax)) then
@@ -326,6 +329,7 @@ Module Ref_Gen
                 case("orient_hh")
                     if(.not. wave_read .and. .not. inst_read) then
                       write(unit=*,fmt="(a)") " => Wavelength shoud be provided!"
+                      mess="Wavelength shoud be provided in CFL file: "//trim(cfl_file)
                       return
                     else if(.not. wave_read) then
                       wave=Current_Orient%wave
@@ -362,12 +366,12 @@ Module Ref_Gen
                     if(err_CFML%ierr == 0) then
                       UB=Get_UB_from_uvw_hkl_omega(wave,Cell,Zone_Axis,h1,omeg)
                       if(err_CFML%ierr /= 0 .or. err_CFML%flag) then
-                        write(unit=*,fmt="(a)") " => UB cannot be calculated from ORIENTH instruction "
+                        write(unit=*,fmt="(a)") " => UB cannot be calculated from ORIENT_VH instruction "
                         write(unit=*,fmt="(a)") " => "//trim(err_CFML%Msg)
                         return
                       end if
                     else
-                      write(unit=*,fmt="(a)") " => UB cannot be calculated from ORIENTH instruction "
+                      write(unit=*,fmt="(a)") " => UB cannot be calculated from ORIENT_VH instruction "
                       write(unit=*,fmt="(a,6f7.3,a,f7.2)") " => Problem with Zone axis and reflection: ",uvw,h1, " with omega(h1)=",omeg
                       return
                     end if
@@ -477,12 +481,22 @@ Module Ref_Gen
 
         end if
 
-        if(ub_read .and. wave_read) call Update_Current_Instrm_UB(trim(file_inst),UB,wave)
-
+        if(ub_read .and. wave_read) then
+            call Update_Current_Instrm_UB(trim(file_inst),UB,wave)
+            if(Err_CFML%Ierr /= 0) then
+               mess="Error updating the instrument with the given UB-matrix in "//trim(file_inst)
+               return
+            end if
+        end if
         !Check that the UB-matrices are consistent with the cell parameters
+        call set_eps_Math(1.0e-12)
         do i=1,n_twins
           call cell_fr_UB(ub_matrix(:,:,i),ipr,dcel)
-          if( sum(abs(dcel-incel)) > 1.0) then
+          if(Err_CFML%Ierr /= 0) then
+             mess="Error calculating the cell parameters from UB-matrix in "//trim(file_inst)
+             return
+          end if
+          if(sum(abs(dcel-incel)) > 1.0) then
               mess="Incompatible UB-matrix and cell parameters in file "//trim(file_inst)
               write(unit=*,fmt="(a,i3)") trim(mess//"  for twin:"),i
               write(unit=*,fmt="(a,6f11.4)") "  Input cell: ",incel
@@ -490,6 +504,7 @@ Module Ref_Gen
               return
           end if
         end do
+        call set_eps_Math()
         if(Err_CFML%Ierr == 0) ok=.true.
     End Subroutine read_sxtal_geom
 
@@ -670,12 +685,12 @@ Program Sxtal_Ref_Gen
 
     write(unit=*,fmt="(/,/,7(a,/))")                                                   &
           "                      ------ PROGRAM SXTAL_REFGEN ------"                 , &
-          "                      ---- Version  1.0  June-2022 ----"                 , &
+          "                      ---- Version  0.7 March-2024  ----"                 , &
           "    *******************************************************************"  , &
           "    * Generates single crystal reflections and nuc. structure factors *"  , &
           "    * (if atoms are given ) reading a *.CFL file (4C & NB geometries) *"  , &
           "    *******************************************************************"  , &
-          "                     (JRC- April-2007, updated June-2022)"
+          "                     (JRC- April-2007, updated March-2024)"
     write(unit=*,fmt=*) " "
 
     if(.not. arggiven) then
@@ -688,12 +703,12 @@ Program Sxtal_Ref_Gen
 
     write(unit=lun,fmt="(/,/,7(a,/))")                                                 &
           "                      ------ PROGRAM SXTAL_REFGEN ------"                 , &
-          "                    ---- Version  0.6 January-2021  ----"                 , &
+          "                      ---- Version  0.7 March-2024  ----"                 , &
           "    *******************************************************************"  , &
           "    * Generates single crystal reflections and nuc. structure factors *"  , &
           "    * (if atoms are given ) reading a *.CFL file (4C & NB geometries) *"  , &
           "    *******************************************************************"  , &
-          "                  (JRC- April-2007, updated January 2021)"
+          "                  (JRC- April-2007, updated March-2024)"
 
     cfl_file=trim(filcod)//".cfl"
     inquire(file=trim(cfl_file),exist=esta)
@@ -796,7 +811,7 @@ Program Sxtal_Ref_Gen
             end if
         else
             !call Gener_Reflections(Cell,Slmin,Slmax,Reflex,SpG,IPhase,MagExt,kinfo,Order,Unique,seqindx,hlim,mag_only,Friedel,Ref_typ,kout)
-            call Gener_Reflections(Cell,stlmin,stlmax,hkl,SpG,1,.true.,Ref_typ="SRefl")
+            call Gener_Reflections(Cell,stlmin,stlmax,hkl,SpG,1,.true.,Ref_typ="SRefl",hlim=hlim)
         end if
         nr_resol=hkl%nref
         !Calculation of Structure factors for neutron scattering
@@ -957,6 +972,14 @@ Program Sxtal_Ref_Gen
                  call H_Equiv_List(h,SpG,.true.,Mul,Hlist)
                  do_mult:do j=1,mul
                     hr=Hlist(:,j)
+                    if(strict) then
+                       if(hr(1) < hlim(1,1))  cycle
+                       if(hr(1) > hlim(1,2))  cycle
+                       if(hr(2) < hlim(2,1))  cycle
+                       if(hr(2) > hlim(2,2))  cycle
+                       if(hr(3) < hlim(3,1))  cycle
+                       if(hr(3) > hlim(3,2))  cycle
+                    end if
                     !z1=matmul(Current_Orient%UB,hr)
                     do k=1,n_twins
                       R_UB= matmul(Chi_matx,matmul(Phi_matx,ub_matrix(:,:,k)))
