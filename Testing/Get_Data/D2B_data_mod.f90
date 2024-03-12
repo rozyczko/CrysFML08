@@ -100,6 +100,9 @@ module D2B_data_mod
          cnorm=cnorm+nex(i)%monitor(1) 
         end do
         cnorm=cnorm/nscans
+
+        !cnorm=sum(nex(:)%monitor(1))/nscans
+
        do i = 2 , nscans
           dga_i      = abs(nex(i)%angles(4,nex(i)%nf)-nex(i)%angles(4,1)) / (nex(i)%nf - 1)
           ga_D_min_i = min(nex(i)%angles(4,nex(i)%nf),nex(i)%angles(4,1))

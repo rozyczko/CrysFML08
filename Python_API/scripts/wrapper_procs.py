@@ -6,40 +6,124 @@ February 2024
 ---------
 Functions
 ---------
-wrap(modules : dict,lucy : dict) -> None
-wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str,lucy : dict) -> None
+get_mandatory(p) -> int
+wrap(modules : dict) -> None
+wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str) -> None
+write_init(f,nproc : int,m_name : str,m : cfml_objects.Module)
+write_module_header(f,m_name : str,w_name : str,m : cfml_objects.Module) -> None:
+write_pyinit(f,w_name : str) -> None:
 """
 import cfml_objects
 import os
+
+publics_types = {}
+
+def get_mandatory(p) -> int:
+	n = 0
+	for a in p.arguments:
+		if not p.arguments[a].optional:
+			n += 1
+	return n
 
 def get_methods(m : dict) -> list:
 
 	pass
 
-def wrap(modules : dict,lucy : dict) -> None:
+def wrap(modules : dict) -> None:
 
     if not os.path.isdir('../Python_API/src'):
         os.mkdir('../Python_API/src')
     for m in modules:
-        wrap_cfml_module_procs(modules[m],m,lucy)
+        wrap_cfml_module_procs(modules[m],m)
 
-def wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str,lucy : dict) -> None:
+def wrap_cfml_module_procs(m : cfml_objects.Module,m_name : str) -> None:
 
-	methods = get_methods(m)
+	nproc = len(m.procedures)
+	if nproc == 0:
+		return
 	w_name = 'py_'+m_name.lower()
 	w_file = os.path.join('../Python_API/src',w_name+'.f90')
 	with open(w_file,'w') as f:
-		f.write(f"module {w_name}\n")
-		f.write(f"\n{'':>4}use forpy\n")
-		f.write(f"{'':>4}use iso_c_binding\n")
-		for u in m.uses:
-			f.write(f"{'':>4}{u.lstrip()}")
-		f.write(f"\n{'':>4}implicit none\n")
-		f.write(f"\n{'':>4}type(PythonModule), save :: mod_{m_name[5:].lower()}\n")
-		f.write(f"{'':>4}type(PythonMethodTable), save :: table_{m_name[5:].lower()}\n")		
-		f.write(f"\n{'':>4}contains\n")
-		f.write(f"\n{'':>4}function PyInit_{w_name.lower()}() bind(c,name='PyInit_py_{w_name.lower()}') result(m)\n")
-		f.write(f"{'':>4}!DEC$ ATTRIBUTES DLLEXPORT :: PyInit_{w_name.lower()}\n")
-		f.write(f"\n{'':>4}type(c_ptr) :: m\n")
-		f.write(f"\n{'':>4}end function PyInit_{w_name.lower()}\n")
+		write_module_header(f,m_name.lower(),w_name.lower(),m)
+		write_pyinit(f,w_name.lower())
+		write_init(f,nproc,m_name,m)
+		for p in m.procedures:
+			write_wrap_procedure(f,m.procedures[p])
 		f.write(f"\nend module {w_name}")
+
+def write_init(f,nproc : int,m_name : str,m : cfml_objects.Module):
+
+	f.write(f"\n{'':>4}function Init() result(m)\n")
+	f.write(f"\n{'':>8}! Local variables\n")
+	f.write(f"{'':>8}type(c_ptr) :: m\n")
+	f.write(f"{'':>8}integer :: ierror\n")
+	f.write(f"\n{'':>8}ierror = Forpy_Initialize()\n")
+	f.write(f"\n{'':>8}! Build method table\n")
+	f.write(f"{'':>8}call table_{m_name[5:].lower()}%init({nproc})\n")
+	for p in m.procedures:
+		f.write(f"{'':>8}call table_{m_name[5:].lower()}%add_method('{p}','py_{p}',&\n")
+		f.write(f"{'':>24}METH_VARARGS,c_funloc(py_{p.lower()}))\n")
+	f.write(f"\n{'':>8}! Build mod_m_name\n")
+	f.write(f"{'':>8}m = mod_{m_name[5:].lower()}%init('py_{m_name.lower()}','Python wrapper for module {m_name} of CrysFML08',table_{m_name[5:].lower()})\n")
+	f.write(f"\n{'':>4}end function Init()\n")
+
+def write_module_header(f,m_name : str,w_name : str,m : cfml_objects.Module):
+
+	f.write(f"module {w_name}\n")
+	f.write(f"\n{'':>4}use forpy\n")
+	f.write(f"{'':>4}use iso_c_binding\n")
+	for u in m.uses:
+		f.write(f"{'':>4}{u.lstrip()}")
+	f.write(f"{'':>4}use CFML_Wraps\n")
+	f.write(f"{'':>4}use CFML_Wraps_Utils\n")
+	f.write(f"\n{'':>4}implicit none\n")
+	f.write(f"\n{'':>4}type(PythonModule), save :: mod_{m_name[5:]}\n")
+	f.write(f"{'':>4}type(PythonMethodTable), save :: table_{m_name[5:]}\n")		
+	f.write(f"\n{'':>4}contains\n")
+
+def write_pyinit(f,w_name : str):
+
+	f.write(f"\n{'':>4}function PyInit_{w_name}() bind(c,name='PyInit_py_{w_name}') result(m)\n")
+	f.write(f"{'':>4}!DEC$ ATTRIBUTES DLLEXPORT :: PyInit_{w_name}\n")
+	f.write(f"\n{'':>8}! Local variables\n")
+	f.write(f"{'':>8}type(c_ptr) :: m\n")
+	f.write(f"\n{'':>8}m = Init()\n")
+	f.write(f"\n{'':>4}end function PyInit_{w_name}\n")
+
+def write_wrap_procedure(f,p):
+
+	f.write(f"\n{'':>4}function py_{p.name.lower()}(self_ptr,args_ptr) result(resul) bind(c)\n")
+	# Arguments
+	f.write(f"\n{'':>8}! Arguments\n")
+	f.write(f"{'':>8}type(c_ptr), value :: self_ptr\n")
+	f.write(f"{'':>8}type(c_ptr), value :: args_ptr\n")
+	f.write(f"{'':>8}type(c_ptr) :: resul\n")
+	# Local Python like variables
+	f.write(f"\n{'':>8}! Local Python like variables\n")
+	for arg in p.arguments:
+		a = p.arguments[arg]
+		if not a.primitive:
+			if not a.allocatable:
+				if a.is_class:
+					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 class = {a.ftype}\n")
+				else:
+					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 type = {a.ftype}\n")
+			else:
+				if a.is_class:
+					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 class = {a.ftype}\n")
+				else:
+					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 type = {a.ftype}\n")
+	f.write(f"{'':>8}type(object) :: item\n")
+	f.write(f"{'':>8}type(tuple) :: args,ret\n")
+	# Local Fortran variables	
+	f.write(f"\n{'':>8}! Local Fortran variables\n")
+	n = get_mandatory(p)
+	f.write(f"{'':>8}integer, parameter :: NMANDATORY = {n}\n")
+	f.write(f"{'':>8}integer :: ierror,narg\n")
+	# Procedure
+	f.write(f"\n{'':>8}ierror = 0\n")
+	f.write(f"{'':>8}call clear_error()\n")
+	f.write(f"\n{'':>8}! Use unsafe_cast_from_c_ptr to cast from c_ptr to tuple/dict\n")
+	f.write(f"{'':>8}call unsafe_cast_from_c_ptr(args,args_ptr)\n")
+	f.write(f"\n{'':>4}end function py_{p.name.lower()}\n")
+

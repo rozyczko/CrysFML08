@@ -462,7 +462,8 @@ def is_primitive(line : str) -> bool:
     if line.startswith('integer') or \
         line.startswith('real') or \
         line.startswith('character') or \
-        line.startswith('logical'):
+        line.startswith('logical') or \
+        line.startswith('complex'):
         return True
     else:
         return False
@@ -582,10 +583,16 @@ def parse_var(line : str) -> list:
     if ii > -1:
         var_optionals['allocatable'] = True
 
+    # Optional
+    var_optionals['optional'] = is_optional(line)
+
+    # Optional
+    var_optionals['primitive'] = is_primitive(line)
+
     # More than one variable can be given in the same line
     vn = var_names.split(',')
-    for i in range(len(vn)):
-        if vn[i] == 'str':
-            vn[i] = 'mystr'
-            break
+    #for i in range(len(vn)):
+    #    if vn[i] == 'str':
+    #        vn[i] = 'mystr'
+    #        break
     return [vn,var_type,var_optionals]

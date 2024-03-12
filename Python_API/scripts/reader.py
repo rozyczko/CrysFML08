@@ -9,7 +9,7 @@ Functions
 get_cfml_modules_filenames() -> list
 read(modules : dict) -> None
 read_cfml_module(file_name : str,modules : dict) -> None
-set_childs(modules : dict,lucy : dict)
+set_childs(modules : dict)
 """
 import cfml_objects
 import glob
@@ -23,7 +23,7 @@ except:
     is_colorama = False
 
 # In EXCLUDED we put the modules we do not want to wrap
-EXCLUDED = ['database','fft','global','keycodes','keyword','maths','messages','python','random','strings','vtk','wraps']
+EXCLUDED = ['database','enbvs','fft','global','keycodes','keyword','mag_superspace_database','maths','messages','optimization_lsq','python','random','strings','vtk','wraps']
 
 def get_cfml_modules_filenames() -> list:
 
@@ -46,13 +46,12 @@ def get_cfml_modules_filenames() -> list:
         raise IOError
     return my_modules
 
-def read(modules : dict, lucy : dict, targetfile: str) -> None:
+def read(modules : dict) -> None:
 
-    os.chdir(targetfile)
+    os.chdir('../../Src')
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name,modules)
-    set_childs(modules,lucy)
     return None
 
 def read_cfml_module(file_name : str,modules : dict) -> None:
@@ -90,19 +89,29 @@ def read_cfml_module(file_name : str,modules : dict) -> None:
     # Get procedures
     n = parser_utils.get_procedures(0,lines,modules[m_name].publics,modules[m_name].interface,modules[m_name].procedures)
 
-def set_childs(modules : dict,lucy : dict):
+def set_childs(modules : dict):
 
-    for m in modules:
-        for t in modules[m].types:
-            if modules[m].types[t].parent:
-                parent = modules[m].types[t].parent
-                p = modules[m].types[t].parent
-                level = 0
-                while modules[m].types[p].parent:
-                    parent = modules[m].types[p].parent
-                    p = modules[m].types[p].parent
-                    level += 1
-                modules[m].types[parent].childs.append([t,level])
-                lucy[t] = parent
-            else:
-                lucy[t] = t
+    for m_name in modules:
+        m = modules[m_name]
+        for t_name in m.types:
+            t = m.types[t_name]
+            if t.parent:
+                p = m.types[t.parent]
+                p.childs.append(t_name)
+
+def set_lucy(modules : dict):
+
+    for m_name in modules:
+        m = modules[m_name]
+        for t_name in m.types:
+            parent = t_name
+            t = m.types[t_name]
+            p = t.parent
+            while p:
+                parent = p 
+                p = m.types[p].parent 
+            m.types[t_name].lucy = parent
+
+
+
+                

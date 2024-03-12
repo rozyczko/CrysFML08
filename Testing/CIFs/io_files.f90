@@ -14,8 +14,8 @@
     !---- Local Variables ----!
     implicit none
 
-    character(len=512)                  :: fname,cmdline
-    integer                             :: nlong,narg
+    character(len=512)                  :: fname,cmdline,title
+    integer                             :: i,nlong,narg,lun
     real(kind=cp)                       :: start, fin
 
     class(Cell_G_Type),allocatable      :: Cell
@@ -31,11 +31,12 @@
        read(unit=*,fmt='(a)') fname
        if (len_trim(fname) <=0 ) call CloseProgram()
        cmdline=trim(fname)
-
     else
        call GET_COMMAND_ARGUMENT(1, cmdline)
     end if
     nlong=len_trim(cmdline)
+    i=index(trim(cmdline),".", back=.true.)
+    fname=cmdline(1:i)//"cfl"
 
     !> Start
     call CPU_TIME(start)
@@ -56,6 +57,11 @@
        !> Atoms
        call Write_Atom_List(Atm)
        write(unit=*,fmt='(a)') " "
+       !Write a new CFL file with all information
+       open(newunit=lun,file=trim(fname),status="replace", action="write")
+       title="CFL file generated from: "//trim(cmdline)
+       call Write_CFL_File(Lun,Cell, SpG, Atm, Title)
+       close(unit=lun)
     else
        write(unit=*,fmt='(/,a)') " => ERROR: "//trim(Err_CFML%Msg)
     end if
