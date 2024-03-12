@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_Molecules
     implicit none
     contains
 
+    Module Subroutine list_to_array_molecule_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molecule_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_molecule_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_molecule_type
+
+    Module Subroutine list_to_array_molecule_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molecule_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_molecule_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_molecule_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_molecule_type_no_alloc
+
+    Module Subroutine list_to_array2d_molecule_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molecule_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_molecule_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_molecule_type
+
+    Module Subroutine list_to_array2d_molecule_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molecule_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_molecule_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_molecule_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_molecule_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_molecule_type_no_alloc
+
     Module Subroutine Unwrap_molecule_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -26,9 +172,7 @@ submodule (CFML_Wraps) Wraps_Molecules
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_molecule_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'molecule_type') then
-                allocate(molecule_type :: for_var)
-            else
+            if (fortran_type /= 'molecule_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -121,7 +265,7 @@ submodule (CFML_Wraps) Wraps_Molecules
 
     End Subroutine Unwrap_molecule_type
 
-    Module Subroutine Wrap_molecule_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_molecule_type(for_var,py_var,ierror)
 
         ! Arguments
         type(molecule_type), intent(in) :: for_var
@@ -129,6 +273,7 @@ submodule (CFML_Wraps) Wraps_Molecules
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_atname,li_atsymb
         type(ndarray) :: nd_xcentre,nd_mxcentre,nd_lxcentre,nd_orient,nd_morient,nd_lorient,nd_t_tls,nd_mt_tls,nd_lt_tls,nd_l_tls,nd_ml_tls,nd_ll_tls,nd_s_tls,nd_ms_tls,nd_ls_tls,nd_euler,nd_atz,nd_ptr,nd_i_coor,nd_mi_coor,nd_li_coor,nd_u_iso,nd_mu_iso,nd_lu_iso,nd_occ,nd_mocc,nd_locc,nd_nb,nd_inb,nd_tb,nd_conn
 
@@ -225,6 +370,152 @@ submodule (CFML_Wraps) Wraps_Molecules
 
     End Subroutine Wrap_molecule_type
 
+    Module Subroutine list_to_array_molcrystal_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molcrystal_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_molcrystal_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_molcrystal_type
+
+    Module Subroutine list_to_array_molcrystal_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molcrystal_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_molcrystal_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_molcrystal_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_molcrystal_type_no_alloc
+
+    Module Subroutine list_to_array2d_molcrystal_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molcrystal_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_molcrystal_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_molcrystal_type
+
+    Module Subroutine list_to_array2d_molcrystal_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(molcrystal_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_molcrystal_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_molcrystal_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_molcrystal_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_molcrystal_type_no_alloc
+
     Module Subroutine Unwrap_molcrystal_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -235,7 +526,7 @@ submodule (CFML_Wraps) Wraps_Molecules
         ! Local variables
         character(len=:), allocatable :: fortran_type
         type(list) :: my_list
-        type(dict) :: dict_cell,dict_spg
+        type(dict) :: di_cell,di_spg
 
         ierror = 0
         ierror = py_var%getitem(fortran_type,'fortran_type')
@@ -244,9 +535,7 @@ submodule (CFML_Wraps) Wraps_Molecules
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_molcrystal_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'molcrystal_type') then
-                allocate(molcrystal_type :: for_var)
-            else
+            if (fortran_type /= 'molcrystal_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -257,13 +546,13 @@ submodule (CFML_Wraps) Wraps_Molecules
         if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','n_mol',py_var,for_var%n_mol,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','n_species',py_var,for_var%n_species,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','npat',py_var,for_var%npat,ierror)
-        if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','cell',py_var,dict_cell,ierror)
-        if (ierror == 0) call unwrap_cell_type('Unwrap_molcrystal_type','cell',dict_cell,for_var%cell,ierror)
-        if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','spg',py_var,dict_spg,ierror)
-        if (ierror == 0) call unwrap_group_type('Unwrap_molcrystal_type','spg',dict_spg,for_var%spg,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','cell',py_var,di_cell,ierror)
+        if (ierror == 0) call unwrap_cell_type(di_cell,for_var%cell,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','spg',py_var,di_spg,ierror)
+        if (ierror == 0) call unwrap_group_type(di_spg,for_var%spg,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','atm',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_molcrystal_type','atm',my_list,for_var%atm,ierror)
+        if (ierror == 0) call list_to_array_class('Unwrap_molcrystal_type','atm',my_list,for_var%atm,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_molcrystal_type','mol',py_var,my_list,ierror)
@@ -277,7 +566,7 @@ submodule (CFML_Wraps) Wraps_Molecules
 
     End Subroutine Unwrap_molcrystal_type
 
-    Module Subroutine Wrap_molcrystal_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_molcrystal_type(for_var,py_var,ierror)
 
         ! Arguments
         type(molcrystal_type), intent(in) :: for_var
@@ -285,8 +574,10 @@ submodule (CFML_Wraps) Wraps_Molecules
         integer, intent(out) :: ierror
 
         ! Local variables
-        type(dict) :: di_cell,di_spg
+        integer :: i
         type(list) :: li_atm,li_mol
+        type(dict) :: di_cell,di_spg
+        type(dict), dimension(:), allocatable :: di_atm,di_mol
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('n_free',for_var%n_free)
@@ -302,7 +593,7 @@ submodule (CFML_Wraps) Wraps_Molecules
         if (ierror == 0) then
             do i = 1 , size(for_var%atm)
                 ierror = dict_create(di_atm(i))
-                if (ierror == 0) call wrap_atm_type(for_var%atm,(di_atm(i),ierror))
+                if (ierror == 0) call wrap_atm_type(for_var%atm(i),di_atm(i),ierror)
                 if (ierror == 0) ierror = li_atm%append(di_atm(i))
             end do
         end if
@@ -312,7 +603,7 @@ submodule (CFML_Wraps) Wraps_Molecules
         if (ierror == 0) then
             do i = 1 , size(for_var%mol)
                 ierror = dict_create(di_mol(i))
-                if (ierror == 0) call wrap_molecule_type(for_var%mol,(di_mol(i),ierror))
+                if (ierror == 0) call wrap_molecule_type(for_var%mol(i),di_mol(i),ierror)
                 if (ierror == 0) ierror = li_mol%append(di_mol(i))
             end do
         end if

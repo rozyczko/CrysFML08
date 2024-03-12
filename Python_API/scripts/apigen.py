@@ -38,7 +38,7 @@ def run() -> None:
         print(f"{colorama.Fore.GREEN}{'Reading modules'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Reading modules'}")
-    reader.read(modules,lucy)
+    reader.read(modules,lucy, '../../Src')
     if is_colorama:
         print(f"{colorama.Fore.GREEN}{'Setting childs'}{colorama.Style.RESET_ALL}")
     else:

@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
     implicit none
     contains
 
+    Module Subroutine list_to_array_polar_calc_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_type
+
+    Module Subroutine list_to_array_polar_calc_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calc_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calc_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_type
+
+    Module Subroutine list_to_array2d_polar_calc_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calc_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calc_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_type_no_alloc
+
     Module Subroutine Unwrap_polar_calc_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -17,7 +163,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         real, dimension(:,:,:), pointer :: p_real_3d
         character(len=1) :: order
         type(list) :: my_list
-        type(dict) :: dict_cell
+        type(dict) :: di_cell
 
         ierror = 0
         ierror = py_var%getitem(fortran_type,'fortran_type')
@@ -26,9 +172,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calc_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calc_type') then
-                allocate(polar_calc_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calc_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -39,12 +183,12 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) call pointer_to_array('Unwrap_polar_calc_type','h',p_real_1d,for_var%h,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','spv',py_var,p_real_1d,ierror)
         if (ierror == 0) call pointer_to_array('Unwrap_polar_calc_type','spv',p_real_1d,for_var%spv,ierror)
-        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','cell',py_var,dict_cell,ierror)
-        if (ierror == 0) call unwrap_cell_type('Unwrap_polar_calc_type','cell',dict_cell,for_var%cell,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','cell',py_var,di_cell,ierror)
+        if (ierror == 0) call unwrap_cell_type(di_cell,for_var%cell,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','p',py_var,for_var%p,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','miv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_polar_calc_type','miv',my_list,for_var%miv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_polar_calc_type','miv',my_list,for_var%miv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','nsf',py_var,for_var%nsf,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_type','nc',py_var,for_var%nc,ierror)
@@ -76,7 +220,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calc_type
 
-    Module Subroutine Wrap_polar_calc_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calc_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calc_type), intent(in) :: for_var
@@ -84,8 +228,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i,j
+        type(list) :: li_miv,li
         type(dict) :: di_cell
-        type(list) :: li_miv
         type(ndarray) :: nd_h,nd_spv,nd_my,nd_mz,nd_ry,nd_rz,nd_iy,nd_iz,nd_tc,nd_mm,nd_cs,nd_pij
 
         ierror = 0
@@ -96,13 +241,6 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) call wrap_cell_type(for_var%cell,di_cell,ierror)
         if (ierror == 0) ierror = py_var%setitem('cell',di_cell)
         if (ierror == 0) ierror = py_var%setitem('p',for_var%p)
-        if (ierror == 0) ierror = list_create(li_miv)
-        if (ierror == 0) then
-            do i = 1 , size(for_var%miv)
-                if (ierror == 0) ierror = li_miv%append(for_var%miv(i))
-            end do
-        end if
-        if (ierror == 0) ierror = py_var%setitem('miv',li_miv)
         if (ierror == 0) ierror = py_var%setitem('nsf',for_var%nsf)
         if (ierror == 0) ierror = py_var%setitem('nc',for_var%nc)
         if (ierror == 0) ierror = ndarray_create(nd_my,for_var%my)
@@ -133,6 +271,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Wrap_polar_calc_type
 
+    Module Subroutine list_to_array_polar_calc_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_list_type
+
+    Module Subroutine list_to_array_polar_calc_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calc_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calc_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_list_type
+
+    Module Subroutine list_to_array2d_polar_calc_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calc_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calc_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_list_type_no_alloc
+
     Module Subroutine Unwrap_polar_calc_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -151,9 +435,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calc_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calc_list_type') then
-                allocate(polar_calc_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calc_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -173,7 +455,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calc_list_type
 
-    Module Subroutine Wrap_polar_calc_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calc_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calc_list_type), intent(in) :: for_var
@@ -181,7 +463,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polari
+        type(dict), dimension(:), allocatable :: di_polari
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
@@ -190,7 +474,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polari)
                 ierror = dict_create(di_polari(i))
-                if (ierror == 0) call wrap_polar_calc_type(for_var%polari,(di_polari(i),ierror))
+                if (ierror == 0) call wrap_polar_calc_type(for_var%polari(i),di_polari(i),ierror)
                 if (ierror == 0) ierror = li_polari%append(di_polari(i))
             end do
         end if
@@ -202,6 +486,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         end if
 
     End Subroutine Wrap_polar_calc_list_type
+
+    Module Subroutine list_to_array_polar_calcmulti_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calcmulti_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calcmulti_list_type
+
+    Module Subroutine list_to_array_polar_calcmulti_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calcmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calcmulti_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calcmulti_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calcmulti_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calcmulti_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calcmulti_list_type
+
+    Module Subroutine list_to_array2d_polar_calcmulti_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calcmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calcmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calcmulti_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calcmulti_list_type_no_alloc
 
     Module Subroutine Unwrap_polar_calcmulti_list_type(py_var,for_var,ierror)
 
@@ -221,9 +651,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calcmulti_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calcmulti_list_type') then
-                allocate(polar_calcmulti_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calcmulti_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -243,7 +671,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calcmulti_list_type
 
-    Module Subroutine Wrap_polar_calcmulti_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calcmulti_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calcmulti_list_type), intent(in) :: for_var
@@ -251,7 +679,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polarilist
+        type(dict), dimension(:), allocatable :: di_polarilist
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nset',for_var%nset)
@@ -260,7 +690,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polarilist)
                 ierror = dict_create(di_polarilist(i))
-                if (ierror == 0) call wrap_polar_calc_list_type(for_var%polarilist,(di_polarilist(i),ierror))
+                if (ierror == 0) call wrap_polar_calc_list_type(for_var%polarilist(i),di_polarilist(i),ierror)
                 if (ierror == 0) ierror = li_polarilist%append(di_polarilist(i))
             end do
         end if
@@ -272,6 +702,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         end if
 
     End Subroutine Wrap_polar_calcmulti_list_type
+
+    Module Subroutine list_to_array_polar_info_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_info_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_info_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_info_type
+
+    Module Subroutine list_to_array_polar_info_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_info_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_info_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_info_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_info_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_info_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_info_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_info_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_info_type
+
+    Module Subroutine list_to_array2d_polar_info_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_info_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_info_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_info_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_info_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_info_type_no_alloc
 
     Module Subroutine Unwrap_polar_info_type(py_var,for_var,ierror)
 
@@ -286,7 +862,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         real, dimension(:,:), pointer :: p_real_2d
         character(len=1) :: order
         type(list) :: my_list
-        type(dict) :: dict_cell
+        type(dict) :: di_cell
 
         ierror = 0
         ierror = py_var%getitem(fortran_type,'fortran_type')
@@ -295,9 +871,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_info_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_info_type') then
-                allocate(polar_info_type :: for_var)
-            else
+            if (fortran_type /= 'polar_info_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -308,12 +882,12 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) call pointer_to_array('Unwrap_polar_info_type','h',p_real_1d,for_var%h,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','spv',py_var,p_real_1d,ierror)
         if (ierror == 0) call pointer_to_array('Unwrap_polar_info_type','spv',p_real_1d,for_var%spv,ierror)
-        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','cell',py_var,dict_cell,ierror)
-        if (ierror == 0) call unwrap_cell_type('Unwrap_polar_info_type','cell',dict_cell,for_var%cell,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','cell',py_var,di_cell,ierror)
+        if (ierror == 0) call unwrap_cell_type(di_cell,for_var%cell,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','p',py_var,for_var%p,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','miv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_polar_info_type','miv',my_list,for_var%miv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_polar_info_type','miv',my_list,for_var%miv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','nsf',py_var,for_var%nsf,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_info_type','nc',py_var,for_var%nc,ierror)
@@ -337,7 +911,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_info_type
 
-    Module Subroutine Wrap_polar_info_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_info_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_info_type), intent(in) :: for_var
@@ -345,8 +919,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
-        type(dict) :: di_cell
+        integer :: i
         type(list) :: li_miv
+        type(dict) :: di_cell
         type(ndarray) :: nd_h,nd_spv,nd_cs,nd_pij
 
         ierror = 0
@@ -386,6 +961,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Wrap_polar_info_type
 
+    Module Subroutine list_to_array_polar_obs_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obs_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obs_type
+
+    Module Subroutine list_to_array_polar_obs_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_obs_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obs_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obs_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_obs_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obs_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obs_type
+
+    Module Subroutine list_to_array2d_polar_obs_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_obs_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_obs_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obs_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obs_type_no_alloc
+
     Module Subroutine Unwrap_polar_obs_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -406,9 +1127,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_obs_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_obs_type') then
-                allocate(polar_obs_type :: for_var)
-            else
+            if (fortran_type /= 'polar_obs_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -434,7 +1153,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_obs_type
 
-    Module Subroutine Wrap_polar_obs_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_obs_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_obs_type), intent(in) :: for_var
@@ -464,6 +1183,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Wrap_polar_obs_type
 
+    Module Subroutine list_to_array_polar_obs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obs_list_type
+
+    Module Subroutine list_to_array_polar_obs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_obs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obs_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_obs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obs_list_type
+
+    Module Subroutine list_to_array2d_polar_obs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obs_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_obs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_obs_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obs_list_type_no_alloc
+
     Module Subroutine Unwrap_polar_obs_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -482,9 +1347,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_obs_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_obs_list_type') then
-                allocate(polar_obs_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_obs_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -504,7 +1367,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_obs_list_type
 
-    Module Subroutine Wrap_polar_obs_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_obs_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_obs_list_type), intent(in) :: for_var
@@ -512,7 +1375,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polaro
+        type(dict), dimension(:), allocatable :: di_polaro
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
@@ -521,7 +1386,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polaro)
                 ierror = dict_create(di_polaro(i))
-                if (ierror == 0) call wrap_polar_obs_type(for_var%polaro,(di_polaro(i),ierror))
+                if (ierror == 0) call wrap_polar_obs_type(for_var%polaro(i),di_polaro(i),ierror)
                 if (ierror == 0) ierror = li_polaro%append(di_polaro(i))
             end do
         end if
@@ -533,6 +1398,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         end if
 
     End Subroutine Wrap_polar_obs_list_type
+
+    Module Subroutine list_to_array_polar_obsmulti_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obsmulti_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obsmulti_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obsmulti_list_type
+
+    Module Subroutine list_to_array_polar_obsmulti_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obsmulti_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_obsmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_obsmulti_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_obsmulti_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_obsmulti_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obsmulti_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obsmulti_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obsmulti_list_type
+
+    Module Subroutine list_to_array2d_polar_obsmulti_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_obsmulti_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_obsmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_obsmulti_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_obsmulti_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_obsmulti_list_type_no_alloc
 
     Module Subroutine Unwrap_polar_obsmulti_list_type(py_var,for_var,ierror)
 
@@ -552,9 +1563,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_obsmulti_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_obsmulti_list_type') then
-                allocate(polar_obsmulti_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_obsmulti_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -574,7 +1583,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_obsmulti_list_type
 
-    Module Subroutine Wrap_polar_obsmulti_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_obsmulti_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_obsmulti_list_type), intent(in) :: for_var
@@ -582,7 +1591,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polarolist
+        type(dict), dimension(:), allocatable :: di_polarolist
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nset',for_var%nset)
@@ -591,7 +1602,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polarolist)
                 ierror = dict_create(di_polarolist(i))
-                if (ierror == 0) call wrap_polar_obs_list_type(for_var%polarolist,(di_polarolist(i),ierror))
+                if (ierror == 0) call wrap_polar_obs_list_type(for_var%polarolist(i),di_polarolist(i),ierror)
                 if (ierror == 0) ierror = li_polarolist%append(di_polarolist(i))
             end do
         end if
@@ -603,6 +1614,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         end if
 
     End Subroutine Wrap_polar_obsmulti_list_type
+
+    Module Subroutine list_to_array_polar_calc_svs_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_svs_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_svs_type
+
+    Module Subroutine list_to_array_polar_calc_svs_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calc_svs_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_svs_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_svs_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calc_svs_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_svs_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_svs_type
+
+    Module Subroutine list_to_array2d_polar_calc_svs_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calc_svs_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calc_svs_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_svs_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_svs_type_no_alloc
 
     Module Subroutine Unwrap_polar_calc_svs_type(py_var,for_var,ierror)
 
@@ -616,7 +1773,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         real, dimension(:), pointer :: p_real_1d
         real, dimension(:,:), pointer :: p_real_2d
         character(len=1) :: order
-        type(dict) :: dict_cell
+        type(dict) :: di_cell
 
         ierror = 0
         ierror = py_var%getitem(fortran_type,'fortran_type')
@@ -625,9 +1782,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calc_svs_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calc_svs_type') then
-                allocate(polar_calc_svs_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calc_svs_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -638,8 +1793,8 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) call pointer_to_array('Unwrap_polar_calc_svs_type','h',p_real_1d,for_var%h,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_svs_type','spv',py_var,p_real_1d,ierror)
         if (ierror == 0) call pointer_to_array('Unwrap_polar_calc_svs_type','spv',p_real_1d,for_var%spv,ierror)
-        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_svs_type','cell',py_var,dict_cell,ierror)
-        if (ierror == 0) call unwrap_cell_type('Unwrap_polar_calc_svs_type','cell',dict_cell,for_var%cell,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_svs_type','cell',py_var,di_cell,ierror)
+        if (ierror == 0) call unwrap_cell_type(di_cell,for_var%cell,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_svs_type','p',py_var,for_var%p,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_polar_calc_svs_type','pij',py_var,p_real_2d,ierror,order)
         if (ierror == 0) call pointer_to_array('Unwrap_polar_calc_svs_type','pij',p_real_2d,for_var%pij,ierror,order)
@@ -651,7 +1806,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calc_svs_type
 
-    Module Subroutine Wrap_polar_calc_svs_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calc_svs_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calc_svs_type), intent(in) :: for_var
@@ -680,6 +1835,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Wrap_polar_calc_svs_type
 
+    Module Subroutine list_to_array_polar_calc_svs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_svs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_svs_list_type
+
+    Module Subroutine list_to_array_polar_calc_svs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calc_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calc_svs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calc_svs_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calc_svs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_svs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_svs_list_type
+
+    Module Subroutine list_to_array2d_polar_calc_svs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calc_svs_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calc_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calc_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calc_svs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calc_svs_list_type_no_alloc
+
     Module Subroutine Unwrap_polar_calc_svs_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -698,9 +1999,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calc_svs_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calc_svs_list_type') then
-                allocate(polar_calc_svs_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calc_svs_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -720,7 +2019,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calc_svs_list_type
 
-    Module Subroutine Wrap_polar_calc_svs_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calc_svs_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calc_svs_list_type), intent(in) :: for_var
@@ -728,7 +2027,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polarisvs
+        type(dict), dimension(:), allocatable :: di_polarisvs
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
@@ -737,7 +2038,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polarisvs)
                 ierror = dict_create(di_polarisvs(i))
-                if (ierror == 0) call wrap_polar_calc_svs_type(for_var%polarisvs,(di_polarisvs(i),ierror))
+                if (ierror == 0) call wrap_polar_calc_svs_type(for_var%polarisvs(i),di_polarisvs(i),ierror)
                 if (ierror == 0) ierror = li_polarisvs%append(di_polarisvs(i))
             end do
         end if
@@ -749,6 +2050,152 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         end if
 
     End Subroutine Wrap_polar_calc_svs_list_type
+
+    Module Subroutine list_to_array_polar_calcmulti_svs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_svs_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calcmulti_svs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calcmulti_svs_list_type
+
+    Module Subroutine list_to_array_polar_calcmulti_svs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_svs_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_polar_calcmulti_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_polar_calcmulti_svs_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_polar_calcmulti_svs_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_polar_calcmulti_svs_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_svs_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calcmulti_svs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calcmulti_svs_list_type
+
+    Module Subroutine list_to_array2d_polar_calcmulti_svs_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(polar_calcmulti_svs_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_polar_calcmulti_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_polar_calcmulti_svs_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_polar_calcmulti_svs_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_polar_calcmulti_svs_list_type_no_alloc
 
     Module Subroutine Unwrap_polar_calcmulti_svs_list_type(py_var,for_var,ierror)
 
@@ -768,9 +2215,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_polar_calcmulti_svs_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'polar_calcmulti_svs_list_type') then
-                allocate(polar_calcmulti_svs_list_type :: for_var)
-            else
+            if (fortran_type /= 'polar_calcmulti_svs_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -790,7 +2235,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
 
     End Subroutine Unwrap_polar_calcmulti_svs_list_type
 
-    Module Subroutine Wrap_polar_calcmulti_svs_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_polar_calcmulti_svs_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(polar_calcmulti_svs_list_type), intent(in) :: for_var
@@ -798,7 +2243,9 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_polarisvslist
+        type(dict), dimension(:), allocatable :: di_polarisvslist
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nset',for_var%nset)
@@ -807,7 +2254,7 @@ submodule (CFML_Wraps) Wraps_kvec_Polarimetry
         if (ierror == 0) then
             do i = 1 , size(for_var%polarisvslist)
                 ierror = dict_create(di_polarisvslist(i))
-                if (ierror == 0) call wrap_polar_calc_svs_list_type(for_var%polarisvslist,(di_polarisvslist(i),ierror))
+                if (ierror == 0) call wrap_polar_calc_svs_list_type(for_var%polarisvslist(i),di_polarisvslist(i),ierror)
                 if (ierror == 0) ierror = li_polarisvslist%append(di_polarisvslist(i))
             end do
         end if

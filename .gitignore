@@ -48,3 +48,4 @@ API
 *.build
 install_manifest.txt
 Makefile
+docs

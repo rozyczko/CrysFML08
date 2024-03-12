@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
     implicit none
     contains
 
+    Module Subroutine list_to_array_magh_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_magh_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_magh_type
+
+    Module Subroutine list_to_array_magh_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_magh_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_magh_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_magh_type_no_alloc
+
+    Module Subroutine list_to_array2d_magh_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_magh_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_magh_type
+
+    Module Subroutine list_to_array2d_magh_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_magh_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_magh_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_magh_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_magh_type_no_alloc
+
     Module Subroutine Unwrap_magh_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -22,9 +168,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_magh_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'magh_type') then
-                allocate(magh_type :: for_var)
-            else
+            if (fortran_type /= 'magh_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -41,19 +185,19 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) call pointer_to_array('Unwrap_magh_type','h',p_real_1d,for_var%h,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_magh_type','msf',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_magh_type','msf',my_list,for_var%msf,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_magh_type','msf',my_list,for_var%msf,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_magh_type','tmsf',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_magh_type','tmsf',my_list,for_var%tmsf,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_magh_type','tmsf',my_list,for_var%tmsf,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_magh_type','miv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_magh_type','miv',my_list,for_var%miv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_magh_type','miv',my_list,for_var%miv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_magh_type','mivc',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_magh_type','mivc',my_list,for_var%mivc,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_magh_type','mivc',my_list,for_var%mivc,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror /= 0) then
             err_cfml%flag = .true.
@@ -63,7 +207,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
 
     End Subroutine Unwrap_magh_type
 
-    Module Subroutine Wrap_magh_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_magh_type(for_var,py_var,ierror)
 
         ! Arguments
         type(magh_type), intent(in) :: for_var
@@ -71,7 +215,8 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         integer, intent(out) :: ierror
 
         ! Local variables
-        type(list) :: li_msf,li_tmsf,li_miv,li_mivc
+        integer :: i,j
+        type(list) :: li_msf,li_tmsf,li_miv,li_mivc,li
         type(ndarray) :: nd_h
 
         ierror = 0
@@ -92,8 +237,13 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) ierror = py_var%setitem('msf',li_msf)
         if (ierror == 0) ierror = list_create(li_tmsf)
         if (ierror == 0) then
-            do i = 1 , size(for_var%tmsf)
-                if (ierror == 0) ierror = li_tmsf%append(for_var%tmsf(i))
+            do i = 1 , size(for_var%tmsf,1)
+                if (ierror == 0) ierror = list_create(li)
+                do j = 1 , size(for_var%tmsf,2)
+                    if (ierror == 0) ierror = li%append(for_var%tmsf(i,j))
+                end do
+                if (ierror == 0) ierror = li_tmsf%append(li)
+                if (ierror == 0) call li%destroy
             end do
         end if
         if (ierror == 0) ierror = py_var%setitem('tmsf',li_tmsf)
@@ -119,6 +269,152 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
 
     End Subroutine Wrap_magh_type
 
+    Module Subroutine list_to_array_magh_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_magh_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_magh_list_type
+
+    Module Subroutine list_to_array_magh_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_magh_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_magh_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_magh_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_magh_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_magh_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_magh_list_type
+
+    Module Subroutine list_to_array2d_magh_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(magh_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_magh_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_magh_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_magh_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_magh_list_type_no_alloc
+
     Module Subroutine Unwrap_magh_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -137,9 +433,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_magh_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'magh_list_type') then
-                allocate(magh_list_type :: for_var)
-            else
+            if (fortran_type /= 'magh_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -159,7 +453,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
 
     End Subroutine Unwrap_magh_list_type
 
-    Module Subroutine Wrap_magh_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_magh_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(magh_list_type), intent(in) :: for_var
@@ -167,7 +461,9 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_mh
+        type(dict), dimension(:), allocatable :: di_mh
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
@@ -176,7 +472,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) then
             do i = 1 , size(for_var%mh)
                 ierror = dict_create(di_mh(i))
-                if (ierror == 0) call wrap_magh_type(for_var%mh,(di_mh(i),ierror))
+                if (ierror == 0) call wrap_magh_type(for_var%mh(i),di_mh(i),ierror)
                 if (ierror == 0) ierror = li_mh%append(di_mh(i))
             end do
         end if
@@ -188,6 +484,152 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         end if
 
     End Subroutine Wrap_magh_list_type
+
+    Module Subroutine list_to_array_maghd_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_maghd_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_maghd_type
+
+    Module Subroutine list_to_array_maghd_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_maghd_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_maghd_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_maghd_type_no_alloc
+
+    Module Subroutine list_to_array2d_maghd_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_maghd_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_maghd_type
+
+    Module Subroutine list_to_array2d_maghd_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_maghd_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_maghd_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_maghd_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_maghd_type_no_alloc
 
     Module Subroutine Unwrap_maghd_type(py_var,for_var,ierror)
 
@@ -208,9 +650,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_maghd_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'maghd_type') then
-                allocate(maghd_type :: for_var)
-            else
+            if (fortran_type /= 'maghd_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -227,19 +667,19 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) call pointer_to_array('Unwrap_maghd_type','h',p_real_1d,for_var%h,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_maghd_type','msf',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_maghd_type','msf',my_list,for_var%msf,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_maghd_type','msf',my_list,for_var%msf,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_maghd_type','miv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_maghd_type','miv',my_list,for_var%miv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_maghd_type','miv',my_list,for_var%miv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_maghd_type','mivc',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_maghd_type','mivc',my_list,for_var%mivc,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_maghd_type','mivc',my_list,for_var%mivc,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_maghd_type','amiv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_maghd_type','amiv',my_list,for_var%amiv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_maghd_type','amiv',my_list,for_var%amiv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror /= 0) then
             err_cfml%flag = .true.
@@ -249,7 +689,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
 
     End Subroutine Unwrap_maghd_type
 
-    Module Subroutine Wrap_maghd_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_maghd_type(for_var,py_var,ierror)
 
         ! Arguments
         type(maghd_type), intent(in) :: for_var
@@ -257,7 +697,8 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         integer, intent(out) :: ierror
 
         ! Local variables
-        type(list) :: li_msf,li_miv,li_mivc,li_amiv
+        integer :: i,j
+        type(list) :: li_msf,li_miv,li_mivc,li_amiv,li
         type(ndarray) :: nd_h
 
         ierror = 0
@@ -269,27 +710,6 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) ierror = py_var%setitem('sqmiv',for_var%sqmiv)
         if (ierror == 0) ierror = ndarray_create(nd_h,for_var%h)
         if (ierror == 0) ierror = py_var%setitem('h',nd_h)
-        if (ierror == 0) ierror = list_create(li_msf)
-        if (ierror == 0) then
-            do i = 1 , size(for_var%msf)
-                if (ierror == 0) ierror = li_msf%append(for_var%msf(i))
-            end do
-        end if
-        if (ierror == 0) ierror = py_var%setitem('msf',li_msf)
-        if (ierror == 0) ierror = list_create(li_miv)
-        if (ierror == 0) then
-            do i = 1 , size(for_var%miv)
-                if (ierror == 0) ierror = li_miv%append(for_var%miv(i))
-            end do
-        end if
-        if (ierror == 0) ierror = py_var%setitem('miv',li_miv)
-        if (ierror == 0) ierror = list_create(li_mivc)
-        if (ierror == 0) then
-            do i = 1 , size(for_var%mivc)
-                if (ierror == 0) ierror = li_mivc%append(for_var%mivc(i))
-            end do
-        end if
-        if (ierror == 0) ierror = py_var%setitem('mivc',li_mivc)
         if (ierror == 0) ierror = list_create(li_amiv)
         if (ierror == 0) then
             do i = 1 , size(for_var%amiv)
@@ -304,6 +724,152 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         end if
 
     End Subroutine Wrap_maghd_type
+
+    Module Subroutine list_to_array_maghd_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_maghd_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_maghd_list_type
+
+    Module Subroutine list_to_array_maghd_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_maghd_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_maghd_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_maghd_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_maghd_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_maghd_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_maghd_list_type
+
+    Module Subroutine list_to_array2d_maghd_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(maghd_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_maghd_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_maghd_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_maghd_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_maghd_list_type_no_alloc
 
     Module Subroutine Unwrap_maghd_list_type(py_var,for_var,ierror)
 
@@ -323,9 +889,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_maghd_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'maghd_list_type') then
-                allocate(maghd_list_type :: for_var)
-            else
+            if (fortran_type /= 'maghd_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -345,7 +909,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
 
     End Subroutine Unwrap_maghd_list_type
 
-    Module Subroutine Wrap_maghd_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_maghd_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(maghd_list_type), intent(in) :: for_var
@@ -353,7 +917,9 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_mh
+        type(dict), dimension(:), allocatable :: di_mh
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nref',for_var%nref)
@@ -362,7 +928,7 @@ submodule (CFML_Wraps) Wraps_kvec_Structure_Factors
         if (ierror == 0) then
             do i = 1 , size(for_var%mh)
                 ierror = dict_create(di_mh(i))
-                if (ierror == 0) call wrap_maghd_type(for_var%mh,(di_mh(i),ierror))
+                if (ierror == 0) call wrap_maghd_type(for_var%mh(i),di_mh(i),ierror)
                 if (ierror == 0) ierror = li_mh%append(di_mh(i))
             end do
         end if

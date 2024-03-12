@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_IOForm
     implicit none
     contains
 
+    Module Subroutine list_to_array_interval_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(interval_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_interval_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_interval_type
+
+    Module Subroutine list_to_array_interval_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(interval_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_interval_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_interval_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_interval_type_no_alloc
+
+    Module Subroutine list_to_array2d_interval_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(interval_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_interval_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_interval_type
+
+    Module Subroutine list_to_array2d_interval_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(interval_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_interval_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_interval_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_interval_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_interval_type_no_alloc
+
     Module Subroutine Unwrap_interval_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -20,9 +166,7 @@ submodule (CFML_Wraps) Wraps_IOForm
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_interval_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'interval_type') then
-                allocate(interval_type :: for_var)
-            else
+            if (fortran_type /= 'interval_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -39,7 +183,7 @@ submodule (CFML_Wraps) Wraps_IOForm
 
     End Subroutine Unwrap_interval_type
 
-    Module Subroutine Wrap_interval_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_interval_type(for_var,py_var,ierror)
 
         ! Arguments
         type(interval_type), intent(in) :: for_var
@@ -58,6 +202,152 @@ submodule (CFML_Wraps) Wraps_IOForm
         end if
 
     End Subroutine Wrap_interval_type
+
+    Module Subroutine list_to_array_job_info_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(job_info_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_job_info_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_job_info_type
+
+    Module Subroutine list_to_array_job_info_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(job_info_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_job_info_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_job_info_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_job_info_type_no_alloc
+
+    Module Subroutine list_to_array2d_job_info_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(job_info_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_job_info_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_job_info_type
+
+    Module Subroutine list_to_array2d_job_info_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(job_info_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_job_info_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_job_info_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_job_info_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_job_info_type_no_alloc
 
     Module Subroutine Unwrap_job_info_type(py_var,for_var,ierror)
 
@@ -78,9 +368,7 @@ submodule (CFML_Wraps) Wraps_IOForm
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_job_info_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'job_info_type') then
-                allocate(job_info_type :: for_var)
-            else
+            if (fortran_type /= 'job_info_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -145,7 +433,7 @@ submodule (CFML_Wraps) Wraps_IOForm
 
     End Subroutine Unwrap_job_info_type
 
-    Module Subroutine Wrap_job_info_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_job_info_type(for_var,py_var,ierror)
 
         ! Arguments
         type(job_info_type), intent(in) :: for_var
@@ -153,7 +441,9 @@ submodule (CFML_Wraps) Wraps_IOForm
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_patt_typ,li_phas_nam,li_cmd,li_range_stl,li_range_q,li_range_d,li_range_2theta,li_range_energy,li_range_tof,li_lambda
+        type(dict), dimension(:), allocatable :: di_range_stl,di_range_q,di_range_d,di_range_2theta,di_range_energy,di_range_tof,di_lambda
         type(ndarray) :: nd_ratio,nd_dtt1,nd_dtt2
 
         ierror = 0
@@ -187,7 +477,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_stl)
                 ierror = dict_create(di_range_stl(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_stl,(di_range_stl(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_stl(i),di_range_stl(i),ierror)
                 if (ierror == 0) ierror = li_range_stl%append(di_range_stl(i))
             end do
         end if
@@ -197,7 +487,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_q)
                 ierror = dict_create(di_range_q(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_q,(di_range_q(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_q(i),di_range_q(i),ierror)
                 if (ierror == 0) ierror = li_range_q%append(di_range_q(i))
             end do
         end if
@@ -207,7 +497,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_d)
                 ierror = dict_create(di_range_d(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_d,(di_range_d(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_d(i),di_range_d(i),ierror)
                 if (ierror == 0) ierror = li_range_d%append(di_range_d(i))
             end do
         end if
@@ -217,7 +507,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_2theta)
                 ierror = dict_create(di_range_2theta(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_2theta,(di_range_2theta(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_2theta(i),di_range_2theta(i),ierror)
                 if (ierror == 0) ierror = li_range_2theta%append(di_range_2theta(i))
             end do
         end if
@@ -227,7 +517,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_energy)
                 ierror = dict_create(di_range_energy(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_energy,(di_range_energy(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_energy(i),di_range_energy(i),ierror)
                 if (ierror == 0) ierror = li_range_energy%append(di_range_energy(i))
             end do
         end if
@@ -237,7 +527,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%range_tof)
                 ierror = dict_create(di_range_tof(i))
-                if (ierror == 0) call wrap_interval_type(for_var%range_tof,(di_range_tof(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%range_tof(i),di_range_tof(i),ierror)
                 if (ierror == 0) ierror = li_range_tof%append(di_range_tof(i))
             end do
         end if
@@ -247,7 +537,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) then
             do i = 1 , size(for_var%lambda)
                 ierror = dict_create(di_lambda(i))
-                if (ierror == 0) call wrap_interval_type(for_var%lambda,(di_lambda(i),ierror))
+                if (ierror == 0) call wrap_interval_type(for_var%lambda(i),di_lambda(i),ierror)
                 if (ierror == 0) ierror = li_lambda%append(di_lambda(i))
             end do
         end if
@@ -265,6 +555,152 @@ submodule (CFML_Wraps) Wraps_IOForm
         end if
 
     End Subroutine Wrap_job_info_type
+
+    Module Subroutine list_to_array_blockinfo_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(blockinfo_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_blockinfo_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_blockinfo_type
+
+    Module Subroutine list_to_array_blockinfo_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(blockinfo_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_blockinfo_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_blockinfo_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_blockinfo_type_no_alloc
+
+    Module Subroutine list_to_array2d_blockinfo_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(blockinfo_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_blockinfo_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_blockinfo_type
+
+    Module Subroutine list_to_array2d_blockinfo_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(blockinfo_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_blockinfo_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_blockinfo_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_blockinfo_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_blockinfo_type_no_alloc
 
     Module Subroutine Unwrap_blockinfo_type(py_var,for_var,ierror)
 
@@ -284,9 +720,7 @@ submodule (CFML_Wraps) Wraps_IOForm
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_blockinfo_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'blockinfo_type') then
-                allocate(blockinfo_type :: for_var)
-            else
+            if (fortran_type /= 'blockinfo_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -308,7 +742,7 @@ submodule (CFML_Wraps) Wraps_IOForm
 
     End Subroutine Unwrap_blockinfo_type
 
-    Module Subroutine Wrap_blockinfo_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_blockinfo_type(for_var,py_var,ierror)
 
         ! Arguments
         type(blockinfo_type), intent(in) :: for_var
@@ -334,6 +768,152 @@ submodule (CFML_Wraps) Wraps_IOForm
 
     End Subroutine Wrap_blockinfo_type
 
+    Module Subroutine list_to_array_genvec_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(genvec_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_genvec_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_genvec_type
+
+    Module Subroutine list_to_array_genvec_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(genvec_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_genvec_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_genvec_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_genvec_type_no_alloc
+
+    Module Subroutine list_to_array2d_genvec_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(genvec_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_genvec_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_genvec_type
+
+    Module Subroutine list_to_array2d_genvec_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(genvec_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_genvec_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_genvec_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_genvec_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_genvec_type_no_alloc
+
     Module Subroutine Unwrap_genvec_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -354,9 +934,7 @@ submodule (CFML_Wraps) Wraps_IOForm
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_genvec_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'genvec_type') then
-                allocate(genvec_type :: for_var)
-            else
+            if (fortran_type /= 'genvec_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -371,7 +949,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         if (ierror == 0) call pointer_to_array('Unwrap_genvec_type','rv',p_real_1d,for_var%rv,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_genvec_type','cv',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_genvec_type','cv',my_list,for_var%cv,ierror)
+        if (ierror == 0) call list_to_array_no_alloc('Unwrap_genvec_type','cv',my_list,for_var%cv,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror /= 0) then
             err_cfml%flag = .true.
@@ -381,7 +959,7 @@ submodule (CFML_Wraps) Wraps_IOForm
 
     End Subroutine Unwrap_genvec_type
 
-    Module Subroutine Wrap_genvec_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_genvec_type(for_var,py_var,ierror)
 
         ! Arguments
         type(genvec_type), intent(in) :: for_var
@@ -389,6 +967,7 @@ submodule (CFML_Wraps) Wraps_IOForm
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_cv
         type(ndarray) :: nd_iv,nd_rv
 

@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_Atoms
     implicit none
     contains
 
+    Module Subroutine list_to_array_atm_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_type
+
+    Module Subroutine list_to_array_atm_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atm_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_type_no_alloc
+
+    Module Subroutine list_to_array2d_atm_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_type
+
+    Module Subroutine list_to_array2d_atm_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atm_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atm_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_type_no_alloc
+
     Module Subroutine Unwrap_atm_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -360,7 +506,62 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_atm_type_no_alloc
 
-    Module Subroutine Wrap_atm_type(py_var,for_var,ierror)
+    Module Subroutine list_to_array_atm_type_class(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        class(atm_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        character(len=:), allocatable :: fortran_type
+        type(atm_type) :: src1
+        type(atm_std_type) :: src2
+        type(modatm_std_type) :: src3
+        type(atm_ref_type) :: src4
+        type(modatm_ref_type) :: src5
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) then
+                    ierror = my_dict%getitem(fortran_type,'fortran_type')
+                    if (ierror /= 0) then
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array_atm_type_class: Cannot determine fortran type'
+                    else if (fortran_type == 'atm_type') then
+                        allocate(arr(n),source=src1)
+                    else if (fortran_type == 'atm_std_type') then
+                        allocate(arr(n),source=src2)
+                    else if (fortran_type == 'modatm_std_type') then
+                        allocate(arr(n),source=src3)
+                    else if (fortran_type == 'atm_ref_type') then
+                        allocate(arr(n),source=src4)
+                    else if (fortran_type == 'modatm_ref_type') then
+                        allocate(arr(n),source=src5)
+                    else
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array_atm_type_class: Wrong fortran type'
+                    end if
+                end if
+                if (ierror == 0) call unwrap_atm_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_type_class
+
+    Module Subroutine Wrap_atm_type(for_var,py_var,ierror)
 
         ! Arguments
         class(atm_type), intent(in) :: for_var
@@ -368,7 +569,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
-        type(ndarray) :: nd_x,nd_u,nd_moment,nd_ind_ff,nd_varf,nd_x_std,nd_u_std,nd_moment_std,nd_poc_q,nd_pbc_q,nd_pmc_q,nd_pdc_q,nd_puc_q,nd_ocs,nd_ocs_std,nd_bcs,nd_bcs_std,nd_mcs,nd_mcs_std,nd_dcs,nd_dcs_std,nd_ucs,nd_ucs_std,nd_xs,nd_moms,nd_us,nd_l_x,nd_l_moment,nd_l_u,nd_m_x,nd_m_moment,nd_m_u,nd_l_x,nd_l_u,nd_m_x,nd_m_u,nd_l_ocs,nd_l_bcs,nd_l_mcs,nd_l_dcs,nd_l_ucs,nd_m_ocs,nd_m_bcs,nd_m_mcs,nd_m_dcs,nd_m_ucs
+        type(ndarray) :: nd_x,nd_u,nd_moment,nd_ind_ff,nd_varf,nd_x_std,nd_u_std,nd_moment_std,nd_poc_q,nd_pbc_q,nd_pmc_q,nd_pdc_q,nd_puc_q,nd_ocs,nd_ocs_std,nd_bcs,nd_bcs_std,nd_mcs,nd_mcs_std,nd_dcs,nd_dcs_std,nd_ucs,nd_ucs_std,nd_xs,nd_moms,nd_us,nd_l_x,nd_l_moment,nd_l_u,nd_m_x,nd_m_moment,nd_m_u,nd_l_ocs,nd_l_bcs,nd_l_mcs,nd_l_dcs,nd_l_ucs,nd_m_ocs,nd_m_bcs,nd_m_mcs,nd_m_dcs,nd_m_ucs
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('lab',for_var%lab)
@@ -399,13 +600,13 @@ submodule (CFML_Wraps) Wraps_Atoms
         if (ierror == 0) then
             select type (A => for_var)
                 class is (atm_std_type)
-                    if (ierror == 0) ierror = ndarray_create(nd_x_std,for_var%x_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_x_std,A%x_std)
                     if (ierror == 0) ierror = py_var%setitem('x_std',nd_x_std)
                     if (ierror == 0) ierror = py_var%setitem('occ_std',A%occ_std)
                     if (ierror == 0) ierror = py_var%setitem('u_iso_std',A%u_iso_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_u_std,for_var%u_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_u_std,A%u_std)
                     if (ierror == 0) ierror = py_var%setitem('u_std',nd_u_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_moment_std,for_var%moment_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_moment_std,A%moment_std)
                     if (ierror == 0) ierror = py_var%setitem('moment_std',nd_moment_std)
             end select
             select type (A => for_var)
@@ -415,93 +616,93 @@ submodule (CFML_Wraps) Wraps_Atoms
                     if (ierror == 0) ierror = py_var%setitem('n_mc',A%n_mc)
                     if (ierror == 0) ierror = py_var%setitem('n_dc',A%n_dc)
                     if (ierror == 0) ierror = py_var%setitem('n_uc',A%n_uc)
-                    if (ierror == 0) ierror = ndarray_create(nd_poc_q,for_var%poc_q)
+                    if (ierror == 0) ierror = ndarray_create(nd_poc_q,A%poc_q)
                     if (ierror == 0) ierror = py_var%setitem('poc_q',nd_poc_q)
-                    if (ierror == 0) ierror = ndarray_create(nd_pbc_q,for_var%pbc_q)
+                    if (ierror == 0) ierror = ndarray_create(nd_pbc_q,A%pbc_q)
                     if (ierror == 0) ierror = py_var%setitem('pbc_q',nd_pbc_q)
-                    if (ierror == 0) ierror = ndarray_create(nd_pmc_q,for_var%pmc_q)
+                    if (ierror == 0) ierror = ndarray_create(nd_pmc_q,A%pmc_q)
                     if (ierror == 0) ierror = py_var%setitem('pmc_q',nd_pmc_q)
-                    if (ierror == 0) ierror = ndarray_create(nd_pdc_q,for_var%pdc_q)
+                    if (ierror == 0) ierror = ndarray_create(nd_pdc_q,A%pdc_q)
                     if (ierror == 0) ierror = py_var%setitem('pdc_q',nd_pdc_q)
-                    if (ierror == 0) ierror = ndarray_create(nd_puc_q,for_var%puc_q)
+                    if (ierror == 0) ierror = ndarray_create(nd_puc_q,A%puc_q)
                     if (ierror == 0) ierror = py_var%setitem('puc_q',nd_puc_q)
-                    if (ierror == 0) ierror = ndarray_create(nd_ocs,for_var%ocs)
+                    if (ierror == 0) ierror = ndarray_create(nd_ocs,A%ocs)
                     if (ierror == 0) ierror = py_var%setitem('ocs',nd_ocs)
-                    if (ierror == 0) ierror = ndarray_create(nd_ocs_std,for_var%ocs_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_ocs_std,A%ocs_std)
                     if (ierror == 0) ierror = py_var%setitem('ocs_std',nd_ocs_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_bcs,for_var%bcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_bcs,A%bcs)
                     if (ierror == 0) ierror = py_var%setitem('bcs',nd_bcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_bcs_std,for_var%bcs_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_bcs_std,A%bcs_std)
                     if (ierror == 0) ierror = py_var%setitem('bcs_std',nd_bcs_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_mcs,for_var%mcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_mcs,A%mcs)
                     if (ierror == 0) ierror = py_var%setitem('mcs',nd_mcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_mcs_std,for_var%mcs_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_mcs_std,A%mcs_std)
                     if (ierror == 0) ierror = py_var%setitem('mcs_std',nd_mcs_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_dcs,for_var%dcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_dcs,A%dcs)
                     if (ierror == 0) ierror = py_var%setitem('dcs',nd_dcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_dcs_std,for_var%dcs_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_dcs_std,A%dcs_std)
                     if (ierror == 0) ierror = py_var%setitem('dcs_std',nd_dcs_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_ucs,for_var%ucs)
+                    if (ierror == 0) ierror = ndarray_create(nd_ucs,A%ucs)
                     if (ierror == 0) ierror = py_var%setitem('ucs',nd_ucs)
-                    if (ierror == 0) ierror = ndarray_create(nd_ucs_std,for_var%ucs_std)
+                    if (ierror == 0) ierror = ndarray_create(nd_ucs_std,A%ucs_std)
                     if (ierror == 0) ierror = py_var%setitem('ucs_std',nd_ucs_std)
-                    if (ierror == 0) ierror = ndarray_create(nd_xs,for_var%xs)
+                    if (ierror == 0) ierror = ndarray_create(nd_xs,A%xs)
                     if (ierror == 0) ierror = py_var%setitem('xs',nd_xs)
-                    if (ierror == 0) ierror = ndarray_create(nd_moms,for_var%moms)
+                    if (ierror == 0) ierror = ndarray_create(nd_moms,A%moms)
                     if (ierror == 0) ierror = py_var%setitem('moms',nd_moms)
-                    if (ierror == 0) ierror = ndarray_create(nd_us,for_var%us)
+                    if (ierror == 0) ierror = ndarray_create(nd_us,A%us)
                     if (ierror == 0) ierror = py_var%setitem('us',nd_us)
                 class is (atm_ref_type)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_x,for_var%l_x)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_x,A%l_x)
                     if (ierror == 0) ierror = py_var%setitem('l_x',nd_l_x)
                     if (ierror == 0) ierror = py_var%setitem('l_occ',A%l_occ)
                     if (ierror == 0) ierror = py_var%setitem('l_u_iso',A%l_u_iso)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_moment,for_var%l_moment)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_moment,A%l_moment)
                     if (ierror == 0) ierror = py_var%setitem('l_moment',nd_l_moment)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_u,for_var%l_u)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_u,A%l_u)
                     if (ierror == 0) ierror = py_var%setitem('l_u',nd_l_u)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_x,for_var%m_x)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_x,A%m_x)
                     if (ierror == 0) ierror = py_var%setitem('m_x',nd_m_x)
                     if (ierror == 0) ierror = py_var%setitem('m_occ',A%m_occ)
                     if (ierror == 0) ierror = py_var%setitem('m_u_iso',A%m_u_iso)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_moment,for_var%m_moment)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_moment,A%m_moment)
                     if (ierror == 0) ierror = py_var%setitem('m_moment',nd_m_moment)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_u,for_var%m_u)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_u,A%m_u)
                     if (ierror == 0) ierror = py_var%setitem('m_u',nd_m_u)
             end select
             select type (A => for_var)
                 class is (modatm_ref_type)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_x,for_var%l_x)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_x,A%l_x)
                     if (ierror == 0) ierror = py_var%setitem('l_x',nd_l_x)
                     if (ierror == 0) ierror = py_var%setitem('l_occ',A%l_occ)
                     if (ierror == 0) ierror = py_var%setitem('l_u_iso',A%l_u_iso)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_u,for_var%l_u)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_u,A%l_u)
                     if (ierror == 0) ierror = py_var%setitem('l_u',nd_l_u)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_x,for_var%m_x)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_x,A%m_x)
                     if (ierror == 0) ierror = py_var%setitem('m_x',nd_m_x)
                     if (ierror == 0) ierror = py_var%setitem('m_occ',A%m_occ)
                     if (ierror == 0) ierror = py_var%setitem('m_u_iso',A%m_u_iso)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_u,for_var%m_u)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_u,A%m_u)
                     if (ierror == 0) ierror = py_var%setitem('m_u',nd_m_u)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_ocs,for_var%l_ocs)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_ocs,A%l_ocs)
                     if (ierror == 0) ierror = py_var%setitem('l_ocs',nd_l_ocs)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_bcs,for_var%l_bcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_bcs,A%l_bcs)
                     if (ierror == 0) ierror = py_var%setitem('l_bcs',nd_l_bcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_mcs,for_var%l_mcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_mcs,A%l_mcs)
                     if (ierror == 0) ierror = py_var%setitem('l_mcs',nd_l_mcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_dcs,for_var%l_dcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_dcs,A%l_dcs)
                     if (ierror == 0) ierror = py_var%setitem('l_dcs',nd_l_dcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_l_ucs,for_var%l_ucs)
+                    if (ierror == 0) ierror = ndarray_create(nd_l_ucs,A%l_ucs)
                     if (ierror == 0) ierror = py_var%setitem('l_ucs',nd_l_ucs)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_ocs,for_var%m_ocs)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_ocs,A%m_ocs)
                     if (ierror == 0) ierror = py_var%setitem('m_ocs',nd_m_ocs)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_bcs,for_var%m_bcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_bcs,A%m_bcs)
                     if (ierror == 0) ierror = py_var%setitem('m_bcs',nd_m_bcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_mcs,for_var%m_mcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_mcs,A%m_mcs)
                     if (ierror == 0) ierror = py_var%setitem('m_mcs',nd_m_mcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_dcs,for_var%m_dcs)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_dcs,A%m_dcs)
                     if (ierror == 0) ierror = py_var%setitem('m_dcs',nd_m_dcs)
-                    if (ierror == 0) ierror = ndarray_create(nd_m_ucs,for_var%m_ucs)
+                    if (ierror == 0) ierror = ndarray_create(nd_m_ucs,A%m_ucs)
                     if (ierror == 0) ierror = py_var%setitem('m_ucs',nd_m_ucs)
             end select
         end if
@@ -512,6 +713,736 @@ submodule (CFML_Wraps) Wraps_Atoms
         end if
 
     End Subroutine Wrap_atm_type
+
+    Module Subroutine list_to_array_atm_std_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_std_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_std_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_std_type
+
+    Module Subroutine list_to_array_atm_std_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_std_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atm_std_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_std_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_std_type_no_alloc
+
+    Module Subroutine list_to_array2d_atm_std_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_std_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_std_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_std_type
+
+    Module Subroutine list_to_array2d_atm_std_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_std_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atm_std_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atm_std_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_std_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_std_type_no_alloc
+
+    Module Subroutine list_to_array_modatm_std_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_std_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_modatm_std_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_modatm_std_type
+
+    Module Subroutine list_to_array_modatm_std_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_std_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_modatm_std_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_modatm_std_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_modatm_std_type_no_alloc
+
+    Module Subroutine list_to_array2d_modatm_std_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_std_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_modatm_std_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_modatm_std_type
+
+    Module Subroutine list_to_array2d_modatm_std_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_std_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_modatm_std_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_modatm_std_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_modatm_std_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_modatm_std_type_no_alloc
+
+    Module Subroutine list_to_array_atm_ref_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_ref_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_ref_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_ref_type
+
+    Module Subroutine list_to_array_atm_ref_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_ref_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_ref_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_ref_type_no_alloc
+
+    Module Subroutine list_to_array2d_atm_ref_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_ref_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_ref_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_ref_type
+
+    Module Subroutine list_to_array2d_atm_ref_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_ref_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_ref_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_ref_type_no_alloc
+
+    Module Subroutine list_to_array_modatm_ref_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_ref_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_modatm_ref_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_modatm_ref_type
+
+    Module Subroutine list_to_array_modatm_ref_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_ref_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_modatm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_modatm_ref_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_modatm_ref_type_no_alloc
+
+    Module Subroutine list_to_array2d_modatm_ref_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_ref_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_modatm_ref_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_modatm_ref_type
+
+    Module Subroutine list_to_array2d_modatm_ref_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(modatm_ref_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_modatm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_modatm_ref_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_modatm_ref_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_modatm_ref_type_no_alloc
+
+    Module Subroutine list_to_array_atm_cell_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_cell_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_cell_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_cell_type
+
+    Module Subroutine list_to_array_atm_cell_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_cell_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atm_cell_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atm_cell_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atm_cell_type_no_alloc
+
+    Module Subroutine list_to_array2d_atm_cell_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_cell_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_cell_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_cell_type
+
+    Module Subroutine list_to_array2d_atm_cell_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atm_cell_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atm_cell_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atm_cell_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atm_cell_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atm_cell_type_no_alloc
 
     Module Subroutine Unwrap_atm_cell_type(py_var,for_var,ierror)
 
@@ -537,9 +1468,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_atm_cell_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'atm_cell_type') then
-                allocate(atm_cell_type :: for_var)
-            else
+            if (fortran_type /= 'atm_cell_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -582,7 +1511,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_atm_cell_type
 
-    Module Subroutine Wrap_atm_cell_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_atm_cell_type(for_var,py_var,ierror)
 
         ! Arguments
         type(atm_cell_type), intent(in) :: for_var
@@ -590,6 +1519,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_lab,li_ddlab
         type(ndarray) :: nd_xyz,nd_charge,nd_moment,nd_var_free,nd_neighb,nd_neighb_atom,nd_distance,nd_trans,nd_ddist
 
@@ -636,6 +1566,152 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Wrap_atm_cell_type
 
+    Module Subroutine list_to_array_atom_equiv_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atom_equiv_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atom_equiv_type
+
+    Module Subroutine list_to_array_atom_equiv_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atom_equiv_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atom_equiv_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atom_equiv_type_no_alloc
+
+    Module Subroutine list_to_array2d_atom_equiv_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atom_equiv_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atom_equiv_type
+
+    Module Subroutine list_to_array2d_atom_equiv_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atom_equiv_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atom_equiv_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atom_equiv_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atom_equiv_type_no_alloc
+
     Module Subroutine Unwrap_atom_equiv_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -656,9 +1732,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_atom_equiv_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'atom_equiv_type') then
-                allocate(atom_equiv_type :: for_var)
-            else
+            if (fortran_type /= 'atom_equiv_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -681,7 +1755,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_atom_equiv_type
 
-    Module Subroutine Wrap_atom_equiv_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_atom_equiv_type(for_var,py_var,ierror)
 
         ! Arguments
         type(atom_equiv_type), intent(in) :: for_var
@@ -689,6 +1763,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_lab
         type(ndarray) :: nd_x
 
@@ -712,6 +1787,152 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Wrap_atom_equiv_type
 
+    Module Subroutine list_to_array_atom_equiv_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atom_equiv_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atom_equiv_list_type
+
+    Module Subroutine list_to_array_atom_equiv_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atom_equiv_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atom_equiv_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atom_equiv_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_atom_equiv_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atom_equiv_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atom_equiv_list_type
+
+    Module Subroutine list_to_array2d_atom_equiv_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atom_equiv_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atom_equiv_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atom_equiv_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atom_equiv_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atom_equiv_list_type_no_alloc
+
     Module Subroutine Unwrap_atom_equiv_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -730,9 +1951,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_atom_equiv_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'atom_equiv_list_type') then
-                allocate(atom_equiv_list_type :: for_var)
-            else
+            if (fortran_type /= 'atom_equiv_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -752,7 +1971,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_atom_equiv_list_type
 
-    Module Subroutine Wrap_atom_equiv_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_atom_equiv_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(atom_equiv_list_type), intent(in) :: for_var
@@ -760,7 +1979,9 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_atm
+        type(dict), dimension(:), allocatable :: di_atm
 
         ierror = 0
         if (ierror == 0) ierror = py_var%setitem('nauas',for_var%nauas)
@@ -769,7 +1990,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         if (ierror == 0) then
             do i = 1 , size(for_var%atm)
                 ierror = dict_create(di_atm(i))
-                if (ierror == 0) call wrap_atom_equiv_type(for_var%atm,(di_atm(i),ierror))
+                if (ierror == 0) call wrap_atom_equiv_type(for_var%atm(i),di_atm(i),ierror)
                 if (ierror == 0) ierror = li_atm%append(di_atm(i))
             end do
         end if
@@ -781,6 +2002,152 @@ submodule (CFML_Wraps) Wraps_Atoms
         end if
 
     End Subroutine Wrap_atom_equiv_list_type
+
+    Module Subroutine list_to_array_atlist_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atlist_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atlist_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atlist_type
+
+    Module Subroutine list_to_array_atlist_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atlist_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_atlist_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_atlist_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_atlist_type_no_alloc
+
+    Module Subroutine list_to_array2d_atlist_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atlist_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atlist_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atlist_type
+
+    Module Subroutine list_to_array2d_atlist_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(atlist_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_atlist_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_atlist_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_atlist_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_atlist_type_no_alloc
 
     Module Subroutine Unwrap_atlist_type(py_var,for_var,ierror)
 
@@ -801,9 +2168,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_atlist_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'atlist_type') then
-                allocate(atlist_type :: for_var)
-            else
+            if (fortran_type /= 'atlist_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -821,7 +2186,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         if (ierror == 0) call pointer_to_array_alloc('Unwrap_atlist_type','iph',p_int_1d,for_var%iph,ierror)
         if (ierror == 0) ierror = list_create(my_list)
         if (ierror == 0) call unwrap_dict_item('Unwrap_atlist_type','atom',py_var,my_list,ierror)
-        if (ierror == 0) call list_to_array('Unwrap_atlist_type','atom',my_list,for_var%atom,ierror)
+        if (ierror == 0) call list_to_array_class('Unwrap_atlist_type','atom',my_list,for_var%atom,ierror)
         if (ierror == 0) call my_list%destroy
         if (ierror /= 0) then
             err_cfml%flag = .true.
@@ -831,7 +2196,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_atlist_type
 
-    Module Subroutine Wrap_atlist_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_atlist_type(for_var,py_var,ierror)
 
         ! Arguments
         type(atlist_type), intent(in) :: for_var
@@ -839,7 +2204,9 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_active,li_atom
+        type(dict), dimension(:), allocatable :: di_atom
         type(ndarray) :: nd_iph
 
         ierror = 0
@@ -860,7 +2227,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         if (ierror == 0) then
             do i = 1 , size(for_var%atom)
                 ierror = dict_create(di_atom(i))
-                if (ierror == 0) call wrap_atm_type(for_var%atom,(di_atom(i),ierror))
+                if (ierror == 0) call wrap_atm_type(for_var%atom(i),di_atom(i),ierror)
                 if (ierror == 0) ierror = li_atom%append(di_atom(i))
             end do
         end if
@@ -872,6 +2239,152 @@ submodule (CFML_Wraps) Wraps_Atoms
         end if
 
     End Subroutine Wrap_atlist_type
+
+    Module Subroutine list_to_array_matom_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_matom_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_matom_type
+
+    Module Subroutine list_to_array_matom_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_matom_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_matom_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_matom_type_no_alloc
+
+    Module Subroutine list_to_array2d_matom_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_matom_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_matom_type
+
+    Module Subroutine list_to_array2d_matom_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_matom_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_matom_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_matom_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_matom_type_no_alloc
 
     Module Subroutine Unwrap_matom_type(py_var,for_var,ierror)
 
@@ -895,9 +2408,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_matom_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'matom_type') then
-                allocate(matom_type :: for_var)
-            else
+            if (fortran_type /= 'matom_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -1011,7 +2522,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_matom_type
 
-    Module Subroutine Wrap_matom_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_matom_type(for_var,py_var,ierror)
 
         ! Arguments
         type(matom_type), intent(in) :: for_var
@@ -1129,6 +2640,152 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Wrap_matom_type
 
+    Module Subroutine list_to_array_matom_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_list_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_matom_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_matom_list_type
+
+    Module Subroutine list_to_array_matom_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_list_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_matom_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_matom_list_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_matom_list_type_no_alloc
+
+    Module Subroutine list_to_array2d_matom_list_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_list_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_matom_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_matom_list_type
+
+    Module Subroutine list_to_array2d_matom_list_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(matom_list_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_matom_list_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_matom_list_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_matom_list_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_matom_list_type_no_alloc
+
     Module Subroutine Unwrap_matom_list_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -1148,9 +2805,7 @@ submodule (CFML_Wraps) Wraps_Atoms
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_matom_list_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'matom_list_type') then
-                allocate(matom_list_type :: for_var)
-            else
+            if (fortran_type /= 'matom_list_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
@@ -1174,7 +2829,7 @@ submodule (CFML_Wraps) Wraps_Atoms
 
     End Subroutine Unwrap_matom_list_type
 
-    Module Subroutine Wrap_matom_list_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_matom_list_type(for_var,py_var,ierror)
 
         ! Arguments
         type(matom_list_type), intent(in) :: for_var
@@ -1182,7 +2837,9 @@ submodule (CFML_Wraps) Wraps_Atoms
         integer, intent(out) :: ierror
 
         ! Local variables
+        integer :: i
         type(list) :: li_atom
+        type(dict), dimension(:), allocatable :: di_atom
         type(ndarray) :: nd_dir_mfield
 
         ierror = 0
@@ -1196,7 +2853,7 @@ submodule (CFML_Wraps) Wraps_Atoms
         if (ierror == 0) then
             do i = 1 , size(for_var%atom)
                 ierror = dict_create(di_atom(i))
-                if (ierror == 0) call wrap_matom_type(for_var%atom,(di_atom(i),ierror))
+                if (ierror == 0) call wrap_matom_type(for_var%atom(i),di_atom(i),ierror)
                 if (ierror == 0) ierror = li_atom%append(di_atom(i))
             end do
         end if

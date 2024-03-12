@@ -3,6 +3,152 @@ submodule (CFML_Wraps) Wraps_Propagation_Vectors
     implicit none
     contains
 
+    Module Subroutine list_to_array_group_k_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(group_k_type), dimension(:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (ierror == 0 .and. n > 0) then
+            allocate(arr(n))
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_group_k_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_group_k_type
+
+    Module Subroutine list_to_array_group_k_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(group_k_type), dimension(:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,n
+        type(object) :: item
+        type(dict) :: my_dict
+
+        ierror = my_list%len(n)
+        if (n /= size(arr)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array_group_k_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. n > 0) then
+            do i = 0 , n-1
+                if (ierror == 0) ierror = my_list%getitem(item,i)
+                if (ierror == 0) ierror = cast(my_dict,item)
+                if (ierror == 0) call unwrap_group_k_type_no_alloc(my_dict,arr(i+1),ierror)
+                if (ierror == 0) ierror = err_cfml%ierr
+            end do
+        end if
+
+    End Subroutine list_to_array_group_k_type_no_alloc
+
+    Module Subroutine list_to_array2d_group_k_type(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(group_k_type), dimension(:,:), allocatable, intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (ierror == 0 .and. .not. allocated(arr)) allocate(arr(m,n))
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_group_k_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_group_k_type
+
+    Module Subroutine list_to_array2d_group_k_type_no_alloc(procedure_name,var_name,my_list,arr,ierror)
+
+        ! Arguments
+        character(len=*), intent(in) :: procedure_name
+        character(len=*), intent(in) :: var_name
+        type(list), intent(inout) :: my_list
+        type(group_k_type), dimension(:,:), intent(out) :: arr
+        integer, intent(inout) :: ierror
+
+        ! Local variables
+        integer :: i,j,m,n
+        type(object) :: item
+        type(dict) :: my_dict
+        type(list) :: li
+
+        ierror = my_list%len(m)
+        if (m /= size(arr,1)) then
+            ierror = -1
+            err_cfml%flag = .true.
+            err_cfml%ierr = -1
+            err_cfml%msg  = 'list_to_array2d_group_k_type_no_alloc: Dimension of list and arr inconsistent'
+        end if
+        if (ierror == 0 .and. m > 0) then
+            if (ierror == 0) ierror = my_list%getitem(item,0)
+            if (ierror == 0) ierror = cast(li,item)
+            if (ierror == 0) ierror = li%len(n)
+            if (ierror == 0) then
+                do i = 0 , m-1
+                    if (ierror == 0) ierror = my_list%getitem(item,i)
+                    if (ierror == 0) ierror = cast(li,item)
+                    if (ierror == 0) ierror = li%len(n)
+                    if (n /= size(arr,2)) then
+                        ierror = -1
+                        err_cfml%flag = .true.
+                        err_cfml%ierr = -1
+                        err_cfml%msg  = 'list_to_array2d_group_k_type_no_alloc: Dimension of list and arr inconsistent'
+                    end if
+                    do j = 0 , n-1
+                        if (ierror == 0) ierror = li%getitem(item,j)
+                        if (ierror == 0) ierror = cast(my_dict,item)
+                        if (ierror == 0) call unwrap_group_k_type_no_alloc(my_dict,arr(i+1,j+1),ierror)
+                        if (ierror == 0) ierror = err_cfml%ierr
+                    end do
+                end do
+            end if
+        end if
+
+    End Subroutine list_to_array2d_group_k_type_no_alloc
+
     Module Subroutine Unwrap_group_k_type(py_var,for_var,ierror)
 
         ! Arguments
@@ -16,7 +162,7 @@ submodule (CFML_Wraps) Wraps_Propagation_Vectors
         integer, dimension(:,:), pointer :: p_int_2d
         real, dimension(:,:), pointer :: p_real_2d
         character(len=1) :: order
-        type(dict) :: dict_g0
+        type(dict) :: di_g0
 
         ierror = 0
         ierror = py_var%getitem(fortran_type,'fortran_type')
@@ -25,17 +171,15 @@ submodule (CFML_Wraps) Wraps_Propagation_Vectors
             err_cfml%ierr = ierror
             err_cfml%msg  = 'Unwrap_group_k_type: Cannot determine fortran type'
         else
-            if (fortran_type == 'group_k_type') then
-                allocate(group_k_type :: for_var)
-            else
+            if (fortran_type /= 'group_k_type') then
                 ierror = -1
                 err_cfml%flag = .true.
                 err_cfml%ierr = ierror
                 err_cfml%msg  = 'Unwrap_group_k_type: Wrong fortran type:'//adjustl(trim(fortran_type))
             end if
         end if
-        if (ierror == 0) call unwrap_dict_item('Unwrap_group_k_type','g0',py_var,dict_g0,ierror)
-        if (ierror == 0) call unwrap_group_type('Unwrap_group_k_type','g0',dict_g0,for_var%g0,ierror)
+        if (ierror == 0) call unwrap_dict_item('Unwrap_group_k_type','g0',py_var,di_g0,ierror)
+        if (ierror == 0) call unwrap_group_type(di_g0,for_var%g0,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_group_k_type','ngk',py_var,for_var%ngk,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_group_k_type','k_equiv_minusk',py_var,for_var%k_equiv_minusk,ierror)
         if (ierror == 0) call unwrap_dict_item('Unwrap_group_k_type','minusk',py_var,for_var%minusk,ierror)
@@ -57,7 +201,7 @@ submodule (CFML_Wraps) Wraps_Propagation_Vectors
 
     End Subroutine Unwrap_group_k_type
 
-    Module Subroutine Wrap_group_k_type(py_var,for_var,ierror)
+    Module Subroutine Wrap_group_k_type(for_var,py_var,ierror)
 
         ! Arguments
         type(group_k_type), intent(in) :: for_var
