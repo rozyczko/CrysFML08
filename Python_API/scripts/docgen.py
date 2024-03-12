@@ -13,10 +13,11 @@ read_cfml_module(file_name : str) -> None
 run() -> None
 """
 
-import reader
 import os
+import reader
+import wrapper_procs
+import wrapper_types
 import build_docs
-from typing import TextIO
 try:
     import colorama
     colorama.init()
@@ -25,7 +26,6 @@ except:
     is_colorama = False
 
 modules = {}
-lucy = {} # Base class for every type
 
 def run() -> None:
 
@@ -42,17 +42,35 @@ def run() -> None:
         print(f"{colorama.Fore.GREEN}{'Reading modules'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Reading modules'}")
-    reader.read(modules,lucy, '../Src/')
+    reader.read(modules, '../Src/')
+    reader.set_childs(modules)
+    reader.set_lucy(modules)
+    set_public_types()
+
     if is_colorama:
         print(f"{colorama.Fore.GREEN}{'Setting childs'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Setting childs'}")
     if is_colorama:
-        print(f"{colorama.Fore.GREEN}{'Start building wraps'}{colorama.Style.RESET_ALL}")
+        print(f"{colorama.Fore.GREEN}{'Building wraps / unwraps of CrysFML08 types'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Building wraps / unwraps of CrysFML08 types'}")
+    if is_colorama:
+        print(f"{colorama.Fore.GREEN}{'Building wraps / unwraps of CrysFML08 procedures'}{colorama.Style.RESET_ALL}")
+    else:
+        print(f"{'Building wraps / unwraps of CrysFML08 procedures'}")
+    build_docs.build_docs(modules)
     os.chdir(cwd)
-    build_docs.build_docs(modules, lucy)
+
+def set_public_types():
+
+    publics_types = {}
+    for m in modules:
+        t = modules[m].types
+        for s in t:
+            publics_types[s] = t[s]
+    wrapper_types.publics_types = publics_types
+    wrapper_procs.publics_types = publics_types
 
 if __name__ == '__main__':
 

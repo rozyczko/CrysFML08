@@ -46,9 +46,9 @@ def get_cfml_modules_filenames() -> list:
         raise IOError
     return my_modules
 
-def read(modules : dict) -> None:
+def read(modules : dict, targetfolder: str) -> None:
 
-    os.chdir('../../Src')
+    os.chdir(targetfolder)
     cfml_modules_fnames = get_cfml_modules_filenames()
     for file_name in cfml_modules_fnames:
         read_cfml_module(file_name,modules)

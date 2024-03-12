@@ -38,7 +38,8 @@ def run() -> None:
         print(f"{colorama.Fore.GREEN}{'Reading modules'}{colorama.Style.RESET_ALL}")
     else:
         print(f"{'Reading modules'}")
-    reader.read(modules)
+
+    reader.read(modules, '../../Src/')
     reader.set_childs(modules)
     reader.set_lucy(modules)
     set_public_types()

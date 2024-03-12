@@ -22,37 +22,17 @@ except:
     is_colorama = False
 
 modules = {}
-lucy = {}
 
 PRIMITIVES = {'integer': 'int','real': 'float','logical': 'bool','character': 'str','complex': 'TODEFINE'}
 NUMERICALS = ['integer','real']
 
-def set_childs_docs(modules : dict,lucy : dict):
-
-    for m in modules:
-        for t in modules[m].types:
-            if modules[m].types[t].parent:
-                parent = modules[m].types[t].parent
-                p = modules[m].types[t].parent
-                level = 0
-                while modules[m].types[p].parent:
-                    parent = modules[m].types[p].parent
-                    p = modules[m].types[p].parent
-                    level += 1
-                modules[m].types[parent].childs.append([t,level])
-                lucy[t] = parent
-            else:
-                lucy[t] = t
-
-def build_docs(mod: dict, luc: dict) -> None:
+def build_docs(mod: dict) -> None:
 
     if not os.path.isdir('./pages'):
         os.mkdir('./pages')
 
     global modules
-    global lucy
     modules = mod
-    lucy = luc
 
     build_entrypage()
     return None
@@ -146,7 +126,7 @@ def document_cfml_type_modules(file: TextIO) -> None:
             document_cfml_type_modules_dicts(m_name, f)
 
 def get_immediate_parents_and_childs(m_name: str, t_name: str) -> tuple:
-    old_parent = lucy[t_name]
+    old_parent = modules[m_name].types[t_name].lucy
     childs = modules[m_name].types[old_parent].childs
     
     level = next((child[1] for child in childs if child[0] == t_name), -1)
@@ -229,7 +209,7 @@ def document_cfml_type_modules_dicts(m_name: str, file: TextIO) -> None:
 
 def get_arguments_of_functions(m_name: str, t_name: str) -> tuple:
     func = modules[m_name].procedures[t_name]
-    arguments = [value.name for value in func.arguments.values() if value.intent == 'in' or value.intent == 'inout']
+    arguments = [value.name for value in func.arguments.values() if (value.intent == 'in' or value.intent == 'inout') and not value.optional]
     return tuple(arguments)
 
 def document_cfml_function_modules_dicts(m_name: str, file: TextIO) -> None:
@@ -259,7 +239,7 @@ def document_cfml_function_modules_dicts(m_name: str, file: TextIO) -> None:
             f.write(f"     - Type\n")
             f.write(f"     - Description\n")
             for c_name, c_val in modules[m_name].procedures[t_name].arguments.items():
-                print(c_val.ftype, c_val.ndim, c_name)
+                print(m_name, t_name, c_val.ftype, c_val.ndim, c_name)
                 if c_val.ndim == 0:
                     if c_val.ftype.lower() not in PRIMITIVES:
                         mod = find_module_of_type(c_val.ftype)
