@@ -125,6 +125,8 @@ def get_function_types(n : int, lines : list, f : cfml_objects.Function) -> int:
             if 'intent' in v[2].keys():
                 for var_name in v[0]:
                     f.arguments[var_name] = cfml_objects.FortranVar(var_name,v[1],**v[2])
+                    #if len(v[0]) > 1:
+                    #    print(var_name.strip(),f.arguments[var_name].ftype)
             else:
                 f.xreturn = cfml_objects.FortranVar(v[0][0],v[1],**v[2])
         else:
@@ -533,6 +535,7 @@ def parse_var(line : str) -> list:
     # Name, value and info
     i = line.index('::')
     j = line[:].find('!')
+    var_optionals['fortran_def'] = ''.join(line[:i].split())
     if j > -1: # Info is given
         var_optionals['info'] = line[j+1:].strip()
         k = line[i:j].find('=')
@@ -586,13 +589,11 @@ def parse_var(line : str) -> list:
     # Optional
     var_optionals['optional'] = is_optional(line)
 
-    # Optional
+    # Primitive
     var_optionals['primitive'] = is_primitive(line)
 
     # More than one variable can be given in the same line
     vn = var_names.split(',')
-    #for i in range(len(vn)):
-    #    if vn[i] == 'str':
-    #        vn[i] = 'mystr'
-    #        break
+    for i in range(len(vn)):
+        vn[i] = vn[i].strip()
     return [vn,var_type,var_optionals]

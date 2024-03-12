@@ -92,38 +92,47 @@ def write_pyinit(f,w_name : str):
 
 def write_wrap_procedure(f,p):
 
-	f.write(f"\n{'':>4}function py_{p.name.lower()}(self_ptr,args_ptr) result(resul) bind(c)\n")
+	proc_name = p.name.lower()
+	f.write(f"\n{'':>4}function py_{proc_name}(self_ptr,args_ptr) result(resul) bind(c)\n")
 	# Arguments
 	f.write(f"\n{'':>8}! Arguments\n")
 	f.write(f"{'':>8}type(c_ptr), value :: self_ptr\n")
 	f.write(f"{'':>8}type(c_ptr), value :: args_ptr\n")
 	f.write(f"{'':>8}type(c_ptr) :: resul\n")
-	# Local Python like variables
-	f.write(f"\n{'':>8}! Local Python like variables\n")
+	# CrysFML08 arguments
+	f.write(f"\n{'':>8}! CrysFML08 arguments\n")
 	for arg in p.arguments:
 		a = p.arguments[arg]
 		if not a.primitive:
-			if not a.allocatable:
-				if a.is_class:
-					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 class = {a.ftype}\n")
-				else:
-					f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 type = {a.ftype}\n")
+			if a.ndim == 0:
+				a.ptype = 'dict'
+				f.write(f"{'':>8}type(dict) :: di_{a.name} ! CrysFML08 : {a.fortran_def}\n")
 			else:
-				if a.is_class:
-					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 class = {a.ftype}\n")
+				a.ptype = 'list'
+				f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 : {a.fortran_def}\n")
+		else:
+			if a.ndim > 0:
+				if a.ftype == 'integer' or a.ftype == 'real' or a.ftype == 'complex':
+					f.write(f"{'':>8}type(ndarray) :: nd_{a.name} ! CrysFML08 type : {a.fortran_def}\n")
+					a.ptype = 'ndarray'
 				else:
-					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 type = {a.ftype}\n")
-	f.write(f"{'':>8}type(object) :: item\n")
-	f.write(f"{'':>8}type(tuple) :: args,ret\n")
-	# Local Fortran variables	
-	f.write(f"\n{'':>8}! Local Fortran variables\n")
+					f.write(f"{'':>8}type(list) :: li_{a.name} ! CrysFML08 type : {a.fortran_def}\n")
+					a.ptype = 'list'
+			else:
+				a.ptype = ''
+	# Local variables	
+	f.write(f"\n{'':>8}! Local variables\n")
 	n = get_mandatory(p)
 	f.write(f"{'':>8}integer, parameter :: NMANDATORY = {n}\n")
 	f.write(f"{'':>8}integer :: ierror,narg\n")
+	f.write(f"{'':>8}type(object) :: item\n")
+	f.write(f"{'':>8}type(tuple) :: args,ret\n")
 	# Procedure
 	f.write(f"\n{'':>8}ierror = 0\n")
 	f.write(f"{'':>8}call clear_error()\n")
 	f.write(f"\n{'':>8}! Use unsafe_cast_from_c_ptr to cast from c_ptr to tuple/dict\n")
 	f.write(f"{'':>8}call unsafe_cast_from_c_ptr(args,args_ptr)\n")
-	f.write(f"\n{'':>4}end function py_{p.name.lower()}\n")
+	f.write(f"\n{'':>8}! Get arguments\n")
+	f.write(f"{'':>8}call check_number_of_arguments('py_{proc_name}',args,NMANDATORY,narg,ierror)\n")
+	f.write(f"\n{'':>4}end function py_{proc_name}\n")
 

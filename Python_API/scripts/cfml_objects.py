@@ -7,7 +7,8 @@ February 2024
 class FortranVar():
 
     def __init__(self,name : str,ftype : str,kind : str='',ndim : int=0,dim : list=[],intent : str='',info : str='',
-        len : str='',allocatable : bool=False, optional : bool=False, primitive : bool=False,is_class : bool=False,value = None,parent : str=''):
+        len : str='',allocatable : bool=False, optional : bool=False, primitive : bool=False,is_class : bool=False,
+        value = None,parent : str='',fortran_def : str=''):
 
         self.name        = name
         self.ftype       = ftype
@@ -23,6 +24,7 @@ class FortranVar():
         self.parent      = parent
         self.is_class    = is_class
         self.value       = value
+        self.fortran_def = fortran_def
 
 class Subroutine():
 
