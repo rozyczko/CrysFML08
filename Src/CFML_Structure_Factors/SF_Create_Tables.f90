@@ -30,6 +30,10 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             Mat=opMat(:,:,i)    !grp%op(i)%Mat(1:3,1:3)
             t=opTr(:,i)         !grp%op(i)%Mat(1:3,4)
             write(*,*) " i, j = ", j, i
+            ! show sizes of matrices
+            write(*,*) " =======> 2 Create_Table_HR_HT: size(reflex%ref(j)%h) = ", size(reflex%ref(j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", size(hr(i,j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: size(Mat) = ", size(Mat)
             hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
             write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
             ht(i,j)=dot_product(real(reflex%ref(j)%h),t)
