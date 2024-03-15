@@ -24,7 +24,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
       !--- Local variables ---!
       integer :: Natm, Multr
       integer :: ierr
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 1 = ", shape(reflex%ref(1)%h)
       !> Init
       call clear_error()
       Natm = Atm%natoms
@@ -111,6 +111,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          err_CFML%Msg="Error on memory for Bj(h) allocating!"
          return
       end if
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 2 = ", shape(reflex%ref(1)%h)
       Bjh=0.0_cp
       if (present(mode)) then
          if (present(lambda)) then
