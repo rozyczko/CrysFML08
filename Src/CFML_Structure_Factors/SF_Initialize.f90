@@ -40,7 +40,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       AF0=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 2 = ", shape(reflex%ref(1)%h)
       !> Anomalous Scattering factor tables
       if (allocated(AFP)) deallocate(AFP)
       allocate(AFP(Natm),stat=ierr)
@@ -51,7 +51,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       AFP=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 3 = ", shape(reflex%ref(1)%h)
       if (allocated(AFPP)) deallocate(AFPP)
       allocate(AFPP(Natm),stat=ierr)
       if (ierr /=0) then
@@ -61,7 +61,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       AFPP=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 4 = ", shape(reflex%ref(1)%h)
       !> HR Table
       if (allocated(HR)) deallocate(HR)
       allocate(HR(Multr,Reflex%Nref),stat=ierr)
@@ -72,7 +72,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       HR=HR_Type(0.0_cp)
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 5 = ", shape(reflex%ref(1)%h)
       !---- HT Table ----!
       if (allocated(HT)) deallocate(HT)
       allocate(HT(Multr,Reflex%Nref),stat=ierr)
@@ -83,7 +83,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       HT=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 6 = ", shape(reflex%ref(1)%h)
       if (allocated(TH)) deallocate(TH)
       allocate(TH(Natm,Reflex%Nref),stat=ierr)
       if (ierr /=0) then
@@ -92,7 +92,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       TH=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 7 = ", shape(reflex%ref(1)%h)
       if (allocated(Ajh)) deallocate(Ajh)
       allocate(Ajh(Natm,Reflex%Nref), stat=ierr)
       if (ierr /=0) then
@@ -102,7 +102,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       Ajh=0.0_cp
-
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 8 = ", shape(reflex%ref(1)%h)
       if (allocated(Bjh)) deallocate(Bjh)
       allocate(Bjh(Natm,Reflex%Nref), stat=ierr)
       if (ierr /=0) then
@@ -111,7 +111,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          err_CFML%Msg="Error on memory for Bj(h) allocating!"
          return
       end if
-      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 2 = ", shape(reflex%ref(1)%h)
+      write(*,*) " ===> ISF shape(reflex%ref(1)%h) 9 = ", shape(reflex%ref(1)%h)
       Bjh=0.0_cp
       if (present(mode)) then
          if (present(lambda)) then
