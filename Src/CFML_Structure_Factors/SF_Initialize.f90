@@ -27,11 +27,11 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       !> Init
       call clear_error()
-
+      write(*,"(a)") " ===> A1"
       Natm = Atm%natoms
       Multr= Grp%Numops
       if(.not. init_symOP) call SF_init_opMatTr(Grp)
-
+      write(*,"(a)") " ===> A2"
       !> Scattering factor tables
       if (allocated(AF0)) deallocate(AF0)
       allocate(AF0(Natm,Reflex%Nref),stat=ierr)
@@ -114,33 +114,49 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       Bjh=0.0_cp
-
+      write(*,"(a)") " ===> A3"
       if (present(mode)) then
          if (present(lambda)) then
             if (present(lun)) then
+               write(*,"(a)") " ===> A4A start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode,lambda,lun)
+               write(*,"(a)") " ===> A4A end"
             else
+               write(*,"(a)") " ===> A4B start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode,lambda)
+               write(*,"(a)") " ===> A4B end"
             end if
          else
             if (present(lun)) then
+               write(*,"(a)") " ===> A4C start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode,lun=lun)
+               write(*,"(a)") " ===> A4C end"
             else
+               write(*,"(a)") " ===> A4D start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode)
+               write(*,"(a)") " ===> A4D end"
             end if
          end if
       else
          if (present(lambda)) then
             if (present(lun)) then
+               write(*,"(a)") " ===> A4E start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,lambda=lambda,lun=lun)
+               write(*,"(a)") " ===> A4E end"
             else
+               write(*,"(a)") " ===> A4F start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,lambda=lambda)
+               write(*,"(a)") " ===> A4F end"
             end if
          else
             if (present(lun)) then
+               write(*,"(a)") " ===> A4G start"
                call Set_Fixed_Tables(Reflex,Atm,Grp,lun=lun)
+               write(*,"(a)") " ===> A4G end"
             else
+               write(*,"(a)") " ===> A4H start"
                call Set_Fixed_Tables(Reflex,Atm,Grp)
+               write(*,"(a)") " ===> A4H
             end if
          end if
       end if
