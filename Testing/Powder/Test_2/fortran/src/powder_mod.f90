@@ -260,10 +260,14 @@ module powder_mod
                 ! First generate reflections and calculate structure factors
                 Mult=2*SpG%NumOps
 
+                write(*,*) " => Generating reflections ..."
+
                 MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=Mult)
                 call Initialize_RefList(MaxNumRef, hkl, "srefl")
+                write(*,"(a)") " => 1"
                 call cpu_time(tini)
                 call H_Uni(Cell,SpG,.true.,0.0,stlmax,"s",MaxNumRef,hkl)
+                write(*,"(a)") " => 2"
                 call cpu_time(tfin)
                 tim=tim + tfin-tini
                 write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
@@ -272,6 +276,9 @@ module powder_mod
                 if (PPC%job == 1) then      !Neutrons
                 call Init_Structure_Factors(hkl,A,Spg,mode="NUC",lun=lun)
                 else if(PPC%job == 0) then !Xrays
+                
+                write(*,*) " => 3"
+
                 call Init_Structure_Factors(hkl,A,Spg,mode="XRA",lambda=PPC%lambda,lun=lun)
                 end if
 
