@@ -25,19 +25,17 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       real, dimension(3)      :: t
       !integer, dimension(2)    :: dims
 
-      ! write(*,*) " =======> 2 Create_Table_HR_HT: Reflex%nref = ", Reflex%nref
-      ! write(*,*) " =======> 2 Create_Table_HR_HT: Grp%NumOps = ", Grp%NumOps
       do j=1,reflex%nref
          do i=1,grp%NumOps
             Mat=opMat(:,:,i)    !grp%op(i)%Mat(1:3,1:3)
             t=opTr(:,i)         !grp%op(i)%Mat(1:3,4)
             ! ! show shapes of matrices
-            write(*,*) " =======> 2 Create_Table_HR_HT: RESULT shape(hr(i,j)%h) = ", shape(hr(i,j)%h)
-            write(*,*) " =======> 2 Create_Table_HR_HT: ARG 1 shape(reflex%ref(j)%h) = ", shape(reflex%ref(j)%h)
-            write(*,*) " =======> 2 Create_Table_HR_HT: ARG 2 shape(Mat) = ", shape(Mat)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: RESULT shape(hr(i,j)%h) = ", shape(hr(i,j)%h)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: ARG 1 shape(reflex%ref(j)%h) = ", shape(reflex%ref(j)%h)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: ARG 2 shape(Mat) = ", shape(Mat)
 
             hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
-            write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
             ht(i,j)=dot_product(real(reflex%ref(j)%h),t)
          end do
       end do
