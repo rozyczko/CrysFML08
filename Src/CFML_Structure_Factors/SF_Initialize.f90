@@ -27,11 +27,9 @@ Submodule (CFML_Structure_Factors) SF_Initialize
 
       !> Init
       call clear_error()
-      write(*,"(a)") " ===> A1"
       Natm = Atm%natoms
       Multr= Grp%Numops
       if(.not. init_symOP) call SF_init_opMatTr(Grp)
-      write(*,"(a)") " ===> A2"
       !> Scattering factor tables
       if (allocated(AF0)) deallocate(AF0)
       allocate(AF0(Natm,Reflex%Nref),stat=ierr)
@@ -114,7 +112,6 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          return
       end if
       Bjh=0.0_cp
-      write(*,"(a)") " ===> A3"
       if (present(mode)) then
          if (present(lambda)) then
             if (present(lun)) then
@@ -128,7 +125,6 @@ Submodule (CFML_Structure_Factors) SF_Initialize
             end if
          else
             if (present(lun)) then
-               write(*,"(a)") " ===> A4C start"
                write(*,*) " ===> A4C start shape(reflex%ref(1)%h) = ", shape(reflex%ref(1)%h)
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode,lun=lun)
                write(*,"(a)") " ===> A4C end"

@@ -261,7 +261,7 @@ module powder_mod
                 Mult=2*SpG%NumOps
 
                 MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=Mult)
-                call Initialize_RefList(MaxNumRef, hkl, "srefl")
+                call Initialize_RefList(MaxNumRef, hkl, "srefl", 3)
                 call cpu_time(tini)
                 call H_Uni(Cell,SpG,.true.,0.0,stlmax,"s",MaxNumRef,hkl)
                 call cpu_time(tfin)
@@ -278,7 +278,6 @@ module powder_mod
                 end if
                 write(*,"(a)") " => B"
                 call cpu_time(tini)
-                write(*,*) " => Calculating structure factors ..."
                 if (PPC%job == 1) then      !Neutrons
                 call Structure_Factors(hkl,A,SpG,mode="NUC")
                 else if(PPC%job == 0) then !X-rays
