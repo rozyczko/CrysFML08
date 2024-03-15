@@ -270,6 +270,7 @@ module powder_mod
                 write(unit=lun,fmt="(a,i9)") " => Total number of generated reflections is ",hkl%nref
 
                 if (PPC%job == 1) then      !Neutrons
+                write(*,*) " => A start shape(hkl%ref(j)%h) = ", shape(hkl%ref(j)%h)
                 call Init_Structure_Factors(hkl,A,Spg,mode="NUC",lun=lun)
                 write(*,"(a)") " => A"
                 else if(PPC%job == 0) then !Xrays
