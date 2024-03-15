@@ -23,7 +23,7 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       integer                 :: i,j
       integer, dimension(3,3) :: Mat
       real, dimension(3)      :: t
-      integer, dimension(2)    :: dims
+      !integer, dimension(2)    :: dims
 
       write(*,*) " =======> 2 Create_Table_HR_HT: Reflex%nref = ", Reflex%nref
       write(*,*) " =======> 2 Create_Table_HR_HT: Grp%NumOps = ", Grp%NumOps
@@ -31,22 +31,10 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
          do i=1,grp%NumOps
             Mat=opMat(:,:,i)    !grp%op(i)%Mat(1:3,1:3)
             t=opTr(:,i)         !grp%op(i)%Mat(1:3,4)
-            ! write(*,*) " i, j = ", j, i
-            ! ! show sizes of matrices
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: size(reflex%ref(j)%h) = ", size(reflex%ref(j)%h)
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", size(hr(i,j)%h)
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: size(Mat) = ", size(Mat)
-            dims = shape(Mat)
-            write(*,*) " =======> 2 Create_Table_HR_HT: shape(Mat) = ", dims
-            dims = shape(reflex%ref(j)%h)
-            write(*,*) " =======> 2 Create_Table_HR_HT: size(reflex%ref(j)%h) = ", dims
-            dims = shape(hr(i,j)%h)
-            write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", dims
-
-            ! show rank of matrices
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(reflex%ref(j)%h) = ", mrank(reflex%ref(j)%h, tol)
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(hr(i,j)%h) = ", mrank(hr(i,j)%h, tol)
-            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(Mat) = ", mrank(Mat, tol)
+            ! ! show shapes of matrices
+            write(*,*) " =======> 2 Create_Table_HR_HT: RESULT shape(hr(i,j)%h) = ", shape(hr(i,j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: ARG 1 shape(reflex%ref(j)%h) = ", shape(reflex%ref(j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: ARG 2 shape(Mat) = ", shape(Mat)
 
             hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
             write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
