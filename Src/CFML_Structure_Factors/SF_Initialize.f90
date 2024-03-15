@@ -129,7 +129,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
          else
             if (present(lun)) then
                write(*,"(a)") " ===> A4C start"
-               write(*,*) " ===> A4C start shape(reflex%ref(j)%h) = ", shape(reflex%ref(j)%h)
+               write(*,*) " ===> A4C start shape(reflex%ref(1)%h) = ", shape(reflex%ref(1)%h)
                call Set_Fixed_Tables(Reflex,Atm,Grp,Mode,lun=lun)
                write(*,"(a)") " ===> A4C end"
             else
