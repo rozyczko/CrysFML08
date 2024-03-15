@@ -40,8 +40,8 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(hr(i,j)%h) = ", mrank(hr(i,j)%h, tol)
             ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(Mat) = ", mrank(Mat, tol)
 
-            !hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
-            hr(i,j)%h= matmul(reflex%ref(j)%h, Mat)
+            hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
+            !hr(i,j)%h= matmul(reflex%ref(j)%h, Mat)
             write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
             ht(i,j)=dot_product(real(reflex%ref(j)%h),t)
          end do
