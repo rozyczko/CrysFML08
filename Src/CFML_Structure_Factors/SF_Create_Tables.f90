@@ -38,8 +38,11 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             ! write(*,*) " =======> 2 Create_Table_HR_HT: size(Mat) = ", size(Mat)
             dims = shape(Mat)
             write(*,*) " =======> 2 Create_Table_HR_HT: shape(Mat) = ", dims
-            write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", shape(hr(i,j)%h)
-            write(*,*) " =======> 2 Create_Table_HR_HT: size(reflex%ref(j)%h) = ", shape(reflex%ref(j)%h)
+            dims = shape(reflex%ref(j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: size(reflex%ref(j)%h) = ", dims
+            dims = shape(hr(i,j)%h)
+            write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", dims
+
             ! show rank of matrices
             ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(reflex%ref(j)%h) = ", mrank(reflex%ref(j)%h, tol)
             ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(hr(i,j)%h) = ", mrank(hr(i,j)%h, tol)
