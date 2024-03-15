@@ -228,18 +228,22 @@ SubModule (CFML_kvec_Structure_Factors) kStrf_Init_FxTables
        !---- Local variables ----!
 
        !---- Table HR - HT ----!
+       write(*,"(a)") " =====> Creating HR and HT tables"
        call Create_Table_HR_HT(Reflex,Grp)
 
        !---- Table mFR ----!
        if (present(lun)) then
+          write(*,"(a)") " =====> Creating mFR table 1"
           call Create_Table_mFR(Reflex,Atm,lun=lun)
        else
+          write(*,"(a)") " =====> Creating mFR table 2"
           call Create_Table_mFR(Reflex,Atm)
        end if
 
        !---- Modify the scattering factor tables to include the
        !---- multipliers factors concerning centre of symmetry and
        !---- centred translations
+       write(*,"(a)") " =====> After tables"
        if (Grp%mCentred == 2) mFR=2.0*mFR
        if (Grp%Num_Lat  > 1)  mFR=Grp%Num_Lat*mFR
     End Subroutine Set_Fixed_Tables
