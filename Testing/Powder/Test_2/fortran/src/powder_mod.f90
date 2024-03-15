@@ -261,16 +261,18 @@ module powder_mod
                 Mult=2*SpG%NumOps
 
                 MaxNumRef = get_maxnumref(stlmax,Cell%Vol,mult=Mult)
-                call Initialize_RefList(MaxNumRef, hkl, "srefl", 3)
+                call Initialize_RefList(MaxNumRef, hkl, "srefl")
+                write(*,*) " => shape(hkl%ref(1)%h) p1 = ", shape(hkl%ref(1)%h)
                 call cpu_time(tini)
                 call H_Uni(Cell,SpG,.true.,0.0,stlmax,"s",MaxNumRef,hkl)
+                write(*,*) " => shape(hkl%ref(1)%h) p2 = ", shape(hkl%ref(1)%h)
                 call cpu_time(tfin)
                 tim=tim + tfin-tini
                 write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
                 write(unit=lun,fmt="(a,i9)") " => Total number of generated reflections is ",hkl%nref
 
                 if (PPC%job == 1) then      !Neutrons
-                write(*,*) " => A start shape(hkl%ref(1)%h) = ", shape(hkl%ref(1)%h)
+                write(*,*) " => shape(hkl%ref(1)%h) p3 = ", shape(hkl%ref(1)%h)
                 call Init_Structure_Factors(hkl,A,Spg,mode="NUC",lun=lun)
                 write(*,"(a)") " => A"
                 else if(PPC%job == 0) then !Xrays
