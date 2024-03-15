@@ -156,7 +156,7 @@ Submodule (CFML_Structure_Factors) SF_Initialize
             else
                write(*,"(a)") " ===> A4H start"
                call Set_Fixed_Tables(Reflex,Atm,Grp)
-               write(*,"(a)") " ===> A4H
+               write(*,"(a)") " ===> A4H end"
             end if
          end if
       end if
