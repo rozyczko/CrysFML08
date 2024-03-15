@@ -175,6 +175,9 @@
 
        z4 = z4frgn(wave,ga,nu)
        omg= Phi_mat(om)
+       write(*,*) "  ---> arg1 shape = ", shape(omg)
+       write(*,*) "  ---> arg2 shape = ", shape(z4)
+       write(*,*) "  ---> result shape = ", shape(z1)
        z1=Matmul(Transpose(omg),z4)
     End Function z1frnb
 
