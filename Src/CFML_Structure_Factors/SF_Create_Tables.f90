@@ -23,6 +23,8 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
       integer, dimension(3,3) :: Mat
       real, dimension(3)      :: t
 
+      write(*,*) " =======> 2 Create_Table_HR_HT: Reflex%nref = ", Reflex%nref
+      write(*,*) " =======> 2 Create_Table_HR_HT: Grp%NumOps = ", Grp%NumOps
       do j=1,reflex%nref
          do i=1,grp%NumOps
             Mat=opMat(:,:,i)    !grp%op(i)%Mat(1:3,1:3)

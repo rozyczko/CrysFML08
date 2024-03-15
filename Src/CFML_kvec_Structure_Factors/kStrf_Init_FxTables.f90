@@ -446,7 +446,8 @@ SubModule (CFML_kvec_Structure_Factors) kStrf_Init_FxTables
 
        !---- Local Variables ----!
        integer :: i,j
-
+      write(*,*) " =======> 1 Create_Table_HR_HT: Reflex%nref = ", reflex%nref
+      write(*,*) " =======> 1 Create_Table_HR_HT: Grp%NumOps = ", grp%NumOps
        do j=1,reflex%nref
           do i=1,grp%NumOps
              hr(i,j)%h=matmul(reflex%Mh(j)%h,Grp%symop(i)%Rot)
