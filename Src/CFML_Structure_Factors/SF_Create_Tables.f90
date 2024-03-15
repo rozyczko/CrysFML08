@@ -13,13 +13,13 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
    !!--++
    !!--++ Update: April 2022
    !!
-   Module Subroutine Create_Table_HR_HT(Reflex, Grp, CFML_Maths)
+   Module Subroutine Create_Table_HR_HT(Reflex, Grp)
       !---- Arguments ----!
       type(RefList_Type), intent(in) :: Reflex
       type(SpG_type),     intent(in) :: Grp
 
       !---- Local Variables ----!
-      real(kind=cp), parameter :: tol= 100.0*epsilon(1.0_cp)
+      !real(kind=cp), parameter :: tol= 100.0*epsilon(1.0_cp)
       integer                 :: i,j
       integer, dimension(3,3) :: Mat
       real, dimension(3)      :: t
@@ -36,11 +36,12 @@ Submodule (CFML_Structure_Factors) SF_Create_Tables
             write(*,*) " =======> 2 Create_Table_HR_HT: size(hr(i,j)%h) = ", size(hr(i,j)%h)
             write(*,*) " =======> 2 Create_Table_HR_HT: size(Mat) = ", size(Mat)
             ! show rank of matrices
-            write(*,*) " =======> 2 Create_Table_HR_HT: mrank(reflex%ref(j)%h) = ", mrank(reflex%ref(j)%h, tol)
-            write(*,*) " =======> 2 Create_Table_HR_HT: mrank(hr(i,j)%h) = ", mrank(hr(i,j)%h, tol)
-            write(*,*) " =======> 2 Create_Table_HR_HT: mrank(Mat) = ", mrank(Mat, tol)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(reflex%ref(j)%h) = ", mrank(reflex%ref(j)%h, tol)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(hr(i,j)%h) = ", mrank(hr(i,j)%h, tol)
+            ! write(*,*) " =======> 2 Create_Table_HR_HT: mrank(Mat) = ", mrank(Mat, tol)
 
-            hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
+            !hr(i,j)%h=real(matmul(reflex%ref(j)%h, Mat))
+            hr(i,j)%h= matmul(reflex%ref(j)%h, Mat)
             write(*,*) " =======> 2 Create_Table_HR_HT: hr(i,j)%h = ", hr(i,j)%h
             ht(i,j)=dot_product(real(reflex%ref(j)%h),t)
          end do
