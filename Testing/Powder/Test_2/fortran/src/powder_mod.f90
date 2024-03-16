@@ -267,10 +267,10 @@ module powder_mod
                 call H_Uni(Cell,SpG,.true.,0.0,stlmax,"s",MaxNumRef,hkl)
                 write(*,*) " => shape(hkl%ref(1)%h) p2 = ", shape(hkl%ref(1)%h)
 
-                call cpu_time(tfin)
-                tim=tim + tfin-tini
-                write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
-                write(unit=lun,fmt="(a,i9)") " => Total number of generated reflections is ",hkl%nref
+                ! call cpu_time(tfin)
+                ! tim=tim + tfin-tini
+                ! write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
+                ! write(unit=lun,fmt="(a,i9)") " => Total number of generated reflections is ",hkl%nref
 
                 if (PPC%job == 1) then      !Neutrons
                 write(*,*) " => shape(hkl%ref(1)%h) p3 = ", shape(hkl%ref(1)%h)
