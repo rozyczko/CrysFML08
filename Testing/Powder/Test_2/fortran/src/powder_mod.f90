@@ -268,8 +268,8 @@ module powder_mod
                 write(*,*) " => shape(hkl%ref(1)%h) p2 = ", shape(hkl%ref(1)%h)
 
                 call cpu_time(tfin)
-                ! tim=tim + tfin-tini
-                ! write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
+                tim=tim + tfin-tini
+                write(*,"(a,i8)") "  => Total number of generated reflections is ",hkl%nref
                 ! write(unit=lun,fmt="(a,i9)") " => Total number of generated reflections is ",hkl%nref
 
                 if (PPC%job == 1) then      !Neutrons
